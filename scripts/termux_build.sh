@@ -12,6 +12,11 @@ export CARGO_INCREMENTAL=0
 
 REPO_DIR="${1:?repository path required}"
 BUILD_ROOT="${2:-$HOME/termux-hermes-build}"
+BUILD_MODE="${3:-android}"
+case "$BUILD_MODE" in
+  android|docker) ;;
+  *) echo "Unknown build mode: $BUILD_MODE" >&2; exit 1 ;;
+esac
 MANIFEST="$REPO_DIR/manifest/wheels.json"
 PYTHON_DEB="$BUILD_ROOT/python_3.13.14_aarch64.deb"
 PYTHON_URL="https://github.com/adybag14-cyber/termux-python/releases/download/termux-aarch64-20260719.9.1/python_3.13.14_aarch64.deb"
@@ -20,7 +25,7 @@ PYTHON_SHA256="42376a2a47e50048cb7eca2d0f442fc1895fbca2aee2dee3d2fd82728ea1bd80"
 mkdir -p "$BUILD_ROOT"
 ARCH="$(dpkg --print-architecture 2>/dev/null || true)"
 [ "$ARCH" = aarch64 ] || { echo "This immutable wheelhouse must build on aarch64 Termux, got: ${ARCH:-unknown}" >&2; exit 1; }
-if [ "${TERMUX_DOCKER_BUILD:-0}" = 1 ]; then
+if [ "$BUILD_MODE" = docker ]; then
   case "$(uname -m)" in
     aarch64|arm64) ;;
     *) echo "Termux Docker host is not arm64" >&2; exit 1 ;;

@@ -67,11 +67,10 @@ jobs:
           docker run --rm --privileged \
             --security-opt seccomp=unconfined \
             -e CI=true \
-            -e TERMUX_DOCKER_BUILD=1 \
             -v "$GITHUB_WORKSPACE:/workspace:ro" \
             -v "$BUILD_DIR:/build" \
             "$TERMUX_IMAGE" \
-            bash /workspace/scripts/termux_build.sh /workspace /build
+            bash /workspace/scripts/termux_build.sh /workspace /build docker
 
       - name: Collect verified wheelhouse
         run: |

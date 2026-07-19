@@ -78,6 +78,9 @@ The automated arm64 release build uses the official Termux Docker image by immut
 digest. The image exists specifically to run the Termux environment off-device; it
 contains the Termux bootstrap and the AOSP/Bionic runtime components needed by the
 Android-targeted Python toolchain.
+The workflow invokes `scripts/termux_build.sh /workspace /build docker`; the explicit
+mode keeps Docker validation independent of environment variables sanitized by the
+Termux container entrypoint.
 
 ## Refreshing the lock
 
