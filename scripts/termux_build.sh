@@ -20,9 +20,15 @@ PYTHON_SHA256="42376a2a47e50048cb7eca2d0f442fc1895fbca2aee2dee3d2fd82728ea1bd80"
 mkdir -p "$BUILD_ROOT"
 ARCH="$(dpkg --print-architecture 2>/dev/null || true)"
 [ "$ARCH" = aarch64 ] || { echo "This immutable wheelhouse must build on aarch64 Termux, got: ${ARCH:-unknown}" >&2; exit 1; }
-[ "$(getprop ro.product.cpu.abi 2>/dev/null | tr -d '\r')" = arm64-v8a ] || { echo "Android ABI is not arm64-v8a" >&2; exit 1; }
+if [ "${TERMUX_DOCKER_BUILD:-0}" = 1 ]; then
+  case "$(uname -m)" in
+    aarch64|arm64) ;;
+    *) echo "Termux Docker host is not arm64" >&2; exit 1 ;;
+  esac
+else
+  [ "$(getprop ro.product.cpu.abi 2>/dev/null | tr -d '\r')" = arm64-v8a ] || { echo "Android ABI is not arm64-v8a" >&2; exit 1; }
+fi
 apt-get update
-apt-get -o Dpkg::Options::="--force-confnew" dist-upgrade -y
 dpkg --force-confnew --configure -a
 apt-get -o Dpkg::Options::="--force-confnew" -f install -y
 apt-get -o Dpkg::Options::="--force-confnew" install -y \
@@ -91,3 +97,5 @@ uv pip install --python "$VENV_PY" "${BUILD_TOOLS[@]}"
   --uv "$PREFIX/bin/uv" \
   --python "$VENV_PY" \
   --install-test
+dpkg-query -W -f='${Package}=${Version}\n' | LC_ALL=C sort > "$BUILD_ROOT/wheelhouse/system-packages.txt"
+sha256sum "$BUILD_ROOT/wheelhouse/system-packages.txt" >> "$BUILD_ROOT/wheelhouse/SHA256SUMS"

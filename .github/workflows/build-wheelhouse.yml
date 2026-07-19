@@ -26,12 +26,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 180
     env:
-      ANDROID_HOME: /home/runner/work/_temp/android-sdk
-      ANDROID_SDK_ROOT: /home/runner/work/_temp/android-sdk
-      CMDLINE_TOOLS_URL: https://dl.google.com/android/repository/commandlinetools-linux-15859902_latest.zip
-      CMDLINE_TOOLS_SHA256: 4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583
-      AVD_NAME: termux_arm64_api35
-      SYSTEM_IMAGE: system-images;android-35;google_apis;arm64-v8a
+      TERMUX_IMAGE: termux/termux-docker@sha256:3aed9c7fbcf9195a9919deaad418da006232864a779fb4f322d68a34887a2e15
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -51,90 +46,43 @@ jobs:
             exit 1
           fi
 
-      - name: Install pinned Android command-line tools, emulator and image
+      - name: Verify native ARM runner and pinned official Termux image
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends openjdk-17-jre-headless unzip
-          rm -rf "$ANDROID_HOME"
-          mkdir -p "$ANDROID_HOME/cmdline-tools"
-          curl -fL --retry 6 --retry-all-errors "$CMDLINE_TOOLS_URL" -o commandlinetools.zip
-          printf '%s  %s\n' "$CMDLINE_TOOLS_SHA256" commandlinetools.zip | sha256sum -c -
-          unzip -q commandlinetools.zip -d "$ANDROID_HOME/cmdline-tools"
-          mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
-          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          AVDMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager"
-          test -x "$SDKMANAGER"
-          test -x "$AVDMANAGER"
-          yes | "$SDKMANAGER" --licenses >/dev/null || true
-          "$SDKMANAGER" --install "platform-tools" "emulator" "$SYSTEM_IMAGE"
-          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
-          echo "$ANDROID_HOME/emulator" >> "$GITHUB_PATH"
-          "$ANDROID_HOME/emulator/emulator" -version
-          file "$ANDROID_HOME/emulator/emulator"
-          echo no | "$AVDMANAGER" create avd --force --name "$AVD_NAME" --package "$SYSTEM_IMAGE"
+          case "$(uname -m)" in
+            aarch64|arm64) ;;
+            *) echo "Runner is not arm64: $(uname -m)" >&2; exit 1 ;;
+          esac
+          docker pull "$TERMUX_IMAGE"
+          test "$(docker image inspect --format '{{.Architecture}}' "$TERMUX_IMAGE")" = arm64
+          docker run --rm --privileged "$TERMUX_IMAGE" uname -m | grep -E '^(aarch64|arm64)$'
 
-      - name: Boot native ARM64 Android emulator
+      - name: Build and verify all locked wheels in official aarch64 Termux
         run: |
           set -euo pipefail
-          if [[ -w /dev/kvm ]]; then
-            ACCEL=on
-          else
-            ACCEL=off
-          fi
-          nohup "$ANDROID_HOME/emulator/emulator" \
-            -avd "$AVD_NAME" \
-            -no-window -no-audio -no-boot-anim -no-snapshot \
-            -gpu swiftshader_indirect -accel "$ACCEL" \
-            -netdelay none -netspeed full \
-            > emulator.log 2>&1 &
-          echo $! > emulator.pid
-          adb wait-for-device
-          timeout 1200 bash -c 'until [[ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d "\r")" == 1 ]]; do sleep 5; done'
-          adb shell input keyevent 82 || true
-          echo "ABI=$(adb shell getprop ro.product.cpu.abi | tr -d '\r')"
-          echo "Android=$(adb shell getprop ro.build.version.release | tr -d '\r')"
-          test "$(adb shell getprop ro.product.cpu.abi | tr -d '\r')" = arm64-v8a
+          BUILD_DIR="$RUNNER_TEMP/termux-hermes-build"
+          rm -rf "$BUILD_DIR"
+          mkdir -p "$BUILD_DIR"
+          chmod 0777 "$BUILD_DIR"
+          docker run --rm --privileged \
+            --security-opt seccomp=unconfined \
+            -e CI=true \
+            -e TERMUX_DOCKER_BUILD=1 \
+            -v "$GITHUB_WORKSPACE:/workspace:ro" \
+            -v "$BUILD_DIR:/build" \
+            "$TERMUX_IMAGE" \
+            bash /workspace/scripts/termux_build.sh /workspace /build
 
-      - name: Install pinned official Termux APK
+      - name: Collect verified wheelhouse
         run: |
           set -euo pipefail
-          readarray -t APK_DATA < <(python - <<'PY'
-          import json
-          m=json.load(open('manifest/wheels.json'))['termux']
-          print(m['app_url'])
-          print(m['app_sha256'])
-          PY
-          )
-          curl -fL --retry 6 --retry-all-errors "${APK_DATA[0]}" -o termux.apk
-          printf '%s  %s\n' "${APK_DATA[1]}" termux.apk | sha256sum -c -
-          adb install -r termux.apk
-          adb shell am start -W -n com.termux/.app.TermuxActivity
-          timeout 300 bash -c 'until adb shell run-as com.termux test -x /data/data/com.termux/files/usr/bin/bash 2>/dev/null; do sleep 3; done'
-          adb shell run-as com.termux /data/data/com.termux/files/usr/bin/bash -lc 'id; uname -a'
-
-      - name: Build and verify all locked wheels inside Termux
-        run: |
-          set -euo pipefail
-          adb push . /data/local/tmp/termux-hermes
-          adb shell chmod -R a+rX /data/local/tmp/termux-hermes
-          adb shell run-as com.termux \
-            /data/data/com.termux/files/usr/bin/bash \
-            /data/local/tmp/termux-hermes/scripts/termux_build.sh \
-            /data/local/tmp/termux-hermes \
-            /data/data/com.termux/files/home/termux-hermes-build
-
-      - name: Pull verified wheelhouse
-        run: |
-          set -euo pipefail
-          adb exec-out run-as com.termux \
-            /data/data/com.termux/files/usr/bin/tar \
-            -C /data/data/com.termux/files/home/termux-hermes-build/wheelhouse \
-            -czf - . > wheelhouse.tar.gz
-          mkdir release
-          tar -xzf wheelhouse.tar.gz -C release
+          BUILD_DIR="$RUNNER_TEMP/termux-hermes-build"
+          mkdir -p release
+          cp -a "$BUILD_DIR/wheelhouse/." release/
           (cd release && sha256sum -c SHA256SUMS)
           test "$(find release -maxdepth 1 -name '*.whl' | wc -l)" -eq 10
+          test -s release/index.json
+          test -s release/system-packages.txt
           ls -lh release
 
       - name: Upload wheelhouse artifact
@@ -145,8 +93,10 @@ jobs:
             release/*.whl
             release/index.json
             release/SHA256SUMS
+            release/system-packages.txt
             manifest/wheels.json
             audit/resolved.txt
+            audit/emulator-audit.json
           if-no-files-found: error
           compression-level: 0
 
@@ -160,19 +110,24 @@ jobs:
           cat > release-notes.md <<EOF
           Native Hermes Termux wheelhouse for CPython 3.13 / Android API 24 / arm64-v8a.
 
-          Built inside the official Termux v0.118.3 app on an ARM64 Android emulator.
+          Package discovery and the binary-only 91-package install were verified in the official Termux v0.118.3 app on Android 15.
+          The arm64 artifacts were built on a native ARM GitHub runner in the official Termux Docker image pinned to:
+          $TERMUX_IMAGE
+
           Sources, versions and SHA-256 digests are locked in manifest/wheels.json.
-          The complete 91-package Hermes Termux graph installed with --only-binary :all: and passed import and dependency checks.
+          The complete 91-package Hermes Termux graph installed with --only-binary :all: and passed native import and dependency checks.
 
           Commit: $GITHUB_SHA
           EOF
           gh release create "$RELEASE_TAG" \
-            release/*.whl release/index.json release/SHA256SUMS \
-            manifest/wheels.json audit/resolved.txt \
+            release/*.whl release/index.json release/SHA256SUMS release/system-packages.txt \
+            manifest/wheels.json audit/resolved.txt audit/emulator-audit.json \
             --target "$GITHUB_SHA" \
             --title "Hermes Termux CPython 3.13 Android arm64 wheelhouse" \
             --notes-file release-notes.md
 
-      - name: Show emulator log on failure
+      - name: Show container state on failure
         if: failure()
-        run: tail -n 300 emulator.log || true
+        run: |
+          docker images || true
+          find "$RUNNER_TEMP/termux-hermes-build" -maxdepth 3 -type f -ls 2>/dev/null || true

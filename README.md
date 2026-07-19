@@ -7,7 +7,8 @@ Rust packages locally.
 ## Locked target
 
 - Hermes source: `adybag14-cyber/hermes-agent@72f6ab2b183fa94d5f3f33bf105cacf6418c3447`
-- Termux app: official GitHub build `v0.118.3`
+- Audited runtime: official Termux app GitHub build `v0.118.3` on Android 15/API 35
+- ARM build environment: official `termux/termux-docker` image pinned to `sha256:3aed9c7fbcf9195a9919deaad418da006232864a779fb4f322d68a34887a2e15`
 - Python: `3.13.14` from the immutable `termux-aarch64-20260719.9.1` release
 - Architecture: `aarch64`
 - Wheel platform: `android_24_arm64_v8a`
@@ -44,9 +45,10 @@ resolver output in [`audit/resolved.txt`](audit/resolved.txt).
 
 ## Build design
 
-The `Build immutable arm64 wheelhouse` workflow runs on an arm64 Ubuntu runner,
-boots an arm64 Android emulator, installs the exact Termux APK, and executes all
-builds inside Termux. The builder:
+The `Build immutable arm64 wheelhouse` workflow runs on a native arm64 Ubuntu runner
+and executes the build inside Termux's official aarch64 Docker image at a fixed
+registry digest. Package discovery and final installation behavior were separately
+verified in the official Termux v0.118.3 Android app. The builder:
 
 1. verifies the pinned Python `.deb` and every PyPI sdist before extraction;
 2. rejects traversal, symlink and device members in source archives;
@@ -57,7 +59,8 @@ builds inside Termux. The builder:
 7. verifies package/version/tag, ZIP integrity and native extension presence;
 8. installs the complete 91-package graph with `--only-binary :all:` in a clean venv;
 9. imports every native package and runs `uv pip check`;
-10. publishes wheels, `index.json`, and `SHA256SUMS` under a new immutable release tag.
+10. records the exact installed Termux system package versions;
+11. publishes wheels, `index.json`, `system-packages.txt`, and `SHA256SUMS` under a new immutable release tag.
 
 ## Run locally in native aarch64 Termux
 
@@ -70,6 +73,11 @@ bash scripts/termux_build.sh "$PWD"
 The complete wheelhouse is written to
 `~/termux-hermes-build/wheelhouse/`. This build is intentionally resource-heavy;
 normal users should consume the published release assets instead.
+
+The automated arm64 release build uses the official Termux Docker image by immutable
+digest. The image exists specifically to run the Termux environment off-device; it
+contains the Termux bootstrap and the AOSP/Bionic runtime components needed by the
+Android-targeted Python toolchain.
 
 ## Refreshing the lock
 
