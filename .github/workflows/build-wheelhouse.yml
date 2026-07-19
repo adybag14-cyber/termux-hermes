@@ -26,6 +26,8 @@ jobs:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 180
     env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
       AVD_NAME: termux_arm64_api35
       SYSTEM_IMAGE: system-images;android-35;google_apis;arm64-v8a
     steps:
@@ -50,9 +52,11 @@ jobs:
       - name: Install current ARM64 Android emulator and image
         run: |
           set -euo pipefail
+          test -d "$ANDROID_HOME" || { echo "Android SDK missing at $ANDROID_HOME" >&2; exit 1; }
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           AVDMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager"
           test -x "$SDKMANAGER"
+          test -x "$AVDMANAGER"
           yes | "$SDKMANAGER" --licenses >/dev/null || true
           "$SDKMANAGER" --install "platform-tools" "emulator" "$SYSTEM_IMAGE"
           "$ANDROID_HOME/emulator/emulator" -version
