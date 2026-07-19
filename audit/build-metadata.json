@@ -1,0 +1,241 @@
+[
+  {
+    "build_backend": "setuptools.build_meta",
+    "build_requires": [
+      "setuptools >= 66.1"
+    ],
+    "has_cargo_toml": false,
+    "has_setup_cfg": true,
+    "has_setup_py": true,
+    "maturin_tool": null,
+    "name": "cffi",
+    "project_requires_python": ">=3.9",
+    "sdist": "cffi-2.0.0.tar.gz",
+    "sha256": "44d1b5909021139fe36001ae048dbdde8214afa20200eda0f64c068cac5d5529",
+    "url": "https://files.pythonhosted.org/packages/eb/56/b1ba7935a17738ae8453301356628e8147c79dbb825bcbc73dc7401f9846/cffi-2.0.0.tar.gz",
+    "version": "2.0.0"
+  },
+  {
+    "build_backend": "maturin",
+    "build_requires": [
+      "maturin>=1.9.4,<2",
+      "cffi>=1.14; platform_python_implementation != 'PyPy' and python_version == '3.8'",
+      "cffi>=2.0.0; platform_python_implementation != 'PyPy' and python_version >= '3.9'",
+      "setuptools!=74.0.0,!=74.1.0,!=74.1.1,!=74.1.2"
+    ],
+    "has_cargo_toml": true,
+    "has_setup_cfg": false,
+    "has_setup_py": false,
+    "maturin_tool": {
+      "exclude": [
+        "vectors/**/*",
+        "target/**/*",
+        "docs/_build/**/*",
+        ".github/**/*",
+        ".readthedocs.yml",
+        "ci-constraints-requirements.txt",
+        "mypy.ini"
+      ],
+      "include": [
+        "CHANGELOG.rst",
+        "CONTRIBUTING.rst",
+        "docs/**/*",
+        {
+          "format": "sdist",
+          "path": "src/_cffi_src/**/*.py"
+        },
+        {
+          "format": "sdist",
+          "path": "src/_cffi_src/**/*.c"
+        },
+        {
+          "format": "sdist",
+          "path": "src/_cffi_src/**/*.h"
+        },
+        {
+          "format": "sdist",
+          "path": "Cargo.toml"
+        },
+        {
+          "format": "sdist",
+          "path": "Cargo.lock"
+        },
+        {
+          "format": "sdist",
+          "path": "src/rust/**/Cargo.toml"
+        },
+        {
+          "format": "sdist",
+          "path": "src/rust/**/Cargo.lock"
+        },
+        {
+          "format": "sdist",
+          "path": "src/rust/**/*.rs"
+        },
+        "tests/**/*.py"
+      ],
+      "locked": true,
+      "manifest-path": "src/rust/Cargo.toml",
+      "module-name": "cryptography.hazmat.bindings._rust",
+      "python-packages": [
+        "cryptography"
+      ],
+      "python-source": "src",
+      "sdist-generator": "git"
+    },
+    "name": "cryptography",
+    "project_requires_python": ">=3.8,!=3.9.0,!=3.9.1",
+    "sdist": "cryptography-46.0.7.tar.gz",
+    "sha256": "e4cfd68c5f3e0bfdad0d38e023239b96a2fe84146481852dffbcca442c245aa5",
+    "url": "https://files.pythonhosted.org/packages/47/93/ac8f3d5ff04d54bc814e961a43ae5b0b146154c89c61b47bb07557679b18/cryptography-46.0.7.tar.gz",
+    "version": "46.0.7"
+  },
+  {
+    "build_backend": "maturin",
+    "build_requires": [
+      "maturin>=1.9.4,<2"
+    ],
+    "has_cargo_toml": true,
+    "has_setup_cfg": false,
+    "has_setup_py": false,
+    "maturin_tool": {
+      "bindings": "pyo3",
+      "features": [
+        "pyo3/generate-import-lib"
+      ],
+      "manifest-path": "crates/jiter-python/Cargo.toml",
+      "module-name": "jiter"
+    },
+    "name": "jiter",
+    "project_requires_python": ">=3.9",
+    "sdist": "jiter-0.13.0.tar.gz",
+    "sha256": "f2839f9c2c7e2dffc1bc5929a510e14ce0a946be9365fd1219e7ef342dae14f4",
+    "url": "https://files.pythonhosted.org/packages/0d/5e/4ec91646aee381d01cdb9974e30882c9cd3b8c5d1079d6b5ff4af522439a/jiter-0.13.0.tar.gz",
+    "version": "0.13.0"
+  },
+  {
+    "build_backend": "setuptools.build_meta",
+    "build_requires": [
+      "setuptools>=77"
+    ],
+    "has_cargo_toml": false,
+    "has_setup_cfg": true,
+    "has_setup_py": true,
+    "maturin_tool": null,
+    "name": "markupsafe",
+    "project_requires_python": ">=3.9",
+    "sdist": "markupsafe-3.0.3.tar.gz",
+    "sha256": "722695808f4b6457b320fdc131280796bdceb04ab50fe1795cd540799ebe1698",
+    "url": "https://files.pythonhosted.org/packages/7e/99/7690b6d4034fffd95959cbe0c02de8deb3098cc577c67bb6a24fe5d7caa7/markupsafe-3.0.3.tar.gz",
+    "version": "3.0.3"
+  },
+  {
+    "build_backend": "backend",
+    "build_requires": [
+      "pybind11",
+      "setuptools>=77"
+    ],
+    "has_cargo_toml": false,
+    "has_setup_cfg": true,
+    "has_setup_py": true,
+    "maturin_tool": null,
+    "name": "pillow",
+    "project_requires_python": ">=3.10",
+    "sdist": "pillow-12.2.0.tar.gz",
+    "sha256": "a830b1a40919539d07806aa58e1b114df53ddd43213d9c8b75847eee6c0182b5",
+    "url": "https://files.pythonhosted.org/packages/8c/21/c2bcdd5906101a30244eaffc1b6e6ce71a31bd0742a01eb89e660ebfac2d/pillow-12.2.0.tar.gz",
+    "version": "12.2.0"
+  },
+  {
+    "build_backend": "setuptools.build_meta",
+    "build_requires": [
+      "setuptools>=43"
+    ],
+    "has_cargo_toml": false,
+    "has_setup_cfg": true,
+    "has_setup_py": true,
+    "maturin_tool": null,
+    "name": "psutil",
+    "project_requires_python": null,
+    "sdist": "psutil-7.2.2.tar.gz",
+    "sha256": "0746f5f8d406af344fd547f1c8daa5f5c33dbc293bb8d6a16d80b4bb88f59372",
+    "url": "https://files.pythonhosted.org/packages/aa/c6/d1ddf4abb55e93cebc4f2ed8b5d6dbad109ecb8d63748dd2b20ab5e57ebe/psutil-7.2.2.tar.gz",
+    "version": "7.2.2"
+  },
+  {
+    "build_backend": "maturin",
+    "build_requires": [
+      "maturin>=1.10,<2"
+    ],
+    "has_cargo_toml": true,
+    "has_setup_cfg": false,
+    "has_setup_py": false,
+    "maturin_tool": {
+      "bindings": "pyo3",
+      "editable-profile": "dev",
+      "module-name": "pydantic_core._pydantic_core",
+      "python-source": "python"
+    },
+    "name": "pydantic-core",
+    "project_requires_python": ">=3.9",
+    "sdist": "pydantic_core-2.46.4.tar.gz",
+    "sha256": "62f875393d7f270851f20523dd2e29f082bcc82292d66db2b64ea71f64b6e1c1",
+    "url": "https://files.pythonhosted.org/packages/9d/56/921726b776ace8d8f5db44c4ef961006580d91dc52b803c489fafd1aa249/pydantic_core-2.46.4.tar.gz",
+    "version": "2.46.4"
+  },
+  {
+    "build_backend": "_pyyaml_pep517",
+    "build_requires": [
+      "setuptools",
+      "Cython; python_version < '3.13'",
+      "Cython>=3.0; python_version >= '3.13'"
+    ],
+    "has_cargo_toml": false,
+    "has_setup_cfg": true,
+    "has_setup_py": true,
+    "maturin_tool": null,
+    "name": "pyyaml",
+    "project_requires_python": null,
+    "sdist": "pyyaml-6.0.3.tar.gz",
+    "sha256": "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f",
+    "url": "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz",
+    "version": "6.0.3"
+  },
+  {
+    "build_backend": "maturin",
+    "build_requires": [
+      "maturin>=1.9,<2.0"
+    ],
+    "has_cargo_toml": true,
+    "has_setup_cfg": false,
+    "has_setup_py": false,
+    "maturin_tool": {
+      "features": [
+        "pyo3/extension-module"
+      ]
+    },
+    "name": "rpds-py",
+    "project_requires_python": ">=3.10",
+    "sdist": "rpds_py-0.30.0.tar.gz",
+    "sha256": "dd8ff7cf90014af0c0f787eea34794ebf6415242ee1d6fa91eaba725cc441e84",
+    "url": "https://files.pythonhosted.org/packages/20/af/3f2f423103f1113b36230496629986e0ef7e199d2aa8392452b484b38ced/rpds_py-0.30.0.tar.gz",
+    "version": "0.30.0"
+  },
+  {
+    "build_backend": "setuptools.build_meta",
+    "build_requires": [
+      "setuptools",
+      "wheel"
+    ],
+    "has_cargo_toml": false,
+    "has_setup_cfg": true,
+    "has_setup_py": true,
+    "maturin_tool": null,
+    "name": "ruamel-yaml-clib",
+    "project_requires_python": null,
+    "sdist": "ruamel_yaml_clib-0.2.15.tar.gz",
+    "sha256": "46e4cc8c43ef6a94885f72512094e482114a8a706d3c555a34ed4b0d20200600",
+    "url": "https://files.pythonhosted.org/packages/ea/97/60fda20e2fb54b83a61ae14648b0817c8f5d84a3821e40bfbdae1437026a/ruamel_yaml_clib-0.2.15.tar.gz",
+    "version": "0.2.15"
+  }
+]
