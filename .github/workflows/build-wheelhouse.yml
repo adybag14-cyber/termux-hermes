@@ -26,8 +26,10 @@ jobs:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 180
     env:
-      ANDROID_HOME: /usr/local/lib/android/sdk
-      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+      ANDROID_HOME: ${{ runner.temp }}/android-sdk
+      ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
+      CMDLINE_TOOLS_URL: https://dl.google.com/android/repository/commandlinetools-linux-15859902_latest.zip
+      CMDLINE_TOOLS_SHA256: 4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583
       AVD_NAME: termux_arm64_api35
       SYSTEM_IMAGE: system-images;android-35;google_apis;arm64-v8a
     steps:
@@ -49,16 +51,25 @@ jobs:
             exit 1
           fi
 
-      - name: Install current ARM64 Android emulator and image
+      - name: Install pinned Android command-line tools, emulator and image
         run: |
           set -euo pipefail
-          test -d "$ANDROID_HOME" || { echo "Android SDK missing at $ANDROID_HOME" >&2; exit 1; }
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends openjdk-17-jre-headless unzip
+          rm -rf "$ANDROID_HOME"
+          mkdir -p "$ANDROID_HOME/cmdline-tools"
+          curl -fL --retry 6 --retry-all-errors "$CMDLINE_TOOLS_URL" -o commandlinetools.zip
+          printf '%s  %s\n' "$CMDLINE_TOOLS_SHA256" commandlinetools.zip | sha256sum -c -
+          unzip -q commandlinetools.zip -d "$ANDROID_HOME/cmdline-tools"
+          mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           AVDMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager"
           test -x "$SDKMANAGER"
           test -x "$AVDMANAGER"
           yes | "$SDKMANAGER" --licenses >/dev/null || true
           "$SDKMANAGER" --install "platform-tools" "emulator" "$SYSTEM_IMAGE"
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/emulator" >> "$GITHUB_PATH"
           "$ANDROID_HOME/emulator/emulator" -version
           file "$ANDROID_HOME/emulator/emulator"
           echo no | "$AVDMANAGER" create avd --force --name "$AVD_NAME" --package "$SYSTEM_IMAGE"
