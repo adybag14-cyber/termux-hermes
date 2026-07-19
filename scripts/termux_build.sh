@@ -103,4 +103,6 @@ uv pip install --python "$VENV_PY" "${BUILD_TOOLS[@]}"
   --python "$VENV_PY" \
   --install-test
 dpkg-query -W -f='${Package}=${Version}\n' | LC_ALL=C sort > "$BUILD_ROOT/wheelhouse/system-packages.txt"
-sha256sum "$BUILD_ROOT/wheelhouse/system-packages.txt" >> "$BUILD_ROOT/wheelhouse/SHA256SUMS"
+"$VENV_PY" "$REPO_DIR/scripts/checksum_artifact.py" \
+  "$BUILD_ROOT/wheelhouse/SHA256SUMS" \
+  "$BUILD_ROOT/wheelhouse/system-packages.txt"

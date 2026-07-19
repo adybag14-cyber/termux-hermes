@@ -15,6 +15,12 @@ assert SPEC and SPEC.loader
 builder = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(builder)
 
+CHECKSUM_SPEC = importlib.util.spec_from_file_location(
+    "checksum_artifact", ROOT / "scripts" / "checksum_artifact.py"
+)
+assert CHECKSUM_SPEC and CHECKSUM_SPEC.loader
+checksum = importlib.util.module_from_spec(CHECKSUM_SPEC)
+CHECKSUM_SPEC.loader.exec_module(checksum)
 
 def test_manifest_is_complete_and_unique() -> None:
     manifest = json.loads((ROOT / "manifest" / "wheels.json").read_text("utf-8"))
@@ -104,3 +110,36 @@ def test_expected_platform_mappings() -> None:
     assert builder.expected_platform(24, "x86_64") == "android_24_x86_64"
     with pytest.raises(builder.BuildError):
         builder.expected_platform(20, "aarch64")
+
+
+def test_sidecar_checksum_is_relocatable_after_directory_copy(tmp_path: Path) -> None:
+
+    wheelhouse = tmp_path / "build" / "wheelhouse"
+    wheelhouse.mkdir(parents=True)
+    sums = wheelhouse / "SHA256SUMS"
+    sums.write_text("", "utf-8")
+    sidecar = wheelhouse / "system-packages.txt"
+    sidecar.write_text("python=3.13.14\n", "utf-8")
+
+    entry = checksum.append_relative_checksum(sums, sidecar)
+    assert entry.endswith("  system-packages.txt")
+    assert str(wheelhouse) not in sums.read_text("utf-8")
+
+    relocated = tmp_path / "release"
+    relocated.mkdir()
+    for source in wheelhouse.iterdir():
+        (relocated / source.name).write_bytes(source.read_bytes())
+    expected, filename = (relocated / "SHA256SUMS").read_text("utf-8").split()
+    assert checksum.sha256_file(relocated / filename) == expected
+
+
+def test_sidecar_checksum_rejects_non_sibling_artifact(tmp_path: Path) -> None:
+
+    sums = tmp_path / "wheelhouse" / "SHA256SUMS"
+    sums.parent.mkdir()
+    sums.write_text("", "utf-8")
+    artifact = tmp_path / "elsewhere" / "system-packages.txt"
+    artifact.parent.mkdir()
+    artifact.write_text("python=3.13.14\n", "utf-8")
+    with pytest.raises(checksum.ChecksumError, match="beside"):
+        checksum.append_relative_checksum(sums, artifact)
