@@ -27,8 +27,8 @@ def test_manifest_is_complete_and_unique() -> None:
     builder.validate_manifest(manifest)
     names = [builder.canonicalize_name(p["name"]) for p in manifest["packages"]]
     assert names == [
-        "cryptography",
         "cffi",
+        "cryptography",
         "markupsafe",
         "pillow",
         "psutil",
@@ -210,6 +210,9 @@ def test_smoke_import_package_uses_requested_neutral_cwd(tmp_path: Path, monkeyp
     assert env["PATH"] == "/termux/bin"
 
 
-def test_cryptography_is_built_first_for_fast_android_loader_failure() -> None:
+def test_cryptography_runs_immediately_after_native_cffi_dependency() -> None:
     manifest = json.loads((ROOT / "manifest" / "wheels.json").read_text("utf-8"))
-    assert manifest["packages"][0]["name"] == "cryptography"
+    assert [package["name"] for package in manifest["packages"][:2]] == [
+        "cffi",
+        "cryptography",
+    ]
