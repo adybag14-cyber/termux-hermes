@@ -42,11 +42,17 @@ def test_manifest_is_complete_and_unique() -> None:
     assert manifest["target"]["wheel_platform"] == "android_24_arm64_v8a"
 
 
-def test_ruamel_import_smoke_is_deferred_until_runtime_dependency_is_installed() -> None:
+def test_package_import_smokes_with_runtime_only_dependencies_are_deferred() -> None:
     manifest = json.loads((ROOT / "manifest" / "wheels.json").read_text("utf-8"))
-    ruamel = next(package for package in manifest["packages"] if package["name"] == "ruamel-yaml-clib")
-    assert ruamel["defer_import_smoke"] is True
-    assert ruamel["imports"] == ["_ruamel_yaml"]
+    deferred = {
+        package["name"]: package["imports"]
+        for package in manifest["packages"]
+        if package.get("defer_import_smoke")
+    }
+    assert deferred == {
+        "pydantic-core": ["pydantic_core"],
+        "ruamel-yaml-clib": ["_ruamel_yaml"],
+    }
 
 
 def test_manifest_rejects_non_boolean_deferred_smoke() -> None:
