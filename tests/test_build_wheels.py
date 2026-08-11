@@ -78,13 +78,13 @@ def test_psutil_patch_is_idempotent(tmp_path: Path) -> None:
     assert common.read_text("utf-8").count(builder.PSUTIL_REPLACEMENT) == 1
 
 
-def _synthetic_wheel(path: Path) -> None:
+def _synthetic_wheel(path: Path, tag: str = "cp313-cp313-linux_x86_64") -> None:
     dist = "demo-1.0.dist-info"
     with zipfile.ZipFile(path, "w") as wheel:
         wheel.writestr("demo/native.so", b"ELF-placeholder")
         wheel.writestr(
             f"{dist}/WHEEL",
-            "Wheel-Version: 1.0\nGenerator: test\nRoot-Is-Purelib: false\nTag: cp313-cp313-linux_x86_64\n",
+            f"Wheel-Version: 1.0\nGenerator: test\nRoot-Is-Purelib: false\nTag: {tag}\n",
         )
         wheel.writestr(f"{dist}/METADATA", "Metadata-Version: 2.1\nName: demo\nVersion: 1.0\n")
         wheel.writestr(f"{dist}/RECORD", "")
@@ -143,3 +143,46 @@ def test_sidecar_checksum_rejects_non_sibling_artifact(tmp_path: Path) -> None:
     artifact.write_text("python=3.13.14\n", "utf-8")
     with pytest.raises(checksum.ChecksumError, match="beside"):
         checksum.append_relative_checksum(sums, artifact)
+
+
+def test_force_link_libpython_env_uses_active_shared_library(monkeypatch) -> None:
+    monkeypatch.setattr(builder.sysconfig, "get_config_var", lambda name: {
+        "LDLIBRARY": "libpython3.13.so",
+        "LIBDIR": "/data/data/com.termux/files/usr/lib",
+    }.get(name))
+    original = {"RUSTFLAGS": "-C opt-level=2"}
+    updated, library = builder._force_link_libpython_env(original)
+    assert library == "libpython3.13.so"
+    assert updated is not original
+    assert original["RUSTFLAGS"] == "-C opt-level=2"
+    assert "-C link-arg=-L/data/data/com.termux/files/usr/lib" in updated["RUSTFLAGS"]
+    assert "-C link-arg=-lpython3.13" in updated["RUSTFLAGS"]
+
+
+def test_force_link_libpython_requires_shared_python(monkeypatch) -> None:
+    monkeypatch.setattr(builder.sysconfig, "get_config_var", lambda name: None)
+    with pytest.raises(builder.BuildError, match="cannot resolve active shared libpython"):
+        builder._force_link_libpython_env({})
+
+
+def test_verify_wheel_enforces_android_libpython_needed(tmp_path: Path, monkeypatch) -> None:
+    wheel = tmp_path / "demo-1.0-cp313-abi3-android_24_arm64_v8a.whl"
+    _synthetic_wheel(wheel, "cp313-abi3-android_24_arm64_v8a")
+    package = {"name": "demo", "version": "1.0", "force_link_libpython": True}
+    monkeypatch.setattr(builder, "_expected_libpython", lambda: ("/termux/lib", "libpython3.13.so"))
+    monkeypatch.setattr(builder, "_elf_needed_libraries", lambda _data: {"libc.so"})
+    with pytest.raises(builder.BuildError, match="must DT_NEEDED libpython3.13.so"):
+        builder.verify_wheel(wheel, package, "android_24_arm64_v8a")
+
+    monkeypatch.setattr(
+        builder,
+        "_elf_needed_libraries",
+        lambda _data: {"libc.so", "libpython3.13.so"},
+    )
+    builder.verify_wheel(wheel, package, "android_24_arm64_v8a")
+
+
+def test_manifest_marks_cryptography_for_libpython_linking() -> None:
+    manifest = json.loads((ROOT / "manifest" / "wheels.json").read_text("utf-8"))
+    cryptography = next(package for package in manifest["packages"] if package["name"] == "cryptography")
+    assert cryptography["force_link_libpython"] is True
