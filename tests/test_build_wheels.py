@@ -27,13 +27,13 @@ def test_manifest_is_complete_and_unique() -> None:
     builder.validate_manifest(manifest)
     names = [builder.canonicalize_name(p["name"]) for p in manifest["packages"]]
     assert names == [
+        "cryptography",
         "cffi",
         "markupsafe",
         "pillow",
         "psutil",
         "pyyaml",
         "ruamel-yaml-clib",
-        "cryptography",
         "jiter",
         "pydantic-core",
         "rpds-py",
@@ -186,3 +186,30 @@ def test_manifest_marks_cryptography_for_libpython_linking() -> None:
     manifest = json.loads((ROOT / "manifest" / "wheels.json").read_text("utf-8"))
     cryptography = next(package for package in manifest["packages"] if package["name"] == "cryptography")
     assert cryptography["force_link_libpython"] is True
+
+
+def test_smoke_import_package_uses_requested_neutral_cwd(tmp_path: Path, monkeypatch) -> None:
+    calls = []
+
+    def fake_run(argv, *, cwd, env):
+        calls.append((argv, cwd, env))
+
+    monkeypatch.setattr(builder, "run", fake_run)
+    builder.smoke_import_package(
+        "/termux/bin/python",
+        {"imports": ["psutil"]},
+        cwd=tmp_path,
+        env={"PATH": "/termux/bin"},
+    )
+
+    assert len(calls) == 1
+    argv, cwd, env = calls[0]
+    assert cwd == tmp_path
+    assert argv[:2] == ["/termux/bin/python", "-c"]
+    assert "importlib.import_module('psutil')" in argv[2]
+    assert env["PATH"] == "/termux/bin"
+
+
+def test_cryptography_is_built_first_for_fast_android_loader_failure() -> None:
+    manifest = json.loads((ROOT / "manifest" / "wheels.json").read_text("utf-8"))
+    assert manifest["packages"][0]["name"] == "cryptography"

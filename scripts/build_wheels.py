@@ -429,7 +429,11 @@ def build_package(
         cwd=source_root,
         env=package_env,
     )
-    smoke_import_package(python, package, cwd=source_root, env=package_env)
+    # Import from the neutral package work directory, not the unpacked sdist.
+    # Projects such as psutil place their import package at the source root;
+    # using source_root here shadows the wheel we just installed and produces
+    # a false missing-extension failure.
+    smoke_import_package(python, package, cwd=package_root, env=package_env)
     return {
         "name": name,
         "version": str(package["version"]),

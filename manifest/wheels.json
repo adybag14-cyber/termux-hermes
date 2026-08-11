@@ -25,6 +25,28 @@
   },
   "packages": [
     {
+      "build_backend": "maturin",
+      "build_requires": [
+        "maturin>=1.14.1,<2",
+        "cffi>=2.0.0; platform_python_implementation != 'PyPy'",
+        "cffi>=2.1; python_version >= '3.15' and platform_python_implementation != 'PyPy'",
+        "setuptools!=74.0.0,!=74.1.0,!=74.1.1,!=74.1.2"
+      ],
+      "imports": [
+        "cryptography",
+        "cryptography.hazmat.bindings._rust"
+      ],
+      "name": "cryptography",
+      "sdist": {
+        "filename": "cryptography-50.0.0.tar.gz",
+        "sha256": "eeac2acb5a20ed25e0ad6d1df9891a520b78b404266b6d11778f25d5d691a6c9",
+        "url": "https://files.pythonhosted.org/packages/de/41/6cbdcf9142d00fe82836fbb51e503e58088575cf7a0fe1dbff6695bf0840/cryptography-50.0.0.tar.gz"
+      },
+      "strategy": "maturin",
+      "version": "50.0.0",
+      "force_link_libpython": true
+    },
+    {
       "build_backend": "setuptools.build_meta",
       "build_requires": [
         "setuptools >= 66.1"
@@ -129,28 +151,6 @@
       },
       "strategy": "setuptools",
       "version": "0.2.15"
-    },
-    {
-      "build_backend": "maturin",
-      "build_requires": [
-        "maturin>=1.14.1,<2",
-        "cffi>=2.0.0; platform_python_implementation != 'PyPy'",
-        "cffi>=2.1; python_version >= '3.15' and platform_python_implementation != 'PyPy'",
-        "setuptools!=74.0.0,!=74.1.0,!=74.1.1,!=74.1.2"
-      ],
-      "imports": [
-        "cryptography",
-        "cryptography.hazmat.bindings._rust"
-      ],
-      "name": "cryptography",
-      "sdist": {
-        "filename": "cryptography-50.0.0.tar.gz",
-        "sha256": "eeac2acb5a20ed25e0ad6d1df9891a520b78b404266b6d11778f25d5d691a6c9",
-        "url": "https://files.pythonhosted.org/packages/de/41/6cbdcf9142d00fe82836fbb51e503e58088575cf7a0fe1dbff6695bf0840/cryptography-50.0.0.tar.gz"
-      },
-      "strategy": "maturin",
-      "version": "50.0.0",
-      "force_link_libpython": true
     },
     {
       "build_backend": "maturin",
