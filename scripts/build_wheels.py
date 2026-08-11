@@ -89,6 +89,8 @@ def validate_manifest(payload: dict[str, Any]) -> None:
             raise BuildError(f"invalid sdist SHA-256 for {name}")
         if not str(sdist.get("url", "")).startswith("https://"):
             raise BuildError(f"non-HTTPS sdist URL for {name}")
+        if "defer_import_smoke" in package and not isinstance(package["defer_import_smoke"], bool):
+            raise BuildError(f"defer_import_smoke must be boolean for {name}")
 
 
 def _safe_parts(name: str) -> tuple[str, ...]:
@@ -433,7 +435,10 @@ def build_package(
     # Projects such as psutil place their import package at the source root;
     # using source_root here shadows the wheel we just installed and produces
     # a false missing-extension failure.
-    smoke_import_package(python, package, cwd=package_root, env=package_env)
+    if package.get("defer_import_smoke"):
+        print(f"  deferring {name} import smoke until full dependency graph verification", flush=True)
+    else:
+        smoke_import_package(python, package, cwd=package_root, env=package_env)
     return {
         "name": name,
         "version": str(package["version"]),

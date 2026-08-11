@@ -42,6 +42,20 @@ def test_manifest_is_complete_and_unique() -> None:
     assert manifest["target"]["wheel_platform"] == "android_24_arm64_v8a"
 
 
+def test_ruamel_import_smoke_is_deferred_until_runtime_dependency_is_installed() -> None:
+    manifest = json.loads((ROOT / "manifest" / "wheels.json").read_text("utf-8"))
+    ruamel = next(package for package in manifest["packages"] if package["name"] == "ruamel-yaml-clib")
+    assert ruamel["defer_import_smoke"] is True
+    assert ruamel["imports"] == ["_ruamel_yaml"]
+
+
+def test_manifest_rejects_non_boolean_deferred_smoke() -> None:
+    manifest = json.loads((ROOT / "manifest" / "wheels.json").read_text("utf-8"))
+    manifest["packages"][0]["defer_import_smoke"] = "yes"
+    with pytest.raises(builder.BuildError, match="defer_import_smoke must be boolean"):
+        builder.validate_manifest(manifest)
+
+
 def test_safe_extract_rejects_tar_symlink(tmp_path: Path) -> None:
     archive = tmp_path / "bad.tar.gz"
     with tarfile.open(archive, "w:gz") as tf:
