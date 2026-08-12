@@ -15,6 +15,7 @@ import shutil
 import stat
 import subprocess
 import sys
+import sysconfig
 import tarfile
 import tempfile
 import time
@@ -88,6 +89,8 @@ def validate_manifest(payload: dict[str, Any]) -> None:
             raise BuildError(f"invalid sdist SHA-256 for {name}")
         if not str(sdist.get("url", "")).startswith("https://"):
             raise BuildError(f"non-HTTPS sdist URL for {name}")
+        if "defer_import_smoke" in package and not isinstance(package["defer_import_smoke"], bool):
+            raise BuildError(f"defer_import_smoke must be boolean for {name}")
 
 
 def _safe_parts(name: str) -> tuple[str, ...]:
@@ -250,6 +253,107 @@ def retag_wheel(wheel: Path, platform_tag: str) -> Path:
     return target
 
 
+def _elf_needed_libraries(data: bytes) -> set[str]:
+    """Read DT_NEEDED names from a little-endian ELF64 shared object.
+
+    Android arm64 wheels are ELF64/LE. Keeping this tiny parser in-tree avoids
+    making release verification depend on host `readelf` availability.
+    """
+    import struct
+
+    if len(data) < 64 or data[:4] != b"\x7fELF" or data[4] != 2 or data[5] != 1:
+        return set()
+    e_phoff = struct.unpack_from("<Q", data, 32)[0]
+    e_phentsize = struct.unpack_from("<H", data, 54)[0]
+    e_phnum = struct.unpack_from("<H", data, 56)[0]
+    loads: list[tuple[int, int, int]] = []
+    dynamic: tuple[int, int] | None = None
+    for index in range(e_phnum):
+        offset = e_phoff + index * e_phentsize
+        if offset + 56 > len(data):
+            return set()
+        p_type = struct.unpack_from("<I", data, offset)[0]
+        p_offset = struct.unpack_from("<Q", data, offset + 8)[0]
+        p_vaddr = struct.unpack_from("<Q", data, offset + 16)[0]
+        p_filesz = struct.unpack_from("<Q", data, offset + 32)[0]
+        if p_type == 1:  # PT_LOAD
+            loads.append((p_vaddr, p_offset, p_filesz))
+        elif p_type == 2:  # PT_DYNAMIC
+            dynamic = (p_offset, p_filesz)
+    if dynamic is None:
+        return set()
+
+    strtab_addr = 0
+    needed_offsets: list[int] = []
+    dyn_offset, dyn_size = dynamic
+    for offset in range(dyn_offset, min(len(data), dyn_offset + dyn_size), 16):
+        d_tag, d_val = struct.unpack_from("<QQ", data, offset)
+        if d_tag == 0:
+            break
+        if d_tag == 1:  # DT_NEEDED
+            needed_offsets.append(d_val)
+        elif d_tag == 5:  # DT_STRTAB
+            strtab_addr = d_val
+    if not strtab_addr:
+        return set()
+
+    strtab_offset = None
+    for vaddr, file_offset, file_size in loads:
+        if vaddr <= strtab_addr < vaddr + file_size:
+            strtab_offset = file_offset + (strtab_addr - vaddr)
+            break
+    if strtab_offset is None:
+        return set()
+
+    names: set[str] = set()
+    for relative in needed_offsets:
+        start = strtab_offset + relative
+        if start >= len(data):
+            continue
+        end = data.find(b"\0", start)
+        if end < 0:
+            continue
+        names.add(data[start:end].decode("utf-8", "replace"))
+    return names
+
+
+def _expected_libpython() -> tuple[str, str]:
+    library = str(sysconfig.get_config_var("LDLIBRARY") or "").strip()
+    libdir = str(sysconfig.get_config_var("LIBDIR") or "").strip()
+    if not library.startswith("libpython") or ".so" not in library or not libdir:
+        raise BuildError(
+            f"cannot resolve active shared libpython from sysconfig: LDLIBRARY={library!r}, LIBDIR={libdir!r}"
+        )
+    return libdir, library
+
+
+def _force_link_libpython_env(env: dict[str, str]) -> tuple[dict[str, str], str]:
+    libdir, library = _expected_libpython()
+    link_name = library[3:].split(".so", 1)[0]
+    package_env = env.copy()
+    extra = f"-C link-arg=-L{libdir} -C link-arg=-l{link_name}"
+    package_env["RUSTFLAGS"] = " ".join(
+        piece for piece in (package_env.get("RUSTFLAGS", "").strip(), extra) if piece
+    )
+    return package_env, library
+
+
+def smoke_import_package(
+    python: str,
+    package: dict[str, Any],
+    *,
+    cwd: Path,
+    env: dict[str, str],
+) -> None:
+    imports = [str(item) for item in package.get("imports") or []]
+    if not imports:
+        return
+    code = "import importlib\n" + "\n".join(
+        f"importlib.import_module({module!r})" for module in imports
+    ) + "\nprint('package imports ok')\n"
+    run([python, "-c", code], cwd=cwd, env=env)
+
+
 def verify_wheel(wheel: Path, package: dict[str, Any], platform_tag: str) -> None:
     distribution, version, _, tags = parse_wheel_filename(wheel.name)
     if canonicalize_name(distribution) != canonicalize_name(package["name"]):
@@ -259,8 +363,16 @@ def verify_wheel(wheel: Path, package: dict[str, Any], platform_tag: str) -> Non
     if not any(tag.platform == platform_tag for tag in tags):
         raise BuildError(f"wheel is not tagged for {platform_tag}: {wheel.name}")
     with zipfile.ZipFile(wheel) as archive:
-        if not any(name.endswith((".so", ".pyd")) for name in archive.namelist()):
+        native_members = [name for name in archive.namelist() if name.endswith((".so", ".pyd"))]
+        if not native_members:
             raise BuildError(f"expected native extension in {wheel.name}")
+        if package.get("force_link_libpython"):
+            _, expected = _expected_libpython()
+            needed = set().union(*(_elf_needed_libraries(archive.read(name)) for name in native_members))
+            if expected not in needed:
+                raise BuildError(
+                    f"{wheel.name} must DT_NEEDED {expected} on Android; found {sorted(needed)}"
+                )
         bad = archive.testzip()
         if bad:
             raise BuildError(f"corrupt member {bad} in {wheel.name}")
@@ -295,10 +407,16 @@ def build_package(
         patch_psutil(source_root)
     package_out = package_root / "wheelhouse"
     package_out.mkdir(parents=True)
+    package_env = env
+    if package.get("force_link_libpython"):
+        if strategy != "maturin":
+            raise BuildError(f"force_link_libpython is only supported for maturin packages: {name}")
+        package_env, expected_libpython = _force_link_libpython_env(env)
+        print(f"  forcing Android DT_NEEDED {expected_libpython}", flush=True)
     run(
         [uv, "build", "--wheel", "--no-build-isolation", "--out-dir", str(package_out), str(source_root)],
         cwd=source_root,
-        env=env,
+        env=package_env,
     )
     wheels = sorted(package_out.glob("*.whl"))
     if len(wheels) != 1:
@@ -308,7 +426,19 @@ def build_package(
     output.mkdir(parents=True, exist_ok=True)
     final = output / wheel.name
     shutil.copy2(wheel, final)
-    run([uv, "pip", "install", "--python", python, "--no-deps", "--reinstall", str(final)], cwd=source_root, env=env)
+    run(
+        [uv, "pip", "install", "--python", python, "--no-deps", "--reinstall", str(final)],
+        cwd=source_root,
+        env=package_env,
+    )
+    # Import from the neutral package work directory, not the unpacked sdist.
+    # Projects such as psutil place their import package at the source root;
+    # using source_root here shadows the wheel we just installed and produces
+    # a false missing-extension failure.
+    if package.get("defer_import_smoke"):
+        print(f"  deferring {name} import smoke until full dependency graph verification", flush=True)
+    else:
+        smoke_import_package(python, package, cwd=package_root, env=package_env)
     return {
         "name": name,
         "version": str(package["version"]),
