@@ -117,12 +117,17 @@ jobs:
 
           Commit: $GITHUB_SHA
           EOF
+          # Immutable releases must contain their complete asset set before
+          # publication, so assemble a draft first and publish it once.
           gh release create "$RELEASE_TAG" \
-            release/*.whl release/index.json release/SHA256SUMS release/system-packages.txt \
-            manifest/wheels.json audit/resolved.txt \
             --target "$GITHUB_SHA" \
             --title "Hermes Termux CPython 3.13 Android arm64 wheelhouse" \
-            --notes-file release-notes.md
+            --notes-file release-notes.md \
+            --draft
+          gh release upload "$RELEASE_TAG" \
+            release/*.whl release/index.json release/SHA256SUMS release/system-packages.txt \
+            manifest/wheels.json audit/resolved.txt
+          gh release edit "$RELEASE_TAG" --draft=false --latest
 
       - name: Show container state on failure
         if: failure()

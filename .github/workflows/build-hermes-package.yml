@@ -198,9 +198,13 @@ jobs:
 
           This workflow installs Hermes in the official aarch64 Termux userspace, validates native imports, packages the complete runtime/source assets and venv, then installs the resulting .deb into a second fresh Termux container before release.
           EOF
+          # Publish through a draft so repository-level immutable releases lock
+          # the tag only after every verified asset is attached.
           gh release create "$RELEASE_TAG" \
-            "$OUT"/hermes-agent_*.deb "$OUT/SHA256SUMS" "$OUT/BUILD-METADATA.json" \
             --target "$GITHUB_SHA" \
             --title "Hermes Agent native Termux aarch64 package" \
             --notes-file "$OUT/release-notes.md" \
-            --latest=false
+            --draft
+          gh release upload "$RELEASE_TAG" \
+            "$OUT"/hermes-agent_*.deb "$OUT/SHA256SUMS" "$OUT/BUILD-METADATA.json"
+          gh release edit "$RELEASE_TAG" --draft=false --latest=false
