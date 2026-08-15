@@ -31,7 +31,8 @@ jobs:
               set -Eeuo pipefail
               bash <(curl -fsSL https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh)
               pkg install -y hermes-agent
-              dpkg-query -W -f="${Status}\n" hermes-agent | grep -Fx "install ok installed"
+              dpkg-query -W -f="\${Status}\n" hermes-agent | grep -Fx "install ok installed"
+              ! dpkg-query -W python >/dev/null 2>&1
               hermes --version
               hermes version | tee /tmp/version.txt
               grep -F "Install method: apt" /tmp/version.txt

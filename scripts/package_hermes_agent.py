@@ -36,7 +36,6 @@ RUNTIME_DEPS = [
     "littlecms",
     "ncurses",
     "ncurses-ui-libs",
-    "nodejs (>= 22)",
     "openjpeg",
     "openssl",
     "python3.13 (>= 3.13.15)",
@@ -117,7 +116,7 @@ Version: {args.version}
 Architecture: aarch64
 Maintainer: adybag14-cyber <adybag14-cyber@users.noreply.github.com>
 Depends: {depends}
-Suggests: wrangler
+Suggests: nodejs (>= 22), wrangler
 Section: utils
 Priority: optional
 Homepage: https://github.com/NousResearch/hermes-agent
