@@ -22,7 +22,7 @@ jobs:
       - name: Run unit tests
         run: python -m pytest -q
       - name: Check shell syntax
-        run: bash -n scripts/termux_build.sh
+        run: bash -n scripts/*.sh
       - name: Validate JSON
         run: |
           python -m json.tool manifest/wheels.json >/dev/null

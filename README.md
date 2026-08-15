@@ -4,6 +4,34 @@ This repository builds the native Python wheels required by the Hermes Agent
 Termux profile so phones can install binary wheels instead of compiling C and
 Rust packages locally.
 
+## Native `pkg install hermes-agent` package
+
+This repository also builds a complete native Termux `.deb` for Hermes Agent. The package is not a thin Python wheel: it contains the full Hermes runtime/source assets and a prevalidated CPython 3.13 virtual environment produced by the existing immutable Android wheelhouse flow. The package is stamped as an APT-managed install, so `hermes update` does not mutate package-owned files and instead directs users to `pkg upgrade hermes-agent`.
+
+The signed third-party repository is enabled once with:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh | bash
+```
+
+Then Hermes and the companion native packages are ordinary Termux packages:
+
+```bash
+pkg install hermes-agent
+pkg install wrangler
+pkg install python3.13
+```
+
+Repository signing fingerprint:
+
+```text
+EAD24A2124EFA7393A78B7B14699F966313F7A6B
+```
+
+`build-hermes-package.yml` builds on a native ARM GitHub runner in the pinned official Termux Docker userspace, installs Hermes through the native installer, validates the runtime imports, assembles the `.deb`, and installs that `.deb` into a second clean Termux container before an immutable GitHub release may be published. `apt-hermes-smoke.yml` separately validates installation from the live signed APT repository.
+
+The public APT repository is a contributor-operated distribution/proving path. It does **not** replace the separate upstream requirement that canonical Hermes Termux binary artifacts eventually be built and released by NousResearch-owned CI.
+
 ## Locked target
 
 - Hermes source: `NousResearch/hermes-agent@ed5e17f4b86da0c4f09c0694757b6074ae6b9d16`

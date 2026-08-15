@@ -1,0 +1,204 @@
+name: Build native Hermes Termux package
+
+on:
+  workflow_dispatch:
+    inputs:
+      hermes_commit:
+        description: Exact adybag14-cyber/hermes-agent commit to package
+        required: true
+        default: 7173dbf0518ddb089bb5d159a3f2d9f736d3b9d6
+        type: string
+      package_version:
+        description: Debian package version
+        required: true
+        default: 0.20.1+termux1
+        type: string
+      release_tag:
+        description: New immutable GitHub release tag
+        required: true
+        default: hermes-agent-termux-0.20.1-20260815.1
+        type: string
+      publish_release:
+        description: Publish verified .deb as a GitHub release
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: termux-hermes-agent-package
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 120
+    env:
+      TERMUX_IMAGE: termux/termux-docker@sha256:3aed9c7fbcf9195a9919deaad418da006232864a779fb4f322d68a34887a2e15
+    steps:
+      - name: Checkout Termux packaging repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Checkout exact Hermes source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: adybag14-cyber/hermes-agent
+          ref: ${{ inputs.hermes_commit }}
+          path: hermes-source
+          fetch-depth: 1
+
+      - name: Verify immutable inputs
+        env:
+          HERMES_COMMIT: ${{ inputs.hermes_commit }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          PUBLISH_RELEASE: ${{ inputs.publish_release }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          test "$(git -C hermes-source rev-parse HEAD)" = "$HERMES_COMMIT"
+          case "${{ inputs.package_version }}" in
+            *[!0-9A-Za-z.+:~_-]*) echo "Invalid Debian package version" >&2; exit 1 ;;
+          esac
+          if [[ "$PUBLISH_RELEASE" == true ]]; then
+            if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+              echo "Release $RELEASE_TAG already exists; immutable releases cannot be overwritten" >&2
+              exit 1
+            fi
+            if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+              echo "Tag $RELEASE_TAG already exists; choose a new immutable tag" >&2
+              exit 1
+            fi
+          fi
+
+      - name: Verify native ARM runner and pinned Termux userspace
+        run: |
+          set -Eeuo pipefail
+          case "$(uname -m)" in aarch64|arm64) ;; *) exit 1 ;; esac
+          docker pull "$TERMUX_IMAGE"
+          test "$(docker image inspect --format '{{.Architecture}}' "$TERMUX_IMAGE")" = arm64
+          docker run --rm --privileged "$TERMUX_IMAGE" uname -m | grep -E '^(aarch64|arm64)$'
+
+      - name: Build Hermes .deb inside native aarch64 Termux
+        env:
+          HERMES_COMMIT: ${{ inputs.hermes_commit }}
+          PACKAGE_VERSION: ${{ inputs.package_version }}
+        run: |
+          set -Eeuo pipefail
+          OUT="$RUNNER_TEMP/hermes-agent-deb"
+          rm -rf "$OUT"
+          mkdir -p "$OUT"
+          chmod 0777 "$OUT"
+          docker run --rm --privileged \
+            --security-opt seccomp=unconfined \
+            -e CI=true \
+            -v "$GITHUB_WORKSPACE:/termux-hermes:ro" \
+            -v "$GITHUB_WORKSPACE/hermes-source:/hermes-source:ro" \
+            -v "$OUT:/out" \
+            "$TERMUX_IMAGE" \
+            bash /termux-hermes/scripts/build_hermes_deb_termux.sh \
+              /hermes-source /out "$HERMES_COMMIT" "$PACKAGE_VERSION"
+          test -s "$OUT/hermes-agent_${PACKAGE_VERSION}_aarch64.deb"
+          (cd "$OUT" && sha256sum -c SHA256SUMS)
+
+      - name: Inspect package contract
+        env:
+          PACKAGE_VERSION: ${{ inputs.package_version }}
+          HERMES_COMMIT: ${{ inputs.hermes_commit }}
+        run: |
+          set -Eeuo pipefail
+          OUT="$RUNNER_TEMP/hermes-agent-deb"
+          DEB="$OUT/hermes-agent_${PACKAGE_VERSION}_aarch64.deb"
+          test "$(dpkg-deb -f "$DEB" Package)" = hermes-agent
+          test "$(dpkg-deb -f "$DEB" Version)" = "$PACKAGE_VERSION"
+          test "$(dpkg-deb -f "$DEB" Architecture)" = aarch64
+          dpkg-deb -f "$DEB" Depends | grep -F 'python3.13 (>= 3.13.15)'
+          rm -rf "$RUNNER_TEMP/hermes-unpack"
+          dpkg-deb -x "$DEB" "$RUNNER_TEMP/hermes-unpack"
+          APP="$RUNNER_TEMP/hermes-unpack/data/data/com.termux/files/usr/lib/hermes-agent/app"
+          test -x "$APP/venv/bin/hermes"
+          test "$(cat "$APP/.install_method")" = apt
+          test ! -e "$APP/.git"
+          META="$RUNNER_TEMP/hermes-unpack/data/data/com.termux/files/usr/share/doc/hermes-agent/BUILD-METADATA.json"
+          python3 - <<PY
+          import json
+          from pathlib import Path
+          data=json.loads(Path("$META").read_text())
+          assert data["source_commit"] == "$HERMES_COMMIT"
+          assert data["package_version"] == "$PACKAGE_VERSION"
+          assert data["target"] == "aarch64-linux-android/Termux"
+          print(json.dumps(data, indent=2, sort_keys=True))
+          PY
+          cp "$META" "$OUT/BUILD-METADATA.json"
+
+      - name: Fresh native Termux install smoke
+        env:
+          PACKAGE_VERSION: ${{ inputs.package_version }}
+        run: |
+          set -Eeuo pipefail
+          OUT="$RUNNER_TEMP/hermes-agent-deb"
+          docker run --rm --privileged \
+            --security-opt seccomp=unconfined \
+            -v "$OUT:/packages:ro" \
+            "$TERMUX_IMAGE" \
+            /entrypoint.sh bash -lc '
+              set -Eeuo pipefail
+              bash <(curl -fsSL https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh)
+              apt install -y "/packages/hermes-agent_'"$PACKAGE_VERSION"'_aarch64.deb"
+              dpkg-query -W -f="${Status}\n" hermes-agent | grep -Fx "install ok installed"
+              hermes --version
+              hermes version | tee /tmp/hermes-version.txt
+              grep -F "Install method: apt" /tmp/hermes-version.txt
+              if hermes update >/tmp/hermes-update.txt 2>&1; then
+                echo "APT-managed hermes update unexpectedly succeeded" >&2
+                exit 1
+              fi
+              grep -F "pkg upgrade hermes-agent" /tmp/hermes-update.txt
+              test ! -e "$PREFIX/lib/hermes-agent/app/.git"
+              "$PREFIX/lib/hermes-agent/app/venv/bin/python" - <<"PY"
+          import importlib
+          for module in ("hermes_cli", "psutil", "yaml", "cffi", "PIL", "pydantic_core", "cryptography", "jiter", "rpds"):
+              importlib.import_module(module)
+          print("Fresh installed Hermes runtime imports passed")
+          PY
+            '
+
+      - name: Upload verified package artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: hermes-agent-termux-aarch64
+          path: |
+            ${{ runner.temp }}/hermes-agent-deb/hermes-agent_*.deb
+            ${{ runner.temp }}/hermes-agent-deb/SHA256SUMS
+            ${{ runner.temp }}/hermes-agent-deb/BUILD-METADATA.json
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Publish immutable GitHub release
+        if: ${{ inputs.publish_release }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          HERMES_COMMIT: ${{ inputs.hermes_commit }}
+          PACKAGE_VERSION: ${{ inputs.package_version }}
+        run: |
+          set -Eeuo pipefail
+          OUT="$RUNNER_TEMP/hermes-agent-deb"
+          cat > "$OUT/release-notes.md" <<EOF
+          Native Hermes Agent package for Termux aarch64.
+
+          Install source: adybag14-cyber/hermes-agent@$HERMES_COMMIT
+          Package version: $PACKAGE_VERSION
+          Build userspace: $TERMUX_IMAGE
+          Python: side-by-side signed APT package python3.13
+          Hermes native dependency wheelhouse: recorded in BUILD-METADATA.json
+
+          This workflow installs Hermes in the official aarch64 Termux userspace, validates native imports, packages the complete runtime/source assets and venv, then installs the resulting .deb into a second fresh Termux container before release.
+          EOF
+          gh release create "$RELEASE_TAG" \
+            "$OUT"/hermes-agent_*.deb "$OUT/SHA256SUMS" "$OUT/BUILD-METADATA.json" \
+            --target "$GITHUB_SHA" \
+            --title "Hermes Agent native Termux aarch64 package" \
+            --notes-file "$OUT/release-notes.md" \
+            --latest
