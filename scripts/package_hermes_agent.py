@@ -17,7 +17,6 @@ RUNTIME_DEPS = [
     "coreutils",
     "curl",
     "dpkg",
-    "ffmpeg",
     "gdbm",
     "git",
     "libandroid-posix-semaphore",
@@ -41,7 +40,6 @@ RUNTIME_DEPS = [
     "python3.13 (>= 3.13.15)",
     "readline",
     "ripgrep",
-    "uv",
     "zlib",
 ]
 
@@ -116,7 +114,7 @@ Version: {args.version}
 Architecture: aarch64
 Maintainer: adybag14-cyber <adybag14-cyber@users.noreply.github.com>
 Depends: {depends}
-Suggests: nodejs (>= 22), wrangler
+Suggests: ffmpeg, nodejs (>= 22), uv, wrangler
 Section: utils
 Priority: optional
 Homepage: https://github.com/NousResearch/hermes-agent

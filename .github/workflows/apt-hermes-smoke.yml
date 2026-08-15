@@ -29,15 +29,16 @@ jobs:
             "$TERMUX_IMAGE" \
             /entrypoint.sh bash -lc '
               set -Eeuo pipefail
+              TMPDIR="${TMPDIR:-$PREFIX/tmp}"
+              mkdir -p "$TMPDIR"
               bash <(curl -fsSL https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh)
               pkg install -y hermes-agent
               dpkg-query -W -f="\${Status}\n" hermes-agent | grep -Fx "install ok installed"
               ! dpkg-query -W python >/dev/null 2>&1
               hermes --version
-              hermes version | tee /tmp/version.txt
-              grep -F "Install method: apt" /tmp/version.txt
-              if hermes update >/tmp/update.txt 2>&1; then exit 1; fi
-              grep -F "pkg upgrade hermes-agent" /tmp/update.txt
+              grep -Fx apt "$PREFIX/lib/hermes-agent/app/.install_method"
+              if hermes update >"$TMPDIR/update.txt" 2>&1; then exit 1; fi
+              grep -F "pkg upgrade hermes-agent" "$TMPDIR/update.txt"
               "$PREFIX/lib/hermes-agent/app/venv/bin/python" - <<"PY"
           import importlib
           for module in ("hermes_cli", "psutil", "yaml", "cffi", "PIL", "pydantic_core", "cryptography", "jiter", "rpds"):
