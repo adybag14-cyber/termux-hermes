@@ -48,4 +48,19 @@ jobs:
               importlib.import_module(module)
           print("Live APT Hermes import smoke passed")
           PY
+
+              # Exercise the public recovery command against preserved user
+              # state and a simulated interrupted legacy Git checkout.
+              printf "RECOVERY_SENTINEL=preserve-me\n" > "$HOME/.hermes/.env"
+              env_before="$(sha256sum "$HOME/.hermes/.env" | awk "{print \$1}")"
+              mkdir -p "$HOME/.hermes/hermes-agent/.git"
+              : > "$HOME/.hermes/hermes-agent/.git/index.lock"
+              hermes config set model.max_tokens 65536
+              curl -fsSL --retry 6 --retry-all-errors \
+                https://raw.githubusercontent.com/adybag14-cyber/termux-hermes/main/install.sh | bash
+              test "$(sha256sum "$HOME/.hermes/.env" | awk "{print \$1}")" = "$env_before"
+              test -e "$HOME/.hermes/hermes-agent/.git/index.lock"
+              test "$(hermes config get model.max_tokens --json)" = "8192"
+              dpkg --compare-versions "$(dpkg-query -W -f="\${Version}" hermes-agent)" ge "0.20.6+termux1"
+              hermes gateway stop >/dev/null 2>&1 || true
             '
