@@ -1,6 +1,27 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -Eeuo pipefail
 
+INSTALL_URL='https://raw.githubusercontent.com/adybag14-cyber/termux-hermes/main/install.sh'
+
+# A program launched by a streamed `curl | bash` installer shares the script's
+# input pipe and can accidentally consume commands that Bash has not read yet.
+# Materialize the installer first so pkg, apt, and Hermes always get /dev/null.
+if [ "${HERMES_RECOVERY_FILE_RUN:-0}" != 1 ] && [ -z "${BASH_SOURCE[0]:-}" ]; then
+  bootstrap_dir="${TMPDIR:-/data/data/com.termux/files/usr/tmp}"
+  mkdir -p "$bootstrap_dir"
+  bootstrap="$(mktemp "$bootstrap_dir/hermes-recovery.XXXXXX")"
+  trap 'rm -f "$bootstrap"' EXIT
+  curl -fsSL --retry 6 --retry-all-errors "$INSTALL_URL" -o "$bootstrap"
+  if HERMES_RECOVERY_FILE_RUN=1 bash "$bootstrap" </dev/null; then
+    bootstrap_status=0
+  else
+    bootstrap_status=$?
+  fi
+  rm -f "$bootstrap"
+  trap - EXIT
+  exit "$bootstrap_status"
+fi
+
 EXPECTED_PREFIX=/data/data/com.termux/files/usr
 PRIMARY_SOURCE='deb https://packages.termux.dev/apt/termux-main stable main'
 MIN_PACKAGE_VERSION='0.20.6+termux1'
@@ -22,24 +43,24 @@ export DEBIAN_FRONTEND=noninteractive
 
 step "Checking official Termux package consistency"
 base_ok=true
-apt-get -o Acquire::Retries=4 update >/dev/null 2>&1 || base_ok=false
-apt-get -s install ncurses ncurses-ui-libs >/dev/null 2>&1 || base_ok=false
+apt-get -o Acquire::Retries=4 update </dev/null >/dev/null 2>&1 || base_ok=false
+apt-get -s install ncurses ncurses-ui-libs </dev/null >/dev/null 2>&1 || base_ok=false
 if ! $base_ok; then
   backup="$PREFIX/etc/apt/sources.list.hermes-recovery-$(date -u +%Y%m%dT%H%M%SZ).bak"
   [ ! -f "$PREFIX/etc/apt/sources.list" ] || cp -p "$PREFIX/etc/apt/sources.list" "$backup"
   printf '%s\n' "$PRIMARY_SOURCE" > "$PREFIX/etc/apt/sources.list"
   printf 'Termux mirror package skew detected; switched main repository to the official primary.\n'
   [ ! -f "$backup" ] || printf 'Previous source list saved at %s\n' "$backup"
-  apt-get -o Acquire::Retries=5 update
-  pkg upgrade -y
+  apt-get -o Acquire::Retries=5 update </dev/null
+  pkg upgrade -y </dev/null
 fi
 
 step "Enabling the signed Hermes/Termux package repository"
 bash <(curl -fsSL --retry 6 --retry-all-errors \
-  https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh)
+  https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh) </dev/null
 
 step "Installing the latest verified Hermes Agent package"
-pkg install -y hermes-agent
+pkg install -y hermes-agent </dev/null
 installed="$(dpkg-query -W -f='${Version}' hermes-agent)"
 if ! dpkg --compare-versions "$installed" ge "$MIN_PACKAGE_VERSION"; then
   fail "repository returned hermes-agent $installed; expected at least $MIN_PACKAGE_VERSION"
@@ -47,8 +68,8 @@ fi
 hash -r
 
 step "Preserving configuration and applying the affordable OpenRouter output cap"
-hermes config migrate >/dev/null 2>&1 || true
-hermes config set model.max_tokens "$RECOVERY_MAX_TOKENS"
+hermes config migrate </dev/null >/dev/null 2>&1 || true
+hermes config set model.max_tokens "$RECOVERY_MAX_TOKENS" </dev/null
 
 step "Verifying APT-managed update behavior"
 version_output="$(hermes --version)"
