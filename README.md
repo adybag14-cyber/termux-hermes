@@ -4,6 +4,25 @@ This repository builds the native Python wheels required by the Hermes Agent
 Termux profile so phones can install binary wheels instead of compiling C and
 Rust packages locally.
 
+## One-command install and recovery
+
+For an existing native Termux aarch64 installation—including an interrupted
+Git update with a stale `.git/index.lock`—run:
+
+```bash
+curl -fsSL --retry 6 --retry-all-errors https://raw.githubusercontent.com/adybag14-cyber/termux-hermes/main/install.sh | bash
+```
+
+The recovery path verifies the signed APT repository, repairs upstream Termux
+mirror skew only when package simulation proves it is broken, installs the
+latest immutable `hermes-agent` package, preserves `~/.hermes`, migrates the
+configuration, caps OpenRouter output at 8,192 tokens to avoid unaffordable
+32K–65K requests, verifies that future updates use `pkg upgrade`, and restarts
+the gateway without requiring users to paste a multi-line shell fragment.
+
+Set `HERMES_RECOVERY_MAX_TOKENS` before the command to choose a different
+positive output cap.
+
 ## Native `pkg install hermes-agent` package
 
 This repository also builds a complete native Termux `.deb` for Hermes Agent. The package is not a thin Python wheel: it contains the full Hermes runtime/source assets and a prevalidated CPython 3.13 virtual environment produced by the existing immutable Android wheelhouse flow. The package is stamped as an APT-managed install, so `hermes update` does not mutate package-owned files and instead directs users to `pkg upgrade hermes-agent`.
@@ -34,10 +53,10 @@ The public APT repository is a contributor-operated distribution/proving path. I
 
 ## Locked target
 
-- Hermes source: `NousResearch/hermes-agent@ed5e17f4b86da0c4f09c0694757b6074ae6b9d16`
+- Hermes source: `NousResearch/hermes-agent@5fc308a70719a83cccdbba4c0e39c23f5a8239d5` (`v2026.8.27`, Hermes 0.20.6)
 - Audited runtime: official Termux app GitHub build `v0.118.3` on Android 15/API 35
 - ARM build environment: official `termux/termux-docker` image pinned to `sha256:3aed9c7fbcf9195a9919deaad418da006232864a779fb4f322d68a34887a2e15`
-- Python: `3.13.14` from the immutable `termux-aarch64-20260719.9.1` release
+- Python: `3.13.15` from the immutable `termux-aarch64-20260824.43.1` release
 - Architecture: `aarch64`
 - Wheel platform: `android_24_arm64_v8a`
 - Dependency profile: Hermes `termux`
@@ -48,7 +67,7 @@ place: the workflow refuses to publish when its tag already exists.
 
 ## Current native wheel set
 
-The current Hermes Termux lock resolves to 90 exact packages under Python 3.13.
+The current Hermes Termux lock resolves to 74 exact packages under Python 3.13.
 Ten packages require Android-native wheels from this repository; the remaining
 packages are satisfied by compatible binary or universal wheels during the
 binary-only verification install. The native set is:
@@ -69,7 +88,7 @@ binary-only verification install. The native set is:
 The prior 91-package Android-emulator discovery snapshot is retained as historical
 evidence in [`audit/emulator-audit.json`](audit/emulator-audit.json). It describes
 the earlier lock and is not republished as evidence for a refreshed release. The
-current exact 90-package resolver output is [`audit/resolved.txt`](audit/resolved.txt),
+current exact 74-package resolver output is [`audit/resolved.txt`](audit/resolved.txt),
 with direct requirements and lock constraints stored beside it.
 
 ## Build design
@@ -86,7 +105,7 @@ verified in the official Termux v0.118.3 Android app. The builder:
 5. emits or normalizes PEP 738 Android wheel tags;
 6. rewrites `WHEEL` and `RECORD` correctly when normalization is required;
 7. verifies package/version/tag, ZIP integrity and native extension presence;
-8. installs the complete current 90-package graph with `--only-binary :all:` in a clean venv;
+8. installs the complete current 74-package graph with `--only-binary :all:` in a clean venv;
 9. imports every native package and runs `uv pip check`;
 10. records the exact installed Termux system package versions;
 11. publishes wheels, `index.json`, `system-packages.txt`, and `SHA256SUMS` under a new immutable release tag.

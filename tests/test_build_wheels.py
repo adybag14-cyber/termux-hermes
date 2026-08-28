@@ -139,7 +139,7 @@ def test_sidecar_checksum_is_relocatable_after_directory_copy(tmp_path: Path) ->
     sums = wheelhouse / "SHA256SUMS"
     sums.write_text("", "utf-8")
     sidecar = wheelhouse / "system-packages.txt"
-    sidecar.write_text("python=3.13.14\n", "utf-8")
+    sidecar.write_text("python=3.13.15\n", "utf-8")
 
     entry = checksum.append_relative_checksum(sums, sidecar)
     assert entry.endswith("  system-packages.txt")
@@ -160,7 +160,7 @@ def test_sidecar_checksum_rejects_non_sibling_artifact(tmp_path: Path) -> None:
     sums.write_text("", "utf-8")
     artifact = tmp_path / "elsewhere" / "system-packages.txt"
     artifact.parent.mkdir()
-    artifact.write_text("python=3.13.14\n", "utf-8")
+    artifact.write_text("python=3.13.15\n", "utf-8")
     with pytest.raises(checksum.ChecksumError, match="beside"):
         checksum.append_relative_checksum(sums, artifact)
 

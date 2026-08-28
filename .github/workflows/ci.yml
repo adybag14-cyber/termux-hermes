@@ -22,9 +22,10 @@ jobs:
       - name: Run unit tests
         run: python -m pytest -q
       - name: Check shell syntax
-        run: bash -n scripts/*.sh
+        run: bash -n install.sh scripts/*.sh
       - name: Validate JSON
         run: |
           python -m json.tool manifest/wheels.json >/dev/null
           python -m json.tool audit/emulator-audit.json >/dev/null
           python -m json.tool audit/build-metadata.json >/dev/null
+          python -m json.tool audit/upstream-lock.json >/dev/null

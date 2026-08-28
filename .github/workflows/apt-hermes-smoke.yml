@@ -31,9 +31,12 @@ jobs:
               set -Eeuo pipefail
               TMPDIR="${TMPDIR:-$PREFIX/tmp}"
               mkdir -p "$TMPDIR"
+              printf "%s\n" "deb https://packages.termux.dev/apt/termux-main stable main" > "$PREFIX/etc/apt/sources.list"
+              pkg update -y
               bash <(curl -fsSL https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh)
               pkg install -y hermes-agent
               dpkg-query -W -f="\${Status}\n" hermes-agent | grep -Fx "install ok installed"
+              dpkg --compare-versions "$(dpkg-query -W -f="\${Version}" hermes-agent)" ge "0.20.6+termux1"
               ! dpkg-query -W python >/dev/null 2>&1
               hermes --version
               grep -Fx apt "$PREFIX/lib/hermes-agent/app/.install_method"
@@ -41,7 +44,7 @@ jobs:
               grep -F "pkg upgrade hermes-agent" "$TMPDIR/update.txt"
               "$PREFIX/lib/hermes-agent/app/venv/bin/python" - <<"PY"
           import importlib
-          for module in ("hermes_cli", "psutil", "yaml", "cffi", "PIL", "pydantic_core", "cryptography", "jiter", "rpds"):
+          for module in ("hermes_cli", "psutil", "yaml", "cffi", "PIL", "pydantic_core", "cryptography", "jiter", "rpds", "mcp", "httpx2", "snowballstemmer", "telegram"):
               importlib.import_module(module)
           print("Live APT Hermes import smoke passed")
           PY

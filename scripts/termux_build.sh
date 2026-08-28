@@ -18,9 +18,9 @@ case "$BUILD_MODE" in
   *) echo "Unknown build mode: $BUILD_MODE" >&2; exit 1 ;;
 esac
 MANIFEST="$REPO_DIR/manifest/wheels.json"
-PYTHON_DEB="$BUILD_ROOT/python_3.13.14_aarch64.deb"
-PYTHON_URL="https://github.com/adybag14-cyber/termux-python/releases/download/termux-aarch64-20260719.9.1/python_3.13.14_aarch64.deb"
-PYTHON_SHA256="42376a2a47e50048cb7eca2d0f442fc1895fbca2aee2dee3d2fd82728ea1bd80"
+PYTHON_DEB="$BUILD_ROOT/python_3.13.15_aarch64.deb"
+PYTHON_URL="https://github.com/adybag14-cyber/termux-python/releases/download/termux-aarch64-20260824.43.1/python_3.13.15_aarch64.deb"
+PYTHON_SHA256="c3038f512f3d95b5c3d4803f3cdd06b43fc09dcb415b3900bd048ef508fbffc3"
 
 mkdir -p "$BUILD_ROOT"
 ARCH="$(dpkg --print-architecture 2>/dev/null || true)"
@@ -33,6 +33,7 @@ if [ "$BUILD_MODE" = docker ]; then
 else
   [ "$(getprop ro.product.cpu.abi 2>/dev/null | tr -d '\r')" = arm64-v8a ] || { echo "Android ABI is not arm64-v8a" >&2; exit 1; }
 fi
+printf '%s\n' 'deb https://packages.termux.dev/apt/termux-main stable main' > "$PREFIX/etc/apt/sources.list"
 apt-get update
 dpkg --force-confnew --configure -a
 apt-get -o Dpkg::Options::="--force-confnew" -f install -y
@@ -46,7 +47,7 @@ apt-get -o Dpkg::Options::="--force-confnew" install -y \
 curl -fL --retry 6 --retry-all-errors "$PYTHON_URL" -o "$PYTHON_DEB"
 printf '%s  %s\n' "$PYTHON_SHA256" "$PYTHON_DEB" | sha256sum -c -
 [ "$(dpkg-deb -f "$PYTHON_DEB" Package)" = python ]
-[ "$(dpkg-deb -f "$PYTHON_DEB" Version)" = 3.13.14 ]
+[ "$(dpkg-deb -f "$PYTHON_DEB" Version)" = 3.13.15 ]
 [ "$(dpkg-deb -f "$PYTHON_DEB" Architecture)" = aarch64 ]
 rm -rf "$BUILD_ROOT/python-root"
 dpkg-deb -x "$PYTHON_DEB" "$BUILD_ROOT/python-root"
@@ -70,7 +71,7 @@ import platform
 import sys
 
 assert sys.platform == "android", sys.platform
-assert sys.version_info[:3] == (3, 13, 14), sys.version
+assert sys.version_info[:3] == (3, 13, 15), sys.version
 assert platform.machine().lower() in {"aarch64", "arm64"}, platform.machine()
 PY
 

@@ -6,7 +6,7 @@ on:
       release_tag:
         description: New immutable GitHub release tag
         required: true
-        default: wheelhouse-cp313-android24-arm64-20260811.1
+        default: wheelhouse-cp313-android24-arm64-20260828.1
         type: string
       publish_release:
         description: Publish verified wheels as a GitHub release
@@ -113,6 +113,7 @@ jobs:
           $TERMUX_IMAGE
 
           Sources, versions and SHA-256 digests are locked in manifest/wheels.json.
+          Hermes source: NousResearch/hermes-agent@5fc308a70719a83cccdbba4c0e39c23f5a8239d5 (v2026.8.27 / v0.20.6)
           Package count: $(grep -Ec '^[A-Za-z0-9_.-]+==' audit/resolved.txt)
 
           Commit: $GITHUB_SHA
