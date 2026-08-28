@@ -35,6 +35,7 @@ bash <(curl -fsSL --retry 5 --retry-all-errors \
   https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh)
 apt-get install -y python3.13 uv
 
+git config --global --add safe.directory "$SOURCE_TREE"
 test "$(git -C "$SOURCE_TREE" rev-parse HEAD)" = "$SOURCE_COMMIT"
 cp -a "$SOURCE_TREE/." "$APP/"
 rm -rf "$APP/.git"
