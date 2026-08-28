@@ -29,10 +29,11 @@ mkdir -p "$OUTPUT_DIR" "$APP" "$WHEELHOUSE"
 # construction uses Termux's official primary repository for coherent metadata.
 printf '%s\n' 'deb https://packages.termux.dev/apt/termux-main stable main' > \
   "$PREFIX/etc/apt/sources.list"
-pkg update -y
+apt-get update
+apt-get install -y ca-certificates curl git gnupg
 bash <(curl -fsSL --retry 5 --retry-all-errors \
   https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh)
-pkg install -y python3.13 uv
+apt-get install -y python3.13 uv
 
 test "$(git -C "$SOURCE_TREE" rev-parse HEAD)" = "$SOURCE_COMMIT"
 cp -a "$SOURCE_TREE/." "$APP/"
