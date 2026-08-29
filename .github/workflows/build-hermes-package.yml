@@ -222,9 +222,9 @@ jobs:
               apt-get satisfy -y "$hermes_deps"
               dpkg -i "$hermes_deb"
               dpkg --configure -a
-              dpkg-query -W -f="\${Status}\n" python | grep -Fx "install ok installed"
+              test "$(dpkg-query -W -f="\${db:Status-Status}" python)" = installed
               ! dpkg-query -W python3.13 >/dev/null 2>&1
-              dpkg-query -W -f="\${Status}\n" hermes-agent | grep -Fx "install ok installed"
+              test "$(dpkg-query -W -f="\${db:Status-Status}" hermes-agent)" = installed
               test -z "$(dpkg --audit)"
               hermes --version
               "$PREFIX/lib/hermes-agent/app/venv/bin/python" - <<"PY"
