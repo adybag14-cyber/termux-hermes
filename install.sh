@@ -52,6 +52,18 @@ package_status() {
   dpkg-query -W -f='${db:Status-Status}' "$1" 2>/dev/null || true
 }
 
+remove_incomplete_package() {
+  incomplete_package="$1"
+  incomplete_label="$2"
+  incomplete_status="$(package_status "$incomplete_package")"
+  case "$incomplete_status" in
+    ''|not-installed|config-files|installed) return 0 ;;
+  esac
+  printf 'Removing incomplete %s package state (%s).\n' \
+    "$incomplete_label" "$incomplete_status"
+  dpkg --remove --force-depends "$incomplete_package" </dev/null
+}
+
 download_verified_package() {
   cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/hermes-recovery"
   complete="$cache_dir/$PACKAGE_FILENAME"
@@ -120,6 +132,12 @@ esac
 mkdir -p "${TMPDIR:-$PREFIX/tmp}" "$HOME/.hermes/logs"
 export DEBIAN_FRONTEND=noninteractive
 
+# Clear only interrupted package transactions before asking APT to simulate
+# repository consistency. Otherwise an unpacked +termux1 can make an unrelated
+# ncurses simulation fail and be mistaken for mirror skew.
+remove_incomplete_package hermes-agent Hermes
+remove_incomplete_package python3.13 python3.13
+
 step "Checking official Termux package consistency"
 base_ok=true
 apt-get -o Acquire::Retries=4 update </dev/null >/dev/null 2>&1 || base_ok=false
@@ -154,18 +172,6 @@ if [ "$installed_status" != installed ] || [ -z "$installed" ] || \
       printf 'Removing incomplete Hermes package state (%s, version %s).\n' \
         "$installed_status" "${installed:-unknown}"
       dpkg --remove --force-depends hermes-agent </dev/null
-      ;;
-  esac
-
-  # Likewise, clear only an incomplete side-by-side interpreter transaction.
-  # A fully installed python3.13 remains valid on Termux installations whose
-  # rolling `python` package has already moved to 3.14.
-  python313_status="$(package_status python3.13)"
-  case "$python313_status" in
-    ''|not-installed|config-files|installed) ;;
-    *)
-      printf 'Removing incomplete python3.13 package state (%s).\n' "$python313_status"
-      dpkg --remove --force-depends python3.13 </dev/null
       ;;
   esac
 
