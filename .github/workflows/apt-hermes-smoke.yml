@@ -56,11 +56,24 @@ jobs:
               mkdir -p "$HOME/.hermes/hermes-agent/.git"
               : > "$HOME/.hermes/hermes-agent/.git/index.lock"
               hermes config set model.max_tokens 65536
+              pkg uninstall -y hermes-agent
+              ! dpkg-query -W hermes-agent >/dev/null 2>&1
+              recovery_cache="${XDG_CACHE_HOME:-$HOME/.cache}/hermes-recovery"
+              recovery_partial="$recovery_cache/hermes-agent_0.20.6+termux1_aarch64.deb.part"
+              apt_partial="$PREFIX/var/cache/apt/archives/partial/hermes-agent_0.20.6+termux1_aarch64.deb"
+              mkdir -p "$(dirname "$apt_partial")"
+              curl -fsSL --range 0-1048575 \
+                http://144.21.61.111/termux/pool/main/hermes-agent_0.20.6+termux1_aarch64.deb \
+                -o "$apt_partial"
+              test "$(wc -c < "$apt_partial")" = 1048576
               curl -fsSL --retry 6 --retry-all-errors \
                 https://raw.githubusercontent.com/adybag14-cyber/termux-hermes/main/install.sh | bash
               test "$(sha256sum "$HOME/.hermes/.env" | awk "{print \$1}")" = "$env_before"
               test -e "$HOME/.hermes/hermes-agent/.git/index.lock"
               test "$(hermes config get model.max_tokens --json)" = "8192"
               dpkg --compare-versions "$(dpkg-query -W -f="\${Version}" hermes-agent)" ge "0.20.6+termux1"
+              test ! -e "$recovery_partial"
+              test ! -e "${recovery_partial%.part}"
+              test ! -e "$apt_partial"
               hermes gateway stop >/dev/null 2>&1 || true
             '

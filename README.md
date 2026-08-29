@@ -14,11 +14,20 @@ curl -fsSL --retry 6 --retry-all-errors https://raw.githubusercontent.com/adybag
 ```
 
 The recovery path verifies the signed APT repository, repairs upstream Termux
-mirror skew only when package simulation proves it is broken, installs the
-latest immutable `hermes-agent` package, preserves `~/.hermes`, migrates the
-configuration, caps OpenRouter output at 8,192 tokens to avoid unaffordable
-32K–65K requests, verifies that future updates use `pkg upgrade`, and restarts
-the gateway without requiring users to paste a multi-line shell fragment.
+mirror skew only when package simulation proves it is broken, downloads the
+latest immutable `hermes-agent` package with resumable transfers and two
+independent sources, preserves `~/.hermes`, migrates the configuration, caps
+OpenRouter output at 8,192 tokens to avoid unaffordable 32K–65K requests,
+verifies that future updates use `pkg upgrade`, and restarts the gateway without
+requiring users to paste a multi-line shell fragment.
+
+The package download prefers the immutable GitHub release asset, falls back to
+the Oracle APT origin, and verifies the pinned package SHA-256 before local APT
+installation. It also recovers an existing APT partial download when present,
+including bytes left by a failed `pkg install`. An interrupted transfer remains in
+`~/.cache/hermes-recovery/` so rerunning the same one-line command resumes the
+existing bytes instead of starting the 63.9 MB download again. A successful
+installation removes that cache file.
 
 Set `HERMES_RECOVERY_MAX_TOKENS` before the command to choose a different
 positive output cap.
