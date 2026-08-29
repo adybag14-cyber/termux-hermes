@@ -24,10 +24,10 @@ fi
 
 EXPECTED_PREFIX=/data/data/com.termux/files/usr
 PRIMARY_SOURCE='deb https://packages.termux.dev/apt/termux-main stable main'
-PACKAGE_VERSION='0.20.6+termux1'
+PACKAGE_VERSION='0.20.6+termux2'
 PACKAGE_FILENAME="hermes-agent_${PACKAGE_VERSION}_aarch64.deb"
-PACKAGE_SHA256='8d54e0339b382c102b653486298bc8cf65abefa71cff38de8b43acf6e849a652'
-PACKAGE_RELEASE_URL="https://github.com/adybag14-cyber/termux-hermes/releases/download/hermes-agent-termux-0.20.6-20260828.1/hermes-agent_0.20.6%2Btermux1_aarch64.deb"
+PACKAGE_SHA256='4e87ebff34c92498b8fe7474a0d74d7aa8e34d0cc02ccc5df8fab2cca3e417af'
+PACKAGE_RELEASE_URL="https://github.com/adybag14-cyber/termux-hermes/releases/download/hermes-agent-termux-0.20.6-20260829.1/hermes-agent_0.20.6%2Btermux2_aarch64.deb"
 PACKAGE_ORACLE_URL="http://144.21.61.111/termux/pool/main/$PACKAGE_FILENAME"
 MIN_PACKAGE_VERSION="$PACKAGE_VERSION"
 RECOVERY_MAX_TOKENS="${HERMES_RECOVERY_MAX_TOKENS:-8192}"
@@ -46,6 +46,10 @@ file_size() {
   else
     printf 0
   fi
+}
+
+package_status() {
+  dpkg-query -W -f='${db:Status-Status}' "$1" 2>/dev/null || true
 }
 
 download_verified_package() {
@@ -136,17 +140,53 @@ bash <(curl -fsSL --retry 6 --retry-all-errors \
 
 step "Installing the latest verified Hermes Agent package"
 installed="$(dpkg-query -W -f='${Version}' hermes-agent 2>/dev/null || true)"
-if [ -z "$installed" ] || ! dpkg --compare-versions "$installed" ge "$MIN_PACKAGE_VERSION"; then
+installed_status="$(package_status hermes-agent)"
+if [ "$installed_status" != installed ] || [ -z "$installed" ] || \
+  ! dpkg --compare-versions "$installed" ge "$MIN_PACKAGE_VERSION"; then
   package_file="$(download_verified_package)"
+
+  # A previous failed APT run can leave the old Hermes package unpacked with
+  # an unsatisfied python3.13 dependency. Remove only package-owned runtime
+  # files; user state is under ~/.hermes and is deliberately untouched.
+  case "$installed_status" in
+    ''|not-installed|config-files) ;;
+    *)
+      printf 'Removing incomplete Hermes package state (%s, version %s).\n' \
+        "$installed_status" "${installed:-unknown}"
+      dpkg --remove --force-depends hermes-agent </dev/null
+      ;;
+  esac
+
+  # Likewise, clear only an incomplete side-by-side interpreter transaction.
+  # A fully installed python3.13 remains valid on Termux installations whose
+  # rolling `python` package has already moved to 3.14.
+  python313_status="$(package_status python3.13)"
+  case "$python313_status" in
+    ''|not-installed|config-files|installed) ;;
+    *)
+      printf 'Removing incomplete python3.13 package state (%s).\n' "$python313_status"
+      dpkg --remove --force-depends python3.13 </dev/null
+      ;;
+  esac
+
+  # Install the dependency relation from the verified +termux2 package first.
+  # It accepts an already-installed official Termux Python 3.13, or selects the
+  # side-by-side python3.13 package when rolling Termux is on Python 3.14.
+  package_deps="$(dpkg-deb -f "$package_file" Depends)"
   apt-get \
     -o Acquire::Retries=8 \
     -o Acquire::http::Timeout=45 \
     -o Acquire::https::Timeout=45 \
-    install -y "$package_file" </dev/null
+    satisfy -y "$package_deps" </dev/null
+  dpkg -i "$package_file" </dev/null
+  dpkg --configure -a </dev/null
   rm -f \
     "$package_file" \
     "$package_file.part" \
-    "$PREFIX/var/cache/apt/archives/partial/$PACKAGE_FILENAME"
+    "$PREFIX/var/cache/apt/archives/partial/$PACKAGE_FILENAME" \
+    "${XDG_CACHE_HOME:-$HOME/.cache}/hermes-recovery/hermes-agent_0.20.6+termux1_aarch64.deb" \
+    "${XDG_CACHE_HOME:-$HOME/.cache}/hermes-recovery/hermes-agent_0.20.6+termux1_aarch64.deb.part" \
+    "$PREFIX/var/cache/apt/archives/partial/hermes-agent_0.20.6+termux1_aarch64.deb"
 else
   printf 'hermes-agent %s is already installed.\n' "$installed"
 fi

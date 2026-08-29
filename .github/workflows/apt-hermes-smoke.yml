@@ -36,7 +36,7 @@ jobs:
               bash <(curl -fsSL https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh)
               pkg install -y hermes-agent
               dpkg-query -W -f="\${Status}\n" hermes-agent | grep -Fx "install ok installed"
-              dpkg --compare-versions "$(dpkg-query -W -f="\${Version}" hermes-agent)" ge "0.20.6+termux1"
+              dpkg --compare-versions "$(dpkg-query -W -f="\${Version}" hermes-agent)" ge "0.20.6+termux2"
               ! dpkg-query -W python >/dev/null 2>&1
               hermes --version
               grep -Fx apt "$PREFIX/lib/hermes-agent/app/.install_method"
@@ -58,12 +58,41 @@ jobs:
               hermes config set model.max_tokens 65536
               pkg uninstall -y hermes-agent
               ! dpkg-query -W hermes-agent >/dev/null 2>&1
+              pkg uninstall -y python3.13 python3.13-ensurepip-wheels
+              ! dpkg-query -W python3.13 >/dev/null 2>&1
+
+              # Recreate the affected phone: an existing Termux Python 3.13
+              # owns pydoc3.13, and +termux1 is left merely unpacked after its
+              # conflicting side-by-side dependency fails.
+              python_deb="$TMPDIR/python_3.13.15_aarch64.deb"
+              curl -fsSL --retry 6 --retry-all-errors \
+                https://github.com/adybag14-cyber/termux-python/releases/download/termux-aarch64-20260824.43.1/python_3.13.15_aarch64.deb \
+                -o "$python_deb"
+              printf "%s  %s\n" \
+                c3038f512f3d95b5c3d4803f3cdd06b43fc09dcb415b3900bd048ef508fbffc3 \
+                "$python_deb" | sha256sum -c -
+              apt-get satisfy -y "$(dpkg-deb -f "$python_deb" Depends)"
+              dpkg -i "$python_deb"
+              apt-mark hold python
+              test "$(dpkg-query -W -f="\${db:Status-Status}" python)" = installed
+              test "$(python3.13 -c "import sys; print(f\"{sys.version_info.major}.{sys.version_info.minor}\")")" = 3.13
+
+              old_hermes="$TMPDIR/hermes-agent_0.20.6+termux1_aarch64.deb"
+              curl -fsSL --retry 6 --retry-all-errors \
+                https://github.com/adybag14-cyber/termux-hermes/releases/download/hermes-agent-termux-0.20.6-20260828.1/hermes-agent_0.20.6%2Btermux1_aarch64.deb \
+                -o "$old_hermes"
+              printf "%s  %s\n" \
+                8d54e0339b382c102b653486298bc8cf65abefa71cff38de8b43acf6e849a652 \
+                "$old_hermes" | sha256sum -c -
+              dpkg --unpack "$old_hermes"
+              test "$(dpkg-query -W -f="\${db:Status-Status}" hermes-agent)" = unpacked
+
               recovery_cache="${XDG_CACHE_HOME:-$HOME/.cache}/hermes-recovery"
-              recovery_partial="$recovery_cache/hermes-agent_0.20.6+termux1_aarch64.deb.part"
-              apt_partial="$PREFIX/var/cache/apt/archives/partial/hermes-agent_0.20.6+termux1_aarch64.deb"
+              recovery_partial="$recovery_cache/hermes-agent_0.20.6+termux2_aarch64.deb.part"
+              apt_partial="$PREFIX/var/cache/apt/archives/partial/hermes-agent_0.20.6+termux2_aarch64.deb"
               mkdir -p "$(dirname "$apt_partial")"
               curl -fsSL --range 0-1048575 \
-                http://144.21.61.111/termux/pool/main/hermes-agent_0.20.6+termux1_aarch64.deb \
+                http://144.21.61.111/termux/pool/main/hermes-agent_0.20.6+termux2_aarch64.deb \
                 -o "$apt_partial"
               test "$(wc -c < "$apt_partial")" = 1048576
               curl -fsSL --retry 6 --retry-all-errors \
@@ -71,7 +100,11 @@ jobs:
               test "$(sha256sum "$HOME/.hermes/.env" | awk "{print \$1}")" = "$env_before"
               test -e "$HOME/.hermes/hermes-agent/.git/index.lock"
               test "$(hermes config get model.max_tokens --json)" = "8192"
-              dpkg --compare-versions "$(dpkg-query -W -f="\${Version}" hermes-agent)" ge "0.20.6+termux1"
+              test "$(dpkg-query -W -f="\${Version}" hermes-agent)" = "0.20.6+termux2"
+              test "$(dpkg-query -W -f="\${db:Status-Status}" hermes-agent)" = installed
+              test "$(dpkg-query -W -f="\${db:Status-Status}" python)" = installed
+              ! dpkg-query -W python3.13 >/dev/null 2>&1
+              test -z "$(dpkg --audit)"
               test ! -e "$recovery_partial"
               test ! -e "${recovery_partial%.part}"
               test ! -e "$apt_partial"

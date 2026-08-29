@@ -16,10 +16,12 @@ curl -fsSL --retry 6 --retry-all-errors https://raw.githubusercontent.com/adybag
 The recovery path verifies the signed APT repository, repairs upstream Termux
 mirror skew only when package simulation proves it is broken, downloads the
 latest immutable `hermes-agent` package with resumable transfers and two
-independent sources, preserves `~/.hermes`, migrates the configuration, caps
-OpenRouter output at 8,192 tokens to avoid unaffordable 32K–65K requests,
-verifies that future updates use `pkg upgrade`, and restarts the gateway without
-requiring users to paste a multi-line shell fragment.
+independent sources, repairs an incomplete dpkg transaction, and accepts an
+existing official Termux Python 3.13 instead of installing a conflicting second
+owner. It preserves `~/.hermes`, migrates the configuration, caps OpenRouter
+output at 8,192 tokens to avoid unaffordable 32K–65K requests, verifies that
+future updates use `pkg upgrade`, and restarts the gateway without requiring
+users to paste a multi-line shell fragment.
 
 The package download prefers the immutable GitHub release asset, falls back to
 the Oracle APT origin, and verifies the pinned package SHA-256 before local APT
@@ -33,6 +35,12 @@ Set `HERMES_RECOVERY_MAX_TOKENS` before the command to choose a different
 positive output cap.
 
 ## Native `pkg install hermes-agent` package
+
+The current Debian package version is `0.20.6+termux2`. Its Python dependency
+accepts an installed Termux `python` package in the 3.13 series; otherwise it
+uses the signed side-by-side `python3.13` package. This avoids overlapping
+ownership of `pydoc3.13` while keeping Hermes on its verified CPython 3.13 ABI
+after rolling Termux advances to Python 3.14.
 
 This repository also builds a complete native Termux `.deb` for Hermes Agent. The package is not a thin Python wheel: it contains the full Hermes runtime/source assets and a prevalidated CPython 3.13 virtual environment produced by the existing immutable Android wheelhouse flow. The package is stamped as an APT-managed install, so `hermes update` does not mutate package-owned files and instead directs users to `pkg upgrade hermes-agent`.
 
