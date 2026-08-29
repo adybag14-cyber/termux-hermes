@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -Eeuo pipefail
 
-INSTALL_URL='https://raw.githubusercontent.com/adybag14-cyber/termux-hermes/main/install.sh'
+INSTALL_URL="${HERMES_RECOVERY_INSTALL_URL:-https://raw.githubusercontent.com/adybag14-cyber/termux-hermes/main/install.sh}"
 
 # A program launched by a streamed `curl | bash` installer shares the script's
 # input pipe and can accidentally consume commands that Bash has not read yet.

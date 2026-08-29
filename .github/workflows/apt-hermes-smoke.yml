@@ -26,6 +26,7 @@ jobs:
           docker pull "$TERMUX_IMAGE"
           docker run --rm --privileged \
             --security-opt seccomp=unconfined \
+            -e HERMES_RECOVERY_INSTALL_URL="https://raw.githubusercontent.com/adybag14-cyber/termux-hermes/$GITHUB_SHA/install.sh" \
             "$TERMUX_IMAGE" \
             /entrypoint.sh bash -lc '
               set -Eeuo pipefail
@@ -96,7 +97,7 @@ jobs:
                 -o "$apt_partial"
               test "$(wc -c < "$apt_partial")" = 1048576
               curl -fsSL --retry 6 --retry-all-errors \
-                https://raw.githubusercontent.com/adybag14-cyber/termux-hermes/main/install.sh | bash
+                "$HERMES_RECOVERY_INSTALL_URL" | bash
               test "$(sha256sum "$HOME/.hermes/.env" | awk "{print \$1}")" = "$env_before"
               test -e "$HOME/.hermes/hermes-agent/.git/index.lock"
               test "$(hermes config get model.max_tokens --json)" = "8192"
