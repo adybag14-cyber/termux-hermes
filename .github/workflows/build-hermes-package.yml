@@ -11,12 +11,12 @@ on:
       package_version:
         description: Debian package version
         required: true
-        default: 0.20.6+termux1
+        default: 0.20.6+termux2
         type: string
       release_tag:
         description: New immutable GitHub release tag
         required: true
-        default: hermes-agent-termux-0.20.6-20260828.1
+        default: hermes-agent-termux-0.20.6-20260829.1
         type: string
       wheelhouse_tag:
         description: Verified immutable termux-hermes wheelhouse release tag
@@ -69,7 +69,7 @@ jobs:
             *[!0-9A-Za-z.+:~_-]*) echo "Invalid Debian package version" >&2; exit 1 ;;
           esac
           source_version="$(python3 -c 'import tomllib; print(tomllib.load(open("hermes-source/pyproject.toml", "rb"))["project"]["version"])')"
-          test "$PACKAGE_VERSION" = "$source_version+termux1"
+          test "$PACKAGE_VERSION" = "$source_version+termux2"
           sums_digest="$(gh release view "$WHEELHOUSE_TAG" \
             --repo adybag14-cyber/termux-hermes \
             --json assets \
@@ -130,7 +130,9 @@ jobs:
           test "$(dpkg-deb -f "$DEB" Package)" = hermes-agent
           test "$(dpkg-deb -f "$DEB" Version)" = "$PACKAGE_VERSION"
           test "$(dpkg-deb -f "$DEB" Architecture)" = aarch64
-          dpkg-deb -f "$DEB" Depends | grep -F 'python3.13 (>= 3.13.15)'
+          depends="$(dpkg-deb -f "$DEB" Depends)"
+          grep -F 'python3.13 (>= 3.13.15) | python (>= 3.13)' <<<"$depends"
+          grep -F 'python3.13 (>= 3.13.15) | python (<< 3.14)' <<<"$depends"
           rm -rf "$RUNNER_TEMP/hermes-unpack"
           dpkg-deb -x "$DEB" "$RUNNER_TEMP/hermes-unpack"
           APP="$RUNNER_TEMP/hermes-unpack/data/data/com.termux/files/usr/lib/hermes-agent/app"
@@ -171,6 +173,7 @@ jobs:
               apt install -y "/packages/hermes-agent_'"$PACKAGE_VERSION"'_aarch64.deb"
               dpkg-query -W -f="\${Status}\n" hermes-agent | grep -Fx "install ok installed"
               ! dpkg-query -W python >/dev/null 2>&1
+              dpkg-query -W -f="\${Status}\n" python3.13 | grep -Fx "install ok installed"
               hermes --version
               grep -Fx apt "$PREFIX/lib/hermes-agent/app/.install_method"
               if hermes update >"$TMPDIR/hermes-update.txt" 2>&1; then
@@ -184,6 +187,51 @@ jobs:
           for module in ("hermes_cli", "psutil", "yaml", "cffi", "PIL", "pydantic_core", "cryptography", "jiter", "rpds", "mcp", "httpx2", "snowballstemmer", "telegram"):
               importlib.import_module(module)
           print("Fresh installed Hermes runtime imports passed")
+          PY
+            '
+
+      - name: Existing Termux Python 3.13 compatibility smoke
+        env:
+          PACKAGE_VERSION: ${{ inputs.package_version }}
+        run: |
+          set -Eeuo pipefail
+          OUT="$RUNNER_TEMP/hermes-agent-deb"
+          PYTHON_DEB="$OUT/python_3.13.15_aarch64.deb"
+          curl -fL --retry 6 --retry-all-errors \
+            https://github.com/adybag14-cyber/termux-python/releases/download/termux-aarch64-20260824.43.1/python_3.13.15_aarch64.deb \
+            -o "$PYTHON_DEB"
+          printf '%s  %s\n' \
+            c3038f512f3d95b5c3d4803f3cdd06b43fc09dcb415b3900bd048ef508fbffc3 \
+            "$PYTHON_DEB" | sha256sum -c -
+          docker run --rm --privileged \
+            --security-opt seccomp=unconfined \
+            -v "$OUT:/packages:ro" \
+            "$TERMUX_IMAGE" \
+            /entrypoint.sh bash -lc '
+              set -Eeuo pipefail
+              printf "%s\n" "deb https://packages.termux.dev/apt/termux-main stable main" > "$PREFIX/etc/apt/sources.list"
+              pkg update -y
+              python_deb=/packages/python_3.13.15_aarch64.deb
+              hermes_deb=/packages/hermes-agent_'"$PACKAGE_VERSION"'_aarch64.deb
+              python_deps="$(dpkg-deb -f "$python_deb" Depends)"
+              apt-get satisfy -y "$python_deps"
+              dpkg -i "$python_deb"
+              apt-mark hold python
+              test "$(python3.13 -c "import sys; print(f\"{sys.version_info.major}.{sys.version_info.minor}\")")" = 3.13
+              hermes_deps="$(dpkg-deb -f "$hermes_deb" Depends)"
+              apt-get satisfy -y "$hermes_deps"
+              dpkg -i "$hermes_deb"
+              dpkg --configure -a
+              dpkg-query -W -f="\${Status}\n" python | grep -Fx "install ok installed"
+              ! dpkg-query -W python3.13 >/dev/null 2>&1
+              dpkg-query -W -f="\${Status}\n" hermes-agent | grep -Fx "install ok installed"
+              test -z "$(dpkg --audit)"
+              hermes --version
+              "$PREFIX/lib/hermes-agent/app/venv/bin/python" - <<"PY"
+          import importlib
+          for module in ("hermes_cli", "psutil", "yaml", "cffi", "PIL", "pydantic_core", "cryptography", "jiter", "rpds"):
+              importlib.import_module(module)
+          print("Existing Termux Python 3.13 compatibility smoke passed")
           PY
             '
 
@@ -214,10 +262,10 @@ jobs:
           Install source: NousResearch/hermes-agent@$HERMES_COMMIT (v2026.8.27 / Hermes 0.20.6)
           Package version: $PACKAGE_VERSION
           Build userspace: $TERMUX_IMAGE
-          Python: side-by-side signed APT package python3.13
+          Python: compatible installed Termux Python 3.13 or side-by-side signed APT package python3.13
           Hermes native dependency wheelhouse: ${{ inputs.wheelhouse_tag }} (recorded in BUILD-METADATA.json)
 
-          This workflow installs Hermes in the official aarch64 Termux userspace, validates native imports, packages the complete runtime/source assets and venv, then installs the resulting .deb into a second fresh Termux container before release.
+          This workflow installs Hermes in the official aarch64 Termux userspace, validates native imports, packages the complete runtime/source assets and venv, then validates both a fresh side-by-side Python install and an existing Termux Python 3.13 before release.
           EOF
           # Publish through a draft so repository-level immutable releases lock
           # the tag only after every verified asset is attached.

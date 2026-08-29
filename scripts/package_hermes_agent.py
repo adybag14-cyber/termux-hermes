@@ -37,7 +37,8 @@ RUNTIME_DEPS = [
     "ncurses-ui-libs",
     "openjpeg",
     "openssl",
-    "python3.13 (>= 3.13.15)",
+    "python3.13 (>= 3.13.15) | python (>= 3.13)",
+    "python3.13 (>= 3.13.15) | python (<< 3.14)",
     "readline",
     "ripgrep",
     "zlib",
@@ -99,7 +100,7 @@ def main() -> int:
             "wheelhouse_tag": args.wheelhouse_tag,
             "wheelhouse_sha256sums_sha256": args.wheelhouse_sha256sums,
             "target": "aarch64-linux-android/Termux",
-            "python": "3.13",
+            "python": "3.13 (official Termux or side-by-side python3.13)",
         }
         (docs / "BUILD-METADATA.json").write_text(
             json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8"
