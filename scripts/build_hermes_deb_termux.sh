@@ -29,10 +29,19 @@ mkdir -p "$OUTPUT_DIR" "$APP" "$WHEELHOUSE"
 # construction uses Termux's official primary repository for coherent metadata.
 printf '%s\n' 'deb https://packages.termux.dev/apt/termux-main stable main' > \
   "$PREFIX/etc/apt/sources.list"
-apt-get update
+# A fresh pinned image still needs a coherent rolling base before new GPG
+# can run against libgcrypt. Keep pkg in the signed-repository helper on the
+# configured primary mirror as well.
+export DEBIAN_FRONTEND=noninteractive TERMUX_PKG_NO_MIRROR_SELECT=1
+apt-get -o Acquire::Retries=5 -o APT::Update::Error-Mode=any update
+apt-get -o Acquire::Retries=5 -o Dpkg::Options::="--force-confnew" dist-upgrade -y
 apt-get install -y ca-certificates curl git gnupg
-bash <(curl -fsSL --retry 5 --retry-all-errors \
-  https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh)
+setup_script="$BUILD_HOME/setup_apt_repo.sh"
+curl -fsSL --retry 5 --retry-all-errors \
+  https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh \
+  -o "$setup_script"
+bash "$setup_script"
+rm -f "$setup_script"
 apt-get install -y python3.13 uv
 
 git config --global --add safe.directory "$SOURCE_TREE"
