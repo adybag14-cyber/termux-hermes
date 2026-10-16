@@ -112,12 +112,33 @@ The workflow:
    ripgrep, FFmpeg and the terminal UI's setup screen.
 8. Upgrades a real installation of the previous package with existing Python
    3.13 and user configuration, then checks preserved state and launcher ownership.
-9. Records the package and dependency provenance and uploads a candidate artifact.
-10. Publishes a new immutable release only when publication was requested and
-    every preceding gate succeeded.
+9. Records the package and dependency provenance and uploads the
+   `hermes-agent-termux-aarch64` candidate artifact.
 
-`publish_release` defaults to false so a normal manual run produces a reviewable
-candidate. The same native gates run when publication is requested.
+This workflow creates a candidate without publishing it. Run it manually with:
+
+```bash
+gh workflow run build-hermes-package.yml --ref <reviewed-build-branch>
+```
+
+After it succeeds, use that candidate's checksum to update `install.sh` together
+with the package version and immutable release URL. Review and merge those pins,
+the updated live smoke and the release workflow. Then dispatch
+[Publish verified Hermes Termux candidate](.github/workflows/publish-hermes-package.yml)
+with the successful build's run ID and the new release tag:
+
+```bash
+gh workflow run publish-hermes-package.yml --ref main \
+  -f build_run_id=<successful-native-run-id> \
+  -f release_tag=<new-release-tag>
+```
+
+Promotion downloads that exact candidate without rebuilding it. It verifies the
+successful run, package identity, upstream pins, checksums and installer pins;
+reruns the existing-package upgrade; and tests the checked-in streamed recovery
+installer with a real interrupted HTTP transfer. It then creates a draft release,
+checks every uploaded asset's GitHub digest and size, and publishes the release.
+An existing tag or release is rejected.
 
 Each package release includes:
 

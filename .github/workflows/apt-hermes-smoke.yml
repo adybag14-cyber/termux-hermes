@@ -16,107 +16,17 @@ jobs:
   native-termux:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 35
-    env:
-      TERMUX_IMAGE: termux/termux-docker@sha256:3aed9c7fbcf9195a9919deaad418da006232864a779fb4f322d68a34887a2e15
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Install Hermes entirely through pkg
+      - name: Install through signed pkg and exercise public streamed recovery
         run: |
           set -Eeuo pipefail
-          docker pull "$TERMUX_IMAGE"
-          docker run --rm --privileged \
+          TERMUX_IMAGE="$(jq -er '.termux_image' manifest/release.json)"
+          PACKAGE_VERSION="$(jq -er '.package_version' manifest/release.json)"
+          [[ "$TERMUX_IMAGE" =~ ^termux/termux-docker@sha256:[a-f0-9]{64}$ ]]
+          case "$(uname -m)" in aarch64|arm64) ;; *) exit 1;; esac
+          docker pull --platform linux/arm64 "$TERMUX_IMAGE"
+          docker run --rm --platform linux/arm64 --privileged \
             --security-opt seccomp=unconfined \
-            "$TERMUX_IMAGE" \
-            /entrypoint.sh bash -lc '
-              set -Eeuo pipefail
-              TMPDIR="${TMPDIR:-$PREFIX/tmp}"
-              mkdir -p "$TMPDIR"
-              printf "%s\n" "deb https://packages.termux.dev/apt/termux-main stable main" > "$PREFIX/etc/apt/sources.list"
-              # The pinned image must be fully upgraded before current GPG
-              # is installed; partial upgrades can leave libgcrypt too old.
-              export DEBIAN_FRONTEND=noninteractive TERMUX_PKG_NO_MIRROR_SELECT=1
-              apt-get -o Acquire::Retries=5 -o APT::Update::Error-Mode=any update
-              apt-get -o Acquire::Retries=5 -o Dpkg::Options::="--force-confnew" dist-upgrade -y
-              setup_script="$TMPDIR/hermes-apt-setup.sh"
-              curl -fsSL --retry 5 --retry-all-errors \
-                https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh \
-                -o "$setup_script"
-              bash "$setup_script"
-              rm -f "$setup_script"
-              pkg install -y hermes-agent
-              dpkg-query -W -f="\${Status}\n" hermes-agent | grep -Fx "install ok installed"
-              dpkg --compare-versions "$(dpkg-query -W -f="\${Version}" hermes-agent)" ge "0.20.6+termux2"
-              ! dpkg-query -W python >/dev/null 2>&1
-              hermes --version
-              grep -Fx apt "$PREFIX/lib/hermes-agent/app/.install_method"
-              if hermes update >"$TMPDIR/update.txt" 2>&1; then exit 1; fi
-              grep -F "pkg upgrade hermes-agent" "$TMPDIR/update.txt"
-              "$PREFIX/lib/hermes-agent/app/venv/bin/python" - <<"PY"
-          import importlib
-          for module in ("hermes_cli", "psutil", "yaml", "cffi", "PIL", "pydantic_core", "cryptography", "jiter", "rpds", "mcp", "httpx2", "snowballstemmer", "telegram"):
-              importlib.import_module(module)
-          print("Live APT Hermes import smoke passed")
-          PY
-
-              # Exercise the public recovery command against preserved user
-              # state and a simulated interrupted legacy Git checkout.
-              printf "RECOVERY_SENTINEL=preserve-me\n" > "$HOME/.hermes/.env"
-              env_before="$(sha256sum "$HOME/.hermes/.env" | awk "{print \$1}")"
-              mkdir -p "$HOME/.hermes/hermes-agent/.git"
-              : > "$HOME/.hermes/hermes-agent/.git/index.lock"
-              hermes config set model.max_tokens 65536
-              pkg uninstall -y hermes-agent
-              ! dpkg-query -W hermes-agent >/dev/null 2>&1
-              pkg uninstall -y python3.13 python3.13-ensurepip-wheels
-              ! dpkg-query -W python3.13 >/dev/null 2>&1
-
-              # Recreate the affected phone: an existing Termux Python 3.13
-              # owns pydoc3.13, and +termux1 is left merely unpacked after its
-              # conflicting side-by-side dependency fails.
-              python_deb="$TMPDIR/python_3.13.15_aarch64.deb"
-              curl -fsSL --retry 6 --retry-all-errors \
-                https://github.com/adybag14-cyber/termux-python/releases/download/termux-aarch64-20260824.43.1/python_3.13.15_aarch64.deb \
-                -o "$python_deb"
-              printf "%s  %s\n" \
-                c3038f512f3d95b5c3d4803f3cdd06b43fc09dcb415b3900bd048ef508fbffc3 \
-                "$python_deb" | sha256sum -c -
-              apt-get satisfy -y "$(dpkg-deb -f "$python_deb" Depends)"
-              dpkg -i "$python_deb"
-              apt-mark hold python
-              test "$(dpkg-query -W -f="\${db:Status-Status}" python)" = installed
-              test "$(python3.13 -c "import sys; print(f\"{sys.version_info.major}.{sys.version_info.minor}\")")" = 3.13
-
-              old_hermes="$TMPDIR/hermes-agent_0.20.6+termux1_aarch64.deb"
-              curl -fsSL --retry 6 --retry-all-errors \
-                https://github.com/adybag14-cyber/termux-hermes/releases/download/hermes-agent-termux-0.20.6-20260828.1/hermes-agent_0.20.6%2Btermux1_aarch64.deb \
-                -o "$old_hermes"
-              printf "%s  %s\n" \
-                8d54e0339b382c102b653486298bc8cf65abefa71cff38de8b43acf6e849a652 \
-                "$old_hermes" | sha256sum -c -
-              dpkg --unpack "$old_hermes"
-              test "$(dpkg-query -W -f="\${db:Status-Status}" hermes-agent)" = unpacked
-
-              recovery_cache="${XDG_CACHE_HOME:-$HOME/.cache}/hermes-recovery"
-              recovery_partial="$recovery_cache/hermes-agent_0.20.6+termux2_aarch64.deb.part"
-              apt_partial="$PREFIX/var/cache/apt/archives/partial/hermes-agent_0.20.6+termux2_aarch64.deb"
-              mkdir -p "$(dirname "$apt_partial")"
-              curl -fsSL --range 0-1048575 \
-                http://144.21.61.111/termux/pool/main/hermes-agent_0.20.6+termux2_aarch64.deb \
-                -o "$apt_partial"
-              test "$(wc -c < "$apt_partial")" = 1048576
-              recovery_url=https://raw.githubusercontent.com/adybag14-cyber/termux-hermes/'"$GITHUB_SHA"'/install.sh
-              curl -fsSL --retry 6 --retry-all-errors \
-                "$recovery_url" | HERMES_RECOVERY_INSTALL_URL="$recovery_url" bash
-              test "$(sha256sum "$HOME/.hermes/.env" | awk "{print \$1}")" = "$env_before"
-              test -e "$HOME/.hermes/hermes-agent/.git/index.lock"
-              test "$(hermes config get model.max_tokens --json)" = "8192"
-              test "$(dpkg-query -W -f="\${Version}" hermes-agent)" = "0.20.6+termux2"
-              test "$(dpkg-query -W -f="\${db:Status-Status}" hermes-agent)" = installed
-              test "$(dpkg-query -W -f="\${db:Status-Status}" python)" = installed
-              ! dpkg-query -W python3.13 >/dev/null 2>&1
-              test -z "$(dpkg --audit)"
-              test ! -e "$recovery_partial"
-              test ! -e "${recovery_partial%.part}"
-              test ! -e "$apt_partial"
-              hermes gateway stop >/dev/null 2>&1 || true
-            '
+            -v "$PWD/scripts/check_live_apt.sh:/check-live-apt.sh:ro" \
+            "$TERMUX_IMAGE" bash /check-live-apt.sh "$PACKAGE_VERSION" "$GITHUB_SHA"
