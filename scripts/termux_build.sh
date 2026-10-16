@@ -34,9 +34,14 @@ else
   [ "$(getprop ro.product.cpu.abi 2>/dev/null | tr -d '\r')" = arm64-v8a ] || { echo "Android ABI is not arm64-v8a" >&2; exit 1; }
 fi
 printf '%s\n' 'deb https://packages.termux.dev/apt/termux-main stable main' > "$PREFIX/etc/apt/sources.list"
-apt-get update
+apt-get -o Acquire::Retries=5 -o APT::Update::Error-Mode=any update
 dpkg --force-confnew --configure -a
 apt-get -o Dpkg::Options::="--force-confnew" -f install -y
+if [ "$BUILD_MODE" = docker ]; then
+  # Selective tool installs can leave incompatible base libraries in the
+  # pinned image. Fully upgrade only the disposable CI userspace here.
+  apt-get -o Acquire::Retries=5 -o Dpkg::Options::="--force-confnew" dist-upgrade -y
+fi
 apt-get -o Dpkg::Options::="--force-confnew" install -y \
   git curl ca-certificates coreutils dpkg uv clang rust make pkg-config \
   binutils patchelf cmake ninja gdbm libandroid-posix-semaphore \

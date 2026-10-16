@@ -32,8 +32,17 @@ jobs:
               TMPDIR="${TMPDIR:-$PREFIX/tmp}"
               mkdir -p "$TMPDIR"
               printf "%s\n" "deb https://packages.termux.dev/apt/termux-main stable main" > "$PREFIX/etc/apt/sources.list"
-              pkg update -y
-              bash <(curl -fsSL https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh)
+              # The pinned image must be fully upgraded before current GPG
+              # is installed; partial upgrades can leave libgcrypt too old.
+              export DEBIAN_FRONTEND=noninteractive TERMUX_PKG_NO_MIRROR_SELECT=1
+              apt-get -o Acquire::Retries=5 -o APT::Update::Error-Mode=any update
+              apt-get -o Acquire::Retries=5 -o Dpkg::Options::="--force-confnew" dist-upgrade -y
+              setup_script="$TMPDIR/hermes-apt-setup.sh"
+              curl -fsSL --retry 5 --retry-all-errors \
+                https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh \
+                -o "$setup_script"
+              bash "$setup_script"
+              rm -f "$setup_script"
               pkg install -y hermes-agent
               dpkg-query -W -f="\${Status}\n" hermes-agent | grep -Fx "install ok installed"
               dpkg --compare-versions "$(dpkg-query -W -f="\${Version}" hermes-agent)" ge "0.20.6+termux2"
