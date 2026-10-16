@@ -1,17 +1,17 @@
-name: Build immutable arm64 wheelhouse
+name: Build legacy CPython 3.13 wheelhouse
 
 on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: New immutable GitHub release tag
+        description: New immutable tag for the historical Hermes 0.20.6 wheelhouse
         required: true
         default: wheelhouse-cp313-android24-arm64-20260828.1
         type: string
       publish_release:
         description: Publish verified wheels as a GitHub release
         required: true
-        default: true
+        default: false
         type: boolean
 
 permissions:

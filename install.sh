@@ -61,7 +61,7 @@ remove_incomplete_package() {
   esac
   printf 'Removing incomplete %s package state (%s).\n' \
     "$incomplete_label" "$incomplete_status"
-  dpkg --remove --force-depends "$incomplete_package" </dev/null
+  dpkg --force-not-root --force-script-chrootless --remove --force-depends "$incomplete_package" </dev/null
 }
 
 download_verified_package() {
@@ -130,7 +130,7 @@ esac
 [ "$RECOVERY_MAX_TOKENS" -gt 0 ] || fail "HERMES_RECOVERY_MAX_TOKENS must be positive"
 
 mkdir -p "${TMPDIR:-$PREFIX/tmp}" "$HOME/.hermes/logs"
-export DEBIAN_FRONTEND=noninteractive
+export DEBIAN_FRONTEND=noninteractive TERMUX_PKG_NO_MIRROR_SELECT=1
 
 # Clear only interrupted package transactions before asking APT to simulate
 # repository consistency. Otherwise an unpacked +termux1 can make an unrelated
@@ -140,7 +140,7 @@ remove_incomplete_package python3.13 python3.13
 
 step "Checking official Termux package consistency"
 base_ok=true
-apt-get -o Acquire::Retries=4 update </dev/null >/dev/null 2>&1 || base_ok=false
+apt-get -o Acquire::Retries=4 -o APT::Update::Error-Mode=any update </dev/null >/dev/null 2>&1 || base_ok=false
 apt-get -s install ncurses ncurses-ui-libs </dev/null >/dev/null 2>&1 || base_ok=false
 if ! $base_ok; then
   backup="$PREFIX/etc/apt/sources.list.hermes-recovery-$(date -u +%Y%m%dT%H%M%SZ).bak"
@@ -148,13 +148,17 @@ if ! $base_ok; then
   printf '%s\n' "$PRIMARY_SOURCE" > "$PREFIX/etc/apt/sources.list"
   printf 'Termux mirror package skew detected; switched main repository to the official primary.\n'
   [ ! -f "$backup" ] || printf 'Previous source list saved at %s\n' "$backup"
-  apt-get -o Acquire::Retries=5 update </dev/null
-  pkg upgrade -y </dev/null
+  apt-get -o Acquire::Retries=5 -o APT::Update::Error-Mode=any update </dev/null
+  apt-get -o Acquire::Retries=5 dist-upgrade -y </dev/null
 fi
 
 step "Enabling the signed Hermes/Termux package repository"
-bash <(curl -fsSL --retry 6 --retry-all-errors \
-  https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh) </dev/null
+setup_script="$(mktemp "${TMPDIR:-$PREFIX/tmp}/hermes-apt-setup.XXXXXX")"
+curl -fsSL --retry 6 --retry-all-errors \
+  https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh \
+  -o "$setup_script"
+bash "$setup_script" </dev/null
+rm -f "$setup_script"
 
 step "Installing the latest verified Hermes Agent package"
 installed="$(dpkg-query -W -f='${Version}' hermes-agent 2>/dev/null || true)"
@@ -163,36 +167,29 @@ if [ "$installed_status" != installed ] || [ -z "$installed" ] || \
   ! dpkg --compare-versions "$installed" ge "$MIN_PACKAGE_VERSION"; then
   package_file="$(download_verified_package)"
 
-  # A previous failed APT run can leave the old Hermes package unpacked with
-  # an unsatisfied python3.13 dependency. Remove only package-owned runtime
-  # files; user state is under ~/.hermes and is deliberately untouched.
-  case "$installed_status" in
-    ''|not-installed|config-files) ;;
-    *)
-      printf 'Removing incomplete Hermes package state (%s, version %s).\n' \
-        "$installed_status" "${installed:-unknown}"
-      dpkg --remove --force-depends hermes-agent </dev/null
-      ;;
-  esac
-
-  # Install the dependency relation from the verified +termux2 package first.
-  # It accepts an already-installed official Termux Python 3.13, or selects the
-  # side-by-side python3.13 package when rolling Termux is on Python 3.14.
+  # Incomplete transactions were cleared above. A configured old package
+  # upgrades directly, retaining dpkg's ownership and maintainer-script rules.
+  # New bundles are self-contained; older packages may declare dependencies.
   package_deps="$(dpkg-deb -f "$package_file" Depends)"
-  apt-get \
-    -o Acquire::Retries=8 \
-    -o Acquire::http::Timeout=45 \
-    -o Acquire::https::Timeout=45 \
-    satisfy -y "$package_deps" </dev/null
-  dpkg -i "$package_file" </dev/null
-  dpkg --configure -a </dev/null
+  if [ -n "$package_deps" ]; then
+    apt-get \
+      -o Acquire::Retries=8 \
+      -o Acquire::http::Timeout=45 \
+      -o Acquire::https::Timeout=45 \
+      satisfy -y "$package_deps" </dev/null
+  fi
+  dpkg --force-not-root --force-script-chrootless --install "$package_file" </dev/null
+  dpkg --force-not-root --force-script-chrootless --configure -a </dev/null
   rm -f \
     "$package_file" \
     "$package_file.part" \
     "$PREFIX/var/cache/apt/archives/partial/$PACKAGE_FILENAME" \
     "${XDG_CACHE_HOME:-$HOME/.cache}/hermes-recovery/hermes-agent_0.20.6+termux1_aarch64.deb" \
     "${XDG_CACHE_HOME:-$HOME/.cache}/hermes-recovery/hermes-agent_0.20.6+termux1_aarch64.deb.part" \
-    "$PREFIX/var/cache/apt/archives/partial/hermes-agent_0.20.6+termux1_aarch64.deb"
+    "$PREFIX/var/cache/apt/archives/partial/hermes-agent_0.20.6+termux1_aarch64.deb" \
+    "${XDG_CACHE_HOME:-$HOME/.cache}/hermes-recovery/hermes-agent_0.20.6+termux2_aarch64.deb" \
+    "${XDG_CACHE_HOME:-$HOME/.cache}/hermes-recovery/hermes-agent_0.20.6+termux2_aarch64.deb.part" \
+    "$PREFIX/var/cache/apt/archives/partial/hermes-agent_0.20.6+termux2_aarch64.deb"
 else
   printf 'hermes-agent %s is already installed.\n' "$installed"
 fi
@@ -214,7 +211,14 @@ update_log="${TMPDIR:-$PREFIX/tmp}/hermes-apt-update-check.$$"
 if hermes update >"$update_log" 2>&1; then
   rm -f "$update_log"
   fail "APT-managed hermes update unexpectedly tried to mutate its package"
+else
+  update_status=$?
 fi
+[ "$update_status" -eq 2 ] || {
+  cat "$update_log" >&2
+  rm -f "$update_log"
+  fail "Hermes updater exited $update_status; expected the APT refusal status 2"
+}
 grep -F 'pkg upgrade hermes-agent' "$update_log" >/dev/null || {
   cat "$update_log" >&2
   rm -f "$update_log"
