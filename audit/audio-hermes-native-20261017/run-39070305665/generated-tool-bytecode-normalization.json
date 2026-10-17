@@ -1,0 +1,347 @@
+{
+  "before_helper": {
+    "bytes": 60357,
+    "sha256": "1c72eb23756959612ac854d0fff1dc7486015a64adb20cf886da9a255fa298e4"
+  },
+  "before_tests": {
+    "bytes": 24971,
+    "sha256": "8b5c7097dccfa3d91ac27198b0e3c8c33226fde9e7da1c98277cf53b6db3ec6f"
+  },
+  "boundary": {
+    "commit_or_push_by_this_agent": false,
+    "installed_hermes_changed": false,
+    "microphone_accessed": false,
+    "native_normalization_tested": false,
+    "original_reconstruction_inputs_changed": false,
+    "physical_vad_tested": false,
+    "release_output": false
+  },
+  "cause": {
+    "canonical_cache_semantics": "pm.store.tree_digest explicitly describes __pycache__ from staged-interpreter use during UV venv/sync as derived runtime state, excluded from tool-content identity.",
+    "canonical_uv_environment": "pm.environment._base_environment strips PYTHON* variables from the child environment; ambient PYTHONDONTWRITEBYTECODE is therefore unavailable to UV.",
+    "confirmed_host_writer": "Actual canonical PythonEnvironment._restore_bundled_wheels using uv pip install --compile-bytecode; create alone produced zero caches. Fresh owned Windows CPython3.14.2 with UV0.12.7, not the Android trial.",
+    "host_after_compile_cache_files": 50,
+    "host_exact_original_python_inventory_restored": true,
+    "host_normalized_cache_files": 50,
+    "host_normalized_directories": 6,
+    "native_specific_writer_stage": "Pending the next native stage inventory; no second speculative PM source patch applied.",
+    "source_functions": {
+      "pm/environment.py": {
+        "bytes": 27316,
+        "sha256": "f88a5684ea0cd75023499a2ce8f8bd79f17b08d60e6f5abcf2a44b410b624a51"
+      },
+      "pm/runtime_stage.py": {
+        "bytes": 2340,
+        "sha256": "263cf609896ca5ebdc650c446ec9a3503d4f36389460193b0ad7e97c8c3bb79f"
+      },
+      "pm/store.py": {
+        "bytes": 17065,
+        "sha256": "87e551a844c1086f2625bf5e445c8000c4aee12252bcd47fbf84ff08ce5542ad"
+      },
+      "scripts/build/agent.py": {
+        "bytes": 8754,
+        "sha256": "f59ed0dc39a37814a43f2465e1391311a3ce8203e42a69257e58db6f3cda3652"
+      },
+      "scripts/bundles/payload.py": {
+        "bytes": 7974,
+        "sha256": "ab2fb59a2face83a92121af5e09e68b04c3abe3301261248cdf0c8a2cca9ae98"
+      }
+    }
+  },
+  "failure": {
+    "artifact": {
+      "created_at": "2026-10-17T21:18:22Z",
+      "digest": "sha256:6ba3951a1f316f229694bc31da48d98e8c1a7233056fd0e2ee69f48e7805bef5",
+      "expired": false,
+      "id": 12114787919,
+      "name": "termux-audio-environment-proof",
+      "size_in_bytes": 6876332
+    },
+    "canonical_build_receipt": {
+      "bytes": 5017,
+      "path": "audit/audio-hermes-native-20261017/run-39070305665/artifact-files/prepared/evidence/canonical-build.json",
+      "sha256": "c797577a4dc7d1af41bef7da9be7d80124bd3e76b1a74ddac59da8b49148fdee"
+    },
+    "conclusion": "failure",
+    "error": "unreviewed staged payload change: tools/python/data/data/com.termux/files/usr/lib/python3.14/__pycache__",
+    "head_sha": "80f66ac0eab411682eded4bdafa80b58aedc3cd2",
+    "job_id": 117506349844,
+    "native_baseline_python_cache_entries": 0,
+    "native_stage_of_first_cache_creation": "Not captured by this failed run; the next preparer records seven stage inventories.",
+    "passed_canonical_build": {
+      "application": {
+        "distribution_count": 101,
+        "distributions": {
+          "agent-client-protocol": "0.9.0",
+          "aiohappyeyeballs": "2.7.1",
+          "aiohttp": "3.14.3",
+          "aiohttp-socks": "0.11.0",
+          "aiosignal": "1.4.0",
+          "aiosqlite": "0.22.1",
+          "annotated-doc": "0.0.5",
+          "annotated-types": "0.8.0",
+          "anyio": "4.14.2",
+          "asyncpg": "0.31.0",
+          "attrs": "26.1.0",
+          "base58": "2.1.1",
+          "browser-harness": "0.1.13",
+          "cdp-use": "1.4.5",
+          "certifi": "2026.5.20",
+          "cffi": "2.1.1",
+          "charset-normalizer": "3.5.1",
+          "click": "8.4.2",
+          "croniter": "6.0.0",
+          "cryptography": "50.0.1",
+          "distro": "1.9.0",
+          "fastapi": "0.133.1",
+          "fetch-use": "0.4.0",
+          "fire": "0.7.1",
+          "firecrawl-anydoc": "0.2.4",
+          "frozenlist": "1.8.0",
+          "h11": "0.16.0",
+          "httpcore": "1.0.9",
+          "httpcore2": "2.12.0",
+          "httptools": "0.8.0",
+          "httpx": "0.28.1",
+          "httpx2": "2.12.0",
+          "idna": "3.19",
+          "importlib-metadata": "8.7.1",
+          "jinja2": "3.1.6",
+          "jiter": "0.16.0",
+          "jsonschema": "4.26.0",
+          "jsonschema-specifications": "2025.9.1",
+          "markdown": "3.10.2",
+          "markdown-it-py": "4.2.0",
+          "markupsafe": "3.0.3",
+          "mautrix": "0.21.1",
+          "mcp": "2.0.0",
+          "mcp-types": "2.0.0",
+          "mdurl": "0.1.2",
+          "multidict": "6.7.1",
+          "nemo-relay": "0.10.0",
+          "numpy": "2.4.3",
+          "openai": "2.24.0",
+          "opentelemetry-api": "1.39.1",
+          "packaging": "26.0",
+          "pathspec": "1.1.1",
+          "pillow": "12.3.0",
+          "pillow-heif": "1.6.0",
+          "prompt-toolkit": "3.0.52",
+          "propcache": "0.5.2",
+          "psutil": "8.0.0",
+          "ptyprocess": "0.7.0",
+          "pycparser": "3.0",
+          "pycryptodome": "3.23.0",
+          "pydantic": "2.13.4",
+          "pydantic-core": "2.46.4",
+          "pygments": "2.21.0",
+          "pyjwt": "2.13.0",
+          "python-dateutil": "2.9.0.post0",
+          "python-dotenv": "1.2.2",
+          "python-multipart": "0.0.32",
+          "python-olm": "3.2.16",
+          "python-socks": "2.8.2",
+          "python-telegram-bot": "22.8",
+          "pytz": "2026.3.post1",
+          "referencing": "0.37.0",
+          "requests": "2.33.0",
+          "resvg-py": "0.4.0",
+          "rich": "14.3.3",
+          "rpds-py": "2026.6.3",
+          "ruamel-yaml": "0.18.16",
+          "six": "1.17.0",
+          "sniffio": "1.3.1",
+          "snowballstemmer": "3.1.1",
+          "socksio": "1.0.0",
+          "sounddevice": "0.5.5",
+          "sse-starlette": "3.4.8",
+          "starlette": "1.3.1",
+          "tenacity": "9.1.4",
+          "termcolor": "3.3.0",
+          "tomli-w": "1.2.0",
+          "tornado": "6.5.8",
+          "tqdm": "4.70.0",
+          "truststore": "0.10.4",
+          "typing-extensions": "4.16.0",
+          "typing-inspection": "0.4.4",
+          "unpaddedbase64": "2.1.0",
+          "urllib3": "2.7.0",
+          "uvicorn": "0.41.0",
+          "uvloop": "0.22.1",
+          "watchfiles": "1.2.0",
+          "wcwidth": "0.8.2",
+          "websockets": "15.0.1",
+          "yarl": "1.24.5",
+          "zipp": "4.1.0"
+        },
+        "record_rewritten_by_uv": true,
+        "wheel_owned_files_checked": 6906
+      },
+      "application_built_fresh": true,
+      "build_environment_arguments": {
+        "all_extras": false,
+        "explicit": true,
+        "frozen": true,
+        "no_install_project": true,
+        "offline": true,
+        "sealed": true
+      },
+      "canonical_api": "pm.stage_manager_runtime + pm.build_environment + canonical agent assembly/seal_pm_runtime",
+      "catalog": {
+        "path": "bundled-wheels.json",
+        "sha256": "50d1fb2c684e92b336435f2df545de29c3e20674320484e9da9335bdfd722c11"
+      },
+      "catalog_union": {
+        "additional_rows": 2,
+        "original_rows": 100,
+        "original_rows_preserved": true,
+        "total_rows": 102
+      },
+      "extras": [
+        "acp",
+        "audio-io",
+        "cron",
+        "matrix",
+        "mcp",
+        "telegram",
+        "termux",
+        "uvloop"
+      ],
+      "final_payload": "/out/prepared/payload",
+      "interpreter": {
+        "base_prefix": "/out/prepared/payload/tools/python/data/data/com.termux/files/usr",
+        "executable": "/out/prepared/payload/pm-runtime/bin/python",
+        "machine": "aarch64",
+        "platform": "android",
+        "version": "3.14.6 (main, Jul  5 2026, 10:35:55) [Clang 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 5e96669f0"
+      },
+      "manager": {
+        "distribution_count": 4,
+        "distributions": {
+          "packaging": "26.0",
+          "ruamel-yaml": "0.18.16",
+          "tomli-w": "1.2.0",
+          "truststore": "0.10.4"
+        },
+        "record_rewritten_by_uv": true,
+        "wheel_owned_files_checked": 75
+      },
+      "manager_built_fresh": true,
+      "pm_runtime_marker": {
+        "python": "../tools/python/data/data/com.termux/files/usr/bin/python3.14",
+        "sitePackages": "lib/python3.14/site-packages"
+      },
+      "project_binding": "Canonical agent source-layout .dist-info and hermes-agent.pth",
+      "runtime_count_policy": "102 catalog files; only each canonical frozen export belongs in its own runtime.",
+      "selection_stamp": "985947f6fbd1e393dd81c43e1e7943999ddd8d6b75b97f4d4f77fcc1d5b39c66",
+      "status": "passed",
+      "target": "linux-arm64-bionic"
+    },
+    "raw_proof_member_count": 16,
+    "run_id": 39070305665,
+    "whole_sha_and_all_member_crc_sha_verified": true
+  },
+  "files": {
+    ".github/workflows/audio-hermes-preparation.yml": {
+      "bytes": 6314,
+      "path": ".github/workflows/audio-hermes-preparation.yml",
+      "sha256": "901dafcc4b4f7cdc5e88318d30cd4452355da2ebe283ef74e9cb78f6ce151705"
+    },
+    "patches/next-stable/audio-pm-marker-bytecode.patch": {
+      "bytes": 533,
+      "path": "patches/next-stable/audio-pm-marker-bytecode.patch",
+      "sha256": "f4e63265aa3a71ceb0f69f11f7876a7e32e1f7e8a0704de5c8df96860e3aa390"
+    },
+    "patches/next-stable/audio-readiness.patch": {
+      "bytes": 8470,
+      "path": "patches/next-stable/audio-readiness.patch",
+      "sha256": "82b92d5095ceabc05f0200569da1cc16b861c77b166095982b05d57940573db7"
+    },
+    "scripts/compatibility_probe_audio_hermes.py": {
+      "bytes": 12881,
+      "path": "scripts/compatibility_probe_audio_hermes.py",
+      "sha256": "487b35edf7f65c0c1482095486a12d021473e73fceac11038e3769d490a8c85b"
+    },
+    "scripts/prepare_audio_hermes_environment.py": {
+      "bytes": 72206,
+      "path": "scripts/prepare_audio_hermes_environment.py",
+      "sha256": "2f45fc5e4ede6dfa895ef56d51c05888ac04ed8fedcf2cd612fe7e1f6f7087ad"
+    },
+    "scripts/run_audio_hermes_preparation.sh": {
+      "bytes": 4646,
+      "path": "scripts/run_audio_hermes_preparation.sh",
+      "sha256": "db04f7c51f18ffe1f5e2fab6ac2303d337ea657bb7199b5349a8a460f2b9ef2d"
+    },
+    "tests/test_audio_hermes_preparation.py": {
+      "bytes": 32970,
+      "path": "tests/test_audio_hermes_preparation.py",
+      "sha256": "0d2466da711262b87f8a45fefbc28d6a3180f20895a46a750033c9a80cf6ed6e"
+    }
+  },
+  "fix": {
+    "baseline_cache_removal": false,
+    "final_payload_oracle_relaxed": false,
+    "normalization_bound": {
+      "files": 512,
+      "per_file_bytes": 8388608,
+      "total_bytes": 33554432
+    },
+    "original_marker_B_patch_preserved": true,
+    "pipeline": [
+      "Snapshot caches and loaded canonical module source identities at seven bounded stages.",
+      "Validate every original Python entry is unchanged and every new entry is an allowed source-derived cache.",
+      "Require canonical CPython314 filename/path, native interpreter magic, valid PEP552 timestamp/hash header, exact original source bytes, and recursive code equality against compile(...,dont_inherit=True,optimize=the cache suffix).",
+      "Validate all entries before any removal, archive exact generated bytes, remove only validated new files and new now-empty directories.",
+      "Require the complete original Python inventory is restored, retain canonical facts/tool verification, and run the unchanged final full-payload oracle."
+    ],
+    "rejections": [
+      "Changed or missing baseline files/directories/caches",
+      "New output outside the exact stdlib",
+      "Unreviewed names, symlinks, escaped paths or non-pyc payloads",
+      "Unknown Python magic or PEP552 flags",
+      "Mismatched source timestamp/size/hash/bytes",
+      "Foreign code, top-level or nested filenames, trailing marshal payload",
+      "Unexplained empty new directories or count/size bounds exceeded"
+    ],
+    "scope": "Only newly derived CPython314 stdlib cache files in the invocation-owned extracted payload.",
+    "source_bytes_changed_by_this_fix": false,
+    "source_locks_or_metadata_relaxed": false
+  },
+  "recorded_at": "2026-10-17T21:34:53.958016+00:00",
+  "schema_version": 1,
+  "status": "host-verified-native-retry-pending",
+  "verification": {
+    "actual_canonical_uv_cache_normalization": {
+      "bytes": 43669,
+      "path": "audit/audio-hermes-native-20261017/run-39070305665/canonical-uv-normalization-owned-host-reproduction.json",
+      "sha256": "04da77da92e1a046077fdc617c8447036457b3355c9479599af405bc397db105"
+    },
+    "actual_canonical_uv_compile": {
+      "bytes": 10264,
+      "path": "audit/audio-hermes-native-20261017/run-39070305665/canonical-uv-compile-owned-host-reproduction.json",
+      "sha256": "b2cbbee34bd4408eccccaf37370c95da35716e128bcd86c383a01a26fa55fccf"
+    },
+    "actual_canonical_uv_create": {
+      "bytes": 2173,
+      "path": "audit/audio-hermes-native-20261017/run-39070305665/canonical-uv-owned-host-reproduction.json",
+      "sha256": "06cd4211a660dd757694234d0836297d2356c95bf28b7546162853d764ea7230"
+    },
+    "focused_tests": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 90
+    },
+    "git_diff_check_exit_code": 0,
+    "test_log": {
+      "bytes": 182,
+      "path": "audit/audio-hermes-native-20261017/run-39070305665/generated-cache-host-tests-attempt1.log",
+      "sha256": "8886429cab1185a8c930355660f5d743d9481b96af47450447659cb08a47fcf3"
+    },
+    "test_xml": {
+      "bytes": 19768,
+      "path": "audit/audio-hermes-native-20261017/run-39070305665/generated-cache-host-tests-attempt1.xml",
+      "sha256": "c593821e025130c4f6966b16eac7bf29eda3ac73bc919a20f5228bf803db6009"
+    }
+  }
+}

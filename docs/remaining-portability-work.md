@@ -114,10 +114,9 @@ original missing-directory error and checking all 2,606 source entries, the sole
 following and the native C ABI/public-wrapper gates remain for the retry.
 The complete failed artifact and all 190 member hashes are preserved.
 
-The exact eSpeak source also attempts an optional Sonic fetch even when the
-caller explicitly disables Sonic. A small explicit-OFF guard and a native
-phonemization probe are being prepared. This work does not use Android audio
-devices or download speech models.
+The exact eSpeak source's optional Sonic fetch is covered by the reviewed
+explicit-OFF guard and native phonemization probe described above. This
+component gate does not use Android audio devices or download speech models.
 
 ### Exact model access and eventual engine gate
 
@@ -247,11 +246,27 @@ subprocess regression demonstrates 25 original cache files versus zero after
 the patch, with identical interpreter facts. All 62 focused tests pass with no
 skips in both the agent and [independent root run](../audit/audio-hermes-native-20261017/run-39068675759/marker-bytecode-root-review.json).
 The [failure and correction record](../audit/audio-hermes-native-20261017/run-39068675759/marker-bytecode-failure-fix.json)
-retains the successful builds and the failed final check; no cache cleanup or
-relaxed payload comparison conceals the write.
+retains the successful builds and that failed final check.
 
-A complete native retry must still pass the final integrity check, execute the
-audio dependency probe, and repeat construction at a second independent path.
+The [third native run, 39070305665](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39070305665),
+again built both environments, then detected additional interpreter caches.
+The canonical UV environment deliberately removes ambient Python flags, and its
+bundle restoration explicitly compiles bytecode. A real host reproduction of
+that canonical operation produced 50 caches in an owned copied interpreter.
+The [reviewed normalization](../audit/audio-hermes-native-20261017/run-39070305665/generated-tool-bytecode-normalization.json)
+checks every new cache's CPython format, exact original source, header and
+recursive code equality against a fresh compile. It archives every verified
+cache byte before removal and restores the complete original Python inventory.
+Baseline files and caches remain unchanged, and the final full-payload comparison
+is unchanged. Seven native stage inventories will identify where caches first
+appear in the next run. All 90 focused host tests pass with no skips in the
+[independent root replay](../audit/audio-hermes-native-20261017/run-39070305665/root-normalization-review.json);
+the actual UV host reproduction also restored all original entries after
+archiving and removing its 50 new cache files and six new directories.
+
+A complete native retry must still verify that normalization, pass the final
+integrity check, execute the audio dependency probe, and repeat construction at
+a second independent path.
 Both environments are built fresh through canonical APIs from the exact main
 candidate and original wheel catalog. The original candidate, installed payload,
 lock files and existing wheels must remain unchanged. The workflow preserves a

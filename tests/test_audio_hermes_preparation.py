@@ -575,3 +575,175 @@ def test_payload_oracle_still_refuses_generated_tool_bytecode(suffix):
     changed["tools/python/lib/" + suffix] = {"kind": "file", "sha256": "generated", "mode": 420}
     with pytest.raises(prep.PreparationError, match="unreviewed staged payload change"):
         prep.allowed_changes(original, changed)
+
+
+@pytest.fixture
+def generated_tool_cache(tmp_path):
+    import py_compile
+    from types import SimpleNamespace
+    payload, evidence = tmp_path / "payload", tmp_path / "evidence"
+    evidence.mkdir()
+    source = payload / prep.TOOL_STDLIB_PREFIX / "example.py"
+    source.parent.mkdir(parents=True)
+    source.write_bytes(
+        b'"""Original stdlib fixture; compile without executing."""\n'
+        b'def operation(value):\n'
+        b'    assert value is not None\n'
+        b'    return value + 7\n'
+        b'raise AssertionError("cache validation must never execute source")\n'
+    )
+    baseline = prep.inventory(payload)
+
+    def create(*, optimization=0, invalidation="TIMESTAMP"):
+        return Path(py_compile.compile(
+            str(source), doraise=True, optimize=optimization,
+            invalidation_mode=getattr(py_compile.PycInvalidationMode, invalidation),
+        ))
+
+    return SimpleNamespace(payload=payload, evidence=evidence, source=source,
+                           baseline=baseline, create=create)
+
+
+@pytest.mark.parametrize("invalidation", ["TIMESTAMP", "CHECKED_HASH", "UNCHECKED_HASH"])
+@pytest.mark.parametrize("optimization", [0, 1, 2])
+def test_generated_cache_is_recompiled_archived_and_removed_without_source_execution(
+    generated_tool_cache, invalidation, optimization,
+):
+    f = generated_tool_cache
+    path = f.create(optimization=optimization, invalidation=invalidation)
+    cache = path.read_bytes()
+    assert path.exists()
+    result = prep.normalize_generated_tool_bytecode(f.payload, f.baseline, f.evidence)
+    assert result["status"] == "normalized"
+    assert result["removed_files"] == result["removed_directories"] == 1
+    assert result["exact_original_python_inventory_restored"] is True
+    assert result["source_files_changed"] == result["baseline_entries_removed"] == 0
+    assert result["original_python_inventory_sha256"] == result["final_python_inventory_sha256"]
+    assert result["files"][0]["optimization"] == optimization
+    assert result["files"][0]["fresh_compile_equal"] is True
+    assert prep.inventory(f.payload) == f.baseline
+    saved = f.evidence / "generated-tool-bytecode" / path.relative_to(f.payload)
+    assert saved.read_bytes() == cache
+
+
+@pytest.mark.parametrize("mutation", [
+    "magic", "flags", "timestamp", "size", "source-hash", "trailing-data",
+    "foreign-code", "foreign-filename", "foreign-nested-filename", "cache-tag",
+    "source-byte", "extra-nonpyc", "new-empty-directory", "nonstdlib-output",
+])
+def test_generated_cache_validation_refuses_mutation_before_any_removal(generated_tool_cache, mutation):
+    import marshal
+    import struct
+    import types
+    f = generated_tool_cache
+    path = f.create(invalidation="CHECKED_HASH" if mutation == "source-hash" else "TIMESTAMP")
+    raw = path.read_bytes()
+    if mutation == "magic":
+        raw = b"BAD!" + raw[4:]
+    elif mutation == "flags":
+        raw = raw[:4] + struct.pack("<I", 2) + raw[8:]
+    elif mutation == "timestamp":
+        raw = raw[:8] + b"\0\0\0\0" + raw[12:]
+    elif mutation == "size":
+        raw = raw[:12] + b"\0\0\0\0" + raw[16:]
+    elif mutation == "source-hash":
+        raw = raw[:8] + b"\0" * 8 + raw[16:]
+    elif mutation == "trailing-data":
+        raw += b"unreviewed appended payload"
+    elif mutation == "foreign-code":
+        raw = raw[:16] + marshal.dumps(compile("x = 1000", str(f.source), "exec", dont_inherit=True))
+    elif mutation in ("foreign-filename", "foreign-nested-filename"):
+        code = marshal.loads(raw[16:])
+        if mutation == "foreign-filename":
+            code = code.replace(co_filename="unowned-source.py")
+        else:
+            constants = tuple(value.replace(co_filename="unowned-nested.py")
+                              if type(value) is types.CodeType else value for value in code.co_consts)
+            code = code.replace(co_consts=constants)
+        raw = raw[:16] + marshal.dumps(code)
+    elif mutation == "cache-tag":
+        path = path.rename(path.with_name(path.name.replace("cpython-314", "cpython-313")))
+    elif mutation == "source-byte":
+        f.source.write_bytes(f.source.read_bytes() + b"\n# changed source\n")
+    elif mutation == "extra-nonpyc":
+        (path.parent / "unreviewed.txt").write_bytes(b"not bytecode")
+    elif mutation == "new-empty-directory":
+        (f.source.parent / "new-unreviewed-directory").mkdir()
+    elif mutation == "nonstdlib-output":
+        (f.payload / "tools/python/foreign-output").write_bytes(b"outside stdlib")
+    path.write_bytes(raw)
+    before = prep.inventory(f.payload)
+    with pytest.raises(prep.PreparationError):
+        prep.normalize_generated_tool_bytecode(f.payload, f.baseline, f.evidence)
+    assert prep.inventory(f.payload) == before
+    assert not (f.evidence / "generated-tool-bytecode").exists()
+
+
+def test_baseline_cache_is_preserved_when_a_new_cache_is_normalized(generated_tool_cache):
+    import py_compile
+    f = generated_tool_cache
+    old_path = f.create()
+    baseline = prep.inventory(f.payload)
+    old_bytes = old_path.read_bytes()
+    second = f.source.with_name("second.py")
+    second.write_bytes(b"value = 2\n")
+    baseline = prep.inventory(f.payload)
+    second_cache = Path(py_compile.compile(str(second), doraise=True))
+    result = prep.normalize_generated_tool_bytecode(f.payload, baseline, f.evidence)
+    assert result["removed_files"] == 1 and result["removed_directories"] == 0
+    assert old_path.read_bytes() == old_bytes and not second_cache.exists()
+    assert prep.inventory(f.payload) == baseline
+
+
+def test_changed_baseline_cache_is_not_removed_or_reclassified(generated_tool_cache):
+    f = generated_tool_cache
+    path = f.create()
+    baseline = prep.inventory(f.payload)
+    path.write_bytes(path.read_bytes() + b"changed")
+    before = prep.inventory(f.payload)
+    with pytest.raises(prep.PreparationError, match="baseline Python"):
+        prep.normalize_generated_tool_bytecode(f.payload, baseline, f.evidence)
+    assert prep.inventory(f.payload) == before
+
+
+def test_generated_cache_symlink_is_refused_without_touching_target(generated_tool_cache, tmp_path):
+    f = generated_tool_cache
+    path = f.create()
+    target = tmp_path / "outside.pyc"
+    target.write_bytes(path.read_bytes())
+    path.unlink()
+    try:
+        path.symlink_to(target)
+    except OSError as exc:
+        pytest.skip(f"Host cannot create the derived-cache symlink fixture: {exc}")
+    raw = target.read_bytes()
+    with pytest.raises(prep.PreparationError, match="cache file or symlink"):
+        prep.normalize_generated_tool_bytecode(f.payload, f.baseline, f.evidence)
+    assert path.is_symlink() and target.read_bytes() == raw
+
+
+def test_cache_stage_inventory_retains_names_headers_and_provenance(generated_tool_cache):
+    f = generated_tool_cache
+    before = prep.record_tool_caches(f.payload, f.evidence, "00-before-test")
+    path = f.create()
+    after = prep.record_tool_caches(f.payload, f.evidence, "01-after-test")
+    assert before["cache_files"] == 0 and after["cache_files"] == 1
+    row = after["cache_entries"][path.relative_to(f.payload / "tools/python").as_posix()]
+    assert row["header_hex"] == path.read_bytes()[:16].hex()
+    assert row["sha256"] == prep.sha256(path)
+    assert (f.evidence / "tool-cache-00-before-test.json").is_file()
+    assert (f.evidence / "tool-cache-01-after-test.json").is_file()
+
+
+def test_actual_canonical_uv_environment_strips_the_ambient_bytecode_flag(
+    canonical_packaged_tools, record_property,
+):
+    import pm.environment as environment
+    from pm.store import tree_digest
+    assert "uv venv/uv sync" in tree_digest.__doc__
+    actual = environment._base_environment(
+        {"PYTHONDONTWRITEBYTECODE": "1", "PYTHONNOUSERSITE": "1", "PATH": "selected-tools"},
+    )
+    assert actual == {"PATH": "selected-tools"}
+    record_property("canonical_uv_base_environment_removes_python_flags", True)
+    record_property("canonical_environment_source", str(Path(environment.__file__).resolve()))

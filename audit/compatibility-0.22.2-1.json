@@ -610,21 +610,21 @@
       "physical_microphone_or_vad_certified": false,
       "included_in_main_candidate": false,
       "isolated_complete_environment": {
-        "status": "both_canonical_environments_built_first_path_bytecode_source_fixed_62_host_tests_native_retry_pending",
+        "status": "both_canonical_environments_built_generated_cache_normalization_90_host_tests_passed_native_retry_pending",
         "workflow": "../.github/workflows/audio-hermes-preparation.yml",
         "evidence": "audio-hermes-environment-preparation-20261017.json",
-        "host_tests_passed": 62,
+        "host_tests_passed": 90,
         "full_four_path_patch_applied": true,
         "catalog_wheels": 102,
         "independent_fresh_preparations_required": 2,
         "physical_microphone_or_vad_certified": false,
         "canonical_pm_tests_passed": 17,
         "host_tests_skipped": 0,
-        "failure_run": 39068675759,
-        "failure_evidence": "audio-hermes-native-20261017/run-39068675759/marker-bytecode-failure-fix.json",
-        "independent_review": "audio-hermes-native-20261017/run-39068675759/marker-bytecode-root-review.json",
-        "failure_stage": "strict final inventory rejected cache writes from isolated canonical interpreter marker subprocess",
-        "current_preparer_sha256": "1c72eb23756959612ac854d0fff1dc7486015a64adb20cf886da9a255fa298e4",
+        "failure_run": 39070305665,
+        "failure_evidence": "audio-hermes-native-20261017/run-39070305665/generated-tool-bytecode-normalization.json",
+        "independent_review": "audio-hermes-native-20261017/run-39070305665/root-normalization-review.json",
+        "failure_stage": "strict final inventory still rejected newly generated stdlib caches after the marker no-bytecode repair; exact native writer stage pending",
+        "current_preparer_sha256": "2f45fc5e4ede6dfa895ef56d51c05888ac04ed8fedcf2cd612fe7e1f6f7087ad",
         "real_microphone_started": false,
         "original_bootstrap_failure": {
           "failure_run": 39067100543,
@@ -649,7 +649,26 @@
           "marker_facts_equal": true
         },
         "native_audio_initialization": "not-probed",
-        "complete_independent_preparations_passed": 0
+        "complete_independent_preparations_passed": 0,
+        "previous_marker_failure": {
+          "run": 39068675759,
+          "evidence": "audio-hermes-native-20261017/run-39068675759/marker-bytecode-failure-fix.json",
+          "host_tests_passed": 62,
+          "original_cache_files": 25,
+          "patched_cache_files": 0,
+          "marker_facts_equal": true
+        },
+        "generated_tool_bytecode_normalization": {
+          "status": "host_passed_native_pending",
+          "actual_canonical_uv_compile_host_cache_files": 50,
+          "host_validated_archived_and_removed": 50,
+          "host_original_inventory_restored": true,
+          "baseline_cache_removal": false,
+          "original_source_changes": false,
+          "final_payload_oracle_relaxed": false,
+          "native_stage_inventories": 7,
+          "validation": "Selected CPython314 magic, canonical filename/path, PEP552 header, original source SHA, recursive fresh-compile equality, archive all bytes, restore exact original Python inventory"
+        }
       }
     },
     "neutts_default_gguf_source_review": {

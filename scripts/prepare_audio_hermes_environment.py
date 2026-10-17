@@ -14,12 +14,14 @@ import hashlib
 import importlib.util
 import io
 import json
+import marshal
 import os
 from pathlib import Path, PurePosixPath
 import platform
 import re
 import shutil
 import stat
+import struct
 import subprocess
 import sys
 import tarfile
@@ -834,6 +836,184 @@ def verified_packaged_tools(*, source_store: Path, target: str, lock=None):
     return VerifiedTools(MappingProxyType(entries), tuple(envs))
 
 
+
+TOOL_PYTHON_PREFIX = "tools/python/"
+TOOL_STDLIB_PREFIX = TOOL_PYTHON_PREFIX + "data/data/com.termux/files/usr/lib/python3.14/"
+MAX_GENERATED_CACHE_FILES = 512
+MAX_GENERATED_CACHE_BYTES = 32 * 1024 * 1024
+
+
+def record_tool_caches(payload, evidence, stage):
+    """Record bounded derived-cache state around canonical assembly stages."""
+    require(re.fullmatch(r"[0-9]{2}-[a-z-]+", stage) is not None, "invalid cache evidence stage")
+    rows = inventory(payload / "tools/python")
+    selected = {name: row for name, row in rows.items() if "__pycache__" in PurePosixPath(name).parts}
+    files = [name for name, row in selected.items() if row["kind"] == "file"]
+    require(len(files) <= MAX_GENERATED_CACHE_FILES
+            and sum(selected[name]["bytes"] for name in files) <= MAX_GENERATED_CACHE_BYTES,
+            "generated tool bytecode exceeds its evidence bound")
+    for name in files:
+        with (payload / "tools/python" / name).open("rb") as stream:
+            selected[name] = {**selected[name], "header_hex": stream.read(16).hex()}
+    origins = {}
+    for name in ("pm.environment", "pm.bundled_wheels", "pm.runtime_stage"):
+        module = sys.modules.get(name)
+        filename = getattr(module, "__file__", None)
+        if filename:
+            path = Path(filename)
+            origins[name] = {"path": str(path), "sha256": sha256(path)}
+    record = {"schema_version": 1, "stage": stage, "cache_tag": sys.implementation.cache_tag,
+              "python": sys.version, "dont_write_bytecode": sys.dont_write_bytecode,
+              "environment_dont_write_bytecode": os.environ.get("PYTHONDONTWRITEBYTECODE"),
+              "base_prefix": sys.base_prefix, "cache_files": len(files),
+              "cache_entries": selected, "canonical_module_origins": origins}
+    write_json(evidence / ("tool-cache-" + stage + ".json"), record)
+    return record
+
+
+def _matching_code(actual, expected):
+    """Compare compiled code recursively without executing either code object."""
+    if type(actual) is not types.CodeType or type(expected) is not types.CodeType:
+        return False
+    fields = ("co_argcount", "co_posonlyargcount", "co_kwonlyargcount", "co_nlocals",
+              "co_stacksize", "co_flags", "co_code", "co_names", "co_varnames",
+              "co_filename", "co_name", "co_qualname", "co_firstlineno", "co_linetable",
+              "co_exceptiontable", "co_freevars", "co_cellvars")
+    if any(getattr(actual, field) != getattr(expected, field) for field in fields):
+        return False
+    if len(actual.co_consts) != len(expected.co_consts):
+        return False
+    for left, right in zip(actual.co_consts, expected.co_consts):
+        if type(left) is types.CodeType or type(right) is types.CodeType:
+            if not _matching_code(left, right):
+                return False
+        elif type(left) is not type(right) or left != right:
+            return False
+    return True
+
+
+def normalize_generated_tool_bytecode(payload, original, evidence):
+    """Remove only newly derived, fully recompiled caches from this owned output.
+
+    Canonical UV assembly can create stdlib caches: PM deliberately excludes
+    __pycache__ from a tool's content digest. This normalization restores the
+    stricter package byte inventory. It never removes baseline entries, accepts
+    arbitrary cache payloads, changes source bytes, or relaxes the final oracle.
+    """
+    require(sys.implementation.name == "cpython" and sys.implementation.cache_tag == "cpython-314"
+            and sys.version_info[:2] == (3, 14) and sys.pycache_prefix is None,
+            "tool cache normalization requires the selected CPython 3.14 format")
+    python_root = payload / "tools/python"
+    require(python_root.is_dir() and not python_root.is_symlink()
+            and python_root.resolve() == python_root.absolute(), "unowned Python cache root")
+    before = {name: row for name, row in original.items() if name.startswith(TOOL_PYTHON_PREFIX)}
+    actual = {TOOL_PYTHON_PREFIX + name: row for name, row in inventory(python_root).items()}
+    require(before and all(actual.get(name) == row for name, row in before.items()),
+            "baseline Python source, tool file, mode, or cache changed before normalization")
+    additions = {name: row for name, row in actual.items() if name not in before}
+    directories, files = [], []
+    for name, row in additions.items():
+        require(name.startswith(TOOL_STDLIB_PREFIX), "new Python output is outside the exact stdlib")
+        relative = PurePosixPath(name)
+        if row["kind"] == "directory":
+            require(relative.name == "__pycache__"
+                    and "__pycache__" not in relative.parent.parts
+                    and before.get(relative.parent.as_posix(), {}).get("kind") == "directory",
+                    "unreviewed new cache directory")
+            directories.append(name)
+        else:
+            require(row["kind"] == "file" and relative.parent.name == "__pycache__"
+                    and "__pycache__" not in relative.parent.parent.parts,
+                    "unreviewed new cache file or symlink")
+            files.append(name)
+    require(len(files) <= MAX_GENERATED_CACHE_FILES
+            and sum(additions[name]["bytes"] for name in files) <= MAX_GENERATED_CACHE_BYTES,
+            "generated tool bytecode exceeds its normalization bound")
+    records = []
+    for name in sorted(files):
+        row = additions[name]
+        path = contained(payload, name)
+        require(path.resolve() == path.absolute() and 16 < row["bytes"] <= 8 * 1024 * 1024,
+                "uncontained or oversized derived bytecode")
+        match = re.fullmatch(r"(.+)\.cpython-314(?:\.opt-([12]))?\.pyc", path.name)
+        require(match is not None, "unreviewed CPython cache filename")
+        optimization = int(match[2] or "0")
+        source = path.parent.parent / (match[1] + ".py")
+        source_name = source.relative_to(payload).as_posix()
+        expected_source = before.get(source_name)
+        require(expected_source is not None and expected_source["kind"] == "file"
+                and source.resolve() == source.absolute(), "cache has no exact original regular source")
+        source_raw = source.read_bytes()
+        require(len(source_raw) == expected_source["bytes"]
+                and hashlib.sha256(source_raw).hexdigest() == expected_source["sha256"],
+                "cache source differs from the original package")
+        expected_name = importlib.util.cache_from_source(
+            str(source), optimization="" if optimization == 0 else str(optimization),
+        )
+        require(Path(expected_name) == path, "cache path is not the canonical path for its source")
+        raw = path.read_bytes()
+        require(len(raw) == row["bytes"] and hashlib.sha256(raw).hexdigest() == row["sha256"],
+                "derived cache changed during validation")
+        require(raw[:4] == importlib.util.MAGIC_NUMBER, "derived cache uses foreign Python magic")
+        flags = struct.unpack_from("<I", raw, 4)[0]
+        require(flags in (0, 1, 3), "derived cache has invalid PEP 552 flags")
+        if flags == 0:
+            mtime, size = struct.unpack_from("<II", raw, 8)
+            require(mtime == int(source.stat().st_mtime) & 0xffffffff
+                    and size == len(source_raw) & 0xffffffff,
+                    "derived cache timestamp/size does not match its source")
+            header = {"mode": "timestamp", "mtime": mtime, "source_size": size}
+        else:
+            require(raw[8:16] == importlib.util.source_hash(source_raw),
+                    "derived cache source hash does not match")
+            header = {"mode": "checked-hash" if flags == 3 else "unchecked-hash",
+                      "source_hash": raw[8:16].hex()}
+        stream = io.BytesIO(raw[16:])
+        try:
+            actual_code = marshal.load(stream)
+        except (EOFError, ValueError, TypeError) as exc:
+            raise PreparationError("derived cache is not valid Python code") from exc
+        require(stream.read(1) == b"", "derived cache contains trailing payload")
+        fresh = compile(source_raw, str(source), "exec", dont_inherit=True, optimize=optimization)
+        require(_matching_code(actual_code, fresh), "derived cache differs from a fresh source compile")
+        records.append({"path": name, "bytes": len(raw), "sha256": row["sha256"],
+                        "mode": row["mode"], "header_hex": raw[:16].hex(),
+                        "header": header, "optimization": optimization,
+                        "source": source_name, "source_bytes": len(source_raw),
+                        "source_sha256": expected_source["sha256"],
+                        "code_filename": actual_code.co_filename,
+                        "fresh_compile_equal": True})
+    # No removal begins until every new entry and every baseline entry passes.
+    require(all(any(PurePosixPath(name).parent.as_posix() == directory for name in files)
+                for directory in directories), "unexplained empty new cache directory")
+    planned = {"schema_version": 1, "status": "validated-before-normalization",
+               "scope": "newly derived CPython stdlib caches in this invocation's owned payload only",
+               "python": sys.version, "cache_tag": sys.implementation.cache_tag,
+               "magic_hex": importlib.util.MAGIC_NUMBER.hex(), "files": records,
+               "directories": sorted(directories), "baseline_entries_removed": 0,
+               "source_files_changed": 0, "original_python_inventory_sha256": inventory_sha(before)}
+    write_json(evidence / "validated-generated-tool-bytecode.json", planned)
+    for record in records:
+        path = contained(payload, record["path"])
+        saved = evidence / "generated-tool-bytecode" / record["path"]
+        saved.parent.mkdir(parents=True, exist_ok=True)
+        with saved.open("xb") as stream:
+            stream.write(path.read_bytes())
+        require(saved.stat().st_size == record["bytes"] and sha256(saved) == record["sha256"]
+                and sha256(path) == record["sha256"], "cache changed before owned removal")
+        path.unlink()
+    for name in sorted(directories, key=lambda value: len(PurePosixPath(value).parts), reverse=True):
+        contained(payload, name).rmdir()
+    after = {TOOL_PYTHON_PREFIX + name: row for name, row in inventory(python_root).items()}
+    require(after == before, "normalization did not restore every original Python entry exactly")
+    result = {**planned, "status": "normalized",
+              "removed_files": len(records), "removed_directories": len(directories),
+              "final_python_inventory_sha256": inventory_sha(after),
+              "exact_original_python_inventory_restored": True}
+    write_json(evidence / "normalized-generated-tool-bytecode.json", result)
+    return result
+
+
 def bootstrap_worker(request):
     payload = Path(request["payload"])
     native_identity(payload)
@@ -842,11 +1022,13 @@ def bootstrap_worker(request):
     from pm.paths import repo_root
     require(repo_root().resolve() == payload / "app", "bootstrap imported another PM")
     verified_packaged_tools(source_store=payload / "tools", target=TARGET)
+    record_tool_caches(payload, Path(request["evidence"]), "00-before-manager")
     manager = pm.stage_manager_runtime(
         python=Path(sys.executable), destination=payload / "pm-runtime",
         project=payload / "app/pm", offline=True, wheelhouse=payload / "wheelhouse",
         cache=Path(request["state"]) / "cache/pm-build",
     )
+    record_tool_caches(payload, Path(request["evidence"]), "01-after-manager")
     run_logged([str(manager), "-I", "-B", str(Path(__file__).resolve()),
                 "--application-worker", request["request_path"]],
                Path(request["evidence"]), "canonical-application-build",
@@ -866,6 +1048,7 @@ def application_worker(request):
     from pm.paths import repo_root
     from pm.store import current_target
     require(repo_root().resolve() == payload / "app" and current_target() == TARGET, "wrong staged PM authority")
+    record_tool_caches(payload, evidence, "02-application-entry")
     original = json_object((evidence / "original-bundled-wheels.json").read_bytes())
     descriptor = write_catalog(payload, wheelhouse=payload / "wheelhouse",
                                lock_paths=(payload / "app/uv.lock", payload / "app/pm/uv.lock"))
@@ -878,6 +1061,7 @@ def application_worker(request):
                                 payload, state / "cache/export-app", EXTRAS)
     manager_rows = canonical_export(payload / "app/pm", evidence / "manager-requirements.txt",
                                     payload, state / "cache/export-manager", [])
+    record_tool_caches(payload, evidence, "03-after-exports")
     python = contained(payload, manifest["runtime"]["storePython"])
     require(python.resolve().is_relative_to(payload / "tools/python"), "base interpreter escaped the owned payload")
     target = payload / "venv"
@@ -886,6 +1070,7 @@ def application_worker(request):
         env=os.environ, extras=EXTRAS, groups=(), all_extras=False,
         no_install_project=True, frozen=True, sealed=True, offline=True, explicit=True, timeout=1500,
     )
+    record_tool_caches(payload, evidence, "04-after-application-build")
     require(Path(executable).parent.parent == target, "canonical PM returned another environment")
     site = target / "lib/python3.14/site-packages"
     manager_site = payload / "pm-runtime/lib/python3.14/site-packages"
@@ -923,12 +1108,18 @@ def application_worker(request):
     require(Venv(payload / "app").expected_stamp(EXTRAS, plugin_dirs=[],
                                                bundled_wheels_sha256=descriptor["sha256"]) == stamp,
             "final canonical dependency selection differs")
+    record_tool_caches(payload, evidence, "05-after-assembly")
+    original_payload = json_object((evidence / "original-payload-inventory.json").read_bytes())["files"]
+    normalization = normalize_generated_tool_bytecode(payload, original_payload, evidence)
+    verified_packaged_tools(source_store=payload / "tools", target=TARGET)
+    record_tool_caches(payload, evidence, "06-after-normalization")
     write_json(evidence / "canonical-build.json", {
         "status": "passed", "target": TARGET, "extras": EXTRAS, "catalog": descriptor,
         "catalog_union": union, "application": app_check, "manager": manager_check,
         "pm_runtime_marker": marker, "selection_stamp": stamp,
         "final_payload": str(payload), "interpreter": native_identity(payload),
         "application_built_fresh": True, "manager_built_fresh": True,
+        "generated_tool_bytecode": normalization,
         "canonical_api": "pm.stage_manager_runtime + pm.build_environment + canonical agent assembly/seal_pm_runtime",
         "build_environment_arguments": {"frozen": True, "offline": True, "explicit": True,
                                        "sealed": True, "no_install_project": True, "all_extras": False},
@@ -1052,6 +1243,7 @@ def prepare(options):
                     "--bootstrap-worker", request["request_path"]], evidence, "canonical-preparation",
                    env=env, timeout=2100)
         after = inventory(payload)
+        write_json(evidence / "post-build-payload-inventory.json", {"files": after})
         changes = allowed_changes(before, after)
         links = verify_links(payload)
         gate = json_object((evidence / "canonical-build.json").read_bytes())
@@ -1090,6 +1282,7 @@ def prepare(options):
                       original_inventory_sha256=inventory_sha(before),
                       prepared_inventory_sha256=inventory_sha(after),
                       payload_changes=changes, contained_links=links,
+                      generated_tool_bytecode=gate["generated_tool_bytecode"],
                       cffi_reuse={"main_wheel_sha256": sha256(main_cffi), "audio_wheel_sha256": sha256(old_cffi),
                                  "uncompressed_members_identical": len(cffi_members)},
                       runtime_additions={"portaudio_sha256": PORTAUDIO_SHA, "opensles": opensles},
