@@ -18,7 +18,7 @@ The [sanitized device-access record](../audit/device-audio-access-20261017.json)
 |---|---|
 | Package inventory lists `com.termux` and `com.termux.x11`; the package follow-up identifies Termux `0.118.0` (code 118, minimum SDK 21, target SDK 28). | Termux is present. The generic Android package installer record does not prove its distribution channel; the installed Hermes payload also still needs to be identified in the intended session. |
 | The Termux package dump contains no `android.permission.RECORD_AUDIO` entry. | This does not establish the complete shared-UID permission or app-ops state. Check actual microphone permission in the intended app context before a take. |
-| The same inventory does not list `com.termux.api`. | The Termux:API companion is unavailable in the observed package inventory. This affects the Termux:API path, not the separately staged sounddevice/PortAudio path. |
+| The same inventory does not list `com.termux.api`. | The Termux:API companion is unavailable in the observed package inventory. The separate sounddevice/PortAudio path still requires verification of microphone permission and app-ops in the actual Termux app context. |
 | `run-as com.termux id` fails with `package not debuggable`. | This ADB command cannot launch the probe as the installed Termux app. A foreground Termux session remains the documented execution context; app-context execution has not yet been established. |
 
 This inventory does not prove microphone permission, PortAudio initialization, capture, or VAD. It establishes no isolated audio environment and does not change any audio gate. The local PCM/VAD test below does not require the Termux:API backend; that backend is a separate check and cannot prove silence autostop.
@@ -34,11 +34,37 @@ the verified candidate from packaging source
 The selected package is 222,096,792 bytes with SHA-256
 `2d5435d0fb19fa9f8ed0a5da5c66cabf59585a8e8bcd35ad2ebf9cb161f5e810`.
 
-**Native recreation verification: pending.** The
-[isolated audio workflow](../.github/workflows/audio-device-staging.yml) builds
-the transfer bundle, recreates it at two distinct final paths with networking
-disabled, and records assembly separately from audio initialization. No physical
-installation or microphone check has been performed.
+**Native recreation verification: passed; audio initialization remains unavailable.**
+The [verified native staging record](../audit/audio-device-staging-20261017/run-39076074868/summary.json) binds
+[run 39076074868](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39076074868) and source
+`09a945cff9e07243fb24e99d9a58a12d500eb18d`. The
+[isolated audio workflow](../.github/workflows/audio-device-staging.yml) recreated
+the bundle twice in the pinned ARM64/Bionic container under UID 1000 with
+networking disabled. Both roots passed CLI startup, diagnostic handling and full
+immutable validation afterward. No physical installation or microphone check
+was performed.
+
+The actual final destinations were
+`/data/data/com.termux/files/usr/tmp/hermes-audio-validation-a` and
+`/data/data/com.termux/files/usr/tmp/hermes audio validation b`; the second
+exercise includes spaces in its final path.
+
+| Measured check | First destination | Second destination |
+|---|---|---|
+| Assembly and explicit validation exit codes | `[0, 0, 0]` | `[0, 0, 0]` |
+| Installed distributions / installed wheel checks / active dependency edges / PM distributions | 102 / 101 / 167 / 4 | 102 / 101 / 167 / 4 |
+| Generated environment entries | 8,289 | 8,289 |
+| CFFI sum; NumPy matrix/linalg behavior | 16; passed | 16; passed |
+| CLI help exit; stdout bytes; stderr bytes | 0; 14,064; 0 | 0; 14,063; 0 |
+| Diagnostic exit and protocol | 0; valid | 0; valid |
+| Validation after diagnostics | Passed | Passed |
+
+Both diagnostics report `audio-unavailable` and retain the original
+`PortAudioError` code `-9999`. The actual private OpenSSL legacy provider loads,
+and the mapped PortAudio, OpenSLES wrapper and namespace helper match their
+frozen private copies. No undeclared ambient library mapping is admitted. A real
+Android audio framework was not mapped, and no device stream was opened.
+Readiness, microphone, recording and VAD flags remain false.
 
 The transfer directory contains `payload.tar.gz`, `manifest.json`,
 `prepare.sh` and `BUNDLE-RECEIPT.json`. It includes the candidate's tools,
@@ -82,6 +108,28 @@ does not supply a real Android audio framework itself. A physical success must
 record the actual mapped framework library and usable input device. The
 container's unavailable audio diagnostic cannot substitute for those observations.
 
+The same frozen `libandroid-stub 30-2` archive also supplies
+`libtermux-platform-ns.so`, retained at
+`runtime-libs/lib/libtermux-platform-ns.so`. The original OpenSLES wrapper names
+this library as a bare ELF dependency; the native origin gate requires the
+private copy. The helper exports `platform_dlopen` and needs only platform
+`libc.so` and `libdl.so`. The [namespace input record](../audit/audio-device-staging-20261017/namespace-private-inputs-828e5d5e/summary.json)
+binds both original members and confirms that adding the helper leaves the
+wrapper, launcher routing, wheel catalog and mapped-library guard unchanged.
+It does not add an Android framework implementation.
+
+The [private OpenSSL input record](../audit/audio-device-staging-20261017/openssl-private-inputs-bd72d882/summary.json)
+binds the original `1:3.6.5` archive's legacy provider and configuration to the
+candidate's byte-identical `libcrypto.so.3` and `libssl.so.3`. Only the missing
+provider/config inputs are added; the existing crypto libraries and the original
+configuration bytes are preserved. Bootstrap and launcher code set
+`OPENSSL_MODULES`, `OPENSSL_CONF` and `OPENSSL_CONF_INCLUDE` to the private
+payload before Python starts and clear inherited engine/provider-disable
+overrides. Native validation retains the mapped-library origin checks and
+requires the actual legacy provider to be loaded. The archive is bound to the
+frozen official input pin; this preparation does not claim a fresh APT signature
+verification. Android/Bionic platform libraries remain external runtime inputs.
+
 The fresh application environment also receives an owned `sitecustomize.py`.
 The pinned Python's generic PortAudio finder relies on a linker or compiler and
 does not directly search `LD_LIBRARY_PATH`. This small adapter maps only the
@@ -120,16 +168,43 @@ Also report the Termux app version and installation channel (F-Droid, official G
 
 ## Recreate the environment in foreground Termux
 
-Use the complete transfer artifact from the isolated audio workflow and verify
-its published artifact digest before using the extracted directory. The
-installer verifies its embedded manifest and payload hashes. Choose a fresh
+Use the complete **`hermes-isolated-audio-device-bundle`** artifact from
+[run 39076074868](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39076074868), artifact ID **12117830095**.
+The verified ZIP is **319,506,282 bytes**, with SHA-256
+`70eb95bac98f42cee655f7917b936eee185ed83483a972c4dbe7f5ba096a077e`.
+Compare the complete downloaded ZIP's digest before extracting it. The verified
+API receipt records expiry at `2026-10-31T22:51:07Z`; retain the verified archive
+for the later device session before that date.
+
+These are the four original native transfer files, distinct from local
+preparation checkpoints:
+
+| File | Bytes | SHA-256 |
+|---|---:|---|
+| `BUNDLE-RECEIPT.json` | 1,793 | `25600ea59dd332e14fc8367e05fd2053bfbf98d56dee48d172908a6f67fae8a6` |
+| `manifest.json` | 5,643,711 | `a86e362fc62df905d3b2e77fca28dc28b5b8d23f4129aaa694552749b0596e15` |
+| `payload.tar.gz` | 313,857,884 | `5606b977350eda8bf8d5586ed2ffe9f91212bc04f53112de35dcecaba8688d48` |
+| `prepare.sh` | 2,392 | `b1f4f29ae7c2affeb64f7005753d5ab3c000676251324b4e3243e84d9e9cba36` |
+
+The separate evidence artifact is ID **12116859683**, 4,557,184 bytes, SHA-256
+`27ae65ccb029d62f34f2c7bdfb23d9d301166c9de7c141d8e581862a4bbd91f8`.
+Its `AUDIO-STAGING-RESULT.json` is 27,038 bytes, SHA-256
+`15f3b456789efd3d4c6302b373c6fcba2b08226f63a0e2c7e0ef6b7effb92634`.
+Both entire ZIPs and every member were verified by digest and CRC. The
+[successful staging record](../audit/audio-device-staging-20261017/run-39076074868/summary.json) links the original receipts and
+source/manifest comparisons. The native manifest retains 25,275 entries and 102
+wheels; the candidate identity, catalog and audio patch outputs remain unchanged.
+`BUNDLE-RECEIPT.json` retains its preparation-time native/device booleans; the
+later native result supplies the completed recreation proof.
+
+The installer verifies its embedded manifest and payload hashes. Choose a fresh
 directory under the Termux app's private home; its parent must already exist.
 The existing installed Hermes payload is not an input to this launcher.
 
 ```bash
 # Run in foreground Termux after selecting the reviewed transfer directory.
 : "${AUDIO_BUNDLE:?Set the extracted reviewed audio bundle directory}"
-AUDIO_ROOT="$HOME/hermes-audio-validation-20261017"
+AUDIO_ROOT="$(realpath -- "$HOME")/hermes-audio-validation-20261017"
 bash "$AUDIO_BUNDLE/prepare.sh" "$AUDIO_ROOT"
 AUDIO_PY="$AUDIO_ROOT/bin/audio-python"
 AUDIO_SOURCE="$AUDIO_ROOT/app"
@@ -260,7 +335,7 @@ For a successful silence-stop observation, speak for about one or two seconds, t
 
 `voice.capture_backend` accepts `auto`, `termux-api`, or `sounddevice`. `auto` prefers the available Termux:API backend. Termux:API records encoded audio and supports manual stopping and a duration cap; it intentionally reports `supports_silence_autostop=False`, so it cannot establish the PCM/VAD claim.
 
-If a user separately wants to verify the normal CLI with their existing chosen STT provider, record the current configuration first, then set `voice.capture_backend` to the intended backend, `voice.max_recording_seconds` to `10`, `voice.silence_duration` to `3`, `voice.submit_mode` to `draft`, `voice.auto_tts` to `false`, and `stt.streaming` to `false` through `hermes config set <key> <value>`. Start `hermes`, use `/voice status`, then `/voice on`; only pressing the displayed record shortcut (default Ctrl+B) starts a take. `/voice off` releases the recorder. The CLI transcribes after stop even in draft mode, so this UI check may send audio to the user's configured provider and requires their separate choice. It is not required for the local-only PCM/VAD test above.
+If the owner separately chooses to verify the isolated CLI with an STT provider, record the configuration in `$AUDIO_ROOT/state/profile` first and configure the chosen provider in that isolated profile. Set `voice.capture_backend` to the intended backend, `voice.max_recording_seconds` to `10`, `voice.silence_duration` to `3`, `voice.submit_mode` to `draft`, `voice.auto_tts` to `false`, and `stt.streaming` to `false` through `"$AUDIO_PY" -m hermes_cli.main config set <key> <value>`. Start `"$AUDIO_PY" -m hermes_cli.main`, use `/voice status`, then `/voice on`; only pressing the displayed record shortcut (default Ctrl+B) starts a take. `/voice off` releases the recorder. The CLI transcribes after stop even in draft mode, so this UI check may send audio to the configured provider and requires the owner's separate choice. It is not required for the local-only PCM/VAD test above.
 
 ## Host preparation proof
 
@@ -268,11 +343,44 @@ The separate [preparation record](../audit/audio-readiness-preparation-20261017.
 
 The unchanged baseline produced three failures and one passing control. On the fixed source, the new file passed four cases, the existing selector suite passed fourteen cases (three Linux-only WSL cases were skipped on Windows), and two selected existing missing-library cases passed. These are separate runs; the red and green runs overlap and are not added together. One expanded attempt hit a 65-second outer timeout before a summary was retained, and no test result is claimed for that attempt. No native microphone or device installation was performed.
 
+The later isolated staging helpers have a separate
+[namespace host proof](../audit/audio-device-staging-20261017/namespace-private-inputs-828e5d5e/summary.json):
+**196 passed, no failures or skips, in 1.22 seconds**, using Windows Python 3.14.2
+and the exact frozen packaging 26.0 wheel. The full focused file includes seven
+new namespace cases beyond the historical
+[OpenSSL checkpoint's 189 passed in 3.97 seconds](../audit/audio-device-staging-20261017/openssl-private-inputs-bd72d882/summary.json).
+Each run preserves its own source hashes and original stdout/stderr; these
+overlapping counts are not added together. Neither correction ran a new full
+Windows repository suite. The prepared bundle comparison preserves the candidate,
+wheel catalog and audio patch outputs while retaining the original required
+private library inputs. Its preparation receipt's native/device booleans remain
+historical observations, separate from the later
+[successful native recreation result](../audit/audio-device-staging-20261017/run-39076074868/summary.json).
+
+## Isolated staging history
+
+These four native attempts remain failed runs. Their completed steps are retained
+without extending them to later phases or to physical audio readiness.
+
+| Native run | Observed boundary | Source-bound correction or retained progress |
+|---|---|---|
+| [39068820175](../audit/audio-device-staging-20261017/run-39068820175/summary.json) | After PM and application installation, the dependency graph rejected the candidate's original active Hermes-to-psutil Git requirement. | The [exact psutil source binding](../audit/audio-device-staging-20261017/psutil-source-binding-7fad395/summary.json) maps only that frozen metadata edge to the pinned offline wheel. It does not fetch the URL or admit other URL dependencies. |
+| [39070524219](../audit/audio-device-staging-20261017/run-39070524219/summary.json) | Requirement parsing rejected the original inactive KittenTTS URL spelling before graph validation completed. | The [exact parser adaptation](../audit/audio-device-staging-20261017/requirement-parser-f691d31/summary.json) handles the two original malformed optional declarations while preserving their raw bytes and rejecting activation. |
+| [39072136395](../audit/audio-device-staging-20261017/run-39072136395/summary.json) | First-root validation rejected ambient OpenSSL `legacy.so`; no complete assembly or CLI receipt was produced. | The [private OpenSSL correction](../audit/audio-device-staging-20261017/openssl-private-inputs-bd72d882/summary.json) adds the matching original provider/config and fixes their routing before the first Python process. |
+| [39074656769](../audit/audio-device-staging-20261017/run-39074656769/summary.json) | The first fresh environment assembled, passed explicit native validation of 102 distributions, and completed CLI help. Diagnostics then rejected ambient `libtermux-platform-ns.so`. | The [namespace correction and preserved diagnostic](../audit/audio-device-staging-20261017/namespace-private-inputs-828e5d5e/summary.json) retain the missing original member from the same frozen `libandroid-stub 30-2` archive. The earlier PortAudio `-9999` is inferred from retained `expected_portaudio_failure=true` and the frozen diagnostic source; the original exception text was replaced by the final origin-guard rejection. `protocol_valid` was false and the two-destination workflow did not complete. |
+
+These corrections preserve the offline wheel graph, candidate CFFI bytes and
+native origin guard. The [later revised-bundle native run](../audit/audio-device-staging-20261017/run-39076074868/summary.json)
+passes complete recreation and diagnostic handling at both final destinations.
+The original component matrix's audio failure and all physical microphone/VAD
+gates are unchanged.
+
 ## Remaining device work
 
 The available device meets the dated ARM64/API identity observation. The
-software preparation is tracked by the isolated audio workflow above; native
-recreation verification is still pending in this draft.
+complete isolated software and both native recreation receipts are now verified
+in the container. The remaining work requires the actual foreground Termux app
+context and a separately initiated physical-device check.
 
 1. **Establish foreground Termux execution.** Use the owner-operated app
    session and the reviewed bundle. The failed ADB `run-as` route does not

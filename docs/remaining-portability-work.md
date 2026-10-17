@@ -320,11 +320,29 @@ duration, playback/audio focus and cancellation remain device gates.
 A separate [audio-readiness repair](audio-readiness-device-validation.md) has
 passing host contract tests for PortAudio initialization failures and output-only
 device inventories; its [preparation record](../audit/audio-readiness-preparation-20261017.json)
-retains the source and test evidence. It remains outside the main candidate.
-The proven candidate does not select `audio-io`: a complete isolated Hermes
-audio environment and its installation receipt must be prepared before physical
-capture/VAD validation. These diagnostics do not supply the missing Android audio
-framework or certify microphone access.
+retains the original source and test evidence. It remains outside the main
+candidate, which does not select `audio-io`.
+
+The [complete isolated audio staging run](../audit/audio-device-staging-20261017/run-39076074868/summary.json) now passes native
+recreation at two fresh final paths, including one containing spaces, with
+networking disabled. Each environment preserves the candidate's 100 installed
+distribution versions and adds NumPy/sounddevice, for 102 distributions, 101
+installed wheel checks and 167 active dependency edges. CLI startup and full
+immutable validation after diagnostics pass in both roots. The actual private
+OpenSSL legacy provider loads, and the PortAudio/OpenSLES/namespace origins match
+the frozen inputs. Both diagnostic protocols pass while reporting unavailable
+audio and the original PortAudio -9999 error; neither maps a real Android audio
+framework or opens a device stream. The transfer bundle and installation
+receipts are now prepared and verified for later foreground-device recreation.
+
+The [namespace host checkpoint](../audit/audio-device-staging-20261017/namespace-private-inputs-828e5d5e/summary.json)
+passed 196 focused tests in 1.22 seconds with frozen packaging 26.0. The preceding
+[OpenSSL checkpoint](../audit/audio-device-staging-20261017/openssl-private-inputs-bd72d882/summary.json)
+passed 189 tests in a separate historical run; the counts are not summed.
+The [four-run staging history](audio-readiness-device-validation.md#isolated-staging-history)
+retains all failed attempts, including the fourth run's first-root
+assembly/validation/CLI progress. No physical Termux installation, microphone
+permission, capture or VAD is certified by the successful container recreation.
 
 ## Stable-release prerequisites
 

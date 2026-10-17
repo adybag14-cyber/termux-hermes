@@ -128,7 +128,7 @@ The reviewed exact source digests are also embedded in the preparation helpers.
 | Default native computer use | Default CUA driver rejects Android. Having the MCP dependency does not supply this native backend. | Fixed the separate remote Linux provider routing bug. The isolated native CUA driver passed all eleven foreground-X11 checks in [run 39052290704](../audit/cua-native-20261017/run-39052290704.json): real MCP registration, independent screenshot/input/clipboard/geometry oracles, native ABI checks and cleanup. Default background input and AT-SPI trees remain uncertified. The [explicit-driver Hermes integration](../audit/cua-hermes-resume-20261017/run-39056472835.json) now passes native manifest discovery before desktop startup, the real registered tool, exact screenshot/click/scroll/text observations, three individual approvals, viewer-lease refusal and owned cleanup. The lost scroll coordinates and pre-desktop native loader are fixed. The driver and experimental adapter remain outside the main candidate and PM admission. Android phone UI requires an Android-specific backend. |
 | Bot Desktop | Virtual display host is Linux-only. | Added a local Termux Xvnc/Xfce adapter, prefix-aware runtime paths and screenshot capture through scrot. Desktop/remote-provider regressions pass, including real resolver result types. Native ARM UID 1000 validation passed: Xfce, an 800x600 RFB framebuffer, private Xauthority/socket permissions, no TCP display listener, real product screenshot capture and cleanup. |
 | Managed gateway service | Service install/start/uninstall paths reject Termux/APT provenance. Manual foreground/background gateway paths remain available. | Added a per-home Termux runit adapter with owned service directories, separate start-now/login policy, graceful stop and crash supervision. Twenty-four gateway tests pass. Native ARM install/start/status/restart/stop/crash-respawn/uninstall checks also passed, including same-basename home isolation and preservation of the shared supervisor. |
-| Recorder silence auto-stop | The Termux:API recorder does not provide the sounddevice VAD/silence path. Manual stop remains available. | Added explicit auto, sounddevice and termux-api capture selection with accurate diagnostics. The PCM path retains the existing VAD implementation. Exact NumPy 2.4.3 built and passed native numerical checks with both build and original payload libraries. PortAudio loaded, but measured runtime evidence shows only the Termux OpenSL ES wrapper: the actual Android audio framework, Binder devices and audio services are absent. Engine initialization failed in that environment; microphone/VAD remains unverified. Termux:API itself has no PCM stream for this VAD path. A [separate readiness repair](audio-readiness-device-validation.md) has host contract proof for PortAudio failures and output-only device inventories. It remains outside the candidate, which does not select audio-io; a complete isolated audio environment is still required before device testing. |
+| Recorder silence auto-stop | The Termux:API recorder does not provide the sounddevice VAD/silence path. Manual stop remains available. | Added explicit auto, sounddevice and termux-api capture selection with accurate diagnostics. The PCM path retains the existing VAD implementation. Exact NumPy 2.4.3 built and passed native numerical checks with both build and original payload libraries. PortAudio loaded, but measured runtime evidence shows only the Termux OpenSL ES wrapper: the actual Android audio framework, Binder devices and audio services are absent. Engine initialization failed in that environment; microphone/VAD remains unverified. Termux:API itself has no PCM stream for this VAD path. A [separate readiness repair](audio-readiness-device-validation.md) has host contract proof for PortAudio failures and output-only device inventories. It remains outside the candidate, which does not select audio-io. The [complete isolated environment](../audit/audio-device-staging-20261017/run-39076074868/summary.json) now passes recreation, CLI startup and final validation at two fresh destinations. Both diagnostic protocols pass while reporting PortAudio -9999 and unavailable audio; foreground device initialization, capture and VAD remain unproved. |
 
 Source guards: upstream [pm/packages.py](https://github.com/NousResearch/hermes-agent/blob/d923a5eb487a17c0a68801bba9ef0f56c81040a8/pm/packages.py),
 [CUA backend](https://github.com/NousResearch/hermes-agent/blob/d923a5eb487a17c0a68801bba9ef0f56c81040a8/tools/computer_use/cua_backend.py),
@@ -342,7 +342,42 @@ audio services are absent; microphone capture was not tested. All seven
 artifact archives were downloaded in full and verified by SHA-256, ZIP CRC and
 member hashes. The failed job's complete original log is retained too.
 
-The [current oracle implementation CI](../audit/packaging-ci-cea5b45-20261017/summary.json)
+The separate [isolated audio staging host checkpoint](../audit/audio-device-staging-20261017/namespace-private-inputs-828e5d5e/summary.json)
+passed **196 focused tests** with no failures or skips in 1.22 seconds on Windows
+Python 3.14.2 with the exact frozen packaging 26.0 wheel. The earlier
+[OpenSSL checkpoint](../audit/audio-device-staging-20261017/openssl-private-inputs-bd72d882/summary.json)
+passed 189 tests in 3.97 seconds; these are overlapping, separate runs, and
+neither is a new full Windows repository suite. Source hashes remained unchanged
+during each check. The [four-run staging history](audio-readiness-device-validation.md#isolated-staging-history)
+retains every native failure, including the fourth run's completed first-root
+assembly, 102-distribution validation and CLI help before its diagnostic origin
+check failed. The later [native staging record](../audit/audio-device-staging-20261017/run-39076074868/summary.json) now proves complete
+recreation at both final destinations, including a path containing spaces, under
+UID 1000 with networking disabled. Each root preserves 102 distribution versions,
+verifies 101 installed wheels and 167 active dependency edges, and passes
+validation after CLI startup and diagnostics. CFFI and NumPy behavior checks pass;
+private OpenSSL legacy activation and the private audio-library origins are
+verified. Both diagnostic protocols pass with original PortAudio error -9999
+and unavailable audio. This closes off-device software preparation while
+physical initialization, capture and VAD remain unproved. The
+[final boundary record](../audit/resume-release-boundary-final-20261017.json)
+preserves the public main/release inputs, protected files and original CUA pin.
+
+The [namespace implementation CI](../audit/packaging-ci-09a945c-20261017/summary.json)
+passed **590 tests with no failures or skips** in each of its separate Linux
+push and PR runs, taking 2.72 and 3.16 seconds respectively. The push source was
+`09a945cff9e07243fb24e99d9a58a12d500eb18d`; the PR merge tree matches that source
+exactly. Python compilation, unit tests, shell syntax and JSON validation all
+passed. Candidate and component workflows performed planning only and skipped
+their native jobs. These CI results do not supply the separate native audio
+staging result or a new full Windows suite.
+
+The preceding [OpenSSL implementation CI](../audit/packaging-ci-bd9b635-20261017/summary.json)
+passed 583 tests with no skips in each separate Linux push and PR run. It remains
+a historical checkpoint alongside the earlier oracle CI below; these overlapping
+counts are not added together.
+
+The [historical oracle implementation CI](../audit/packaging-ci-cea5b45-20261017/summary.json)
 passed **394 tests** with no failures or skips in each of its separate push and
 PR runs. The push checked out source `cea5b45c7f3b0474c51706153c2cee848f29d181`; the PR
 used its generated merge commit, whose tree is verified identical to that source.
