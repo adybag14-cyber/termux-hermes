@@ -154,8 +154,8 @@ A changed lock source must never reuse an unrelated wheel with the same version.
 The frozen current selection determines which wheels apply; optional SDKs still
 use the ordinary resolver and their exact lock entries. A real isolated-index regression proves that an intentionally unbuildable source dependency can be preserved from its verified wheel while an additional SDK installs with an empty cache.
 
-The package now carries its wheelhouse and a native-verified selection receipt.
-The receipt binds the actual Android target, seven selected extras, frozen input
+The proposed packaging recipe includes a wheelhouse and generates a native
+selection receipt during assembly. The receipt binds the actual Android target, seven selected extras, frozen input
 hashes and catalog digest. The PM environment stamp includes that digest, so
 corrected wheel bytes invalidate an older optional environment even when upstream
 versions stay the same. Receipt, stamp and existing baked-selection tests pass
