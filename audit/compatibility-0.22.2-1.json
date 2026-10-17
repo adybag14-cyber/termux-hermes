@@ -610,14 +610,22 @@
       "physical_microphone_or_vad_certified": false,
       "included_in_main_candidate": false,
       "isolated_complete_environment": {
-        "status": "host_gates_passed_native_preparation_pending",
+        "status": "initial_native_bootstrap_failure_fixed_56_host_tests_passed_native_retry_pending",
         "workflow": "../.github/workflows/audio-hermes-preparation.yml",
         "evidence": "audio-hermes-environment-preparation-20261017.json",
-        "host_tests_passed": 39,
+        "host_tests_passed": 56,
         "full_four_path_patch_applied": true,
         "catalog_wheels": 102,
         "independent_fresh_preparations_required": 2,
-        "physical_microphone_or_vad_certified": false
+        "physical_microphone_or_vad_certified": false,
+        "canonical_pm_tests_passed": 17,
+        "host_tests_skipped": 0,
+        "failure_run": 39067100543,
+        "failure_evidence": "audio-hermes-native-20261017/run-39067100543/packaged-tool-verification-fix.json",
+        "independent_review": "audio-hermes-packaged-tool-root-review-20261017.json",
+        "failure_stage": "build-cache verifier rejected the published flat Python tool entry before manager construction",
+        "current_preparer_sha256": "04663ed192171d14866a49c33a45e16ca34eef1a2325d9403dd578029414be3b",
+        "real_microphone_started": false
       }
     },
     "neutts_default_gguf_source_review": {
@@ -768,6 +776,38 @@
       "status": "source_patch_and_30_host_contract_tests_passed_native_wrapper_gate_pending",
       "original_files_unchanged": 55,
       "metadata_unchanged": true
+    },
+    "neutts_espeak_phonemizer_preparation": {
+      "status": "complete_input_preparation_and_host_validation_passed_native_gate_pending",
+      "espeak_commit": "69bfd1efde0236654ccc117a28d04aef27673a30",
+      "espeak_patch": "../patches/next-stable/espeak-ng-explicit-off-sonic.patch",
+      "espeak_source_git_blobs_independently_verified": 2606,
+      "espeak_real_cmake_regression_cases_passed": 4,
+      "phonemizer_runtime_distributions": 23,
+      "phonemizer_active_requirement_edges": 26,
+      "phonemizer_host_checks_passed": 69,
+      "phonemizer_host_checks_skipped": 0,
+      "phonemizer_lock": "../scripts/phonemizer_runtime_lock.json",
+      "phonemizer_lock_sha256": "48d43784778817bd4a907b63f11738ff910cafc6aac2eed6bc27349b6d5d8c82",
+      "evidence": "neutts-espeak-integration-v2-20261017.json",
+      "guide": "../docs/phonemizer-runtime-preparation.md",
+      "workflow": "../.github/workflows/neutts-espeak-component.yml",
+      "original_compiler_archives": 44,
+      "retained_provenance_archives": 45,
+      "extra_archive": "Original already-installed python-pip26.2.1 archive, downloaded only for provenance; no additional install",
+      "native_c_abi_passed": false,
+      "native_public_wrapper_passed": false,
+      "complete_neutts_engine_passed": false,
+      "model_downloaded": false
+    },
+    "packaging_ci_latest_saved": {
+      "head": "4fd661e1b3586a6480c20ec6ca3c8fb17aaba05d",
+      "run": 39066622371,
+      "job": 117495538199,
+      "status": "passed",
+      "tests_passed": 493,
+      "duration_seconds": 3.01,
+      "evidence": "ci-boundary-4fd661e-20261017"
     }
   }
 }

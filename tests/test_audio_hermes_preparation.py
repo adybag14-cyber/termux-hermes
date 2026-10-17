@@ -295,3 +295,188 @@ def test_runtime_gate_rejects_an_unselected_distribution(tmp_path):
     (extra / "METADATA").write_text("Metadata-Version: 2.1\nName: extra\nVersion: 9.0\n")
     with pytest.raises(prep.PreparationError, match="distributions differ"):
         prep.verify_installed(site, {}, payload)
+
+
+@pytest.fixture
+def canonical_packaged_tools(tmp_path, monkeypatch):
+    """Exercise the actual pinned PM classes when its source checkout is supplied."""
+    import os
+    from types import SimpleNamespace
+
+    source_text = os.environ.get("HERMES_AUDIO_CANONICAL_PM_SOURCE")
+    if not source_text:
+        pytest.skip("Canonical PM source checkout is required for the packaged-tool source gate")
+    source = Path(source_text).resolve()
+    monkeypatch.syspath_prepend(str(source))
+    import pm
+    import pm.build_operations as build_operations
+    import pm.registry as registry
+    from pm.install import _identity, _lockfile
+    from pm.lock import Facts
+    from pm.package import InstallError
+    from pm.store import tree_digest
+
+    assert Path(pm.__file__).resolve() == source / "pm/__init__.py"
+    lock = _lockfile()
+    packages = registry.walk(["python", "uv"], target=prep.TARGET)
+    assert {package.name for package in packages} == {"python", "uv"}
+    store = tmp_path / "tools"
+    store.mkdir()
+    facts_path = store / "facts.json"
+
+    def record(package):
+        entry = store / package.name
+        identity = _identity(lock, package.name, prep.TARGET)
+        assert identity is not None
+        Facts(facts_path, strict=True).record(
+            package.name, lock.version(package.name), package.name,
+            package.env(entry, prep.TARGET), store,
+            target=identity[0], artifacts=list(identity[1]), digest=tree_digest(entry),
+        )
+
+    for package in packages:
+        entry = store / package.name
+        entry.mkdir()
+        binary = package.binary(entry, prep.TARGET)
+        binary.parent.mkdir(parents=True, exist_ok=True)
+        binary.write_bytes((package.name + " fixture; never execute\n").encode())
+        record(package)
+    return SimpleNamespace(
+        store=store, facts_path=facts_path, packages=packages, lock=lock,
+        Facts=Facts, InstallError=InstallError, build_operations=build_operations,
+        registry=registry, record=record,
+    )
+
+
+def packaged_store_snapshot(store):
+    import os
+    result = {}
+    for directory, dirs, files in os.walk(store):
+        for name in dirs + files:
+            path = Path(directory) / name
+            relative = path.relative_to(store).as_posix()
+            result[relative] = (
+                path.lstat().st_mode,
+                os.readlink(path) if path.is_symlink()
+                else path.read_bytes() if path.is_file() else None,
+            )
+    return result
+
+
+def test_canonical_build_cache_verifier_rejects_published_flat_entries(canonical_packaged_tools):
+    fixture = canonical_packaged_tools
+    before = packaged_store_snapshot(fixture.store)
+    with pytest.raises(fixture.InstallError, match="tool source failed verification"):
+        fixture.build_operations.verified_tools(
+            ["python", "uv"], source_store=fixture.store, target=prep.TARGET, lock=fixture.lock,
+        )
+    assert packaged_store_snapshot(fixture.store) == before
+
+
+def test_published_flat_tools_keep_canonical_contract_without_writes_or_execution(
+    canonical_packaged_tools, monkeypatch,
+):
+    import subprocess
+    fixture = canonical_packaged_tools
+    before = packaged_store_snapshot(fixture.store)
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Read-only packaged admission must not write or execute")
+
+    with monkeypatch.context() as guard:
+        guard.setattr(subprocess, "run", forbidden)
+        guard.setattr(Path, "chmod", forbidden)
+        guard.setattr(fixture.Facts, "_merge_and_write", forbidden)
+        result = prep.verified_packaged_tools(
+            source_store=fixture.store, target=prep.TARGET, lock=fixture.lock,
+        )
+    assert isinstance(result, fixture.build_operations.VerifiedTools)
+    assert set(result.entries) == {"python", "uv"}
+    for name, item in result.entries.items():
+        assert item.path.resolve() == (fixture.store / name).resolve()
+        assert item.version == fixture.lock.version(name)
+        assert item.binary.resolve().is_relative_to((fixture.store / name).resolve())
+    assert isinstance(result.environment({}), dict)
+    assert packaged_store_snapshot(fixture.store) == before
+
+
+@pytest.mark.parametrize("mutation", [
+    "missing-fact", "version", "target", "artifact", "digest", "entry",
+    "tree-byte", "missing-binary", "environment", "extra-file",
+])
+def test_published_flat_tool_admission_rejects_tampering(canonical_packaged_tools, mutation):
+    fixture = canonical_packaged_tools
+    package = next(package for package in fixture.packages if package.name == "python")
+    binary = package.binary(fixture.store / "python", prep.TARGET)
+    document = json.loads(fixture.facts_path.read_text())
+    fact = document["packages"]["python"]
+    if mutation == "missing-fact":
+        del document["packages"]["python"]
+    elif mutation == "version":
+        fact["version"] = "0.0.0"
+    elif mutation == "target":
+        fact["target"] = "linux-arm64"
+    elif mutation == "artifact":
+        fact["artifacts"][0] = "f" * 64
+    elif mutation == "digest":
+        fact["digest"] = "f" * 64
+    elif mutation == "entry":
+        fact["entry"] = package.store_entry(fixture.lock.version("python"), prep.TARGET)
+    elif mutation == "tree-byte":
+        binary.write_bytes(b"changed tool")
+    elif mutation == "missing-binary":
+        binary.unlink()
+    elif mutation == "environment":
+        fact["env"]["HERMES_UNDECLARED_TEST_VALUE"] = "changed"
+    elif mutation == "extra-file":
+        (fixture.store / "python/unrecorded").write_bytes(b"extra")
+    fixture.facts_path.write_text(json.dumps(document) + "\n", encoding="utf-8")
+    before = packaged_store_snapshot(fixture.store)
+    with pytest.raises(fixture.InstallError, match="packaged tool source failed"):
+        prep.verified_packaged_tools(
+            source_store=fixture.store, target=prep.TARGET, lock=fixture.lock,
+        )
+    assert packaged_store_snapshot(fixture.store) == before
+
+
+def test_published_flat_admission_refuses_a_changed_canonical_closure(canonical_packaged_tools, monkeypatch):
+    fixture = canonical_packaged_tools
+    monkeypatch.setattr(fixture.registry, "walk", lambda *args, **kwargs: fixture.packages + [fixture.packages[0]])
+    with pytest.raises(fixture.InstallError, match="closure changed"):
+        prep.verified_packaged_tools(
+            source_store=fixture.store, target=prep.TARGET, lock=fixture.lock,
+        )
+
+
+@pytest.mark.parametrize("link_kind", ["absolute-internal", "relative-escape", "broken", "relative-internal"])
+def test_published_flat_admission_keeps_canonical_link_policy(canonical_packaged_tools, link_kind):
+    fixture = canonical_packaged_tools
+    package = next(package for package in fixture.packages if package.name == "python")
+    entry = fixture.store / "python"
+    binary = package.binary(entry, prep.TARGET)
+    link = entry / "test-link"
+    if link_kind == "absolute-internal":
+        target = binary.resolve()
+    elif link_kind == "relative-escape":
+        target = Path("../outside")
+        (fixture.store / "outside").write_bytes(b"outside")
+    elif link_kind == "broken":
+        target = Path("missing")
+    else:
+        target = binary.relative_to(entry)
+    try:
+        link.symlink_to(target)
+    except OSError as exc:
+        pytest.skip(f"Host cannot create the canonical link fixture: {exc}")
+    fixture.record(package)
+    before = packaged_store_snapshot(fixture.store)
+    if link_kind == "relative-internal":
+        prep.verified_packaged_tools(
+            source_store=fixture.store, target=prep.TARGET, lock=fixture.lock,
+        )
+    else:
+        with pytest.raises(fixture.InstallError, match="tool copy link escapes entry"):
+            prep.verified_packaged_tools(
+                source_store=fixture.store, target=prep.TARGET, lock=fixture.lock,
+            )
+    assert packaged_store_snapshot(fixture.store) == before

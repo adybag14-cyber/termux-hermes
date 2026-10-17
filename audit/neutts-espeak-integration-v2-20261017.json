@@ -1,0 +1,137 @@
+{
+  "change": {
+    "bytes": 12148,
+    "command": "apt-get -o Acquire::Retries=5 download python-pip=26.2.1",
+    "download_location": "The existing owned temporary archive directory.",
+    "new_installs": 0,
+    "new_native_receipt": "PHONEMIZER-APT-ARCHIVE-UNION.json",
+    "new_reinstalls": 0,
+    "original_44_compiler_download_install_gate_unchanged": true,
+    "original_locks_unchanged": true,
+    "path": "scripts/compatibility_probe_neutts_espeak.sh",
+    "pip_pin": {
+      "architecture": "all",
+      "bytes": 1190440,
+      "control": {
+        "Architecture": "all",
+        "Depends": "python (>= 3.11.1-1)",
+        "Package": "python-pip",
+        "Pre-Depends": null,
+        "Version": "26.2.1"
+      },
+      "filename": "python-pip_26.2.1_all.deb",
+      "package": "python-pip",
+      "repository_path": "pool/main/p/python-pip/python-pip_26.2.1_all.deb",
+      "sha256": "92a9cb4b3c99dd20086f90fedc95c604eefc5bd0f88d1862690884474f82de44",
+      "version": "26.2.1"
+    },
+    "position": "After the independent eSpeak C ABI passes and before the unchanged native Phonemizer stage.",
+    "sha256": "69553e28d224e2654b485b68190ec111ce01c5381ea3aea59dbee45167399185",
+    "verification": "Require exactly the original 44 compiler archive identities plus the original python-pip archive, recheck all sizes/SHA-256 values, and verify pip control and source/metadata members with the unchanged APT metadata verifier."
+  },
+  "evidence": {
+    "directory": "neutts-espeak-integration-v2-20261017",
+    "native_binary_saved_in_git": false,
+    "raw_bytes": 48652,
+    "raw_file_count": 15,
+    "saved_files_sha256": "f4b3f7e201052ccc64d1953d91125d3aac1fe168d9a0cde3ba5f3468cdb5f586"
+  },
+  "final_inputs": {
+    "count": 23,
+    "path": "FINAL-INPUTS.json",
+    "sha256": "dd9de4d3efa1d3eb9f693f707ac21195bb5353dce1070c3c73882788aab60d92"
+  },
+  "host_checks": {
+    "actual_frozen_metadata_derivation": "passed",
+    "bash_syntax": "passed",
+    "inline_python_syntax": "passed",
+    "missing_runtime_archives_after": [],
+    "missing_runtime_archives_before": [
+      "python-pip"
+    ],
+    "original_compiler_count": 44,
+    "prefix_before_C_ABI_marker_unchanged_byte_for_byte": true,
+    "receipt": "host-followup/ARCHIVE-UNION-STATIC-REVIEW.json",
+    "receipt_sha256": "c0c9668b5fa0351cf603b70d8a817e587407a08dda0efe7ff16f55a37814d946",
+    "resulting_union_count": 45,
+    "suffix_native_Phonemizer_stage_unchanged_byte_for_byte": true
+  },
+  "independent_full_phonemizer_root_review": {
+    "active_requirement_edges": 26,
+    "actual_21_runtime_wheels_2_build_wheels_2_sources_and_catalog_verified": true,
+    "checks_passed": 69,
+    "checks_skipped": 0,
+    "exact_fixture_environment_provided": true,
+    "full_reachable_graph_verified": true,
+    "prior_root_review_scope": "The root receipt explicitly preserves that its earlier run omitted the fixture environment (58 passed, 11 skipped). This v2 run supplies the real inputs and passes all 69.",
+    "receipt": "root-phonemizer-review/ROOT-VERIFICATION.json",
+    "runtime_nodes": 23,
+    "sha256": "040a45c26f303487484f04fef1ae1ab7e6d39eed27a5fe14df3e25428a0101e1"
+  },
+  "other_native_dependencies_review": {
+    "APT_provider": "Exact python archive, already included in the original 44.",
+    "actual_rpds_DT_NEEDED": [
+      "libpython3.14.so",
+      "libdl.so",
+      "libc.so"
+    ],
+    "declared_edges_checked": 78,
+    "original_44_declared_dependency_graph_closed": true,
+    "platform_libraries": [
+      "libdl.so",
+      "libc.so"
+    ],
+    "python_direct_dependencies": [
+      "gdbm",
+      "libandroid-posix-semaphore",
+      "libandroid-support",
+      "libbz2",
+      "libcrypt",
+      "libexpat",
+      "libffi",
+      "liblzma",
+      "libsqlite",
+      "ncurses",
+      "ncurses-ui-libs",
+      "openssl",
+      "readline",
+      "zlib",
+      "zstd"
+    ],
+    "python_direct_dependency_count": 15,
+    "readelf_exit_code": 0,
+    "receipt": "host-followup/RPDS-DYNAMIC-INPUT-REVIEW.json",
+    "rpds_whole_wheel_and_native_member_verified_against_lock": true,
+    "runtime_limit": "The actual compiled Regex/eSpeak and loaded-library ownership/byte checks remain required by the unchanged native probes; no successful native import is inferred from host inspection."
+  },
+  "previous_integration_audit": {
+    "path": "audit/neutts-espeak-integration-20261017.json",
+    "raw_ledger_reverified_and_preserved": true,
+    "sha256": "4dc5abb82955451a777a844927eb7af4459d8e2bd0748eed1c7444e4f9bbbfb5"
+  },
+  "reason": "The separate Phonemizer APT runtime provenance check needs both exact python and python-pip archives. The foundation removes its temporary archives, and the retained 44 compiler archives contain python but not python-pip.",
+  "recorded_at_utc": "2026-10-17T20:50:19.128256+00:00",
+  "schema_version": 1,
+  "scope": {
+    "APT_install_or_reinstall_performed": false,
+    "commit_push_or_dispatch_performed_by_this_subagent": false,
+    "host_archive_download_performed": false,
+    "model_downloaded": false,
+    "native_executed": false,
+    "real_Phonemizer_wrapper_passed": false,
+    "release_performed": false,
+    "synthesis_tested": false,
+    "version_changed": false
+  },
+  "status": "review-input-gap-fixed-static-and-independent-host-checks-passed-native-not-run",
+  "workflow": {
+    "events": "Manual dispatch or narrowly filtered implementation pushes on prepare/termux-compatibility-next-stable.",
+    "path": ".github/workflows/neutts-espeak-component.yml",
+    "permissions": {
+      "actions": "read",
+      "contents": "read"
+    },
+    "sha256": "1e6c20b5243662d7f60f6f47512c7032f4bca99bfe43db9db9ce1f98eb780706",
+    "unchanged": true
+  }
+}

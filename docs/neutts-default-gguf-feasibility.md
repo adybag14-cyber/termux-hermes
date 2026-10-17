@@ -1,5 +1,25 @@
 # NeuTTS default GGUF feasibility on native Termux
 
+
+## Current native status
+
+The initial source-only checkpoint below is retained as historical analysis.
+[Native run 39064666810](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39064666810)
+has since built and tested the patched Llama binding and Numba on Bionic
+AArch64/Python 3.14.6, after all seven scientific foundation cases passed.
+Llama backend initialization, default model/context parameters, CPU capability
+reporting and exact loaded libraries passed; Numba executed real nopython JIT
+and generalized-vector operations.
+[The complete result](../audit/neutts-native-20261017/run-39064666810.json)
+preserves the wheel identities, commands and raw native observations.
+
+These results establish the tested CPU components. A complete installed
+NeuTTS engine, authorized model weights, reference encoding and generated
+speech remain separate work. The current
+[117-distribution runtime preparation](neutts-runtime-preparation.md) and
+[remaining portability work](remaining-portability-work.md) track that status.
+
+
 Status: **source review and an isolated loader experiment; NeuTTS is not admitted
 to the managed package graph**. This work does not change the published package,
 the main Hermes compatibility patch, the NeuTTS probe, or its dependency locks.

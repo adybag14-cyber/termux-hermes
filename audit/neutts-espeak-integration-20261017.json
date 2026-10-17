@@ -1,0 +1,153 @@
+{
+  "boundaries": {
+    "NeuTTS_engine_installed": false,
+    "actual_Phonemizer_wrapper_run": false,
+    "audio_io_performed": false,
+    "commit_or_push_or_dispatch_performed_by_this_subagent": false,
+    "existing_locks_or_gate_files_modified": false,
+    "model_downloaded": false,
+    "native_eSpeak_C_ABI_passed": false,
+    "native_eSpeak_build_run": false,
+    "production_admission_changed": false,
+    "published": false,
+    "synthesis_tested": false,
+    "version_bumped": false
+  },
+  "evidence": {
+    "archive_wheel_and_deb_bytes_saved_in_git": false,
+    "directory": "neutts-espeak-integration-20261017",
+    "raw_file_count": 39,
+    "raw_total_bytes": 285785,
+    "saved_files_sha256": "438cb750e44e913afbedda980f39e688c3017a33b2a70f517f40c248128152a9"
+  },
+  "final_inputs": {
+    "file_count": 23,
+    "path": "FINAL-INPUTS.json",
+    "sha256": "333f031d72c15cfecd73e916407200979a94737a4045e1ab0f46d0b6c3c9fe4d"
+  },
+  "host_integration": {
+    "active_dependency_edges": 26,
+    "bounded_actual_deb_extraction_passed": true,
+    "complete_declared_runtime_inputs_prepared": true,
+    "complete_original_catalog_sha256": "d2dc66575cf8aa5ef828e5e536b4d55b8801143101b7e608f6fb4878c2397904",
+    "existing_phonemizer_host_checks": {
+      "audit": "phonemizer-host-review/phonemizer-runtime-preparation-20261017.json",
+      "existing_patch_checks": 30,
+      "input_contract_checks": 39,
+      "passed": 69,
+      "sha256": "11d5212a806281c3778d95adeb97b860351d62c0fdb76781e08eae1cd7fd2501",
+      "skipped": 0
+    },
+    "local_source_deb": {
+      "bytes": 235252088,
+      "scope": "Already verified CUA package preserves the exact original 100 catalog and selected nine wheels. It is used only for this host replay, not substituted for the CI candidate identity.",
+      "sha256": "2b4c01a400622c45cf0f0f7af39fa5cdca4b37e311cebb71cdbacc770aa4f529",
+      "workflow_run": 39063611615
+    },
+    "main_wheel_count": 9,
+    "native_builds_still_required": [
+      "regex 2026.9.10",
+      "patched phonemizer 3.3.0"
+    ],
+    "prebuilt_runtime_wheels": 21,
+    "receipt": "host-integration/INTEGRATION-HOST-CHECKS.json",
+    "runtime_distributions": 23,
+    "separate_build_wheels": 2,
+    "sha256": "b560df190135e3c104367424d5184ce8845edc0c2fa23f0d839b5cb9dca41c7c"
+  },
+  "independent_root_review": {
+    "full_official_git_blobs_verified": 2606,
+    "native_result_claimed": false,
+    "raw_ledger_files_verified": 29,
+    "real_cmake_cases_passed": 4,
+    "receipt": "root-review/ROOT-VERIFICATION.json",
+    "sha256": "e42c010a19dca01da976be4cd75cfb10b415b9c98a29f2198e90c55b2f4b029e"
+  },
+  "previous_preparation_audit": {
+    "path": "audit/neutts-espeak-preparation-20261017.json",
+    "preserved": true,
+    "sha256": "41403cae57e6b9b1928282ed505764a10325c0d4a081e68556681e15d344cf8c"
+  },
+  "purpose": "Reviewable unpublished native eSpeak C ABI gate followed by a separate complete installed Phonemizer public API gate.",
+  "recorded_at_utc": "2026-10-17T20:41:08.688753+00:00",
+  "reviewed_native_design": {
+    "apt_closure": "Reuse unchanged exact 44 verified archives; eSpeak installer performs the established 19 additional package checks/installations; Phonemizer only verifies already installed toolchain.",
+    "eSpeak_C_ABI": {
+      "planned_child_cases": 14,
+      "real_python_wrapper_proved": false,
+      "receipt": "espeak-component/ESPEAK-COMPONENT-RESULT.json",
+      "scope": "Five exact upstream ASCII fixtures, repeatable stressed English IPA, relocation, invalid voice and missing data. Actual ctypes calls to the compiled eSpeak C ABI and exact data tree, with no synthesis/audio call."
+    },
+    "foundation": "Unchanged seven-case scientific foundation must pass first.",
+    "image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
+    "runtime": "Native AArch64 Bionic / UID1000 / exact APT Python3.14.6",
+    "separate_phonemizer": {
+      "data": "/out/espeak-component/bundle/share/espeak-ng-data",
+      "library": "/out/espeak-component/bundle/lib/libespeak-ng.so.1.52.0.1",
+      "receipt": "phonemizer-component/PHONEMIZER-COMPONENT-RESULT.json",
+      "runtime_receipt": "phonemizer-component/PHONEMIZER-RUNTIME-RESULT.json",
+      "scope": "Build Regex and patched Phonemizer, install all 23 declared runtime distributions in a separate exact-APT-Python environment, and call the real installed public API. It must verify the actual library, data path, punctuation/stress and absence of imported dlinfo."
+    },
+    "source_build": "NeuTTS-pinned eSpeak source plus the explicit-OFF guard; native non-cross CMake with audio engines and tests/manpages disabled, cmn/ru extras enabled."
+  },
+  "schema_version": 1,
+  "source": {
+    "archive_sha256": "0d36c8e81e972805d343e2b93d77baf3b57dd6c7a18a12df6782c80fe9f11d15",
+    "derived_recursive_git_tree": "c8d05b9f7d8a1fe9c38ca909e152ee4cec20dd97",
+    "espeak_commit": "69bfd1efde0236654ccc117a28d04aef27673a30",
+    "original_blob_count": 2606,
+    "patch": {
+      "behavior": "Honour explicit USE_LIBSONIC=OFF before optional Sonic fallback; unspecified/default and ON behavior remain preserved.",
+      "path": "patches/next-stable/espeak-ng-explicit-off-sonic.patch",
+      "sha256": "934c9d9a5d3cc76e0011321cfea7270b91dc954fed2a4c03857a7a6ea42b7d4a"
+    },
+    "version": "1.52.0.1"
+  },
+  "status": "source-and-integration-prepared-host-verified-native-not-run",
+  "workflow": {
+    "ci_candidate": {
+      "archive_sha256": "c49f41590424520b99136800b7ba9fa41f3ab3926d418131cdf686da812d849b",
+      "artifact": 12107225801,
+      "credential_scope": "Host GitHub metadata requests only; token not passed to the native container.",
+      "deb_bytes": 222089768,
+      "deb_sha256": "1e4e58fe17a1800f23ababcb2724e92b8904829eae3284569db52dbc672ca76a",
+      "fetcher": "scripts/fetch_compatibility_candidate.py",
+      "head": "e271e922a2e71fd18591c45e9b98b8c7f9fffe02",
+      "retention": "Small exact candidate receipts and selected nine wheels/catalog are retained; full candidate .deb remains in an owned temporary host directory cleaned by its trap.",
+      "run": 39048514731,
+      "sha256": "dc075415b46e14f3f09fb6a889fdf38279564b2f2e6e6008b21232545d1d6d8a"
+    },
+    "command": "bash scripts/compatibility_probe_neutts_espeak.sh --out probe-results/neutts-espeak",
+    "container_timeout_minutes": 45,
+    "events": {
+      "push": {
+        "branches": [
+          "prepare/termux-compatibility-next-stable"
+        ],
+        "paths": [
+          ".github/workflows/neutts-espeak-component.yml",
+          "scripts/compatibility_probe_neutts_espeak.sh",
+          "scripts/compatibility_probe_neutts_espeak.py",
+          "scripts/prepare_neutts_espeak_source.py",
+          "scripts/neutts_espeak_source_lock.json",
+          "scripts/check_neutts_espeak_cmake.py",
+          "patches/next-stable/espeak-ng-explicit-off-sonic.patch",
+          "scripts/extract_phonemizer_catalog.py",
+          "scripts/prepare_phonemizer_runtime.py",
+          "scripts/phonemizer_runtime_lock.json",
+          "scripts/compatibility_probe_phonemizer.py",
+          "patches/next-stable/phonemizer-lazy-dlinfo.patch"
+        ]
+      },
+      "workflow_dispatch": ""
+    },
+    "job_timeout_minutes": 65,
+    "path": ".github/workflows/neutts-espeak-component.yml",
+    "permissions": {
+      "actions": "read",
+      "contents": "read"
+    },
+    "runner": "ubuntu-24.04-arm",
+    "sha256": "1e6c20b5243662d7f60f6f47512c7032f4bca99bfe43db9db9ce1f98eb780706"
+  }
+}

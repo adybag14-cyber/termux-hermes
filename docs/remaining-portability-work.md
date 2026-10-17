@@ -91,6 +91,18 @@ including a real Regex build, the patched Phonemizer wheel and exact native
 eSpeak library/data. A C-ABI-only eSpeak result will remain distinct from real
 Phonemizer package import and public-wrapper phonemization.
 
+The [complete Phonemizer input preparation](phonemizer-runtime-preparation.md)
+now passes 69 host checks with all real-artifact fixtures supplied. Its 23 nodes
+and 26 active dependency edges were independently recomputed. The exact eSpeak
+source also has a reviewed CMake repair for the explicit Sonic-OFF setting;
+all four real configuration regression cases passed. The
+[integrated native runner](../audit/neutts-espeak-integration-v2-20261017.json)
+will build eSpeak, test its C ABI and full language data, then build Regex and
+patched Phonemizer and run the real public wrapper. It retains the original
+44 compiler archives plus the original pip archive needed for runtime
+provenance. These complete preparations do not yet establish a native wrapper
+pass or complete NeuTTS engine compatibility.
+
 The exact eSpeak source also attempts an optional Sonic fetch even when the
 caller explicitly disables Sonic. A small explicit-OFF guard and a native
 phonemization probe are being prepared. This work does not use Android audio
@@ -201,9 +213,16 @@ inventory as microphone readiness. Its
 [source/test receipt](../audit/audio-readiness-preparation-20261017.json) records
 the reviewed behavior.
 
-The [reviewed audio preparer](../audit/audio-hermes-environment-preparation-20261017.json)
-passes 39 focused host tests and full four-path source replay. Its native staging
-gate is pending. It prepares a complete isolated Hermes-plus-audio environment from the
+The [initial audio preparer](../audit/audio-hermes-environment-preparation-20261017.json)
+passed 39 focused host tests and full four-path source replay. Its first complete
+native run, [39067100543](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39067100543),
+stopped before manager construction because the build-cache verifier expected
+versioned tool directories while the packaged payload records flat python/uv
+entries. The narrow [packaged-tool correction](../audit/audio-hermes-native-20261017/run-39067100543/packaged-tool-verification-fix.json)
+preserves the original lock, facts, tree digests, link policy and environment
+checks. It passes 56 focused host tests with no skips, including 17 cases using
+the actual canonical PM classes. The [independent root review](../audit/audio-hermes-packaged-tool-root-review-20261017.json)
+records the same result. A complete native retry is required. It prepares a complete isolated Hermes-plus-audio environment from the
 exact main candidate, its original 100 wheel entries, and the two exact NumPy
 and sounddevice additions. Both PM and the application environment must be built
 fresh at the final destination through canonical APIs. Original candidate,

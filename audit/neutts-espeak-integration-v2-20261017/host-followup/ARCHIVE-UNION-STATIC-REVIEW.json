@@ -1,0 +1,463 @@
+{
+  "android_system_dependencies": [
+    "libdl.so",
+    "libc.so"
+  ],
+  "apt_install_or_reinstall_in_added_stage": false,
+  "archive_download_performed_on_host": false,
+  "archives_installed": false,
+  "bash_syntax_exit_code": 0,
+  "code_added": "stage=python-pip-provenance-download\n(\n  cd \"$work/archives\"\n  apt-get -o Acquire::Retries=5 download python-pip=26.2.1\n)\nstage=phonemizer-archive-union\n\"$PREFIX/bin/python\" -I -B - /probes/scripts \"$work/archives\" \"$out\" <<'PY_PIP_UNION'\nimport hashlib, importlib.util, json, pathlib, sys\nscripts, archives, out = map(pathlib.Path, sys.argv[1:4])\ndef sha(path):\n    with path.open(\"rb\") as stream:\n        return hashlib.file_digest(stream, \"sha256\").hexdigest()\ndef require(condition, message):\n    if not condition:\n        raise RuntimeError(message)\nhelper_path = scripts / \"validate_neutts_apt_python.py\"\nrequire(sha(helper_path) == \"7c051b0143675594aadd52f9a0b66ec71e6950e9953feef3f773acceafcb0a29\",\n        \"Reviewed APT metadata verifier changed\")\nspec = importlib.util.spec_from_file_location(\"_phonemizer_union_apt\", helper_path)\napt = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(apt)\nmetadata = apt.load_manifest(scripts / \"neutts_apt_python_metadata.json\")\nnative_path = scripts / \"neutts_native_sources_lock.json\"\nrequire(sha(native_path) == \"a06e595179fad6f437ca95210d685beb339baa0867cd527dba5f5083d94b36ce\",\n        \"Original compiler lock changed\")\ncompiler = json.loads(native_path.read_bytes())[\"build_apt\"][\"packages\"]\nrequire(len(compiler) == 44 and len({p[\"name\"] for p in compiler}) == 44,\n        \"Original compiler closure is incomplete\")\nruntime = metadata[\"runtime\"][\"archives\"]\nrequire({p[\"package\"] for p in runtime} - {p[\"name\"] for p in compiler} == {\"python-pip\"},\n        \"Review an unexpected runtime archive outside the compiler closure\")\npip_pin = next(p for p in runtime if p[\"package\"] == \"python-pip\")\nrequire((pip_pin[\"version\"], pip_pin[\"architecture\"], pip_pin[\"bytes\"], pip_pin[\"sha256\"]) ==\n        (\"26.2.1\", \"all\", 1190440, \"92a9cb4b3c99dd20086f90fedc95c604eefc5bd0f88d1862690884474f82de44\"),\n        \"Original python-pip archive identity changed\")\npins = [*compiler, {\"name\": pip_pin[\"package\"], **pip_pin}]\nselected, rows = set(), []\nfor pin in pins:\n    matches = list(archives.glob(pin[\"name\"] + \"_*.deb\"))\n    require(len(matches) == 1, \"Missing or ambiguous retained archive: \" + pin[\"name\"])\n    path = matches[0]\n    require(path.is_file() and not path.is_symlink() and path.stat().st_size == pin[\"bytes\"]\n            and sha(path) == pin[\"sha256\"], \"Retained archive bytes changed: \" + pin[\"name\"])\n    selected.add(path)\n    rows.append({\"name\": pin[\"name\"], \"version\": pin[\"version\"], \"architecture\": pin[\"architecture\"],\n                 \"path\": str(path), \"bytes\": pin[\"bytes\"], \"sha256\": pin[\"sha256\"]})\nrequire(len(selected) == 45 and selected == set(archives.glob(\"*.deb\")),\n        \"Retained archive directory must be the exact 44 compiler archives plus python-pip\")\nwanted = {r[\"path\"] for r in metadata[\"runtime\"][\"files\"] if r[\"package\"] == \"python-pip\"}\nmembers = apt.inspect_archive(archives / pip_pin[\"filename\"], pip_pin, wanted, include_pip=True)\nfor row in metadata[\"runtime\"][\"files\"]:\n    if row[\"package\"] == \"python-pip\":\n        raw = members[row[\"path\"]]\n        require(hashlib.sha256(raw).hexdigest() == row[\"sha256\"]\n                and (\"bytes\" not in row or len(raw) == row[\"bytes\"]),\n                \"Pinned pip source or metadata member changed\")\ncomponent = out / \"espeak-component/ESPEAK-COMPONENT-RESULT.json\"\nrequire(json.loads(component.read_bytes()).get(\"status\") == \"passed\",\n        \"The independent C ABI gate must pass before augmenting provenance archives\")\nreceipt = {\"schema_version\": 1, \"status\": \"verified-45-archive-union\",\n           \"compiler_archive_count\": 44, \"compiler_lock_sha256\": sha(native_path),\n           \"compiler_controls_scope\": \"Verified by the preceding unchanged eSpeak compiler gate.\",\n           \"espeak_receipt_sha256\": sha(component), \"archive_count\": 45, \"archives\": rows,\n           \"download_only_addition\": pip_pin, \"pip_control_verified\": True,\n           \"pip_selected_source_files_verified\": len(members), \"apt_install_performed\": False,\n           \"apt_reinstall_performed\": False, \"compiler_gate_changed\": False}\nwith (out / \"PHONEMIZER-APT-ARCHIVE-UNION.json\").open(\"x\", encoding=\"utf-8\", newline=\"\\n\") as stream:\n    json.dump(receipt, stream, sort_keys=True, indent=2)\n    stream.write(\"\\n\")\nprint(\"PHONEMIZER_APT_ARCHIVES_VERIFIED: unchanged 44 compiler archives plus exact python-pip\")\nPY_PIP_UNION\n",
+  "compiler_depends_graph_closed": true,
+  "declared_compiler_dependency_edges": [
+    {
+      "declared": "libcompiler-rt",
+      "from": "clang",
+      "to": "libcompiler-rt"
+    },
+    {
+      "declared": "lld",
+      "from": "clang",
+      "to": "lld"
+    },
+    {
+      "declared": "llvm",
+      "from": "clang",
+      "to": "llvm"
+    },
+    {
+      "declared": "ndk-sysroot",
+      "from": "clang",
+      "to": "ndk-sysroot"
+    },
+    {
+      "declared": "libllvm (= 21.1.8-3)",
+      "from": "clang",
+      "to": "libllvm"
+    },
+    {
+      "declared": "libarchive",
+      "from": "cmake",
+      "to": "libarchive"
+    },
+    {
+      "declared": "libc++",
+      "from": "cmake",
+      "to": "libc++"
+    },
+    {
+      "declared": "libcurl",
+      "from": "cmake",
+      "to": "libcurl"
+    },
+    {
+      "declared": "libexpat",
+      "from": "cmake",
+      "to": "libexpat"
+    },
+    {
+      "declared": "jsoncpp",
+      "from": "cmake",
+      "to": "jsoncpp"
+    },
+    {
+      "declared": "libuv",
+      "from": "cmake",
+      "to": "libuv"
+    },
+    {
+      "declared": "rhash",
+      "from": "cmake",
+      "to": "rhash"
+    },
+    {
+      "declared": "zlib",
+      "from": "cmake",
+      "to": "zlib"
+    },
+    {
+      "declared": "readline",
+      "from": "gdbm",
+      "to": "readline"
+    },
+    {
+      "declared": "libandroid-support",
+      "from": "glib",
+      "to": "libandroid-support"
+    },
+    {
+      "declared": "libffi",
+      "from": "glib",
+      "to": "libffi"
+    },
+    {
+      "declared": "libiconv",
+      "from": "glib",
+      "to": "libiconv"
+    },
+    {
+      "declared": "pcre2",
+      "from": "glib",
+      "to": "pcre2"
+    },
+    {
+      "declared": "resolv-conf",
+      "from": "glib",
+      "to": "resolv-conf"
+    },
+    {
+      "declared": "zlib",
+      "from": "glib",
+      "to": "zlib"
+    },
+    {
+      "declared": "python",
+      "from": "glib",
+      "to": "python"
+    },
+    {
+      "declared": "libc++",
+      "from": "jsoncpp",
+      "to": "libc++"
+    },
+    {
+      "declared": "libbz2",
+      "from": "libarchive",
+      "to": "libbz2"
+    },
+    {
+      "declared": "libiconv",
+      "from": "libarchive",
+      "to": "libiconv"
+    },
+    {
+      "declared": "liblzma",
+      "from": "libarchive",
+      "to": "liblzma"
+    },
+    {
+      "declared": "libxml2",
+      "from": "libarchive",
+      "to": "libxml2"
+    },
+    {
+      "declared": "openssl",
+      "from": "libarchive",
+      "to": "openssl"
+    },
+    {
+      "declared": "zlib",
+      "from": "libarchive",
+      "to": "zlib"
+    },
+    {
+      "declared": "libc++",
+      "from": "libcompiler-rt",
+      "to": "libc++"
+    },
+    {
+      "declared": "openssl",
+      "from": "libcrypt",
+      "to": "openssl"
+    },
+    {
+      "declared": "libnghttp2",
+      "from": "libcurl",
+      "to": "libnghttp2"
+    },
+    {
+      "declared": "libnghttp3",
+      "from": "libcurl",
+      "to": "libnghttp3"
+    },
+    {
+      "declared": "libngtcp2",
+      "from": "libcurl",
+      "to": "libngtcp2"
+    },
+    {
+      "declared": "libssh2",
+      "from": "libcurl",
+      "to": "libssh2"
+    },
+    {
+      "declared": "openssl (>= 1:3.2.1-1)",
+      "from": "libcurl",
+      "to": "openssl"
+    },
+    {
+      "declared": "zlib",
+      "from": "libcurl",
+      "to": "zlib"
+    },
+    {
+      "declared": "libc++",
+      "from": "libllvm",
+      "to": "libc++"
+    },
+    {
+      "declared": "libffi",
+      "from": "libllvm",
+      "to": "libffi"
+    },
+    {
+      "declared": "libxml2",
+      "from": "libllvm",
+      "to": "libxml2"
+    },
+    {
+      "declared": "ncurses",
+      "from": "libllvm",
+      "to": "ncurses"
+    },
+    {
+      "declared": "zlib",
+      "from": "libllvm",
+      "to": "zlib"
+    },
+    {
+      "declared": "zstd",
+      "from": "libllvm",
+      "to": "zstd"
+    },
+    {
+      "declared": "openssl",
+      "from": "libngtcp2",
+      "to": "openssl"
+    },
+    {
+      "declared": "zlib",
+      "from": "libsqlite",
+      "to": "zlib"
+    },
+    {
+      "declared": "openssl",
+      "from": "libssh2",
+      "to": "openssl"
+    },
+    {
+      "declared": "zlib",
+      "from": "libssh2",
+      "to": "zlib"
+    },
+    {
+      "declared": "libandroid-spawn",
+      "from": "libuv",
+      "to": "libandroid-spawn"
+    },
+    {
+      "declared": "libandroid-glob",
+      "from": "libxml2",
+      "to": "libandroid-glob"
+    },
+    {
+      "declared": "libiconv",
+      "from": "libxml2",
+      "to": "libiconv"
+    },
+    {
+      "declared": "zlib",
+      "from": "libxml2",
+      "to": "zlib"
+    },
+    {
+      "declared": "libllvm (= 21.1.8-3)",
+      "from": "lld",
+      "to": "libllvm"
+    },
+    {
+      "declared": "libllvm (= 21.1.8-3)",
+      "from": "llvm",
+      "to": "libllvm"
+    },
+    {
+      "declared": "ncurses (= 6.6.20260307+really6.5.20250830)",
+      "from": "ncurses-ui-libs",
+      "to": "ncurses"
+    },
+    {
+      "declared": "libandroid-spawn",
+      "from": "ninja",
+      "to": "libandroid-spawn"
+    },
+    {
+      "declared": "libc++",
+      "from": "ninja",
+      "to": "libc++"
+    },
+    {
+      "declared": "ca-certificates",
+      "from": "openssl",
+      "to": "ca-certificates"
+    },
+    {
+      "declared": "zlib",
+      "from": "openssl",
+      "to": "zlib"
+    },
+    {
+      "declared": "glib",
+      "from": "pkg-config",
+      "to": "glib"
+    },
+    {
+      "declared": "gdbm",
+      "from": "python",
+      "to": "gdbm"
+    },
+    {
+      "declared": "libandroid-posix-semaphore",
+      "from": "python",
+      "to": "libandroid-posix-semaphore"
+    },
+    {
+      "declared": "libandroid-support",
+      "from": "python",
+      "to": "libandroid-support"
+    },
+    {
+      "declared": "libbz2",
+      "from": "python",
+      "to": "libbz2"
+    },
+    {
+      "declared": "libcrypt",
+      "from": "python",
+      "to": "libcrypt"
+    },
+    {
+      "declared": "libexpat",
+      "from": "python",
+      "to": "libexpat"
+    },
+    {
+      "declared": "libffi",
+      "from": "python",
+      "to": "libffi"
+    },
+    {
+      "declared": "liblzma",
+      "from": "python",
+      "to": "liblzma"
+    },
+    {
+      "declared": "libsqlite",
+      "from": "python",
+      "to": "libsqlite"
+    },
+    {
+      "declared": "ncurses",
+      "from": "python",
+      "to": "ncurses"
+    },
+    {
+      "declared": "ncurses-ui-libs",
+      "from": "python",
+      "to": "ncurses-ui-libs"
+    },
+    {
+      "declared": "openssl",
+      "from": "python",
+      "to": "openssl"
+    },
+    {
+      "declared": "readline",
+      "from": "python",
+      "to": "readline"
+    },
+    {
+      "declared": "zlib",
+      "from": "python",
+      "to": "zlib"
+    },
+    {
+      "declared": "zstd",
+      "from": "python",
+      "to": "zstd"
+    },
+    {
+      "declared": "libandroid-support",
+      "from": "readline",
+      "to": "libandroid-support"
+    },
+    {
+      "declared": "ncurses",
+      "from": "readline",
+      "to": "ncurses"
+    },
+    {
+      "declared": "openssl",
+      "from": "rhash",
+      "to": "openssl"
+    },
+    {
+      "declared": "liblzma",
+      "from": "zstd",
+      "to": "liblzma"
+    },
+    {
+      "declared": "zlib",
+      "from": "zstd",
+      "to": "zlib"
+    }
+  ],
+  "driver": {
+    "bytes": 12148,
+    "sha256": "69553e28d224e2654b485b68190ec111ce01c5381ea3aea59dbee45167399185"
+  },
+  "dynamic_scope": "Existing actual native mapped-library ownership and byte checks remain required at runtime. This host inspection does not prove successful native imports or phonemization.",
+  "inline_python_syntax": "passed",
+  "metadata_only_derivation_executed": true,
+  "missing_runtime_archives_after": [],
+  "missing_runtime_archives_before": [
+    "python-pip"
+  ],
+  "native_executed": false,
+  "new_package_operation": "apt-get -o Acquire::Retries=5 download python-pip=26.2.1",
+  "original_compiler_count": 44,
+  "pip_pin": {
+    "architecture": "all",
+    "bytes": 1190440,
+    "control": {
+      "Architecture": "all",
+      "Depends": "python (>= 3.11.1-1)",
+      "Package": "python-pip",
+      "Pre-Depends": null,
+      "Version": "26.2.1"
+    },
+    "filename": "python-pip_26.2.1_all.deb",
+    "package": "python-pip",
+    "repository_path": "pool/main/p/python-pip/python-pip_26.2.1_all.deb",
+    "sha256": "92a9cb4b3c99dd20086f90fedc95c604eefc5bd0f88d1862690884474f82de44",
+    "version": "26.2.1"
+  },
+  "python_direct_dependencies": [
+    "gdbm",
+    "libandroid-posix-semaphore",
+    "libandroid-support",
+    "libbz2",
+    "libcrypt",
+    "libexpat",
+    "libffi",
+    "liblzma",
+    "libsqlite",
+    "ncurses",
+    "ncurses-ui-libs",
+    "openssl",
+    "readline",
+    "zlib",
+    "zstd"
+  ],
+  "rpds_apt_dependency": "libpython3.14.so is supplied by exact python archive already in compiler closure",
+  "rpds_dynamic_dependencies": [
+    "libpython3.14.so",
+    "libdl.so",
+    "libc.so"
+  ],
+  "runtime_archive_pin_count": 2,
+  "schema_version": 1,
+  "status": "review-fix-static-checks-passed",
+  "unchanged_before_c_abi_pass_bytes": true,
+  "unchanged_native_phonemizer_stage_bytes": true,
+  "union_count": 45
+}

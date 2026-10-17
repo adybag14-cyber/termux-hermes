@@ -756,15 +756,70 @@ def verify_installed(site, rows, payload):
             "wheel_owned_files_checked": checked, "record_rewritten_by_uv": True}
 
 
+def verified_packaged_tools(*, source_store: Path, target: str, lock=None):
+    """Read the pinned Python/UV closure in the published flat payload layout.
+
+    PM's build-cache verifier requires versioned store entry names. Published
+    payloads instead record the fixed python/uv names through record_tools.
+    Retain every other canonical identity, tree, link, binary and environment
+    check without writing facts, healing modes, acquiring or executing tools.
+    """
+    from types import MappingProxyType
+    from pm.build_operations import VerifiedTools, _copy_links
+    from pm.filesystem import long_root, native
+    from pm.install import InstalledPackage, _identity, _lockfile
+    from pm.lock import Facts
+    from pm.package import InstallError, StatePackage
+    from pm.registry import walk
+    from pm.store import tree_digest
+
+    if target != TARGET:
+        raise InstallError("tools", "packaged audio tool verification requires the pinned target")
+    packages = walk(["python", "uv"], target=target)
+    if (len(packages) != 2 or {package.name for package in packages} != {"python", "uv"}
+            or any(isinstance(package, StatePackage) or getattr(package, "pin_only", False)
+                   for package in packages)):
+        raise InstallError("tools", "packaged audio tool closure changed")
+    source_store = Path(source_store).resolve()
+    if not (source_store / "facts.json").is_file():
+        raise InstallError("tools", "packaged source facts are missing")
+    source_store = long_root(source_store)
+    facts = Facts(source_store / "facts.json", strict=True)
+    lock = lock if lock is not None else _lockfile()
+    entries, envs = {}, []
+    for package in packages:
+        name = package.name
+        version, identity = lock.version(name), _identity(lock, name, target)
+        if not version or identity is None:
+            raise InstallError(name, "packaged tool source has no original lock identity")
+        fact = facts.get(name)
+        # These two flat names are part of the exact admitted .deb layout.
+        entry = source_store / name
+        if (not fact or fact.get("entry") != name
+                or entry.is_symlink() or not entry.is_dir()
+                or not entry.resolve().is_relative_to(source_store)
+                or not facts.installed(name, version, source_store, identity)
+                or tree_digest(entry) != fact.get("digest")):
+            raise InstallError(name, "packaged tool source failed fact or tree verification")
+        _copy_links(package, entry)
+        binary, env = package.binary(entry, target), package.env(entry, target)
+        if (binary is None or not binary.is_file()
+                or not binary.resolve().is_relative_to(entry)
+                or facts.env_for(name, source_store) != env):
+            raise InstallError(name, "packaged tool source failed binary or environment verification")
+        entries[name] = InstalledPackage(Path(native(entry)), version, Path(native(binary)))
+        envs.append(env)
+    return VerifiedTools(MappingProxyType(entries), tuple(envs))
+
+
 def bootstrap_worker(request):
     payload = Path(request["payload"])
     native_identity(payload)
     sys.path.insert(0, str(payload / "app"))
     import pm
     from pm.paths import repo_root
-    from pm.build_operations import verified_tools
     require(repo_root().resolve() == payload / "app", "bootstrap imported another PM")
-    verified_tools(["python", "uv"], source_store=payload / "tools", target=TARGET)
+    verified_packaged_tools(source_store=payload / "tools", target=TARGET)
     manager = pm.stage_manager_runtime(
         python=Path(sys.executable), destination=payload / "pm-runtime",
         project=payload / "app/pm", offline=True, wheelhouse=payload / "wheelhouse",
