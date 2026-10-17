@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "run_id": 39043935925,
+  "packaging_head_sha": "9fcd31cbd1e10cf9ffdd88c28ab95824ee13700b",
+  "checkout_merge_sha": "84f44aa2d23568b58773696964057174985d734a",
+  "next_stable_patch_sha256": "add3afb05e2aaa4066b7e2e9eaaa7e5c9fd84a2b6bf954cede1b6564e380374e",
+  "job_id": 117428798399,
+  "job_conclusion": "failure",
+  "bindings": "browser-bindings.json",
+  "artifact": {
+    "id": 12105156882,
+    "name": "termux-compatibility-browser",
+    "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39043935925/artifacts/12105156882",
+    "sha256": "02a153c8c80f11acec45794bbe174e1d6be3ebefe64118f0a6ba2e9b218fdeeb",
+    "bytes": 1368704,
+    "created_at": "2026-10-17T15:12:48Z"
+  },
+  "raw_static_driver_roundtrip": "passed",
+  "pm_built_in_browser_roundtrip": "passed",
+  "default_browser_exec_readiness": "passed",
+  "default_browser_exec_roundtrip": "not yet admitted; stopped at a fixture title assertion",
+  "default_failure": "The pinned browser-harness adds a cosmetic controlled-tab marker; actual title was 🐴 Hermes Android browser probe.",
+  "default_failure_evidence": "browser-default-result.json",
+  "validated": [
+    "Native Android/Bionic UID 1000.",
+    "Pinned PM AgentBrowser installation and exact binary selection.",
+    "Chromium remains owned by Termux APT, with no PM Chromium artifact.",
+    "Built-in backend off: real readiness, native navigation/snapshot/click/readback/PNG screenshot/close.",
+    "Unset backend: real default browser_exec readiness and bundled browser-harness interpreter.",
+    "Default browser_exec launched through the managed local CDP route and executed the fixture code."
+  ],
+  "not_yet_validated": [
+    "The complete default loopback assertions and its PNG screenshot."
+  ],
+  "proposed_probe_correction": "Accept only the documented cosmetic horse-title prefix while requiring exact fixture URL, heading, before/after DOM values and screenshot.",
+  "physical_android_phone_ui_tested": false,
+  "physical_android_audio_tested": false,
+  "screenshots": "Binary screenshots remain in the linked artifact; hashes are in browser-bindings.json.",
+  "release_output": false
+}

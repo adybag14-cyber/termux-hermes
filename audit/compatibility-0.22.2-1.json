@@ -1,0 +1,658 @@
+{
+  "schema_version": 1,
+  "audited_at": "2026-10-17",
+  "baseline": {
+    "package": "hermes-agent_0.22.2-1_aarch64.deb",
+    "package_version": "0.22.2-1",
+    "sha256": "deb163351554ca03f7104f91a50f4f8dc4d9247ce0cf5f2cca2608be3b319add",
+    "upstream_tag": "v0.22.2",
+    "upstream_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+    "python": "3.14.6",
+    "abi": "cp314",
+    "platform": "android_24_arm64_v8a",
+    "selected_extras": [
+      "acp",
+      "cron",
+      "mcp",
+      "telegram",
+      "termux"
+    ],
+    "installed_distributions": 81,
+    "android_admitted_resolved_distributions": 81,
+    "missing_selected_distributions": [],
+    "mismatched_selected_versions": [],
+    "shipped_uv_cache": false,
+    "shipped_wheelhouse": false,
+    "recorded_venv_state": false,
+    "packaging_main_commit": "91e096aec63aafd55700675e07148285522dcc70",
+    "package_build_commit": "25e82b34c019bcac4127d4519d5498e73de87c1d",
+    "release_tag_commit": "7c272cfeeb6cbb387d9993acad3130a258b95fdb",
+    "release_boundary_evidence": "release-boundary-20261017.json"
+  },
+  "groups": {
+    "selected": [
+      "acp",
+      "cron",
+      "mcp",
+      "telegram",
+      "termux"
+    ],
+    "core_already_supplies_dependencies": [
+      "doc-extract",
+      "pty",
+      "vision",
+      "web"
+    ],
+    "partial_default_backend_unavailable": [
+      "computer-use"
+    ],
+    "aggregate_alias_unselected": [
+      "all",
+      "termux-all",
+      "messaging",
+      "voice",
+      "wake"
+    ],
+    "explicit_compatibility_exclusion": [
+      "uvloop",
+      "matrix",
+      "neutts",
+      "nemo-relay"
+    ],
+    "deliberately_opt_in": [
+      "kittentts"
+    ],
+    "unselected_not_proven_incompatible": [
+      "anthropic",
+      "audio-io",
+      "azure-identity",
+      "bedrock",
+      "daytona",
+      "ddgs",
+      "dingtalk",
+      "discord",
+      "edge-tts",
+      "exa",
+      "fal",
+      "feishu",
+      "firecrawl",
+      "google",
+      "google-chat",
+      "google-meet",
+      "mistral",
+      "modal",
+      "otlp",
+      "parallel-web",
+      "piper",
+      "silk",
+      "slack",
+      "sms",
+      "stt-whisper",
+      "teams",
+      "trace-upload",
+      "tts-premium",
+      "vercel",
+      "vertex",
+      "wake-openwakeword",
+      "wake-porcupine",
+      "wake-sherpa",
+      "wecom",
+      "youtube"
+    ]
+  },
+  "counting": {
+    "optional_groups": 55,
+    "explicit_dependency_group_exclusions": 4,
+    "additional_runtime_capabilities": 5,
+    "named_restricted_capabilities": 9,
+    "rule": "Count product capabilities, not package counts or every unselected extra. Merge AgentBrowser and Chromium into local browser. Computer-use extra is the same default CUA restriction, not an additional item. Count the missing cache and three broken adapter paths separately as defects."
+  },
+  "runtime_restrictions": [
+    {
+      "id": "local-browser",
+      "components": [
+        "PM AgentBrowser",
+        "PM Chromium"
+      ],
+      "baseline": "No managed Android artifacts; local managed browser cannot be provisioned.",
+      "status": "native_raw_pm_built_in_and_actual_default_browser_exec_roundtrips_passed"
+    },
+    {
+      "id": "native-cua",
+      "baseline": "Default local CUA driver does not support Android; MCP dependency alone is not a native backend.",
+      "status": "standalone_native_foreground_x11_passed_hermes_integration_pending",
+      "evidence": "cua-native-20261017/run-39052290704.json"
+    },
+    {
+      "id": "bot-desktop",
+      "baseline": "Linux virtual desktop host only.",
+      "status": "native_xvnc_xfce_framebuffer_product_screenshot_and_cleanup_passed"
+    },
+    {
+      "id": "gateway-service",
+      "baseline": "Managed service installation/start/uninstall refuses Termux/APT provenance; manual gateway remains usable.",
+      "status": "native_profile_isolated_runit_lifecycle_and_crash_recovery_passed"
+    },
+    {
+      "id": "recorder-silence-vad",
+      "baseline": "Termux:API recorder does not provide the sounddevice silence/VAD auto-stop path.",
+      "status": "numpy_native_passed_container_android_audio_framework_measured_absent_microphone_unverified"
+    }
+  ],
+  "adjacent_defects": [
+    {
+      "id": "text-clipboard",
+      "status": "adapter_and_focused_tests_passed_device_pending"
+    },
+    {
+      "id": "android-audio-playback",
+      "status": "adapter_and_focused_tests_passed_device_pending"
+    },
+    {
+      "id": "recorder-max-duration",
+      "status": "adapter_and_focused_tests_passed_device_pending"
+    },
+    {
+      "id": "optional-install-cold-cache",
+      "status": "complete_native_candidate_empty_cache_optional_install_and_repeat_reuse_passed"
+    }
+  ],
+  "unbundled_frontends": [
+    "built web dashboard assets",
+    "Electron desktop runtime"
+  ],
+  "release_policy": {
+    "publish": false,
+    "version_bump": false,
+    "main_merge": false,
+    "installer_pin_change": false,
+    "scope": "preparation branch and candidate-only validation for the next stable version"
+  },
+  "preparation": {
+    "selected_extras": [
+      "acp",
+      "cron",
+      "matrix",
+      "mcp",
+      "telegram",
+      "termux",
+      "uvloop"
+    ],
+    "dependency_probes": {
+      "uvloop": "native_behavior_and_original_payload_linkage_passed",
+      "matrix": "native_encrypted_protocol_and_original_payload_linkage_passed",
+      "nemo-relay": "native_build_behavior_original_payload_linkage_and_artifact_capture_passed",
+      "neutts": "blocked_by_python_and_native_ml_runtime_closure"
+    },
+    "initial_native_run": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39037495656",
+    "pm_selection_stamp_catalog_tests": {
+      "passed": 22,
+      "failed": 0
+    },
+    "voice_regressions": {
+      "passed": 101,
+      "skipped_host_specific": 31,
+      "failed": 0
+    },
+    "desktop_and_remote_cua_regressions": {
+      "passed": 15,
+      "failed": 0,
+      "scope": "8 current Termux desktop tests plus 7 remote CUA availability tests"
+    },
+    "candidate_package": {
+      "status": "native_full_package_and_optional_install_lifecycle_passed",
+      "tested_commit": "e271e922a2e71fd18591c45e9b98b8c7f9fffe02",
+      "run": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39048514731",
+      "patch_sha256": "77ac41bc11a6facd928f4cef577642b9eeb042ce3da7d820478aa49e1d98fa1e",
+      "candidate_sha256": "1e4e58fe17a1800f23ababcb2724e92b8904829eae3284569db52dbc672ca76a",
+      "published": false,
+      "version_bumped": false,
+      "baseline_distributions_before_optional_install": 100,
+      "preserved_baseline_distributions": 100,
+      "distributions_after_optional_install": 102,
+      "added_dependencies": {
+        "anthropic": "0.87.0",
+        "docstring-parser": "0.18.0"
+      },
+      "native_build_toolchain_present": false,
+      "repeat_generation_reused": true,
+      "evidence": "candidate-lifecycle-e271e92-20261017/summary.json",
+      "previous_assembly_failures": "candidate-assembly-20261017/summary.json",
+      "published_distributions_retained_at_same_versions": 81,
+      "published_distribution_inventory_evidence": "candidate-lifecycle-e271e92-20261017/release-to-candidate-inventory.json"
+    },
+    "pm_bundled_wheel_regressions": {
+      "passed": 21,
+      "failed": 0,
+      "scope": "18 bundled-wheel/bootstrap tests, 2 bytecode fallback, 1 ambient-config isolation"
+    },
+    "native_evidence": "native-probes-20261017/summary.json",
+    "published_package_census": "released-package-census.json",
+    "remaining_portability_notes": "../docs/remaining-portability-work.md",
+    "browser_regressions": {
+      "passed": 139,
+      "failed": 0,
+      "skipped_host_specific": 7
+    },
+    "gateway_runit_regressions": {
+      "passed": 24,
+      "failed": 0,
+      "scope": "14 new runit cases plus 10 existing provenance/manual/profile dispatch regressions"
+    },
+    "numpy_source_regressions": {
+      "passed": 9,
+      "failed": 0
+    },
+    "termux_diagnostic_regressions": {
+      "passed": 2,
+      "failed": 0
+    },
+    "packaging_regressions": {
+      "passed": 205,
+      "failed": 0,
+      "skipped_host_specific": 4
+    },
+    "native_gateway_evidence": "native-probes-4b3d121-20261017/gateway-summary.json",
+    "native_audio_evidence": "native-probes-9fcd31c-20261017/audio-summary.json",
+    "native_desktop_evidence": "native-probes-4b3d121-20261017/browser-desktop-summary.json",
+    "native_browser_evidence": "native-probes-e20e8c4-20261017/browser-summary.json",
+    "native_planner_regressions": {
+      "passed": 19,
+      "failed": 0
+    },
+    "cua_source_port": {
+      "source_commit": "70db98d1bcd92890d778f4978e0eb107a4b66c1b",
+      "original_cargo_lock_sha256": "27b025bc4fd81074cf18ae614597bec5b7c9d8ea99b2a7aaf45072aec72c64ce",
+      "adapted_registry_crates": [
+        "clipboard-rs==0.3.5",
+        "x11rb-protocol==0.13.2"
+      ],
+      "unchanged_other_cargo_package_records": 602,
+      "status": "standalone_native_bionic_foreground_x11_all_eleven_checks_passed_hermes_integration_pending",
+      "included_in_hermes_candidate": false,
+      "physical_android_phone_ui": false,
+      "native_progress_evidence": "cua-native-20261017/",
+      "background_input_certified": false,
+      "native_success_evidence": "cua-native-20261017/run-39052290704.json",
+      "native_success_evidence_sha256": "66551fb4a60e10c877767952c9e25ecd0cc1b93c9f6ea636195871d8dc7b5c65",
+      "tested_head_sha": "3e63be4a65dcb0d6d2c0c2fec86f94546fbba8ed",
+      "run_id": 39052290704,
+      "artifact_id": 12108595649,
+      "native_behavior_checks_passed": 11,
+      "foreground_virtual_x11_probe_passed": true,
+      "accessibility_tree_certified": false,
+      "hermes_native_integration_executed": true
+    },
+    "termux_host_assembly_regressions": {
+      "passed": 3,
+      "failed": 0,
+      "scope": "fixed-prefix assembly, bare-host PM runtime handoff, corrupt native catalog exit propagation"
+    },
+    "reviewed_termux_recipe_pins": "termux-recipe-pins-20261017.json",
+    "neutts_resolution": {
+      "declared_version": "1.4.1",
+      "upstream_requires_python": ">=3.10,<3.14",
+      "hermes_resolver_environment": "python_version >= '3.14'",
+      "resolved_neutts_package_record_present": false,
+      "resolved_complete_neutts_closure_present": false,
+      "separate_engine_environment_requires_own_frozen_resolution": true,
+      "termux_apt_python_observed": "3.14.6-1"
+    },
+    "cua_hermes_integration": {
+      "patch": "../patches/next-stable/cua-hermes-integration.patch",
+      "status": "explicit_driver_and_foreground_native_integration_passed_packaged_default_gate_pending",
+      "included_in_main_candidate": false,
+      "preparation_evidence": "cua-hermes-preparation-20261017.json",
+      "canonical_host_test_evidence": "cua-hermes-host-tests-20261017.json",
+      "canonical_source_runs_not_aggregated": true,
+      "native_source_strategy": "copy the exact proven candidate's trimmed app tree outside the installed payload and apply only the experimental CUA patch; full-source reference Git tree equality is not asserted",
+      "native_run_id": 39056267366,
+      "native_run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39056267366",
+      "tested_head_sha": "fbf7c029b8df66618f520a47e6c07ff722129a43",
+      "tested_patch_sha256": "486bd24394e17e34143304f4a9f1bd7c9668db8433975f83101eddcb7986571f",
+      "native_evidence": "cua-native-20261017/run-39056267366.json",
+      "native_evidence_sha256": "0e8e0a2180db2b722f82caa3f772541917bdff99ebfaabfa3d315657226d09ad",
+      "native_behavior_checks_passed": 5,
+      "separate_once_approvals": 3,
+      "original_payload_file_and_symlink_count_unchanged": 29809,
+      "packaged_default_admission_certified": false
+    },
+    "main_candidate_repaired_restrictions": {
+      "count": 6,
+      "capabilities": [
+        "uvloop",
+        "matrix",
+        "nemo-relay",
+        "local-browser",
+        "bot-desktop",
+        "gateway-service"
+      ],
+      "standalone_cua_success_counted_as_main_candidate_repair": false
+    },
+    "packaging_ci": {
+      "run_id": 39058572994,
+      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39058572994",
+      "job_id": 117471524118,
+      "branch_head": "19ab7a1ce9f496dd8dd291d19e3818bb5f878048",
+      "tested_merge_checkout": "5d40caf985598eb6b6842a0fe46d70b489fe3fe7",
+      "status": "success",
+      "passed": 322,
+      "elapsed_seconds": 2.7,
+      "raw_job_log_sha256": "cc67c01087a9d299fbffcc958036eb470e8caff6099daf046c3227603828641a",
+      "raw_job_log_bytes": 22522
+    },
+    "neutts_apt_core_probe": {
+      "status": "native_foundation_passed",
+      "run_id": 39058569758,
+      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39058569758",
+      "head_sha": "19ab7a1ce9f496dd8dd291d19e3818bb5f878048",
+      "workflow_conclusion": "success",
+      "evidence": "neutts-native-20261017/run-39058569758.json",
+      "evidence_sha256": "ae3af59b4b37a031dce47f8627c67dc61a0ab28994c8c666da9c32bd339faa8c",
+      "artifact": {
+        "id": 12110107775,
+        "bytes": 11169316,
+        "sha256": "994dd71b304d4d8147000859b7260c198fa35cce48b247b9ce0a282a3284c760",
+        "all_crc_verified": true
+      },
+      "scope": {
+        "engine_installed": false,
+        "model_downloaded": false,
+        "synthesis_tested": false,
+        "physical_audio_tested": false,
+        "candidate_modified": false,
+        "pm_admission_changed": false,
+        "release_created": false
+      },
+      "apt_archives": 122,
+      "python_wheels": 9,
+      "cases": [
+        {
+          "component": "python_dependencies",
+          "exit_code": 0,
+          "status": "passed",
+          "timed_out": false,
+          "receipt": "neutts-python_dependencies.json",
+          "receipt_sha256": "469749bfb7161075c32f437c26d6eaac99e9797b40aad0308e09f11c2638a66f",
+          "stdout_bytes": 0,
+          "stdout_saved_bytes": 0,
+          "stdout_truncated": false,
+          "stderr_bytes": 0,
+          "stderr_saved_bytes": 0,
+          "stderr_truncated": false
+        },
+        {
+          "component": "torch",
+          "exit_code": 0,
+          "status": "passed",
+          "timed_out": false,
+          "receipt": "neutts-torch.json",
+          "receipt_sha256": "22eabd8fd93dfdd820ba2f7f7b36b3525deed2a2ac7a12d1337b5fef7a3d441b",
+          "stdout_bytes": 0,
+          "stdout_saved_bytes": 0,
+          "stdout_truncated": false,
+          "stderr_bytes": 0,
+          "stderr_saved_bytes": 0,
+          "stderr_truncated": false
+        },
+        {
+          "component": "torchaudio",
+          "exit_code": 0,
+          "status": "passed",
+          "timed_out": false,
+          "receipt": "neutts-torchaudio.json",
+          "receipt_sha256": "0f03237292ae7374d8120575a25e3a4b5a03b8544cb234756e0d5eac89ab1465",
+          "stdout_bytes": 0,
+          "stdout_saved_bytes": 0,
+          "stdout_truncated": false,
+          "stderr_bytes": 0,
+          "stderr_saved_bytes": 0,
+          "stderr_truncated": false
+        },
+        {
+          "component": "torchcodec",
+          "exit_code": 0,
+          "status": "passed",
+          "timed_out": false,
+          "receipt": "neutts-torchcodec.json",
+          "receipt_sha256": "9060f7f8b897ef7d812cab74adfae513ad167d56af9cb50aa20e26c473fb8e1a",
+          "stdout_bytes": 0,
+          "stdout_saved_bytes": 0,
+          "stdout_truncated": false,
+          "stderr_bytes": 0,
+          "stderr_saved_bytes": 0,
+          "stderr_truncated": false
+        },
+        {
+          "component": "scipy",
+          "exit_code": 0,
+          "status": "passed",
+          "timed_out": false,
+          "receipt": "neutts-scipy.json",
+          "receipt_sha256": "da7a049de51980f75c9295767fc16dd4349055024d77ca4b11448401a7488a0b",
+          "stdout_bytes": 0,
+          "stdout_saved_bytes": 0,
+          "stdout_truncated": false,
+          "stderr_bytes": 0,
+          "stderr_saved_bytes": 0,
+          "stderr_truncated": false
+        },
+        {
+          "component": "llvmlite",
+          "exit_code": 0,
+          "status": "passed",
+          "timed_out": false,
+          "receipt": "neutts-llvmlite.json",
+          "receipt_sha256": "26606b1effe73ef69edfd2c4acf23c8dd6c4203ba00ff87f725efd1e4624fff6",
+          "stdout_bytes": 0,
+          "stdout_saved_bytes": 0,
+          "stdout_truncated": false,
+          "stderr_bytes": 0,
+          "stderr_saved_bytes": 0,
+          "stderr_truncated": false
+        },
+        {
+          "component": "soxr",
+          "exit_code": 0,
+          "status": "passed",
+          "timed_out": false,
+          "receipt": "neutts-soxr.json",
+          "receipt_sha256": "451d8041a13d7ec9dc1eca06d7d531a0317ca5e256d520caed0f95f92222e33b",
+          "stdout_bytes": 0,
+          "stdout_saved_bytes": 0,
+          "stdout_truncated": false,
+          "stderr_bytes": 0,
+          "stderr_saved_bytes": 0,
+          "stderr_truncated": false
+        }
+      ],
+      "requirements_and_provenance": {
+        "status": "requirements-and-provenance-passed",
+        "exit_code": 0,
+        "receipt": "NEUTTS-APT-PYTHON-VALIDATION.json",
+        "sha256": "51c43c3c98916bce3285de415ae78dc17ddb6d412307e02bfe955a3b51fc3f00",
+        "metadata_ledger_sha256": "2031c8a6915915ffffb980b268ad5107d42a186682cb2ca7009d803fe2abe200",
+        "raw_pip_check_preserved": true
+      },
+      "raw_pip_check": {
+        "exit_code": 1,
+        "log": "NEUTTS-PYTHON-CHECK.log",
+        "log_sha256": "2c025ce5a45cfa2b6f032ea3bc706e8173fa7c6a1c78ff860e40d669199a48bf"
+      },
+      "next_gate": "native Numba and matching patched llama-cpp-python, then complete NeuTTS codec/eSpeak/model synthesis",
+      "rolling_base_upgrade_recorded_separately_from_pinned_dependency_archives": true
+    },
+    "neutts_apt_probe_history": [
+      {
+        "status": "completed_partial_dependency_proof_missing_python_closure",
+        "script": "../scripts/compatibility_probe_neutts.sh",
+        "workflow": "../.github/workflows/neutts-termux-probe.yml",
+        "scope": "separate APT-only scientific dependency ABI/behavior experiment under Termux system Python",
+        "run_id": 39053355817,
+        "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39053355817",
+        "head_sha": "036f11515eda3a6e4129e14c7dd75ec27d5ae47d",
+        "workflow_conclusion": "failure",
+        "tested_inputs": {
+          "scripts/compatibility_probe_neutts.sh": "66c36889ff4af3d627d17f51387e497583c6d5bc4bd2c61dfea7ff77d3a9ffdb",
+          ".github/workflows/neutts-termux-probe.yml": "879ba127636bb181d51466cb7213eccec086c0fca091de54d563a00e38728acd"
+        },
+        "artifact": {
+          "id": 12108591522,
+          "name": "termux-neutts-dependency-experiment",
+          "bytes": 288815,
+          "sha256": "1d770fc5107e4bf666a6ea8dff4622e7eb907eecfe8ee1cced27ae5ffa6d8682",
+          "all_crc_verified": true
+        },
+        "raw_exit_result": {
+          "schema_version": 1,
+          "stage": "native-scientific-behavior",
+          "exit_code": 1
+        },
+        "apt_archive_count": 122,
+        "apt_archive_hashes_checked_before_install": true,
+        "rolling_base_upgrade_recorded_separately_from_pinned_dependency_archives": true,
+        "cases": [
+          {
+            "component": "torch",
+            "status": "failed",
+            "error": {
+              "type": "ModuleNotFoundError",
+              "message": "No module named 'typing_extensions'"
+            },
+            "receipt_sha256": "7a22e4f6974001f47375b33c2d09c75f1c7e91271e9f11bcbc31005191dfacaf"
+          },
+          {
+            "component": "torchaudio",
+            "status": "failed",
+            "error": {
+              "type": "ModuleNotFoundError",
+              "message": "No module named 'typing_extensions'"
+            },
+            "receipt_sha256": "26acae33c84861521a115cd8f5bc0495732fe62ff01214e0a4bd5cc02f972800"
+          },
+          {
+            "component": "torchcodec",
+            "status": "failed",
+            "error": {
+              "type": "ModuleNotFoundError",
+              "message": "No module named 'typing_extensions'"
+            },
+            "receipt_sha256": "a4045082b82cdb336c8dae6e7281f9262df9d212b4b4aa692584f18c683454c7"
+          },
+          {
+            "component": "scipy",
+            "status": "passed",
+            "error": null,
+            "receipt_sha256": "68060a1618b4c2d6baa765dfd532a676b5e4a57647e3773f10a1858fcc2efe4f"
+          },
+          {
+            "component": "llvmlite",
+            "status": "passed",
+            "error": null,
+            "receipt_sha256": "e07f5c1d09ddec61d02a051893d9d7f0934848d66a105648189a25d1e1e5bbe6"
+          },
+          {
+            "component": "soxr",
+            "status": "passed",
+            "error": null,
+            "receipt_sha256": "451d8041a13d7ec9dc1eca06d7d531a0317ca5e256d520caed0f95f92222e33b"
+          }
+        ],
+        "completed_native_behavior_cases": [
+          "scipy",
+          "llvmlite",
+          "soxr"
+        ],
+        "cases_blocked_before_native_behavior": [
+          "torch",
+          "torchaudio",
+          "torchcodec"
+        ],
+        "next_step": "provide the reviewed exact Python dependency closure, then rerun the isolated scientific probe",
+        "native_run_completed": true,
+        "engine_installed": false,
+        "synthesis_tested": false,
+        "hermes_pm_admission_changed": false
+      },
+      {
+        "run_id": 39055594718,
+        "evidence": "neutts-native-20261017/run-39055594718.json",
+        "status": "nine_python_wheels_installed_pip_tag_failure_before_native_cases"
+      },
+      {
+        "run_id": 39056756533,
+        "evidence": "neutts-native-20261017/run-39056756533.json",
+        "status": "six_native_scientific_cases_passed_tag_and_installed_data_oracle_gates_failed"
+      }
+    ],
+    "audio_readiness_preparation": {
+      "patch": "../patches/next-stable/audio-readiness.patch",
+      "patch_sha256": "82b92d5095ceabc05f0200569da1cc16b861c77b166095982b05d57940573db7",
+      "evidence": "audio-readiness-preparation-20261017.json",
+      "evidence_sha256": "e96c40ab39516a1a59b87e6a2d55bf5ed533576cb2e012183fb1befa79bd1bd0",
+      "guide": "../docs/audio-readiness-device-validation.md",
+      "status": "import_time_PortAudio_failure_and_output_only_inventory_fixed_host_tested",
+      "physical_microphone_or_vad_certified": false,
+      "included_in_main_candidate": false
+    },
+    "neutts_default_gguf_source_review": {
+      "documentation": "../docs/neutts-default-gguf-feasibility.md",
+      "evidence": "neutts-default-gguf-source-20261017.json",
+      "loader_patch": "../patches/next-stable/llama-cpp-python-android-loader.patch",
+      "loader_patch_sha256": "254d0d86b5b3d0ff0a92f0767d997f9d11d16449570713f1fc6ab64f0e718a9b",
+      "host_loader_tests_passed": 15,
+      "native_loader_or_engine_certified": false
+    },
+    "neutts_native_cpu_preparation": {
+      "status": "host_prepared_native_validation_pending",
+      "source_lock": "scripts/neutts_native_sources_lock.json",
+      "source_lock_sha256": "a06e595179fad6f437ca95210d685beb339baa0867cd527dba5f5083d94b36ce",
+      "workflow": ".github/workflows/neutts-engine-components.yml",
+      "foundation_required": "All seven cases and strict archive/Python/APT provenance pass before compiler installation.",
+      "additional_python_wheels": 4,
+      "build_apt_closure_packages": 44,
+      "additional_apt_packages": 19,
+      "native_cases": [
+        "installed_inputs",
+        "numba_cpu_jit_and_parallel_workqueue",
+        "matching_vendored_llama_cpu_backend"
+      ],
+      "models_downloaded": false,
+      "synthesis_tested": false,
+      "pm_admission_changed": false,
+      "published_candidate_modified": false,
+      "latest_run": {
+        "run_id": 39062163081,
+        "head_sha": "3d9086cfc190ba981e48e0276234064903315539",
+        "status": "failed",
+        "completed_stage": "foundation_and_pinned_compiler_install_passed",
+        "failing_stage": "numba_source_wheel_build",
+        "exit_code": 2,
+        "detail": "Detailed native build logs are being inspected; no inference or complete engine claim."
+      }
+    },
+    "cua_packaged_default_preparation": {
+      "status": "host_gates_passed_native_package_pending",
+      "patch": "patches/next-stable/cua-hermes-integration.patch",
+      "patch_sha256": "8bbfddbbacfd508db35de6158e4c1a2c06423b84cd5f4ed621d4955fcd529edd",
+      "source_receipt": "audit/cua-native-20261017/sealed-driver-preparation.json",
+      "preparation": "docs/cua-candidate-preparation.md",
+      "additional_runtime_dependencies": [
+        "libx11",
+        "libxi"
+      ],
+      "native_requirements": [
+        "normal_bundled_pm_selection",
+        "omitted_foreground_before_approval",
+        "explicit_background_refused",
+        "background_grant_cannot_authorize_foreground",
+        "real_registered_tool_and_owned_X11_oracles",
+        "same_version_upgrade_and_state_preservation",
+        "runtime_only_empty_cache_optional_install_and_reuse"
+      ],
+      "published": false,
+      "version_bumped": false,
+      "original_candidate_modified": false
+    }
+  }
+}

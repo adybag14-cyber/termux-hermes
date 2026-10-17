@@ -1,0 +1,72 @@
+2026-10-17T16:14:19.9801507Z [command]/usr/bin/git log -1 --format=%H
+2026-10-17T16:14:19.9823556Z e271e922a2e71fd18591c45e9b98b8c7f9fffe02
+2026-10-17T16:14:24.4729848Z [command]/usr/bin/git log -1 --format=%H
+2026-10-17T16:14:24.4760700Z d923a5eb487a17c0a68801bba9ef0f56c81040a8
+2026-10-17T16:18:03.5391555Z Cache restored from key: termux314-wheels-a154ab57068f0059151d57543885f09098a41a7d3538aec70abc35fdf503b887
+2026-10-17T16:18:07.2708036Z docker.io/termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303
+2026-10-17T16:18:07.3574753Z ==> Wheelhouse cache verified -- skipping resolve, probe, and native builds
+2026-10-17T16:18:07.3575270Z ==> Building the wheelhouse inside the pinned container (payload ABI)
+2026-10-17T16:18:07.8362253Z ==> Emitting index.json and SHA256SUMS
+2026-10-17T16:18:07.9081316Z ==> Wheelhouse complete: /home/runner/work/termux-hermes/termux-hermes/hermes-source/termux-build/payload/wheelhouse
+2026-10-17T16:18:16.9144309Z ==> Creating application and PM environments with the bundled CPython (inside the container)
+2026-10-17T16:18:21.7244464Z   → Installing Python packages…
+2026-10-17T16:18:21.9756306Z   ✓ Installing Python packages
+2026-10-17T16:18:23.4854603Z   → Installing Python packages…
+2026-10-17T16:18:24.9407755Z   ✓ Installing Python packages
+2026-10-17T16:18:26.4355110Z ==> Writing app/install-stamp.json
+2026-10-17T16:18:27.0549804Z [write_install_stamp] wrote /home/runner/work/termux-hermes/termux-hermes/hermes-source/termux-build/payload/app/install-stamp.json -> d923a5eb487a (6/merge) [DIRTY]
+2026-10-17T16:18:27.0712280Z ==> Staging the package tree
+2026-10-17T16:18:28.8140311Z ==> Validating in a fresh pinned termux-docker container
+2026-10-17T16:18:28.8169769Z dpkg-deb: building package 'hermes-agent' in '/home/runner/work/termux-hermes/termux-hermes/hermes-source/termux-build/deb/hermes-agent_0.22.2-1_aarch64.deb'.
+2026-10-17T16:19:42.8915754Z Selecting previously unselected package hermes-agent.
+2026-10-17T16:19:42.8947254Z (Reading database ... 4985 files and directories currently installed.)
+2026-10-17T16:19:42.8949088Z Preparing to unpack /tmp/pkg.deb ...
+2026-10-17T16:19:42.8957337Z Unpacking hermes-agent (0.22.2-1) ...
+2026-10-17T16:19:47.9762661Z Setting up hermes-agent (0.22.2-1) ...
+2026-10-17T16:19:50.1097296Z + /data/data/com.termux/files/usr/bin/hermes --version
+2026-10-17T16:19:50.1097990Z Hermes Agent v0.22.2 (2026.9.24) · stable
+2026-10-17T16:19:50.1098365Z Install directory: /data/data/com.termux/files/usr/lib/hermes-agent/app
+2026-10-17T16:19:50.1098728Z Install method: apt
+2026-10-17T16:19:50.1098918Z Python: 3.14.6
+2026-10-17T16:19:50.1099100Z OpenAI SDK: 2.24.0
+2026-10-17T16:19:54.2558484Z + /data/data/com.termux/files/usr/bin/hermes-acp --check
+2026-10-17T16:19:54.2558851Z Hermes ACP check OK
+2026-10-17T16:20:00.7003255Z + /data/data/com.termux/files/usr/lib/hermes-agent/venv/bin/python -c import ctypes, ssl, sqlite3, bz2, lzma, zlib, hashlib, readline; import cli, run_agent, tui_gateway.server; from hermes_cli.config import detect_install_method; assert detect_install_method() == 'apt'; print('CLI_AND_STDLIB_IMPORTS_OK')
+2026-10-17T16:20:00.7004460Z  CLI_AND_STDLIB_IMPORTS_OK
+2026-10-17T16:20:01.6488025Z + /data/data/com.termux/files/usr/lib/hermes-agent/venv/bin/python /data/data/com.termux/files/usr/lib/hermes-agent/app/scripts/termux/build_wheels.py --import-modules aiohttp asyncpg cffi cryptography firecrawl-anydoc httptools jiter markupsafe nemo-relay pillow pillow-heif psutil pycryptodome pydantic-core python-olm resvg-py rpds-py tornado uvloop watchfiles
+2026-10-17T16:20:01.9843830Z FFMPEG_MEDIA_CONVERSION_OK
+2026-10-17T16:20:02.1667810Z + /data/data/com.termux/files/usr/lib/hermes-agent/venv/bin/python -c import pm; issues = pm.check(); assert not issues, issues; print('PM_RUNTIME_TOOLS_OK')
+2026-10-17T16:20:02.1668506Z PM_RUNTIME_TOOLS_OK
+2026-10-17T16:20:03.0910752Z APT_UPDATE_REFUSAL_OK
+2026-10-17T16:20:08.2903383Z TUI_SETUP_SCREEN_OK
+2026-10-17T16:20:08.5335392Z INSTALLED_BUNDLE_VALIDATION_OK
+2026-10-17T16:20:08.6377842Z (Reading database ... 37490 files and directories currently installed.)
+2026-10-17T16:20:08.6386801Z Preparing to unpack /tmp/pkg.deb ...
+2026-10-17T16:20:08.6427316Z Unpacking hermes-agent (0.22.2-1) over (0.22.2-1) ...
+2026-10-17T16:20:16.0521209Z Setting up hermes-agent (0.22.2-1) ...
+2026-10-17T16:20:16.0801087Z DEB_INSTALL_AND_REINSTALL_OK
+2026-10-17T16:20:16.6185098Z no pm sync receipt yet (no venv operation has run)
+2026-10-17T16:20:18.1483248Z ==> Built /home/runner/work/termux-hermes/termux-hermes/hermes-source/termux-build/deb/hermes-agent_0.22.2-1_aarch64.deb (validated)
+2026-10-17T16:20:19.1594557Z /home/runner/work/_temp/hermes-next-stable-fixture-DSdM32/baseline.deb: OK
+2026-10-17T16:20:19.8794868Z Selecting previously unselected package hermes-agent.
+2026-10-17T16:20:19.8827448Z (Reading database ... 4985 files and directories currently installed.)
+2026-10-17T16:20:19.8830332Z Preparing to unpack /fixtures/baseline.deb ...
+2026-10-17T16:20:19.8837699Z Unpacking hermes-agent (0.22.2-1) ...
+2026-10-17T16:20:24.6551769Z Setting up hermes-agent (0.22.2-1) ...
+2026-10-17T16:20:24.7119246Z (Reading database ... 36169 files and directories currently installed.)
+2026-10-17T16:20:24.7128509Z Preparing to unpack /fixtures/candidate.deb ...
+2026-10-17T16:20:24.7168410Z Unpacking hermes-agent (0.22.2-1) over (0.22.2-1) ...
+2026-10-17T16:20:31.4665739Z Setting up hermes-agent (0.22.2-1) ...
+2026-10-17T16:20:31.4948348Z /data/data/com.termux/files/usr/tmp/hermes-next-stable-kRlpKm/state/config.yaml: OK
+2026-10-17T16:20:31.4949037Z /data/data/com.termux/files/usr/tmp/hermes-next-stable-kRlpKm/state/session-preservation.txt: OK
+2026-10-17T16:20:31.4950001Z /data/data/com.termux/files/usr/tmp/hermes-next-stable-kRlpKm/state/profiles/review/.env: OK
+2026-10-17T16:20:43.5586357Z   → Installing Python dependencies…
+2026-10-17T16:20:43.5586842Z   ✓ Installing Python dependencies
+2026-10-17T16:20:43.5589143Z   → Installing Python packages…
+2026-10-17T16:20:43.5589743Z   ✓ Installing Python packages
+2026-10-17T16:20:43.5590021Z ✓ venv +anthropic
+2026-10-17T16:20:44.9559076Z Hermes Agent v0.22.2 (2026.9.24) · stable
+2026-10-17T16:20:44.9560185Z Install directory: /data/data/com.termux/files/usr/lib/hermes-agent/app
+2026-10-17T16:20:44.9560626Z Install method: apt
+2026-10-17T16:20:44.9560828Z Python: 3.14.6
+2026-10-17T16:20:44.9561008Z OpenAI SDK: 2.24.0

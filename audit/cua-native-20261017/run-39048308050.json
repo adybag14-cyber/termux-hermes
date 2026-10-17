@@ -1,0 +1,221 @@
+{
+  "schema_version": 1,
+  "record_kind": "observed_failed_native_probe",
+  "run": {
+    "id": 39048308050,
+    "head_sha": "398e1880ce139dbaf8ed537b23a2693b7f5002eb",
+    "workflow": "cua-termux-probe.yml",
+    "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39048308050",
+    "job_id": 117441425490,
+    "job_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39048308050/job/117441425490",
+    "conclusion": "failure"
+  },
+  "artifact": {
+    "id": 12107125950,
+    "node_id": "MDg6QXJ0aWZhY3QxMjEwNzEyNTk1MA==",
+    "name": "termux-cua-x11-experiment",
+    "size_in_bytes": 312980,
+    "url": "https://api.github.com/repos/adybag14-cyber/termux-hermes/actions/artifacts/12107125950",
+    "archive_download_url": "https://api.github.com/repos/adybag14-cyber/termux-hermes/actions/artifacts/12107125950/zip",
+    "expired": false,
+    "digest": "sha256:d834f573d6dc738d392b915b6bcd21dd72f808e773794358dcc7458eee1e1302",
+    "created_at": "2026-10-17T16:16:14Z",
+    "updated_at": "2026-10-17T16:16:14Z",
+    "expires_at": "2026-10-31T16:16:13Z",
+    "workflow_run": {
+      "id": 39048308050,
+      "repository_id": 1305668154,
+      "head_repository_id": 1305668154,
+      "head_branch": "prepare/termux-compatibility-next-stable",
+      "head_sha": "398e1880ce139dbaf8ed537b23a2693b7f5002eb"
+    }
+  },
+  "verification": {
+    "downloaded_zip_sha256": "d834f573d6dc738d392b915b6bcd21dd72f808e773794358dcc7458eee1e1302",
+    "downloaded_zip_bytes": 312980,
+    "artifact_digest_verified": true,
+    "head_binding_verified": true,
+    "full_log_files_retained_in_actions_artifact": {
+      "cua-cargo-build.log": {
+        "sha256": "1ab0a30ecccc2f1c861e346662826093696928b92f7919c3ec92cfd9614c4cab",
+        "bytes": 14415
+      },
+      "cua-native-probe.log": {
+        "sha256": "4f3b7c3bbcbae4ab5c21ed334dba4e9f826a9ed7975d9d4be837ff020362aac1",
+        "bytes": 86523
+      }
+    }
+  },
+  "raw_probe_inputs": {
+    "schema_version": 1,
+    "purpose": "unpublished isolated native CUA virtual-X11 experiment",
+    "run_id": "39048308050",
+    "head_sha": "398e1880ce139dbaf8ed537b23a2693b7f5002eb",
+    "workflow_sha": "398e1880ce139dbaf8ed537b23a2693b7f5002eb",
+    "builder_image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
+    "native_architecture": "aarch64",
+    "inputs": {
+      "scripts/compatibility_probe_cua.sh": "8f789b2c4d207477a8be96fb6dbedddcdb2a8228dda33197992b95a8b2fcdb81",
+      "scripts/prepare_cua_termux_source.py": "093c12378c2f04e07da58dce83ac8e77c3d9edf86e5f2ad7bb2d14bd855c1d57",
+      "patches/next-stable/cua-driver.patch": "25b8d2557dbdc0cee98bbae346df99b5c348efdcacf0d2e9aec68ed50bcf8d23",
+      ".github/workflows/cua-termux-probe.yml": "b0e93b124464107a51d8d24a5a2e05d8b6df5f01435995430e7649bcbc299766"
+    },
+    "hermes_pm_cua_admission_changed": false,
+    "release_output": false
+  },
+  "raw_source_receipt": {
+    "schema": 1,
+    "purpose": "isolated native Termux X11 experiment; no PM admission",
+    "source_repository": "trycua/cua",
+    "source_tag": "cua-driver-rs-v0.21.0",
+    "source_commit": "70db98d1bcd92890d778f4978e0eb107a4b66c1b",
+    "source_lock_sha256": "27b025bc4fd81074cf18ae614597bec5b7c9d8ea99b2a7aaf45072aec72c64ce",
+    "prepared_lock_sha256": "fd6e9eb4984e8af3de23f38822bd91ca2e700cd20d0ad81b44142e33991116b9",
+    "source_patch_sha256": "25b8d2557dbdc0cee98bbae346df99b5c348efdcacf0d2e9aec68ed50bcf8d23",
+    "preparer_sha256": "093c12378c2f04e07da58dce83ac8e77c3d9edf86e5f2ad7bb2d14bd855c1d57",
+    "registry_adapters": [
+      {
+        "name": "clipboard-rs",
+        "version": "0.3.5",
+        "registry": "registry+https://github.com/rust-lang/crates.io-index",
+        "url": "https://static.crates.io/crates/clipboard-rs/clipboard-rs-0.3.5.crate",
+        "archive_sha256": "d1c988a897ea030e32f0668c90b0192800e0c561b3d941fc366f9ad5a1bf26ba",
+        "archive_bytes": 52800,
+        "edits": [
+          {
+            "path": "termux-vendor/clipboard-rs-0.3.5/Cargo.toml",
+            "before_sha256": "b188ce2135a516a06aad98efe4f685bad2c9ae813aefbd3ea01f7384495a67fb",
+            "after_sha256": "4525342aaa290f10569af864713ab5b4106feea0b203f357c8764fc04d4b4d3b"
+          },
+          {
+            "path": "termux-vendor/clipboard-rs-0.3.5/src/lib.rs",
+            "before_sha256": "83013190c29b099f546f949ea081e2250c71d3b8efcb02847dd671c270693ccb",
+            "after_sha256": "b92834fab8520e730f1a73c09f31c4dbbba5c90fe807cc98918f8d444cd960e5"
+          },
+          {
+            "path": "termux-vendor/clipboard-rs-0.3.5/src/platform/mod.rs",
+            "before_sha256": "85e216513925da0627cbba22d2c18d2b5e736d106c0cee73e1f366dd0c0e75be",
+            "after_sha256": "0fa9e139aa12793e2bd04dba876a677b0e17a1c6a16b7d5f39c353210582da72"
+          }
+        ],
+        "prepared_tree_sha256": "1ef3400cc7a4783b94cfa2257472fd0835d665da7b82acea6cf557e5e90ad8f8"
+      },
+      {
+        "name": "x11rb-protocol",
+        "version": "0.13.2",
+        "registry": "registry+https://github.com/rust-lang/crates.io-index",
+        "url": "https://static.crates.io/crates/x11rb-protocol/x11rb-protocol-0.13.2.crate",
+        "archive_sha256": "ea6fc2961e4ef194dcbfe56bb845534d0dc8098940c7e5c012a258bfec6701bd",
+        "archive_bytes": 514069,
+        "edits": [
+          {
+            "path": "termux-vendor/x11rb-protocol-0.13.2/src/parse_display/connect_instruction.rs",
+            "before_sha256": "e3a05c67ea9b2f9a1e25dcd482fecc2443b1dc5c8b49a6f0e2f2d35b223ef6ae",
+            "after_sha256": "8d00aee51662b8bb3957284a55ee97efd75202a350d3d9041f271dc703b803f6"
+          }
+        ],
+        "prepared_tree_sha256": "0a92a477359ee4a531611c0aee6cea581d3c0daf1c03a9919159bb1ff35a588f"
+      }
+    ],
+    "changed_source_sha256": {
+      "libs/cua-driver/rust/Cargo.lock": "fd6e9eb4984e8af3de23f38822bd91ca2e700cd20d0ad81b44142e33991116b9",
+      "libs/cua-driver/rust/Cargo.toml": "f5da03c2d5bbc708e7f3128b9352f5a28be81bee8d8f6ff7c08e5cd49b6c84d4",
+      "libs/cua-driver/rust/crates/cua-driver-core/src/daemon.rs": "cb6146fa127323ea56fe768a650c2ea51ac5d8b37c0c178c5e6f44083c935817",
+      "libs/cua-driver/rust/crates/cua-driver-sdk/Cargo.toml": "e02368be5bb91d7af696e5c211493a82c3489507a4588b5b12d1e74bd3f92e0e",
+      "libs/cua-driver/rust/crates/cua-driver-sdk/src/runtime.rs": "8d738591bc71e790a02dc063306ecc6192181dacdac4bee54c60cde2baf6851c",
+      "libs/cua-driver/rust/crates/cua-driver/Cargo.toml": "8f79bbb544e37895b7857a9b61eb55cfb757f78e24c659fdf2458712a5a66dac",
+      "libs/cua-driver/rust/crates/cua-driver/src/cli.rs": "c23a58bce4dd883c14d53dbf531d88fdda1f7be3cf8cfbc92e78394a53c7bafa",
+      "libs/cua-driver/rust/crates/cua-driver/src/history_runtime.rs": "ba7babdd9113def18260d1580a29ac6f0cf37f2cf9a8e28d92d55f5c77fa90af",
+      "libs/cua-driver/rust/crates/cua-driver/src/serve.rs": "bd90fd6604e17a0f2b5b71fcbaa8cea6c0758155f09e919f1862a03d46a0ed49",
+      "libs/cua-driver/rust/crates/platform-linux/Cargo.toml": "0a7310d56d6d9fb6a92abf5847e825230d987c7339f9a1c382c35fbb69b95eba",
+      "libs/cua-driver/rust/crates/platform-linux/src/health_report.rs": "ac21dcf8bc667311e65a33d2eb74d1a85de669c02b45054803d2ac67470bdd66",
+      "libs/cua-driver/rust/crates/platform-linux/src/lib.rs": "fb2f5ded1f5476de9f6d461702ea82736b23873d7f4c7315dbb2005acf6d50ff",
+      "libs/cua-driver/rust/crates/platform-linux/src/overlay.rs": "c8554c4a6733b10fa04ad6a979418ec05e082416e3b49721c49a58621c2b2a2c",
+      "libs/cua-driver/rust/crates/platform-linux/src/recording_hooks.rs": "d9923feaea12aff97102a8bccf017d67fbb9ab08a878d42555c943690c76cd01",
+      "libs/cua-driver/rust/crates/platform-linux/src/terminal.rs": "997d7a231973e835cffd328ae614c9c9f874d63dab793a302f381be5d9436f2e",
+      "libs/cua-driver/rust/crates/platform-linux/src/tools/mod.rs": "d7b51b99ea266fa333c8de49f15b1eb12a6c18754c490cf06e1fcb29d87f8847",
+      "libs/cua-driver/rust/crates/platform-linux/src/tty.rs": "bb517faa6f9e800e1c3a54ee63a0450f458a9356665e0e24b6d8b1b5185b8637"
+    },
+    "unchanged_registry_package_rows": 602,
+    "unavailable_claims": [
+      "Android phone UI",
+      "TigerVNC parallel uinput pointers",
+      "encrypted history without a supported secure credential store"
+    ]
+  },
+  "raw_exit_result": {
+    "schema_version": 1,
+    "stage": "compile",
+    "exit_code": 101
+  },
+  "raw_compiler_reports": {
+    "CUA-RUSTC.txt": {
+      "sha256": "481adb50a1a63f35f62b2fb8ac7715ae65f476eca2730518d0e12d52a2eff4e7",
+      "content": "rustc 1.99.1 (58cf8f9c3 2026-10-13) (built from a source tarball)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: aarch64-linux-android\nrelease: 1.99.1\nLLVM version: 21.1.8\n"
+    },
+    "CUA-CLANG.txt": {
+      "sha256": "de78135dc0138338f33897fb853af0f614f913d701547b32ecf2450046e00b65",
+      "content": "clang version 21.1.8\nTarget: aarch64-unknown-linux-android24\nThread model: posix\nInstalledDir: /data/data/com.termux/files/usr/bin\n"
+    }
+  },
+  "verbatim_failure_excerpt": {
+    "file": "cua-cargo-build.log",
+    "lines": [
+      {
+        "line": 403,
+        "text": "error[E0425]: cannot find value `command` in this scope"
+      },
+      {
+        "line": 404,
+        "text": "    --> crates/cua-driver/src/telemetry.rs:2579:5"
+      },
+      {
+        "line": 405,
+        "text": "     |"
+      },
+      {
+        "line": 406,
+        "text": "2579 |     command"
+      },
+      {
+        "line": 407,
+        "text": "     |     ^^^^^^^ not found in this scope"
+      },
+      {
+        "line": 408,
+        "text": ""
+      },
+      {
+        "line": 409,
+        "text": "For more information about this error, try `rustc --explain E0425`."
+      }
+    ]
+  },
+  "analysis": {
+    "failure_stage": "compile",
+    "subsequent_fix_commit": "6c870da998632d9b7bd845257f3717d70af95162",
+    "subsequent_fix_patch_sha256": "8c2af4a9cc04931297015621e57ce9ed057f6d97919841fea4b17e209e620fd1",
+    "subsequent_fix_description": "Add Android's Build.VERSION.RELEASE system-property command to telemetry::os_version, retaining the existing command/output/error handling.",
+    "native_pty_abi_status": "passed",
+    "native_platform_linux_compile_status": "passed",
+    "native_driver_build_status": "failed",
+    "native_mcp_behavior_status": "not_reached"
+  },
+  "raw_pty_abi_result": {
+    "sha256": "6090767b46965cfabaa2d2f14e8b1b1f0cdd2ade2f6f3944ad9f3358b5dbfd85",
+    "content": {
+      "request_u32": 2147767344,
+      "pty_number_agrees_with_ptsname_r": true,
+      "non_master_rejected": true
+    }
+  },
+  "verbatim_platform_compile_excerpt": {
+    "file": "cua-cargo-build.log",
+    "lines": [
+      {
+        "line": 402,
+        "text": "warning: `platform-linux` (lib) generated 2 warnings"
+      }
+    ]
+  }
+}

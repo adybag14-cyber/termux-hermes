@@ -1,0 +1,188 @@
+{
+  "run_id": 39039959324,
+  "head_commit": "fb8700218a5b3735f66f36c676d2afd03c8b29e8",
+  "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39039959324",
+  "components": {
+    "uvloop": {
+      "job_id": 117417226748,
+      "artifact_id": 12102859120,
+      "status": "passed",
+      "tested_merge_commit": "caa1cec45cb286b80ae500e9c358f6f665220e1e",
+      "compatibility_patch_sha256": "b77f8b45667874b2ef172a1cd0354f63dea3a04e6285d9013f7ebbd5518e7d38",
+      "checks": [
+        "uvloop native extension",
+        "TCP roundtrip",
+        "task scheduling",
+        "loop shutdown"
+      ],
+      "original_payload_runtime_passed": true,
+      "undeclared_runtime_libraries": [],
+      "extension_count": 1,
+      "evidence": {
+        "BUILD-PROBE.json": "1b0f94ab2f9bf3faadb24517706c99fd586f24118dde982717a2b659044f86a4",
+        "ORIGINAL-RUNTIME-PROBE.json": "a278ae3d37d62356ddc0ac5c35ef3fe2f17a9da81c03806ce59b180d979ecf9b",
+        "NATIVE-LINKAGE.json": "678bb99c04b825506d9b1e5af3a0e0f390cddb9bd3e17e92670cb8d8c63aeee6"
+      }
+    },
+    "matrix": {
+      "job_id": 117417226728,
+      "artifact_id": 12103607606,
+      "status": "passed",
+      "tested_merge_commit": "caa1cec45cb286b80ae500e9c358f6f665220e1e",
+      "compatibility_patch_sha256": "b77f8b45667874b2ef172a1cd0354f63dea3a04e6285d9013f7ebbd5518e7d38",
+      "checks": [
+        "Olm bidirectional ratchet",
+        "Megolm roundtrip",
+        "mautrix crypto import",
+        "PyCryptodome AES",
+        "asyncpg native UUID codec",
+        "aiohttp loopback",
+        "SQLite state"
+      ],
+      "original_payload_runtime_passed": true,
+      "undeclared_runtime_libraries": [],
+      "extension_count": 49,
+      "evidence": {
+        "BUILD-PROBE.json": "1d48f8c3b1e7ca3e2d80fb6600b34e66177586be17ef3b06d73bbee4d0694a49",
+        "ORIGINAL-RUNTIME-PROBE.json": "27672dbfd044a10fc25b67b30ce97177e765b4393e2288989db35ac242ff88b2",
+        "NATIVE-LINKAGE.json": "7201955389bac5f4a1a43b80ddff1ff8d1bc0adae65b4197985df9cc2160ee05"
+      }
+    },
+    "browser": {
+      "job_id": 117417226849,
+      "artifact_id": 12103289633,
+      "status": "passed",
+      "artifact": {
+        "version": "0.26.0",
+        "archive_url": "https://registry.npmjs.org/agent-browser/-/agent-browser-0.26.0.tgz",
+        "archive_sha256": "8a48cf4110d7dc2c12c1c4d6d25e0babdfa31604b537f05df0dc835fe2f854bf",
+        "binary_sha256": "fca20648bc64491f3a0a0f5eaac7d6f6017d547f9cdff9bf6307905eeb2f5426",
+        "elf_machine": 183,
+        "elf_interpreter": false,
+        "dynamic_linkage": false
+      },
+      "steps": {
+        "browser-click": {
+          "success": true,
+          "data": {
+            "clicked": "#change"
+          },
+          "error": null
+        },
+        "browser-close": {
+          "success": true,
+          "data": {
+            "closed": true
+          },
+          "error": null
+        },
+        "browser-eval": {
+          "success": true,
+          "data": {
+            "origin": "http://127.0.0.1:35917/",
+            "result": "Clicked successfully"
+          },
+          "error": null
+        },
+        "browser-open": {
+          "success": true,
+          "data": {
+            "title": "Hermes Android browser probe",
+            "url": "http://127.0.0.1:35917/"
+          },
+          "error": null
+        },
+        "browser-screenshot": {
+          "success": true,
+          "data": {
+            "path": "/out/browser-loopback.png"
+          },
+          "error": null
+        },
+        "browser-snapshot-before": {
+          "success": true,
+          "data": {
+            "origin": "http://127.0.0.1:35917/",
+            "refs": {
+              "e1": {
+                "name": "Hermes loopback probe",
+                "role": "heading"
+              },
+              "e2": {
+                "name": "Change result",
+                "role": "button"
+              }
+            },
+            "snapshot": "- heading \"Hermes loopback probe\" [level=1, ref=e1]\n- button \"Change result\" [ref=e2]"
+          },
+          "error": null
+        }
+      }
+    },
+    "nemo": {
+      "job_id": 117417226739,
+      "artifact_id": 12104027325,
+      "artifact_name": "termux-compatibility-nemo",
+      "status": "passed",
+      "workflow_head_commit": "fb8700218a5b3735f66f36c676d2afd03c8b29e8",
+      "tested_merge_commit": "caa1cec45cb286b80ae500e9c358f6f665220e1e",
+      "artifact_archive_sha256": "078e6cbe2d50cf21401fcdc7ebef26b6e9098556f4e9e61ea9a8e37dc89d5769",
+      "artifact_archive_bytes": 15200386,
+      "artifact_archive_digest_verified": true,
+      "compatibility_patch_sha256": "b77f8b45667874b2ef172a1cd0354f63dea3a04e6285d9013f7ebbd5518e7d38",
+      "baseline_package_version": "0.22.2-1",
+      "baseline_package_sha256": "deb163351554ca03f7104f91a50f4f8dc4d9247ce0cf5f2cca2608be3b319add",
+      "builder_image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
+      "checks": [
+        "nemo_relay native import",
+        "static plugin configuration validation",
+        "native scope push/pop",
+        "nested trace propagation"
+      ],
+      "original_payload_runtime_passed": true,
+      "undeclared_runtime_libraries": [],
+      "declared_added_runtime_libraries": [],
+      "extension_count": 1,
+      "elf_machine": 183,
+      "native_extension_sha256": "125bc4bd1b91051f4cae579151c574931f3fc6434dedf70b485b9ead6746b7f1",
+      "dt_needed": [
+        "libpython3.14.so",
+        "libdl.so",
+        "libm.so",
+        "libc.so"
+      ],
+      "packages": {
+        "nemo-relay": "0.10.0"
+      },
+      "wheels": [
+        {
+          "name": "nemo_relay-0.10.0-cp311-abi3-android_24_arm64_v8a.whl",
+          "sha256": "203b58a22b0c5ebe423f32493be006c1ddf20a748d00b6918b033147edacb244",
+          "size": 11464239
+        },
+        {
+          "name": "setuptools-83.0.0-py3-none-any.whl",
+          "sha256": "29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3",
+          "size": 1008090
+        }
+      ],
+      "registry_source": {
+        "registry": "https://pypi.org/simple"
+      },
+      "sdist": {
+        "url": "https://files.pythonhosted.org/packages/16/e8/016a4c95429c37c456d5580d92dffb46bd7d071017fea6d751c5b73582ca/nemo_relay-0.10.0.tar.gz",
+        "hash": "sha256:d3382e826d3d65551f3a307128c15116057fd7f45277f8a8d0cb51f8aca3ed68",
+        "size": 1922175,
+        "upload-time": "2026-10-08T22:01:42.101Z"
+      },
+      "lock_sha256": "72abb87a634769baaf30830cd317892053c6e15f8e9519b085524fa0ed542829",
+      "pyproject_sha256": "7ee8c02a9eb624c8fe2c718ba0f69a573d55e5223f3297bb3439afa2dd275547",
+      "evidence": {
+        "BUILD-PROBE.json": "ad03680f72750f029d128ae009e41fb3d48fc75378a5341b39fb88f088eb16be",
+        "ORIGINAL-RUNTIME-PROBE.json": "3afd944664627d945da97c5c4470fd0f88d92ea41ecd1264619dec5667aad335",
+        "NATIVE-LINKAGE.json": "0e889f879a34e2a5245056cdff8d33ee0eab29ebde25209dc20e2cd5e5de19ef",
+        "PROBE-INPUTS.json": "7b5d37e3cda47fef33a6a0753fbca42aeeb19db4190354cde60babf6224fe92f"
+      }
+    }
+  }
+}

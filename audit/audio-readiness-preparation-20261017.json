@@ -1,0 +1,349 @@
+{
+  "schema_version": 1,
+  "prepared_at_utc": "2026-10-17",
+  "status": "host-contract-proof-only",
+  "repository": "adybag14-cyber/termux-hermes",
+  "packaging_reference_commit": "1eaee07fddc0dadab59ea4a5758f27513488b168",
+  "upstream_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+  "source_worktree": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\hermes-agent-audio-readiness-v0.22.2-20261017",
+  "ordered_baseline_patches": [
+    {
+      "path": "patches/upstream-v0.22.2-termux.patch",
+      "sha256": "6fafa8a39ed0295e6788755206a4c7c946e9246bb99484b5a23eb186e54608d2"
+    },
+    {
+      "path": "patches/upstream-v0.22.2-source-integrity.patch",
+      "sha256": "ae8d1a7a6137c8ba5c6b642ad1d4b69f1877cfaeb2fb6de9720f1f18d35815f3"
+    },
+    {
+      "path": "patches/upstream-v0.22.2-imports.patch",
+      "sha256": "f95683a50151c690b645ed83dc3dddc93354364b9e091fa54ed62deaeeb83729"
+    },
+    {
+      "path": "patches/upstream-v0.22.2-snapshot.patch",
+      "sha256": "b762b8ec3429064193d80cd8c9fe80571c83d085c1cb20409ab9cfc7fbc844aa"
+    },
+    {
+      "path": "patches/next-stable/compatibility.patch",
+      "sha256": "77ac41bc11a6facd928f4cef577642b9eeb042ce3da7d820478aa49e1d98fa1e"
+    }
+  ],
+  "full_source_tree_scope": "The baseline/replay trees describe the full source reference, not the trimmed candidate app payload.",
+  "integrity": {
+    "baseline_tree": "f49c77b666cef7fd5235cdd786556908527b532e",
+    "replay_tree": "aa90e9a6eca74835dacc2dc55f376bddfd499c25",
+    "patch": {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\patches\\next-stable\\audio-readiness.patch",
+      "bytes": 8470,
+      "sha256": "82b92d5095ceabc05f0200569da1cc16b861c77b166095982b05d57940573db7"
+    },
+    "paths": [
+      {
+        "path": "tools/voice_mode.py",
+        "bytes": 70749,
+        "sha256": "2080ba077ec94146d06cbd704a7e21763e5cf37f4221561145b4c45de6a78a58"
+      },
+      {
+        "path": "tools/voice_mode_capture.py",
+        "bytes": 7542,
+        "sha256": "492c013f8473acdd58dff027ffc4f787347dc27524e801692bf32efe67516d60"
+      },
+      {
+        "path": "tests/tools/test_voice_wsl_pipewire.py",
+        "bytes": 2233,
+        "sha256": "3ac8ad669799f3c23b1bfda02996619e7f71d8ed08c58a80fd61234981870be0"
+      },
+      {
+        "path": "tests/tools/test_voice_audio_readiness.py",
+        "bytes": 3281,
+        "sha256": "d94b5bc0db75dff255c4f1ef5cd155d5605ce907d2606c2e71052457b5c470ef"
+      }
+    ],
+    "ast_validation": "passed",
+    "git_diff_check": "passed",
+    "temporary_index_replay": "byte-identical to all four changed files",
+    "main_source_files": "unchanged; equal staged baseline blobs",
+    "main_compatibility_patch": "unchanged"
+  },
+  "native_failure_evidence": "audit/native-probes-9fcd31c-20261017/audio-summary.json",
+  "sounddevice_primary_source_check": {
+    "url": "https://files.pythonhosted.org/packages/1e/0a/478e441fd049002cf308520c0d62dd8333e7c6cc8d997f0dda07b9fbcc46/sounddevice-0.5.5-py3-none-any.whl",
+    "bytes": 32807,
+    "sha256": "30ff99f6c107f49d25ad16a45cacd8d91c25a1bcdd3e81a206b921a3a6405b1f",
+    "method": "Downloaded in memory, checked against the exact uv.lock size/SHA, inspected sounddevice.py from the ZIP without importing it.",
+    "observed": "PortAudioError subclasses Exception; module initialization calls Pa_Initialize through _initialize()."
+  },
+  "host": {
+    "platform": "win32",
+    "test_python": "3.14.7",
+    "pytest": "9.1.1"
+  },
+  "canonical_runs": [
+    {
+      "argv": [
+        "C:\\Program Files\\Git\\bin\\bash.exe",
+        "scripts/run_tests.sh",
+        "tests/tools/test_voice_audio_readiness.py",
+        "--file-retries",
+        "0",
+        "--file-timeout",
+        "45",
+        "-j",
+        "1"
+      ],
+      "cwd": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\hermes-agent-audio-readiness-v0.22.2-20261017",
+      "HERMES_PYTHON": "C:/Users/adyba/AppData/Local/hermes/installs/9e27fc18556ae4a8/test-environment/gen-1b15ec8e3cfd4a399274d893e0cfbbf6/venv/Scripts/python.exe",
+      "exit_code": 1,
+      "duration_seconds": 15.254,
+      "stdout_sha256": "f4993f9e702a2f06dcef5817513e80787f82e2b292fdb597f9632827292a6cfa",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 8594,
+      "stderr_bytes": 0,
+      "name": "base-red",
+      "counts": {
+        "passed": 1,
+        "failed": 3,
+        "skipped": 0
+      },
+      "raw_logs": {
+        "stdout": {
+          "encoding": "base64",
+          "data": "4pa2IG5vdCBhY3RpdmF0ZWQg4oCUIHVzaW5nIEhFUk1FU19QWVRIT046IEM6L1VzZXJzL2FkeWJhL0FwcERhdGEvTG9jYWwvaGVybWVzL2luc3RhbGxzLzllMjdmYzE4NTU2YWU0YTgvdGVzdC1lbnZpcm9ubWVudC9nZW4tMWIxNWVjOGUzY2ZkNGEzOTkyNzRkODkzZTBjZmJiZjYvdmVudi9TY3JpcHRzL3B5dGhvbi5leGUK4pa2IHJ1bm5pbmcgcGVyLWZpbGUgcGFyYWxsZWwgdGVzdCBzdWl0ZSB2aWEgcnVuX3Rlc3RzX3BhcmFsbGVsLnB5CiAgKFRaPVVUQyBMQU5HPUMuVVRGLTggUFlUSE9OSEFTSFNFRUQ9MDsgY2xlYW4gZW52KQrilrYgcHJlLWNvbXBpbGluZyBieXRlY29kZSBjYWNoZQrilrYgbGF1bmNoaW5nIHRlc3QgcnVubmVyCkRpc2NvdmVyZWQgMSB0ZXN0IGZpbGVzICh+MiB0ZXN0cykgdW5kZXIgWyd0ZXN0c1xcdG9vbHNcXHRlc3Rfdm9pY2VfYXVkaW9fcmVhZGluZXNzLnB5J107IHJ1bm5pbmcgd2l0aCAtaiAxDQpbMTAwLjAlIHwgICAgIDIvfjIgfCDinJMxIHwg4pyXM10g4pyXIHRlc3RzXHRvb2xzXHRlc3Rfdm9pY2VfYXVkaW9fcmVhZGluZXNzLnB5ICgx4pyTIDPinJcsIDkuMHMpDQoNCiAg4pWU4pWNIEZhaWxlZDogdGVzdHNcdG9vbHNcdGVzdF92b2ljZV9hdWRpb19yZWFkaW5lc3MucHkg4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWN4pWNDQogIOKVkSBmb3J3YXJkZWQgPSBUcnVlLCByZWFkeSA9IEZhbHNlDQogIOKVkSANCiAg4pWRICAgICBAcHl0ZXN0Lm1hcmsucGFyYW1ldHJpemUoDQogIOKVkSAgICAgICAgICJkZXZpY2VzLCBmb3J3YXJkZWQsIHJlYWR5IiwNCiAg4pWRICAgICAgICAgWw0KICDilZEgICAgICAgICAgICAgKFt7Im5hbWUiOiAic3BlYWtlciIsICJtYXhfaW5wdXRfY2hhbm5lbHMiOiAwLCAibWF4X291dHB1dF9jaGFubmVscyI6IDJ9XSwgRmFsc2UsIEZhbHNlKSwNCiAg4pWRICAgICAgICAgICAgIChbeyJuYW1lIjogInNwZWFrZXIiLCAibWF4X2lucHV0X2NoYW5uZWxzIjogMCwgIm1heF9vdXRwdXRfY2hhbm5lbHMiOiAyfV0sIFRydWUsIEZhbHNlKSwNCiAg4pWRICAgICAgICAgICAgIChbeyJuYW1lIjogInNwZWFrZXIiLCAibWF4X2lucHV0X2NoYW5uZWxzIjogMCwgIm1heF9vdXRwdXRfY2hhbm5lbHMiOiAyfSwNCiAg4pWRICAgICAgICAgICAgICAgeyJuYW1lIjogIm1pY3JvcGhvbmUiLCAibWF4X2lucHV0X2NoYW5uZWxzIjogMSwgIm1heF9vdXRwdXRfY2hhbm5lbHMiOiAwfV0sIEZhbHNlLCBUcnVlKSwNCiAg4pWRICAgICAgICAgXSwNCiAg4pWRICAgICApDQogIOKVkSAgICAgZGVmIHRlc3RfZGV2aWNlX2ludmVudG9yeV9yZXF1aXJlc19hbl9pbnB1dF9ub3RfanVzdF9vdXRwdXQobW9ua2V5cGF0Y2gsIGRldmljZXMsIGZvcndhcmRlZCwgcmVhZHkpOg0KICDilZEgICAgICAgICBsaWJyYXJ5ID0gU2ltcGxlTmFtZXNwYWNlKHF1ZXJ5X2RldmljZXM9bGFtYmRhOiBkZXZpY2VzKQ0KICDilZEgICAgICAgICBtb25rZXlwYXRjaC5zZXRhdHRyKHZtLCAiX2ltcG9ydF9hdWRpbyIsIGxhbWJkYTogKGxpYnJhcnksIE5vbmUpKQ0KICDilZEgICAgICAgICB3YXJuaW5ncywgbm90aWNlcyA9IFtdLCBbXQ0KICDilZEgICAgIA0KICDilZEgICAgICAgICB2bS5fcHJvYmVfYXVkaW9fbGlicmFyaWVzKA0KICDilZEgICAgICAgICAgICAgd2FybmluZ3MsIG5vdGljZXMsIGhhc19mb3J3YXJkZWRfYXVkaW89Zm9yd2FyZGVkLA0KICDilZEgICAgICAgICAgICAgdGVybXV4X21pY19jbWQ9Tm9uZSwgdGVybXV4X2FwcF9pbnN0YWxsZWQ9RmFsc2UsDQogIOKVkSAgICAgICAgICkNCiAg4pWRICAgICANCiAg4pWRID4gICAgICAgYXNzZXJ0IChub3Qgd2FybmluZ3MpIGlzIHJlYWR5DQogIOKVkSBFICAgICAgIGFzc2VydCBub3QgW10gaXMgRmFsc2UNCiAg4pWRIA0KICDilZEgdGVzdHNcdG9vbHNcdGVzdF92b2ljZV9hdWRpb19yZWFkaW5lc3MucHk6ODM6IEFzc2VydGlvbkVycm9yDQogIOKVkSA9PT09PT09PT09PT09PT09PT09PT09PT09PT0gc2hvcnQgdGVzdCBzdW1tYXJ5IGluZm8gPT09PT09PT09PT09PT09PT09PT09PT09PT09DQogIOKVkSBGQUlMRUQgdGVzdHMvdG9vbHMvdGVzdF92b2ljZV9hdWRpb19yZWFkaW5lc3MucHk6OnRlc3RfcG9ydGF1ZGlvX2ltcG9ydF9mYWlsdXJlX2lzX2FfcmVhZGluZXNzX2RpYWdub3N0aWMNCiAg4pWRIEZBSUxFRCB0ZXN0cy90b29scy90ZXN0X3ZvaWNlX2F1ZGlvX3JlYWRpbmVzcy5weTo6dGVzdF9kZXZpY2VfaW52ZW50b3J5X3JlcXVpcmVzX2FuX2lucHV0X25vdF9qdXN0X291dHB1dFtkZXZpY2VzMC1GYWxzZS1GYWxzZV0NCiAg4pWRIEZBSUxFRCB0ZXN0cy90b29scy90ZXN0X3ZvaWNlX2F1ZGlvX3JlYWRpbmVzcy5weTo6dGVzdF9kZXZpY2VfaW52ZW50b3J5X3JlcXVpcmVzX2FuX2lucHV0X25vdF9qdXN0X291dHB1dFtkZXZpY2VzMS1UcnVlLUZhbHNlXQ0KICDilZEgPT09PT09PT09PT09PT09PT09PT09PT09PSAzIGZhaWxlZCwgMSBwYXNzZWQgaW4gNS45M3MgPT09PT09PT09PT09PT09PT09PT09PT09PQ0KICDilZENCiAg4pWRICBSZXBybzogcHl0aG9uIC1tIHB5dGVzdCB0ZXN0c1x0b29sc1x0ZXN0X3ZvaWNlX2F1ZGlvX3JlYWRpbmVzcy5weQ0KICDilZrilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY3ilY0NCg0KDQo9PT0gU3VtbWFyeTogMSBmaWxlcywgMSB0ZXN0cyBwYXNzZWQsIDMgZmFpbGVkICgxMDAlIGNvbXBsZXRlKSBpbiAxMi4zcyAoMSB3b3JrZXJzKSA9PT0NCg0KPT09IFBlci1maWxlIHN1YnByb2Nlc3MgdGltZSBkaXN0cmlidXRpb24gPT09DQogIEZpbGVzOiAgIDENCiAgVG90YWwgc3VicHJvY2VzcyBDUFUtd2FsbDogOS4wcyAgKHJ1bm5lciB3YWxsOiAxMi4zcywgcGFyYWxsZWxpc206IDF4KQ0KICBQNTA6IDkuMDBzICBQOTA6IDkuMDBzICBQOTU6IDkuMDBzICBQOTk6IDkuMDBzICBNYXg6IDkuMDBzDQogIDwxczogMCBmaWxlcyAoMCUpICA8MnM6IDAgZmlsZXMgKDAlKQ0KICBUb3AgMTAgc2xvd2VzdDoNCiAgICAgIDkuMDBzICB0ZXN0c1x0b29sc1x0ZXN0X3ZvaWNlX2F1ZGlvX3JlYWRpbmVzcy5weQ0KDQo9PT0gRmFpbHVyZSBvdXRwdXQgPT09DQoNCi0tLSB0ZXN0c1x0b29sc1x0ZXN0X3ZvaWNlX2F1ZGlvX3JlYWRpbmVzcy5weSAtLS0NCj09PT09PT09PT09PT09PT09PT09PT09PT09PT09IHRlc3Qgc2Vzc2lvbiBzdGFydHMgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT0NCnBsYXRmb3JtIHdpbjMyIC0tIFB5dGhvbiAzLjE0LjcsIHB5dGVzdC05LjEuMSwgcGx1Z2d5LTEuNi4wDQpyb290ZGlyOiBDOlxVc2Vyc1xhZHliYVxkb2NrZXItY2hhdGdwdC1kZXZib3hcd29ya3NwYWNlXGhlcm1lcy1hZ2VudC1hdWRpby1yZWFkaW5lc3MtdjAuMjIuMi0yMDI2MTAxNw0KY29uZmlnZmlsZTogcHlwcm9qZWN0LnRvbWwNCnBsdWdpbnM6IGFueWlvLTQuMTQuMiwgYXN5bmNpby0xLjMuMA0KYXN5bmNpbzogbW9kZT1Nb2RlLlNUUklDVCwgZGVidWc9RmFsc2UsIGFzeW5jaW9fZGVmYXVsdF9maXh0dXJlX2xvb3Bfc2NvcGU9Tm9uZSwgYXN5bmNpb19kZWZhdWx0X3Rlc3RfbG9vcF9zY29wZT1mdW5jdGlvbg0KY29sbGVjdGVkIDQgaXRlbXMNCg0KdGVzdHNcdG9vbHNcdGVzdF92b2ljZV9hdWRpb19yZWFkaW5lc3MucHkgRkZGLiAgICAgICAgICAgICAgICAgICAgICAgICAgIFsxMDAlXQ0KDQo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09IEZBSUxVUkVTID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09DQpfX19fX19fX19fXyB0ZXN0X3BvcnRhdWRpb19pbXBvcnRfZmFpbHVyZV9pc19hX3JlYWRpbmVzc19kaWFnbm9zdGljIF9fX19fX19fX19fDQoNCnVuYXZhaWxhYmxlX3BvcnRhdWRpbyA9IE5vbmUNCg0KICAgIGRlZiB0ZXN0X3BvcnRhdWRpb19pbXBvcnRfZmFpbHVyZV9pc19hX3JlYWRpbmVzc19kaWFnbm9zdGljKHVuYXZhaWxhYmxlX3BvcnRhdWRpbyk6DQo+ICAgICAgIGFzc2VydCB2bS5fYXVkaW9fYXZhaWxhYmxlKCkgaXMgRmFsc2UNCiAgICAgICAgICAgICAgIF5eXl5eXl5eXl5eXl5eXl5eXl5eXg0KDQp0ZXN0c1x0b29sc1x0ZXN0X3ZvaWNlX2F1ZGlvX3JlYWRpbmVzcy5weTozNzogDQpfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfDQp0b29sc1x2b2ljZV9tb2RlLnB5OjExODogaW4gX2F1ZGlvX2F2YWlsYWJsZQ0KICAgIF9pbXBvcnRfYXVkaW8oKQ0KdG9vbHNcdm9pY2VfbW9kZS5weTo1OTogaW4gX2ltcG9ydF9hdWRpbw0KICAgIGltcG9ydCBzb3VuZGRldmljZSBhcyBzZA0KXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXw0KDQogICAgY2xhc3MgUG9ydEF1ZGlvRXJyb3IoRXhjZXB0aW9uKToNCiAgICAgICAgZGVmIF9fc3RyX18oc2VsZik6DQogICAgICAgICAgICByZXR1cm4gZiJ7c2VsZi5hcmdzWzBdfSBbUGFFcnJvckNvZGUge3NlbGYuYXJnc1sxXX1dOiB7c2VsZi5hcmdzWzJdWzJdfSINCj4gICByYWlzZSBQb3J0QXVkaW9FcnJvcigiRXJyb3IgaW5pdGlhbGl6aW5nIFBvcnRBdWRpbyIsIC05OTk5LCAoLTEwMDAwLCAtOTk5OSwgIkluaXRpYWxpemluZyBlbmdpbmUgZmFpbGVkIikpDQpFICAgc291bmRkZXZpY2UuUG9ydEF1ZGlvRXJyb3I6IEVycm9yIGluaXRpYWxpemluZyBQb3J0QXVkaW8gW1BhRXJyb3JDb2RlIC05OTk5XTogSW5pdGlhbGl6aW5nIGVuZ2luZSBmYWlsZWQNCg0KLi5cLi5cLi5cQXBwRGF0YVxMb2NhbFxUZW1wXGhlcm1lcy1weXRlc3Rcci15c3AyaXNielxweXRlc3Qtb2YtdW5rbm93blxweXRlc3QtMFx0ZXN0X3BvcnRhdWRpb19pbXBvcnRfZmFpbHVyZV8wXHNvdW5kZGV2aWNlLnB5OjQ6IFBvcnRBdWRpb0Vycm9yDQpfIHRlc3RfZGV2aWNlX2ludmVudG9yeV9yZXF1aXJlc19hbl9pbnB1dF9ub3RfanVzdF9vdXRwdXRbZGV2aWNlczAtRmFsc2UtRmFsc2VdIF8NCg0KbW9ua2V5cGF0Y2ggPSA8X3B5dGVzdC5tb25rZXlwYXRjaC5Nb25rZXlQYXRjaCBvYmplY3QgYXQgMHgwMDAwMDIxODREM0UzMzYwPg0KZGV2aWNlcyA9IFt7J25hbWUnOiAnc3BlYWtlcicsICdtYXhfaW5wdXRfY2hhbm5lbHMnOiAwLCAnbWF4X291dHB1dF9jaGFubmVscyc6IDJ9XQ0KZm9yd2FyZGVkID0gRmFsc2UsIHJlYWR5ID0gRmFsc2UNCg0KICAgIEBweXRlc3QubWFyay5wYXJhbWV0cml6ZSgNCiAgICAgICAgImRldmljZXMsIGZvcndhcmRlZCwgcmVhZHkiLA0KICAgICAgICBbDQogICAgICAgICAgICAoW3sibmFtZSI6ICJzcGVha2VyIiwgIm1heF9pbnB1dF9jaGFubmVscyI6IDAsICJtYXhfb3V0cHV0X2NoYW5uZWxzIjogMn1dLCBGYWxzZSwgRmFsc2UpLA0KICAgICAgICAgICAgKFt7Im5hbWUiOiAic3BlYWtlciIsICJtYXhfaW5wdXRfY2hhbm5lbHMiOiAwLCAibWF4X291dHB1dF9jaGFubmVscyI6IDJ9XSwgVHJ1ZSwgRmFsc2UpLA0KICAgICAgICAgICAgKFt7Im5hbWUiOiAic3BlYWtlciIsICJtYXhfaW5wdXRfY2hhbm5lbHMiOiAwLCAibWF4X291dHB1dF9jaGFubmVscyI6IDJ9LA0KICAgICAgICAgICAgICB7Im5hbWUiOiAibWljcm9waG9uZSIsICJtYXhfaW5wdXRfY2hhbm5lbHMiOiAxLCAibWF4X291dHB1dF9jaGFubmVscyI6IDB9XSwgRmFsc2UsIFRydWUpLA0KICAgICAgICBdLA0KICAgICkNCiAgICBkZWYgdGVzdF9kZXZpY2VfaW52ZW50b3J5X3JlcXVpcmVzX2FuX2lucHV0X25vdF9qdXN0X291dHB1dChtb25rZXlwYXRjaCwgZGV2aWNlcywgZm9yd2FyZGVkLCByZWFkeSk6DQogICAgICAgIGxpYnJhcnkgPSBTaW1wbGVOYW1lc3BhY2UocXVlcnlfZGV2aWNlcz1sYW1iZGE6IGRldmljZXMpDQogICAgICAgIG1vbmtleXBhdGNoLnNldGF0dHIodm0sICJfaW1wb3J0X2F1ZGlvIiwgbGFtYmRhOiAobGlicmFyeSwgTm9uZSkpDQogICAgICAgIHdhcm5pbmdzLCBub3RpY2VzID0gW10sIFtdDQogICAgDQogICAgICAgIHZtLl9wcm9iZV9hdWRpb19saWJyYXJpZXMoDQogICAgICAgICAgICB3YXJuaW5ncywgbm90aWNlcywgaGFzX2ZvcndhcmRlZF9hdWRpbz1mb3J3YXJkZWQsDQogICAgICAgICAgICB0ZXJtdXhfbWljX2NtZD1Ob25lLCB0ZXJtdXhfYXBwX2luc3RhbGxlZD1GYWxzZSwNCiAgICAgICAgKQ0KICAgIA0KPiAgICAgICBhc3NlcnQgKG5vdCB3YXJuaW5ncykgaXMgcmVhZHkNCkUgICAgICAgYXNzZXJ0IG5vdCBbXSBpcyBGYWxzZQ0KDQp0ZXN0c1x0b29sc1x0ZXN0X3ZvaWNlX2F1ZGlvX3JlYWRpbmVzcy5weTo4MzogQXNzZXJ0aW9uRXJyb3INCl8gdGVzdF9kZXZpY2VfaW52ZW50b3J5X3JlcXVpcmVzX2FuX2lucHV0X25vdF9qdXN0X291dHB1dFtkZXZpY2VzMS1UcnVlLUZhbHNlXSBfDQoNCm1vbmtleXBhdGNoID0gPF9weXRlc3QubW9ua2V5cGF0Y2guTW9ua2V5UGF0Y2ggb2JqZWN0IGF0IDB4MDAwMDAyMTg0RDExQTBGMD4NCmRldmljZXMgPSBbeyduYW1lJzogJ3NwZWFrZXInLCAnbWF4X2lucHV0X2NoYW5uZWxzJzogMCwgJ21heF9vdXRwdXRfY2hhbm5lbHMnOiAyfV0NCmZvcndhcmRlZCA9IFRydWUsIHJlYWR5ID0gRmFsc2UNCg0KICAgIEBweXRlc3QubWFyay5wYXJhbWV0cml6ZSgNCiAgICAgICAgImRldmljZXMsIGZvcndhcmRlZCwgcmVhZHkiLA0KICAgICAgICBbDQogICAgICAgICAgICAoW3sibmFtZSI6ICJzcGVha2VyIiwgIm1heF9pbnB1dF9jaGFubmVscyI6IDAsICJtYXhfb3V0cHV0X2NoYW5uZWxzIjogMn1dLCBGYWxzZSwgRmFsc2UpLA0KICAgICAgICAgICAgKFt7Im5hbWUiOiAic3BlYWtlciIsICJtYXhfaW5wdXRfY2hhbm5lbHMiOiAwLCAibWF4X291dHB1dF9jaGFubmVscyI6IDJ9XSwgVHJ1ZSwgRmFsc2UpLA0KICAgICAgICAgICAgKFt7Im5hbWUiOiAic3BlYWtlciIsICJtYXhfaW5wdXRfY2hhbm5lbHMiOiAwLCAibWF4X291dHB1dF9jaGFubmVscyI6IDJ9LA0KICAgICAgICAgICAgICB7Im5hbWUiOiAibWljcm9waG9uZSIsICJtYXhfaW5wdXRfY2hhbm5lbHMiOiAxLCAibWF4X291dHB1dF9jaGFubmVscyI6IDB9XSwgRmFsc2UsIFRydWUpLA0KICAgICAgICBdLA0KICAgICkNCiAgICBkZWYgdGVzdF9kZXZpY2VfaW52ZW50b3J5X3JlcXVpcmVzX2FuX2lucHV0X25vdF9qdXN0X291dHB1dChtb25rZXlwYXRjaCwgZGV2aWNlcywgZm9yd2FyZGVkLCByZWFkeSk6DQogICAgICAgIGxpYnJhcnkgPSBTaW1wbGVOYW1lc3BhY2UocXVlcnlfZGV2aWNlcz1sYW1iZGE6IGRldmljZXMpDQogICAgICAgIG1vbmtleXBhdGNoLnNldGF0dHIodm0sICJfaW1wb3J0X2F1ZGlvIiwgbGFtYmRhOiAobGlicmFyeSwgTm9uZSkpDQogICAgICAgIHdhcm5pbmdzLCBub3RpY2VzID0gW10sIFtdDQogICAgDQogICAgICAgIHZtLl9wcm9iZV9hdWRpb19saWJyYXJpZXMoDQogICAgICAgICAgICB3YXJuaW5ncywgbm90aWNlcywgaGFzX2ZvcndhcmRlZF9hdWRpbz1mb3J3YXJkZWQsDQogICAgICAgICAgICB0ZXJtdXhfbWljX2NtZD1Ob25lLCB0ZXJtdXhfYXBwX2luc3RhbGxlZD1GYWxzZSwNCiAgICAgICAgKQ0KICAgIA0KPiAgICAgICBhc3NlcnQgKG5vdCB3YXJuaW5ncykgaXMgcmVhZHkNCkUgICAgICAgYXNzZXJ0IG5vdCBbXSBpcyBGYWxzZQ0KDQp0ZXN0c1x0b29sc1x0ZXN0X3ZvaWNlX2F1ZGlvX3JlYWRpbmVzcy5weTo4MzogQXNzZXJ0aW9uRXJyb3INCj09PT09PT09PT09PT09PT09PT09PT09PT09PSBzaG9ydCB0ZXN0IHN1bW1hcnkgaW5mbyA9PT09PT09PT09PT09PT09PT09PT09PT09PT0NCkZBSUxFRCB0ZXN0cy90b29scy90ZXN0X3ZvaWNlX2F1ZGlvX3JlYWRpbmVzcy5weTo6dGVzdF9wb3J0YXVkaW9faW1wb3J0X2ZhaWx1cmVfaXNfYV9yZWFkaW5lc3NfZGlhZ25vc3RpYw0KRkFJTEVEIHRlc3RzL3Rvb2xzL3Rlc3Rfdm9pY2VfYXVkaW9fcmVhZGluZXNzLnB5Ojp0ZXN0X2RldmljZV9pbnZlbnRvcnlfcmVxdWlyZXNfYW5faW5wdXRfbm90X2p1c3Rfb3V0cHV0W2RldmljZXMwLUZhbHNlLUZhbHNlXQ0KRkFJTEVEIHRlc3RzL3Rvb2xzL3Rlc3Rfdm9pY2VfYXVkaW9fcmVhZGluZXNzLnB5Ojp0ZXN0X2RldmljZV9pbnZlbnRvcnlfcmVxdWlyZXNfYW5faW5wdXRfbm90X2p1c3Rfb3V0cHV0W2RldmljZXMxLVRydWUtRmFsc2VdDQo9PT09PT09PT09PT09PT09PT09PT09PT09IDMgZmFpbGVkLCAxIHBhc3NlZCBpbiA1LjkzcyA9PT09PT09PT09PT09PT09PT09PT09PT09DQoNCj09PSAxIGZpbGUgd2l0aCB0ZXN0IGZhaWx1cmVzICgzIHRlc3RzIGZhaWxlZCkgPT09DQogIHRlc3RzXHRvb2xzXHRlc3Rfdm9pY2VfYXVkaW9fcmVhZGluZXNzLnB5ICAoMyB0ZXN0cyBmYWlsZWQpDQo=",
+          "bytes": 8594,
+          "sha256": "f4993f9e702a2f06dcef5817513e80787f82e2b292fdb597f9632827292a6cfa"
+        },
+        "stderr": {
+          "encoding": "base64",
+          "data": "",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "raw_summary_lines": [
+        "=== Summary: 1 files, 1 tests passed, 3 failed (100% complete) in 12.3s (1 workers) ==="
+      ]
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Git\\bin\\bash.exe",
+        "scripts/run_tests.sh",
+        "tests/tools/test_voice_audio_readiness.py",
+        "--file-retries",
+        "0",
+        "--file-timeout",
+        "30",
+        "-j",
+        "1"
+      ],
+      "cwd": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\hermes-agent-audio-readiness-v0.22.2-20261017",
+      "HERMES_PYTHON": "C:/Users/adyba/AppData/Local/hermes/installs/9e27fc18556ae4a8/test-environment/gen-1b15ec8e3cfd4a399274d893e0cfbbf6/venv/Scripts/python.exe",
+      "started_utc": "2026-10-17T17:50:15Z",
+      "pid": 67088,
+      "exit_code": 0,
+      "duration_seconds": 6.94,
+      "stdout_sha256": "5b79f65b4fd07ce6b9e6e27f61a521ab7beebc2aa1af82b2a4900a09ce4d61c4",
+      "stdout_bytes": 1020,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "name": "fixed-focused",
+      "counts": {
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "raw_logs": {
+        "stdout": {
+          "encoding": "base64",
+          "data": "4pa2IG5vdCBhY3RpdmF0ZWQg4oCUIHVzaW5nIEhFUk1FU19QWVRIT046IEM6L1VzZXJzL2FkeWJhL0FwcERhdGEvTG9jYWwvaGVybWVzL2luc3RhbGxzLzllMjdmYzE4NTU2YWU0YTgvdGVzdC1lbnZpcm9ubWVudC9nZW4tMWIxNWVjOGUzY2ZkNGEzOTkyNzRkODkzZTBjZmJiZjYvdmVudi9TY3JpcHRzL3B5dGhvbi5leGUK4pa2IHJ1bm5pbmcgcGVyLWZpbGUgcGFyYWxsZWwgdGVzdCBzdWl0ZSB2aWEgcnVuX3Rlc3RzX3BhcmFsbGVsLnB5CiAgKFRaPVVUQyBMQU5HPUMuVVRGLTggUFlUSE9OSEFTSFNFRUQ9MDsgY2xlYW4gZW52KQrilrYgcHJlLWNvbXBpbGluZyBieXRlY29kZSBjYWNoZQrilrYgbGF1bmNoaW5nIHRlc3QgcnVubmVyCkRpc2NvdmVyZWQgMSB0ZXN0IGZpbGVzICh+MiB0ZXN0cykgdW5kZXIgWyd0ZXN0c1xcdG9vbHNcXHRlc3Rfdm9pY2VfYXVkaW9fcmVhZGluZXNzLnB5J107IHJ1bm5pbmcgd2l0aCAtaiAxDQpbMTAwLjAlIHwgICAgIDIvfjIgfCDinJM0IHwg4pyXMF0g4pyTIHRlc3RzXHRvb2xzXHRlc3Rfdm9pY2VfYXVkaW9fcmVhZGluZXNzLnB5ICg04pyTLCAyLjdzKQ0KDQo9PT0gU3VtbWFyeTogMSBmaWxlcywgNCB0ZXN0cyBwYXNzZWQsIDAgZmFpbGVkICgxMDAlIGNvbXBsZXRlKSBpbiA1LjlzICgxIHdvcmtlcnMpID09PQ0KICBEdXJhdGlvbnMgY2FjaGVkIHRvIHRlc3RfZHVyYXRpb25zLmpzb24gKDEgZmlsZXMpDQoNCj09PSBQZXItZmlsZSBzdWJwcm9jZXNzIHRpbWUgZGlzdHJpYnV0aW9uID09PQ0KICBGaWxlczogICAxDQogIFRvdGFsIHN1YnByb2Nlc3MgQ1BVLXdhbGw6IDIuN3MgIChydW5uZXIgd2FsbDogNS45cywgcGFyYWxsZWxpc206IDF4KQ0KICBQNTA6IDIuNjdzICBQOTA6IDIuNjdzICBQOTU6IDIuNjdzICBQOTk6IDIuNjdzICBNYXg6IDIuNjdzDQogIDwxczogMCBmaWxlcyAoMCUpICA8MnM6IDAgZmlsZXMgKDAlKQ0KICBUb3AgMTAgc2xvd2VzdDoNCiAgICAgIDIuNjdzICB0ZXN0c1x0b29sc1x0ZXN0X3ZvaWNlX2F1ZGlvX3JlYWRpbmVzcy5weQ0K",
+          "bytes": 1020,
+          "sha256": "5b79f65b4fd07ce6b9e6e27f61a521ab7beebc2aa1af82b2a4900a09ce4d61c4"
+        },
+        "stderr": {
+          "encoding": "base64",
+          "data": "",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "raw_summary_lines": [
+        "=== Summary: 1 files, 4 tests passed, 0 failed (100% complete) in 5.9s (1 workers) ==="
+      ]
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Git\\bin\\bash.exe",
+        "scripts/run_tests.sh",
+        "tests/tools/test_voice_capture_backend.py",
+        "tests/tools/test_voice_wsl_pipewire.py",
+        "--file-retries",
+        "0",
+        "--file-timeout",
+        "25",
+        "-j",
+        "1"
+      ],
+      "cwd": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\hermes-agent-audio-readiness-v0.22.2-20261017",
+      "HERMES_PYTHON": "C:/Users/adyba/AppData/Local/hermes/installs/9e27fc18556ae4a8/test-environment/gen-1b15ec8e3cfd4a399274d893e0cfbbf6/venv/Scripts/python.exe",
+      "started_utc": "2026-10-17T17:50:49Z",
+      "pid": 16992,
+      "exit_code": 0,
+      "duration_seconds": 7.602,
+      "stdout_sha256": "12c1ef4032649d33085faa8ca1741b4bedc4d2df1f5cfb6787a850b1408c9c84",
+      "stdout_bytes": 1346,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "name": "selector-regression",
+      "counts": {
+        "passed": 14,
+        "failed": 0,
+        "skipped": 3
+      },
+      "raw_logs": {
+        "stdout": {
+          "encoding": "base64",
+          "data": "4pa2IG5vdCBhY3RpdmF0ZWQg4oCUIHVzaW5nIEhFUk1FU19QWVRIT046IEM6L1VzZXJzL2FkeWJhL0FwcERhdGEvTG9jYWwvaGVybWVzL2luc3RhbGxzLzllMjdmYzE4NTU2YWU0YTgvdGVzdC1lbnZpcm9ubWVudC9nZW4tMWIxNWVjOGUzY2ZkNGEzOTkyNzRkODkzZTBjZmJiZjYvdmVudi9TY3JpcHRzL3B5dGhvbi5leGUK4pa2IHJ1bm5pbmcgcGVyLWZpbGUgcGFyYWxsZWwgdGVzdCBzdWl0ZSB2aWEgcnVuX3Rlc3RzX3BhcmFsbGVsLnB5CiAgKFRaPVVUQyBMQU5HPUMuVVRGLTggUFlUSE9OSEFTSFNFRUQ9MDsgY2xlYW4gZW52KQrilrYgcHJlLWNvbXBpbGluZyBieXRlY29kZSBjYWNoZQrilrYgbGF1bmNoaW5nIHRlc3QgcnVubmVyCkRpc2NvdmVyZWQgMiB0ZXN0IGZpbGVzICh+MTIgdGVzdHMpIHVuZGVyIFsndGVzdHNcXHRvb2xzXFx0ZXN0X3ZvaWNlX2NhcHR1cmVfYmFja2VuZC5weScsICd0ZXN0c1xcdG9vbHNcXHRlc3Rfdm9pY2Vfd3NsX3BpcGV3aXJlLnB5J107IHJ1bm5pbmcgd2l0aCAtaiAxDQpbIDc1LjAlIHwgICAgIDkvfjEyIHwg4pyTMTQgfCDinJcgMF0g4pyTIHRlc3RzXHRvb2xzXHRlc3Rfdm9pY2VfY2FwdHVyZV9iYWNrZW5kLnB5ICgxNOKckywgMi44cykNClsxMDAuMCUgfCAgICAxMi9+MTIgfCDinJMxNCB8IOKclyAwXSDinJMgdGVzdHNcdG9vbHNcdGVzdF92b2ljZV93c2xfcGlwZXdpcmUucHkgKDNzLCAxLjFzKQ0KDQo9PT0gU3VtbWFyeTogMiBmaWxlcywgMTQgdGVzdHMgcGFzc2VkLCAwIGZhaWxlZCwgMyBza2lwcGVkICgxMDAlIGNvbXBsZXRlKSBpbiA3LjFzICgxIHdvcmtlcnMpID09PQ0KDQogIG5vdGU6IHBsYXRmb3JtcygnbGludXgnKSB0ZXN0cyAoaW4gMSBmaWxlKSB3ZXJlIFNLSVBQRUQgb24gdGhpcyBob3N0ICh3aW4zMik7IHRoZXkgcnVuIG9uIHRoZSBtYWluIExpbnV4IENJIGxhbmUuDQogIER1cmF0aW9ucyBjYWNoZWQgdG8gdGVzdF9kdXJhdGlvbnMuanNvbiAoMiBmaWxlcykNCg0KPT09IFBlci1maWxlIHN1YnByb2Nlc3MgdGltZSBkaXN0cmlidXRpb24gPT09DQogIEZpbGVzOiAgIDINCiAgVG90YWwgc3VicHJvY2VzcyBDUFUtd2FsbDogMy45cyAgKHJ1bm5lciB3YWxsOiA3LjFzLCBwYXJhbGxlbGlzbTogMXgpDQogIFA1MDogMi44MXMgIFA5MDogMi44MXMgIFA5NTogMi44MXMgIFA5OTogMi44MXMgIE1heDogMi44MXMNCiAgPDFzOiAwIGZpbGVzICgwJSkgIDwyczogMSBmaWxlcyAoNTAlKQ0KICBUb3AgMTAgc2xvd2VzdDoNCiAgICAgIDIuODFzICB0ZXN0c1x0b29sc1x0ZXN0X3ZvaWNlX2NhcHR1cmVfYmFja2VuZC5weQ0KICAgICAgMS4wOHMgIHRlc3RzXHRvb2xzXHRlc3Rfdm9pY2Vfd3NsX3BpcGV3aXJlLnB5DQo=",
+          "bytes": 1346,
+          "sha256": "12c1ef4032649d33085faa8ca1741b4bedc4d2df1f5cfb6787a850b1408c9c84"
+        },
+        "stderr": {
+          "encoding": "base64",
+          "data": "",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "raw_summary_lines": [
+        "=== Summary: 2 files, 14 tests passed, 0 failed, 3 skipped (100% complete) in 7.1s (1 workers) ==="
+      ]
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Git\\bin\\bash.exe",
+        "scripts/run_tests.sh",
+        "tests/tools/test_voice_mode.py",
+        "-k",
+        "test_start_raises_without_audio_libs or test_start_oserror_points_at_portaudio_not_pip",
+        "--file-retries",
+        "0",
+        "--file-timeout",
+        "25",
+        "-j",
+        "1"
+      ],
+      "cwd": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\hermes-agent-audio-readiness-v0.22.2-20261017",
+      "HERMES_PYTHON": "C:/Users/adyba/AppData/Local/hermes/installs/9e27fc18556ae4a8/test-environment/gen-1b15ec8e3cfd4a399274d893e0cfbbf6/venv/Scripts/python.exe",
+      "started_utc": "2026-10-17T17:50:56Z",
+      "pid": 2596,
+      "exit_code": 0,
+      "duration_seconds": 6.097,
+      "stdout_sha256": "b3d5395d3c69866f81913077f0b085b49447ce268f47a0926949bde5c5b16207",
+      "stdout_bytes": 1230,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "name": "missing-library-regression",
+      "counts": {
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0
+      },
+      "raw_logs": {
+        "stdout": {
+          "encoding": "base64",
+          "data": "4pa2IG5vdCBhY3RpdmF0ZWQg4oCUIHVzaW5nIEhFUk1FU19QWVRIT046IEM6L1VzZXJzL2FkeWJhL0FwcERhdGEvTG9jYWwvaGVybWVzL2luc3RhbGxzLzllMjdmYzE4NTU2YWU0YTgvdGVzdC1lbnZpcm9ubWVudC9nZW4tMWIxNWVjOGUzY2ZkNGEzOTkyNzRkODkzZTBjZmJiZjYvdmVudi9TY3JpcHRzL3B5dGhvbi5leGUK4pa2IHJ1bm5pbmcgcGVyLWZpbGUgcGFyYWxsZWwgdGVzdCBzdWl0ZSB2aWEgcnVuX3Rlc3RzX3BhcmFsbGVsLnB5CiAgKFRaPVVUQyBMQU5HPUMuVVRGLTggUFlUSE9OSEFTSFNFRUQ9MDsgY2xlYW4gZW52KQrilrYgcHJlLWNvbXBpbGluZyBieXRlY29kZSBjYWNoZQrilrYgbGF1bmNoaW5nIHRlc3QgcnVubmVyCkRpc2NvdmVyZWQgMSB0ZXN0IGZpbGVzICh+NjAgdGVzdHMpIHVuZGVyIFsndGVzdHNcXHRvb2xzXFx0ZXN0X3ZvaWNlX21vZGUucHknXTsgcnVubmluZyB3aXRoIC1qIDENClsxMDAuMCUgfCAgICA2MC9+NjAgfCDinJMyIHwg4pyXMF0g4pyTIHRlc3RzXHRvb2xzXHRlc3Rfdm9pY2VfbW9kZS5weSAoMuKckywgMi4xcykNCg0KPT09IFN1bW1hcnk6IDEgZmlsZXMsIDIgdGVzdHMgcGFzc2VkLCAwIGZhaWxlZCAoMTAwJSBjb21wbGV0ZSkgaW4gNS4zcyAoMSB3b3JrZXJzKSA9PT0NCg0KICBub3RlOiBwbGF0Zm9ybXMoJ2xpbnV4JykgdGVzdHMgKGluIDEgZmlsZSkgd2VyZSBTS0lQUEVEIG9uIHRoaXMgaG9zdCAod2luMzIpOyB0aGV5IHJ1biBvbiB0aGUgbWFpbiBMaW51eCBDSSBsYW5lLg0KICBub3RlOiBwbGF0Zm9ybXMoJ21hY29zJykgdGVzdHMgKGluIDEgZmlsZSkgd2VyZSBTS0lQUEVEIG9uIHRoaXMgaG9zdCAod2luMzIpOyB0aGV5IHJ1biBvbiB0aGUgbWFjT1MgUHl0aG9uLXRlc3RzIGxhbmUuDQogIER1cmF0aW9ucyBjYWNoZWQgdG8gdGVzdF9kdXJhdGlvbnMuanNvbiAoMSBmaWxlcykNCg0KPT09IFBlci1maWxlIHN1YnByb2Nlc3MgdGltZSBkaXN0cmlidXRpb24gPT09DQogIEZpbGVzOiAgIDENCiAgVG90YWwgc3VicHJvY2VzcyBDUFUtd2FsbDogMi4xcyAgKHJ1bm5lciB3YWxsOiA1LjNzLCBwYXJhbGxlbGlzbTogMXgpDQogIFA1MDogMi4xMnMgIFA5MDogMi4xMnMgIFA5NTogMi4xMnMgIFA5OTogMi4xMnMgIE1heDogMi4xMnMNCiAgPDFzOiAwIGZpbGVzICgwJSkgIDwyczogMCBmaWxlcyAoMCUpDQogIFRvcCAxMCBzbG93ZXN0Og0KICAgICAgMi4xMnMgIHRlc3RzXHRvb2xzXHRlc3Rfdm9pY2VfbW9kZS5weQ0K",
+          "bytes": 1230,
+          "sha256": "b3d5395d3c69866f81913077f0b085b49447ce268f47a0926949bde5c5b16207"
+        },
+        "stderr": {
+          "encoding": "base64",
+          "data": "",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "raw_summary_lines": [
+        "=== Summary: 1 files, 2 tests passed, 0 failed (100% complete) in 5.3s (1 workers) ==="
+      ]
+    }
+  ],
+  "unclaimed_attempt": {
+    "status": "outer-timeout",
+    "timeout_seconds": 65,
+    "argv": [
+      "C:\\Program Files\\Git\\bin\\bash.exe",
+      "scripts/run_tests.sh",
+      "tests/tools/test_voice_audio_readiness.py",
+      "tests/tools/test_voice_capture_backend.py",
+      "tests/tools/test_voice_mode.py",
+      "--file-retries",
+      "0",
+      "--file-timeout",
+      "45",
+      "-j",
+      "3"
+    ],
+    "captured_stdout_retained": false,
+    "note": "The outer subprocess timeout raised before the first wrapper wrote captured output. No per-test result is claimed for this attempt."
+  },
+  "counting": "Keep runs separate. Base-red and fixed-focused contain the same four cases and must not be added. The timeout attempt has no claimed result.",
+  "regression_scope": {
+    "new_file": "tests/tools/test_voice_audio_readiness.py",
+    "new_cases": 4,
+    "contracts": [
+      "import-time native initialization failure becomes an unavailable diagnostic and clean recorder error, with original cause and no PM installation",
+      "output-only inventory is rejected with or without configured forwarding",
+      "mixed input/output inventory remains admissible"
+    ],
+    "existing_selector_file": "tests/tools/test_voice_capture_backend.py",
+    "existing_missing_library_cases": [
+      "TestAudioRecorder.test_start_raises_without_audio_libs",
+      "TestAudioRecorder.test_start_oserror_points_at_portaudio_not_pip"
+    ],
+    "linux_fixture": "tests/tools/test_voice_wsl_pipewire.py now declares the actual max_input_channels field; its three Linux-only cases were skipped on Windows"
+  },
+  "read_only_reviews": [
+    {
+      "reviewer": "bootstrap_fix_review",
+      "result": "no concrete blocker; original error/cause and existing forwarding/API behavior preserved",
+      "additional_tests_run": false
+    },
+    {
+      "reviewer": "root",
+      "result": "entire 8470-byte patch reviewed; no blocker"
+    }
+  ],
+  "device_guide": {
+    "path": "docs/audio-readiness-device-validation.md",
+    "sha256": "74f7d7a0c3bc19fd33a54759d3e609aa657d2de3889e909416eb35e92b742072",
+    "bytes": 14545,
+    "syntax_checks": [
+      {
+        "block": 1,
+        "bash_syntax": "passed"
+      },
+      {
+        "block": 2,
+        "bash_syntax": "passed"
+      },
+      {
+        "block": 3,
+        "bash_syntax": "passed"
+      },
+      {
+        "block": 4,
+        "bash_syntax": "passed",
+        "embedded_python_ast": "passed; not executed"
+      }
+    ],
+    "execution": "Neither initialization nor recording code was executed on a device or the Devbox host."
+  },
+  "limits": {
+    "microphone_accessed": false,
+    "native_audio_framework_tested": false,
+    "physical_vad_proven": false,
+    "audio_environment_installed_on_device": false,
+    "audio_io_admitted": false,
+    "main_compatibility_patch_changed": false,
+    "candidate_identity_changed": false,
+    "committed_pushed_or_released": false
+  }
+}

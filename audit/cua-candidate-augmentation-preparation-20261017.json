@@ -1,0 +1,410 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-17",
+  "status": "host-prepared-native-package-validation-pending",
+  "purpose": "Separate unpublished native CUA package augmenter; no published/main candidate changes.",
+  "files": [
+    {
+      "path": "scripts/prepare_cua_hermes_candidate.py",
+      "bytes": 45107,
+      "sha256": "b6f5b394ff5d4a58fd8e79f1108ec6dd1a3966f5b27debf7f33cec19798d20d2"
+    },
+    {
+      "path": "tests/test_prepare_cua_hermes_candidate.py",
+      "bytes": 14337,
+      "sha256": "b95a5c74d507cd1a871875eedf21e87d2865fba3f8256f3c0ed5ed9940e5e907"
+    },
+    {
+      "path": "docs/cua-candidate-preparation.md",
+      "bytes": 8578,
+      "sha256": "f22aeac091f488add322b2f42d2c4705986583cdf84c6808055d3ca4cd244d9e"
+    }
+  ],
+  "original_candidate": {
+    "repository": "adybag14-cyber/termux-hermes",
+    "run_id": 39048514731,
+    "head_sha": "e271e922a2e71fd18591c45e9b98b8c7f9fffe02",
+    "artifact_id": 12107225801,
+    "package": "hermes-agent_0.22.2-1_aarch64.deb",
+    "package_bytes": 222089768,
+    "package_sha256": "1e4e58fe17a1800f23ababcb2724e92b8904829eae3284569db52dbc672ca76a"
+  },
+  "experimental_source": {
+    "patch": "patches/next-stable/cua-hermes-integration.patch",
+    "bytes": 67709,
+    "sha256": "8bbfddbbacfd508db35de6158e4c1a2c06423b84cd5f4ed621d4955fcd529edd",
+    "declared_paths": 19,
+    "full_source_reference_baseline": "f49c77b666cef7fd5235cdd786556908527b532e",
+    "full_source_reference_replay": "bf1356eda991ea38dcb3c5866d0d97be3d7eb3e6",
+    "candidate_source_rule": "Deep extraction of exact trimmed candidate app plus only this patch. Full reference Git trees are not the candidate app identity."
+  },
+  "source_receipt": {
+    "sha256": "47c43e002a868f0387e02142a9c623e5790c2656076959688abc3e93a6ec6167",
+    "pm_api": "stage_source_built_tool(payload, name='cua-driver', target='linux-arm64-bionic', binary=..., binary_sha256=..., source_receipt=...)"
+  },
+  "canonical_assembly": {
+    "source_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+    "comparison": "Actual git show <source_commit>:<path> byte comparisons in preserved main and isolated CUA source.",
+    "main_source": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\hermes-agent-compat-v0.22.2-20261017",
+    "isolated_source": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\hermes-agent-cua-integration-v0.22.2-20261017",
+    "files": [
+      {
+        "path": "scripts/build/agent.py",
+        "bytes": 8754,
+        "sha256": "f59ed0dc39a37814a43f2465e1391311a3ce8203e42a69257e58db6f3cda3652",
+        "unchanged_from_d923": true
+      },
+      {
+        "path": "scripts/build/inputs.py",
+        "bytes": 5846,
+        "sha256": "36fb218726fce97505d7dfd50002046bb9c19b25c0b7cc546bae0b9c586083d9",
+        "unchanged_from_d923": true
+      },
+      {
+        "path": "scripts/build/launchers.py",
+        "bytes": 4861,
+        "sha256": "cf5c225ded65193042a330f69b217a5ffcd5201032cca9e288cebea681cb37b3",
+        "unchanged_from_d923": true
+      },
+      {
+        "path": "scripts/build/launcher_wrapper.py",
+        "bytes": 6327,
+        "sha256": "bfab043b63b8faa588ea1fa6f9143ff33b319df71ef6a7e3855f8574c2b07155",
+        "unchanged_from_d923": true
+      }
+    ],
+    "scope": "Only these four pinned modules are loaded. PM is imported from staged candidate app/pm."
+  },
+  "validation": {
+    "host_tests": {
+      "program": "C:\\Python314\\python.exe",
+      "argv": [
+        "-B",
+        "-m",
+        "pytest",
+        "-v",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_cua_hermes_probe.py",
+        "tests/test_prepare_cua_hermes_candidate.py"
+      ],
+      "working_directory": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017",
+      "exit_code": 0,
+      "passed": 44,
+      "failed": 0,
+      "skipped": 0,
+      "suite_passed": 87,
+      "per_file_passed": {
+        "tests/test_cua_hermes_probe.py": 43,
+        "tests/test_prepare_cua_hermes_candidate.py": 44
+      },
+      "scope": "One host-only invocation; this audit's passed count is scoped to tests/test_prepare_cua_hermes_candidate.py. The combined 87-test run is shared by both preparation audits and must not be counted twice.",
+      "log_file": "audit/cua-native-20261017/pin-refresh-final-label-tests-20261017.log",
+      "log_bytes": 11430,
+      "log_sha256": "31f058d2a2d1996765d7af34b6e64178b678739647d9769319a94d0faf509456",
+      "capture_form": "Raw subprocess stdout and stderr merged and saved as bytes before decoding; SHA-256 is the complete retained log.",
+      "summary": "============================= 87 passed in 1.00s ==============================",
+      "aggregate_with_prior_runs": false,
+      "compile_and_whitespace_checks": {
+        "AST": "passed",
+        "UTF8_LF": "passed",
+        "trailing_whitespace": "passed",
+        "pin_only_reverse_identity": "passed",
+        "source_patch_and_sealed_receipt": "passed",
+        "tests_unchanged": "passed"
+      }
+    },
+    "static_checks": {
+      "AST": "passed",
+      "UTF8_LF": "passed",
+      "trailing_whitespace": "passed",
+      "pin_only_reverse_identity": "passed",
+      "source_patch_and_sealed_receipt": "passed",
+      "tests_unchanged": "passed"
+    },
+    "actual_driver_elf_parser": {
+      "augmenter_sha256": "a67ea2528a24f096b844f6d73513834d6f76f33079e315f37af841f5a23b59fb",
+      "artifact_id": 12110165011,
+      "archive_sha256": "b590a7e8a1f1ec9ef1e02bc303d4c3b4a6fe292c6abe76719614caba11bf855e",
+      "member": "bin/cua-driver",
+      "member_crc32": "0xa624abe4",
+      "bytes": 110459288,
+      "driver_sha256": "97abdcfdbddc55c20c9ea4a2e897be9e3183458df83475cee0e3d152212f0b53",
+      "actual_elf": {
+        "interpreter": "/system/bin/linker64",
+        "needed": [
+          "libX11.so",
+          "libXi.so",
+          "libdl.so",
+          "libm.so",
+          "libc.so"
+        ],
+        "search_path": [
+          "/data/data/com.termux/files/usr/bin/../../usr/lib"
+        ],
+        "apt_depends": "libx11, libxi",
+        "platform_libraries": [
+          "libc.so",
+          "libdl.so",
+          "libm.so"
+        ],
+        "method": "Read actual ELF PT_DYNAMIC/DT_NEEDED/PT_INTERP; no driver execution."
+      },
+      "run_id": 39056267366,
+      "source": "Existing authenticated artifact-reconstructed.zip, rehashed against retained artifact API digest before extracting only bin/cua-driver. ZIP member CRC validated by full read. No driver execution or new artifact download.",
+      "command": {
+        "program": "python",
+        "argv": [
+          "-c",
+          "from pathlib import Path\nimport hashlib,importlib.util,json,shutil,tempfile,zipfile\nsource=Path('scripts/prepare_cua_hermes_candidate.py')\nspec=importlib.util.spec_from_file_location('augment',source)\nmodule=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)\nroot=Path(r'C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\cua-termux-native-evidence-20261017\\39056267366')\napi=json.loads((root/'artifact-api.json').read_text())\narchive=root/'artifact-reconstructed.zip'\nactual=module.sha256(archive)\nassert api['digest']=='sha256:'+actual and api['size_in_bytes']==archive.stat().st_size\nwith zipfile.ZipFile(archive) as z:\n entries=[x for x in z.infolist() if x.filename.endswith('bin/cua-driver')]\n assert len(entries)==1\n info=entries[0]\n with tempfile.TemporaryDirectory(prefix='cua-elf-read-',dir=root.parent) as temp:\n  target=Path(temp)/'cua-driver'\n  with z.open(info) as src,target.open('wb') as dst: shutil.copyfileobj(src,dst)\n  print(json.dumps({'augmenter_sha256':module.sha256(source),'artifact_id':api['id'],'archive_sha256':actual,'member':info.filename,'member_crc32':hex(info.CRC),'bytes':target.stat().st_size,'driver_sha256':module.sha256(target),'actual_elf':module.elf_linkage(target)},indent=2))\n"
+        ],
+        "working_directory": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017"
+      },
+      "captured_stdout": "{\r\n  \"augmenter_sha256\": \"a67ea2528a24f096b844f6d73513834d6f76f33079e315f37af841f5a23b59fb\",\r\n  \"artifact_id\": 12110165011,\r\n  \"archive_sha256\": \"b590a7e8a1f1ec9ef1e02bc303d4c3b4a6fe292c6abe76719614caba11bf855e\",\r\n  \"member\": \"bin/cua-driver\",\r\n  \"member_crc32\": \"0xa624abe4\",\r\n  \"bytes\": 110459288,\r\n  \"driver_sha256\": \"97abdcfdbddc55c20c9ea4a2e897be9e3183458df83475cee0e3d152212f0b53\",\r\n  \"actual_elf\": {\r\n    \"interpreter\": \"/system/bin/linker64\",\r\n    \"needed\": [\r\n      \"libX11.so\",\r\n      \"libXi.so\",\r\n      \"libdl.so\",\r\n      \"libm.so\",\r\n      \"libc.so\"\r\n    ],\r\n    \"search_path\": [\r\n      \"/data/data/com.termux/files/usr/bin/../../usr/lib\"\r\n    ],\r\n    \"apt_depends\": \"libx11, libxi\",\r\n    \"platform_libraries\": [\r\n      \"libc.so\",\r\n      \"libdl.so\",\r\n      \"libm.so\"\r\n    ],\r\n    \"method\": \"Read actual ELF PT_DYNAMIC/DT_NEEDED/PT_INTERP; no driver execution.\"\r\n  }\r\n}\r\n",
+      "capture_form": "Devbox structured text; no raw-byte stdout digest claimed."
+    },
+    "previous_host_tests": {
+      "program": "python",
+      "argv": [
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_prepare_cua_hermes_candidate.py"
+      ],
+      "working_directory": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017",
+      "exit_code": 0,
+      "captured_stdout": "............................................                             [100%]\r\n44 passed in 0.48s\r\n",
+      "captured_stderr": "",
+      "capture_form": "Devbox structured text; no raw-byte stdout digest claimed.",
+      "passed": 44,
+      "skipped": 0,
+      "aggregate_with_prior_runs": false,
+      "validated_augmenter_sha256": "a67ea2528a24f096b844f6d73513834d6f76f33079e315f37af841f5a23b59fb",
+      "validated_patch_sha256": "141d38b9f7ad5004164fcf443b271fdd89458a15a3b1c4b610bedb9f73686d0e"
+    }
+  },
+  "runtime_libraries": {
+    "control_depends": "libx11, libxi",
+    "control_pre_depends": "",
+    "only_other_control_change": "Installed-Size",
+    "official_main_index_lookup": {
+      "url": "https://packages.termux.dev/apt/termux-main/dists/stable/main/binary-aarch64/Packages.gz",
+      "index_sha256": "dba73c2f0caaa828b65f02ba0e56cac694ee7186999a442ae7858b4258c321b6",
+      "index_bytes": 727968,
+      "packages": [
+        {
+          "Package": "libx11",
+          "Installed-Size": "13704",
+          "Maintainer": "@termux",
+          "Architecture": "aarch64",
+          "Version": "1.8.14",
+          "Depends": "libandroid-support, libxcb, xorgproto",
+          "Recommends": "xorg-xauth",
+          "Filename": "pool/main/libx/libx11/libx11_1.8.14_aarch64.deb",
+          "Size": "1910512",
+          "MD5sum": "7b242d5a941ee4faf01f9e6477047eff",
+          "SHA1": "0f5bac55d39cd208d75a1efd762915058e011c06",
+          "SHA256": "c5206ee9cc26a63985d110b57bc24f23c7c97505e6100c4d6a8547a1aeed5532",
+          "SHA512": "2573e06b722485701ad01b0e1ead09402311f22c212edbf2c954debf808c0ff1dd03967d0406f339482dc96ce8f71f99302379ac190c42c18821f8bff2fa093f",
+          "Description": "X11 client-side library",
+          "Homepage": "https://xorg.freedesktop.org/"
+        },
+        {
+          "Package": "libxi",
+          "Installed-Size": "788",
+          "Maintainer": "@termux",
+          "Architecture": "aarch64",
+          "Version": "1.8.4",
+          "Depends": "libx11, libxext",
+          "Filename": "pool/main/libx/libxi/libxi_1.8.4_aarch64.deb",
+          "Size": "141860",
+          "MD5sum": "c6e61fe61fc9feae470735aac9d44602",
+          "SHA1": "3c1bd83f55e82321d874cd052ca2ff0251b2c836",
+          "SHA256": "58a19a659db5a90c1557ab5c2ddd7b1c3449898e2dcbf6ffbc14ec02db56cba1",
+          "SHA512": "279b0486f064b0375844e89c361fda951265bf2a29406c1bb454bbaab7b11c1353525fbf2631f4eb3cd2d5e796fe00260784ccb53bf8c8ab3da1539a644e8f45",
+          "Description": "X11 Input extension library",
+          "Homepage": "https://xorg.freedesktop.org/"
+        }
+      ]
+    },
+    "lookup_scope": "Read-only official HTTPS Packages.gz availability lookup; lifecycle must install through signed APT. No signature-validation claim for this metadata lookup.",
+    "unknown_ELF_dependencies": "Rejected; no mutable supported-library policy."
+  },
+  "identity_decisions": {
+    "application_stamp": "Native staged-PM recomputation must equal original selected stamp, using unchanged lock/extras/Python artifact/target/plugin selection/catalog.",
+    "manager_runtime": "Recompute canonical PM _inputs against original and staged pm/pyproject.toml + pm/uv.lock at the same final interpreter path; require equality.",
+    "dependencies": "Every original venv/PM-runtime/wheelhouse/runtime-library/existing-tool path, byte, link target, and mode is preserved. Catalog regeneration must reproduce original SHA.",
+    "source": "Full changed source file hashes and full before/after payload inventories are external receipts; no invented source aggregate in canonical manifest.",
+    "invalid_identity": "Fail with rebuild required; never write a fabricated environment stamp.",
+    "package_control": "Only exact libx11/libxi Depends and recomputed Installed-Size differ; all other fields and maintainer scripts remain unchanged."
+  },
+  "output_contract": {
+    "directory_publication": "Rename a complete new output directory only after checks; original input and installed candidate rechecked unchanged.",
+    "files": [
+      "hermes-agent_0.22.2-1_aarch64-cua-candidate.deb",
+      "prepared-cua-receipt.json",
+      "CUA-PREPARED-PAYLOAD.json"
+    ],
+    "receipt_schema_version": 1,
+    "receipt_status": "prepared-candidate",
+    "published": false,
+    "version_bumped": false,
+    "inventory": "All descendants, root excluded. Regular file: kind/mode/bytes/sha256; symlink: kind/mode/target; directory: kind/mode. No link following.",
+    "roundtrip": "Actual new Debian payload/control extraction must equal staged inventory before local output publication."
+  },
+  "pending": [
+    "Native execution of the augmenter and new Debian assembly.",
+    "Installed own-payload PM resident-driver default selection without authority overrides.",
+    "Real registered computer_use fixture actions, foreground approvals/lease refusal, product cleanup with omitted delivery mode and default local overlay policy.",
+    "Signed-APT runtime dependency closure in a compiler-free lifecycle environment.",
+    "Published baseline to augmented candidate upgrade/reinstall and ordinary optional SDK cold-cache lifecycle."
+  ],
+  "performed": {
+    "native_augmenter_execution": false,
+    "package_installation": false,
+    "workflow_execution": false,
+    "commit": false,
+    "push": false,
+    "release": false
+  },
+  "unclaimed": [
+    "Phone UI control",
+    "Microphone or VAD",
+    "AT-SPI content",
+    "Background input",
+    "History or preview",
+    "Stable-release admission"
+  ],
+  "pin_refresh": {
+    "previous_patch": {
+      "sha256": "cbfa3b9e79d4189350fd9e33adcb14a66195244bc04366c5e8c430c5f8033ed8",
+      "bytes": 67641,
+      "replay_tree": "2d5548348553e4c81c29318af66159e6fffe2001"
+    },
+    "current_patch": {
+      "sha256": "8bbfddbbacfd508db35de6158e4c1a2c06423b84cd5f4ed621d4955fcd529edd",
+      "bytes": 67709,
+      "replay_tree": "bf1356eda991ea38dcb3c5866d0d97be3d7eb3e6"
+    },
+    "source_reference_receipt": {
+      "file": "audit/cua-native-20261017/sealed-driver-preparation.json",
+      "bytes": 14233,
+      "sha256": "4b2df6d0ea4b105f1351f6540d0780a52e8ba8ae464cbdac61b2f4c858d68d12"
+    },
+    "changed_source_files": [
+      {
+        "path": "hermes_cli/tools_config.py",
+        "bytes": 62528,
+        "sha256": "0917e0ba72ebcec3f9ef25fc2912881d93e957c69d9d5c588bbbd043e400352a"
+      }
+    ],
+    "unchanged_permissions": {
+      "path": "tools/computer_use/permissions.py",
+      "bytes": 8792,
+      "sha256": "4c13f04af424f04e34448a9485564c9c5070862f7e54fbe752de937dbb72c995"
+    },
+    "scope": "Final source follow-up changes only the provider label from cua-driver (background) to cua-driver. Combined with the previous checkpoint, the source change is limited to four display/status strings. This preparation refresh changes only the patch and tools_config.py post-patch pins.",
+    "mechanics_unchanged": true,
+    "tests_unchanged": true,
+    "historical_native_receipts_unchanged": true,
+    "script_reverse_identity": "Reversing only pin constants reproduces the original complete augmenter SHA a67ea2528a24f096b844f6d73513834d6f76f33079e315f37af841f5a23b59fb and helper SHA ec609752a2f5b15c6f33b18285fbc126fb7b5bd19d6c55e1720e3ba4a7d3e444.",
+    "source_reference_at_test_start": {
+      "file": "audit/cua-native-20261017/sealed-driver-preparation.json",
+      "bytes": 13400,
+      "sha256": "6f76a70170079fd02168c0567b93fe56d250c3727635a4dc8be1da1a9c7dee90"
+    },
+    "source_reference_post_test_update": "Only diagnostic_followup.source_test_gate was appended after the 87-test pin-refresh gate. Exact source_reference values, patch bytes, script bytes and test bytes were verified unchanged; the earlier sealed-receipt hash is retained as the test-start checkpoint."
+  },
+  "pin_refresh_history": [
+    {
+      "pin_refresh": {
+        "previous_patch": {
+          "sha256": "141d38b9f7ad5004164fcf443b271fdd89458a15a3b1c4b610bedb9f73686d0e",
+          "bytes": 67606,
+          "replay_tree": "dfac85279351daafa64350b6bfc7fcb3ac3ce02b"
+        },
+        "current_patch": {
+          "sha256": "cbfa3b9e79d4189350fd9e33adcb14a66195244bc04366c5e8c430c5f8033ed8",
+          "bytes": 67641,
+          "replay_tree": "2d5548348553e4c81c29318af66159e6fffe2001"
+        },
+        "source_reference_receipt": {
+          "file": "audit/cua-native-20261017/sealed-driver-preparation.json",
+          "bytes": 13112,
+          "sha256": "43a139fc1e05af966b3ad9b4a21e797d49510a2e45d123cf7fbf018aefdb0e67"
+        },
+        "changed_source_files": [
+          {
+            "path": "hermes_cli/tools_config.py",
+            "bytes": 62541,
+            "sha256": "4acfdb56808f073dbcf242475c7fb97a0cdf8ffbf3b800712d1cc623c53e35f1"
+          },
+          {
+            "path": "tools/computer_use/permissions.py",
+            "bytes": 8792,
+            "sha256": "4c13f04af424f04e34448a9485564c9c5070862f7e54fbe752de937dbb72c995"
+          }
+        ],
+        "scope": "Follow-up source change is limited to three display/status strings. This preparation refresh changes only the corresponding patch and post-patch file pins; reversing those constants reproduces the previous complete augmenter/helper SHA-256 values.",
+        "mechanics_unchanged": true,
+        "tests_unchanged": true,
+        "historical_native_receipts_unchanged": true
+      },
+      "files": [
+        {
+          "path": "scripts/prepare_cua_hermes_candidate.py",
+          "bytes": 45107,
+          "sha256": "c57f4dde73b56d52b829e0ad128c6b1d21ba1359e2ffd9729671520f14396f97"
+        },
+        {
+          "path": "tests/test_prepare_cua_hermes_candidate.py",
+          "bytes": 14337,
+          "sha256": "b95a5c74d507cd1a871875eedf21e87d2865fba3f8256f3c0ed5ed9940e5e907"
+        },
+        {
+          "path": "docs/cua-candidate-preparation.md",
+          "bytes": 8534,
+          "sha256": "2a6d7099c3ac92831beb4851c293bfd723a19d72cd97112ac55a3dfa18e0d852"
+        }
+      ],
+      "host_validation": {
+        "program": "C:\\Python314\\python.exe",
+        "argv": [
+          "-B",
+          "-m",
+          "pytest",
+          "-v",
+          "-p",
+          "no:cacheprovider",
+          "tests/test_cua_hermes_probe.py",
+          "tests/test_prepare_cua_hermes_candidate.py"
+        ],
+        "working_directory": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017",
+        "exit_code": 0,
+        "passed": 44,
+        "failed": 0,
+        "skipped": 0,
+        "suite_passed": 87,
+        "per_file_passed": {
+          "tests/test_cua_hermes_probe.py": 43,
+          "tests/test_prepare_cua_hermes_candidate.py": 44
+        },
+        "scope": "One host-only invocation; this audit's passed count is scoped to tests/test_prepare_cua_hermes_candidate.py. The combined 87-test run is shared by both preparation audits and must not be counted twice.",
+        "log_file": "audit/cua-native-20261017/pin-refresh-tests-20261017.log",
+        "log_bytes": 11430,
+        "log_sha256": "8e40dae850df38966e8a170ae0de47585de6bbb77517443504e002c7f22f54d1",
+        "capture_form": "Raw subprocess stdout and stderr merged and saved as bytes before decoding; SHA-256 is the complete retained log.",
+        "summary": "============================= 87 passed in 1.18s ==============================",
+        "aggregate_with_prior_runs": false,
+        "compile_and_whitespace_checks": {
+          "AST": "passed",
+          "UTF8_LF": "passed",
+          "trailing_whitespace": "passed",
+          "pin_only_reverse_identity": "passed",
+          "source_patch_and_sealed_receipt": "passed",
+          "tests_unchanged": "passed"
+        }
+      }
+    }
+  ]
+}

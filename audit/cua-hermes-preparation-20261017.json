@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "status": "prepared_and_reviewed_native_integration_pending",
+  "recorded_at": "2026-10-17",
+  "purpose": "next-stable compatibility preparation; no release",
+  "files": {
+    "patches/next-stable/cua-hermes-integration.patch": {
+      "bytes": 22045,
+      "sha256": "7d78150b29f186ab64e05818826d85312fa9c986a19d63facfbccb08aecdfbb7"
+    },
+    "scripts/compatibility_probe_cua_hermes.py": {
+      "bytes": 37732,
+      "sha256": "873a6dc99b445a88d711b28507df2d00cc1767c949ced75b32c45fb26f0232de"
+    },
+    "scripts/fetch_compatibility_candidate.py": {
+      "bytes": 19415,
+      "sha256": "dc075415b46e14f3f09fb6a889fdf38279564b2f2e6e6008b21232545d1d6d8a"
+    },
+    "tests/test_cua_hermes_probe.py": {
+      "bytes": 6948,
+      "sha256": "8d42e4f5c78a1bddb44ecad018fd263d287446bd844db206ba9851fc5f8fbd87"
+    },
+    "tests/test_fetch_compatibility_candidate.py": {
+      "bytes": 14547,
+      "sha256": "ff4bb8670b4163ca2b29909258c5bc83306474206d18da170f91f824fdbb1685"
+    },
+    ".github/workflows/ci.yml": {
+      "bytes": 1110,
+      "sha256": "9a823342dc43403b6e1d48eb4f897e61b444d0e4522305c8d9e7eb2d70afc0fa"
+    }
+  },
+  "source_baseline": {
+    "upstream_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+    "main_compatibility_patch_sha256": "77ac41bc11a6facd928f4cef577642b9eeb042ce3da7d820478aa49e1d98fa1e",
+    "before_integration_tree": "f49c77b666cef7fd5235cdd786556908527b532e",
+    "after_integration_tree": "d4e6233dc147ca2595d37e9a76a03878ee137498",
+    "reference_patch_order": "four released v0.22.2 patches; main compatibility patch; separate CUA integration patch",
+    "proof_scope": "full-source reference and exact experimental-patch replay; these Git trees are not the package's trimmed app tree",
+    "candidate_trimmed_app_tree_equality_asserted": false
+  },
+  "host_validation": {
+    "packaging_suite": {
+      "command": [
+        "python",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "passed": 205,
+      "skipped_host_specific": 4,
+      "failed": 0,
+      "elapsed_seconds": 3.77
+    },
+    "helper_oracle_tests": 13,
+    "fetch_verification_tests": 37,
+    "counts_overlap_full_packaging_suite": true,
+    "reviewers": [
+      "root",
+      "package_contract",
+      "bootstrap_fix_review"
+    ],
+    "canonical_source_tests": {
+      "evidence": "cua-hermes-host-tests-20261017.json",
+      "evidence_sha256": "310744ca5ea34db71f8b96fd97ab8a38588d9161dd48b0f74552992c604187ae",
+      "runs": [
+        {
+          "id": "source-integration-regressions",
+          "label": "Run 1: initial integration and existing regressions",
+          "passed": 58,
+          "failed": 0,
+          "skipped": 3,
+          "elapsed_seconds": 25.7,
+          "production_matches_frozen_patch": true,
+          "final_test_file": false,
+          "raw_summary_line": "=== Summary: 6 files, 58 tests passed, 0 failed, 3 skipped (100% complete) in 25.7s (1 workers) ==="
+        },
+        {
+          "id": "source-readiness-environment",
+          "label": "Run 2: final readiness test file and existing environment regressions",
+          "passed": 14,
+          "failed": 0,
+          "skipped": 0,
+          "elapsed_seconds": 8.7,
+          "production_matches_frozen_patch": true,
+          "final_test_file": true,
+          "raw_summary_line": "=== Summary: 2 files, 14 tests passed, 0 failed (100% complete) in 8.7s (1 workers) ==="
+        }
+      ],
+      "overlap": {
+        "passed_cases": 7,
+        "file": "tests/tools/test_computer_use_termux_override.py",
+        "description": "Run 2 repeats the original seven cases from Run 1 and adds two readiness-environment cases.",
+        "aggregate_counts_reported": false
+      },
+      "native_termux_execution": false
+    }
+  },
+  "native_integration_executed": false,
+  "model_api_calls_requested": false,
+  "included_in_main_candidate": false,
+  "scope": "explicit external driver; owned X11 desktop; standard three one-action foreground approvals and real viewer-lease refusal; no phone UI, background input, AT-SPI or history claim",
+  "release_output": false,
+  "packaging_ci": {
+    "run_id": 39052294622,
+    "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39052294622",
+    "job_id": 117453149639,
+    "job_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39052294622/job/117453149639",
+    "event": "pull_request",
+    "head_sha": "3e63be4a65dcb0d6d2c0c2fec86f94546fbba8ed",
+    "checked_out_ref": "refs/remotes/pull/6/merge",
+    "checked_out_sha": "e6fd5fcfb260ab72ef77e87f109c51aa69444a34",
+    "conclusion": "success",
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "-q"
+    ],
+    "passed": 209,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_seconds": 1.53,
+    "raw_summary_line": "209 passed in 1.53s",
+    "log_evidence": {
+      "raw_job_log_bytes": 22297,
+      "raw_job_log_sha256": "842dc3ba99f7483e1e12162a228964b2e3212353c844ac7c3eae9a8ffab6a1c8",
+      "lines": [
+        {
+          "line": 106,
+          "text": "2026-10-17T17:06:29.1989653Z ##[group]Checking out the ref"
+        },
+        {
+          "line": 107,
+          "text": "2026-10-17T17:06:29.1992979Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/6/merge"
+        },
+        {
+          "line": 125,
+          "text": "2026-10-17T17:06:29.2143285Z HEAD is now at e6fd5fc Merge 3e63be4a65dcb0d6d2c0c2fec86f94546fbba8ed into 91e096aec63aafd55700675e07148285522dcc70"
+        },
+        {
+          "line": 127,
+          "text": "2026-10-17T17:06:29.2186555Z [command]/usr/bin/git log -1 --format=%H"
+        },
+        {
+          "line": 128,
+          "text": "2026-10-17T17:06:29.2211460Z e6fd5fcfb260ab72ef77e87f109c51aa69444a34"
+        },
+        {
+          "line": 186,
+          "text": "2026-10-17T17:06:35.1649495Z ##[group]Run python -m pytest -q"
+        },
+        {
+          "line": 190,
+          "text": "2026-10-17T17:06:35.1706616Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.8/x64"
+        },
+        {
+          "line": 200,
+          "text": "2026-10-17T17:06:37.5479631Z 209 passed in 1.53s"
+        }
+      ]
+    },
+    "counts_not_aggregated_with_host_runs": true
+  },
+  "standalone_native_driver": {
+    "status": "passed_standalone_only",
+    "evidence": "cua-native-20261017/run-39052290704.json",
+    "evidence_sha256": "66551fb4a60e10c877767952c9e25ecd0cc1b93c9f6ea636195871d8dc7b5c65",
+    "run_id": 39052290704,
+    "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39052290704",
+    "job_id": 117453138507,
+    "head_sha": "3e63be4a65dcb0d6d2c0c2fec86f94546fbba8ed",
+    "artifact_id": 12108595649,
+    "artifact_sha256": "0c2ce1e6b5f93e59be16d4a32d71d35715a4d36ec394f37a49bed9ed4f9cd612",
+    "binary_sha256": "97abdcfdbddc55c20c9ea4a2e897be9e3183458df83475cee0e3d152212f0b53",
+    "native_behavior_checks_passed": 11,
+    "scope": "owned Termux Xvnc/Xfwm4/Xlib virtual desktop",
+    "authorization_mode": "standard",
+    "background_input_certified": false,
+    "accessibility_tree_certified": false,
+    "phone_ui_certified": false,
+    "history_admitted": false,
+    "included_in_main_candidate": false
+  },
+  "native_integration_inputs": {
+    "status": "planned_not_yet_executed",
+    "candidate_run_id": 39048514731,
+    "candidate_head_sha": "e271e922a2e71fd18591c45e9b98b8c7f9fffe02",
+    "candidate_artifact_id": 12107225801,
+    "candidate_package_sha256": "1e4e58fe17a1800f23ababcb2724e92b8904829eae3284569db52dbc672ca76a",
+    "candidate_evidence": "candidate-lifecycle-e271e92-20261017/summary.json",
+    "source_strategy": "copy the exact installed candidate's trimmed app tree outside the payload; apply only patches/next-stable/cua-hermes-integration.patch to that copy",
+    "reference_replay_strategy": "separately reconstruct the full reference tree from the upstream commit, four released patches and main compatibility patch, then verify the experimental patch replay",
+    "candidate_trimmed_app_tree_equality_to_full_source_reference_asserted": false,
+    "interpreter": "actual candidate PM-prepared Bionic interpreter and fixed-prefix runtime libraries",
+    "installed_candidate_immutability_required": true
+  }
+}

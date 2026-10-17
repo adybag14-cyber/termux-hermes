@@ -1,0 +1,250 @@
+# Remaining portability work: local ML and Android device integration
+
+This note records the limits that remain after the prepared compatibility fixes.
+It is not a claim that these capabilities are impossible on Android.
+
+## NeuTTS 1.4.1
+
+The engine is excluded by the managed Python version, not just the Android OS
+marker. The published package and the public source both declare Python
+>=3.10,<3.14; the audited Hermes package uses CPython 3.14.6.
+The PyPI release supplies platform wheels but no source distribution.
+The public source is available and still declares version 1.4.1, so a source port
+can be considered without pretending an sdist exists.
+
+Hermes declares the exact NeuTTS version, but its current resolver environment
+is Python >=3.14. The resulting uv.lock contains no resolved NeuTTS, NeuCodec,
+Torchaudio, librosa, or llama-cpp-python package records. The Torch and ONNX
+Runtime records mentioned below come from other selected or optional graphs;
+they are not a complete locked NeuTTS closure. A separate engine environment
+would need its own exact dependency resolution and native validation. The
+[upstream resolver configuration](https://github.com/NousResearch/hermes-agent/blob/d923a5eb487a17c0a68801bba9ef0f56c81040a8/pyproject.toml)
+and the audited lock establish this distinction.
+
+Primary sources:
+
+- [Exact PyPI release metadata](https://pypi.org/pypi/neutts/1.4.1/json).
+- [Public source at the reviewed version declaration](https://github.com/neuphonic/neutts/blob/b7a3427d0d25e20e8b9e92cbaae688f732916baf/pyproject.toml).
+- [Official Termux PyTorch recipe](https://github.com/termux/termux-packages/blob/ae877f2c6a2b2318abeb43699d6ec5f619c216a6/packages/python-torch/build.sh).
+- [Official Termux Torchaudio recipe](https://github.com/termux/termux-packages/blob/ae877f2c6a2b2318abeb43699d6ec5f619c216a6/packages/python-torchaudio/build.sh).
+- [Official Termux SciPy recipe](https://github.com/termux/termux-packages/blob/ae877f2c6a2b2318abeb43699d6ec5f619c216a6/packages/python-scipy/build.sh).
+
+Official Termux already builds native PyTorch and Torchaudio. Their existence is
+evidence that Android ML support is feasible; it does not make their current
+versions interchangeable with Hermes' frozen Python dependency graph. The
+recipes inspected on 17 October 2026 declare PyTorch 2.14.1, Torchaudio 2.11.0
+and SciPy 1.18.1. The [reviewed recipe pins](../audit/termux-recipe-pins-20261017.json)
+record the immutable source commit and file digests. Hermes' current lock
+contains PyTorch 2.14.0, while the NeuTTS
+dependency group is excluded for the managed interpreter. No Android wheel for
+the locked PyTorch or ONNX Runtime entries is present in that lock.
+
+The first separate [APT-only dependency experiment](../scripts/compatibility_probe_neutts.sh),
+[run 39053355817](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39053355817)
+at head `036f11515eda3a6e4129e14c7dd75ec27d5ae47d`, installed all 122 pinned
+APT packages. SciPy's numerical checks, llvmlite's native MCJIT function and soxr
+resampling passed. Torch, Torchaudio and Torchcodec each stopped at
+`ModuleNotFoundError: No module named 'typing_extensions'` before their native
+behavior cases; the overall probe correctly failed. The preparation then added
+a verified nine-wheel Python dependency closure. The [later native run
+39056756533](../audit/neutts-native-20261017/run-39056756533.json) passes all six
+scientific checks: Torch matrix/Conv1d arithmetic, Torchaudio resampling,
+Torchcodec decoding an owned PCM WAV with zero sample error, SciPy numerical/FFT
+operations, llvmlite JIT and soxr resampling.
+
+Two validation issues remain recorded in that run. Pip reports seven original
+APT WHEEL tags using `android_aarch64`, while the actual interpreter expects
+the `arm64_v8a` ABI spelling. The installed-file oracle also needed to handle
+Sympy's real `.data/data/share/man/man1/isympy.1` file. The latter mapping is
+corrected without omitting the file. The [strict APT validator](../scripts/validate_neutts_apt_python.py)
+binds the original archives, installed metadata and pip sources, enforces Python
+and APT requirements, and recognizes only the exact reviewed native tag
+convention. It preserves pip's nonzero result without retagging packages. The
+combined validator/file/native gate **passed** in [run 39058569758](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39058569758)
+at packaging head `19ab7a1ce9f496dd8dd291d19e3818bb5f878048`. Its
+[retained receipt and raw evidence](../audit/neutts-native-20261017/run-39058569758.json)
+verify all seven gates, all 2,829 files from the nine wheels, the native
+MarkupSafe extension, 474 APT-owned provenance files, and both Python and APT
+dependency checks. Pip's original seven tag errors remain verbatim in the
+evidence; no wheel metadata or interpreter tag table was changed.
+
+The [exact default-engine source review](neutts-default-gguf-feasibility.md)
+identifies the next concrete builds: Numba 0.67.0 against the proven APT
+NumPy/llvmlite and llama-cpp-python 0.3.36 with its matching vendored llama.cpp.
+The latter's Android shared-library loader exclusion is fixed in a separate
+patch with 15 focused host tests. A [separate native-component workflow](../.github/workflows/neutts-engine-components.yml)
+now prepares exact Numba and matching vendored llama sources, four additional
+hash-verified Python wheels and a 44-package compiler closure. It first reruns
+the full scientific foundation, then installs only the 19 additional compiler
+packages from verified retained archives and builds isolated native wheels.
+Numba CPU JIT/workqueue behavior and actual llama backend initialization are
+the required next gates. Neither the native engine nor model inference is
+claimed from the host preparation tests.
+
+This disposable Termux system-Python experiment records the rolling base upgrade
+separately from the pinned dependency archives. Its
+[native workflow](../.github/workflows/neutts-termux-probe.yml) does not install
+NeuTTS, change Hermes PM, validate synthesis or alter the current engine
+exclusion. The [audit record](../audit/compatibility-0.22.2-1.json) binds these
+partial results to the exact tested inputs and verified artifact.
+
+The engine still needs one certified runtime arrangement:
+
+1. Port the exact NeuTTS source and its native codec/inference closure to the
+   managed CPython ABI, then adjust the Python requirement only after actual
+   synthesis works; or
+2. Give the engine a separately managed, supported interpreter and native
+   dependency environment, with subprocess lifecycle and output validation.
+
+Either route needs actual synthesis with reference audio, model/codec loading,
+phonemization, streaming where offered, and cleanup after cancellation. Simply
+removing the marker, importing a different Python's system packages, or pointing
+the bundled interpreter at an APT site-packages directory would not establish
+that compatibility. No such shortcut is part of this preparation.
+
+## Local computer use
+
+The pinned CUA driver release for Linux ARM64 is a glibc executable with
+interpreter /lib/ld-linux-aarch64.so.1. Its Linux backend assumes desktop
+display/input facilities, including X11/Wayland and accessibility services.
+
+[Reviewed CUA driver source](https://github.com/trycua/cua/tree/cua-driver-rs-v0.21.0/libs/cua-driver/rust).
+
+The prepared remote-provider routing fix lets an Android client select an
+explicitly configured remote Linux desktop. The Termux Bot Desktop adapter
+provides a separate local virtual X11 display. These are useful capabilities,
+but neither supplies Android Accessibility/MediaProjection control of arbitrary
+phone apps. A phone UI backend requires that Android integration and its explicit
+device permissions. A potential native X11 driver build should be evaluated
+against the virtual desktop on its own terms.
+
+### Isolated native X11 source-port experiment
+
+The preparation includes a candidate-only source port for CUA's existing virtual
+X11 desktop backend. Its source is pinned to commit
+`70db98d1bcd92890d778f4978e0eb107a4b66c1b` (CUA 0.21.0), with original
+Cargo.lock SHA-256
+`27b025bc4fd81074cf18ae614597bec5b7c9d8ea99b2a7aaf45072aec72c64ce`.
+The [source preparer](../scripts/prepare_cua_termux_source.py) verifies the clean
+Git checkout and both exact registry archives before applying
+[the reviewed patch](../patches/next-stable/cua-driver.patch).
+
+The driver/SDK platform configuration admits Android to the existing X11 code.
+Two local crate adapters enable clipboard-rs's Unix X11 implementation and align
+x11rb-protocol's socket location with Termux's PREFIX/tmp. Both retain their
+locked versions; the preparer verifies that all 602 other Cargo package records
+remain unchanged. The standalone native probe now **passes all eleven checks** in
+[run 39052290704](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39052290704)
+at head `3e63be4a65dcb0d6d2c0c2fec86f94546fbba8ed`. Its
+[success record](../audit/cua-native-20261017/run-39052290704.json) preserves
+the source/input receipts, native linking and PTY/shared-memory ABI proof, a
+private D-Bus round trip, all 60 real standalone MCP tool names, and owned cleanup.
+
+The independent Xlib fixture verified a 320x240 screenshot with its two painted
+colors, one foreground click at client coordinates (80,60), exactly two scroll
+events, the exact typed text, and client geometry (40,60,400,200). Clipboard
+write/read returned the exact fixture string. The driver reported input effects
+as unverifiable; success was established by the actual fixture events, not that
+transport response alone.
+
+The [earlier default-background attempt](../audit/cua-native-20261017/run-39051490364.json)
+returned an unverifiable effect and produced no click event. That path remains
+uncertified. The successful foreground run also retained a degraded accessibility
+response because the private bus lacks org.a11y.Bus; its fallback window element
+is not an AT-SPI-tree proof. [Native progress records](../audit/cua-native-20261017/)
+retain the actual failures and subsequent bounded corrections.
+
+The experiment checks a private, owned Xvnc desktop using real MCP operations
+and independent fixture observations. Its scope includes screenshot capture,
+keyboard and mouse events, scrolling, clipboard transfer, window geometry, and
+cleanup. It remains separate from Hermes PM admission and the complete package
+candidate. Encrypted history still requires a supported secure credential store;
+its existing failure behavior is preserved. TigerVNC does not provide the
+parallel uinput devices expected by CUA's multiple-pointer implementation.
+Android phone application control still requires an Android-specific backend.
+
+A [separate Hermes integration patch](../patches/next-stable/cua-hermes-integration.patch)
+allows an explicitly selected native Termux X11 executable. It leaves the full
+runtime manifest check, action approval gate and viewer lease in place. The
+[native integration helper](../scripts/compatibility_probe_cua_hermes.py) uses the
+real registered tool and product Bot Desktop, with exact fixture image/input
+observations, three one-action foreground approvals, refusal without an approver,
+viewer takeover/hand-back, and owned cleanup. Its [candidate fetcher](../scripts/fetch_compatibility_candidate.py)
+verifies the already-proven package and source identities before the test. These
+files now have [successful real native Hermes evidence](../audit/cua-native-20261017/run-39056267366.json)
+at head `fbf7c029b8df66618f520a47e6c07ff722129a43`. Five integration checks
+passed through real MCP, including three once approvals, exact input oracles,
+viewer takeover and cleanup. The preceding run exposed a scroll-schema error:
+Hermes dropped requested coordinates and scrolled at the window center.
+Corrected paired-x/y schema handling delivered both events at (80,60).
+The experimental patch is still not part of the full main candidate. The
+[preparation receipt](../audit/cua-hermes-preparation-20261017.json) distinguishes
+the full-source reference/replay Git trees from the forthcoming runtime input:
+the successful native probe copied the exact proven candidate's trimmed `app/`
+tree outside the installed payload and applied only the experimental CUA patch. The
+full-source trees `f49c77b666cef7fd5235cdd786556908527b532e` and
+`d4e6233dc147ca2595d37e9a76a03878ee137498` prove the reference patch replay;
+they do not assert that the candidate's trimmed app tree is identical to either.
+
+The [canonical host-validation record](../audit/cua-hermes-host-tests-20261017.json)
+preserves the initial 58-pass/three-skip run and the final 14-pass readiness run,
+with seven overlapping cases and unchanged production code. Those host results are not summed. The later native integration establishes
+Hermes-to-MCP behavior for explicit driver/foreground selection. A new candidate
+preparation adds a sealed, source-bound PM tool descriptor and normal driver
+discovery, plus a Termux-local foreground default resolved before approval.
+Explicit background requests are refused; background grants must not authorize
+foreground input. The next gate must execute the app and PM inside the
+augmented package and exercise omitted delivery mode. Until that package gate
+passes, the six main-candidate repairs and nine-restriction baseline remain
+unchanged.
+
+The [packaged CUA preparation](cua-candidate-preparation.md) now adds canonical
+bundled-driver selection and resolves omitted input delivery mode to foreground
+before approval on the local Termux X11 backend. Explicit background input is
+refused. Its separate unpublished package adds `Depends: libx11, libxi`,
+preserves the original Python/runtime dependency identities, and must pass
+installed default selection plus a fresh-container same-version upgrade and
+optional-install lifecycle. Those new native gates remain pending.
+
+## Microphone silence detection
+
+Termux:API records a finalized audio file; it does not expose the live PCM stream
+used by Hermes' sounddevice silence detector. The prepared capture selector
+exposes the existing PCM backend explicitly and keeps Termux:API as an
+independent choice. It does not substitute Android speech recognition for the
+user's configured transcription provider.
+
+[Official Termux PortAudio recipe](https://github.com/termux/termux-packages/blob/ae877f2c6a2b2318abeb43699d6ec5f619c216a6/packages/portaudio/build.sh).
+
+That recipe uses an OpenSL ES backend and requires Android's real libOpenSLES.so.
+It disables ALSA, JACK, OSS and PulseAudio backends. The native audio probe
+therefore records two separate results: exact NumPy wheel/numerical behavior,
+and actual PortAudio loading/device enumeration. A container missing Android's
+audio framework must remain environment-limited, with no fabricated audio device
+or library. The diagnostic run now verifies that specific boundary: native
+NumPy passes with both library environments, the mapped OpenSL ES object is the
+Termux libandroid-stub wrapper, and the real Android framework/Binder/audio
+services are absent. PortAudio initialization remains failed and no microphone
+capability is admitted from this container result. See the [captured audio
+evidence](../audit/native-probes-9fcd31c-20261017/audio-summary.json) and the
+[reviewed wrapper source](https://github.com/termux/termux-packages/blob/11ae750781a261b8df328697b12d66d75b72e5da/packages/libandroid-stub/libOpenSLES-wrapper.c).
+Physical microphone permission, capture, VAD thresholds, maximum
+duration, playback/audio focus and cancellation remain device gates.
+
+The separate [audio-readiness patch](../patches/next-stable/audio-readiness.patch)
+catches the actual import-time PortAudio exception path, preserves its diagnostic
+cause and prevents an output-only inventory from being reported as microphone
+readiness. Its [source/test receipt](../audit/audio-readiness-preparation-20261017.json)
+and [device guide](audio-readiness-device-validation.md) distinguish tested source
+behavior from missing physical-device proof. A fresh isolated PM audio environment
+still has to be staged before the device test; copying a CI environment is not
+an installation procedure.
+
+## Stable-release prerequisites
+
+The compatibility preparation is saved independently from the released recipe.
+The current same-version candidate passed the complete native package and
+optional-install lifecycle gate; its [saved evidence](../audit/candidate-lifecycle-e271e92-20261017/summary.json)
+records the exact tested inputs. A future stable release must keep that gate
+passing for its final source and complete the Android device checks. This branch does not
+publish a release or promote the candidate into the signed APT feed.

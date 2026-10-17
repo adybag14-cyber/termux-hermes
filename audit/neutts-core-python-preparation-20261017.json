@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-10-17T17:51:35.213529+00:00",
+  "preparation_base_commit": "1eaee07fddc0dadab59ea4a5758f27513488b168",
+  "scope": "Separate, unpublished native APT scientific-stack probe with nine verified Python dependency wheels. No NeuTTS engine or model execution and no package-manager admission.",
+  "frozen_files": [
+    {
+      "path": ".github/workflows/neutts-termux-probe.yml",
+      "bytes": 1538,
+      "sha256": "cd348ed82c933b89e7267cf00e90fb5d25474f0ddd5619f031eca9a500f8f0a5"
+    },
+    {
+      "path": "scripts/compatibility_probe_neutts.sh",
+      "bytes": 28107,
+      "sha256": "28a29eee73a65813b7573c3e1088965992eeadb00c48b7a89cb29213431732cd"
+    },
+    {
+      "path": "scripts/compatibility_probe_neutts.py",
+      "bytes": 17720,
+      "sha256": "c665c24acd717243e8f0a23fc12879fad63ca29819c05a8e77d8cd98694891ca"
+    },
+    {
+      "path": "scripts/neutts_core_python_lock.json",
+      "bytes": 17316,
+      "sha256": "ba927bae7ec87c331e23136ba883da86876ca24044485288d9866649130fab38"
+    },
+    {
+      "path": "scripts/prepare_neutts_core_python.py",
+      "bytes": 17727,
+      "sha256": "b78a252eb1c3d1872b64f7ffe5e16bf16c161057b6579732a7af966317e0b19e"
+    },
+    {
+      "path": "tests/test_neutts_core_python.py",
+      "bytes": 14833,
+      "sha256": "c89ae1bb9af04a2d645c1dd8f748c96601a34c3350634888a987ed6f139f9e25"
+    },
+    {
+      "path": "tests/test_neutts_probe.py",
+      "bytes": 6881,
+      "sha256": "8027127735c8574c704122ee2109b18a6a775468fadb28c8903460086c13a6f7"
+    },
+    {
+      "path": "audit/neutts-core-python-metadata-20261017.json",
+      "bytes": 19016,
+      "sha256": "7d88c810afa416620e24a5c7ddf7dd5091a2cbda5a8cf948dc4d5b4c7ef8ab1f"
+    }
+  ],
+  "review": {
+    "root": "Reviewed all eight inputs, including the complete download verifier, rejection tests and native installed-file oracle.",
+    "peer": "bootstrap_fix_review independently confirmed the wheel-lock interface and native MarkupSafe API identity."
+  },
+  "validation": {
+    "packaging_command": [
+      "python",
+      "-X",
+      "utf8",
+      "-m",
+      "pytest",
+      "-q"
+    ],
+    "packaging_result": {
+      "passed": 266,
+      "skipped": 4,
+      "duration_seconds": 10.19,
+      "platform": "Windows host",
+      "capture": "Tool-captured text; not claimed to be raw child-process bytes."
+    },
+    "focused_verifier_tests": 42,
+    "focused_collector_tests": 19,
+    "focused_results_are_subsets_of_packaging_result": true,
+    "bash_syntax": "passed",
+    "python_ast": "passed",
+    "json_parse": "passed",
+    "frozen_sha256_checks": "passed",
+    "git_diff_check": "passed"
+  },
+  "dependency_provenance": {
+    "original_upstream_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+    "original_uv_lock_sha256": "16300cf807347b7fcfa3c19963f5fe950913fdb3e41e3c649ea724bc7dc997da",
+    "versions_unchanged_from_original_lock": 8,
+    "explicit_probe_deviation": "MarkupSafe 3.0.4, official CPython 3.14 Android arm64 wheel; original source lock uses 3.0.3.",
+    "previous_real_helper_execution": "All nine unchanged artifacts were downloaded and verified under python -S before the provenance-only frozen-lock correction. The upcoming native run must create a fresh output using the final lock."
+  },
+  "previous_native_probe": {
+    "run_id": 39053355817,
+    "passed": [
+      "SciPy solve and FFT",
+      "llvmlite MCJIT",
+      "soxr resampling"
+    ],
+    "blocked": [
+      "Torch",
+      "Torchaudio",
+      "Torchcodec"
+    ],
+    "observed_blocker": "Missing typing_extensions before native operations."
+  },
+  "release_boundary": {
+    "release_created": false,
+    "version_bumped": false,
+    "main_candidate_patch_changed": false,
+    "installer_pins_changed": false,
+    "apt_published": false
+  }
+}

@@ -1,0 +1,51 @@
+name: Probe NeuTTS native Termux dependencies
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [prepare/termux-compatibility-next-stable]
+    paths:
+      - '.github/workflows/neutts-termux-probe.yml'
+      - 'scripts/compatibility_probe_neutts.sh'
+      - 'scripts/compatibility_probe_neutts.py'
+      - 'tests/test_neutts_probe.py'
+      - 'scripts/prepare_neutts_core_python.py'
+      - 'scripts/neutts_core_python_lock.json'
+      - 'tests/test_neutts_core_python.py'
+      - 'scripts/validate_neutts_apt_python.py'
+      - 'scripts/neutts_apt_python_metadata.json'
+      - 'tests/test_neutts_apt_python.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neutts-termux-probe-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  native-core:
+    name: Separate scientific ABI experiment
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    steps:
+      - name: Checkout the exact proposed probe
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify pinned APT inputs and exercise the native dependency core
+        env:
+          NEUTTS_PROBE_HEAD_SHA: ${{ github.sha }}
+        run: bash scripts/compatibility_probe_neutts.sh --out probe-results/neutts
+
+      - name: Preserve actual dependency results and concrete blockers
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-neutts-dependency-experiment
+          path: probe-results/neutts/
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 14
