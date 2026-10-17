@@ -121,14 +121,15 @@ This workflow creates a candidate without publishing it. Run it manually with:
 gh workflow run build-hermes-package.yml --ref <reviewed-build-branch>
 ```
 
-After it succeeds, use that candidate's checksum to update `install.sh` together
-with the package version and immutable release URL. Review and merge those pins,
-the updated live smoke and the release workflow. Then dispatch
+After it succeeds, review and merge the packaging and release workflow changes.
+Keep the public installer's existing release pins until the new asset is published.
+Record the candidate's checksum, package version and immutable release URL in
+`install.sh` on a reviewed release branch. Dispatch
 [Publish verified Hermes Termux candidate](.github/workflows/publish-hermes-package.yml)
-with the successful build's run ID and the new release tag:
+on that branch with the successful build's run ID and the new release tag:
 
 ```bash
-gh workflow run publish-hermes-package.yml --ref main \
+gh workflow run publish-hermes-package.yml --ref <reviewed-release-branch> \
   -f build_run_id=<successful-native-run-id> \
   -f release_tag=<new-release-tag>
 ```
@@ -138,7 +139,13 @@ successful run, package identity, upstream pins, checksums and installer pins;
 reruns the existing-package upgrade; and tests the checked-in streamed recovery
 installer with a real interrupted HTTP transfer. It then creates a draft release,
 checks every uploaded asset's GitHub digest and size, and publishes the release.
-An existing tag or release is rejected.
+An existing tag or release is rejected. Recovery also reproduces the older
+Termux base's GPG/libgcrypt incompatibility and requires the installer to repair
+that dependency set while preserving the system Python.
+
+Once publication succeeds, merge the installer pins into `main`. After the new
+package appears in the signed APT repository, run the live APT smoke on that
+commit. This ordering ensures the public installer points to an available asset.
 
 Each package release includes:
 
