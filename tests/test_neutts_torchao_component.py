@@ -33,7 +33,7 @@ probe = module_at("_tested_torchao_probe", ROOT / "scripts/compatibility_probe_n
 def fixture_inputs():
     value = os.environ.get("TORCHAO_COMPONENT_INPUTS")
     if not value:
-        raise unittest.SkipTest("Set TORCHAO_COMPONENT_INPUTS to the exact prepared one-wheel fixture")
+        raise unittest.SkipTest("Set TORCHAO_COMPONENT_INPUTS to the exact prepared original/patch/output fixture")
     inputs = Path(value)
     lock, wheel, _ = prep.verify_inputs(inputs)
     return inputs, lock, wheel
@@ -70,7 +70,7 @@ class ExactInputTests(unittest.TestCase):
 
     def test_real_wheel_preparation_and_replay(self):
         out = self.work / "prepared"
-        receipt = prep.prepare(out, self.wheel)
+        receipt = prep.prepare(out, self.inputs / "upstream" / self.lock["upstream_package"]["artifact"]["filename"])
         lock, wheel, proof = prep.verify_inputs(out)
         self.assertEqual(wheel.read_bytes(), self.wheel.read_bytes())
         self.assertEqual(proof, receipt["wheel"])
@@ -88,7 +88,7 @@ class ExactInputTests(unittest.TestCase):
 
     def test_corrupt_cached_wheel_rejected_before_output_creation(self):
         bad = self.work / self.wheel.name
-        raw = bytearray(self.wheel.read_bytes())
+        raw = bytearray((self.inputs / "upstream" / self.lock["upstream_package"]["artifact"]["filename"]).read_bytes())
         raw[len(raw) // 2] ^= 1
         bad.write_bytes(raw)
         with self.assertRaises(RuntimeError):
@@ -273,6 +273,179 @@ class ProcessEvidenceTests(unittest.TestCase):
         self.assertEqual(row["exit_code"], 124)
         self.assertTrue(row["timed_out"])
 
+
+
+class ReviewedLazyPatchInputTests(unittest.TestCase):
+    """Actual artifact replays prove the bounded payload change and provenance."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.inputs, cls.lock, cls.wheel = fixture_inputs()
+
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory(prefix="torchao-patch-check-")
+        self.addCleanup(self.temporary.cleanup)
+        self.work = Path(self.temporary.name)
+        self.upstream = self.inputs / "upstream" / self.lock["upstream_package"]["artifact"]["filename"]
+
+    def test_only_optional_source_and_truthful_record_change(self):
+        with zipfile.ZipFile(self.upstream) as original, zipfile.ZipFile(self.wheel) as patched:
+            self.assertEqual(original.namelist(), patched.namelist())
+            differences = [name for name in original.namelist()
+                           if original.read(name) != patched.read(name)]
+            self.assertEqual(sorted(differences), sorted(self.lock["patch"]["changed_members"]))
+            self.assertEqual(len(differences), 2)
+            for field in ("metadata_member", "wheel_member"):
+                name = self.lock["package"]["wheel"][field]
+                self.assertEqual(original.read(name), patched.read(name))
+        self.assertEqual(self.lock["upstream_package"]["version"], self.lock["package"]["version"])
+
+    def test_original_artifact_tampering_is_rejected_on_replay(self):
+        copied = self.work / "inputs"
+        shutil.copytree(self.inputs, copied)
+        path = copied / "upstream" / self.upstream.name
+        raw = bytearray(path.read_bytes())
+        raw[len(raw) // 2] ^= 1
+        path.write_bytes(raw)
+        with self.assertRaisesRegex(RuntimeError, "Wheel size or SHA-256 mismatch"):
+            prep.verify_inputs(copied)
+
+    def test_patch_tampering_rejected_before_output_creation(self):
+        patch = self.work / "changed.patch"
+        raw = bytearray((self.inputs / self.lock["patch"]["input_filename"]).read_bytes())
+        raw[-3] ^= 1
+        patch.write_bytes(raw)
+        output = self.work / "uncreated"
+        with self.assertRaisesRegex(prep.PrepareError, "patch changed"):
+            prep.prepare(output, self.upstream, patch)
+        self.assertFalse(output.exists())
+
+    def test_false_preservation_claim_is_rejected(self):
+        copied = self.work / "inputs"
+        shutil.copytree(self.inputs, copied)
+        path = copied / prep.RECEIPT_NAME
+        receipt = json.loads(path.read_bytes())
+        receipt["all_other_original_member_bytes_preserved"] = False
+        path.write_text(json.dumps(receipt), encoding="utf-8")
+        with self.assertRaisesRegex(prep.PrepareError, "receipt differs"):
+            prep.verify_inputs(copied)
+
+
+class OptionalSdpaImportBoundaryTests(unittest.TestCase):
+    """Import-semantics units using the actual patched initializer and named peers.
+
+    These temporary packages have unique non-Torch names. Their peer fixtures
+    isolate lazy-import behavior; they are never substituted into the separate
+    real Android TorchAO import or the five native CPU-operation cases.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.inputs, cls.lock, cls.wheel = fixture_inputs()
+        with zipfile.ZipFile(cls.wheel) as wheel:
+            cls.initializer = wheel.read(cls.lock["patch"]["member"])
+
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory(prefix="torchao-lazy-import-")
+        self.addCleanup(self.temporary.cleanup)
+        self.parent = Path(self.temporary.name)
+        self.package = "_optional_sdpa_fixture_" + self.parent.name.replace("-", "_")
+        self.directory = self.parent / self.package
+        self.directory.mkdir()
+        (self.directory / "__init__.py").write_bytes(self.initializer)
+        (self.directory / "da8w4_concat_linear_fusion_cpu.py").write_text(
+            "registration_count = 0\n"
+            "def register_da8w4_concat_linear_cpu_pass():\n"
+            "    global registration_count\n"
+            "    registration_count += 1\n"
+            "    return 'da8w4-registration'\n", encoding="utf-8", newline="\n")
+        self.optional_path = self.directory / "int8_sdpa_fusion.py"
+        self.optional_source = (
+            "from functools import lru_cache\n"
+            "initialization_count = 0\n"
+            "@lru_cache(None)\n"
+            "def _int8_sdpa_init():\n"
+            "    global initialization_count\n"
+            "    initialization_count += 1\n"
+            "    return 'sdpa-registration'\n")
+        self.optional_path.write_text(self.optional_source, encoding="utf-8", newline="\n")
+        sys.path.insert(0, str(self.parent))
+        self.addCleanup(self.clear_modules)
+        importlib.invalidate_caches()
+
+    def clear_modules(self):
+        if str(self.parent) in sys.path:
+            sys.path.remove(str(self.parent))
+        for name in list(sys.modules):
+            if name == self.package or name.startswith(self.package + "."):
+                del sys.modules[name]
+        importlib.invalidate_caches()
+
+    def package_module(self):
+        return importlib.import_module(self.package)
+
+    def test_package_import_preserves_da8w4_without_loading_sdpa(self):
+        module = self.package_module()
+        self.assertNotIn(self.package + ".int8_sdpa_fusion", sys.modules)
+        peer = importlib.import_module(self.package + ".da8w4_concat_linear_fusion_cpu")
+        self.assertIs(module.register_da8w4_concat_linear_cpu_pass,
+                      peer.register_da8w4_concat_linear_cpu_pass)
+        self.assertEqual(module.register_da8w4_concat_linear_cpu_pass(), "da8w4-registration")
+        self.assertEqual(peer.registration_count, 1)
+        self.assertNotIn(self.package + ".int8_sdpa_fusion", sys.modules)
+
+    def test_explicit_access_preserves_original_callable_identity_and_cache(self):
+        module = self.package_module()
+        function = module._int8_sdpa_init
+        peer = importlib.import_module(self.package + ".int8_sdpa_fusion")
+        self.assertIs(function, peer._int8_sdpa_init)
+        self.assertIs(module._int8_sdpa_init, function)
+        self.assertIs(vars(module)["_int8_sdpa_init"], function)
+        self.assertEqual(function(), "sdpa-registration")
+        self.assertEqual(function(), "sdpa-registration")
+        self.assertEqual(peer.initialization_count, 1)
+        self.assertEqual(function.cache_info().hits, 1)
+        function.cache_clear()
+        self.assertEqual(function.cache_info().currsize, 0)
+
+    def test_explicit_star_import_retains_original_exports(self):
+        module = self.package_module()
+        self.assertEqual(module.__all__, ["_int8_sdpa_init", "register_da8w4_concat_linear_cpu_pass"])
+        namespace = {}
+        exec("from " + self.package + " import *", namespace)
+        peer = importlib.import_module(self.package + ".int8_sdpa_fusion")
+        self.assertIs(namespace["_int8_sdpa_init"], peer._int8_sdpa_init)
+        self.assertIs(namespace["register_da8w4_concat_linear_cpu_pass"],
+                      module.register_da8w4_concat_linear_cpu_pass)
+
+    def test_unknown_attribute_has_normal_error_and_does_not_import_sdpa(self):
+        module = self.package_module()
+        with self.assertRaises(AttributeError) as caught:
+            getattr(module, "unknown_optional_name")
+        self.assertEqual(str(caught.exception),
+                         "module " + repr(self.package) + " has no attribute 'unknown_optional_name'")
+        self.assertNotIn(self.package + ".int8_sdpa_fusion", sys.modules)
+
+    def test_missing_transitive_dependency_error_is_preserved_and_not_cached(self):
+        missing = "_absent_sdpa_backend_" + self.parent.name.replace("-", "_")
+        self.optional_path.write_text("import " + missing + "\n", encoding="utf-8", newline="\n")
+        module = self.package_module()
+        with self.assertRaises(ModuleNotFoundError) as caught:
+            getattr(module, "_int8_sdpa_init")
+        self.assertEqual(caught.exception.name, missing)
+        self.assertNotIn("_int8_sdpa_init", vars(module))
+        self.assertNotIn(self.package + ".int8_sdpa_fusion", sys.modules)
+        self.optional_path.write_text(self.optional_source, encoding="utf-8", newline="\n")
+        importlib.invalidate_caches()
+        self.assertEqual(module._int8_sdpa_init(), "sdpa-registration")
+
+    def test_other_explicit_backend_errors_are_not_suppressed(self):
+        self.optional_path.write_text("raise RuntimeError('optional compiler fixture failure')\n",
+                                      encoding="utf-8", newline="\n")
+        module = self.package_module()
+        with self.assertRaisesRegex(RuntimeError, "optional compiler fixture failure"):
+            getattr(module, "_int8_sdpa_init")
+        self.assertNotIn("_int8_sdpa_init", vars(module))
 
 if __name__ == "__main__":
     unittest.main()

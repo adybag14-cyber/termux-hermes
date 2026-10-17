@@ -23,7 +23,7 @@ import zipfile
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 PREFIX = Path("/data/data/com.termux/files/usr")
-PREPARER_SHA256 = "0ebd003722f80b29b63e143da13c64627deb060b86ab67fdc8ea8d15d1bb5095"
+PREPARER_SHA256 = "2053b4b6e457196527e86ee547e9f358bbbfbb78798550fd84bf520bc0f28c55"
 CASE_NAMES = ("real_package_import", "nf4_default_quantization",
               "independent_dequantization", "linear_forward", "input_gradient")
 CODEBOOK = (-1.0, -0.6962, -0.5251, -0.3949, -0.2844, -0.1848, -0.0911, 0.0,

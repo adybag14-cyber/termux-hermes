@@ -23,6 +23,7 @@ if json.loads((root / "manifest/release.json").read_bytes())["termux_image"] != 
     raise SystemExit("review the native image pin")
 names = ("scripts/compatibility_probe_neutts_torchao.sh", "scripts/compatibility_probe_neutts_torchao.py",
          "scripts/prepare_neutts_torchao.py", "scripts/neutts_torchao_component_lock.json",
+         "patches/next-stable/torchao-lazy-sdpa.patch",
          ".github/workflows/neutts-torchao-component.yml",
          "scripts/compatibility_probe_neutts.sh", "scripts/compatibility_probe_neutts.py",
          "scripts/compatibility_probe_neutts_native.py",
@@ -40,7 +41,8 @@ with (out / "TORCHAO-PROBE-INPUTS.json").open("x", encoding="utf-8", newline="\n
 PY
   python3 -B "$packaging/scripts/prepare_neutts_core_python.py" \
     --lock "$packaging/scripts/neutts_core_python_lock.json" --out "$out/python-wheelhouse"
-  python3 -B "$packaging/scripts/prepare_neutts_torchao.py" --out "$out/torchao-inputs"
+  python3 -B "$packaging/scripts/prepare_neutts_torchao.py" \
+    --patch "$packaging/patches/next-stable/torchao-lazy-sdpa.patch" --out "$out/torchao-inputs"
   chmod 0777 "$out"
   docker pull "$image"
   [[ "$(docker image inspect "$image" --format '{{.Architecture}}')" == arm64 ]]
