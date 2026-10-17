@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "run_id": 39042809536,
+  "packaging_head_sha": "4b3d1214ea24688fdf538190fcba14d08b837d16",
+  "checkout_merge_sha": "b66d4a89c7bdddaf1821dea697c8c977e9d923ea",
+  "next_stable_patch_sha256": "add3afb05e2aaa4066b7e2e9eaaa7e5c9fd84a2b6bf954cede1b6564e380374e",
+  "desktop": {
+    "job_conclusion": "success",
+    "bindings": "desktop-bindings.json",
+    "evidence": "desktop-evidence.json",
+    "job_id": 117425533428,
+    "artifact": {
+      "id": 12104792158,
+      "name": "termux-compatibility-desktop",
+      "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39042809536/artifacts/12104792158",
+      "sha256": "6fa3504175823855bf1c7dda63b017deb6038329fcb0314616b38cf0bf84b304",
+      "bytes": 1366758,
+      "created_at": "2026-10-17T14:56:49Z"
+    },
+    "validated": [
+      "Android/Bionic UID 1000 installs official Termux X11 packages without sudo.",
+      "Actual Hermes Bot Desktop starts Xvnc and Xfce.",
+      "RFB 3.8 returns an 800x600 framebuffer.",
+      "Private RFB socket 0600, profile 0700, Xauthority 0600.",
+      "Xvnc has no TCP listener.",
+      "Actual product screenshot returns 800x600 JPEG.",
+      "Actual product stop removes the private server and socket."
+    ]
+  },
+  "browser": {
+    "job_conclusion": "failure",
+    "bindings": "browser-bindings.json",
+    "failure": "browser-failure.json",
+    "job_id": 117425533297,
+    "artifact": {
+      "id": 12104832106,
+      "name": "termux-compatibility-browser",
+      "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39042809536/artifacts/12104832106",
+      "sha256": "d33912763da706f65af8a2fe6da2f8d7cc9ca66fbfc068d57db36b2ca49988f7",
+      "bytes": 1349047,
+      "created_at": "2026-10-17T14:57:16Z"
+    },
+    "validated": [
+      "Pinned static ARM64 AgentBrowser 0.26.0 and official Termux Chromium 155.0.8059.79 execute natively.",
+      "Raw CLI navigation, accessible snapshot, DOM click/readback, PNG screenshot, and close pass.",
+      "Resident PM acquires the pinned driver and selects its actual binary.",
+      "Chromium remains Termux APT-owned with no fabricated PM artifact record."
+    ],
+    "not_validated": [
+      "Integrated built-in Hermes browser roundtrip after readiness.",
+      "Default browser_exec/browser-harness behavior."
+    ],
+    "failed_gate": "Built-in readiness was asserted under the upstream default browser_exec configuration."
+  },
+  "physical_android_phone_ui_tested": false,
+  "physical_android_audio_tested": false,
+  "screenshots": "Binary images remain in linked GitHub artifacts; hashes are recorded in each bindings file.",
+  "release_output": false
+}

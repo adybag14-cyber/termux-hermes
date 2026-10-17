@@ -122,17 +122,17 @@
     {
       "id": "bot-desktop",
       "baseline": "Linux virtual desktop host only.",
-      "status": "adapter_regressions_passed_native_probe_pending"
+      "status": "native_xvnc_xfce_framebuffer_product_screenshot_and_cleanup_passed"
     },
     {
       "id": "gateway-service",
       "baseline": "Managed service installation/start/uninstall refuses Termux/APT provenance; manual gateway remains usable.",
-      "status": "runit_adapter_tests_passed_native_lifecycle_pending"
+      "status": "native_profile_isolated_runit_lifecycle_and_crash_recovery_passed"
     },
     {
       "id": "recorder-silence-vad",
       "baseline": "Termux:API recorder does not provide the sounddevice silence/VAD auto-stop path.",
-      "status": "explicit_pcm_backend_selection_tested_native_audio_provisioning_pending"
+      "status": "numpy_native_behavior_passed_portaudio_engine_initialization_failed_microphone_unverified"
     }
   ],
   "adjacent_defects": [
@@ -223,9 +223,12 @@
       "failed": 0
     },
     "packaging_regressions": {
-      "passed": 131,
+      "passed": 135,
       "failed": 0,
       "skipped_host_specific": 4
-    }
+    },
+    "native_gateway_evidence": "native-probes-4b3d121-20261017/gateway-summary.json",
+    "native_audio_evidence": "native-probes-4b3d121-20261017/audio-summary.json",
+    "native_desktop_evidence": "native-probes-4b3d121-20261017/browser-desktop-summary.json"
   }
 }

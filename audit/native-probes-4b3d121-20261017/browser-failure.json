@@ -1,0 +1,14 @@
+{
+  "job_conclusion": "failure",
+  "failed_phase": "built-in product readiness after PM acquisition",
+  "native_log_excerpt": "Traceback (most recent call last):\n  File \"<stdin>\", line 24, in <module>\nAssertionError: the product readiness gate must advertise the proven local browser",
+  "raw_static_driver_roundtrip": "passed",
+  "pm_acquisition_and_exact_driver_selection": "passed before the failing assertion",
+  "built_in_browser_readiness": "returned false",
+  "default_browser_exec_behavior": "not exercised in this snapshot",
+  "diagnosis": {
+    "basis": "Source trace of upstream default selection; mode value was not emitted in this failed probe.",
+    "reason": "browser-harness is bundled and an unset browser.backend selects browser_exec; check_browser_requirements intentionally hides the built-in browser_* surface.",
+    "proposed_probe_correction": "Select browser.backend:\"off\" only for the built-in case and separately exercise the real default browser_exec handler with backend unset."
+  }
+}

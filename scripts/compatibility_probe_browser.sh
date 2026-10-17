@@ -130,6 +130,13 @@ export HERMES_HOME="$work/pm-home" HERMES_RUNTIME_DIR="$HERMES_PROBE_PAYLOAD/too
 export PYTHONPATH="$HERMES_PROBE_PAYLOAD/app" PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1
 export AGENT_BROWSER_PROFILE="$work/pm-profile"
 mkdir -p "$HERMES_HOME" "$AGENT_BROWSER_PROFILE"
+# Browser Use CLI is the upstream default when browser-harness is installed.
+# This probe intentionally exercises the built-in browser_* surface, selected by
+# the documented "off" backend (it disables Browser Use CLI, not local browsing).
+cat > "$HERMES_HOME/config.yaml" <<'YAML'
+browser:
+  backend: "off"
+YAML
 "$HERMES_PROBE_PAYLOAD/venv/bin/python" -B - "$work" "$OUT" "$port" <<'PY'
 from pathlib import Path
 import hashlib
@@ -142,6 +149,7 @@ import pm
 from hermes_cli.browser_runtime import chromium_executable
 from tools import browser_tool_install as install
 from tools import browser_tool_session as session
+from tools import browser_use_cli
 
 work, out = map(Path, sys.argv[1:3])
 port = int(sys.argv[3])
@@ -154,7 +162,17 @@ assert installed is not None and installed.binary == Path(driver)
 assert pm.installed_package("chromium") is None, "APT Chromium must not be recorded as a PM-owned artifact"
 chromium = chromium_executable()
 assert chromium == os.environ["PREFIX"] + "/bin/chromium-browser", chromium
-assert install.check_browser_requirements(), "the product readiness gate must advertise the proven local browser"
+backend = browser_use_cli.get_browser_backend()
+browser_use_mode = browser_use_cli.is_browser_use_cli_mode()
+ready = install.check_browser_requirements()
+(out / "browser-pm-preflight.json").write_text(json.dumps({
+    "target": pm.current_target(), "uid": os.geteuid(),
+    "driver": driver, "chromium": chromium, "chromium_owner": "Termux APT",
+    "browser_backend": backend, "browser_use_cli_mode": browser_use_mode,
+    "built_in_browser_readiness": ready,
+}, indent=2) + "\n")
+assert backend == "off" and not browser_use_mode, "the isolated profile must select the built-in browser surface"
+assert ready, "the product readiness gate must advertise the proven local browser"
 socket_dir = work / "pm-sockets"
 socket_dir.mkdir(mode=0o700)
 env = session._agent_browser_command_env(str(socket_dir))
@@ -188,10 +206,81 @@ finally:
     "target": pm.current_target(), "uid": os.geteuid(), "version": installed.version,
     "driver": driver, "driver_sha256": hashlib.sha256(Path(driver).read_bytes()).hexdigest(),
     "chromium": chromium, "chromium_owner": "Termux APT",
+    "browser_backend": backend, "browser_surface": "built-in browser_*",
     "product_readiness": True, "pm_install_and_child_environment": True,
     "physical_android_display_tested": False,
 }, indent=2) + "\n")
 (out / "browser-pm-probe-passed.txt").write_text(
     "PM-managed static driver, actual Hermes discovery/readiness/environment, and APT Chromium completed the native loopback workflow.\n"
+)
+PY
+
+
+# The normal default is browser_exec/browser-harness. It reaches the same PM
+# driver through _resolve_managed_chromium_cdp and must work without a backend
+# override, external CDP URL, or a separately selected provider.
+printf '{}\n' > "$HERMES_HOME/config.yaml"
+export AGENT_BROWSER_PROFILE="$work/default-profile"
+mkdir -p "$AGENT_BROWSER_PROFILE"
+"$HERMES_PROBE_PAYLOAD/venv/bin/python" -B - "$OUT" "$port" <<'PY'
+from pathlib import Path
+import importlib.metadata
+import json
+import os
+import sys
+
+import pm
+from tools import browser_tool_install as install
+from tools import browser_tool_lifecycle as lifecycle
+from tools import browser_use_cli
+
+out = Path(sys.argv[1])
+port = int(sys.argv[2])
+assert sys.platform == "android" and os.geteuid() == 1000
+assert browser_use_cli.get_browser_backend() == ""
+assert not os.environ.get("BU_CDP_WS") and not os.environ.get("BU_CDP_URL")
+assert not os.environ.get("BROWSER_CDP_URL")
+assert browser_use_cli.is_browser_use_cli_mode(), "browser_exec must be the default advertised surface"
+assert not install.check_browser_requirements(), "built-in tools must stay hidden while browser_exec owns the surface"
+assert browser_use_cli._find_cli() == [sys.executable, "-m", "browser_harness.run"]
+(out / "browser-default-preflight.json").write_text(json.dumps({
+    "target": pm.current_target(), "uid": os.geteuid(),
+    "browser_backend": "", "browser_use_cli_mode": True,
+    "built_in_browser_readiness": False,
+    "harness_version": importlib.metadata.version("browser-harness"),
+    "operator_cdp_override": False,
+}, indent=2) + "\n")
+
+screenshot = out / "browser-default-loopback.png"
+code = (
+    "# Checking the native default browser\n"
+    "import base64, json\n"
+    "from pathlib import Path\n"
+    f"new_tab({json.dumps(f'http://127.0.0.1:{port}/')})\n"
+    "wait_for_load()\n"
+    "title = js('document.title')\n"
+    "before = js(\"document.getElementById('result').textContent\")\n"
+    "js(\"document.getElementById('change').click()\")\n"
+    "after = js(\"document.getElementById('result').textContent\")\n"
+    "assert title == 'Hermes Android browser probe', title\n"
+    "assert before == 'Before click', before\n"
+    "assert after == 'Clicked successfully', after\n"
+    "shot = cdp('Page.captureScreenshot', format='png')\n"
+    f"Path({json.dumps(str(screenshot))}).write_bytes(base64.b64decode(shot['data']))\n"
+    "print('HERMES_DEFAULT_BROWSER_OK ' + json.dumps({'title': title, 'before': before, 'after': after}))\n"
+)
+try:
+    raw = browser_use_cli.browser_exec(code, session="compatdefault", timeout_s=90, task_id="compatdefault")
+    result = json.loads(raw)
+    (out / "browser-default-result.json").write_text(json.dumps(result, indent=2) + "\n")
+    assert result.get("success") is True, result
+    assert result.get("exit_code") == 0, result
+    assert "HERMES_DEFAULT_BROWSER_OK" in result.get("output", ""), result
+    assert screenshot.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
+finally:
+    browser_use_cli.stop_harness_daemons()
+    lifecycle.cleanup_all_browsers()
+(out / "browser-default-probe-passed.txt").write_text(
+    "Default browser_exec/browser-harness with no backend or CDP override used the managed local route and completed native navigation, DOM click/readback, CDP screenshot, and cleanup.\n"
 )
 PY

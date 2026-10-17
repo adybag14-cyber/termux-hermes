@@ -234,7 +234,94 @@ def audio_failure_status(error: Exception) -> str:
     return "environment-limited" if "libopensles.so" in message and missing_library else "failed"
 
 
-def inspect_audio_devices() -> dict:
+def audio_mapped_libraries(maps: str) -> list[str]:
+    """Select only real mapped audio objects, never the full process map."""
+    paths = set()
+    for line in maps.splitlines():
+        columns = line.split(maxsplit=5)
+        if len(columns) != 6 or not columns[5].startswith("/"):
+            continue
+        path = columns[5].removesuffix(" (deleted)")
+        if Path(path).name.startswith(("libportaudio.so", "libOpenSLES.so")):
+            paths.add(path)
+    return sorted(paths)
+
+
+def android_audio_host(*, root: Path = Path("/"), proc: Path = Path("/proc")) -> dict:
+    """Bounded observations of the disposable container's audio prerequisites."""
+    import stat
+
+    paths = {}
+    for relative in ("dev/binder", "dev/vndbinder", "dev/hwbinder", "dev/binderfs/binder",
+                     "system/bin/audioserver", "system/bin/servicemanager",
+                     "system/lib64/libOpenSLES.so", "system/lib/libOpenSLES.so"):
+        path = root / relative
+        row = {"exists": path.exists()}
+        if row["exists"]:
+            row["character_device"] = stat.S_ISCHR(path.stat().st_mode)
+            if path.is_file() and path.name == "libOpenSLES.so":
+                row["sha256"] = source_sha(path)
+        paths["/" + relative] = row
+    services, unreadable = set(), 0
+    for process in proc.glob("[0-9]*"):
+        try:
+            name = (process / "comm").read_text().strip()
+        except OSError:
+            unreadable += 1
+            continue
+        if name in {"audioserver", "mediaserver", "servicemanager", "hwservicemanager"}:
+            services.add(name)
+    return {"paths": paths, "audio_service_process_names": sorted(services),
+            "unreadable_process_names": unreadable}
+
+
+def load_audio_for_evidence() -> tuple[dict, object | None]:
+    """Keep the same discoverable PortAudio object mapped if sounddevice raises."""
+    import ctypes
+    import ctypes.util
+
+    evidence = {"requested_library": None, "ctypes_dlopen": "not-attempted"}
+    handle = None
+    try:
+        library = ctypes.util.find_library("portaudio")
+        evidence["requested_library"] = library
+        if library is not None:
+            handle = ctypes.CDLL(library)
+            evidence["ctypes_dlopen"] = "loaded"
+    except OSError as exc:
+        evidence.update(ctypes_dlopen="failed", ctypes_error=str(exc))
+    return evidence, handle
+
+
+def write_audio_host_evidence(out: Path, load: dict, *, maps: Path = Path("/proc/self/maps")) -> None:
+    """Retain origin evidence even when actual PortAudio initialization fails."""
+    result = {**load, "host": android_audio_host(), "libraries": [], "hardware_capture_tested": False}
+    env = {key: value for key, value in os.environ.items() if key != "LD_LIBRARY_PATH"}
+    try:
+        for path in audio_mapped_libraries(maps.read_text()):
+            source = Path(path)
+            row = {"path": path, "sha256": source_sha(source), "size": source.stat().st_size}
+            owner = subprocess.run(["dpkg-query", "-S", path], env=env, capture_output=True,
+                                   text=True, check=False, timeout=10)
+            row.update(package_query_exit=owner.returncode,
+                       package_owner=owner.stdout.strip() if owner.returncode == 0 else None)
+            result["libraries"].append(row)
+    except (OSError, subprocess.SubprocessError) as exc:
+        result["evidence_error"] = str(exc)
+    out.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+
+
+def inspect_audio_devices(evidence_path: Path) -> dict:
+    # A ctypes handle retains the naturally resolved library for evidence even
+    # when sounddevice's CFFI handle is discarded after initialization failure.
+    load, _audio_handle = load_audio_for_evidence()
+    try:
+        return _inspect_audio_devices()
+    finally:
+        write_audio_host_evidence(evidence_path, load)
+
+
+def _inspect_audio_devices() -> dict:
     # Import performs the actual CFFI dlopen and PortAudio initialization.
     # Never substitute an empty inventory for a failed import.
     import sounddevice as sd
@@ -284,11 +371,12 @@ def exercise(group: str, out: Path) -> None:
         numpy_out = out.with_name("NUMPY-" + out.name)
         numpy_out.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
         try:
-            result["audio"] = inspect_audio_devices()
+            result["audio"] = inspect_audio_devices(out.with_name("AUDIO-HOST-" + out.name))
         except Exception as exc:
             result["status"] = audio_failure_status(exc)
             result["audio"] = {"portaudio_status": "unavailable", "error": str(exc),
-                               "hardware_capture_tested": False}
+                               "hardware_capture_tested": False,
+                               "host_evidence": "AUDIO-HOST-" + out.name}
             out.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
             raise
         result["checks"].extend(["actual PortAudio dlopen", "native audio-device inventory"])

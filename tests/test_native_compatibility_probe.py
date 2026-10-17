@@ -106,6 +106,7 @@ def test_audio_probe_uses_audio_io_extra_and_preserves_cffi_transitive_dependenc
     ("PortAudio library not found", "failed"),
     ('cannot locate symbol "new_function" referenced by "libOpenSLES.so"', "failed"),
     ("Error initializing PortAudio: Internal PortAudio error", "failed"),
+    ("Error initializing PortAudio: Unanticipated host error [PaErrorCode -9999]: Initializing engine failed", "failed"),
 ])
 def test_only_missing_android_audio_library_is_environment_limited(message, expected):
     from scripts.probe_native_compatibility import audio_failure_status
@@ -139,3 +140,82 @@ def test_direct_portaudio_runtime_library_dependencies_are_accounted_for(tmp_pat
     assert portaudio["needed"]["libOpenSLES.so"]["kind"] == "android-system-abi"
     assert portaudio["needed"]["libc++_shared.so"]["kind"] == "original-payload"
     assert [row["name"] for row in result["declared_added_runtime_libraries"]] == ["libportaudio.so"]
+
+
+def test_audio_map_evidence_selects_only_loaded_audio_objects():
+    from scripts.probe_native_compatibility import audio_mapped_libraries
+
+    maps = "\n".join([
+        "100-200 r-xp 0000 00:00 1 /data/lib/libportaudio.so.2.0.0",
+        "200-300 r--p 0000 00:00 1 /data/lib/libportaudio.so.2.0.0",
+        "300-400 r-xp 0000 00:00 2 /data/lib/libOpenSLES.so",
+        "400-500 r-xp 0000 00:00 3 /system/lib64/libOpenSLES.so",
+        "500-600 r-xp 0000 00:00 4 /private/unrelated.so",
+        "600-700 rw-p 0000 00:00 0 [heap]",
+    ])
+    assert audio_mapped_libraries(maps) == [
+        "/data/lib/libOpenSLES.so", "/data/lib/libportaudio.so.2.0.0", "/system/lib64/libOpenSLES.so",
+    ]
+
+
+def test_audio_host_evidence_reports_only_fixed_framework_and_service_observations(tmp_path):
+    from scripts.probe_native_compatibility import android_audio_host
+
+    (tmp_path / "dev").mkdir()
+    (tmp_path / "dev/binder").write_text("regular fixture, not a binder device")
+    (tmp_path / "system/bin").mkdir(parents=True)
+    (tmp_path / "system/bin/audioserver").write_text("fixture")
+    proc = tmp_path / "proc"
+    for pid, name in (("1", "audioserver"), ("2", "servicemanager"), ("3", "private-app")):
+        (proc / pid).mkdir(parents=True)
+        (proc / pid / "comm").write_text(name + "\n")
+    result = android_audio_host(root=tmp_path, proc=proc)
+    assert result["paths"]["/dev/binder"] == {"exists": True, "character_device": False}
+    assert result["paths"]["/system/lib64/libOpenSLES.so"] == {"exists": False}
+    assert result["audio_service_process_names"] == ["audioserver", "servicemanager"]
+    assert "private-app" not in str(result)
+
+
+def test_audio_initialization_failure_keeps_real_object_hash_and_origin_evidence(tmp_path, monkeypatch):
+    import hashlib
+    import json
+    import subprocess
+    from scripts import probe_native_compatibility as probe
+
+    library = tmp_path / "libOpenSLES.so"
+    library.write_bytes(b"exact mapped object fixture")
+    maps = tmp_path / "maps"
+    maps.write_text("fixture map")
+    out = tmp_path / "audio-host.json"
+    held = object()
+    monkeypatch.setattr(probe, "load_audio_for_evidence",
+                        lambda: ({"ctypes_dlopen": "loaded", "requested_library": "libportaudio.so"}, held))
+    monkeypatch.setattr(probe, "android_audio_host", lambda: {"paths": {}, "audio_service_process_names": []})
+    monkeypatch.setattr(probe, "audio_mapped_libraries", lambda _: [str(library)])
+    monkeypatch.setenv("LD_LIBRARY_PATH", "parent-python-libraries")
+
+    def package_owner(args, **kwargs):
+        assert args == ["dpkg-query", "-S", str(library)]
+        assert "LD_LIBRARY_PATH" not in kwargs["env"]
+        return subprocess.CompletedProcess(args, 0, "libandroid-stub: " + str(library) + "\n", "")
+
+    monkeypatch.setattr(probe.subprocess, "run", package_owner)
+    write_evidence = probe.write_audio_host_evidence
+    monkeypatch.setattr(probe, "write_audio_host_evidence",
+                        lambda path, load: write_evidence(path, load, maps=maps))
+
+    def initialize():
+        raise RuntimeError("Error initializing PortAudio: Initializing engine failed")
+
+    monkeypatch.setattr(probe, "_inspect_audio_devices", initialize)
+    with pytest.raises(RuntimeError, match="Initializing engine failed"):
+        probe.inspect_audio_devices(out)
+    evidence = json.loads(out.read_text())
+    assert evidence["ctypes_dlopen"] == "loaded"
+    assert evidence["libraries"] == [{
+        "path": str(library), "sha256": hashlib.sha256(library.read_bytes()).hexdigest(),
+        "size": library.stat().st_size, "package_query_exit": 0,
+        "package_owner": "libandroid-stub: " + str(library),
+    }]
+    assert probe.os.environ["LD_LIBRARY_PATH"] == "parent-python-libraries"
+    assert evidence["hardware_capture_tested"] is False
