@@ -46,6 +46,11 @@ PY
   chmod 0777 "$OUT" "$packaging/.cua-native-cache"
   # Actions restores files as the runner UID; only this task-owned cache is changed.
   sudo chown -hR 1000:1000 -- "$packaging/.cua-native-cache"
+  # Checkout can create runner-private promisor metadata. This isolated public
+  # component checkout must remain verifiable after the UID1000 container copy.
+  [[ -d "$SOURCE/.git" ]]
+  find "$SOURCE/.git" -type f -exec chmod a+r {} +
+  find "$SOURCE/.git" -type d -exec chmod a+rx {} +
   docker pull "$image"
   [[ "$(docker image inspect "$image" --format '{{.Architecture}}')" == arm64 ]]
   docker run --rm --platform linux/arm64 --user 1000:1000 \
