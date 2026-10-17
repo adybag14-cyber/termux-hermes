@@ -1051,3 +1051,133 @@ def test_frozen_psutil_binding_rejects_broken_identity_chain(psutil_binding_docu
     with pytest.raises(staging.StagingError) as caught:
         native.frozen_psutil_binding(root, manifest)
     assert "hermes-agent: " + native.PSUTIL_DIRECT_REQUIREMENT in str(caught.value)
+
+
+# Exact rows observed in candidate source METADATA, not generated test requirements.
+ORIGINAL_MALFORMED_OPTIONAL_REQUIREMENTS = [
+    "kittentts @ https://github.com/KittenML/KittenTTS/releases/download/0.8.1/kittentts-0.8.1-py3-none-any.whl; ((platform_machine != 'ARM64' or sys_platform != 'win32') and (platform_machine != 'x86_64' or sys_platform != 'darwin')) and extra == 'kittentts'",
+    "misaki[en] @ git+https://github.com/NousResearch/misaki.git@f03fd2be7346952a83d3d4845c217fc7667f322d; ((platform_machine != 'ARM64' or sys_platform != 'win32') and (platform_machine != 'x86_64' or sys_platform != 'darwin')) and extra == 'kittentts'"
+]
+
+
+def test_exact_inactive_original_rows_parse_without_changing_selected_graph(android_psutil_graph):
+    import packaging
+    distributions, versions, binding = android_psutil_graph
+    distributions["hermes-agent"].requires += list(ORIGINAL_MALFORMED_OPTIONAL_REQUIREMENTS)
+    extras = ["acp", "cron", "matrix", "mcp", "telegram", "termux", "uvloop", "audio-io"]
+    proof = {}
+    graph = native.dependency_graph(distributions, versions, extras,
+                                    direct_url_binding=binding, parse_evidence=proof)
+    assert [edge["requirement"] for edge in graph] == [native.PSUTIL_DIRECT_REQUIREMENT]
+    assert proof["parser"] == {"name": "packaging", "version": packaging.__version__}
+    assert proof["marker_environment"]["sys_platform"] == "android"
+    assert proof["marker_environment"]["python_full_version"] == "3.14.6"
+    assert proof["source_metadata_rewritten"] is False
+    assert len(proof["adaptations"]) == 2
+    for row, raw in zip(proof["adaptations"], ORIGINAL_MALFORMED_OPTIONAL_REQUIREMENTS):
+        assert row["parent"] == "hermes-agent" and row["parent_version"] == "0.0.0"
+        assert row["raw_requirement"] == raw
+        assert row["parsed_requirement"] == raw.replace("; ", " ; ", 1)
+        assert row["source_metadata_rewritten"] is False and row["url_install_allowed"] is False
+        assert row["source_inputs"] == {
+            name: binding["source_inputs"][name] for name in
+            ("app/hermes_agent-0.0.0.dist-info/METADATA", "app/pyproject.toml")}
+        assert row["marker_evaluations"] == [{"extra": extra, "active": False} for extra in sorted(["", *extras])]
+    repeated = {}
+    assert native.dependency_graph(distributions, versions, extras,
+                                   direct_url_binding=binding, parse_evidence=repeated) == graph
+    assert repeated == proof
+    assert distributions["hermes-agent"].requires[1:] == list(ORIGINAL_MALFORMED_OPTIONAL_REQUIREMENTS)
+
+
+@pytest.mark.parametrize("raw", ORIGINAL_MALFORMED_OPTIONAL_REQUIREMENTS)
+def test_activating_an_adapted_optional_url_still_fails_even_if_installed(android_psutil_graph, raw):
+    from types import SimpleNamespace
+    from packaging.requirements import Requirement
+    distributions, versions, binding = android_psutil_graph
+    distributions["hermes-agent"].requires = [raw]
+    parsed = Requirement(raw.replace("; ", " ; ", 1))
+    name = native.normalized_name(parsed.name)
+    # Merely adding a matching name/version cannot turn the parse adapter into an install permission.
+    versions[name] = "0.8.1" if name == "kittentts" else "0.9.4"
+    distributions[name] = SimpleNamespace(metadata={}, requires=[])
+    with pytest.raises(staging.StagingError) as caught:
+        native.dependency_graph(distributions, versions, ["kittentts"], direct_url_binding=binding)
+    assert "active direct-URL dependency is outside the frozen wheel closure: hermes-agent: " + raw in str(caught.value)
+
+
+@pytest.mark.parametrize("raw", ORIGINAL_MALFORMED_OPTIONAL_REQUIREMENTS)
+def test_parser_adapter_does_not_override_real_platform_exclusion(android_psutil_graph, monkeypatch, raw):
+    import packaging.markers
+    distributions, versions, binding = android_psutil_graph
+    distributions["hermes-agent"].requires = [raw]
+    actual = packaging.markers.default_environment()
+    monkeypatch.setattr(packaging.markers, "default_environment", lambda: {
+        **actual, "sys_platform": "win32", "platform_machine": "ARM64"})
+    evidence = {}
+    assert native.dependency_graph(distributions, versions, ["kittentts"],
+                                   direct_url_binding=binding, parse_evidence=evidence) == []
+    assert evidence["adaptations"][0]["marker_evaluations"] == [
+        {"extra": "", "active": False}, {"extra": "kittentts", "active": False}]
+
+
+@pytest.mark.parametrize("raw", ORIGINAL_MALFORMED_OPTIONAL_REQUIREMENTS)
+@pytest.mark.parametrize("damage", ["absent", "metadata_digest", "project_digest", "parent", "parent_version"])
+def test_known_malformed_row_requires_exact_verified_parent_context(android_psutil_graph, raw, damage):
+    distributions, versions, binding = android_psutil_graph
+    distributions["hermes-agent"].requires = [raw]
+    if damage == "absent":
+        binding = None
+    elif damage == "metadata_digest":
+        binding["source_inputs"]["app/hermes_agent-0.0.0.dist-info/METADATA"]["sha256"] = "0" * 64
+    elif damage == "project_digest":
+        binding["source_inputs"]["app/pyproject.toml"]["sha256"] = "0" * 64
+    elif damage == "parent":
+        distributions["manager-package"] = distributions.pop("hermes-agent")
+        versions["manager-package"] = versions.pop("hermes-agent")
+    else:
+        versions["hermes-agent"] = "0.0.1"
+    with pytest.raises(staging.StagingError) as caught:
+        native.dependency_graph(distributions, versions, [], direct_url_binding=binding)
+    assert "malformed requirement has no verified frozen parent binding" in str(caught.value)
+    assert raw in str(caught.value)
+
+
+@pytest.mark.parametrize("raw", ORIGINAL_MALFORMED_OPTIONAL_REQUIREMENTS)
+@pytest.mark.parametrize("change", ["url", "marker", "whitespace", "name"])
+def test_unknown_or_mutated_malformed_rows_are_not_normalized(android_psutil_graph, raw, change):
+    distributions, versions, binding = android_psutil_graph
+    if change == "url":
+        damaged = raw.replace("github.com", "example.invalid")
+    elif change == "marker":
+        damaged = raw.replace("extra == 'kittentts'", "extra == 'audio-io'")
+    elif change == "whitespace":
+        damaged = raw.replace("; (", ";  (")
+    else:
+        damaged = "unreviewed-" + raw
+    distributions["hermes-agent"].requires = [damaged]
+    with pytest.raises(staging.StagingError) as caught:
+        native.dependency_graph(distributions, versions, [], direct_url_binding=binding)
+    assert "invalid frozen dependency requirement: hermes-agent: " + damaged in str(caught.value)
+
+
+@pytest.mark.parametrize("raw", ORIGINAL_MALFORMED_OPTIONAL_REQUIREMENTS)
+def test_private_manager_cannot_use_application_parser_adapters(raw):
+    from types import SimpleNamespace
+    distributions = {"manager-package": SimpleNamespace(metadata={}, requires=[raw])}
+    with pytest.raises(staging.StagingError, match="malformed requirement has no verified frozen parent binding"):
+        native.dependency_graph(distributions, {"manager-package": "1.0"}, [])
+
+
+def test_parser_adaptation_preserves_normal_dependency_and_python_constraints(android_psutil_graph):
+    distributions, versions, binding = android_psutil_graph
+    dist = distributions["hermes-agent"]
+    dist.requires = [*ORIGINAL_MALFORMED_OPTIONAL_REQUIREMENTS, "psutil>=9"]
+    with pytest.raises(staging.StagingError, match="frozen dependency version conflict"):
+        native.dependency_graph(distributions, versions, ["audio-io"], direct_url_binding=binding)
+    dist.requires[-1] = "unfrozen-package>=1"
+    with pytest.raises(staging.StagingError, match="missing active dependency"):
+        native.dependency_graph(distributions, versions, ["audio-io"], direct_url_binding=binding)
+    dist.metadata["Requires-Python"] = ">=3.15"
+    with pytest.raises(staging.StagingError, match="Requires-Python conflict"):
+        native.dependency_graph(distributions, versions, ["audio-io"], direct_url_binding=binding)

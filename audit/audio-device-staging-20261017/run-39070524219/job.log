@@ -1,0 +1,415 @@
+﻿2026-10-17T21:20:34.4138621Z Current runner version: '2.337.0'
+2026-10-17T21:20:34.4168178Z ##[group]Runner Image Provisioner
+2026-10-17T21:20:34.4169303Z Hosted Compute Agent
+2026-10-17T21:20:34.4169911Z Version: 20261012.601
+2026-10-17T21:20:34.4170675Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-17T21:20:34.4171698Z Build Date: 2026-10-12T17:48:21Z
+2026-10-17T21:20:34.4172427Z Worker ID: {91a8a392-b36c-46a7-bbc8-4d0f150d6111}
+2026-10-17T21:20:34.4173278Z Region: southcentralus
+2026-10-17T21:20:34.4173875Z Cloud: Azure
+2026-10-17T21:20:34.4174554Z ##[endgroup]
+2026-10-17T21:20:34.4176420Z ##[group]Operating System
+2026-10-17T21:20:34.4177128Z Ubuntu
+2026-10-17T21:20:34.4178280Z 24.04.5
+2026-10-17T21:20:34.4178805Z LTS
+2026-10-17T21:20:34.4179330Z ##[endgroup]
+2026-10-17T21:20:34.4179962Z ##[group]Runner Image
+2026-10-17T21:20:34.4180569Z Image: ubuntu-24.04-arm
+2026-10-17T21:20:34.4181184Z Version: 20261012.149.1
+2026-10-17T21:20:34.4182891Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24-arm64/20261012.149/images/ubuntu/Ubuntu2404-Arm64-Readme.md
+2026-10-17T21:20:34.4184571Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24-arm64%2F20261012.149
+2026-10-17T21:20:34.4185517Z ##[endgroup]
+2026-10-17T21:20:34.4186815Z ##[group]GITHUB_TOKEN Permissions
+2026-10-17T21:20:34.4189749Z Actions: read
+2026-10-17T21:20:34.4190636Z Contents: read
+2026-10-17T21:20:34.4191216Z Metadata: read
+2026-10-17T21:20:34.4192095Z ##[endgroup]
+2026-10-17T21:20:34.4194851Z Secret source: Actions
+2026-10-17T21:20:34.4195849Z Cache mode: write
+2026-10-17T21:20:34.4197099Z Prepare workflow directory
+2026-10-17T21:20:34.4583449Z Prepare all required actions
+2026-10-17T21:20:34.4637232Z Getting action download info
+2026-10-17T21:20:34.7567931Z Download action repository 'actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd' (SHA:de0fac2e4500dabe0009e67214ff5f5447ce83dd)
+2026-10-17T21:20:34.8569373Z Download action repository 'actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405' (SHA:a309ff8b426b58ec0e2a45f0f869d46889d02405)
+2026-10-17T21:20:34.9978490Z Download action repository 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+2026-10-17T21:20:35.2005509Z Complete job name: Frozen transfer bundle and two fresh native environments
+2026-10-17T21:20:35.2861986Z ##[group]Run actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+2026-10-17T21:20:35.2863518Z with:
+2026-10-17T21:20:35.2864319Z   ref: 0111f4dbd08e609e0e66811360875ee267b83d34
+2026-10-17T21:20:35.2865047Z   persist-credentials: false
+2026-10-17T21:20:35.2865711Z   repository: adybag14-cyber/termux-hermes
+2026-10-17T21:20:35.2869870Z   token: ***
+2026-10-17T21:20:35.2870474Z   ssh-strict: true
+2026-10-17T21:20:35.2871107Z   ssh-user: git
+2026-10-17T21:20:35.2871898Z   clean: true
+2026-10-17T21:20:35.2872509Z   sparse-checkout-cone-mode: true
+2026-10-17T21:20:35.2873277Z   fetch-depth: 1
+2026-10-17T21:20:35.2873894Z   fetch-tags: false
+2026-10-17T21:20:35.2874508Z   show-progress: true
+2026-10-17T21:20:35.2875119Z   lfs: false
+2026-10-17T21:20:35.2875688Z   submodules: false
+2026-10-17T21:20:35.2876335Z   set-safe-directory: true
+2026-10-17T21:20:35.2877550Z ##[endgroup]
+2026-10-17T21:20:35.3732629Z Syncing repository: adybag14-cyber/termux-hermes
+2026-10-17T21:20:35.3735529Z ##[group]Getting Git version info
+2026-10-17T21:20:35.3736472Z Working directory is '/home/runner/work/termux-hermes/termux-hermes'
+2026-10-17T21:20:35.3737982Z [command]/usr/bin/git version
+2026-10-17T21:20:35.3785068Z git version 2.55.0
+2026-10-17T21:20:35.3806235Z ##[endgroup]
+2026-10-17T21:20:35.3821432Z Temporarily overriding HOME='/home/runner/work/_temp/1a3d86ac-99f7-4966-81f4-5b846f924650' before making global git config changes
+2026-10-17T21:20:35.3823510Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-17T21:20:35.3826468Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/termux-hermes/termux-hermes
+2026-10-17T21:20:35.3867344Z Deleting the contents of '/home/runner/work/termux-hermes/termux-hermes'
+2026-10-17T21:20:35.3872528Z ##[group]Initializing the repository
+2026-10-17T21:20:35.3877290Z [command]/usr/bin/git init /home/runner/work/termux-hermes/termux-hermes
+2026-10-17T21:20:35.3965489Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-17T21:20:35.3967288Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-17T21:20:35.3968747Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-17T21:20:35.3970214Z hint: call:
+2026-10-17T21:20:35.3971140Z hint:
+2026-10-17T21:20:35.3972332Z hint: 	git config --global init.defaultBranch <name>
+2026-10-17T21:20:35.3973433Z hint:
+2026-10-17T21:20:35.3974422Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-17T21:20:35.3975631Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-17T21:20:35.3976817Z hint:
+2026-10-17T21:20:35.3977716Z hint: 	git branch -m <name>
+2026-10-17T21:20:35.3978569Z hint:
+2026-10-17T21:20:35.3979590Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-17T21:20:35.3981211Z Initialized empty Git repository in /home/runner/work/termux-hermes/termux-hermes/.git/
+2026-10-17T21:20:35.3984607Z [command]/usr/bin/git remote add origin https://github.com/adybag14-cyber/termux-hermes
+2026-10-17T21:20:35.4015802Z ##[endgroup]
+2026-10-17T21:20:35.4017408Z ##[group]Disabling automatic garbage collection
+2026-10-17T21:20:35.4018992Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-17T21:20:35.4049039Z ##[endgroup]
+2026-10-17T21:20:35.4050172Z ##[group]Setting up auth
+2026-10-17T21:20:35.4056084Z Removing SSH command configuration
+2026-10-17T21:20:35.4062853Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-17T21:20:35.4086613Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-17T21:20:35.4384068Z Removing HTTP extra header
+2026-10-17T21:20:35.4390161Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-17T21:20:35.4421830Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-17T21:20:35.4621174Z Removing includeIf entries pointing to credentials config files
+2026-10-17T21:20:35.4627444Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-17T21:20:35.4658155Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-17T21:20:35.4850870Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-b6c47617-7a81-4bea-8fdc-a1beaf93c753.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-17T21:20:35.4889232Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git.path /home/runner/work/_temp/git-credentials-b6c47617-7a81-4bea-8fdc-a1beaf93c753.config
+2026-10-17T21:20:35.4918539Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-b6c47617-7a81-4bea-8fdc-a1beaf93c753.config
+2026-10-17T21:20:35.4947409Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-b6c47617-7a81-4bea-8fdc-a1beaf93c753.config
+2026-10-17T21:20:35.4976754Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-b6c47617-7a81-4bea-8fdc-a1beaf93c753.config
+2026-10-17T21:20:35.5004973Z ##[endgroup]
+2026-10-17T21:20:35.5006019Z ##[group]Fetching the repository
+2026-10-17T21:20:35.5013437Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 0111f4dbd08e609e0e66811360875ee267b83d34
+2026-10-17T21:20:36.4772473Z From https://github.com/adybag14-cyber/termux-hermes
+2026-10-17T21:20:36.4774109Z  * branch            0111f4dbd08e609e0e66811360875ee267b83d34 -> FETCH_HEAD
+2026-10-17T21:20:36.4783443Z [command]/usr/bin/git rev-parse --verify --quiet 0111f4dbd08e609e0e66811360875ee267b83d34^{object}
+2026-10-17T21:20:36.4816329Z 0111f4dbd08e609e0e66811360875ee267b83d34
+2026-10-17T21:20:36.4820053Z ##[endgroup]
+2026-10-17T21:20:36.4821770Z ##[group]Determining the checkout info
+2026-10-17T21:20:36.4823132Z ##[endgroup]
+2026-10-17T21:20:36.4825848Z [command]/usr/bin/git sparse-checkout disable
+2026-10-17T21:20:36.4867584Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-17T21:20:36.4895642Z ##[group]Checking out the ref
+2026-10-17T21:20:36.4897797Z [command]/usr/bin/git checkout --progress --force 0111f4dbd08e609e0e66811360875ee267b83d34
+2026-10-17T21:20:36.5559319Z Note: switching to '0111f4dbd08e609e0e66811360875ee267b83d34'.
+2026-10-17T21:20:36.5560529Z 
+2026-10-17T21:20:36.5561656Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-17T21:20:36.5563764Z changes and commit them, and you can discard any commits you make in this
+2026-10-17T21:20:36.5565536Z state without impacting any branches by switching back to a branch.
+2026-10-17T21:20:36.5566499Z 
+2026-10-17T21:20:36.5567264Z If you want to create a new branch to retain commits you create, you may
+2026-10-17T21:20:36.5568846Z do so (now or later) by using -c with the switch command. Example:
+2026-10-17T21:20:36.5569780Z 
+2026-10-17T21:20:36.5570285Z   git switch -c <new-branch-name>
+2026-10-17T21:20:36.5571075Z 
+2026-10-17T21:20:36.5571741Z Or undo this operation with:
+2026-10-17T21:20:36.5572407Z 
+2026-10-17T21:20:36.5572799Z   git switch -
+2026-10-17T21:20:36.5573288Z 
+2026-10-17T21:20:36.5574128Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-17T21:20:36.5575218Z 
+2026-10-17T21:20:36.5575991Z HEAD is now at 0111f4d Bind frozen psutil Git requirement during audio staging
+2026-10-17T21:20:36.5579756Z ##[endgroup]
+2026-10-17T21:20:36.5609460Z [command]/usr/bin/git log -1 --format=%H
+2026-10-17T21:20:36.5633318Z 0111f4dbd08e609e0e66811360875ee267b83d34
+2026-10-17T21:20:36.5654244Z ##[group]Removing auth
+2026-10-17T21:20:36.5655352Z Removing SSH command configuration
+2026-10-17T21:20:36.5656790Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-17T21:20:36.5674459Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-17T21:20:36.5860616Z Removing HTTP extra header
+2026-10-17T21:20:36.5863319Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-17T21:20:36.5892988Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-17T21:20:36.6079412Z Removing includeIf entries pointing to credentials config files
+2026-10-17T21:20:36.6082189Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-17T21:20:36.6104810Z includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git.path
+2026-10-17T21:20:36.6107091Z includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git/worktrees/*.path
+2026-10-17T21:20:36.6108851Z includeif.gitdir:/github/workspace/.git.path
+2026-10-17T21:20:36.6110248Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-17T21:20:36.6114761Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git.path
+2026-10-17T21:20:36.6137516Z /home/runner/work/_temp/git-credentials-b6c47617-7a81-4bea-8fdc-a1beaf93c753.config
+2026-10-17T21:20:36.6148537Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git.path /home/runner/work/_temp/git-credentials-b6c47617-7a81-4bea-8fdc-a1beaf93c753.config
+2026-10-17T21:20:36.6180138Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git/worktrees/*.path
+2026-10-17T21:20:36.6202448Z /home/runner/work/_temp/git-credentials-b6c47617-7a81-4bea-8fdc-a1beaf93c753.config
+2026-10-17T21:20:36.6211999Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-b6c47617-7a81-4bea-8fdc-a1beaf93c753.config
+2026-10-17T21:20:36.6244227Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-10-17T21:20:36.6266602Z /github/runner_temp/git-credentials-b6c47617-7a81-4bea-8fdc-a1beaf93c753.config
+2026-10-17T21:20:36.6273646Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-b6c47617-7a81-4bea-8fdc-a1beaf93c753.config
+2026-10-17T21:20:36.6309166Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-17T21:20:36.6329421Z /github/runner_temp/git-credentials-b6c47617-7a81-4bea-8fdc-a1beaf93c753.config
+2026-10-17T21:20:36.6336424Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-b6c47617-7a81-4bea-8fdc-a1beaf93c753.config
+2026-10-17T21:20:36.6367092Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-17T21:20:36.6563615Z Removing credentials config '/home/runner/work/_temp/git-credentials-b6c47617-7a81-4bea-8fdc-a1beaf93c753.config'
+2026-10-17T21:20:36.6572082Z ##[endgroup]
+2026-10-17T21:20:36.6899109Z ##[group]Run actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+2026-10-17T21:20:36.6900423Z with:
+2026-10-17T21:20:36.6901584Z   python-version: 3.14
+2026-10-17T21:20:36.6902421Z   check-latest: false
+2026-10-17T21:20:36.6909097Z   token: ***
+2026-10-17T21:20:36.6909932Z   update-environment: true
+2026-10-17T21:20:36.6910777Z   allow-prereleases: false
+2026-10-17T21:20:36.6911990Z   freethreaded: false
+2026-10-17T21:20:36.6912791Z ##[endgroup]
+2026-10-17T21:20:36.8006041Z ##[group]Installed versions
+2026-10-17T21:20:36.8097845Z Successfully set up CPython (3.14.8)
+2026-10-17T21:20:36.8100035Z ##[endgroup]
+2026-10-17T21:20:36.8254289Z ##[group]Run python3 scripts/prepare_audio_device_bundle.py fetch --out audio-staging-inputs
+2026-10-17T21:20:36.8256460Z [36;1mpython3 scripts/prepare_audio_device_bundle.py fetch --out audio-staging-inputs[0m
+2026-10-17T21:20:36.8390683Z shell: /usr/bin/bash -e {0}
+2026-10-17T21:20:36.8391832Z env:
+2026-10-17T21:20:36.8392728Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:20:36.8394151Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.8/arm64/lib/pkgconfig
+2026-10-17T21:20:36.8395472Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:20:36.8396641Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:20:36.8397983Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:20:36.8399169Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.8/arm64/lib
+2026-10-17T21:20:36.8406091Z   GH_TOKEN: ***
+2026-10-17T21:20:36.8406882Z ##[endgroup]
+2026-10-17T21:20:45.4892784Z {
+2026-10-17T21:20:45.4893643Z   "status": "verified",
+2026-10-17T21:20:45.4894209Z   "directory": "/home/runner/work/termux-hermes/termux-hermes/audio-staging-inputs"
+2026-10-17T21:20:45.4894643Z }
+2026-10-17T21:20:45.5107022Z ##[group]Run python3 scripts/prepare_audio_device_bundle.py build \
+2026-10-17T21:20:45.5107753Z [36;1mpython3 scripts/prepare_audio_device_bundle.py build \[0m
+2026-10-17T21:20:45.5108547Z [36;1m  --candidate-archive audio-staging-inputs/candidate.zip \[0m
+2026-10-17T21:20:45.5109050Z [36;1m  --audio-archive audio-staging-inputs/audio.zip \[0m
+2026-10-17T21:20:45.5109472Z [36;1m  --opensles-deb audio-staging-inputs/opensles.deb \[0m
+2026-10-17T21:20:45.5109843Z [36;1m  --out audio-device-bundle[0m
+2026-10-17T21:20:45.5167093Z shell: /usr/bin/bash -e {0}
+2026-10-17T21:20:45.5167559Z env:
+2026-10-17T21:20:45.5167919Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:20:45.5168399Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.8/arm64/lib/pkgconfig
+2026-10-17T21:20:45.5168973Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:20:45.5169411Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:20:45.5169940Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:20:45.5170360Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.8/arm64/lib
+2026-10-17T21:20:45.5170740Z ##[endgroup]
+2026-10-17T21:21:07.8027551Z {
+2026-10-17T21:21:07.8028229Z   "schema_version": 1,
+2026-10-17T21:21:07.8028811Z   "status": "prepared-input-bundle",
+2026-10-17T21:21:07.8029990Z   "candidate_package_sha256": "2d5435d0fb19fa9f8ed0a5da5c66cabf59585a8e8bcd35ad2ebf9cb161f5e810",
+2026-10-17T21:21:07.8030541Z   "files": {
+2026-10-17T21:21:07.8030759Z     "manifest.json": {
+2026-10-17T21:21:07.8036473Z       "size": 5640268,
+2026-10-17T21:21:07.8037060Z       "sha256": "79db65abd118897751afcbac087e88e05262826e74aebf34ae7caf84b2e57647"
+2026-10-17T21:21:07.8037616Z     },
+2026-10-17T21:21:07.8037939Z     "payload.tar.gz": {
+2026-10-17T21:21:07.8038243Z       "size": 313805227,
+2026-10-17T21:21:07.8038959Z       "sha256": "fd1e6c2d688e15930bea99b2ca6bf04a6ccb47b763e10c8f35cf33a5b5c9b50a"
+2026-10-17T21:21:07.8039450Z     },
+2026-10-17T21:21:07.8039715Z     "prepare.sh": {
+2026-10-17T21:21:07.8039978Z       "size": 2145,
+2026-10-17T21:21:07.8040361Z       "sha256": "82825ca1219e3fb59f331489d3d55f039358eff9d5550f9d6cc62b63a52c56b1"
+2026-10-17T21:21:07.8040775Z     }
+2026-10-17T21:21:07.8040988Z   },
+2026-10-17T21:21:07.8041241Z   "source_changes": [
+2026-10-17T21:21:07.8041690Z     {
+2026-10-17T21:21:07.8041880Z       "after": {
+2026-10-17T21:21:07.8042325Z         "sha256": "2080ba077ec94146d06cbd704a7e21763e5cf37f4221561145b4c45de6a78a58",
+2026-10-17T21:21:07.8042758Z         "size": 70749
+2026-10-17T21:21:07.8043140Z       },
+2026-10-17T21:21:07.8043363Z       "before": {
+2026-10-17T21:21:07.8043785Z         "sha256": "f5be589a9807016958af833cdabb4e1f965db1b3935bdacad72a89f7b0ac88eb",
+2026-10-17T21:21:07.8044252Z         "size": 70132
+2026-10-17T21:21:07.8044511Z       },
+2026-10-17T21:21:07.8044773Z       "path": "app/tools/voice_mode.py"
+2026-10-17T21:21:07.8045056Z     },
+2026-10-17T21:21:07.8045253Z     {
+2026-10-17T21:21:07.8045545Z       "after": {
+2026-10-17T21:21:07.8045918Z         "sha256": "492c013f8473acdd58dff027ffc4f787347dc27524e801692bf32efe67516d60",
+2026-10-17T21:21:07.8046468Z         "size": 7542
+2026-10-17T21:21:07.8046716Z       },
+2026-10-17T21:21:07.8046916Z       "before": {
+2026-10-17T21:21:07.8047304Z         "sha256": "3fe427ceac71c7a4680f4d9e88b6ffe957b46753bc7683d468dbb4f3ab0b96d0",
+2026-10-17T21:21:07.8047739Z         "size": 6870
+2026-10-17T21:21:07.8047964Z       },
+2026-10-17T21:21:07.8048246Z       "path": "app/tools/voice_mode_capture.py"
+2026-10-17T21:21:07.8048564Z     }
+2026-10-17T21:21:07.8048792Z   ],
+2026-10-17T21:21:07.8049023Z   "wheel_count": 102,
+2026-10-17T21:21:07.8049273Z   "baseline_distribution_count": 100,
+2026-10-17T21:21:07.8049623Z   "environment_included": false,
+2026-10-17T21:21:07.8049939Z   "environment_recreated_at_destination": true,
+2026-10-17T21:21:07.8050313Z   "assembly_validated_natively": false,
+2026-10-17T21:21:07.8050639Z   "audio_readiness": false,
+2026-10-17T21:21:07.8051622Z   "microphone_accessed": false,
+2026-10-17T21:21:07.8052123Z   "recording_tested": false,
+2026-10-17T21:21:07.8052424Z   "external_runtime_policy": {
+2026-10-17T21:21:07.8052783Z     "allowed_system_roots": [
+2026-10-17T21:21:07.8053294Z       "/system",
+2026-10-17T21:21:07.8053797Z       "/apex"
+2026-10-17T21:21:07.8054071Z     ],
+2026-10-17T21:21:07.8054336Z     "ambient_termux_library_directory_allowed": false,
+2026-10-17T21:21:07.8054688Z     "container_bionic_roots": [
+2026-10-17T21:21:07.8054990Z       "/lib",
+2026-10-17T21:21:07.8055203Z       "/lib64"
+2026-10-17T21:21:07.8055466Z     ],
+2026-10-17T21:21:07.8055697Z     "framework_on_device_only": true
+2026-10-17T21:21:07.8055978Z   }
+2026-10-17T21:21:07.8056212Z }
+2026-10-17T21:21:07.8204495Z ##[group]Run bash scripts/check_audio_device_staging.sh \
+2026-10-17T21:21:07.8205033Z [36;1mbash scripts/check_audio_device_staging.sh \[0m
+2026-10-17T21:21:07.8205507Z [36;1m  "$GITHUB_WORKSPACE/audio-device-bundle" \[0m
+2026-10-17T21:21:07.8205970Z [36;1m  "$GITHUB_WORKSPACE/audio-device-evidence"[0m
+2026-10-17T21:21:07.8242180Z shell: /usr/bin/bash -e {0}
+2026-10-17T21:21:07.8242522Z env:
+2026-10-17T21:21:07.8242904Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:21:07.8243379Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.8/arm64/lib/pkgconfig
+2026-10-17T21:21:07.8243829Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:21:07.8244285Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:21:07.8244715Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:21:07.8245160Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.8/arm64/lib
+2026-10-17T21:21:07.8245594Z ##[endgroup]
+2026-10-17T21:21:08.6348089Z docker.io/termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303: Pulling from termux/termux-docker
+2026-10-17T21:21:08.6354750Z 4be35323a92b: Pulling fs layer
+2026-10-17T21:21:08.6355362Z 4f4fb700ef54: Pulling fs layer
+2026-10-17T21:21:08.7832797Z 4f4fb700ef54: Verifying Checksum
+2026-10-17T21:21:08.7833568Z 4f4fb700ef54: Download complete
+2026-10-17T21:21:09.0529876Z 4be35323a92b: Verifying Checksum
+2026-10-17T21:21:09.0530556Z 4be35323a92b: Download complete
+2026-10-17T21:21:10.1076562Z 4be35323a92b: Pull complete
+2026-10-17T21:21:12.0201254Z 4f4fb700ef54: Pull complete
+2026-10-17T21:21:12.0242742Z Digest: sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303
+2026-10-17T21:21:12.0255464Z Status: Downloaded newer image for termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303
+2026-10-17T21:21:12.0263657Z docker.io/termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303
+2026-10-17T21:21:12.2153561Z manifest.json: OK
+2026-10-17T21:21:12.3973504Z payload.tar.gz: OK
+2026-10-17T21:21:22.4501712Z   → Installing Python packages…
+2026-10-17T21:21:22.6511700Z   ✓ Installing Python packages
+2026-10-17T21:21:30.6426781Z   → Installing Python packages…
+2026-10-17T21:21:30.6427504Z   ✓ Installing Python packages
+2026-10-17T21:21:46.1088052Z {"schema_version": 1, "status": "failed", "error": {"type": "InvalidRequirement", "message": "Expected semicolon (after URL and whitespace) or end\n    kittentts @ https://github.com/KittenML/KittenTTS/releases/download/0.8.1/kittentts-0.8.1-py3-none-any.whl; ((platform_machine != 'ARM64' or sys_platform != 'win32') and (platform_machine != 'x86_64' or sys_platform != 'darwin')) and extra == 'kittentts'\n                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^"}}
+2026-10-17T21:21:46.1090139Z {"schema_version": 1, "status": "failed", "error": {"type": "StagingError", "message": "_validate failed with exit 2: "}}
+2026-10-17T21:21:48.1375578Z ##[error]Process completed with exit code 2.
+2026-10-17T21:21:48.1469711Z ##[group]Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+2026-10-17T21:21:48.1470270Z with:
+2026-10-17T21:21:48.1470577Z   name: hermes-isolated-audio-device-bundle
+2026-10-17T21:21:48.1470890Z   path: audio-device-bundle/
+2026-10-17T21:21:48.1471189Z   if-no-files-found: warn
+2026-10-17T21:21:48.1471685Z   compression-level: 0
+2026-10-17T21:21:48.1472170Z   retention-days: 14
+2026-10-17T21:21:48.1472504Z   overwrite: false
+2026-10-17T21:21:48.1472738Z   include-hidden-files: false
+2026-10-17T21:21:48.1473051Z   archive: true
+2026-10-17T21:21:48.1473273Z env:
+2026-10-17T21:21:48.1473540Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:21:48.1474045Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.8/arm64/lib/pkgconfig
+2026-10-17T21:21:48.1474484Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:21:48.1474905Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:21:48.1475383Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:21:48.1475839Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.8/arm64/lib
+2026-10-17T21:21:48.1476185Z ##[endgroup]
+2026-10-17T21:21:48.2663105Z With the provided path, there will be 4 files uploaded
+2026-10-17T21:21:48.2664133Z Artifact name is valid!
+2026-10-17T21:21:48.2664614Z Root directory input is valid!
+2026-10-17T21:21:48.5486385Z Uploading artifact: hermes-isolated-audio-device-bundle.zip
+2026-10-17T21:21:48.5520886Z Beginning upload of artifact content to blob storage
+2026-10-17T21:21:49.1632482Z Uploaded bytes 8388608
+2026-10-17T21:21:49.1952804Z Uploaded bytes 16777216
+2026-10-17T21:21:49.2084177Z Uploaded bytes 25165824
+2026-10-17T21:21:49.2256682Z Uploaded bytes 33554432
+2026-10-17T21:21:49.3892291Z Uploaded bytes 41943040
+2026-10-17T21:21:49.3964541Z Uploaded bytes 50331648
+2026-10-17T21:21:49.4138791Z Uploaded bytes 58720256
+2026-10-17T21:21:49.4203090Z Uploaded bytes 67108864
+2026-10-17T21:21:49.5816374Z Uploaded bytes 75497472
+2026-10-17T21:21:49.5905737Z Uploaded bytes 83886080
+2026-10-17T21:21:49.6094532Z Uploaded bytes 92274688
+2026-10-17T21:21:49.6158186Z Uploaded bytes 100663296
+2026-10-17T21:21:49.7887808Z Uploaded bytes 109051904
+2026-10-17T21:21:49.8160499Z Uploaded bytes 117440512
+2026-10-17T21:21:49.8222809Z Uploaded bytes 125829120
+2026-10-17T21:21:49.8290816Z Uploaded bytes 134217728
+2026-10-17T21:21:50.0170577Z Uploaded bytes 142606336
+2026-10-17T21:21:50.0240855Z Uploaded bytes 150994944
+2026-10-17T21:21:50.0301103Z Uploaded bytes 159383552
+2026-10-17T21:21:50.0389311Z Uploaded bytes 167772160
+2026-10-17T21:21:50.2167475Z Uploaded bytes 176160768
+2026-10-17T21:21:50.2232712Z Uploaded bytes 184549376
+2026-10-17T21:21:50.2289922Z Uploaded bytes 192937984
+2026-10-17T21:21:50.2350753Z Uploaded bytes 201326592
+2026-10-17T21:21:50.4132424Z Uploaded bytes 209715200
+2026-10-17T21:21:50.4284311Z Uploaded bytes 218103808
+2026-10-17T21:21:50.4344405Z Uploaded bytes 226492416
+2026-10-17T21:21:50.5130177Z Uploaded bytes 234881024
+2026-10-17T21:21:50.5947456Z Uploaded bytes 243269632
+2026-10-17T21:21:50.6292952Z Uploaded bytes 251658240
+2026-10-17T21:21:50.6418869Z Uploaded bytes 260046848
+2026-10-17T21:21:50.6940819Z Uploaded bytes 268435456
+2026-10-17T21:21:50.7809427Z Uploaded bytes 276824064
+2026-10-17T21:21:50.8373117Z Uploaded bytes 285212672
+2026-10-17T21:21:50.8742960Z Uploaded bytes 293601280
+2026-10-17T21:21:50.9133012Z Uploaded bytes 301989888
+2026-10-17T21:21:51.0167636Z Uploaded bytes 310378496
+2026-10-17T21:21:51.0205984Z Uploaded bytes 318767104
+2026-10-17T21:21:51.0822653Z Uploaded bytes 319449935
+2026-10-17T21:21:51.1278877Z Finished uploading artifact content to blob storage!
+2026-10-17T21:21:51.1280744Z SHA256 digest of uploaded artifact is 5e707e7876c62a948d74979287f9993fe626688295ec94541fb76d078a9d790d
+2026-10-17T21:21:51.1282906Z Finalizing artifact upload
+2026-10-17T21:21:51.4318739Z Artifact hermes-isolated-audio-device-bundle successfully finalized. Artifact ID 12114408308
+2026-10-17T21:21:51.4320499Z Artifact hermes-isolated-audio-device-bundle has been successfully uploaded! Final size is 319449935 bytes. Artifact ID is 12114408308
+2026-10-17T21:21:51.4327723Z Artifact download URL: https://github.com/adybag14-cyber/termux-hermes/actions/runs/39070524219/artifacts/12114408308
+2026-10-17T21:21:51.4509438Z ##[group]Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+2026-10-17T21:21:51.4510148Z with:
+2026-10-17T21:21:51.4510490Z   name: hermes-isolated-audio-device-evidence
+2026-10-17T21:21:51.4510834Z   path: audio-device-evidence/
+2026-10-17T21:21:51.4511120Z   if-no-files-found: warn
+2026-10-17T21:21:51.4511714Z   compression-level: 0
+2026-10-17T21:21:51.4511994Z   retention-days: 14
+2026-10-17T21:21:51.4512277Z   overwrite: false
+2026-10-17T21:21:51.4512549Z   include-hidden-files: false
+2026-10-17T21:21:51.4512806Z   archive: true
+2026-10-17T21:21:51.4513092Z env:
+2026-10-17T21:21:51.4513368Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:21:51.4513876Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.8/arm64/lib/pkgconfig
+2026-10-17T21:21:51.4514342Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:21:51.4514744Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:21:51.4515310Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/arm64
+2026-10-17T21:21:51.4515731Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.8/arm64/lib
+2026-10-17T21:21:51.4516164Z ##[endgroup]
+2026-10-17T21:21:51.5691057Z With the provided path, there will be 4 files uploaded
+2026-10-17T21:21:51.5692248Z Artifact name is valid!
+2026-10-17T21:21:51.5692607Z Root directory input is valid!
+2026-10-17T21:21:51.8419959Z Uploading artifact: hermes-isolated-audio-device-evidence.zip
+2026-10-17T21:21:51.8455781Z Beginning upload of artifact content to blob storage
+2026-10-17T21:21:52.0211634Z Uploaded bytes 8359
+2026-10-17T21:21:52.0639145Z Finished uploading artifact content to blob storage!
+2026-10-17T21:21:52.0640369Z SHA256 digest of uploaded artifact is 35282e9ae895ff404328fcbdebdf5f0c8d581501cedb60c154a14b27c368cd8d
+2026-10-17T21:21:52.0641147Z Finalizing artifact upload
+2026-10-17T21:21:52.3715837Z Artifact hermes-isolated-audio-device-evidence successfully finalized. Artifact ID 12115161030
+2026-10-17T21:21:52.3717227Z Artifact hermes-isolated-audio-device-evidence has been successfully uploaded! Final size is 8359 bytes. Artifact ID is 12115161030
+2026-10-17T21:21:52.3719827Z Artifact download URL: https://github.com/adybag14-cyber/termux-hermes/actions/runs/39070524219/artifacts/12115161030
+2026-10-17T21:21:52.3896126Z Post job cleanup.
+2026-10-17T21:21:52.4589285Z [command]/usr/bin/git version
+2026-10-17T21:21:52.4624678Z git version 2.55.0
+2026-10-17T21:21:52.4659475Z Temporarily overriding HOME='/home/runner/work/_temp/4fb39886-7c4a-4606-9807-40f1a364f25d' before making global git config changes
+2026-10-17T21:21:52.4660447Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-17T21:21:52.4665769Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/termux-hermes/termux-hermes
+2026-10-17T21:21:52.4692785Z Removing SSH command configuration
+2026-10-17T21:21:52.4698983Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-17T21:21:52.4728575Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-17T21:21:52.4924091Z Removing HTTP extra header
+2026-10-17T21:21:52.4924906Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-17T21:21:52.4960174Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-17T21:21:52.5181172Z Removing includeIf entries pointing to credentials config files
+2026-10-17T21:21:52.5189114Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-17T21:21:52.5218676Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-17T21:21:52.5536430Z Cleaning up orphan processes

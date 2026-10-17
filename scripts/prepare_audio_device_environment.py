@@ -86,6 +86,23 @@ PSUTIL_DIRECT_BINDING = {
     "source_build_executed": False,
 }
 
+
+# These two original source-metadata rows lost only the URL/marker separator.
+# Their correctly separated project declarations are retained here for audit.
+# This adapts parsing in memory, never metadata bytes or URL-install policy.
+FROZEN_REQUIREMENT_ADAPTATIONS = [
+    {
+        "raw_requirement": "kittentts @ https://github.com/KittenML/KittenTTS/releases/download/0.8.1/kittentts-0.8.1-py3-none-any.whl; ((platform_machine != 'ARM64' or sys_platform != 'win32') and (platform_machine != 'x86_64' or sys_platform != 'darwin')) and extra == 'kittentts'",
+        "parsed_requirement": "kittentts @ https://github.com/KittenML/KittenTTS/releases/download/0.8.1/kittentts-0.8.1-py3-none-any.whl ; ((platform_machine != 'ARM64' or sys_platform != 'win32') and (platform_machine != 'x86_64' or sys_platform != 'darwin')) and extra == 'kittentts'",
+        "project_requirement": "kittentts @ https://github.com/KittenML/KittenTTS/releases/download/0.8.1/kittentts-0.8.1-py3-none-any.whl ; (platform_machine != 'ARM64' or sys_platform != 'win32') and (platform_machine != 'x86_64' or sys_platform != 'darwin')"
+    },
+    {
+        "raw_requirement": "misaki[en] @ git+https://github.com/NousResearch/misaki.git@f03fd2be7346952a83d3d4845c217fc7667f322d; ((platform_machine != 'ARM64' or sys_platform != 'win32') and (platform_machine != 'x86_64' or sys_platform != 'darwin')) and extra == 'kittentts'",
+        "parsed_requirement": "misaki[en] @ git+https://github.com/NousResearch/misaki.git@f03fd2be7346952a83d3d4845c217fc7667f322d ; ((platform_machine != 'ARM64' or sys_platform != 'win32') and (platform_machine != 'x86_64' or sys_platform != 'darwin')) and extra == 'kittentts'",
+        "project_requirement": "misaki[en] @ git+https://github.com/NousResearch/misaki.git@f03fd2be7346952a83d3d4845c217fc7667f322d ; (platform_machine != 'ARM64' or sys_platform != 'win32') and (platform_machine != 'x86_64' or sys_platform != 'darwin')"
+    }
+]
+
 def normalized_name(value: str) -> str:
     return re.sub(r"[-_.]+", "-", value).lower()
 
@@ -555,10 +572,41 @@ def frozen_psutil_binding(root: Path, manifest: dict) -> dict:
     return copy.deepcopy(binding)
 
 
+def parse_frozen_requirement(parent: str, text: str, parent_version: str, *,
+                             direct_url_binding: dict | None = None):
+    """Parse the exact frozen declarations without rewriting source metadata."""
+    import copy
+    from packaging.requirements import InvalidRequirement, Requirement
+
+    label = parent + ": " + text
+    adaptation = next((row for row in FROZEN_REQUIREMENT_ADAPTATIONS
+                       if row["raw_requirement"] == text), None)
+    if adaptation is not None:
+        require(parent == PSUTIL_DIRECT_BINDING["parent"]
+                and parent_version == PSUTIL_DIRECT_BINDING["parent_version"]
+                and direct_url_binding == PSUTIL_DIRECT_BINDING,
+                "malformed requirement has no verified frozen parent binding: " + label)
+        parsed_text = adaptation["parsed_requirement"]
+    else:
+        parsed_text = text
+    try:
+        parsed = Requirement(parsed_text)
+    except InvalidRequirement as exc:
+        raise StagingError("invalid frozen dependency requirement: " + label + " [" + str(exc) + "]") from exc
+    if adaptation is None:
+        return parsed, None
+    proof = {"parent": parent, "parent_version": parent_version, **copy.deepcopy(adaptation),
+             "source_inputs": {name: copy.deepcopy(direct_url_binding["source_inputs"][name])
+                               for name in ("app/hermes_agent-0.0.0.dist-info/METADATA", "app/pyproject.toml")},
+             "source_metadata_rewritten": False, "url_install_allowed": False}
+    return parsed, proof
+
+
 def dependency_graph(distributions: dict, expected: dict[str, str], extras: list[str], *,
-                     direct_url_binding: dict | None = None) -> list[dict]:
+                     direct_url_binding: dict | None = None,
+                     parse_evidence: dict | None = None) -> list[dict]:
     from packaging.markers import default_environment
-    from packaging.requirements import Requirement
+    import packaging
     from packaging.version import Version
     from packaging.specifiers import SpecifierSet
     environment = default_environment()
@@ -569,7 +617,7 @@ def dependency_graph(distributions: dict, expected: dict[str, str], extras: list
     active = {name: {""} for name in expected}
     if "hermes-agent" in active:
         active["hermes-agent"].update(extras)
-    visited, edges = set(), {}
+    visited, edges, adaptations = set(), {}, {}
     while True:
         pending = sorted((name, extra) for name, values in active.items() for extra in values
                          if (name, extra) not in visited)
@@ -578,8 +626,14 @@ def dependency_graph(distributions: dict, expected: dict[str, str], extras: list
         for name, extra in pending:
             visited.add((name, extra))
             for text in distributions[name].requires or []:
-                requirement = Requirement(text)
-                if requirement.marker and not requirement.marker.evaluate({**environment, "extra": extra}):
+                requirement, adaptation = parse_frozen_requirement(
+                    name, text, expected[name], direct_url_binding=direct_url_binding)
+                is_active = requirement.marker is None or requirement.marker.evaluate({**environment, "extra": extra})
+                if adaptation is not None:
+                    record = adaptations.setdefault((name, text), {
+                        **adaptation, "marker": str(requirement.marker), "marker_evaluations": []})
+                    record["marker_evaluations"].append({"extra": extra, "active": is_active})
+                if not is_active:
                     continue
                 dependency = normalized_name(requirement.name)
                 bound_source = None
@@ -600,6 +654,13 @@ def dependency_graph(distributions: dict, expected: dict[str, str], extras: list
                 edges[(name, text)] = {"parent": name, "requirement": text, "selected": expected[dependency]}
                 if bound_source is not None:
                     edges[(name, text)]["frozen_direct_url_binding"] = bound_source
+    if parse_evidence is not None:
+        parse_evidence.update({
+            "parser": {"name": "packaging", "version": packaging.__version__},
+            "marker_environment": environment,
+            "adaptations": [adaptations[key] for key in sorted(adaptations)],
+            "source_metadata_rewritten": False,
+        })
     return [edges[key] for key in sorted(edges)]
 
 
@@ -740,8 +801,9 @@ def native_validation(root: Path) -> dict:
             "wheel catalog has a missing or unexpected dependency")
     wheels = [installed_wheel(root, by_name[name]) for name in sorted(expected) if name != "hermes-agent"]
     psutil_binding = frozen_psutil_binding(root, manifest)
+    parsing = {}
     graph = dependency_graph(selected, expected, lock["candidate"]["extras"] + ["audio-io"],
-                             direct_url_binding=psutil_binding)
+                             direct_url_binding=psutil_binding, parse_evidence=parsing)
     import pm
     import cffi
     import _cffi_backend
@@ -785,7 +847,7 @@ def native_validation(root: Path) -> dict:
             "versions": versions, "installed_distribution_count": len(versions), "installed_wheels": wheels,
             "source_layout": {"path": "app", "metadata": "hermes-agent==0.0.0", "pth": source_pth(root).decode()},
             "active_extras": lock["candidate"]["extras"] + ["audio-io"],
-            "active_dependency_edges": graph, "module_origins": modules,
+            "active_dependency_edges": graph, "requirement_parsing": parsing, "module_origins": modules,
             "application_source_origins": source_origins, "manager": manager,
             "native_operations": {"cffi_sum": 16, "numpy_matrix_product": result, "numpy_linalg_finite": True},
             "audio_available_metadata_only": True, "audio_resolver": resolver,
