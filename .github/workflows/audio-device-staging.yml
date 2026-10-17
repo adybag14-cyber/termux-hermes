@@ -1,0 +1,81 @@
+name: Assemble isolated audio device environment
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - prepare/termux-compatibility-resume-20261017
+    paths:
+      - '.github/workflows/audio-device-staging.yml'
+      - 'scripts/prepare_audio_device_bundle.py'
+      - 'scripts/prepare_audio_device_environment.py'
+      - 'scripts/audio_device_bundle_lock.json'
+      - 'scripts/check_audio_device_staging.sh'
+      - 'scripts/fetch_compatibility_candidate.py'
+      - 'tests/test_audio_device_staging.py'
+      - 'patches/next-stable/audio-readiness.patch'
+      - 'manifest/release.json'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: isolated-audio-staging-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  assemble:
+    name: Frozen transfer bundle and two fresh native environments
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 35
+    steps:
+      - name: Checkout the exact preparation source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Set up the bundle preparation interpreter
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.14'
+
+      - name: Fetch and verify the frozen candidate and audio inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/prepare_audio_device_bundle.py fetch --out audio-staging-inputs
+
+      - name: Assemble the reviewed transfer bundle without a copied environment
+        run: |
+          python3 scripts/prepare_audio_device_bundle.py build \
+            --candidate-archive audio-staging-inputs/candidate.zip \
+            --audio-archive audio-staging-inputs/audio.zip \
+            --opensles-deb audio-staging-inputs/opensles.deb \
+            --out audio-device-bundle
+
+      - name: Recreate and verify two isolated environments with networking disabled
+        run: |
+          bash scripts/check_audio_device_staging.sh \
+            "$GITHUB_WORKSPACE/audio-device-bundle" \
+            "$GITHUB_WORKSPACE/audio-device-evidence"
+
+      - name: Preserve the transfer bundle
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: hermes-isolated-audio-device-bundle
+          path: audio-device-bundle/
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 14
+
+      - name: Preserve source, assembly and separate readiness evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: hermes-isolated-audio-device-evidence
+          path: audio-device-evidence/
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 14

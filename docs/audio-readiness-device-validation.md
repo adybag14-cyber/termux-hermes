@@ -8,7 +8,7 @@ The standalone [audio-readiness patch](../patches/next-stable/audio-readiness.pa
 
 The [native audio record](../audit/native-probes-9fcd31c-20261017/audio-summary.json) proves NumPy 2.4.3 arithmetic, FFT and internal LAPACK with both the build runtime and original package libraries. The same run failed PortAudio initialization with error -9999. Its mapped OpenSL ES object was the official libandroid-stub wrapper, and the container lacked the actual Android framework library and recorded Binder/audio services. The relationship to the engine error is an inference from those measured facts and the pinned wrapper source. Actual device initialization, microphone permission, capture, and silence stopping remain unproved.
 
-The successful e271 full candidate still selects seven extras and does not include `audio-io`. Changing `voice.capture_backend` alone does not supply NumPy or sounddevice. This guide does not authorize or perform an installation, add an extra to the released package, or change the main compatibility patch.
+The verified 635ec13 full candidate still selects seven extras and does not include `audio-io`. Changing `voice.capture_backend` alone does not supply NumPy or sounddevice. The experiment remains separate from the released package and main compatibility patch; no physical device installation has been performed.
 
 ## Device access observed on 2026-10-17
 
@@ -23,25 +23,83 @@ The [sanitized device-access record](../audit/device-audio-access-20261017.json)
 
 This inventory does not prove microphone permission, PortAudio initialization, capture, or VAD. It establishes no isolated audio environment and does not change any audio gate. The local PCM/VAD test below does not require the Termux:API backend; that backend is a separate check and cannot prove silence autostop.
 
-## Exact software prerequisites before a phone test
+## Isolated software for the device test
 
-A packager must first supply a separately reviewed, freshly assembled PM environment for native Android ARM64/Python 3.14, plus a copy of the prepared Hermes source with this patch applied. Keep the installed package and its environment unchanged. Reuse the exact candidate's reviewed base runtime and wheel catalog, then add the locked audio closure in the isolated environment; do not copy the CI venv to the phone or substitute system Python packages. This full device-test environment and its installer/receipt have not yet been prepared or certified.
+The separate [bundle builder](../scripts/prepare_audio_device_bundle.py) and
+[native recreation helper](../scripts/prepare_audio_device_environment.py) use
+a [frozen input lock](../scripts/audio_device_bundle_lock.json). They prepare
+the verified candidate from packaging source
+`635ec13c9d0f264f508d1bdbaa7670d4eaa00787`, candidate run
+[39057745675](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745675).
+The selected package is 222,096,792 bytes with SHA-256
+`2d5435d0fb19fa9f8ed0a5da5c66cabf59585a8e8bcd35ad2ebf9cb161f5e810`.
 
-The launcher below resolves `AUDIO_PAYLOAD` to the existing `$PREFIX/lib/hermes-agent` directory. Its receipt must bind that payload to the selected candidate's source, package digest and runtime-library hashes, as well as the new environment's complete wheel manifest and patched source. If the existing payload does not match, prepare a separately reviewed launcher pointing to an isolated copy of the selected payload before using these blocks. An unrelated installed payload is not a substitute for this prerequisite.
+**Native recreation verification: pending.** The
+[isolated audio workflow](../.github/workflows/audio-device-staging.yml) builds
+the transfer bundle, recreates it at two distinct final paths with networking
+disabled, and records assembly separately from audio initialization. No physical
+installation or microphone check has been performed.
 
-The existing component proof is [run 39043935925](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39043935925), artifact `12104898993`; the [build receipt](../audit/native-probes-9fcd31c-20261017/audio-build-probe.json) records these exact files. The runtime closure has four packages; the fifth retained wheel is build support.
+The transfer directory contains `payload.tar.gz`, `manifest.json`,
+`prepare.sh` and `BUNDLE-RECEIPT.json`. It includes the candidate's tools,
+runtime libraries, application source and complete wheel catalog; the two
+production audio-readiness changes; the frozen audio additions; and the
+recreation and validation helpers. Its input manifest records every retained
+payload member and the exact before/after hashes of
+`tools/voice_mode.py` and `tools/voice_mode_capture.py`.
 
-| Artifact | Bytes | SHA-256 | Role |
-|---|---:|---|---|
-| `cffi-2.1.1-cp314-cp314-android_24_arm64_v8a.whl` | 201386 | `36977e26001a7f4da546fda9fd8715ff6e81e6661d02eb28bc5f2ee0f235f9b2` | Runtime |
-| `numpy-2.4.3-cp314-cp314-android_24_arm64_v8a.whl` | 7180471 | `4b1840a7d73d6111604b22102e58b551a670db579164e0ddede3e78733fd68d4` | Runtime, built with internal BLAS/LAPACK fallback |
-| `pycparser-3.0-py3-none-any.whl` | 48172 | `b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992` | Runtime |
-| `sounddevice-0.5.5-py3-none-any.whl` | 32807 | `30ff99f6c107f49d25ad16a45cacd8d91c25a1bcdd3e81a206b921a3a6405b1f` | Runtime |
-| `setuptools-83.0.0-py3-none-any.whl` | 1008090 | `29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3` | Retained build support |
+The installer creates fresh private PM and application environments at the
+chosen final path. It preserves the candidate's 100 installed distribution
+versions and adds NumPy 2.4.3 and sounddevice 0.5.5, for 102 application
+distributions. The 102-wheel transfer catalog includes the unused build-support
+setuptools wheel; the application inventory comprises 101 dependency wheels
+and the source-layout Hermes metadata. No existing venv or PM environment is
+copied into the transfer bundle.
 
-The recorded additional runtime library is official Termux `portaudio` version `19.07.00-3`: `libportaudio.so.2`, 61976 bytes, SHA-256 `116ff3e80f1b29042cad96e3f923d25dfe5325420d4b5140653fa2226ba47073`; its SONAME aliases contain the same bytes. It needs `libc.so`, `libm.so`, and `libOpenSLES.so`. The phone must provide the real working Android audio framework, not merely an importable wrapper. The probe records the actual mapped paths, owners and hashes, including the system OpenSL ES object if the wrapper loads it. Do not install a fabricated replacement or relax the initialization check.
+| New runtime wheel | Bytes | SHA-256 |
+|---|---:|---|
+| `numpy-2.4.3-cp314-cp314-android_24_arm64_v8a.whl` | 7180471 | `4b1840a7d73d6111604b22102e58b551a670db579164e0ddede3e78733fd68d4` |
+| `sounddevice-0.5.5-py3-none-any.whl` | 32807 | `30ff99f6c107f49d25ad16a45cacd8d91c25a1bcdd3e81a206b921a3a6405b1f` |
 
-The historical component environment was `/out/environment/bin/python`, created through `pm.build_requirements_environment(..., wheelhouse=..., offline=True)`. That was a dependency-only environment, not the full Hermes application. For the full recorder test below, the packager must provide all frozen Hermes runtime dependencies as well, and bind the new environment's Python, complete wheel manifest, source and locks in a receipt. `AUDIO_ENV` below names this new environment; `AUDIO_SOURCE` names its separate patched source; `PROBE_SOURCE` names the reviewed packaging checkout. These task-local shell variables are not new Hermes configuration options.
+Those two wheels come from the original audio component
+[run 39043935925](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39043935925),
+artifact `12104898993`. That workflow remains a recorded audio failure.
+Its [build receipt](../audit/native-probes-9fcd31c-20261017/audio-build-probe.json)
+also contains a different CFFI build with the same filename/version. The new
+bundle deliberately retains the candidate's CFFI SHA-256
+`196cd52f8b5ac753e947e1267381ddf9616a41033f310a05993b96c6262b52e1`;
+it does not replace it with the historical audio CFFI
+`36977e26001a7f4da546fda9fd8715ff6e81e6661d02eb28bc5f2ee0f235f9b2`.
+The duplicate pycparser and setuptools inputs also leave the original catalog
+bytes unchanged.
+
+The additional library is official Termux `portaudio` version `19.07.00-3`:
+`libportaudio.so.2`, 61,976 bytes, SHA-256
+`116ff3e80f1b29042cad96e3f923d25dfe5325420d4b5140653fa2226ba47073`.
+The isolated libraries also include the pinned official OpenSL ES forwarding
+wrapper. It forwards to the platform's `/system/lib64/libOpenSLES.so`; it
+does not supply a real Android audio framework itself. A physical success must
+record the actual mapped framework library and usable input device. The
+container's unavailable audio diagnostic cannot substitute for those observations.
+
+The fresh application environment also receives an owned `sitecustomize.py`.
+The pinned Python's generic PortAudio finder relies on a linker or compiler and
+does not directly search `LD_LIBRARY_PATH`. This small adapter maps only the
+exact library name `portaudio` to the private, size- and SHA-verified
+`libportaudio.so.2`; all other lookups use Python's original finder. Its bytes
+and activation are verified in the generated environment receipt. It leaves the
+original sounddevice wheel unchanged and retains real native loading and
+PortAudio initialization.
+
+The installer rejects existing or noncanonical destinations, overlap with the
+installed Hermes payload, changed bundle bytes and inherited Python platform
+overrides. It uses the included pinned Python rather than requiring a user
+Python installation. Each resulting `bin/audio-python` launcher is bound to
+its absolute destination and receipt. Recreate at a new destination when needed;
+moving a prepared environment does not satisfy the receipt. The launcher fixes
+`HERMES_HOME` to `<destination>/state/profile`, places caches and temporary
+files under `state`, removes ambient Python/native-library overrides, and
+uses the isolated payload's library paths. The user's real `HOME` is retained.
 
 ## Device facts: no recording
 
@@ -60,43 +118,79 @@ timeout 10s termux-microphone-record -i
 
 Also report the Termux app version and installation channel (F-Droid, official GitHub, or another channel), the Termux:API add-on's version/channel if installed, and whether Android microphone permission is granted. Termux and its add-ons must use compatible signatures; do not uninstall an existing app to answer this question. The [official Termux:API README](https://github.com/termux/termux-api/blob/master/README.md) documents this requirement. No API key, full environment dump, account details, or recording needs to be shared.
 
-## Non-recording native initialization and input inventory
+## Recreate the environment in foreground Termux
 
-After the separately reviewed environment is delivered and its receipt verified, use its exact interpreter with the original payload libraries and the declared official PortAudio package. This preserves the tested executable layout; it does not put a compiler's replacement libc++ ahead of the package runtime.
+Use the complete transfer artifact from the isolated audio workflow and verify
+its published artifact digest before using the extracted directory. The
+installer verifies its embedded manifest and payload hashes. Choose a fresh
+directory under the Termux app's private home; its parent must already exist.
+The existing installed Hermes payload is not an input to this launcher.
 
 ```bash
-# These paths are supplied with the separately reviewed device-test environment.
-: "${AUDIO_SOURCE:?Set the reviewed Hermes source path}"
-: "${AUDIO_ENV:?Set the reviewed isolated audio environment path}"
-: "${PROBE_SOURCE:?Set the reviewed packaging checkout path}"
-AUDIO_PAYLOAD="$PREFIX/lib/hermes-agent"
-AUDIO_PY="$AUDIO_ENV/bin/python"
+# Run in foreground Termux after selecting the reviewed transfer directory.
+: "${AUDIO_BUNDLE:?Set the extracted reviewed audio bundle directory}"
+AUDIO_ROOT="$HOME/hermes-audio-validation-20261017"
+bash "$AUDIO_BUNDLE/prepare.sh" "$AUDIO_ROOT"
+AUDIO_PY="$AUDIO_ROOT/bin/audio-python"
+AUDIO_SOURCE="$AUDIO_ROOT/app"
 test -x "$AUDIO_PY" && test -f "$AUDIO_SOURCE/tools/voice_mode.py"
-export LD_LIBRARY_PATH="$AUDIO_PAYLOAD/tools/python$PREFIX/lib:$AUDIO_PAYLOAD/tools/node$PREFIX/lib:$AUDIO_PAYLOAD/tools/ffmpeg$PREFIX/lib:$AUDIO_PAYLOAD/runtime-libs/lib:$PREFIX/lib"
-AUDIO_EVIDENCE="$(mktemp -d "$TMPDIR/hermes-audio-device.XXXXXX")"
+AUDIO_EVIDENCE="$(mktemp -d "$AUDIO_ROOT/state/device-check.XXXXXX")"
 chmod 700 "$AUDIO_EVIDENCE"
 cd "$AUDIO_SOURCE"
-"$AUDIO_PY" -c 'import sys, platform, importlib.metadata as m; assert sys.platform == "android"; assert platform.machine() in ("aarch64", "arm64"); assert sys.version_info[:2] == (3, 14); assert m.version("numpy") == "2.4.3"; assert m.version("sounddevice") == "0.5.5"; print(sys.executable, sys.version)'
 ```
 
-Run the existing dependency/inventory probe:
+The resulting `staging/assembly-receipt.json` binds the candidate identity,
+complete installed inventory, source manifest and environment receipt.
+`staging/environment-manifest.json` records the generated PM/application
+files and links. The launcher verifies those bindings before each command.
+Mutable profile/cache files remain inside this experiment.
+
+## Non-recording native initialization and input inventory
+
+Use the delivered launcher and bundled helper. No separate packaging checkout,
+manual `LD_LIBRARY_PATH` change, global PortAudio installation or CI venv is
+needed for these commands.
 
 ```bash
-"$AUDIO_PY" "$PROBE_SOURCE/scripts/probe_native_compatibility.py" \
-  exercise --group audio --out "$AUDIO_EVIDENCE/AUDIO-DEVICE.json"
+"$AUDIO_PY" "$AUDIO_ROOT/staging/prepare_audio_device_environment.py" \
+  validate --root "$AUDIO_ROOT"
+"$AUDIO_PY" "$AUDIO_ROOT/staging/prepare_audio_device_environment.py" \
+  diagnose --root "$AUDIO_ROOT"
+cat "$AUDIO_ROOT/staging/audio-diagnostic.json"
 ```
 
-This opens no input stream and records no audio. It imports sounddevice (which initializes PortAudio), enumerates devices, and saves `AUDIO-DEVICE.json`, `NUMPY-AUDIO-DEVICE.json`, and `AUDIO-HOST-AUDIO-DEVICE.json`. A successful exit alone is insufficient: require `audio.input_device_status` to be `available`, inspect the default input and supported sample rate, and verify the real mapped audio-library provenance. Initialization errors remain failures. Android process visibility restrictions can limit service observations; an unreadable process inventory does not prove that the framework is absent.
+The diagnostic opens no input stream and records no audio. It imports the
+patched audio module, initializes PortAudio, and reports the actual library and
+input inventory when initialization succeeds. A zero command exit means the
+diagnostic protocol completed; it does not prove device readiness. The
+receipt's `readiness` and `device_readiness` remain false because recording
+and VAD have not been checked.
+
+Before the owner starts a take, require `status=audio-initialized`,
+`input_device_status=available`, and
+`framework_input.real_android_framework_mapped=true`. Review the recorded
+default input and `supported_input_formats`, including the supported sample
+rate. These observations are prerequisites for the take; they do not by
+themselves prove microphone capture or VAD.
+
+A known PortAudio -9999 initialization failure is retained as
+`audio-unavailable` with `input_device_status=initialization-unavailable`;
+unexpected errors fail the command. The other input statuses are `unavailable`
+(no usable default input), `unsupported` (known format, channel or rate
+rejections), and `available` (format support). Missing or output-only devices
+do not pass the input gate. Android process visibility restrictions can limit
+observations; an unreadable process inventory does not establish that the
+framework is absent.
 
 ## User-initiated local PCM/VAD check
 
-Only the device owner should initiate this block after agreeing to a brief microphone test in a quiet private setting. It uses the real recorder factory and callback path, limits the take to ten seconds, disables streaming and all transcription, prints only numeric observations, and deletes its own temporary WAV. It does not run a model or send the take to an STT provider. The outer timeout is an additional cleanup bound; `shutdown()` releases the persistent input stream.
+Only the device owner should initiate this block after agreeing to a brief microphone test in a quiet private setting. It uses the real recorder factory and callback path, limits the take to ten seconds, disables streaming and all transcription, prints only numeric observations, and deletes its own temporary WAV. The launcher always uses `$AUDIO_ROOT/state/profile`; the block writes that experiment-only configuration instead of supplying an ignored `HERMES_HOME` override. It does not run a model or send the take to an STT provider. The outer timeout is an additional cleanup bound; `shutdown()` releases the persistent input stream.
 
 ```bash
 # This block is for a later user-initiated microphone test.
-# It creates a temporary validation profile and never calls transcription.
-mkdir "$AUDIO_EVIDENCE/profile"
-cat > "$AUDIO_EVIDENCE/profile/config.yaml" <<'YAML'
+# It configures only this isolated bundle's profile and never calls transcription.
+test -d "$AUDIO_ROOT/state/profile"
+cat > "$AUDIO_ROOT/state/profile/config.yaml" <<'YAML'
 security:
   allow_lazy_installs: false
 stt:
@@ -107,7 +201,7 @@ voice:
   capture_backend: sounddevice
   auto_tts: false
 YAML
-HERMES_HOME="$AUDIO_EVIDENCE/profile" timeout --signal=INT --kill-after=3s 20s "$AUDIO_PY" - <<'PY'
+timeout --signal=INT --kill-after=3s 20s "$AUDIO_PY" - <<'PY'
 import json
 import threading
 import time
@@ -174,13 +268,26 @@ The separate [preparation record](../audit/audio-readiness-preparation-20261017.
 
 The unchanged baseline produced three failures and one passing control. On the fixed source, the new file passed four cases, the existing selector suite passed fourteen cases (three Linux-only WSL cases were skipped on Windows), and two selected existing missing-library cases passed. These are separate runs; the red and green runs overlap and are not added together. One expanded attempt hit a 65-second outer timeout before a summary was retained, and no test result is claimed for that attempt. No native microphone or device installation was performed.
 
-## Remaining preparation for the device test
+## Remaining device work
 
-The available device already meets the observed ARM64/API identity part of the plan. The concrete follow-up is:
+The available device meets the dated ARM64/API identity observation. The
+software preparation is tracked by the isolated audio workflow above; native
+recreation verification is still pending in this draft.
 
-1. **Prepare the exact isolated software.** Deliver the full audio environment, patched source, selected candidate payload, launcher and digest receipt described above. This staging remains unfinished; the dependency-only CI environment is insufficient for the Hermes recorder check.
-2. **Establish execution inside foreground Termux.** Use an owner-operated Termux session and the delivered launcher. Record the app version/channel, human-readable device model and Android release, installed Hermes payload identity, and existing microphone-permission state. The failed `run-as` route does not provide this entry point. Determine compatible Termux:API companion/helper versions only if that separate backend will be tested.
-3. **Run the non-recording readiness gate.** Verify the receipt and exact interpreter, then require successful native initialization, a real input device and mapped audio-library provenance. Retain the numeric and provenance reports; an unavailable or output-only inventory remains a failed gate.
-4. **Let the device owner initiate the bounded local PCM/VAD check.** After the readiness gate passes, use the local-only block above for speech followed by silence, distinguish silence stopping from the duration cap, and repeat to check reopen/cleanup. Retain the numeric result and shutdown observation; delete the temporary WAV as the block specifies.
+1. **Establish foreground Termux execution.** Use the owner-operated app
+   session and the reviewed bundle. The failed ADB `run-as` route does not
+   provide that context. Confirm the app's distribution channel, installed
+   Hermes identity and existing microphone-permission state. Determine compatible
+   Termux:API companion/helper versions only for that separate backend.
+2. **Recreate and check the isolated environment.** Use a fresh private
+   destination and its generated launcher. Inspect the complete assembly receipt,
+   then require successful initialization, a usable input device and real
+   mapped framework provenance.
+3. **Let the device owner initiate the bounded local PCM/VAD check.**
+   Use the local-only block above for speech followed by silence, distinguish
+   silence stopping from the duration cap, and repeat to check reopen/cleanup.
+   Retain numeric results and the shutdown observation; delete the temporary
+   WAV as the block specifies.
 
-Playback/audio focus, physical clipboard behavior and the normal Hermes UI remain separate checks. None is established by a successful local PCM/VAD result. The packager must finish software staging before requesting any brief microphone take from the device owner.
+Playback/audio focus, physical clipboard behavior and the normal Hermes UI
+remain separate checks. None is established by a successful local PCM/VAD result.
