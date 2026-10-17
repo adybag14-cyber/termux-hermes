@@ -722,3 +722,150 @@ def test_native_writable_apt_copy_restores_index_basename_and_preserves_input(tm
     assert source.read_bytes() == raw
     assert list(stored.values())[0].read_bytes() == raw
     assert digest(list(stored.values())[0]) == pin["sha256"]
+
+
+def apt_index_row(pin, **changed):
+    fields = {"Package": pin["name"], "Version": pin["version"],
+              "Architecture": pin["architecture"], "Filename": pin["filename"],
+              "Size": str(pin["bytes"]), "SHA256": pin["sha256"]}
+    fields.update(changed)
+    return "".join(key + ": " + value + "\n" for key, value in fields.items()).encode()
+
+
+def selected_index_fixture():
+    raw, pin = epoch_archive_fixture()
+    selected = apt_index_row(pin)
+    other_version = apt_index_row(pin, Version="1:0.9",
+                                  Filename="pool/main/f/fixture/fixture_1:0.9_all.deb",
+                                  SHA256="7" * 64, Size="72")
+    unrelated = apt_index_row(pin, Package="unrelated", Version="2.0",
+                              Filename="pool/main/u/unrelated/unrelated_2.0_aarch64.deb",
+                              Architecture="aarch64")
+    unrelated_old = apt_index_row(pin, Package="unrelated", Version="1.0",
+                                  Filename="pool/main/u/unrelated/unrelated_1.0_aarch64.deb",
+                                  Architecture="aarch64")
+    return pin, selected, b"\n".join((other_version, unrelated, unrelated_old))
+
+
+def test_actual_frozen_index_preserves_all_rows_and_matches_all_46_selections():
+    lock, lock_raw = prep.load_lock(ROOT / "scripts" / prep.LOCK_FILENAME)
+    snapshot = ROOT / "audit/neutts-runtime-index-20261017/Packages.gz"
+    compressed = snapshot.read_bytes()
+    index_pin = next(p for p in lock["build_apt"]["snapshot"] if p["filename"] == "Packages.gz")
+    assert len(compressed) == index_pin["bytes"] and prep.sha(compressed) == index_pin["sha256"]
+    raw, pins = gzip.decompress(compressed), deepcopy(lock["build_apt"]["packages"])
+    before = bytes(raw), deepcopy(pins)
+    assert native.verify_selected_apt_index(raw, pins) == {
+        "target_record_count": 3011, "target_package_name_count": 3008,
+        "selected_record_count": 46}
+    assert (raw, pins) == before
+    assert snapshot.read_bytes() == compressed and prep.sha(lock_raw) == prep.LOCK_SHA256
+
+
+def test_selected_apt_index_accepts_other_versions_without_rewriting_index_or_pins():
+    pin, selected, others = selected_index_fixture()
+    raw, pins = selected + b"\n" + others, [pin]
+    before = bytes(raw), deepcopy(pins)
+    assert native.verify_selected_apt_index(raw, pins) == {
+        "target_record_count": 4, "target_package_name_count": 2, "selected_record_count": 1}
+    assert (raw, pins) == before
+
+
+@pytest.mark.parametrize("case", ["missing", "exact-duplicate", "conflicting-selected-row"])
+def test_selected_apt_index_rejects_missing_duplicate_or_conflicting_selected_identity(case):
+    pin, selected, others = selected_index_fixture()
+    if case == "missing":
+        raw = others
+    elif case == "exact-duplicate":
+        raw = selected + b"\n" + others + b"\n" + selected
+    else:
+        raw = selected + b"\n" + others + b"\n" + apt_index_row(pin, SHA256="0" * 64)
+    with pytest.raises(native.ProbeError, match="selected identity is missing or duplicated"):
+        native.verify_selected_apt_index(raw, [pin])
+
+
+@pytest.mark.parametrize("field,value", [
+    ("Filename", "pool/main/f/fixture/changed_1:1.0_all.deb"),
+    ("Size", "123456789"),
+    ("SHA256", "0" * 64),
+])
+def test_selected_apt_index_rejects_changed_single_selected_archive(field, value):
+    pin, selected, others = selected_index_fixture()
+    with pytest.raises(native.ProbeError, match="source index pin differs"):
+        native.verify_selected_apt_index(apt_index_row(pin, **{field: value}) + b"\n" + others, [pin])
+
+
+@pytest.mark.parametrize("field", ["Package", "Version", "Architecture", "Filename", "Size", "SHA256"])
+def test_selected_apt_index_rejects_repeated_selected_fields(field):
+    pin, selected, others = selected_index_fixture()
+    # Even an identical repeated header is ambiguous input, not a second valid identity.
+    repeated = next(line for line in selected.splitlines(keepends=True)
+                    if line.startswith((field + ":").encode()))
+    with pytest.raises(native.ProbeError, match="source index pin differs or has repeated fields"):
+        native.verify_selected_apt_index(selected + repeated + b"\n" + others, [pin])
+
+
+def test_selected_apt_index_rejects_duplicate_frozen_selection():
+    pin, selected, others = selected_index_fixture()
+    with pytest.raises(native.ProbeError, match="Duplicate frozen APT selected identity"):
+        native.verify_selected_apt_index(selected + b"\n" + others, [pin, deepcopy(pin)])
+
+
+@pytest.mark.parametrize("acquired", ["exact", "changed-packages", "changed-inrelease"])
+def test_real_signed_snapshot_preserves_authentication_and_acquired_byte_oracles(tmp_path, monkeypatch, acquired):
+    """Run production parsing and retained-byte gates; only native APT is a fixture."""
+    lock, _ = prep.load_lock(ROOT / "scripts" / prep.LOCK_FILENAME)
+    inputs, work, output = tmp_path / "inputs", tmp_path / "work", tmp_path / "out"
+    snapshot = inputs / "snapshot"
+    snapshot.mkdir(parents=True)
+    work.mkdir()
+    output.mkdir()
+    original = ROOT / "audit/neutts-runtime-index-20261017"
+    for filename in ("InRelease", "Packages.gz"):
+        shutil.copyfile(original / filename, snapshot / filename)
+    raw = gzip.decompress((snapshot / "Packages.gz").read_bytes())
+    calls = []
+    def update(command, out, label, timeout):
+        assert command[0] == str(native.PREFIX / "bin/apt-get") and command[-1] == "update"
+        assert (out, label, timeout) == (output, "rust-frozen-signed-index", 90)
+        for setting in (
+            "Acquire::AllowInsecureRepositories=false",
+            "Acquire::AllowDowngradeToInsecureRepositories=false",
+            "Acquire::AllowWeakRepositories=false",
+            "APT::Get::AllowUnauthenticated=false",
+            "APT::Update::Error-Mode=any",
+        ):
+            assert command[command.index(setting) - 1] == "-o"
+        repository = work / "signed-repository/dists/stable"
+        assert (repository / "InRelease").read_bytes() == (snapshot / "InRelease").read_bytes()
+        assert (repository / "main/binary-aarch64/Packages.gz").read_bytes() == (snapshot / "Packages.gz").read_bytes()
+        lists = work / "apt-lists"
+        retained = (snapshot / "InRelease").read_bytes()
+        (lists / "fixture_InRelease").write_bytes(retained + (b"\nchanged" if acquired == "changed-inrelease" else b""))
+        (lists / "fixture_Packages").write_bytes(raw)
+        calls.append("update-fixture")
+        return {"exit_code": 0, "fixture_only": True}
+    def acquired_bytes(command, **kwargs):
+        assert command == [str(native.PREFIX / "lib/apt/apt-helper"), "cat-file",
+                           str(work / "apt-lists/fixture_Packages")]
+        assert kwargs == {"capture_output": True, "timeout": 30, "check": False}
+        calls.append("acquired-byte-fixture")
+        return SimpleNamespace(returncode=0, stdout=raw + (b"\nchanged" if acquired == "changed-packages" else b""),
+                               stderr=b"")
+    monkeypatch.setattr(native, "bounded_command", update)
+    monkeypatch.setattr(native.subprocess, "run", acquired_bytes)
+    args = SimpleNamespace(inputs=inputs, out=output)
+    if acquired == "exact":
+        options, result = native.signed_snapshot(args, lock, work)
+        assert result["matched_archives"] == 46 and result["insecure_repository_exceptions"] is False
+        assert result["selected_index"] == {"target_record_count": 3011,
+                                             "target_package_name_count": 3008, "selected_record_count": 46}
+        assert result["packages_uncompressed_sha256"] == prep.sha(raw)
+        assert calls == ["update-fixture", "acquired-byte-fixture"]
+    else:
+        message = "APT-acquired package index differs" if acquired == "changed-packages" else "APT did not retain the exact authenticated InRelease"
+        with pytest.raises(native.ProbeError, match=message):
+            native.signed_snapshot(args, lock, work)
+        assert calls == (["update-fixture", "acquired-byte-fixture"] if acquired == "changed-packages" else ["update-fixture"])
+    assert all((snapshot / filename).read_bytes() == (original / filename).read_bytes()
+               for filename in ("InRelease", "Packages.gz"))

@@ -77,6 +77,16 @@ The original index Filename, version, URL, size, hash, and archive bytes remain 
 
 The new host regressions exercise both actual stage download plans twice in fresh outputs, all 46 original frozen identities, verified cache reuse, original request URLs, and the native copy contract. See [the recorded native failure](../audit/neutts-rust-native-20261017/run-39076217343/epoch-basename-failure-analysis.json) and [the correction receipt](../audit/neutts-rust-native-20261017/run-39076217343/epoch-basename-fix-preparation.json). The original 57-test preparation receipt remains a historical checkpoint.
 
+## Second native attempt and signed-index selection
+
+The retry, [run 39077868589](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39077868589), reached native Termux in both stages. All seven scientific foundation cases passed. Both stages then stopped in the saved APT index parser, before native APT signature authentication, compiler installation, Cargo resolution, or Rust wheel builds.
+
+The exact frozen index contains 3,011 target rows for 3,008 package names. Carapace, Chezmoi, and MPD each retain two versions. Requiring every package name in that whole repository to be unique incorrectly rejected those valid rows. All 46 selected build packages have exactly one row for their frozen name, version, and architecture, with their exact original Filename, size, and SHA256.
+
+The parser now retains those original rows and selects each frozen identity explicitly. Missing selections, repeated selected rows, conflicting selected archive metadata, and repeated selected fields fail. Additional versions remain in the original repository bytes. The signed InRelease, Packages.gz, configured APT trust store, insecure-repository prohibitions, and comparison with the exact APT-acquired bytes remain unchanged.
+
+The original error was reproduced through the original signed_snapshot function on the actual saved index before the correction. New regressions run the corrected selector on that same 3,011-row snapshot, exercise mixed-version and conflicting selections, and replay the full signed_snapshot path with controlled native-command fixtures. Those host fixtures verify the preserved byte and command contracts; actual native APT authentication remains a native retry gate. See [the separate failure receipt](../audit/neutts-rust-native-20261017/run-39077868589/selected-index-failure-analysis.json).
+
 ## Running and reading results
 
 After source review, the preparation-only workflow can run both stages or one selected stage. It uses the pinned native Termux Docker image on an ARM64 runner, UID 1000, two CPUs, six GiB of memory, and bounded timeouts. Its permissions only read repository contents.
@@ -91,7 +101,7 @@ Equivalent ARM64 host entry points:
 
 Both require fresh outputs. The workflow retains all preparation inputs and actual native result files even after a failure. Component checkpoints retain completed wheel results if a later component fails. Subprocess stdout and stderr are preserved on errors and timeouts.
 
-Host evidence currently covers 69 focused integrity checks with no skips, all 744 original source files, 11 cached registry archives containing 2,474 files, and an actual 12-file directory-source export. The real export exposed a cross-platform path-ordering mismatch. The verifier now sorts canonical POSIX path strings while retaining every original file and checksum comparison. The remaining 793 registry archives are checksum-frozen for native preparation acquisition.
+Host evidence currently covers 87 focused integrity checks with no skips. The source/cache checkpoint covers all 744 original source files, 11 expanded registry archives containing 2,474 files, and an actual 12-file directory-source export. The real export exposed a cross-platform path-ordering mismatch. The verifier now sorts canonical POSIX path strings while retaining every original file and checksum comparison. Subsequent complete capture of the first native run preserves all 804 original registry archives with their exact frozen checksums. The [separate cache admission receipt](../audit/neutts-rust-native-20261017/run-39076217343/captured-original-input-cache-admission.json) distinguishes that archive-byte admission from the earlier expanded-source checks and records the then-missing 42 APT archives.
 
 Final review also exercised the production APT archive parser against the exact cached Python 3.14.6-1 archive. A missing standard-library import was captured as a real host failure, corrected, and replayed against both original libpython payload hashes. A separate regression executes the installed-wheel inventory and its adapter with actual wheel bytes and Python distribution metadata. See [the archive replay](../audit/neutts-rust-routes-20261017/archive-parser-exact-apt-replay.json).
 

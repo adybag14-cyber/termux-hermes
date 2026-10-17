@@ -381,6 +381,39 @@ def cargo_source_config(home, vendor):
             "source_replacement": "independently SHA-verified original registry archives"}
 
 
+def verify_selected_apt_index(packages_raw, pins):
+    """Check frozen selections while retaining legitimate repository versions."""
+    records = []
+    for block in packages_raw.decode().split("\n\n"):
+        if not block.strip():
+            continue
+        fields = BytesParser(policy=compat32).parsebytes(block.encode())
+        if any(value in ("aarch64", "all") for value in fields.get_all("Architecture", [])):
+            records.append(fields)
+    identities = [(p["name"], p["version"], p["architecture"]) for p in pins]
+    require(len(identities) == len(set(identities)), "Duplicate frozen APT selected identity")
+    for pin in pins:
+        # A name may have several versions in a valid signed repository. Only
+        # this selected name/version/architecture must identify exactly one row.
+        # get_all also exposes repeated identity headers instead of choosing one.
+        candidates = [row for row in records
+                      if pin["name"] in row.get_all("Package", [])
+                      and pin["version"] in row.get_all("Version", [])
+                      and pin["architecture"] in row.get_all("Architecture", [])]
+        require(len(candidates) == 1, "APT selected identity is missing or duplicated: "
+                + pin["name"] + "=" + pin["version"] + ":" + pin["architecture"])
+        expected = {"Package": pin["name"], "Version": pin["version"],
+                    "Architecture": pin["architecture"], "Filename": pin["filename"],
+                    "Size": str(pin["bytes"]), "SHA256": pin["sha256"]}
+        require(all(candidates[0].get_all(key, []) == [value]
+                    for key, value in expected.items()),
+                "APT source index pin differs or has repeated fields: " + pin["name"])
+    return {"target_record_count": len(records),
+            "target_package_name_count": len({name for row in records
+                                             for name in row.get_all("Package", [])}),
+            "selected_record_count": len(pins)}
+
+
 def signed_snapshot(args, lock, work):
     snapshot = args.inputs / "snapshot"
     frozen = {p["filename"]: p for p in lock["build_apt"]["snapshot"]}
@@ -405,19 +438,7 @@ def signed_snapshot(args, lock, work):
     with gzip.GzipFile(fileobj=io.BytesIO((snapshot / "Packages.gz").read_bytes())) as stream:
         packages_raw = stream.read(32_000_001)
     require(len(packages_raw) <= 32_000_000, "Expanded APT index exceeds bound")
-    records = {}
-    for block in packages_raw.decode().split("\n\n"):
-        if not block.strip():
-            continue
-        fields = BytesParser(policy=compat32).parsebytes(block.encode())
-        if fields.get("Architecture") in ("aarch64", "all"):
-            require(fields["Package"] not in records, "Duplicate target APT package")
-            records[fields["Package"]] = fields
-    for pin in lock["build_apt"]["packages"]:
-        row = records.get(pin["name"])
-        require(row is not None and (row["Version"], row["Architecture"], row["Filename"],
-                row["SHA256"], int(row["Size"])) == (pin["version"], pin["architecture"],
-                pin["filename"], pin["sha256"], pin["bytes"]), "APT source index pin differs")
+    selected_index = verify_selected_apt_index(packages_raw, lock["build_apt"]["packages"])
     repo, lists = work / "signed-repository", work / "apt-lists"
     (repo / "dists/stable/main/binary-aarch64").mkdir(parents=True)
     lists.mkdir()
@@ -451,7 +472,8 @@ def signed_snapshot(args, lock, work):
                      "inrelease_sha256": frozen["InRelease"]["sha256"],
                      "packages_gz_sha256": frozen["Packages.gz"]["sha256"],
                      "packages_uncompressed_sha256": hashlib.sha256(packages_raw).hexdigest(),
-                     "matched_archives": len(lock["build_apt"]["packages"])}
+                     "matched_archives": len(lock["build_apt"]["packages"]),
+                     "selected_index": selected_index}
 
 def verify_archive_set(args, lock, prep):
     pins = lock["build_apt"]["packages"]
