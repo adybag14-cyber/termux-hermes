@@ -221,6 +221,14 @@ main-candidate repairs or change the nine-restriction baseline count.
 
 ## Microphone silence detection
 
+The [final full component run](../audit/native-probes-635ec13-20261017/summary.json)
+again fails at PortAudio initialization on implementation commit `635ec13`.
+NumPy's four numerical checks pass in both runtime contexts, and the PortAudio
+library loads. The observed container still lacks the actual Android audio
+framework and Binder services; hardware capture remains untested. The overall
+component workflow retains its audio failure, alongside six passing non-audio
+lanes, and its complete failed-job log is saved.
+
 Termux:API records a finalized audio file; it does not expose the live PCM stream
 used by Hermes' sounddevice silence detector. The prepared capture selector
 exposes the existing PCM backend explicitly and keeps Termux:API as an

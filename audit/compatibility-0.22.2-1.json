@@ -339,10 +339,10 @@
     },
     "packaging_ci": {
       "schema_version": 1,
-      "run_id": 39057092320,
-      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057092320",
-      "event": "push",
-      "head_sha": "34145858cdf215fb971534537ee3ef294813d6a0",
+      "run_id": 39057745679,
+      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745679",
+      "event": "pull_request",
+      "head_sha": "635ec13c9d0f264f508d1bdbaa7670d4eaa00787",
       "conclusion": "success",
       "command": [
         "python",
@@ -353,13 +353,14 @@
       "passed": 291,
       "skipped": 0,
       "failed": 0,
-      "elapsed_seconds": 2.23,
-      "raw_summary_line": "291 passed in 2.23s",
-      "counts_not_aggregated_with_host_runs": true,
-      "raw_log": "resume-ci-3414585-20261017.log.gz",
-      "raw_log_sha256": "9ae6965c70f122ff9107bca05d7614f88b62368ff21575b2c299e045d9197ebe",
-      "compressed_log_sha256": "0dc217d146ed67548f89c59f33d3a9f12256f2390e23ed22b4459da79fb4b5c1",
-      "detail_evidence": "resume-ci-3414585-20261017.json"
+      "elapsed_seconds": 2.18,
+      "raw_summary_line": "291 passed in 2.18s",
+      "counts_not_aggregated_with_other_runs": true,
+      "raw_log": "resume-ci-635ec13-20261017/39057745679.log.gz",
+      "raw_log_sha256": "b15a501b3a418f3c7a9de3d2f9eb2a58213b7d96e29d68980e17b12bcfc767e4",
+      "compressed_log_sha256": "31e410cf1c2134877aa4dd797a7e1585aa4fcab5dad011de9f2d8c0598b45d33",
+      "detail_evidence": "resume-ci-635ec13-20261017/39057745679.json",
+      "push_and_pr_run_evidence": "resume-ci-635ec13-20261017.json"
     },
     "neutts_apt_core_probe": {
       "status": "all_six_native_scientific_behavior_cases_passed_pip_wheel_tags_unresolved_engine_excluded",
@@ -421,6 +422,30 @@
       "candidate_selects_audio_io": false,
       "full_isolated_audio_environment_prepared": false,
       "physical_capture_vad_certified": false
+    },
+    "previous_packaging_ci_evidence": "resume-ci-3414585-20261017.json",
+    "full_component_revalidation": {
+      "run_id": 39057745666,
+      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666",
+      "head_sha": "635ec13c9d0f264f508d1bdbaa7670d4eaa00787",
+      "status": "completed",
+      "workflow_conclusion": "failure",
+      "passed_lanes": [
+        "uvloop",
+        "matrix",
+        "nemo",
+        "browser",
+        "desktop",
+        "gateway"
+      ],
+      "failed_lanes": [
+        "audio"
+      ],
+      "failure_reason": "PortAudio initialization fails in the observed environment without the real Android audio framework and Binder services.",
+      "numpy_numerical_behavior_passed_both_contexts": true,
+      "hardware_capture_tested": false,
+      "all_seven_artifact_archives_sha256_crc_and_member_hashes_verified": true,
+      "evidence": "native-probes-635ec13-20261017/summary.json"
     }
   }
 }

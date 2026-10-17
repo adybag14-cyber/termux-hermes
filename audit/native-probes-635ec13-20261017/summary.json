@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-10-17T18:52:00.272897+00:00",
+  "purpose": "Final full PR-open component validation; preparation only, no release.",
+  "run_id": 39057745666,
+  "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666",
+  "head_sha": "635ec13c9d0f264f508d1bdbaa7670d4eaa00787",
+  "status": "completed",
+  "workflow_conclusion": "failure",
+  "overall_run_passed": false,
+  "native_lane_counts": {
+    "success": 6,
+    "failure": 1,
+    "other": 0
+  },
+  "failure_reason": "Audio alone fails at PortAudio initialization in a measured environment missing the real Android audio framework and Binder services.",
+  "all_seven_artifacts_fully_downloaded_and_sha256_verified": true,
+  "all_zip_crc_and_member_hashes_verified": true,
+  "all_five_package_patch_hashes_match_implementation_commit": true,
+  "download_snapshot_note": "Six artifact verification records were captured while Nemo was still running; this summary and monitor-receipt.json retain the final completed overall failure.",
+  "components": {
+    "uvloop": {
+      "status": "passed",
+      "job": {
+        "name": "Native uvloop probe",
+        "job_id": 117469130532,
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-17T18:21:55Z",
+        "completed_at": "2026-10-17T18:23:58Z",
+        "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130532"
+      },
+      "source_binding": "uvloop/source-binding.json",
+      "artifact_verification": "uvloop/verification.json",
+      "artifact": {
+        "id": 12110530871,
+        "name": "termux-compatibility-uvloop",
+        "size_in_bytes": 4652778,
+        "digest": "sha256:f60387c551809de62a7a4563daad60789382edb2ef597f5d63fe530b1f71b106",
+        "expired": false
+      },
+      "build_runtime_passed": true,
+      "original_payload_runtime_passed": true,
+      "checks": [
+        "uvloop native extension",
+        "TCP roundtrip",
+        "task scheduling",
+        "loop shutdown"
+      ],
+      "wheel_hashes_and_sizes_verified": 2,
+      "native_extension_count": 1,
+      "undeclared_runtime_libraries": [],
+      "declared_added_runtime_libraries": []
+    },
+    "matrix": {
+      "status": "passed",
+      "job": {
+        "name": "Native matrix probe",
+        "job_id": 117469130531,
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-17T18:21:55Z",
+        "completed_at": "2026-10-17T18:25:40Z",
+        "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130531"
+      },
+      "source_binding": "matrix/source-binding.json",
+      "artifact_verification": "matrix/verification.json",
+      "artifact": {
+        "id": 12109858967,
+        "name": "termux-compatibility-matrix",
+        "size_in_bytes": 7936333,
+        "digest": "sha256:423d33b32b6bea9a35da28e4bc105d4d0bf4550ec042a8545503377a4de4cab7",
+        "expired": false
+      },
+      "build_runtime_passed": true,
+      "original_payload_runtime_passed": true,
+      "checks": [
+        "Olm bidirectional ratchet",
+        "Megolm roundtrip",
+        "mautrix crypto import",
+        "PyCryptodome AES",
+        "asyncpg native UUID codec",
+        "aiohttp loopback",
+        "SQLite state"
+      ],
+      "wheel_hashes_and_sizes_verified": 21,
+      "native_extension_count": 49,
+      "undeclared_runtime_libraries": [],
+      "declared_added_runtime_libraries": []
+    },
+    "nemo": {
+      "status": "passed",
+      "job": {
+        "name": "Native nemo probe",
+        "job_id": 117469130486,
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-17T18:21:55Z",
+        "completed_at": "2026-10-17T18:48:13Z",
+        "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130486"
+      },
+      "source_binding": "nemo/source-binding.json",
+      "artifact_verification": "nemo/verification.json",
+      "artifact": {
+        "id": 12111126140,
+        "name": "termux-compatibility-nemo",
+        "size_in_bytes": 15200417,
+        "digest": "sha256:699b8b50c1a35aab6c0cce6f2cd1874b0c1fae870e5d5392890c33ef12c46396",
+        "expired": false
+      },
+      "build_runtime_passed": true,
+      "original_payload_runtime_passed": true,
+      "checks": [
+        "nemo_relay native import",
+        "static plugin configuration validation",
+        "native scope push/pop",
+        "nested trace propagation"
+      ],
+      "wheel_hashes_and_sizes_verified": 2,
+      "native_extension_count": 1,
+      "undeclared_runtime_libraries": [],
+      "declared_added_runtime_libraries": []
+    },
+    "browser": {
+      "status": "passed",
+      "job": {
+        "name": "Native browser probe",
+        "job_id": 117469130514,
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-17T18:21:55Z",
+        "completed_at": "2026-10-17T18:23:40Z",
+        "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130514"
+      },
+      "source_binding": "browser/source-binding.json",
+      "artifact_verification": "browser/verification.json",
+      "artifact": {
+        "id": 12110615528,
+        "name": "termux-compatibility-browser",
+        "size_in_bytes": 1380873,
+        "digest": "sha256:8f4a85514b2409bf21ff2d3506bcd31d9645a4b34d15c980cce7e50e9555300a",
+        "expired": false
+      },
+      "default_route_passed": true,
+      "operator_backend_or_cdp_override": false,
+      "pm_install_and_product_readiness_passed": true,
+      "driver_sha256": "fca20648bc64491f3a0a0f5eaac7d6f6017d547f9cdff9bf6307905eeb2f5426",
+      "physical_android_display_tested": false,
+      "qualification": "Loopback DOM interaction through direct, PM-managed and default Hermes browser paths; no live third-party account or physical display claim."
+    },
+    "desktop": {
+      "status": "passed",
+      "job": {
+        "name": "Native desktop probe",
+        "job_id": 117469130516,
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-17T18:21:55Z",
+        "completed_at": "2026-10-17T18:23:26Z",
+        "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130516"
+      },
+      "source_binding": "desktop/source-binding.json",
+      "artifact_verification": "desktop/verification.json",
+      "artifact": {
+        "id": 12109734459,
+        "name": "termux-compatibility-desktop",
+        "size_in_bytes": 1366516,
+        "digest": "sha256:60b7f4772668d023accd4e79271d6b9685a7a6bfe90a39b4ebea44acf5c3b408",
+        "expired": false
+      },
+      "private_rfb_dimensions": [
+        800,
+        600
+      ],
+      "raw_pixels": 480000,
+      "no_xvnc_tcp_listener": true,
+      "physical_android_phone_control": false,
+      "qualification": "Private Termux Xvnc/Xfce desktop; no physical Android UI, touch, microphone, or speaker test."
+    },
+    "gateway": {
+      "status": "passed",
+      "job": {
+        "name": "Native gateway probe",
+        "job_id": 117469130513,
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-17T18:21:55Z",
+        "completed_at": "2026-10-17T18:23:26Z",
+        "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130513"
+      },
+      "source_binding": "gateway/source-binding.json",
+      "artifact_verification": "gateway/verification.json",
+      "artifact": {
+        "id": 12109858706,
+        "name": "termux-compatibility-gateway",
+        "size_in_bytes": 1284671,
+        "digest": "sha256:542f86e7e9ad00593d6f086bbff01efac0666c765eb88d093a604ec2681c9643",
+        "expired": false
+      },
+      "lifecycle": [
+        "install-no-start",
+        "start",
+        "status",
+        "restart",
+        "crash-respawn",
+        "stop",
+        "uninstall"
+      ],
+      "same_profile_basename_isolated": true,
+      "shared_supervisor_preserved": true,
+      "qualification": "Native Termux runit and product gateway dispatch with harmless fixture workers; no Android force-stop persistence claim."
+    },
+    "audio": {
+      "status": "failed",
+      "job": {
+        "name": "Native audio probe",
+        "job_id": 117469130530,
+        "status": "completed",
+        "conclusion": "failure",
+        "started_at": "2026-10-17T18:21:55Z",
+        "completed_at": "2026-10-17T18:25:13Z",
+        "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130530"
+      },
+      "source_binding": "audio/source-binding.json",
+      "artifact_verification": "audio/verification.json",
+      "artifact": {
+        "id": 12110550404,
+        "name": "termux-compatibility-audio",
+        "size_in_bytes": 11408183,
+        "digest": "sha256:47c5b65be9c51ec10e662c7592645648b17fe643832a043f654778d0269a64f7",
+        "expired": false
+      },
+      "build_runtime_passed": false,
+      "original_payload_runtime_passed": false,
+      "checks": [
+        "NumPy native array arithmetic",
+        "FFT roundtrip",
+        "internal LAPACK linear solve",
+        "matrix multiplication without external BLAS"
+      ],
+      "wheel_hashes_and_sizes_verified": 5,
+      "native_extension_count": 23,
+      "undeclared_runtime_libraries": [],
+      "declared_added_runtime_libraries": [
+        {
+          "name": "libportaudio.so",
+          "sha256": "116ff3e80f1b29042cad96e3f923d25dfe5325420d4b5140653fa2226ba47073"
+        },
+        {
+          "name": "libportaudio.so.2",
+          "sha256": "116ff3e80f1b29042cad96e3f923d25dfe5325420d4b5140653fa2226ba47073"
+        },
+        {
+          "name": "libportaudio.so.2.0.0",
+          "sha256": "116ff3e80f1b29042cad96e3f923d25dfe5325420d4b5140653fa2226ba47073"
+        }
+      ],
+      "numpy_numerical_behavior_passed_both_contexts": true,
+      "portaudio_ctypes_dlopen": "loaded",
+      "portaudio_initialization": "failed",
+      "error": "Error initializing PortAudio: Unanticipated host error [PaErrorCode -9999]: 'Initializing engine failed' [<error getting host API: -10000> error -9999]",
+      "hardware_capture_tested": false,
+      "observed_host": {
+        "paths": {
+          "/dev/binder": {
+            "exists": false
+          },
+          "/dev/vndbinder": {
+            "exists": false
+          },
+          "/dev/hwbinder": {
+            "exists": false
+          },
+          "/dev/binderfs/binder": {
+            "exists": false
+          },
+          "/system/bin/audioserver": {
+            "exists": false
+          },
+          "/system/bin/servicemanager": {
+            "exists": false
+          },
+          "/system/lib64/libOpenSLES.so": {
+            "exists": false
+          },
+          "/system/lib/libOpenSLES.so": {
+            "exists": false
+          }
+        },
+        "audio_service_process_names": [],
+        "unreadable_process_names": 0
+      },
+      "observed_loaded_libraries": [
+        {
+          "path": "/data/data/com.termux/files/usr/lib/libOpenSLES.so",
+          "sha256": "87c61d872767541e332783d85f70bfdc1b2d48e373ef3025380345171bac4db9",
+          "size": 11480,
+          "package_query_exit": 0,
+          "package_owner": "libandroid-stub: /data/data/com.termux/files/usr/lib/libOpenSLES.so"
+        },
+        {
+          "path": "/out/added-runtime-libs/libportaudio.so.2",
+          "sha256": "116ff3e80f1b29042cad96e3f923d25dfe5325420d4b5140653fa2226ba47073",
+          "size": 61976,
+          "package_query_exit": 1,
+          "package_owner": null
+        }
+      ],
+      "qualification": "NumPy numerical behavior and declared library loading/linkage are verified; audio initialization, microphone capture and VAD are not verified.",
+      "explanation": "The missing real Android audio framework and Binder services are measured. Their relationship to the initialization error is an inference consistent with the separately pinned official OpenSL ES wrapper source in the prior audio audit.",
+      "failure_admission_relaxed": false
+    }
+  },
+  "monitoring_receipt": "monitor-receipt.json",
+  "monitoring_receipt_sha256": "19c4e5ef070d9a33d9b61589cc6af9f3941a0c14211f80b27ee0e084db7c2202",
+  "failed_audio_full_raw_log": {
+    "filename": "job-117469130530-audio.raw.log.gz",
+    "bytes": 23450,
+    "sha256": "8d922f6d83673d67e62cbf9041fa623caf40440e5674492f07d48b2eba3cda0e",
+    "unmodified_raw_log_round_trip_verified": true
+  },
+  "published": false,
+  "version_bumped": false,
+  "main_candidate_repaired_restrictions_count": 6,
+  "cua_and_neutts_experiments_counted_as_main_candidate_repairs": false,
+  "physical_device_certification_claimed": false
+}

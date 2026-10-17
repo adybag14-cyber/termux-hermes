@@ -271,11 +271,23 @@ and [eight passing scoped lint checks](../audit/cua-hermes-resume-20261017/scope
 Counts are not aggregated. Three broader Windows fixture failures reproduced
 before both fixes; the detailed source record preserves them.
 
-The [combined preparation CI](../audit/resume-ci-3414585-20261017.json)
-passed **291 tests** with no failures or skips at
-`34145858cdf215fb971534537ee3ef294813d6a0`. Compile, shell syntax and JSON
-validation passed too. The matching Windows host run passed 287 tests with four
-host-specific skips. The [merge receipt](../audit/resume-integration-20261017.json)
+The [full component revalidation](../audit/native-probes-635ec13-20261017/summary.json)
+at `635ec13c9d0f264f508d1bdbaa7670d4eaa00787` completed with **six passing lanes
+and one failed audio lane**. The overall workflow conclusion is **failure**.
+uvloop, Matrix, Nemo, browser, Bot Desktop and the runit gateway lifecycle pass
+their native behavior checks. Audio again passes NumPy's four numerical cases
+in both runtime contexts and loads PortAudio, but initialization fails with
+`PaErrorCode -9999`. The actual Android OpenSL ES framework, Binder nodes and
+audio services are absent; microphone capture was not tested. All seven
+artifact archives were downloaded in full and verified by SHA-256, ZIP CRC and
+member hashes. The failed job's complete original log is retained too.
+
+The [implementation-commit CI](../audit/resume-ci-635ec13-20261017.json)
+passed **291 tests** with no failures or skips in each of the separate push and
+pull-request runs at `635ec13c9d0f264f508d1bdbaa7670d4eaa00787`. Compile, shell
+syntax and JSON validation passed too. The [earlier combined CI](../audit/resume-ci-3414585-20261017.json)
+and its separate Windows host run remain recorded at `3414585`; that host run
+passed 287 tests with four host-specific skips. The [merge receipt](../audit/resume-integration-20261017.json)
 records preserved concurrent preparation work and confirms that native-tested
 inputs remain byte-identical. The earlier
 [standalone](../audit/cua-native-20261017/run-39052290704.json) and
