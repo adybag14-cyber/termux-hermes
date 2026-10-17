@@ -77,9 +77,13 @@ x11rb-protocol's socket location with Termux's PREFIX/tmp. Both retain their
 locked versions; the preparer verifies that all 602 other Cargo package records
 remain unchanged. Source preparation, the adapted platform backend compilation,
 and an owned-PTY check against Android's installed ioctl header have passed.
-The driver now compiles through its Android OS-version branch; final linking
-exposed two Wayland helper calls to an unavailable Bionic libc export. That
-specific link correction and actual X11 input/capture behavior remain pending.
+The driver now compiles and links natively. The Android shared-memory adapter
+uses the existing kernel syscall where Bionic does not export the libc wrapper;
+native descriptor, shared-mapping, keymap and error-path checks passed. The first
+linked run stopped before Xfwm4 startup because the private test bus rejected
+method replies and signals. A narrow correction restores the standard D-Bus
+session receive policy and adds a real request/reply gate. Actual X11 input and
+capture behavior remain pending.
 [Native progress records](../audit/cua-native-20261017/) preserve the exact tested
 inputs, real failure messages and completed PTY proof.
 

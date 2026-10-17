@@ -516,15 +516,29 @@ rpc = None
 failure = None
 try:
     bus_config = work / "dbus.conf"
+    # Match the ordinary session-bus send/receive policy from D-Bus 1.16.2
+    # bus/session.conf.in; authentication and the private socket stay local.
     bus_config.write_text(
         '<!DOCTYPE busconfig PUBLIC "-//freedesktop//DTD D-Bus Bus Configuration 1.0//EN" '
         '"http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">\n'
         '<busconfig><type>session</type><listen>' + env["DBUS_SESSION_BUS_ADDRESS"] +
         '</listen><auth>EXTERNAL</auth><policy context="default">'
-        '<allow send_destination="*" eavesdrop="true"/><allow own="*"/>'
+        '<allow send_destination="*" eavesdrop="true"/>'
+        '<allow eavesdrop="true"/><allow own="*"/>'
         '</policy></busconfig>')
     spawn("dbus", ["dbus-daemon", "--nofork", "--nopidfile", "--config-file=" + str(bus_config)])
     until(lambda: (work / "bus").exists(), "private D-Bus socket")
+    bus_reply = subprocess.run(
+        ["dbus-send", "--session", "--type=method_call", "--print-reply",
+         "--reply-timeout=3000", "--dest=org.freedesktop.DBus",
+         "/org/freedesktop/DBus", "org.freedesktop.DBus.ListNames"],
+        env=env, capture_output=True, text=True, timeout=5)
+    (out / "CUA-DBUS-ROUNDTRIP.json").write_text(json.dumps({
+        "returncode": bus_reply.returncode, "stdout": bus_reply.stdout,
+        "stderr": bus_reply.stderr}, indent=2) + "\n")
+    assert bus_reply.returncode == 0 and "org.freedesktop.DBus" in bus_reply.stdout, (
+        "private session-bus reply failed", bus_reply.returncode, bus_reply.stderr)
+    receipt["checks"].append("private-session-bus-method-roundtrip")
     xvnc = spawn("xvnc", ["Xvnc", env["DISPLAY"], "-geometry", "800x600", "-depth", "24",
                          "-SecurityTypes", "None", "-rfbport", "-1",
                          "-rfbunixpath", str(work / "rfb.sock"), "-rfbunixmode", "0600",
