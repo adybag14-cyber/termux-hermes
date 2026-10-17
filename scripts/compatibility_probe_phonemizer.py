@@ -764,6 +764,26 @@ def pip_command(python):
     return [str(PREFIX / "bin/python"), "-I", "-B", "-m", "pip", "--python", str(python)]
 
 
+def copy_built_wheel(source, destination, artifact):
+    """Copy verified wheel bytes across mounts into one fresh owned output."""
+    require(source.name == artifact["filename"] and not source.is_symlink()
+            and source.is_file() and 0 < artifact["bytes"] <= 16_000_000,
+            "Invalid built wheel transfer source")
+    require(source.stat().st_size == artifact["bytes"]
+            and sha_file(source) == artifact["sha256"], "Built wheel changed before transfer")
+    require(not destination.exists() and not destination.is_symlink(),
+            "Built wheel transfer destination already exists")
+    with source.open("rb") as input_stream, destination.open("xb") as output_stream:
+        shutil.copyfileobj(input_stream, output_stream, length=1024 * 1024)
+    require(destination.stat().st_size == artifact["bytes"]
+            and sha_file(destination) == artifact["sha256"]
+            and sha_file(source) == artifact["sha256"], "Built wheel transfer changed bytes")
+    return {"source": str(source), "destination": str(destination),
+            "bytes": artifact["bytes"], "sha256": artifact["sha256"],
+            "exclusive_destination": True, "source_preserved": True,
+            "copied_bytes_verified": True}
+
+
 def build_runtime(args, lock, prep, env, work):
     base = str(PREFIX / "bin/python")
     build_venv, runtime_venv = work / "build-venv", work / "runtime-venv"
@@ -801,9 +821,10 @@ def build_runtime(args, lock, prep, env, work):
             log += (args.out / ("phonemizer-build-" + source["name"] + ".stderr.log")).read_text()
             require("--target=aarch64-linux-android24" in log and "-march=native" not in log,
                     "Regex build did not record portable native compiler flags")
-        found[0].rename(args.out / "wheels" / found[0].name)
+        transfer = copy_built_wheel(found[0], args.out / "wheels" / found[0].name,
+                                    package["artifact"])
         built.append(package)
-        build_records.append({"name": source["name"], "result": record})
+        build_records.append({"name": source["name"], "result": record, "transfer": transfer})
     save_json(args.out / "PHONEMIZER-BUILT-WHEELS.json",
               {"schema_version": 1, "packages": built, "source_builds": build_records})
     complete = sorted(lock["packages"] + built, key=lambda p: p["name"])

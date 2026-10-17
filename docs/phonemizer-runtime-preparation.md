@@ -1,5 +1,16 @@
 # Complete Phonemizer runtime preparation
 
+## Latest native checkpoint
+
+[Run 39071928457](../audit/neutts-espeak-native-20261017/run-39071928457.json)
+passes all 14 eSpeak C ABI checks and verifies 371 language-data files, including
+117 dictionaries. The subsequent pure Phonemizer build completed, but retaining
+its wheel with a cross-filesystem rename failed before Regex and public-wrapper
+execution. The [exclusive verified-copy fix](../audit/phonemizer-wheel-transfer-fix-20261017/WHEEL-TRANSFER-FIX.json)
+now passes 48 focused host checks with no skips. The complete 23-distribution
+installed public API still requires the next native run.
+
+
 ## Purpose and current evidence
 
 This component prepares Phonemizer 3.3.0 with its complete selected runtime dependency graph: **23 distributions and 26 active dependency edges**. It provides the first model-free executable slice of the larger NeuTTS preparation. The source patch moves dlinfo discovery behind the existing unresolved-library fallback; the declared dlinfo dependency is retained.

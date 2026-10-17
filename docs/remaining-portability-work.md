@@ -33,7 +33,7 @@ and [Hermes resolver configuration](https://github.com/NousResearch/hermes-agent
 | Numba 0.67.0 | Exact native source wheel builds. Nopython JIT returns the expected result, and the parallel workqueue generalized-ufunc test returns the exact matrix. | CPU behavior only; no speech synthesis claim. |
 | llama-cpp-python 0.3.36 | Exact source and matching vendored llama.cpp build with the Android loader repair. Backend initialization/free, real default parameters, CPU capability calls and mapped-library verification pass. | No model is loaded; token generation and synthesis are not tested. |
 | NeuCodec Hub adapter | The source adapter passes 34 focused tests and retains revision, token, cache, local-files-only and error behavior. Unsupported per-call proxy settings fail before the download. | Real codec/model operations still need the complete native environment and weights. |
-| Phonemizer discovery | The repair passes 30 focused tests. Explicit existing library paths no longer trigger an unnecessary Bionic-incompatible dlinfo import. All 55 other original source files and dependency metadata remain unchanged. | Exact eSpeak native library/data and the real public Phonemizer wrapper remain separate gates. |
+| Phonemizer discovery | The repair passes 30 focused tests. Explicit existing library paths no longer trigger an unnecessary Bionic-incompatible dlinfo import. All 55 other original source files and dependency metadata remain unchanged. | Exact eSpeak C ABI and language-data checks now pass; the real public Phonemizer wrapper remains a separate gate. |
 
 The [first complete foundation run](../audit/neutts-native-20261017/run-39058569758.json)
 verifies all 2,829 installed files from nine Python wheels, native MarkupSafe,
@@ -113,6 +113,17 @@ original missing-directory error and checking all 2,606 source entries, the sole
 24-byte link and the target's containment after correction. Exact POSIX link
 following and the native C ABI/public-wrapper gates remain for the retry.
 The complete failed artifact and all 190 member hashes are preserved.
+
+The [next native run](../audit/neutts-espeak-native-20261017/run-39071928457.json)
+passes all **14 eSpeak C ABI checks**, including relocation and negative controls,
+with all 371 language-data files and 117 pronunciation dictionaries preserved.
+Its whole 54,767,182-byte artifact and all 641 member hashes were independently
+verified. The wrapper stage then built the pure Phonemizer wheel but failed to
+move it across the separate temporary/output filesystems, before Regex or the
+23-package public API gate. The [reviewed transfer fix](../audit/phonemizer-wheel-transfer-fix-20261017/WHEEL-TRANSFER-FIX.json)
+copies the already-verified bytes into an exclusive new destination and verifies
+both size and hash. All 48 focused preparation/transfer tests pass with no skips.
+The public-wrapper result remains pending.
 
 The exact eSpeak source's optional Sonic fetch is covered by the reviewed
 explicit-OFF guard and native phonemization probe described above. This
