@@ -152,6 +152,13 @@ if ! $base_ok; then
   apt-get -o Acquire::Retries=5 dist-upgrade -y </dev/null
 fi
 
+# GnuPG declares unversioned crypto-library dependencies. A selective install
+# can otherwise retain an older libgcrypt that current gpg refuses at runtime.
+# Update this small dependency set explicitly without replacing system Python.
+step "Preparing the system GnuPG runtime"
+apt-get -o Acquire::Retries=5 --no-remove install -y gnupg libgcrypt libgpg-error </dev/null
+gpg --batch --version >/dev/null
+
 step "Enabling the signed Hermes/Termux package repository"
 setup_script="$(mktemp "${TMPDIR:-$PREFIX/tmp}/hermes-apt-setup.XXXXXX")"
 curl -fsSL --retry 6 --retry-all-errors \

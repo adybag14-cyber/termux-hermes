@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Verify streamed recovery of the exact candidate before its public release.
-# Usage: TERMUX_IMAGE=<digest> bash scripts/check_bundle_recovery.sh DEB VERSION INSTALLER
+# Usage: bash scripts/check_bundle_recovery.sh DEB VERSION INSTALLER
 set -Eeuo pipefail
 
 if [[ "${1:-}" == --in-container ]]; then
@@ -11,7 +11,8 @@ if [[ "${1:-}" == --in-container ]]; then
   mkdir -p "$TMPDIR"
   printf '%s\n' 'deb https://packages.termux.dev/apt/termux-main stable main' > "$PREFIX/etc/apt/sources.list"
   apt-get -o Acquire::Retries=5 -o APT::Update::Error-Mode=any update
-  apt-get -o Acquire::Retries=5 -o Dpkg::Options::="--force-confnew" dist-upgrade -y
+  # Retain the aged base so the installer must repair its incompatible GPG
+  # crypto library itself. Fresh-base validation runs in the native build.
 
   python_deb=/fixtures/python_3.13.15_aarch64.deb
   python_deps="$(dpkg-deb -f "$python_deb" Depends)"
@@ -29,6 +30,9 @@ if [[ "${1:-}" == --in-container ]]; then
   env_before="$(sha256sum "$HOME/.hermes/.env")"
   mkdir -p "$HOME/.hermes/hermes-agent/.git"
   : > "$HOME/.hermes/hermes-agent/.git/index.lock"
+  # The ordinary installer path must work: metadata is consistent, but the
+  # old libgcrypt is too old for current GPG despite its unversioned dependency.
+  apt-get -s install ncurses ncurses-ui-libs >/dev/null
   dpkg --force-not-root --force-script-chrootless --remove hermes-agent
   dpkg --force-not-root --force-script-chrootless --unpack /fixtures/hermes-agent_0.20.6+termux1_aarch64.deb
   test "$(dpkg-query -W -f='${db:Status-Status}' hermes-agent)" = unpacked
@@ -51,8 +55,12 @@ if [[ "${1:-}" == --in-container ]]; then
   curl -fsS --range 0-1048575 http://127.0.0.1:8765/package.deb -o "$apt_partial"
   test "$(wc -c < "$apt_partial")" = 1048576
 
+  dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libgcrypt)" lt 1.12.0
   recovery_url=http://127.0.0.1:8765/install.sh
-  curl -fsS "$recovery_url" | HERMES_RECOVERY_INSTALL_URL="$recovery_url" bash
+  curl -fsS "$recovery_url" | HERMES_RECOVERY_INSTALL_URL="$recovery_url" bash \
+    2>&1 | tee "$TMPDIR/candidate-recovery.log"
+  ! grep -F 'Termux mirror package skew detected' "$TMPDIR/candidate-recovery.log"
+  dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libgcrypt)" ge 1.12.0
   grep -Fx 'RANGE bytes=1048576-' "$TMPDIR/recovery-http.log"
   test "$(sha256sum "$HOME/.hermes/.env")" = "$env_before"
   test -e "$HOME/.hermes/hermes-agent/.git/index.lock"
@@ -76,9 +84,9 @@ fi
 deb="$(realpath "$1")"
 version="$2"
 installer="$(realpath "$3")"
-[[ "${TERMUX_IMAGE:-}" =~ ^termux/termux-docker@sha256:[a-f0-9]{64}$ ]] || {
-  echo 'TERMUX_IMAGE must name the pinned official image digest' >&2; exit 2;
-}
+# The prior production smoke exposed GPG's libgcrypt 1.11.2 incompatibility
+# in this exact image. Do not pre-upgrade it or substitute the newer build base.
+recovery_image=termux/termux-docker@sha256:3aed9c7fbcf9195a9919deaad418da006232864a779fb4f322d68a34887a2e15
 case "$(uname -m)" in aarch64|arm64) ;; *) echo 'Native ARM runner required' >&2; exit 1;; esac
 [[ -s "$deb" && -s "$installer" ]]
 test "$(dpkg-deb -f "$deb" Package)" = hermes-agent
@@ -169,7 +177,7 @@ fetch_fixture hermes-agent_0.20.6+termux1_aarch64.deb \
   https://github.com/adybag14-cyber/termux-hermes/releases/download/hermes-agent-termux-0.20.6-20260828.1/hermes-agent_0.20.6%2Btermux1_aarch64.deb
 chmod -R a+rX "$scratch" "$fixtures"
 
-docker run --rm --privileged --security-opt seccomp=unconfined \
+docker run --rm --platform linux/arm64 --privileged --security-opt seccomp=unconfined \
   -v "$scratch:/candidate:ro" -v "$fixtures:/fixtures:ro" \
   -v "$(realpath "$0"):/check-recovery.sh:ro" \
-  "$TERMUX_IMAGE" bash /check-recovery.sh --in-container "$version"
+  "$recovery_image" bash /check-recovery.sh --in-container "$version"
