@@ -1,0 +1,220 @@
+{
+  "schema_version": 1,
+  "scope": "Current scroll fix and explicit comparison of unrelated Windows fixture failures",
+  "raw_archive": "scroll-source-tests-raw.zip",
+  "raw_archive_sha256": "f5b65768b36afc24ddb283f3648b69aa2d2bfdfbe11737b5457a82f6e3084e91",
+  "members": [
+    {
+      "member": "final-scroll-green-receipt.json",
+      "bytes": 917,
+      "sha256": "6198a21c738e0a6f9445c578c8f0bbec136b2e172da26999179ba871d8d98402"
+    },
+    {
+      "member": "final-scroll-green.log",
+      "bytes": 1464,
+      "sha256": "c474886d5adaac9a3f791351e54b95fa345b4660895df1a04729bb84e4e1f2b3"
+    },
+    {
+      "member": "post-scroll-broad-test-receipt.json",
+      "bytes": 863,
+      "sha256": "9de6f20b16a7558dd05d825eed1830e57892eae8650710b7d281384970fa1be6"
+    },
+    {
+      "member": "post-scroll-broad-test.log",
+      "bytes": 10460,
+      "sha256": "f16e12d08f803930c00980741a74a3544a07925976710a7aff3ffaddcc98376c"
+    },
+    {
+      "member": "pre-loader-targeted-baseline-receipt.json",
+      "bytes": 1223,
+      "sha256": "8d6ff417bb08e6f581b7948440871ba7bbd76373b824592dbb361f58af2f6da8"
+    },
+    {
+      "member": "pre-loader-targeted-baseline.log",
+      "bytes": 9927,
+      "sha256": "80df1c222a3d0b025b17f1f33d0c2b4c514df4cc8e6d6dacdda688f021160234"
+    },
+    {
+      "member": "pre-scroll-baseline-receipt.json",
+      "bytes": 853,
+      "sha256": "4b9176fd06fde241c4e1949aea5a82d3511d6785c74203d0f778c2346d93f17b"
+    },
+    {
+      "member": "pre-scroll-baseline.log",
+      "bytes": 14693,
+      "sha256": "8bda10de381e1495fdada86f8b6e25ee057ab00f267de6f636f5722754cddabd"
+    },
+    {
+      "member": "red-before-relocation-receipt.json",
+      "bytes": 444,
+      "sha256": "93cf77fc75780ca294f811603d58050e460bd5985a77edd7fdeab809a16e2141"
+    },
+    {
+      "member": "red-before-relocation.log",
+      "bytes": 5623,
+      "sha256": "c761c0b20cc6a7e1e85cdb4d8d4a8126c2e7019d8c0e269a7fe2bba3ea7a4051"
+    }
+  ],
+  "runs": [
+    {
+      "phase": "final-scroll-green",
+      "receipt": {
+        "schema_version": 1,
+        "phase": "final-scroll-green",
+        "cwd": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\hermes-agent-cua-resume-20261017",
+        "command": [
+          "C:\\Program Files\\Git\\bin\\bash.exe",
+          "scripts/run_tests.sh",
+          "tests/tools/test_computer_use_scroll_schema.py",
+          "tests/tools/test_computer_use_cua_0_9.py",
+          "tests/tools/test_computer_use_delivery_ladder.py",
+          "--tb=short"
+        ],
+        "hermes_python": "C:/Users/adyba/AppData/Local/hermes/installs/9e27fc18556ae4a8/test-environment/gen-1b15ec8e3cfd4a399274d893e0cfbbf6/venv/Scripts/python.exe",
+        "test_file_retries": 0,
+        "source_file_sha256": {
+          "tools/computer_use/cua_backend_input.py": "63e0e12ac78319afa4e3e25550f8e293c15b18b7b20837480443a225846daf89",
+          "tests/tools/test_computer_use_scroll_schema.py": "040eab641cc5007a01fc5645081250350a9fcb9a019e9922da7689eb98673082"
+        },
+        "exit_code": 0
+      },
+      "raw_receipt_member": "final-scroll-green-receipt.json",
+      "raw_log_member": "final-scroll-green.log",
+      "summary_lines": [
+        "=== Summary: 3 files, 31 tests passed, 0 failed (100% complete) in 11.2s (32 workers) ==="
+      ]
+    },
+    {
+      "phase": "post-scroll-broad-test",
+      "receipt": {
+        "schema_version": 1,
+        "cwd": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\hermes-agent-cua-resume-20261017",
+        "command": [
+          "C:\\Program Files\\Git\\bin\\bash.exe",
+          "scripts/run_tests.sh",
+          "tests/tools/test_computer_use_cua_0_9.py",
+          "tests/tools/test_computer_use_delivery_ladder.py",
+          "tests/tools/test_computer_use.py",
+          "--tb=short"
+        ],
+        "hermes_python": "C:/Users/adyba/AppData/Local/hermes/installs/9e27fc18556ae4a8/test-environment/gen-1b15ec8e3cfd4a399274d893e0cfbbf6/venv/Scripts/python.exe",
+        "test_file_retries": 0,
+        "source_file_sha256": {
+          "tools/computer_use/cua_backend_input.py": "63e0e12ac78319afa4e3e25550f8e293c15b18b7b20837480443a225846daf89",
+          "tests/tools/test_computer_use_cua_0_9.py": "8b098175525644ad653d08264f9513c56b3f801e0cc24ef9dcd4b74093433c7e"
+        },
+        "exit_code": 1
+      },
+      "raw_receipt_member": "post-scroll-broad-test-receipt.json",
+      "raw_log_member": "post-scroll-broad-test.log",
+      "summary_lines": [
+        "  \u2551 ================== 3 failed, 83 passed, 1 skipped in 26.11s ===================",
+        "=== Summary: 3 files, 114 tests passed, 3 failed, 1 skipped (100% complete) in 31.0s (32 workers) ===",
+        "================== 3 failed, 83 passed, 1 skipped in 26.11s ==================="
+      ]
+    },
+    {
+      "phase": "pre-loader-targeted-baseline",
+      "receipt": {
+        "schema_version": 1,
+        "phase": "pre-loader-targeted-baseline",
+        "baseline_tree": "d4e6233dc147ca2595d37e9a76a03878ee137498",
+        "command": [
+          "C:\\Program Files\\Git\\bin\\bash.exe",
+          "scripts/run_tests.sh",
+          "tests/tools/test_computer_use.py",
+          "-k",
+          "test_cua_driver_cmd_env_override_is_resolved_dynamically or test_cli_fallback_reads_screenshot_from_file or test_cua_session_sanitizes_provider_env_vars",
+          "--tb=short"
+        ],
+        "hermes_python": "C:/Users/adyba/AppData/Local/hermes/installs/9e27fc18556ae4a8/test-environment/gen-1b15ec8e3cfd4a399274d893e0cfbbf6/venv/Scripts/python.exe",
+        "test_file_retries": 0,
+        "pre_loader_backend_sha256": "001e324645d671a05cb5db532d95c06592c04d52208bfd2822701477db25703d",
+        "current_backend_sha256": "69588d9671a1dde4703ded8d9be26ccb6aec0d067e6a5c529ddf7626f3dfd887",
+        "unchanged_source_files": {
+          "tools/computer_use/cua_backend_input.py": "63e0e12ac78319afa4e3e25550f8e293c15b18b7b20837480443a225846daf89",
+          "tests/tools/test_computer_use_scroll_schema.py": "040eab641cc5007a01fc5645081250350a9fcb9a019e9922da7689eb98673082"
+        },
+        "exit_code": 1,
+        "current_backend_restored": true,
+        "other_fixed_files_unchanged": true
+      },
+      "raw_receipt_member": "pre-loader-targeted-baseline-receipt.json",
+      "raw_log_member": "pre-loader-targeted-baseline.log",
+      "summary_lines": [
+        "=== Summary: 1 files, 0 tests passed, 3 failed (100% complete) in 9.8s (32 workers) ==="
+      ]
+    },
+    {
+      "phase": "pre-scroll-baseline",
+      "receipt": {
+        "schema_version": 1,
+        "phase": "pre-scroll-baseline",
+        "cwd": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\hermes-agent-cua-resume-20261017",
+        "command": [
+          "C:\\Program Files\\Git\\bin\\bash.exe",
+          "scripts/run_tests.sh",
+          "tests/tools/test_computer_use.py",
+          "tests/tools/test_computer_use_scroll_schema.py",
+          "--tb=short"
+        ],
+        "hermes_python": "C:/Users/adyba/AppData/Local/hermes/installs/9e27fc18556ae4a8/test-environment/gen-1b15ec8e3cfd4a399274d893e0cfbbf6/venv/Scripts/python.exe",
+        "test_file_retries": 0,
+        "source_file_sha256": {
+          "tools/computer_use/cua_backend_input.py": "a34c327a5526f2250d2c9a520b999a75f693d42b10fced4ef5270911044d1004",
+          "tests/tools/test_computer_use_scroll_schema.py": "040eab641cc5007a01fc5645081250350a9fcb9a019e9922da7689eb98673082"
+        },
+        "exit_code": 1
+      },
+      "raw_receipt_member": "pre-scroll-baseline-receipt.json",
+      "raw_log_member": "pre-scroll-baseline.log",
+      "summary_lines": [
+        "  \u2551 ======================== 1 failed, 4 passed in 18.51s =========================",
+        "  \u2551 ================== 3 failed, 83 passed, 1 skipped in 36.18s ===================",
+        "=== Summary: 2 files, 87 tests passed, 4 failed, 1 skipped (100% complete) in 43.5s (32 workers) ===",
+        "======================== 1 failed, 4 passed in 18.51s =========================",
+        "================== 3 failed, 83 passed, 1 skipped in 36.18s ==================="
+      ]
+    },
+    {
+      "phase": "red before scroll fix and test relocation",
+      "receipt": {
+        "schema_version": 1,
+        "phase": "red before scroll fix and test relocation",
+        "exit_code": 1,
+        "selected_tests": 5,
+        "passed": 4,
+        "failed": 1,
+        "failure": "Schema-advertised x/y omitted from actual scroll payload",
+        "canonical_runner": "scripts/run_tests.sh tests/tools/test_computer_use_cua_0_9.py -k scroll_coordinates --tb=short",
+        "source_sha256": "a34c327a5526f2250d2c9a520b999a75f693d42b10fced4ef5270911044d1004"
+      },
+      "raw_receipt_member": "red-before-relocation-receipt.json",
+      "raw_log_member": "red-before-relocation.log",
+      "summary_lines": [
+        "  \u2551 ================= 1 failed, 4 passed, 12 deselected in 17.37s =================",
+        "=== Summary: 1 files, 4 tests passed, 1 failed (100% complete) in 27.8s (32 workers) ===",
+        "================= 1 failed, 4 passed, 12 deselected in 17.37s ================="
+      ]
+    }
+  ],
+  "final_focused_result": {
+    "passed": 31,
+    "failed": 0
+  },
+  "new_regression_before_fix": {
+    "passed": 4,
+    "failed": 1
+  },
+  "broader_windows_result_before_and_after_scroll": {
+    "passed": 83,
+    "failed": 3,
+    "skipped": 1
+  },
+  "same_three_failures_confirmed_before_loader_fix": true,
+  "existing_windows_fixture_failures": [
+    "test_cua_driver_cmd_env_override_is_resolved_dynamically",
+    "test_cli_fallback_reads_screenshot_from_file",
+    "test_cua_session_sanitizes_provider_env_vars"
+  ]
+}

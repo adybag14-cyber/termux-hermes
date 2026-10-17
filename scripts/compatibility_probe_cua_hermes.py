@@ -469,7 +469,13 @@ def run_probe(args: argparse.Namespace, receipt: dict[str, Any]) -> None:
         driver_process = drivers[0]
         receipt["transport"] = {"kind": "real MCP stdio", "pid": driver_process.pid,
                                 "create_time": driver_process.create_time(), "argv": driver_process.cmdline(),
-                                "generation": generation, "capability_version": backend._session.capability_version}
+                                "generation": generation, "capability_version": backend._session.capability_version,
+                                "scroll_input_schema": backend._session._tool_schemas.get("scroll", {}),
+                                "scroll_coordinate_support": {
+                                    "capability": backend._session.supports_capability("input.scroll.coordinates", tool="scroll"),
+                                    "x_property": backend._session.supports_input_property("scroll", "x"),
+                                    "y_property": backend._session.supports_input_property("scroll", "y"),
+                                }}
         require("--no-overlay" in driver_process.cmdline(), "the normal MCP invocation did not disable its overlay")
         require("--grant" not in driver_process.cmdline() and "unrestricted" not in driver_process.cmdline(),
                 "probe driver has a launch grant or permission bypass")
