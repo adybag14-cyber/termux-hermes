@@ -165,6 +165,94 @@ C
 clang "$work/cua-tty-abi.c" -o "$work/cua-tty-abi"
 "$work/cua-tty-abi" > "$OUT/CUA-TTY-ABI.json"
 
+stage=memfd-abi
+cat > "$work/cua-memfd-abi.c" <<'C'
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <linux/memfd.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+
+static int fail(const char *what, int code, int fd, void *map) {
+    int saved_errno = errno;
+    if (map != MAP_FAILED) munmap(map, 4096);
+    if (fd >= 0) close(fd);
+    errno = saved_errno;
+    perror(what);
+    return code;
+}
+
+int main(void) {
+    int fd = (int)syscall(SYS_memfd_create, "cua-probe-shm", MFD_CLOEXEC);
+    void *map = MAP_FAILED;
+    if (fd < 0) return fail("memfd syscall", 2, fd, map);
+    int flags = fcntl(fd, F_GETFD);
+    if (flags < 0 || !(flags & FD_CLOEXEC))
+        return fail("memfd close-on-exec", 3, fd, map);
+    if (ftruncate(fd, 4096)) return fail("memfd size", 4, fd, map);
+    map = mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (map == MAP_FAILED) return fail("memfd mapping", 5, fd, map);
+    const char first[] = "cua-memfd-mapping";
+    char observed[sizeof(first)];
+    memcpy(map, first, sizeof(first));
+    if (pread(fd, observed, sizeof(observed), 0) != sizeof(observed) ||
+        memcmp(first, observed, sizeof(first)))
+        return fail("shared mapping to fd", 6, fd, map);
+    const char second[] = "cua-memfd-fd";
+    if (pwrite(fd, second, sizeof(second), 0) != sizeof(second) ||
+        memcmp(second, map, sizeof(second)))
+        return fail("fd to shared mapping", 7, fd, map);
+    if (munmap(map, 4096)) return fail("memfd unmap", 8, fd, map);
+    map = MAP_FAILED;
+    int closed_fd = fd;
+    if (close(fd)) return fail("memfd close", 9, -1, map);
+    fd = -1;
+    errno = 0;
+    if (fcntl(closed_fd, F_GETFD) != -1 || errno != EBADF)
+        return fail("closed memfd", 10, fd, map);
+
+    fd = (int)syscall(SYS_memfd_create, "cua-probe-keymap", MFD_CLOEXEC);
+    if (fd < 0) return fail("keymap memfd", 11, fd, map);
+    flags = fcntl(fd, F_GETFD);
+    if (flags < 0 || !(flags & FD_CLOEXEC))
+        return fail("keymap close-on-exec", 12, fd, map);
+    const char keymap[] = "cua-probe-keymap";
+    char readback[sizeof(keymap)];
+    if (write(fd, keymap, sizeof(keymap) - 1) != sizeof(keymap) - 1 ||
+        write(fd, "", 1) != 1 || lseek(fd, 0, SEEK_SET) != 0 ||
+        read(fd, readback, sizeof(readback)) != sizeof(readback) ||
+        memcmp(keymap, readback, sizeof(keymap)))
+        return fail("keymap write terminator seek read", 13, fd, map);
+    closed_fd = fd;
+    if (close(fd)) return fail("keymap close", 14, -1, map);
+    fd = -1;
+    errno = 0;
+    if (fcntl(closed_fd, F_GETFD) != -1 || errno != EBADF)
+        return fail("closed keymap", 15, fd, map);
+
+    errno = 0;
+    long invalid_fd = syscall(SYS_memfd_create, "cua-probe-invalid", UINT_MAX);
+    int error = errno;
+    if (invalid_fd != -1 || error != EINVAL) {
+        if (invalid_fd >= 0) close((int)invalid_fd);
+        errno = error;
+        return fail("invalid memfd flags must preserve EINVAL", 16, -1, map);
+    }
+    printf("{\"syscall_number\":%ld,\"close_on_exec\":true,"
+           "\"shared_mapping_fd_roundtrip\":true,"
+           "\"keymap_write_nul_seek_read\":true,\"owned_fds_closed\":true,"
+           "\"invalid_flags_return_minus_one_einval\":true}\n",
+           (long)SYS_memfd_create);
+    return 0;
+}
+C
+clang "$work/cua-memfd-abi.c" -o "$work/cua-memfd-abi"
+"$work/cua-memfd-abi" > "$OUT/CUA-MEMFD-ABI.json"
+
 stage=compile
 cargo build --locked --no-default-features -p cua-driver \
   --manifest-path "$work/source/libs/cua-driver/rust/Cargo.toml" \

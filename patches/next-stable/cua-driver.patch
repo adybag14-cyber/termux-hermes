@@ -1232,3 +1232,54 @@ index 159a4c5..d168608 100644
      (ret == 0).then_some(n as u32)
  }
  
+diff --git a/libs/cua-driver/rust/crates/platform-linux/src/wayland/mod.rs b/libs/cua-driver/rust/crates/platform-linux/src/wayland/mod.rs
+index 3432293..dc7c204 100644
+--- a/libs/cua-driver/rust/crates/platform-linux/src/wayland/mod.rs
++++ b/libs/cua-driver/rust/crates/platform-linux/src/wayland/mod.rs
+@@ -836,6 +836,24 @@ fn capture_via_screencopy() -> anyhow::Result<Vec<u8>> {
+     result
+ }
+ 
++// Bionic exports memfd_create only from Android API 30. Termux's API 24
++// target uses the same Linux syscall through libc::syscall, which preserves
++// -1/errno for denied or unavailable calls. No fallback changes ownership.
++// Source: aosp-mirror/platform_bionic@731631f300090436d7f5df80d50b6275c8c60a93
++// libc/include/sys/mman.h. The native probe checks fd flags, mapping and errno.
++//
++// SAFETY: name must point to a valid NUL-terminated C string.
++unsafe fn create_memfd(name: *const libc::c_char, flags: libc::c_uint) -> libc::c_int {
++    #[cfg(target_os = "android")]
++    {
++        unsafe { libc::syscall(libc::SYS_memfd_create, name, flags) as libc::c_int }
++    }
++    #[cfg(not(target_os = "android"))]
++    {
++        unsafe { libc::memfd_create(name, flags) }
++    }
++}
++
+ /// Allocate an anonymous shared-memory file of `size` bytes and mmap it RW.
+ /// Returns the raw fd and the mmap pointer; the caller is responsible for
+ /// passing both to [`cleanup_mmap`] when done.
+@@ -843,7 +861,7 @@ pub(crate) fn anon_shm(size: usize) -> anyhow::Result<(i32, *mut libc::c_void)>
+     // memfd_create is Linux-only and is the cleanest path; fall back to
+     // shm_open if memfd isn't available for any reason.
+     let name = b"cua-scrcopy\0";
+-    let fd = unsafe { libc::memfd_create(name.as_ptr() as *const libc::c_char, libc::MFD_CLOEXEC) };
++    let fd = unsafe { create_memfd(name.as_ptr() as *const libc::c_char, libc::MFD_CLOEXEC) };
+     if fd < 0 {
+         return Err(anyhow::anyhow!(
+             "memfd_create failed: {}",
+diff --git a/libs/cua-driver/rust/crates/platform-linux/src/wayland/virtual_keyboard.rs b/libs/cua-driver/rust/crates/platform-linux/src/wayland/virtual_keyboard.rs
+index 5a57436..aae3c11 100644
+--- a/libs/cua-driver/rust/crates/platform-linux/src/wayland/virtual_keyboard.rs
++++ b/libs/cua-driver/rust/crates/platform-linux/src/wayland/virtual_keyboard.rs
+@@ -163,7 +163,7 @@ fn send_key(
+ 
+ fn keymap_file() -> anyhow::Result<File> {
+     let name = CString::new("cua-driver-keymap")?;
+-    let fd = unsafe { libc::memfd_create(name.as_ptr(), libc::MFD_CLOEXEC) };
++    let fd = unsafe { super::create_memfd(name.as_ptr(), libc::MFD_CLOEXEC) };
+     if fd < 0 {
+         return Err(std::io::Error::last_os_error().into());
+     }
