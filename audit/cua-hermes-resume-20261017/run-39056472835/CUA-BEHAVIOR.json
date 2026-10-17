@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "scope": "owned Termux Xvnc/Xfwm4/Xlib virtual desktop",
+  "platform": "android",
+  "uid": 1000,
+  "binary_sha256": "97abdcfdbddc55c20c9ea4a2e897be9e3183458df83475cee0e3d152212f0b53",
+  "authorization_mode": "standard",
+  "phone_ui_certified": false,
+  "history_admitted": false,
+  "parallel_uinput_claimed": false,
+  "background_input_certified": false,
+  "accessibility_tree_certified": false,
+  "hermes_pm_cua_admission_changed": false,
+  "checks": [
+    "native-aarch64-bionic-elf",
+    "private-session-bus-method-roundtrip",
+    "private-authenticated-x11-unix-only",
+    "real-linux-tool-registry",
+    "screenshot-png-independent-two-color-oracle",
+    "click-observed-by-xlib-fixture",
+    "scroll-two-exact-xlib-wheel-events",
+    "foreground-text-exact-keypress-oracle",
+    "clipboard-exact-roundtrip",
+    "window-frame-independent-xlib-readback",
+    "all-owned-child-processes-reaped"
+  ],
+  "status": "passed",
+  "fixture": {
+    "pid": 3571,
+    "window_id": 4194305
+  },
+  "tool_count": 60,
+  "screenshot": {
+    "width": 320,
+    "height": 240,
+    "sha256": "efec3f5f96c0ae3f94bebc27c130939bca73801c703e6a437d1b5e025058bd88"
+  },
+  "cleanup": [
+    {
+      "name": "driver",
+      "pid": 3572,
+      "returncode": -15
+    },
+    {
+      "name": "fixture",
+      "pid": 3571,
+      "returncode": -15
+    },
+    {
+      "name": "xfwm4",
+      "pid": 3562,
+      "returncode": 0
+    },
+    {
+      "name": "xvnc",
+      "pid": 3558,
+      "returncode": 0
+    },
+    {
+      "name": "dbus",
+      "pid": 3556,
+      "returncode": 0
+    }
+  ],
+  "cleanup_errors": []
+}

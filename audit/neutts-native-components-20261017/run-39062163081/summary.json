@@ -1,0 +1,460 @@
+{
+  "schema_version": 1,
+  "record_type": "Failed native component run with full artifact verification and preserved original receipts",
+  "run": {
+    "id": 39062163081,
+    "head_sha": "3d9086cfc190ba981e48e0276234064903315539",
+    "head_branch": "prepare/termux-compatibility-next-stable",
+    "event": "push",
+    "status": "completed",
+    "conclusion": "failure",
+    "html_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39062163081",
+    "created_at": "2026-10-17T19:22:09Z",
+    "updated_at": "2026-10-17T19:24:29Z"
+  },
+  "artifact": {
+    "id": 12111708125,
+    "name": "termux-neutts-native-cpu-components",
+    "bytes": 128077620,
+    "sha256": "54674b8f315b4673b6b47a1ecdd854c3fcd40bd6b6bd485038bc0d2a5d2a88d2",
+    "all_crc_and_member_sha256_verified": true,
+    "member_count": 4650,
+    "verification": "verification.json",
+    "verification_sha256": "407c24b224421dbdde8e945224e6932cbc248a439391036b0a476c6af4f04a84"
+  },
+  "original_outcome": {
+    "status": "failed",
+    "stage": "native-build",
+    "error": {
+      "message": "native-build-numba failed; retained exit code 2",
+      "type": "ProbeError"
+    },
+    "foundation_status": "passed",
+    "foundation_cases": 7,
+    "strict_apt_provenance_status": "requirements-and-provenance-passed",
+    "pip_check_passed": false,
+    "pip_check_exit_code": 1,
+    "compiler_apt_status": "passed",
+    "compiler_archives_verified": 44,
+    "compiler_additions": 19,
+    "component_cases": [],
+    "numba_compilation_reached": false,
+    "llama_build_reached": false
+  },
+  "diagnosis": {
+    "stage": "pip supported-tag enumeration before the Numba compiler starts",
+    "exception_type": "KeyError",
+    "exception_value": "24-arm64_v8a",
+    "cause": "The helper injected _PYTHON_HOST_PLATFORM=android-24-arm64_v8a. Actual native CPython sysconfig.get_platform parsed 24-arm64_v8a as the machine and failed during pip supported-tag enumeration.",
+    "original_stderr": "native-components/native-build-numba.stderr.log",
+    "original_stderr_bytes": 2811,
+    "original_stderr_sha256": "020e92c38bdc2d67c4747ec18116fc63f63ed671fa1704cc1d72f1dde35e18ec",
+    "measured_native_runtime": {
+      "api_level": 24,
+      "cache_tag": "cpython-314",
+      "executable": "/data/data/com.termux/files/usr/bin/python",
+      "machine": "aarch64",
+      "prefix": "/data/data/com.termux/files/usr",
+      "sys_platform": "android",
+      "sysconfig_platform": "android-24-arm64_v8a",
+      "system": "Android",
+      "version": "3.14.6"
+    },
+    "backend_source_review": [
+      {
+        "wheel": "python-wheelhouse/setuptools-83.0.0-py3-none-any.whl",
+        "wheel_sha256": "29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3",
+        "member": "setuptools/_distutils/util.py",
+        "member_sha256": "1bb22c4cda8547974203bc724d382510e9a5d4fe8a37792a20af2d810f9a3503",
+        "finding": "get_host_platform delegates to the real stdlib sysconfig.get_platform."
+      },
+      {
+        "wheel": "python-wheelhouse/setuptools-83.0.0-py3-none-any.whl",
+        "wheel_sha256": "29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3",
+        "member": "setuptools/command/bdist_wheel.py",
+        "member_sha256": "d93325db57fb596787de6d0d8492d564f54e496134c3ec19706da916c78ff10c",
+        "finding": "Wheel generation normalizes the native sysconfig platform; no finished-wheel retagging is needed."
+      },
+      {
+        "wheel": "native-inputs/wheels/scikit_build_core-1.1.1-py3-none-any.whl",
+        "wheel_sha256": "6f6d6cf600e2e9639fd258ecd11cfc19bd189354b968916a519c6793e7e26237",
+        "member": "scikit_build_core/builder/wheel_tag.py",
+        "member_sha256": "5638af91e220c6fe9b5155e2643f01b5153b664e14b2935440160acbcef5e949",
+        "finding": "Without an override, compute_best selects a real packaging.tags.sys_tags result."
+      },
+      {
+        "wheel": "native-inputs/wheels/packaging-26.0-py3-none-any.whl",
+        "wheel_sha256": "b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529",
+        "member": "packaging/tags.py",
+        "member_sha256": "7172d5d69243dd4b4994383b5b3df3adf75085166aafc8ee99200a28001ddb11",
+        "finding": "Official Android platform generation uses actual platform.android_ver().api_level and sysconfig ABI, yielding API24 first here."
+      }
+    ]
+  },
+  "prepared_correction": {
+    "status": "host-regression-verified-native-rerun-required",
+    "changes": [
+      "Remove the injected host platform override.",
+      "Construct a clean child environment before venv creation and all pip commands.",
+      "Reject inherited overrides at the native entry and record the actual checked sysconfig platform.",
+      "Keep source/archive/version/ABI/numerical/installed-file gates unchanged."
+    ],
+    "inputs": {
+      "scripts/compatibility_probe_neutts_native.py": {
+        "bytes": 42987,
+        "sha256": "8d34f192f6597a4980566e622ca8acac6d27f0cf6efcffcb37562048aeda0eb7"
+      },
+      "scripts/neutts_native_sources_lock.json": {
+        "bytes": 35211,
+        "sha256": "822aeabc9dca027f2f940dfb63a96fa5d015f81f293e138b67d126bd6914cc25"
+      },
+      "scripts/prepare_neutts_native_sources.py": {
+        "bytes": 22681,
+        "sha256": "96e6787b9aa35a2b7f820955750c8d75dbcc90728946b23594dbb12e48d48ced"
+      },
+      "tests/test_neutts_native_components.py": {
+        "bytes": 11570,
+        "sha256": "ddfe58b5c95bfb06e174f953bceab71aac56b0ead5baac9a9aaca651abc46e6c"
+      }
+    },
+    "old_lock_sha256": "a06e595179fad6f437ca95210d685beb339baa0867cd527dba5f5083d94b36ce",
+    "new_lock_sha256": "822aeabc9dca027f2f940dfb63a96fa5d015f81f293e138b67d126bd6914cc25",
+    "parsed_lock_changes": [
+      {
+        "path": "/build/wheel_tag_policy",
+        "before": "Emit modern Android API24 tags during the native build using _PYTHON_HOST_PLATFORM; never mutate/retag a finished wheel. sys.platform remains android.",
+        "after": "Emit Android API24 tags from the actual native CPython platform and supported tags; no _PYTHON_HOST_PLATFORM override and no mutation or retagging of finished wheels. sys.platform remains android."
+      }
+    ],
+    "all_other_parsed_lock_fields_identical": true,
+    "historical_source_preparation_receipt_rewritten": false,
+    "host_tests": "focused-test-result.json",
+    "regression_red_stdout": "platform-override-regression-red.stdout.log",
+    "regression_red_stdout_sha256": "ec757889dc8279c1181394badafaf333a407743a7d2ddf1fbaa3cfde30c5b353",
+    "host_syntax": "host-syntax-verification.json"
+  },
+  "raw_evidence": {
+    "zip": "raw-small-members.zip",
+    "zip_bytes": 527368,
+    "zip_sha256": "6dd189e4822ad62f221c48d14fc6f1412890b63c20df981580de968d1fccc761",
+    "selected_member_count": 61,
+    "selection": "Original logs and receipts, frozen source/wheel/APT manifests and requirements; full source trees, sdist and binary wheels remain represented by the complete verified artifact inventory.",
+    "members": [
+      {
+        "path": "NEUTTS-APT-PYTHON-METADATA.json",
+        "bytes": 32254,
+        "sha256": "6fb50c94a727ee743580f3c763b8f119066e82bc6b5d3020f7f57b6877203c56"
+      },
+      {
+        "path": "NEUTTS-APT-PYTHON-VALIDATION.json",
+        "bytes": 173678,
+        "sha256": "3f5256f6f1873da84e0dad9472615e66b5a485922b6629540c9fc39663490015"
+      },
+      {
+        "path": "NEUTTS-APT-PYTHON-VALIDATION.log",
+        "bytes": 141,
+        "sha256": "fad891e4749fc619ae026aa4faebc8b99e2ab08c1c1ce59c947af0683acdf95b"
+      },
+      {
+        "path": "NEUTTS-BASE-PACKAGES.tsv",
+        "bytes": 1471,
+        "sha256": "78ff2592d1d13be57ae34035e67f41de78677af37644cea50622877b590c6046"
+      },
+      {
+        "path": "NEUTTS-BOOTSTRAP-ARCHIVES.sha256",
+        "bytes": 5688,
+        "sha256": "4fc9fb394bbe9f8a982a95b773e515ac8c9eaac8cf850e33c33767a55f651f36"
+      },
+      {
+        "path": "NEUTTS-CORE-RESULT.json",
+        "bytes": 40501,
+        "sha256": "e6542a6219582c84c26861283195257c05a6514dff7b502d9d9671bcdb211c76"
+      },
+      {
+        "path": "NEUTTS-ENGINE-pyproject.toml",
+        "bytes": 908,
+        "sha256": "3d74df60f0db27733b308c93b88ae95f9deaa8f396f48183b0cf4f14eb3deb94"
+      },
+      {
+        "path": "NEUTTS-EXIT.json",
+        "bytes": 70,
+        "sha256": "e5be978fbf7dea92cd79da1828dca5416aa4c814204ee66bce0d60847ca07a54"
+      },
+      {
+        "path": "NEUTTS-INSTALLED-PACKAGES.tsv",
+        "bytes": 4804,
+        "sha256": "40c4104a1cc044bd3f5297deb160e0f952208afe1e383f1b5b8fa3b441956bd3"
+      },
+      {
+        "path": "NEUTTS-PINNED-APT.tsv",
+        "bytes": 18469,
+        "sha256": "7ad635d7f1ce1157c7f3b3d7808eaf113c8bb77c4e99a8fe30b6b155faf04c5e"
+      },
+      {
+        "path": "NEUTTS-PROBE-INPUTS.json",
+        "bytes": 3463,
+        "sha256": "220e48a226188530f25987e24a316dd862670abefa2d4d1e009140bb64ddddb8"
+      },
+      {
+        "path": "NEUTTS-PYTHON-CHECK.log",
+        "bytes": 339,
+        "sha256": "2c025ce5a45cfa2b6f032ea3bc706e8173fa7c6a1c78ff860e40d669199a48bf"
+      },
+      {
+        "path": "NEUTTS-PYTHON-INSTALL.log",
+        "bytes": 2992,
+        "sha256": "b6f168a7c490237e88b0756959eeb782b15fcd2ed77c0b1ca229f435d4dea5fa"
+      },
+      {
+        "path": "NEUTTS-UPGRADED-BASE-PACKAGES.tsv",
+        "bytes": 1448,
+        "sha256": "132cb4a2c2714a6c97f61d2393ac17dd5f11edaf16eaaf1dbce3527972d076aa"
+      },
+      {
+        "path": "native-components/NEUTTS-NATIVE-BUILD-APT.json",
+        "bytes": 26360,
+        "sha256": "38dd8de3305e41aff278ced75043467d81c4c0fc7010565230723b54c3e43751"
+      },
+      {
+        "path": "native-components/NEUTTS-NATIVE-COMPONENTS.json",
+        "bytes": 37653,
+        "sha256": "80c0d876c9557bb4a71a629d3d150f1f5d0f1f8f2fc93124e767d424a339e865"
+      },
+      {
+        "path": "native-components/native-apt-install.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "native-components/native-apt-install.stdout.log",
+        "bytes": 6653,
+        "sha256": "9284ee1d31a3f050727eb1960ac18c8e65e4adb9dc32482b3e5c47feb004bfea"
+      },
+      {
+        "path": "native-components/native-apt-plan.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "native-components/native-apt-plan.stdout.log",
+        "bytes": 2830,
+        "sha256": "b401e297c3e847ba50368568b62aef331902498ae767b478256ea392919593d2"
+      },
+      {
+        "path": "native-components/native-build-numba.stderr.log",
+        "bytes": 2811,
+        "sha256": "020e92c38bdc2d67c4747ec18116fc63f63ed671fa1704cc1d72f1dde35e18ec"
+      },
+      {
+        "path": "native-components/native-build-numba.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "native-components/native-build-python-inputs.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "native-components/native-build-python-inputs.stdout.log",
+        "bytes": 749,
+        "sha256": "ae744470854fbf871c9d84790175fb2fbe2014daa1a6e09f7269d2240f8a71b3"
+      },
+      {
+        "path": "native-components/native-create-venv.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "native-components/native-create-venv.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "native-inputs/PREPARED-NATIVE-SOURCES.json",
+        "bytes": 12024,
+        "sha256": "8009a4fa566de90e3af6a6da2d60fbfef9e544d7119b51af5ec04e0e481deb96"
+      },
+      {
+        "path": "native-inputs/build-apt-additional.tsv",
+        "bytes": 2780,
+        "sha256": "ada651794bc26d0780844c90709201519463ef51bfe92df1fea83263e1be242c"
+      },
+      {
+        "path": "native-inputs/build-apt-closure.tsv",
+        "bytes": 6581,
+        "sha256": "83e67a558d1322b8ea55c2d3d885e0dde9725e54694faa490f3ea16064978af3"
+      },
+      {
+        "path": "native-inputs/llama-cpp-python-android-loader.patch",
+        "bytes": 7913,
+        "sha256": "254d0d86b5b3d0ff0a92f0767d997f9d11d16449570713f1fc6ab64f0e718a9b"
+      },
+      {
+        "path": "native-inputs/neutts-native-sources-lock.json",
+        "bytes": 35165,
+        "sha256": "a06e595179fad6f437ca95210d685beb339baa0867cd527dba5f5083d94b36ce"
+      },
+      {
+        "path": "native-inputs/requirements.txt",
+        "bytes": 390,
+        "sha256": "91fc7df8213ad23f60b3d6de5bbea61d1e6ba6e53ea1b2a83a1cfaf539eb0d34"
+      },
+      {
+        "path": "native-inputs/source-manifests/llama-cpp-python.json",
+        "bytes": 27815,
+        "sha256": "a87d6b886c0cc0195252cc32bbb2498e33b0f811101f06bd399ee0b0a8302f75"
+      },
+      {
+        "path": "native-inputs/source-manifests/llama.cpp.json",
+        "bytes": 923169,
+        "sha256": "ed01cc0891a772be1cbe24a479204df3b269b2327b6ffea3683e90d0ea6a84d3"
+      },
+      {
+        "path": "native-inputs/source-manifests/numba.json",
+        "bytes": 234836,
+        "sha256": "009a2207aeb5dfc77073db43f02a3e4cec5c280c71f32700c6cd47d751fb4b1d"
+      },
+      {
+        "path": "neutts-llvmlite.json",
+        "bytes": 14905,
+        "sha256": "cbe0ac56004c86ae1d81878425e51a20f7efbf3d3cdfb36ae03c0e1571a18c54"
+      },
+      {
+        "path": "neutts-llvmlite.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "neutts-llvmlite.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "neutts-native-probe.log",
+        "bytes": 111658,
+        "sha256": "8c0f5455494e73efb91628411fc9d0d052916f018763fead5cf1c73e743e3d7f"
+      },
+      {
+        "path": "neutts-python_dependencies.json",
+        "bytes": 18116,
+        "sha256": "f7ab942c58557fd593304a2cac544e17f3e7da6eea9f9a6cb860c76b87fcb1f8"
+      },
+      {
+        "path": "neutts-python_dependencies.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "neutts-python_dependencies.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "neutts-scipy.json",
+        "bytes": 35798,
+        "sha256": "f54e7834bf4a1b50be9491f07540afc2c236d37650c4283e30d7bfea458d154d"
+      },
+      {
+        "path": "neutts-scipy.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "neutts-scipy.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "neutts-soxr.json",
+        "bytes": 16445,
+        "sha256": "bb37d2026751c0dd0963ef251154327ae118c3290402a01c9746a7144d181a65"
+      },
+      {
+        "path": "neutts-soxr.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "neutts-soxr.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "neutts-torch.json",
+        "bytes": 59936,
+        "sha256": "1823591126e0a978c940185db8a137a94a833c8bbcf2b4b0d71f1f33457cab77"
+      },
+      {
+        "path": "neutts-torch.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "neutts-torch.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "neutts-torchaudio.json",
+        "bytes": 61598,
+        "sha256": "b713a07d3caae408d659aaf4a5492cd24c50f80795bb24531abdbd702c7f9a3f"
+      },
+      {
+        "path": "neutts-torchaudio.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "neutts-torchaudio.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "neutts-torchcodec.json",
+        "bytes": 101229,
+        "sha256": "71ddd15c886f06b3cc6af023910be05c5ea5c706eba51bb144c86c47bb50039b"
+      },
+      {
+        "path": "neutts-torchcodec.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "neutts-torchcodec.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "python-wheelhouse/python-wheelhouse-receipt.json",
+        "bytes": 16207,
+        "sha256": "c222ab086e89ae5176be414ac75f6743e104a53e4dcac3c92a7178d1d55c8149"
+      },
+      {
+        "path": "python-wheelhouse/neutts_core_python_lock.json",
+        "bytes": 17316,
+        "sha256": "ba927bae7ec87c331e23136ba883da86876ca24044485288d9866649130fab38"
+      },
+      {
+        "path": "python-wheelhouse/requirements.txt",
+        "bytes": 866,
+        "sha256": "7a8c6c2672cf2b28305978102d9f3fb6025398015603947f362a79c700f8fdd1"
+      },
+      {
+        "path": "signed-apt/packages.termux.dev_apt_termux-main_dists_stable_InRelease",
+        "bytes": 14016,
+        "sha256": "249dab3ab3da3993b2436d48c819506f9aa586f6985905d81a451e76f2de7901"
+      }
+    ],
+    "native_job": "native-job-verification.json"
+  },
+  "scope": {
+    "engine_installed": false,
+    "models_downloaded": false,
+    "synthesis_tested": false,
+    "numba_or_llama_behavior_certified": false,
+    "pm_admission_changed": false,
+    "published_candidate_modified": false,
+    "release_created": false
+  }
+}

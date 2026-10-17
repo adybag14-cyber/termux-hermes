@@ -1,0 +1,271 @@
+{
+  "schema_version": 1,
+  "status": "failed",
+  "published": false,
+  "candidate_receipt_sha256": "2bf694eec468c10a4d3820092813d8b2734c2b212954888009e3867a8a88dbf3",
+  "candidate": {
+    "schema_version": 1,
+    "status": "verified",
+    "repository": "adybag14-cyber/termux-hermes",
+    "run_id": 39048514731,
+    "head_sha": "e271e922a2e71fd18591c45e9b98b8c7f9fffe02",
+    "artifact": {
+      "id": 12107225801,
+      "name": "hermes-termux-next-stable-candidate",
+      "bytes": 222119336,
+      "sha256": "c49f41590424520b99136800b7ba9fa41f3ab3926d418131cdf686da812d849b"
+    },
+    "package": {
+      "file": "hermes-agent_0.22.2-1_aarch64.deb",
+      "bytes": 222089768,
+      "sha256": "1e4e58fe17a1800f23ababcb2724e92b8904829eae3284569db52dbc672ca76a",
+      "zip_member": "hermes-source/termux-build/deb/hermes-agent_0.22.2-1_aarch64.deb"
+    },
+    "identity": {
+      "purpose": "next-stable compatibility candidate; do not publish",
+      "published": false,
+      "version_bumped": false,
+      "package": "hermes-agent_0.22.2-1_aarch64.deb",
+      "package_sha256": "1e4e58fe17a1800f23ababcb2724e92b8904829eae3284569db52dbc672ca76a",
+      "packaging_commit": "e271e922a2e71fd18591c45e9b98b8c7f9fffe02",
+      "workflow_ref_commit": "6f2f8e28deab2729673b2efbbf4054c5dd715a65",
+      "upstream_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+      "upstream_tag": "v0.22.2",
+      "patches": {
+        "patches/upstream-v0.22.2-imports.patch": "f95683a50151c690b645ed83dc3dddc93354364b9e091fa54ed62deaeeb83729",
+        "patches/upstream-v0.22.2-snapshot.patch": "b762b8ec3429064193d80cd8c9fe80571c83d085c1cb20409ab9cfc7fbc844aa",
+        "patches/upstream-v0.22.2-source-integrity.patch": "ae8d1a7a6137c8ba5c6b642ad1d4b69f1877cfaeb2fb6de9720f1f18d35815f3",
+        "patches/upstream-v0.22.2-termux.patch": "6fafa8a39ed0295e6788755206a4c7c946e9246bb99484b5a23eb186e54608d2",
+        "patches/next-stable/compatibility.patch": "77ac41bc11a6facd928f4cef577642b9eeb042ce3da7d820478aa49e1d98fa1e"
+      },
+      "file": "CANDIDATE-IDENTITY.json",
+      "sha256": "bd45eceb7ffecf4e892243f6e964fd28337f1be20abee39435d934cc768fb5a5",
+      "zip_member": "next-stable-evidence/CANDIDATE-IDENTITY.json"
+    },
+    "native_selection": {
+      "schema": 1,
+      "target": "linux-arm64-bionic",
+      "extras": [
+        "acp",
+        "cron",
+        "matrix",
+        "mcp",
+        "telegram",
+        "termux",
+        "uvloop"
+      ],
+      "stamp": "3b2935496d2e947be1904f37052d1fcbae409418e892a52973d5a46fc1df4d7f",
+      "bundled_wheels": {
+        "path": "bundled-wheels.json",
+        "sha256": "d2dc66575cf8aa5ef828e5e536b4d55b8801143101b7e608f6fb4878c2397904"
+      },
+      "uv_lock_sha256": "72abb87a634769baaf30830cd317892053c6e15f8e9519b085524fa0ed542829",
+      "pm_lock_sha256": "49b79259220160f147255078a19af541a5f328d3871c8041cc1eb909d19eb549",
+      "requirements_sha256": "f3e32ca1cae5bb50a30e0957ed136f992d546e4475fb8bc73350790e9e762698",
+      "file": "venv-selection.json",
+      "sha256": "5d7eef31190f9152c3b8005f3c9cc8bb05a69fdb57b883c648edcfe4db2cf1ce",
+      "zip_member": "hermes-source/termux-build/payload/.work/venv-selection.json"
+    }
+  },
+  "baseline": "installed app from the exact verified candidate: upstream plus four released patches and the main compatibility patch",
+  "upstream_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+  "baseline_patches": {
+    "patches/upstream-v0.22.2-imports.patch": "f95683a50151c690b645ed83dc3dddc93354364b9e091fa54ed62deaeeb83729",
+    "patches/upstream-v0.22.2-snapshot.patch": "b762b8ec3429064193d80cd8c9fe80571c83d085c1cb20409ab9cfc7fbc844aa",
+    "patches/upstream-v0.22.2-source-integrity.patch": "ae8d1a7a6137c8ba5c6b642ad1d4b69f1877cfaeb2fb6de9720f1f18d35815f3",
+    "patches/upstream-v0.22.2-termux.patch": "6fafa8a39ed0295e6788755206a4c7c946e9246bb99484b5a23eb186e54608d2",
+    "patches/next-stable/compatibility.patch": "77ac41bc11a6facd928f4cef577642b9eeb042ce3da7d820478aa49e1d98fa1e"
+  },
+  "additional_patch": {
+    "path": "patches/next-stable/cua-hermes-integration.patch",
+    "sha256": "6424636d7d5b590724365eb8b952fa164ac6dfc26a9d7c1a9a70ac8baf7b591b"
+  },
+  "helper_sha256": "310ca4e826fad5badad3750ea25fafe941a01c65311c3c5488afa4c2dc494b08",
+  "driver_sha256": "97abdcfdbddc55c20c9ea4a2e897be9e3183458df83475cee0e3d152212f0b53",
+  "installed_payload": "/data/data/com.termux/files/usr/lib/hermes-agent",
+  "experimental_source": "/data/data/com.termux/files/usr/tmp/cua-probe.l9wH15/hermes-source",
+  "hermes_pm_cua_admission_changed": false,
+  "debian_control": {
+    "Package": "hermes-agent",
+    "Version": "0.22.2-1",
+    "Architecture": "aarch64",
+    "Depends": "",
+    "Pre-Depends": ""
+  },
+  "installed_payload_before": {
+    "file_and_symlink_count": 29809,
+    "sha256": "3cb29a62319f60b3cd55934f4d18bc6fb3b1652be7abe0c1ff9ea9f59a81e013",
+    "regular_file_bytes": 822944489
+  },
+  "baseline_app": {
+    "file_and_symlink_count": 18625,
+    "sha256": "ece2cf0769bb1946dfda94d4e902eec36470504f5f95b91c41001354d4e28e6f",
+    "regular_file_bytes": 218666045
+  },
+  "patched_app": {
+    "file_and_symlink_count": 18628,
+    "sha256": "cd0092d486179f9c18271ec928e3bc13c52217faf103368bd4cccdad6ee7ea82",
+    "regular_file_bytes": 218677636
+  },
+  "changed_paths": {
+    "hermes_cli/tools_config.py": {
+      "before": {
+        "kind": "file",
+        "bytes": 62413,
+        "sha256": "43fe9f97de62893fd7d372067adb979e41ecec32f5fec9fd6d0fba7474f91664",
+        "mode": 420
+      },
+      "after": {
+        "kind": "file",
+        "bytes": 62497,
+        "sha256": "1acea77027ed3f3fdbcdeda5b3504fc68ad4f7e3c840b6fe762b01f59d040308",
+        "mode": 384
+      }
+    },
+    "hermes_cli/tools_config_cua.py": {
+      "before": {
+        "kind": "file",
+        "bytes": 12609,
+        "sha256": "1c59fa3b0893ae5ad9a9935fbe08d8217a470a742eaca1c7eebb2a127cd826c4",
+        "mode": 420
+      },
+      "after": {
+        "kind": "file",
+        "bytes": 13367,
+        "sha256": "2b3a21ebe23a5cf73a760bb50674e450d9bbc29ed639494506cca265cce3c6a5",
+        "mode": 384
+      }
+    },
+    "hermes_cli/tools_config_providers.py": {
+      "before": {
+        "kind": "file",
+        "bytes": 57975,
+        "sha256": "feb6278c87923ce2ae0e232af926ac04e0a033c273bad57128527aa24ed442a5",
+        "mode": 420
+      },
+      "after": {
+        "kind": "file",
+        "bytes": 57967,
+        "sha256": "ac8f72e9f4ba724e2d6f7d5815cbe949e106d05d0fc28470f384824dcccb29bc",
+        "mode": 384
+      }
+    },
+    "plugins/computer_use/cua/__init__.py": {
+      "before": {
+        "kind": "file",
+        "bytes": 1497,
+        "sha256": "b2d0cc91e57dc01be5088287a3efa98b5aa174f347d2822bd180ac0bac31f37c",
+        "mode": 420
+      },
+      "after": {
+        "kind": "file",
+        "bytes": 2207,
+        "sha256": "b64b51bda123224de492508d7bd43c3c975350b5d2fe2a2c3e146c576a1f493b",
+        "mode": 384
+      }
+    },
+    "tests/hermes_cli/test_cua_termux_setup.py": {
+      "before": null,
+      "after": {
+        "kind": "file",
+        "bytes": 1315,
+        "sha256": "0022172cd2ef307ea49c5796a9c525150958635a9bc8f0518519a2c086c2041c",
+        "mode": 384
+      }
+    },
+    "tests/tools/test_computer_use_termux_override.py": {
+      "before": null,
+      "after": {
+        "kind": "file",
+        "bytes": 5309,
+        "sha256": "177a272e7f88111a6a6bbe476c2cb15609842d2f07386e0c3c20df86e4ce32ee",
+        "mode": 384
+      }
+    },
+    "tools/computer_use/cua_backend.py": {
+      "before": {
+        "kind": "file",
+        "bytes": 28305,
+        "sha256": "6c0287de53eb3fbfd3307d961898554343271e406c4e6bd31ba4a43194ab5821",
+        "mode": 420
+      },
+      "after": {
+        "kind": "file",
+        "bytes": 28754,
+        "sha256": "69588d9671a1dde4703ded8d9be26ccb6aec0d067e6a5c529ddf7626f3dfd887",
+        "mode": 384
+      }
+    },
+    "tools/computer_use/cua_backend_driver.py": {
+      "before": {
+        "kind": "file",
+        "bytes": 9939,
+        "sha256": "8031564bf9e19111b295496a4312ce96087163ba6b9f9ff6e0b1da6796159d67",
+        "mode": 420
+      },
+      "after": {
+        "kind": "file",
+        "bytes": 10146,
+        "sha256": "c24c0cc00914e7450dcd7dcb2dc8d9cba1811894b64f1a248e62cbbc153932b8",
+        "mode": 384
+      }
+    },
+    "tools/computer_use/cua_backend_platform.py": {
+      "before": null,
+      "after": {
+        "kind": "file",
+        "bytes": 1947,
+        "sha256": "ae86fbfcc60087df77199faaa6dafbf3ff1fa59ccc281f13d899e40e743f771b",
+        "mode": 384
+      }
+    },
+    "tools/computer_use/permissions.py": {
+      "before": {
+        "kind": "file",
+        "bytes": 7981,
+        "sha256": "1723fcfb656581149daeb8bc6f4a59f35048ba1772e828832835fb5b9abae729",
+        "mode": 420
+      },
+      "after": {
+        "kind": "file",
+        "bytes": 8801,
+        "sha256": "4af47e87fb1c65ec59913b0107856583a8b4e57dca16d84b8d3e4fbdaa9ba0ee",
+        "mode": 384
+      }
+    }
+  },
+  "command": [
+    "/data/data/com.termux/files/usr/lib/hermes-agent/venv/bin/python",
+    "-B",
+    "/probes/scripts/compatibility_probe_cua_hermes.py",
+    "--source",
+    "/data/data/com.termux/files/usr/tmp/cua-probe.l9wH15/hermes-source",
+    "--driver",
+    "/out/bin/cua-driver",
+    "--driver-sha256",
+    "97abdcfdbddc55c20c9ea4a2e897be9e3183458df83475cee0e3d152212f0b53",
+    "--fixture",
+    "/data/data/com.termux/files/usr/tmp/cua-probe.l9wH15/cua-fixture",
+    "--out",
+    "/out/hermes-integration",
+    "--candidate-receipt",
+    "/candidate/candidate-receipt.json"
+  ],
+  "loader_library_paths": [
+    "/data/data/com.termux/files/usr/lib/hermes-agent/tools/python/data/data/com.termux/files/usr/lib",
+    "/data/data/com.termux/files/usr/lib/hermes-agent/tools/node/data/data/com.termux/files/usr/lib",
+    "/data/data/com.termux/files/usr/lib/hermes-agent/tools/ffmpeg/data/data/com.termux/files/usr/lib",
+    "/data/data/com.termux/files/usr/lib/hermes-agent/runtime-libs/lib",
+    "/data/data/com.termux/files/usr/lib"
+  ],
+  "helper_exit_code": 1,
+  "error": "ProbeFailure('native Hermes integration failed; see hermes-integration.log')",
+  "installed_payload_after": {
+    "file_and_symlink_count": 29809,
+    "sha256": "3cb29a62319f60b3cd55934f4d18bc6fb3b1652be7abe0c1ff9ea9f59a81e013",
+    "regular_file_bytes": 822944489
+  },
+  "installed_payload_unchanged": true,
+  "experimental_source_unchanged_after_execution": true,
+  "preservation_errors": []
+}

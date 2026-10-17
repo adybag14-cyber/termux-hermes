@@ -16,10 +16,12 @@ the counting rule below.
 
 Six of these restrictions have repairs in the main candidate with passing native
 checks: **uvloop, Matrix, Nemo Relay, local managed browser, Bot Desktop, and
-managed gateway service**. The separate CUA foreground-X11 experiment has now
-passed its standalone probe; it remains outside that candidate and still needs
-native validation through Hermes. NeuTTS and microphone/VAD retain their stated
-runtime and device limits. The baseline count remains nine.
+managed gateway service**. The separate CUA foreground-X11 experiment now passes
+both standalone and real Hermes integration checks; it remains outside that
+candidate and requires an explicitly selected external driver. The separate
+NeuTTS scientific dependency experiment passes all six native cases, while pip
+wheel tagging, the full speech engine and physical microphone/VAD retain their
+stated limits. The baseline count remains nine.
 
 The audit also found three broken Android adapter paths (text clipboard, audio
 playback, and microphone maximum duration), and a missing native dependency cache
@@ -54,6 +56,9 @@ before that graph is installed.
 The package build, release tag and subsequent packaging main are distinct commits;
 [release identity evidence](../audit/release-boundary-20261017.json) records each
 against the unchanged published asset.
+The [latest preparation identity check](../audit/resume-release-boundary-20261017.json)
+confirms the unchanged public main, package asset, installer and publication files,
+and records the draft against its frozen reviewed base.
 
 The package's `pyproject.toml` and `uv.lock` match this upstream release.
 The released adapters change packaging/build behavior. The census compares
@@ -100,7 +105,7 @@ source-reviewed judgment, distinct from distribution inventory.
 | uvloop event-loop acceleration | Android marker excludes uvloop 0.22.1. Its setup backend runs shell/configure commands assuming a conventional Unix shell path; the old preconfigure workaround is overwritten by setup.py's later copy/configure sequence. Standard asyncio remains available. | Verify the exact locked source archive, patch the commands actually executed to use Termux's `CONFIG_SHELL`, and admit Android aarch64. Supply the resulting wheel through the reusable bundle cache. | Corrected native ARM TCP/task/shutdown job passed in run 39039959324, including original-payload runtime and successful artifact capture. |
 | Matrix messaging with encryption | Five requirements and the PM extra gate admit Linux only. The encrypted backend's python-olm 3.2.16 builds an older vendored libolm with CMake compatibility assumptions and an incorrectly const-qualified pointer rejected by current Clang. | Preserve bundled static libolm, apply Termux's CMake policy and const-pointer corrections, and admit Android aarch64 for the complete encrypted dependency group. Bundle reusable native wheels. | Native ARM Olm/Megolm, AES, asyncpg codec, HTTP and SQLite probes passed with original payload libraries; no undeclared runtime libraries. |
 | Nemo Relay | Core platform marker excludes Android. The 0.10.0 Rust source unconditionally requests a vendored protoc binary whose platform table lacks Android, ignoring the available system `PROTOC`. The old builder also silently skipped Nemo if it reached the build list. | Verify the locked sdist, honor the system protoc executable, remove the silent omission paths, and require Nemo in completeness checks. | Android Rust build, native plugin validation and scope/trace behavior passed in run 39039959324, including original-payload execution and successful artifact capture. |
-| NeuTTS local speech engine | The declared NeuTTS 1.4.1 pin requires Python >=3.10 and <3.14; its full dependency group is excluded from the current resolved lock. Its published release has platform wheels but **no source distribution**; the closure also needs native Torch/Torchaudio, codec and inference libraries. This package uses Python 3.14.6 on Bionic. | Retain the honest exclusion. Public upstream source exists, but enabling this engine requires a supported Python/runtime arrangement plus the complete native Torch, codec and inference closure. No speculative marker-only enablement is made. | Exact PyPI release metadata inspected; merely removing the Python marker cannot produce a compatible engine. The first separate APT-only probe installed all 122 pinned packages and passed SciPy, llvmlite JIT and soxr checks. Torch, Torchaudio and Torchcodec stopped at missing typing_extensions before their native cases; a pinned Python dependency-closure fix is pending. No NeuTTS engine is installed or admitted. See [remaining portability work](remaining-portability-work.md#neutts-141). |
+| NeuTTS local speech engine | The declared NeuTTS 1.4.1 pin requires Python >=3.10 and <3.14; its full dependency group is excluded from the current resolved lock. Its published release has platform wheels but **no source distribution**; the closure also needs native Torch/Torchaudio, codec and inference libraries. This package uses Python 3.14.6 on Bionic. | Retain the honest exclusion. Public upstream source exists, but enabling this engine requires a supported Python/runtime arrangement plus the complete native Torch, codec and inference closure. No speculative marker-only enablement is made. | Exact PyPI/source requirements remain incompatible with managed Python 3.14.6. The earlier [native scientific probe](../audit/neutts-native-20261017/run-39055874446.json) passed all six Torch, Torchaudio, TorchCodec, SciPy, llvmlite and Soxr behavior cases with all 122 pinned APT archives and exact supplemental Python dependencies. Pip still rejects seven original APT WHEEL tags; that failure is explicitly retained. This does not install or admit NeuTTS, provide its complete engine closure, or certify synthesis. See [remaining portability work](remaining-portability-work.md#neutts-141). |
 
 The uvloop, Olm and Nemo adapters reject unexpected source bytes or changed build
 hooks. They do not bypass checksums or substitute unpinned upstream branches.
@@ -120,10 +125,10 @@ The reviewed exact source digests are also embedded in the preparation helpers.
 | Capability | Published behavior | Preparation status |
 | --- | --- | --- |
 | Local managed browser | PM has no Bionic artifact for either AgentBrowser or Chromium. Remote browser/CDP paths are distinct and can remain usable. | Fixed and passed native ARM validation under UID 1000: raw static driver, real PM installation/discovery, built-in browser tools, and the default `browser_exec` handler with the backend unset. Navigation, exact loopback URL/heading, DOM interaction, PNG screenshot and product cleanup all passed. Product PM/discovery integration also passed 139 regression tests. Chromium remains an explicitly APT-owned dependency. See the [final browser evidence](../audit/native-probes-e20e8c4-20261017/browser-summary.json). |
-| Default native computer use | Default CUA driver rejects Android. Having the MCP dependency does not supply this native backend. | Fixed the separate remote Linux provider routing bug. The isolated native CUA driver passed all eleven foreground-X11 checks in [run 39052290704](../audit/cua-native-20261017/run-39052290704.json): real MCP registration, independent screenshot/input/clipboard/geometry oracles, native ABI checks and cleanup. Default background input and AT-SPI trees remain uncertified. The separate explicit-driver Hermes adapter retains manifest validation, standard approvals and desktop leases; its native Hermes integration is still pending. The driver and experimental adapter remain outside the main candidate and PM admission. Android phone UI requires an Android-specific backend. |
+| Default native computer use | Default CUA driver rejects Android. Having the MCP dependency does not supply this native backend. | Fixed the separate remote Linux provider routing bug. The isolated native CUA driver passed all eleven foreground-X11 checks in [run 39052290704](../audit/cua-native-20261017/run-39052290704.json): real MCP registration, independent screenshot/input/clipboard/geometry oracles, native ABI checks and cleanup. Default background input and AT-SPI trees remain uncertified. The [explicit-driver Hermes integration](../audit/cua-hermes-resume-20261017/run-39056472835.json) now passes native manifest discovery before desktop startup, the real registered tool, exact screenshot/click/scroll/text observations, three individual approvals, viewer-lease refusal and owned cleanup. The lost scroll coordinates and pre-desktop native loader are fixed. The driver and experimental adapter remain outside the main candidate and PM admission. Android phone UI requires an Android-specific backend. |
 | Bot Desktop | Virtual display host is Linux-only. | Added a local Termux Xvnc/Xfce adapter, prefix-aware runtime paths and screenshot capture through scrot. Desktop/remote-provider regressions pass, including real resolver result types. Native ARM UID 1000 validation passed: Xfce, an 800x600 RFB framebuffer, private Xauthority/socket permissions, no TCP display listener, real product screenshot capture and cleanup. |
 | Managed gateway service | Service install/start/uninstall paths reject Termux/APT provenance. Manual foreground/background gateway paths remain available. | Added a per-home Termux runit adapter with owned service directories, separate start-now/login policy, graceful stop and crash supervision. Twenty-four gateway tests pass. Native ARM install/start/status/restart/stop/crash-respawn/uninstall checks also passed, including same-basename home isolation and preservation of the shared supervisor. |
-| Recorder silence auto-stop | The Termux:API recorder does not provide the sounddevice VAD/silence path. Manual stop remains available. | Added explicit auto, sounddevice and termux-api capture selection with accurate diagnostics. The PCM path retains the existing VAD implementation. Exact NumPy 2.4.3 built and passed native numerical checks with both build and original payload libraries. PortAudio loaded, but measured runtime evidence shows only the Termux OpenSL ES wrapper: the actual Android audio framework, Binder devices and audio services are absent. Engine initialization failed in that environment; microphone/VAD remains unverified. Termux:API itself has no PCM stream for this VAD path. |
+| Recorder silence auto-stop | The Termux:API recorder does not provide the sounddevice VAD/silence path. Manual stop remains available. | Added explicit auto, sounddevice and termux-api capture selection with accurate diagnostics. The PCM path retains the existing VAD implementation. Exact NumPy 2.4.3 built and passed native numerical checks with both build and original payload libraries. PortAudio loaded, but measured runtime evidence shows only the Termux OpenSL ES wrapper: the actual Android audio framework, Binder devices and audio services are absent. Engine initialization failed in that environment; microphone/VAD remains unverified. Termux:API itself has no PCM stream for this VAD path. A [separate readiness repair](audio-readiness-device-validation.md) has host contract proof for PortAudio failures and output-only device inventories. It remains outside the candidate, which does not select audio-io. The [complete isolated environment](../audit/audio-device-staging-20261017/run-39076074868/summary.json) now passes recreation, CLI startup and final validation at two fresh destinations. Both diagnostic protocols pass while reporting PortAudio -9999 and unavailable audio; foreground device initialization, capture and VAD remain unproved. |
 
 Source guards: upstream [pm/packages.py](https://github.com/NousResearch/hermes-agent/blob/d923a5eb487a17c0a68801bba9ef0f56c81040a8/pm/packages.py),
 [CUA backend](https://github.com/NousResearch/hermes-agent/blob/d923a5eb487a17c0a68801bba9ef0f56c81040a8/tools/computer_use/cua_backend.py),
@@ -190,6 +195,18 @@ confirms all 81 published distributions remain at identical versions. The
 candidate's 19 additional distribution records include the application's own
 metadata record; they are not 19 additional user-facing features.
 
+The independent [full rebuild at `635ec13`](../audit/candidate-lifecycle-635ec13-20261017/summary.json)
+also passed every package and lifecycle gate in
+[run 39057745675](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745675).
+Both build caches missed. The finished package and diagnostics archives were
+downloaded in full and verified by SHA-256, ZIP CRC and every member hash.
+The new receipts independently confirm all 81 released versions retained,
+100 initial candidate distributions, and 102 after the two optional additions.
+All 100 wheel hashes agree between the build index and lifecycle receipt;
+21 wheels were built with Android tags and none were retagged from Linux.
+The new package has its own recorded digest. The earlier package remains the
+pinned input for the completed CUA experiment.
+
 [Two initial assembly failures](../audit/candidate-assembly-20261017/summary.json)
 identified a host script running outside PM's locked environment. The corrected
 entry point now uses the existing PM runtime and preserves child failure status;
@@ -248,23 +265,145 @@ that Android ports are impossible.
 
 ## Validation and release boundary
 
-The [standalone CUA success record](../audit/cua-native-20261017/run-39052290704.json)
-binds its native result to head `3e63be4a65dcb0d6d2c0c2fec86f94546fbba8ed`
-and the authenticated Actions artifact. It preserves the exact archive
-reconstruction method, the real Xlib observations, the earlier background-input
-failure and the still-degraded accessibility result. This proof does not exercise
-Hermes' registered tool, action approvals or viewer lease.
+The [native Hermes integration record](../audit/cua-hermes-resume-20261017/run-39056472835.json)
+binds the successful standalone and registered-tool results to exact head
+`37bf89d09a2a68a41585389d59b19e5e583c1f23` and a fully SHA-256/CRC-verified
+Actions artifact. The independent Xlib log confirms the requested coordinates
+and text. Missing/consumed approvals and viewer takeover correctly block actions;
+the installed candidate payload remains unchanged. The current patch is still
+an external-driver experiment, separate from the main candidate.
 
-The separate [Hermes preparation receipt](../audit/cua-hermes-preparation-20261017.json)
-links the [canonical host tests](../audit/cua-hermes-host-tests-20261017.json).
-Their first run passed 58 tests with three host-specific skips; the final
-readiness run passed 14 tests and repeated seven earlier cases. These are separate
-runs, not an aggregate count. The production patch was unchanged between them.
-Separate packaging [CI run 39052294622](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39052294622)
-passed 209 tests in 1.53 seconds on merge checkout
-`e6fd5fcfb260ab72ef77e87f109c51aa69444a34`, for branch head
-`3e63be4a65dcb0d6d2c0c2fec86f94546fbba8ed`; the preparation receipt retains
-the API identity and exact checkout/test log evidence.
+The [native scientific result](../audit/neutts-native-20261017/run-39055874446.json)
+records all six NeuTTS-adjacent dependency cases passing at
+`d439e8100bc89dbfe681fc03aa22017f175b8b2d`. Its dependency closure passed,
+while the original APT wheel tags still fail pip compatibility. The engine,
+model loading and synthesis were not exercised.
+
+The [stricter scientific revalidation](../audit/neutts-native-20261017/run-39062191148.json)
+passed at exact head `ba708a8ac82666c9d1a05b1495335d8d1bb76179`. All six
+scientific cases, installed-wheel verification and strict APT/Python provenance
+passed together. It verified 474 selected APT-owned files, including 456 pip
+source files, and 2,829 installed files from nine frozen wheels, including native
+MarkupSafe 3.0.4. The actual requirements graph contained 17 distributions and
+11 active edges. The original pip exit 1 and seven tag failures remain recorded;
+neither pip compatibility nor the complete NeuTTS engine is certified.
+
+The [merged-wrapper native revalidation](../audit/neutts-native-20261017/run-39063780780.json)
+now passes at exact source `1136617b0c5983f1bdc5991126758c7892f4c94c`.
+All seven cases and the same strict provenance checks passed again: nine frozen
+wheels, 2,829 installed wheel files, 474 selected APT-owned files and 11 active
+requirement edges across 17 distributions. The complete artifact and its 49
+members were verified; all 40 original non-wheel files are retained. Raw pip
+still exits 1 and overall compatibility remains false. These results validate
+the current standalone scientific wrapper, independently of the CPU build path.
+
+The separate [native CPU preparation](../audit/neutts-native-components-reconciliation-20261017.json)
+adds opt-in Numba and matching llama source builds. Its first attempt failed
+before compilation because of an unnecessary host-platform override. The
+[platform-corrected native run](../audit/neutts-native-components-20261017/run-39063780748/summary.json)
+then built and installed both Android-tagged wheels, verified native installed
+inputs, and passed Numba JIT, exact guvectorize and two-thread workqueue behavior.
+All 4,669 artifact members were verified. That historical run remains **failed**:
+the llama oracle read an obsolete model parameter after initialization.
+
+The [oracle correction](../audit/neutts-llama-oracle-reconciliation-20261017.json)
+checks the exact pinned Python/C load_mode and lazy_mode AUTO defaults and
+preserves mmap capability, CPU, context, ABI, library and cleanup checks. It
+changes no source/archive/version/build pins. The new regression first reproduced
+the original AttributeError; the focused suite now passes 57 tests, and the full
+Windows host suite passes 390 with four skips. These overlapping counts are not
+summed. The [corrected native run](../audit/neutts-native-components-20261017/run-39065274205/summary.json)
+now passes at source `cea5b45c7f3b0474c51706153c2cee848f29d181`: all seven
+foundation cases and all three native cases pass, including both source builds,
+installed-input verification, Numba behavior and llama initialization/cleanup.
+The actual pinned model defaults are `load_mode=-1` and `lazy_mode=1`.
+Numba produces the expected JIT result 102.0, exact guvectorize output and two
+workqueue threads. All 13 source input hashes match the current implementation;
+the complete 151,554,662-byte artifact and all 4,669 member hashes/CRCs were verified.
+Raw pip still exits 1 and APT WHEEL tag compatibility remains unresolved, so
+overall compatibility is still false. No model was loaded, and inference,
+synthesis, the complete NeuTTS engine and physical devices remain untested.
+
+The final source validation comprises
+[73 loader tests with three host skips](../audit/cua-hermes-resume-20261017/host-tests.json),
+a separate [31-test focused scroll run](../audit/cua-hermes-resume-20261017/scroll-source-tests.json),
+and [eight passing scoped lint checks](../audit/cua-hermes-resume-20261017/scoped-lint.json).
+Counts are not aggregated. Three broader Windows fixture failures reproduced
+before both fixes; the detailed source record preserves them.
+
+The [full component revalidation](../audit/native-probes-635ec13-20261017/summary.json)
+at `635ec13c9d0f264f508d1bdbaa7670d4eaa00787` completed with **six passing lanes
+and one failed audio lane**. The overall workflow conclusion is **failure**.
+uvloop, Matrix, Nemo, browser, Bot Desktop and the runit gateway lifecycle pass
+their native behavior checks. Audio again passes NumPy's four numerical cases
+in both runtime contexts and loads PortAudio, but initialization fails with
+`PaErrorCode -9999`. The actual Android OpenSL ES framework, Binder nodes and
+audio services are absent; microphone capture was not tested. All seven
+artifact archives were downloaded in full and verified by SHA-256, ZIP CRC and
+member hashes. The failed job's complete original log is retained too.
+
+The separate [isolated audio staging host checkpoint](../audit/audio-device-staging-20261017/namespace-private-inputs-828e5d5e/summary.json)
+passed **196 focused tests** with no failures or skips in 1.22 seconds on Windows
+Python 3.14.2 with the exact frozen packaging 26.0 wheel. The earlier
+[OpenSSL checkpoint](../audit/audio-device-staging-20261017/openssl-private-inputs-bd72d882/summary.json)
+passed 189 tests in 3.97 seconds; these are overlapping, separate runs, and
+neither is a new full Windows repository suite. Source hashes remained unchanged
+during each check. The [four-run staging history](audio-readiness-device-validation.md#isolated-staging-history)
+retains every native failure, including the fourth run's completed first-root
+assembly, 102-distribution validation and CLI help before its diagnostic origin
+check failed. The later [native staging record](../audit/audio-device-staging-20261017/run-39076074868/summary.json) now proves complete
+recreation at both final destinations, including a path containing spaces, under
+UID 1000 with networking disabled. Each root preserves 102 distribution versions,
+verifies 101 installed wheels and 167 active dependency edges, and passes
+validation after CLI startup and diagnostics. CFFI and NumPy behavior checks pass;
+private OpenSSL legacy activation and the private audio-library origins are
+verified. Both diagnostic protocols pass with original PortAudio error -9999
+and unavailable audio. This closes off-device software preparation while
+physical initialization, capture and VAD remain unproved. The
+[final boundary record](../audit/resume-release-boundary-final-20261017.json)
+preserves the public main/release inputs, protected files and original CUA pin.
+
+The [namespace implementation CI](../audit/packaging-ci-09a945c-20261017/summary.json)
+passed **590 tests with no failures or skips** in each of its separate Linux
+push and PR runs, taking 2.72 and 3.16 seconds respectively. The push source was
+`09a945cff9e07243fb24e99d9a58a12d500eb18d`; the PR merge tree matches that source
+exactly. Python compilation, unit tests, shell syntax and JSON validation all
+passed. Candidate and component workflows performed planning only and skipped
+their native jobs. These CI results do not supply the separate native audio
+staging result or a new full Windows suite.
+
+The preceding [OpenSSL implementation CI](../audit/packaging-ci-bd9b635-20261017/summary.json)
+passed 583 tests with no skips in each separate Linux push and PR run. It remains
+a historical checkpoint alongside the earlier oracle CI below; these overlapping
+counts are not added together.
+
+The [historical oracle implementation CI](../audit/packaging-ci-cea5b45-20261017/summary.json)
+passed **394 tests** with no failures or skips in each of its separate push and
+PR runs. The push checked out source `cea5b45c7f3b0474c51706153c2cee848f29d181`; the PR
+used its generated merge commit, whose tree is verified identical to that source.
+Python compilation, shell syntax and JSON validation passed. The concurrent
+candidate and component workflows performed planning only and skipped their
+native jobs; they are not new native validation of the unchanged main candidate.
+
+The [platform-fix implementation CI](../audit/packaging-ci-1136617-20261017/summary.json)
+passed **391 tests** with no failures or skips at
+`1136617b0c5983f1bdc5991126758c7892f4c94c`. Python compilation, shell syntax
+and JSON validation passed. The corresponding Windows host run passed
+387 tests with four host-specific skips; these overlapping counts are not summed.
+The subsequent oracle correction has its own host and Linux results above.
+
+The [earlier implementation-commit CI](../audit/resume-ci-635ec13-20261017.json)
+passed **291 tests** with no failures or skips in each of the separate push and
+pull-request runs at `635ec13c9d0f264f508d1bdbaa7670d4eaa00787`. Compile, shell
+syntax and JSON validation passed too. The [earlier combined CI](../audit/resume-ci-3414585-20261017.json)
+and its separate Windows host run remain recorded at `3414585`; that host run
+passed 287 tests with four host-specific skips. The [earlier merge receipt](../audit/resume-integration-20261017.json)
+records preserved concurrent preparation work and confirms unchanged native-test
+inputs at that earlier checkpoint. The later scientific implementation and
+merged wrapper have their own completed native results above. The earlier
+[standalone](../audit/cua-native-20261017/run-39052290704.json) and
+[host preparation](../audit/cua-hermes-host-tests-20261017.json) evidence remains
+available with its original source bindings.
 
 [Probe next-stable Termux compatibility](../.github/workflows/compatibility-probes.yml)
 runs seven native ARM lanes against the immutable released package and the proposed

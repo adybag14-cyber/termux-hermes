@@ -39,21 +39,111 @@ contains PyTorch 2.14.0, while the NeuTTS
 dependency group is excluded for the managed interpreter. No Android wheel for
 the locked PyTorch or ONNX Runtime entries is present in that lock.
 
-The first separate [APT-only dependency experiment](../scripts/compatibility_probe_neutts.sh),
-[run 39053355817](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39053355817)
-at head `036f11515eda3a6e4129e14c7dd75ec27d5ae47d`, installed all 122 pinned
-APT packages. SciPy's numerical checks, llvmlite's native MCJIT function and soxr
-resampling passed. Torch, Torchaudio and Torchcodec each stopped at
-`ModuleNotFoundError: No module named 'typing_extensions'` before their native
-behavior cases; the overall probe correctly failed. A pinned Python
-dependency-closure fix is pending.
+The earlier version of the separate scientific dependency experiment
+**passed all six native behavior cases** in
+[run 39055874446](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39055874446)
+at exact head `d439e8100bc89dbfe681fc03aa22017f175b8b2d`. The
+[verified result](../audit/neutts-native-20261017/run-39055874446.json)
+binds all 122 pinned APT archives, the exact supplemental Python artifacts from
+the upstream lock, the real Termux system interpreter, mapped AArch64 libraries,
+and each independent child-process receipt.
+
+| Component | Native behavior observed |
+| --- | --- |
+| Torch 2.14.1 | Exact CPU convolution and matrix multiplication results. |
+| Torchaudio 2.11.0 | 24 kHz to 16 kHz resampling; 1,600 output samples with mean absolute error 0.0002513. |
+| TorchCodec 0.17.0 | Decoded the 16 kHz PCM fixture into 1,600 samples with zero maximum error. |
+| NumPy 2.5.4 / SciPy 1.18.1 | Linear-system solution and FFT matched their numerical oracles. |
+| llvmlite 0.49.0 | Real Android AArch64 MCJIT execution returned the expected 23.0. |
+| Soxr 1.1.0 | Resampling produced 1,600 samples with mean absolute error 2.1722e-7. |
+
+The first run, [39053355817](../audit/neutts-native-20261017/run-39053355817.json),
+stopped Torch, Torchaudio and TorchCodec at missing `typing_extensions`, while
+the other three cases passed. The supplemental dependency repair then completed
+the installed metadata graph and actual MarkupSafe/Jinja2 escaping checks.
+[Run 39055038031](../audit/neutts-native-20261017/run-39055038031/verification.json)
+still failed before native cases because pip rejected the seven original APT
+scientific distributions' `android_aarch64` WHEEL tags.
+
+That pip compatibility issue is **still unresolved**. The final probe records
+`dependency_closure_passed=true` and `scientific_behavior_passed=true`, alongside
+`pip_check_passed=false`. Diagnostic continuation requires exactly the seven
+observed unsupported-platform messages, expected versions, and original WHEEL
+file hashes from the pinned APT archives. Missing dependencies, version conflicts
+or any other pip error stop the probe. No wheel tags are rewritten and no
+interpreter platform is spoofed.
+
+### Stricter provenance preparation
+
+The [active experiment](../scripts/compatibility_probe_neutts.sh) now incorporates
+the incoming preparation through commit
+`19ab7a1ce9f496dd8dd291d19e3818bb5f878048`. Its frozen nine-wheel closure
+uses official native MarkupSafe 3.0.4; the earlier passing experiment used an
+upstream MarkupSafe 3.0.3 source fallback. These are different inputs.
+
+The added validator binds the original APT archives and package identities,
+installed interpreter and metadata bytes, all recorded pip source files and
+their unique package ownership, the installed dependency inventory and
+Requires-Python requirements. Diagnostic continuation still requires the exact
+seven original pip platform-tag failures, with interpreter and ABI checks.
+It does not rewrite metadata or supported tags. A SymPy installed-file check now
+accounts for its wheel data-directory installation path.
+
+This stricter implementation passed native validation in
+[run 39062191148](../audit/neutts-native-20261017/run-39062191148.json) at
+`ba708a8ac82666c9d1a05b1495335d8d1bb76179`. All seven cases passed,
+including native MarkupSafe and Jinja2 escaping. The checker verified 474 selected
+APT-owned files (456 pip source files), 2,829 installed wheel files, 17 installed
+distributions and 11 active requirement edges. Pip still exits 1 with its exact
+seven tag failures; overall compatibility remains false. The
+[reconciliation record](../audit/neutts-provenance-reconciliation-20261017.json)
+keeps both the older source-fallback result and this stricter result under their
+own tested inputs. The [GGUF feasibility study](neutts-default-gguf-feasibility.md)
+and isolated llama-cpp-python Android loader patch remain source preparation,
+outside the main package candidate and without a native inference claim.
+
+### Opt-in native CPU source builds
+
+A separate [native component workflow](../.github/workflows/neutts-engine-components.yml)
+prepares Numba 0.67.0 and llama-cpp-python 0.3.36 with its exact vendored llama
+source. It builds and tests CPU behavior without downloading models. The
+[initial native attempt](../audit/neutts-native-components-20261017/run-39062163081/summary.json)
+passed the complete scientific foundation and verified the compiler APT closure,
+then stopped before Numba compilation. An injected
+`_PYTHON_HOST_PLATFORM=android-24-arm64_v8a` made pip's native platform
+enumeration raise `KeyError: '24-arm64_v8a'`.
+
+The helper now uses native Python's actual platform, removes that injected
+override from build children, and rejects inherited overrides before querying
+native metadata. The [regression and reconciliation record](../audit/neutts-native-components-reconciliation-20261017.json)
+preserves the failing evidence and the host-validated correction. Every frozen
+source, archive, version, ABI and compiler-option pin remains the same; only the
+lock's descriptive platform policy and its checksum changed.
+
+The [new standalone-wrapper run](../audit/neutts-native-20261017/run-39063780780.json)
+passed all seven scientific/installed-wheel cases and strict provenance at
+`1136617b0c5983f1bdc5991126758c7892f4c94c`, while preserving pip exit 1. The [platform-corrected CPU run](../audit/neutts-native-components-20261017/run-39063780748/summary.json)
+built and installed Numba and the matching llama backend. Installed-input and
+Numba JIT/guvectorize/workqueue behavior checks passed. That historical result remains
+failed because the llama oracle referenced an obsolete use_mmap parameter.
+The pinned Python/C structures instead define load_mode/lazy_mode AUTO defaults;
+the [corrected oracle](../audit/neutts-llama-oracle-reconciliation-20261017.json)
+now checks those actual values while retaining all existing CPU, ABI, library
+and cleanup guards. The [fresh native run](../audit/neutts-native-components-20261017/run-39065274205/summary.json)
+passes at `cea5b45c7f3b0474c51706153c2cee848f29d181`: seven foundation cases
+and three native cases, with both source builds, installed-input verification,
+Numba behavior and llama initialization/cleanup passing. The observed model
+defaults are `load_mode=-1` and `lazy_mode=1`; all 13 tested inputs match the
+current implementation. All 4,669 artifact members were verified. Raw pip still
+exits 1 and WHEEL tag compatibility remains unresolved, so overall compatibility
+is false. No model loading, inference, full engine closure or synthesis is inferred.
 
 This disposable Termux system-Python experiment records the rolling base upgrade
 separately from the pinned dependency archives. Its
 [native workflow](../.github/workflows/neutts-termux-probe.yml) does not install
 NeuTTS, change Hermes PM, validate synthesis or alter the current engine
-exclusion. The [audit record](../audit/compatibility-0.22.2-1.json) binds these
-partial results to the exact tested inputs and verified artifact.
+exclusion. Its successful scientific measurements do not establish the complete
+NeuTTS dependency closure or compatibility with the bundled Hermes interpreter.
 
 The engine still needs one certified runtime arrangement:
 
@@ -82,8 +172,8 @@ explicitly configured remote Linux desktop. The Termux Bot Desktop adapter
 provides a separate local virtual X11 display. These are useful capabilities,
 but neither supplies Android Accessibility/MediaProjection control of arbitrary
 phone apps. A phone UI backend requires that Android integration and its explicit
-device permissions. A potential native X11 driver build should be evaluated
-against the virtual desktop on its own terms.
+device permissions. The native X11 driver has now been evaluated
+against the virtual desktop, as recorded below.
 
 ### Isolated native X11 source-port experiment
 
@@ -130,32 +220,79 @@ its existing failure behavior is preserved. TigerVNC does not provide the
 parallel uinput devices expected by CUA's multiple-pointer implementation.
 Android phone application control still requires an Android-specific backend.
 
-A [separate Hermes integration patch](../patches/next-stable/cua-hermes-integration.patch)
-allows an explicitly selected native Termux X11 executable. It leaves the full
-runtime manifest check, action approval gate and viewer lease in place. The
-[native integration helper](../scripts/compatibility_probe_cua_hermes.py) uses the
-real registered tool and product Bot Desktop, with exact fixture image/input
-observations, three one-action foreground approvals, refusal without an approver,
-viewer takeover/hand-back, and owned cleanup. Its [candidate fetcher](../scripts/fetch_compatibility_candidate.py)
-verifies the already-proven package and source identities before the test. These
-files are prepared and reviewed; native Hermes integration is still pending and
-the experimental patch is not included in the full main candidate. The
-[preparation receipt](../audit/cua-hermes-preparation-20261017.json) distinguishes
-the full-source reference/replay Git trees from the forthcoming runtime input:
-the native probe will copy the exact proven candidate's trimmed `app/` tree
-outside the installed payload and apply only the experimental CUA patch. The
-full-source trees `f49c77b666cef7fd5235cdd786556908527b532e` and
-`d4e6233dc147ca2595d37e9a76a03878ee137498` prove the reference patch replay;
-they do not assert that the candidate's trimmed app tree is identical to either.
+### Native Hermes integration completed
 
-The [canonical host-validation record](../audit/cua-hermes-host-tests-20261017.json)
-preserves the initial 58-pass/three-skip run and the final 14-pass readiness run,
-with seven overlapping cases and unchanged production code. Those results are
-not summed and do not establish native Hermes-to-MCP behavior. The standalone
-driver result therefore does not increase the six main-candidate repairs or
-change the nine-restriction baseline count.
+The [separate Hermes integration patch](../patches/next-stable/cua-hermes-integration.patch)
+now **passes the real registered Hermes tool path** in
+[run 39056472835](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39056472835)
+at exact head `37bf89d09a2a68a41585389d59b19e5e583c1f23`.
+The [verified result](../audit/cua-hermes-resume-20261017/run-39056472835.json)
+preserves the complete artifact digest, inner preparation and helper receipts,
+actual Xlib events and the screenshot. All three completion signals passed:
+native preparation, the Hermes helper, and the outer completed/exit-zero receipt.
+
+The test installs the already-proven same-version candidate, copies its trimmed
+`app/` tree into a private directory, and applies only this experimental patch.
+The candidate's own managed Python executes the registered `computer_use`
+handler against the external Bionic driver and real product Bot Desktop.
+The complete installed payload and experimental source remained unchanged after
+execution. All 12 changed source-file hashes match the host-validated reference
+tree `d2cfed7c6e84682ce2c8656215226cff2778e1d2`; the trimmed installed app
+is not claimed to equal the full-source Git tree.
+
+Two concrete integration defects are repaired:
+
+- Before a desktop exists, manifest discovery now launches the native driver with
+  Termux's system libraries while preserving the managed Python parent's bundled
+  loader environment. The actual pre-desktop driver contract passed.
+- Scroll coordinates are forwarded when the live driver advertises either the
+  existing coordinate capability or both schema properties `x` and `y`.
+  The native driver advertises the two properties without the legacy capability.
+  Its independently recorded wheel events now land at the requested `(80,60)`;
+  the prior run delivered them at `(160,120)`.
+
+The integration also proved a 320x240 two-color capture, the exact click, exactly
+two scroll ticks, and the full text `hermes-native-input`. Each input received
+one separate `once` approval; requests without an approver and reuse of a
+consumed approval were refused. A real viewer lease blocked both input and
+capture until hand-back. Product session release, the fixture and observed owned
+child processes, the virtual desktop and the private workspace were cleaned up.
+
+[Canonical loader tests](../audit/cua-hermes-resume-20261017/host-tests.json)
+passed **73 tests with three macOS-only skips**.
+[Scroll regression evidence](../audit/cua-hermes-resume-20261017/scroll-source-tests.json)
+shows the new case failing before the fix and the final focused run passing
+**31 tests**. These are separate runs and are not added together. The broader
+computer-use file had the same **83 passes, three failures and one skip** before
+and after the fix. Those three Windows fixture failures also reproduced before
+the loader change: an extensionless shell fixture, an unescaped Windows path in
+JSON, and a fixture that removes the home-directory environment. Their actual
+failures remain in the record.
+
+All eight [scoped lint checks](../audit/cua-hermes-resume-20261017/scoped-lint.json)
+passed for the final integration diff, including pinned Ruff and the unmodified
+code-health engine with zero blocking or advisory findings. This is scoped lint,
+not a claim that the entire all-tree checker lane ran. The earlier
+[58/14-test preparation evidence](../audit/cua-hermes-host-tests-20261017.json)
+and [failed native runs](../audit/cua-hermes-resume-20261017/) remain historical
+records.
+
+This completed integration still requires an explicitly selected external driver
+and foreground delivery. The driver and experimental adapter are **outside the
+main package candidate and default PM admission**. Default background input,
+AT-SPI trees, secure encrypted history and Android phone-app control retain the
+limits described above. This result therefore does not increase the six
+main-candidate repairs or change the nine-restriction baseline count.
 
 ## Microphone silence detection
+
+The [final full component run](../audit/native-probes-635ec13-20261017/summary.json)
+again fails at PortAudio initialization on implementation commit `635ec13`.
+NumPy's four numerical checks pass in both runtime contexts, and the PortAudio
+library loads. The observed container still lacks the actual Android audio
+framework and Binder services; hardware capture remains untested. The overall
+component workflow retains its audio failure, alongside six passing non-audio
+lanes, and its complete failed-job log is saved.
 
 Termux:API records a finalized audio file; it does not expose the live PCM stream
 used by Hermes' sounddevice silence detector. The prepared capture selector
@@ -180,11 +317,41 @@ evidence](../audit/native-probes-9fcd31c-20261017/audio-summary.json) and the
 Physical microphone permission, capture, VAD thresholds, maximum
 duration, playback/audio focus and cancellation remain device gates.
 
+A separate [audio-readiness repair](audio-readiness-device-validation.md) has
+passing host contract tests for PortAudio initialization failures and output-only
+device inventories; its [preparation record](../audit/audio-readiness-preparation-20261017.json)
+retains the original source and test evidence. It remains outside the main
+candidate, which does not select `audio-io`.
+
+The [complete isolated audio staging run](../audit/audio-device-staging-20261017/run-39076074868/summary.json) now passes native
+recreation at two fresh final paths, including one containing spaces, with
+networking disabled. Each environment preserves the candidate's 100 installed
+distribution versions and adds NumPy/sounddevice, for 102 distributions, 101
+installed wheel checks and 167 active dependency edges. CLI startup and full
+immutable validation after diagnostics pass in both roots. The actual private
+OpenSSL legacy provider loads, and the PortAudio/OpenSLES/namespace origins match
+the frozen inputs. Both diagnostic protocols pass while reporting unavailable
+audio and the original PortAudio -9999 error; neither maps a real Android audio
+framework or opens a device stream. The transfer bundle and installation
+receipts are now prepared and verified for later foreground-device recreation.
+
+The [namespace host checkpoint](../audit/audio-device-staging-20261017/namespace-private-inputs-828e5d5e/summary.json)
+passed 196 focused tests in 1.22 seconds with frozen packaging 26.0. The preceding
+[OpenSSL checkpoint](../audit/audio-device-staging-20261017/openssl-private-inputs-bd72d882/summary.json)
+passed 189 tests in a separate historical run; the counts are not summed.
+The [four-run staging history](audio-readiness-device-validation.md#isolated-staging-history)
+retains all failed attempts, including the fourth run's first-root
+assembly/validation/CLI progress. No physical Termux installation, microphone
+permission, capture or VAD is certified by the successful container recreation.
+
 ## Stable-release prerequisites
 
 The compatibility preparation is saved independently from the released recipe.
 The current same-version candidate passed the complete native package and
-optional-install lifecycle gate; its [saved evidence](../audit/candidate-lifecycle-e271e92-20261017/summary.json)
-records the exact tested inputs. A future stable release must keep that gate
+optional-install lifecycle gate again in the independent full rebuild at
+`635ec13`; its [saved evidence](../audit/candidate-lifecycle-635ec13-20261017/summary.json)
+records the exact tested inputs, complete artifact verification and preserved
+distribution versions. The older candidate remains the pinned input of the
+completed CUA experiment. A future stable release must keep that gate
 passing for its final source and complete the Android device checks. This branch does not
 publish a release or promote the candidate into the signed APT feed.

@@ -1,0 +1,79 @@
+{
+  "environment_trace": [
+    {
+      "finding": "Sets isolated LD_LIBRARY_PATH but no OPENSSL_MODULES/OPENSSL_CONF before first Python startup",
+      "function": "prepare.sh"
+    },
+    {
+      "finding": "Currently inherits OpenSSL settings and does not set a private provider/config",
+      "function": "runtime_environment"
+    },
+    {
+      "finding": "Passes runtime_environment(root, os.environ) into every helper worker",
+      "function": "run_child"
+    },
+    {
+      "finding": "Delegates to pm.environment._base_environment and retains non-Python/non-UV OpenSSL settings",
+      "function": "pm.runtime.runtime_environment"
+    },
+    {
+      "finding": "Passes PM runtime environment to PythonEnvironment and installed-PM validation subprocess",
+      "function": "pm.runtime_stage.stage_runtime"
+    },
+    {
+      "finding": "Its sealed PM subprocess currently takes pm.runtime.runtime_environment directly",
+      "function": "native_validation"
+    },
+    {
+      "finding": "Sets isolated LD_LIBRARY_PATH before helper Python but no OpenSSL settings",
+      "function": "launcher_bytes"
+    }
+  ],
+  "observed_failure": {
+    "ambient_provider": "/data/data/com.termux/files/usr/lib/ossl-modules/legacy.so",
+    "excerpt": {
+      "sha256": "451b7d2678c5e96b366f3854ef6ba2b677170f1fbf077a0621348226c4a0fd13",
+      "size": 983
+    },
+    "head_sha": "54c7f99263041949eb5513a535c0e663916e78d8",
+    "job_log": {
+      "sha256": "0f943a711e7067695a4370aecc970272f090412ba1112cc883f450b068774b7c",
+      "size": 32464
+    },
+    "run_id": 39072136395
+  },
+  "original_source_matches_manifest": {
+    "app/pm/environment.py": {
+      "sha256": "f88a5684ea0cd75023499a2ce8f8bd79f17b08d60e6f5abcf2a44b410b624a51",
+      "size": 27316
+    },
+    "app/pm/runtime.py": {
+      "sha256": "68d6ae47d2e0143f3cc377e462e3588abbb0e857bbc9f22442a3f66ebe54c478",
+      "size": 12142
+    },
+    "app/pm/runtime_stage.py": {
+      "sha256": "263cf609896ca5ebdc650c446ec9a3503d4f36389460193b0ad7e97c8c3bb79f",
+      "size": 2340
+    }
+  },
+  "schema_version": 1,
+  "scope": "Read-only source trace for the observed provider leak; no native success or device-readiness claim",
+  "source_before": {
+    "scripts/audio_device_bundle_lock.json": {
+      "sha256": "ab203853f6d4d7e827bffb821ab07524fae7c25a1a4282cbb23fdf7322f5d6c9",
+      "size": 19413
+    },
+    "scripts/prepare_audio_device_bundle.py": {
+      "sha256": "a94f646258967e0cd12f83a491690cf9db4bc3589edd45da12d53062f40c526d",
+      "size": 34453
+    },
+    "scripts/prepare_audio_device_environment.py": {
+      "sha256": "f691d3187bbd40aa7af0c95dae15335c89a34dfe2511882870c142899a4f3499",
+      "size": 58569
+    },
+    "tests/test_audio_device_staging.py": {
+      "sha256": "aa38887f05261d5fadf7deb687753ef68e916dffabba09cfa7fad678071ce05c",
+      "size": 56212
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "scope": "Packaging harness regression suite after CUA loader fix and NeuTTS exact Python dependency completion",
+  "base_commit": "58b3176ba0dfa224964313405826a48421c924a0",
+  "inputs": {
+    "scripts/compatibility_probe_neutts.py": "7eda9a8d77d0bec11978e19f63546af2d7ca9fe453f3fa30f29567c22b3fede9",
+    "scripts/compatibility_probe_neutts.sh": "17c8797e328f7a7c039210c65122a4a5457dabb978d457357edc1923759de6ef",
+    "tests/test_neutts_probe.py": "e58ee62a1f35be9163d68a74edf0e94728ddc68d7612f64004cef02affaa8ff9",
+    ".github/workflows/neutts-termux-probe.yml": "e7b477dff174ba0d5ea98f2db924a936225e617646795e567f3b7671ef3083af",
+    "scripts/compatibility_probe_cua_hermes.py": "310ca4e826fad5badad3750ea25fafe941a01c65311c3c5488afa4c2dc494b08",
+    "patches/next-stable/cua-hermes-integration.patch": "6424636d7d5b590724365eb8b952fa164ac6dfc26a9d7c1a9a70ac8baf7b591b"
+  },
+  "checks": [
+    {
+      "command": [
+        "python",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "started_at": "2026-10-17T17:42:59.879621+00:00",
+      "exit_code": 0,
+      "stdout": "...................................s.................................... [ 30%]\r\n........................................................................ [ 60%]\r\n........s............................................................... [ 91%]\r\n...................ss                                                    [100%]\r\n233 passed, 4 skipped in 12.92s\r\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\Git\\bin\\bash.exe",
+        "-n",
+        "scripts/compatibility_probe_neutts.sh"
+      ],
+      "started_at": "2026-10-17T17:43:16.010295+00:00",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\adyba\\go\\bin\\actionlint.EXE",
+        ".github/workflows/neutts-termux-probe.yml"
+      ],
+      "started_at": "2026-10-17T17:43:16.333573+00:00",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "started_at": "2026-10-17T17:43:17.198716+00:00",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "native_abi_or_physical_device_test": false
+}

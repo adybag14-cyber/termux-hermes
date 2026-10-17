@@ -14,7 +14,8 @@ import traceback
 import wave
 import zipfile
 
-CASES = ("python_dependencies", "torch", "torchaudio", "torchcodec", "scipy", "llvmlite", "soxr")
+SCIENTIFIC_CASES = ("torch", "torchaudio", "torchcodec", "scipy", "llvmlite", "soxr")
+CASES = ("python_dependencies", *SCIENTIFIC_CASES)
 EXPECTED = {
     "torch": "2.14.1", "torchaudio": "2.11.0", "torchcodec": "0.17.0",
     "scipy": "1.18.1", "llvmlite": "0.49.0", "soxr": "1.1.0", "numpy": "2.5.4",
@@ -140,9 +141,13 @@ def python_dependencies_case():
     require(markupsafe._escape_inner is _speedups._escape_inner, "MarkupSafe used a Python fallback")
     escaped = str(markupsafe.escape("<Hermes & Termux>"))
     require(escaped == "&lt;Hermes &amp; Termux&gt;", "native MarkupSafe escaping differs")
+    import jinja2
+    rendered = jinja2.Environment(autoescape=True).from_string("{{ value }}").render(value="<owned>&")
+    require(rendered == "&lt;owned&gt;&amp;", "Jinja2 escaping differs")
     return {"lock_sha256": sha(lock_path), "installed_distributions": installed,
             "apt_torch_metadata_sha256": sha(torch_metadata),
             "markupsafe_native_module": elf(_speedups.__file__), "escaped_text": escaped,
+            "jinja2_result": rendered,
             "engine_installed": False, "candidate_modified": False}
 
 
@@ -408,6 +413,36 @@ def apt_python_validation(out, pip_code, validation_code, metadata_sha):
             "raw_pip_check_preserved": True}
 
 
+def summarize_core_results(cases, provenance, metadata, pip_code):
+    """Keep measured scientific success separate from every dependency gate."""
+    rows = {row["component"]: row for row in cases}
+    complete = len(cases) == len(CASES) and set(rows) == set(CASES)
+
+    def passed(name):
+        row = rows.get(name, {})
+        return (row.get("status") == "passed" and row.get("exit_code") == 0
+                and row.get("timed_out") is False)
+
+    scientific_passed = all(passed(name) for name in SCIENTIFIC_CASES)
+    installed_files_passed = passed("python_dependencies")
+    provenance_passed = (provenance.get("status") == "requirements-and-provenance-passed"
+                         and provenance.get("exit_code") == 0 and "error" not in provenance)
+    metadata_passed = ("error" not in metadata
+                       and sorted(metadata.get("unsupported_distribution_names", [])) == sorted(EXPECTED))
+    core_passed = (complete and scientific_passed and installed_files_passed
+                   and provenance_passed and metadata_passed and pip_code == 1)
+    return {
+        "status": "passed" if core_passed else "failed",
+        "scientific_behavior_passed": scientific_passed,
+        "python_installed_files_passed": installed_files_passed,
+        "dependency_closure_passed": provenance_passed,
+        "native_case_set_complete": complete,
+        "pip_check_passed": pip_code == 0,
+        "pip_wheel_tag_compatibility": "unresolved",
+        "overall_compatibility_passed": False,
+    }
+
+
 def main(out):
     require(sys.platform == "android" and os.uname().machine == "aarch64" and os.getuid() == 1000,
             "native Bionic UID1000 interpreter required")
@@ -443,7 +478,10 @@ def main(out):
                                  "error": {"type": type(exc).__name__, "message": str(exc)}}
         traceback.print_exc()
     receipt = {
-        "schema_version": 1, "status": "running", "scope": "APT native scientific ABI/behavior with verified Python dependencies",
+        "schema_version": 1, "status": "running",
+        "scope": "Separate APT native scientific behavior with pinned dependency provenance; not NeuTTS engine or pip compatibility",
+        "overall_compatibility_passed": False,
+        "pip_check_passed": pip_check_code == 0, "pip_wheel_tag_compatibility": "unresolved",
         "apt_python_validation": provenance_validation,
         "pip_check": {"exit_code": pip_check_code, "log": pip_check_log.name,
                       "log_sha256": sha(pip_check_log)},
@@ -461,16 +499,25 @@ def main(out):
     for name in CASES:
         receipt["cases"].append(execute_case(name, out))
         result_path.write_text(json.dumps(receipt, indent=2) + "\n")
-    receipt["status"] = "passed" if ("error" not in provenance_validation and "error" not in packaging_metadata and all(
-        row["exit_code"] == 0 and row["status"] == "passed" for row in receipt["cases"])) else "failed"
+    receipt.update(summarize_core_results(
+        receipt["cases"], provenance_validation, packaging_metadata, pip_check_code
+    ))
     result_path.write_text(json.dumps(receipt, indent=2) + "\n")
-    print(json.dumps({"status": receipt["status"], "pip_check": receipt["pip_check"],
+    print(json.dumps({"status": receipt["status"],
+                      "scientific_behavior_passed": receipt["scientific_behavior_passed"],
+                      "python_installed_files_passed": receipt["python_installed_files_passed"],
+                      "dependency_closure_passed": receipt["dependency_closure_passed"],
+                      "pip_check_passed": receipt["pip_check_passed"],
+                      "pip_wheel_tag_compatibility": receipt["pip_wheel_tag_compatibility"],
+                      "overall_compatibility_passed": False, "pip_check": receipt["pip_check"],
                       "apt_python_metadata": packaging_metadata,
                       "apt_python_validation": provenance_validation, "cases": receipt["cases"]}), flush=True)
     return 0 if receipt["status"] == "passed" else 1
 
 
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        raise SystemExit("usage: compatibility_probe_neutts.py --case NAME OUT | OUT")
     if sys.argv[1] == "--case":
         raise SystemExit(run_case(sys.argv[2], Path(sys.argv[3])))
     raise SystemExit(main(Path(sys.argv[1])))

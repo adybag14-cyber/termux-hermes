@@ -227,3 +227,89 @@ def test_replaced_pip_log_cannot_reuse_a_previous_validation_receipt(tmp_path):
     (tmp_path / "NEUTTS-PYTHON-CHECK.log").write_bytes(b"different requirements failure\n")
     with pytest.raises(RuntimeError, match="this invocation"):
         probe.apt_python_validation(tmp_path, 1, 0, "a" * 64)
+
+
+def complete_core_fixture():
+    cases = [
+        {"component": name, "status": "passed", "exit_code": 0, "timed_out": False}
+        for name in probe.CASES
+    ]
+    provenance = {"status": "requirements-and-provenance-passed", "exit_code": 0}
+    metadata = {"unsupported_distribution_names": list(probe.EXPECTED)}
+    return cases, provenance, metadata
+
+
+def test_successful_scientific_core_does_not_claim_pip_or_engine_compatibility():
+    cases, provenance, metadata = complete_core_fixture()
+    result = probe.summarize_core_results(cases, provenance, metadata, 1)
+    assert result["status"] == "passed"
+    assert result["scientific_behavior_passed"] is True
+    assert result["python_installed_files_passed"] is True
+    assert result["dependency_closure_passed"] is True
+    assert result["pip_check_passed"] is False
+    assert result["pip_wheel_tag_compatibility"] == "unresolved"
+    assert result["overall_compatibility_passed"] is False
+
+
+def test_six_scientific_passes_cannot_hide_failed_installed_wheel_evidence():
+    cases, provenance, metadata = complete_core_fixture()
+    cases[0].update(status="failed", exit_code=1)
+    result = probe.summarize_core_results(cases, provenance, metadata, 1)
+    assert result["status"] == "failed"
+    assert result["scientific_behavior_passed"] is True
+    assert result["python_installed_files_passed"] is False
+
+
+@pytest.mark.parametrize("provenance", [
+    {"status": "failed", "exit_code": 1},
+    {"status": "requirements-and-provenance-passed", "exit_code": 1},
+    {"status": "requirements-and-provenance-passed", "exit_code": 0, "error": {}},
+    {},
+])
+def test_seven_native_passes_cannot_replace_strict_dependency_provenance(provenance):
+    cases, _, metadata = complete_core_fixture()
+    result = probe.summarize_core_results(cases, provenance, metadata, 1)
+    assert result["status"] == "failed"
+    assert result["scientific_behavior_passed"] is True
+    assert result["dependency_closure_passed"] is False
+
+
+@pytest.mark.parametrize("metadata", [
+    {"error": {"message": "unreadable original WHEEL"}},
+    {"unsupported_distribution_names": ["unreviewed"]},
+    {},
+])
+def test_summary_requires_the_exact_original_apt_tag_evidence(metadata):
+    cases, provenance, _ = complete_core_fixture()
+    assert probe.summarize_core_results(cases, provenance, metadata, 1)["status"] == "failed"
+
+
+@pytest.mark.parametrize("kind", ["omitted", "duplicated", "unreviewed"])
+def test_partial_or_ambiguous_case_collection_cannot_certify_the_scientific_core(kind):
+    cases, provenance, metadata = complete_core_fixture()
+    if kind == "omitted":
+        cases.pop()
+    elif kind == "duplicated":
+        cases.append(dict(cases[-1]))
+    else:
+        cases.append({"component": "unreviewed", "status": "passed", "exit_code": 0, "timed_out": False})
+    result = probe.summarize_core_results(cases, provenance, metadata, 1)
+    assert result["status"] == "failed"
+    assert result["native_case_set_complete"] is False
+
+
+@pytest.mark.parametrize("updates", [{"exit_code": 9}, {"timed_out": True}])
+def test_success_receipt_cannot_hide_a_failed_or_timed_out_scientific_child(updates):
+    cases, provenance, metadata = complete_core_fixture()
+    cases[-1].update(updates)
+    result = probe.summarize_core_results(cases, provenance, metadata, 1)
+    assert result["status"] == "failed"
+    assert result["scientific_behavior_passed"] is False
+
+
+def test_changed_pip_exit_is_outside_the_frozen_provenance_convention():
+    cases, provenance, metadata = complete_core_fixture()
+    result = probe.summarize_core_results(cases, provenance, metadata, 0)
+    assert result["status"] == "failed"
+    assert result["pip_check_passed"] is True
+    assert result["overall_compatibility_passed"] is False

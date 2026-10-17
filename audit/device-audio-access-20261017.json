@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-17T20:01:38.177344+00:00",
+  "scope": "Read-only inventory of the connected Android development surface; no physical audio certification",
+  "device": {
+    "android_api_level": 36,
+    "abi": "arm64-v8a",
+    "persistent_device_identifier_recorded": false
+  },
+  "checks": [
+    {
+      "command": [
+        "adb",
+        "shell",
+        "getprop",
+        "ro.build.version.sdk"
+      ],
+      "exit_code": 0,
+      "stdout": "36\n"
+    },
+    {
+      "command": [
+        "adb",
+        "shell",
+        "getprop",
+        "ro.product.cpu.abi"
+      ],
+      "exit_code": 0,
+      "stdout": "arm64-v8a\n"
+    },
+    {
+      "command": [
+        "adb",
+        "shell",
+        "pm",
+        "list",
+        "packages",
+        "com.termux"
+      ],
+      "exit_code": 0,
+      "stdout": "package:com.termux.x11\npackage:com.termux\n"
+    },
+    {
+      "command": [
+        "adb",
+        "shell",
+        "run-as",
+        "com.termux",
+        "id"
+      ],
+      "exit_code": 1,
+      "stderr": "run-as: package not debuggable: com.termux\n"
+    }
+  ],
+  "derived_findings": {
+    "termux_installed": true,
+    "termux_x11_installed": true,
+    "termux_api_companion_listed": false,
+    "adb_run_as_termux_available": false,
+    "isolated_termux_audio_environment_established": false,
+    "termux_version": "0.118.0",
+    "distribution_channel_proved": false,
+    "microphone_permission_state_proved": false
+  },
+  "physical_audio_validation": "not_performed",
+  "actions": {
+    "app_installed": false,
+    "existing_termux_installation_modified": false,
+    "permission_changed": false,
+    "microphone_accessed": false,
+    "clipboard_read_or_changed": false,
+    "release_created": false
+  },
+  "next_steps": "Follow docs/audio-readiness-device-validation.md in an authorized Termux device session; this ADB inventory cannot certify those app-UID behaviors.",
+  "remaining_gates": [
+    "Exact candidate isolated audio environment and installation receipt",
+    "Foreground Termux app-UID execution; adb run-as is unavailable for this installation",
+    "For Termux:API routes: companion app and applicable permissions; its absence does not disqualify the separate PortAudio route",
+    "Microphone capture, silence/max-duration behavior, playback/audio focus and physical clipboard observations"
+  ],
+  "package_details_followup": {
+    "observed_on": "2026-10-17",
+    "command": [
+      "adb",
+      "shell",
+      "dumpsys",
+      "package",
+      "com.termux"
+    ],
+    "exit_code": 0,
+    "selected_fields": {
+      "versionName": "0.118.0",
+      "versionCode": 118,
+      "minSdk": 21,
+      "targetSdk": 28,
+      "installerPackageName": "com.google.android.packageinstaller"
+    },
+    "record_audio_permission_mentioned_in_package_dump": false,
+    "record_audio_permission_lines": [],
+    "full_package_dump_retained": false,
+    "scope_limit": "Selected read-only package facts; generic installer does not identify the distribution channel, and absence of RECORD_AUDIO in this package dump does not establish the complete shared-UID permission or app-ops state."
+  }
+}

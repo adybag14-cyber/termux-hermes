@@ -3,7 +3,9 @@ name: Prepare NeuTTS native CPU components
 on:
   workflow_dispatch:
   push:
-    branches: [prepare/termux-compatibility-next-stable]
+    branches:
+      - prepare/termux-compatibility-next-stable
+      - prepare/termux-compatibility-resume-20261017
     paths:
       - '.github/workflows/neutts-engine-components.yml'
       - 'scripts/prepare_neutts_native_sources.py'

@@ -1,0 +1,244 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-17T21:40:11.100057+00:00",
+  "status": "host-correction-verified-native-rerun-pending",
+  "parent_source_commit": "0111f4dbd08e609e0e66811360875ee267b83d34",
+  "source_inputs": {
+    "scripts/audio_device_bundle_lock.json": {
+      "sha256": "ab203853f6d4d7e827bffb821ab07524fae7c25a1a4282cbb23fdf7322f5d6c9",
+      "size": 19413
+    },
+    "scripts/prepare_audio_device_bundle.py": {
+      "sha256": "a94f646258967e0cd12f83a491690cf9db4bc3589edd45da12d53062f40c526d",
+      "size": 34453
+    },
+    "scripts/prepare_audio_device_environment.py": {
+      "sha256": "f691d3187bbd40aa7af0c95dae15335c89a34dfe2511882870c142899a4f3499",
+      "size": 58569
+    },
+    "tests/test_audio_device_staging.py": {
+      "sha256": "aa38887f05261d5fadf7deb687753ef68e916dffabba09cfa7fad678071ce05c",
+      "size": 56212
+    }
+  },
+  "failed_native_run": {
+    "id": 39070524219,
+    "conclusion": "failure",
+    "evidence": "../run-39070524219/summary.json",
+    "error_type": "InvalidRequirement"
+  },
+  "previous_psutil_correction": "../psutil-source-binding-7fad395/summary.json",
+  "correction": {
+    "scope": "Two exact original Hermes optional KittenTTS/Misaki requirements each receive one ASCII space before their URL-marker separator for in-memory parsing only.",
+    "original_parent_metadata_and_project_hashes_required": true,
+    "original_source_metadata_rewritten": false,
+    "active_optional_urls_rejected": true,
+    "unknown_malformed_strings_rejected": true,
+    "private_manager_exception": false,
+    "install_policy_changed": false,
+    "url_accessed": false,
+    "source_build_executed": false
+  },
+  "original_scan": {
+    "evidence": "original-parser-scan.json",
+    "wheel_metadata_count": 102,
+    "source_metadata_count": 1,
+    "requires_dist_count": 710,
+    "parse_failures": 2,
+    "parser": "packaging 26.0 from the exact frozen wheel",
+    "scan_precedes_the_correction": true
+  },
+  "corrected_host_metadata_simulation": {
+    "evidence": "metadata-simulation-2.json",
+    "all_710_requirements_parse": true,
+    "selected_distributions": 102,
+    "selected_declarations": 660,
+    "active_edges": 167,
+    "selected_extras": [
+      "acp",
+      "cron",
+      "matrix",
+      "mcp",
+      "telegram",
+      "termux",
+      "uvloop",
+      "audio-io"
+    ],
+    "both_adapted_rows_inactive_for_all_nine_extra_contexts": true,
+    "private_manager_distributions": 4,
+    "private_manager_graph_passed_without_binding": true,
+    "marker_environment": {
+      "extra": "",
+      "implementation_name": "cpython",
+      "implementation_version": "3.14.6",
+      "os_name": "posix",
+      "platform_machine": "aarch64",
+      "platform_python_implementation": "CPython",
+      "platform_release": "",
+      "platform_system": "Android",
+      "platform_version": "",
+      "python_full_version": "3.14.6",
+      "python_version": "3.14",
+      "sys_platform": "android"
+    },
+    "native_runtime_executed": false,
+    "physical_device_facts_claimed": false
+  },
+  "focused_tests": {
+    "passed": 164,
+    "skipped": 0,
+    "exit_code": 0,
+    "seconds": 1.79,
+    "parser_version": "26.0",
+    "evidence": "focused-correction-receipt.json",
+    "original_metadata_and_project_byte_tampering_rejected": true
+  },
+  "checkpoint_5": {
+    "status": "prepared-input-bundle",
+    "entry_count": 25269,
+    "wheel_count": 102,
+    "receipt": "LOCAL-BUNDLE-RECEIPT.json",
+    "assembly_validated_natively": false,
+    "files": {
+      "manifest.json": {
+        "sha256": "dab3c2888f0b56f432cacc1b18cd387c1dc4dfdf249ffbe7e3c4c891a2aaebdf",
+        "size": 5640268
+      },
+      "payload.tar.gz": {
+        "sha256": "5bcdd411fcd775949512e121ffa5f396b4b5268e50cfee4e38b7d4304a5880cf",
+        "size": 315008001
+      },
+      "prepare.sh": {
+        "sha256": "d9c5a93ca302467913becb2976a410af59bbff5e657da352dddba2976383d1d9",
+        "size": 2145
+      }
+    }
+  },
+  "boundaries": {
+    "fresh_native_validation_pending": true,
+    "audio_readiness": false,
+    "physical_device_readiness": false,
+    "microphone_accessed": false,
+    "recording_tested": false,
+    "default_audio_io_enabled": false,
+    "release_created": false
+  },
+  "files": {
+    "author-correction-summary.json": {
+      "bytes": 29294,
+      "sha256": "629d7663c7a7ba5dc2668856b6b7e82b398a48f3e0497b7548a69bd369351abb"
+    },
+    "focused-correction-receipt.json": {
+      "bytes": 7967,
+      "sha256": "48c59cf97f6018dba36bb2fb5754ac34a1d7d6dc0cee250b8deea38bc942fb3e"
+    },
+    "focused-proof.stderr.gz": {
+      "bytes": 22,
+      "sha256": "084db3bbd5505bf63da5ba02ad8a1080e356af2b5f32f5aacbe2549b3e277382"
+    },
+    "focused-proof.stdout.gz": {
+      "bytes": 465,
+      "sha256": "170155ebae6bcab3871cf07d32df02744672ef713918815775412c5ef7d68dc6"
+    },
+    "LOCAL-BUNDLE-RECEIPT.json": {
+      "bytes": 1793,
+      "sha256": "a8b1e948228acaac6fa013f0671adbe9e75aaafeb4d10414a22b528bf796eacf"
+    },
+    "metadata-simulation-1.json": {
+      "bytes": 39669,
+      "sha256": "b4cd8de30d3518282e169a4eb161e25d7af7a877d5a09625b71be89444f446c3"
+    },
+    "metadata-simulation-2.json": {
+      "bytes": 40041,
+      "sha256": "d7349e09cfa65644e16da95ce0dd8570a8828cb465095ccbc3bddd6f0d81ef81"
+    },
+    "observed-native-error-excerpt.log": {
+      "bytes": 1296,
+      "sha256": "ef25b3ec1550d5cb114aebfe438f19a6f54f95210d19b027383ffa0a4c9a50b2"
+    },
+    "original-parser-scan.json": {
+      "bytes": 310833,
+      "sha256": "537a44012abf206be10a30e79cbd1ea6da87bfb6fba59c8cc495e9fcd25c2393"
+    },
+    "pytest.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "pytest.stdout": {
+      "bytes": 264,
+      "sha256": "ec820711440a6ec119cd50a01333d7fa307f8b19ace9028a452b868c071f7ee9"
+    },
+    "scan.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "scan.stdout": {
+      "bytes": 3418,
+      "sha256": "575ddcbfd48286c763339b0110216dc3edee9cb48500d3924335fb094753fec1"
+    },
+    "scan_original_requirements.py": {
+      "bytes": 6879,
+      "sha256": "4431172bdd0ccb9e35fe7e79895eaf40ea3b7d97100301b06ff188b08eda51da"
+    },
+    "simulate_frozen_metadata.py": {
+      "bytes": 6073,
+      "sha256": "22ba4741a92f431685fa88e5aeb206371ad1d4afe17415d17b63f0989f9606a5"
+    },
+    "simulation-1.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "simulation-1.stdout": {
+      "bytes": 924,
+      "sha256": "84bc2b2f0e0bd6efc0e0584930f9154ca0690a22f6da6e9fb193d3744b15dcb8"
+    },
+    "simulation-2.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "simulation-2.stdout": {
+      "bytes": 906,
+      "sha256": "4706e554aec1553d3a8fac24356939685b9c2c6cc9eed23f7cf0f4832c9a386f"
+    },
+    "verify_parser_correction.py": {
+      "bytes": 3551,
+      "sha256": "81c2b1259d5df61f7a097095cc49a42a8dfee880b9de0709d470b062414a6517"
+    }
+  },
+  "previous_host_metadata_simulation": {
+    "evidence": "metadata-simulation-1.json",
+    "status": "superseded",
+    "reason": "The final harness returns a fresh marker dictionary per call, matching the pinned parser API. The active graph result is identical."
+  },
+  "author_full_evidence_inventory": {
+    "evidence": "author-correction-summary.json",
+    "original_retained_file_count": 132,
+    "scope": "Original author inventory includes copied input metadata, manifests and parser wheel retained outside this compact Git curation; only the files in this summary's files index are copied here."
+  },
+  "compressed_original_wrapper_logs": {
+    "focused-proof.stdout": {
+      "original": {
+        "bytes": 1094,
+        "sha256": "a684ccd7680022987b8a30ab88e72e2e298a078ba23961e8755505744a1088d2"
+      },
+      "compressed_file": "focused-proof.stdout.gz",
+      "compressed": {
+        "bytes": 465,
+        "sha256": "170155ebae6bcab3871cf07d32df02744672ef713918815775412c5ef7d68dc6"
+      },
+      "original_bytes_preserved": true
+    },
+    "focused-proof.stderr": {
+      "original": {
+        "bytes": 2,
+        "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6"
+      },
+      "compressed_file": "focused-proof.stderr.gz",
+      "compressed": {
+        "bytes": 22,
+        "sha256": "084db3bbd5505bf63da5ba02ad8a1080e356af2b5f32f5aacbe2549b3e277382"
+      },
+      "original_bytes_preserved": true
+    }
+  }
+}

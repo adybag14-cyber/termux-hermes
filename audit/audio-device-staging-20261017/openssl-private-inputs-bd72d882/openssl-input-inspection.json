@@ -1,0 +1,716 @@
+{
+  "source": "https://packages.termux.dev/apt/termux-main/pool/main/o/openssl/openssl_1%3A3.6.5_aarch64.deb",
+  "archive": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\audio-staging-input-audit-20261017\\openssl_1-3.6.5_aarch64.deb",
+  "bytes": 2482764,
+  "sha256": "a2fb7856875e63ef6b90442752e05974813372c3ca86d2513a78ea43c67a0f8b",
+  "members": [
+    {
+      "archive_member": "control.tar.xz",
+      "name": "./conffiles",
+      "size": 52,
+      "type": "0",
+      "linkname": "",
+      "sha256": "bed6a266e60cf2411f70ed8327001ff39a36b1ed64d52b58d941e5bbb61bdde8",
+      "active_lines": [
+        {
+          "line": 1,
+          "text": "/data/data/com.termux/files/usr/etc/tls/openssl.cnf"
+        }
+      ]
+    },
+    {
+      "archive_member": "control.tar.xz",
+      "name": "./control",
+      "size": 404,
+      "type": "0",
+      "linkname": "",
+      "sha256": "5ecabc22584434df60829163ea087c166f89c3101039790cca4105293d70020d",
+      "active_lines": [
+        {
+          "line": 1,
+          "text": "Package: openssl"
+        },
+        {
+          "line": 2,
+          "text": "Architecture: aarch64"
+        },
+        {
+          "line": 3,
+          "text": "Installed-Size: 8532"
+        },
+        {
+          "line": 4,
+          "text": "Maintainer: @termux"
+        },
+        {
+          "line": 5,
+          "text": "Version: 1:3.6.5"
+        },
+        {
+          "line": 6,
+          "text": "Homepage: https://www.openssl.org/"
+        },
+        {
+          "line": 7,
+          "text": "Breaks: openssl-tool (<< 1.1.1b-1), openssl-dev"
+        },
+        {
+          "line": 8,
+          "text": "Depends: ca-certificates, zlib"
+        },
+        {
+          "line": 9,
+          "text": "Conflicts: libcurl (<< 7.61.0-1)"
+        },
+        {
+          "line": 10,
+          "text": "Replaces: openssl-tool (<< 1.1.1b-1), openssl-dev"
+        },
+        {
+          "line": 11,
+          "text": "Description: Library implementing the SSL and TLS protocols as well as general purpose cryptography functions"
+        }
+      ]
+    },
+    {
+      "archive_member": "data.tar.xz",
+      "name": "./data/data/com.termux/files/usr/etc/tls/openssl.cnf",
+      "size": 12411,
+      "type": "0",
+      "linkname": "",
+      "sha256": "a65a2cb9f4ee8ffdc7ef4f0ac600c0bdafb95b7b1ab457188ac610a62f5ad6b3",
+      "active_lines": [
+        {
+          "line": 14,
+          "text": "HOME\t\t\t= ."
+        },
+        {
+          "line": 17,
+          "text": "openssl_conf = openssl_init"
+        },
+        {
+          "line": 20,
+          "text": "config_diagnostics = 1"
+        },
+        {
+          "line": 24,
+          "text": "oid_section = new_oids"
+        },
+        {
+          "line": 33,
+          "text": "[ new_oids ]"
+        },
+        {
+          "line": 41,
+          "text": "tsa_policy1 = 1.2.3.4.1"
+        },
+        {
+          "line": 42,
+          "text": "tsa_policy2 = 1.2.3.4.5.6"
+        },
+        {
+          "line": 43,
+          "text": "tsa_policy3 = 1.2.3.4.5.7"
+        },
+        {
+          "line": 53,
+          "text": "[openssl_init]"
+        },
+        {
+          "line": 54,
+          "text": "providers = provider_sect"
+        },
+        {
+          "line": 57,
+          "text": "[provider_sect]"
+        },
+        {
+          "line": 58,
+          "text": "default = default_sect"
+        },
+        {
+          "line": 71,
+          "text": "[default_sect]"
+        },
+        {
+          "line": 76,
+          "text": "[ ca ]"
+        },
+        {
+          "line": 77,
+          "text": "default_ca\t= CA_default\t\t# The default ca section"
+        },
+        {
+          "line": 80,
+          "text": "[ CA_default ]"
+        },
+        {
+          "line": 82,
+          "text": "dir\t\t= ./demoCA\t\t# Where everything is kept"
+        },
+        {
+          "line": 83,
+          "text": "certs\t\t= $dir/certs\t\t# Where the issued certs are kept"
+        },
+        {
+          "line": 84,
+          "text": "crl_dir\t\t= $dir/crl\t\t# Where the issued crl are kept"
+        },
+        {
+          "line": 85,
+          "text": "database\t= $dir/index.txt\t# database index file."
+        },
+        {
+          "line": 88,
+          "text": "new_certs_dir\t= $dir/newcerts\t\t# default place for new certs."
+        },
+        {
+          "line": 90,
+          "text": "certificate\t= $dir/cacert.pem \t# The CA certificate"
+        },
+        {
+          "line": 91,
+          "text": "serial\t\t= $dir/serial \t\t# The current serial number"
+        },
+        {
+          "line": 92,
+          "text": "crlnumber\t= $dir/crlnumber\t# the current crl number"
+        },
+        {
+          "line": 94,
+          "text": "crl\t\t= $dir/crl.pem \t\t# The current CRL"
+        },
+        {
+          "line": 95,
+          "text": "private_key\t= $dir/private/cakey.pem # The private key"
+        },
+        {
+          "line": 97,
+          "text": "x509_extensions\t= usr_cert\t\t# The extensions to add to the cert"
+        },
+        {
+          "line": 101,
+          "text": "name_opt \t= ca_default\t\t# Subject Name options"
+        },
+        {
+          "line": 102,
+          "text": "cert_opt \t= ca_default\t\t# Certificate field options"
+        },
+        {
+          "line": 112,
+          "text": "default_days\t= 365\t\t\t# how long to certify for"
+        },
+        {
+          "line": 113,
+          "text": "default_crl_days= 30\t\t\t# how long before next CRL"
+        },
+        {
+          "line": 114,
+          "text": "default_md\t= default\t\t# use public key default MD"
+        },
+        {
+          "line": 115,
+          "text": "preserve\t= no\t\t\t# keep passed DN ordering"
+        },
+        {
+          "line": 120,
+          "text": "policy\t\t= policy_match"
+        },
+        {
+          "line": 123,
+          "text": "[ policy_match ]"
+        },
+        {
+          "line": 124,
+          "text": "countryName\t\t= match"
+        },
+        {
+          "line": 125,
+          "text": "stateOrProvinceName\t= match"
+        },
+        {
+          "line": 126,
+          "text": "organizationName\t= match"
+        },
+        {
+          "line": 127,
+          "text": "organizationalUnitName\t= optional"
+        },
+        {
+          "line": 128,
+          "text": "commonName\t\t= supplied"
+        },
+        {
+          "line": 129,
+          "text": "emailAddress\t\t= optional"
+        },
+        {
+          "line": 134,
+          "text": "[ policy_anything ]"
+        },
+        {
+          "line": 135,
+          "text": "countryName\t\t= optional"
+        },
+        {
+          "line": 136,
+          "text": "stateOrProvinceName\t= optional"
+        },
+        {
+          "line": 137,
+          "text": "localityName\t\t= optional"
+        },
+        {
+          "line": 138,
+          "text": "organizationName\t= optional"
+        },
+        {
+          "line": 139,
+          "text": "organizationalUnitName\t= optional"
+        },
+        {
+          "line": 140,
+          "text": "commonName\t\t= supplied"
+        },
+        {
+          "line": 141,
+          "text": "emailAddress\t\t= optional"
+        },
+        {
+          "line": 144,
+          "text": "[ req ]"
+        },
+        {
+          "line": 145,
+          "text": "default_bits\t\t= 2048"
+        },
+        {
+          "line": 146,
+          "text": "default_keyfile \t= privkey.pem"
+        },
+        {
+          "line": 147,
+          "text": "distinguished_name\t= req_distinguished_name"
+        },
+        {
+          "line": 148,
+          "text": "attributes\t\t= req_attributes"
+        },
+        {
+          "line": 149,
+          "text": "x509_extensions\t= v3_ca\t# The extensions to add to the self signed cert"
+        },
+        {
+          "line": 162,
+          "text": "string_mask = utf8only"
+        },
+        {
+          "line": 166,
+          "text": "[ req_distinguished_name ]"
+        },
+        {
+          "line": 167,
+          "text": "countryName\t\t\t= Country Name (2 letter code)"
+        },
+        {
+          "line": 168,
+          "text": "countryName_default\t\t= AU"
+        },
+        {
+          "line": 169,
+          "text": "countryName_min\t\t\t= 2"
+        },
+        {
+          "line": 170,
+          "text": "countryName_max\t\t\t= 2"
+        },
+        {
+          "line": 172,
+          "text": "stateOrProvinceName\t\t= State or Province Name (full name)"
+        },
+        {
+          "line": 173,
+          "text": "stateOrProvinceName_default\t= Some-State"
+        },
+        {
+          "line": 175,
+          "text": "localityName\t\t\t= Locality Name (eg, city)"
+        },
+        {
+          "line": 177,
+          "text": "0.organizationName\t\t= Organization Name (eg, company)"
+        },
+        {
+          "line": 178,
+          "text": "0.organizationName_default\t= Internet Widgits Pty Ltd"
+        },
+        {
+          "line": 184,
+          "text": "organizationalUnitName\t\t= Organizational Unit Name (eg, section)"
+        },
+        {
+          "line": 187,
+          "text": "commonName\t\t\t= Common Name (e.g. server FQDN or YOUR name)"
+        },
+        {
+          "line": 188,
+          "text": "commonName_max\t\t\t= 64"
+        },
+        {
+          "line": 190,
+          "text": "emailAddress\t\t\t= Email Address"
+        },
+        {
+          "line": 191,
+          "text": "emailAddress_max\t\t= 64"
+        },
+        {
+          "line": 195,
+          "text": "[ req_attributes ]"
+        },
+        {
+          "line": 196,
+          "text": "challengePassword\t\t= A challenge password"
+        },
+        {
+          "line": 197,
+          "text": "challengePassword_min\t\t= 4"
+        },
+        {
+          "line": 198,
+          "text": "challengePassword_max\t\t= 20"
+        },
+        {
+          "line": 200,
+          "text": "unstructuredName\t\t= An optional company name"
+        },
+        {
+          "line": 202,
+          "text": "[ usr_cert ]"
+        },
+        {
+          "line": 209,
+          "text": "basicConstraints=CA:FALSE"
+        },
+        {
+          "line": 215,
+          "text": "subjectKeyIdentifier=hash"
+        },
+        {
+          "line": 216,
+          "text": "authorityKeyIdentifier=keyid,issuer"
+        },
+        {
+          "line": 231,
+          "text": "[ v3_req ]"
+        },
+        {
+          "line": 235,
+          "text": "basicConstraints = CA:FALSE"
+        },
+        {
+          "line": 236,
+          "text": "keyUsage = nonRepudiation, digitalSignature, keyEncipherment"
+        },
+        {
+          "line": 238,
+          "text": "[ v3_ca ]"
+        },
+        {
+          "line": 246,
+          "text": "subjectKeyIdentifier=hash"
+        },
+        {
+          "line": 248,
+          "text": "authorityKeyIdentifier=keyid:always,issuer"
+        },
+        {
+          "line": 250,
+          "text": "basicConstraints = critical,CA:true"
+        },
+        {
+          "line": 268,
+          "text": "[ crl_ext ]"
+        },
+        {
+          "line": 274,
+          "text": "authorityKeyIdentifier=keyid:always"
+        },
+        {
+          "line": 276,
+          "text": "[ proxy_cert_ext ]"
+        },
+        {
+          "line": 282,
+          "text": "basicConstraints=CA:FALSE"
+        },
+        {
+          "line": 288,
+          "text": "subjectKeyIdentifier=hash"
+        },
+        {
+          "line": 289,
+          "text": "authorityKeyIdentifier=keyid,issuer"
+        },
+        {
+          "line": 302,
+          "text": "proxyCertInfo=critical,language:id-ppl-anyLanguage,pathlen:3,policy:foo"
+        },
+        {
+          "line": 305,
+          "text": "[ tsa ]"
+        },
+        {
+          "line": 307,
+          "text": "default_tsa = tsa_config1\t# the default TSA section"
+        },
+        {
+          "line": 309,
+          "text": "[ tsa_config1 ]"
+        },
+        {
+          "line": 312,
+          "text": "dir\t\t= ./demoCA\t\t# TSA root directory"
+        },
+        {
+          "line": 313,
+          "text": "serial\t\t= $dir/tsaserial\t# The current serial number (mandatory)"
+        },
+        {
+          "line": 314,
+          "text": "crypto_device\t= builtin\t\t# OpenSSL engine to use for signing"
+        },
+        {
+          "line": 315,
+          "text": "signer_cert\t= $dir/tsacert.pem \t# The TSA signing certificate"
+        },
+        {
+          "line": 317,
+          "text": "certs\t\t= $dir/cacert.pem\t# Certificate chain to include in reply"
+        },
+        {
+          "line": 319,
+          "text": "signer_key\t= $dir/private/tsakey.pem # The TSA private key (optional)"
+        },
+        {
+          "line": 320,
+          "text": "signer_digest  = sha256\t\t\t# Signing digest to use. (Optional)"
+        },
+        {
+          "line": 321,
+          "text": "default_policy\t= tsa_policy1\t\t# Policy if request did not specify it"
+        },
+        {
+          "line": 323,
+          "text": "other_policies\t= tsa_policy2, tsa_policy3\t# acceptable policies (optional)"
+        },
+        {
+          "line": 324,
+          "text": "digests     = sha1, sha256, sha384, sha512  # Acceptable message digests (mandatory)"
+        },
+        {
+          "line": 325,
+          "text": "accuracy\t= secs:1, millisecs:500, microsecs:100\t# (optional)"
+        },
+        {
+          "line": 326,
+          "text": "clock_precision_digits  = 0\t# number of digits after dot. (optional)"
+        },
+        {
+          "line": 327,
+          "text": "ordering\t\t= yes\t# Is ordering defined for timestamps?"
+        },
+        {
+          "line": 329,
+          "text": "tsa_name\t\t= yes\t# Must the TSA name be included in the reply?"
+        },
+        {
+          "line": 331,
+          "text": "ess_cert_id_chain\t= no\t# Must the ESS cert id chain be included?"
+        },
+        {
+          "line": 333,
+          "text": "ess_cert_id_alg\t\t= sha256\t# algorithm to compute certificate"
+        },
+        {
+          "line": 336,
+          "text": "[insta] # CMP using Insta Demo CA"
+        },
+        {
+          "line": 338,
+          "text": "server = pki.certificate.fi:8700"
+        },
+        {
+          "line": 341,
+          "text": "path = pkix/"
+        },
+        {
+          "line": 344,
+          "text": "recipient = \"/C=FI/O=Insta Demo/CN=Insta Demo CA\" # or set srvcert or issuer"
+        },
+        {
+          "line": 345,
+          "text": "ignore_keyusage = 1 # quirk needed to accept Insta CA cert not including digitalsignature"
+        },
+        {
+          "line": 346,
+          "text": "unprotected_errors = 1 # quirk needed to accept negative responses possibly not protected"
+        },
+        {
+          "line": 347,
+          "text": "extracertsout = insta.extracerts.pem"
+        },
+        {
+          "line": 350,
+          "text": "ref = 3078 # user identification"
+        },
+        {
+          "line": 351,
+          "text": "secret = pass:insta # can be used for both client and server side"
+        },
+        {
+          "line": 354,
+          "text": "cmd = ir # default operation, can be overridden on cmd line with, e.g., kur"
+        },
+        {
+          "line": 357,
+          "text": "subject = \"/CN=openssl-cmp-test\""
+        },
+        {
+          "line": 358,
+          "text": "newkey = insta.priv.pem"
+        },
+        {
+          "line": 359,
+          "text": "out_trusted = apps/insta.ca.crt # does not include keyUsage digitalSignature"
+        },
+        {
+          "line": 360,
+          "text": "certout = insta.cert.pem"
+        },
+        {
+          "line": 362,
+          "text": "[pbm] # Password-based protection for Insta CA"
+        },
+        {
+          "line": 364,
+          "text": "ref = $insta::ref # 3078"
+        },
+        {
+          "line": 365,
+          "text": "secret = $insta::secret # pass:insta"
+        },
+        {
+          "line": 367,
+          "text": "[signature] # Signature-based protection for Insta CA"
+        },
+        {
+          "line": 369,
+          "text": "trusted = $insta::out_trusted # apps/insta.ca.crt"
+        },
+        {
+          "line": 372,
+          "text": "secret = # disable PBM"
+        },
+        {
+          "line": 373,
+          "text": "key = $insta::newkey # insta.priv.pem"
+        },
+        {
+          "line": 374,
+          "text": "cert = $insta::certout # insta.cert.pem"
+        },
+        {
+          "line": 376,
+          "text": "[ir]"
+        },
+        {
+          "line": 377,
+          "text": "cmd = ir"
+        },
+        {
+          "line": 379,
+          "text": "[cr]"
+        },
+        {
+          "line": 380,
+          "text": "cmd = cr"
+        },
+        {
+          "line": 382,
+          "text": "[kur]"
+        },
+        {
+          "line": 384,
+          "text": "cmd = kur"
+        },
+        {
+          "line": 385,
+          "text": "oldcert = $insta::certout # insta.cert.pem"
+        },
+        {
+          "line": 387,
+          "text": "[rr]"
+        },
+        {
+          "line": 389,
+          "text": "cmd = rr"
+        },
+        {
+          "line": 390,
+          "text": "oldcert = $insta::certout # insta.cert.pem"
+        }
+      ]
+    },
+    {
+      "archive_member": "data.tar.xz",
+      "name": "./data/data/com.termux/files/usr/lib/libcrypto.so",
+      "size": 0,
+      "type": "2",
+      "linkname": "libcrypto.so.3"
+    },
+    {
+      "archive_member": "data.tar.xz",
+      "name": "./data/data/com.termux/files/usr/lib/libcrypto.so.3",
+      "size": 5213680,
+      "type": "0",
+      "linkname": "",
+      "sha256": "5dddfd86746aabaca2c13eea108c8968811a4f9dcccf5889e34ebff6be920949"
+    },
+    {
+      "archive_member": "data.tar.xz",
+      "name": "./data/data/com.termux/files/usr/lib/libssl.so",
+      "size": 0,
+      "type": "2",
+      "linkname": "libssl.so.3"
+    },
+    {
+      "archive_member": "data.tar.xz",
+      "name": "./data/data/com.termux/files/usr/lib/libssl.so.3",
+      "size": 880976,
+      "type": "0",
+      "linkname": "",
+      "sha256": "595ce9fe0189a24ceae2eaa07721ac428a6df26794f5bfcfe4347013cbd4b9f2"
+    },
+    {
+      "archive_member": "data.tar.xz",
+      "name": "./data/data/com.termux/files/usr/lib/ossl-modules",
+      "size": 0,
+      "type": "5",
+      "linkname": ""
+    },
+    {
+      "archive_member": "data.tar.xz",
+      "name": "./data/data/com.termux/files/usr/lib/ossl-modules/legacy.so",
+      "size": 124000,
+      "type": "0",
+      "linkname": "",
+      "sha256": "d961c814c22295278c8a9f1944e5957c2f0ff19b1f69285f0264e112f4369e22"
+    }
+  ],
+  "full_texts": {
+    "./conffiles": "/data/data/com.termux/files/usr/etc/tls/openssl.cnf\n",
+    "./control": "Package: openssl\nArchitecture: aarch64\nInstalled-Size: 8532\nMaintainer: @termux\nVersion: 1:3.6.5\nHomepage: https://www.openssl.org/\nBreaks: openssl-tool (<< 1.1.1b-1), openssl-dev\nDepends: ca-certificates, zlib\nConflicts: libcurl (<< 7.61.0-1)\nReplaces: openssl-tool (<< 1.1.1b-1), openssl-dev\nDescription: Library implementing the SSL and TLS protocols as well as general purpose cryptography functions\n",
+    "./data/data/com.termux/files/usr/etc/tls/openssl.cnf": "#\n# OpenSSL example configuration file.\n# See doc/man5/config.pod for more info.\n#\n# This is mostly being used for generation of certificate requests,\n# but may be used for auto loading of providers\n\n# Note that you can include other files from the main configuration\n# file using the .include directive.\n#.include filename\n\n# This definition stops the following lines choking if HOME isn't\n# defined.\nHOME\t\t\t= .\n\n# Use this in order to automatically load providers.\nopenssl_conf = openssl_init\n\n# Comment out the next line to ignore configuration errors\nconfig_diagnostics = 1\n\n# Extra OBJECT IDENTIFIER info:\n# oid_file       = $ENV::HOME/.oid\noid_section = new_oids\n\n# To use this configuration file with the \"-extfile\" option of the\n# \"openssl x509\" utility, name here the section containing the\n# X.509v3 extensions to use:\n# extensions\t\t=\n# (Alternatively, use a configuration file that has only\n# X.509v3 extensions in its main [= default] section.)\n\n[ new_oids ]\n# We can add new OIDs in here for use by 'ca', 'req' and 'ts'.\n# Add a simple OID like this:\n# testoid1=1.2.3.4\n# Or use config file substitution like this:\n# testoid2=${testoid1}.5.6\n\n# Policies used by the TSA examples.\ntsa_policy1 = 1.2.3.4.1\ntsa_policy2 = 1.2.3.4.5.6\ntsa_policy3 = 1.2.3.4.5.7\n\n# For FIPS\n# Optionally include a file that is generated by the OpenSSL fipsinstall\n# application. This file contains configuration data required by the OpenSSL\n# fips provider. It contains a named section e.g. [fips_sect] which is\n# referenced from the [provider_sect] below.\n# Refer to the OpenSSL security policy for more information.\n# .include fipsmodule.cnf\n\n[openssl_init]\nproviders = provider_sect\n\n# List of providers to load\n[provider_sect]\ndefault = default_sect\n# The fips section name should match the section name inside the\n# included fipsmodule.cnf.\n# fips = fips_sect\n\n# If no providers are activated explicitly, the default one is activated implicitly.\n# See man 7 OSSL_PROVIDER-default for more details.\n#\n# If you add a section explicitly activating any other provider(s), you most\n# probably need to explicitly activate the default provider, otherwise it\n# becomes unavailable in openssl.  As a consequence applications depending on\n# OpenSSL may not work correctly which could lead to significant system\n# problems including inability to remotely access the system.\n[default_sect]\n# activate = 1\n\n\n####################################################################\n[ ca ]\ndefault_ca\t= CA_default\t\t# The default ca section\n\n####################################################################\n[ CA_default ]\n\ndir\t\t= ./demoCA\t\t# Where everything is kept\ncerts\t\t= $dir/certs\t\t# Where the issued certs are kept\ncrl_dir\t\t= $dir/crl\t\t# Where the issued crl are kept\ndatabase\t= $dir/index.txt\t# database index file.\n#unique_subject\t= no\t\t\t# Set to 'no' to allow creation of\n\t\t\t\t\t# several certs with same subject.\nnew_certs_dir\t= $dir/newcerts\t\t# default place for new certs.\n\ncertificate\t= $dir/cacert.pem \t# The CA certificate\nserial\t\t= $dir/serial \t\t# The current serial number\ncrlnumber\t= $dir/crlnumber\t# the current crl number\n\t\t\t\t\t# must be commented out to leave a V1 CRL\ncrl\t\t= $dir/crl.pem \t\t# The current CRL\nprivate_key\t= $dir/private/cakey.pem # The private key\n\nx509_extensions\t= usr_cert\t\t# The extensions to add to the cert\n\n# Comment out the following two lines for the \"traditional\"\n# (and highly broken) format.\nname_opt \t= ca_default\t\t# Subject Name options\ncert_opt \t= ca_default\t\t# Certificate field options\n\n# Extension copying option: use with caution.\n# copy_extensions = copy\n\n# Extensions to add to a CRL. Note: Netscape communicator chokes on V2 CRLs\n# so this is commented out by default to leave a V1 CRL.\n# crlnumber must also be commented out to leave a V1 CRL.\n# crl_extensions\t= crl_ext\n\ndefault_days\t= 365\t\t\t# how long to certify for\ndefault_crl_days= 30\t\t\t# how long before next CRL\ndefault_md\t= default\t\t# use public key default MD\npreserve\t= no\t\t\t# keep passed DN ordering\n\n# A few difference way of specifying how similar the request should look\n# For type CA, the listed attributes must be the same, and the optional\n# and supplied fields are just that :-)\npolicy\t\t= policy_match\n\n# For the CA policy\n[ policy_match ]\ncountryName\t\t= match\nstateOrProvinceName\t= match\norganizationName\t= match\norganizationalUnitName\t= optional\ncommonName\t\t= supplied\nemailAddress\t\t= optional\n\n# For the 'anything' policy\n# At this point in time, you must list all acceptable 'object'\n# types.\n[ policy_anything ]\ncountryName\t\t= optional\nstateOrProvinceName\t= optional\nlocalityName\t\t= optional\norganizationName\t= optional\norganizationalUnitName\t= optional\ncommonName\t\t= supplied\nemailAddress\t\t= optional\n\n####################################################################\n[ req ]\ndefault_bits\t\t= 2048\ndefault_keyfile \t= privkey.pem\ndistinguished_name\t= req_distinguished_name\nattributes\t\t= req_attributes\nx509_extensions\t= v3_ca\t# The extensions to add to the self signed cert\n\n# Passwords for private keys if not present they will be prompted for\n# input_password = secret\n# output_password = secret\n\n# This sets a mask for permitted string types. There are several options.\n# default: PrintableString, T61String, BMPString.\n# pkix\t : PrintableString, BMPString (PKIX recommendation before 2004)\n# utf8only: only UTF8Strings (PKIX recommendation after 2004).\n# nombstr : PrintableString, T61String (no BMPStrings or UTF8Strings).\n# MASK:XXXX a literal mask value.\n# WARNING: ancient versions of Netscape crash on BMPStrings or UTF8Strings.\nstring_mask = utf8only\n\n# req_extensions = v3_req # The extensions to add to a certificate request\n\n[ req_distinguished_name ]\ncountryName\t\t\t= Country Name (2 letter code)\ncountryName_default\t\t= AU\ncountryName_min\t\t\t= 2\ncountryName_max\t\t\t= 2\n\nstateOrProvinceName\t\t= State or Province Name (full name)\nstateOrProvinceName_default\t= Some-State\n\nlocalityName\t\t\t= Locality Name (eg, city)\n\n0.organizationName\t\t= Organization Name (eg, company)\n0.organizationName_default\t= Internet Widgits Pty Ltd\n\n# we can do this but it is not needed normally :-)\n#1.organizationName\t\t= Second Organization Name (eg, company)\n#1.organizationName_default\t= World Wide Web Pty Ltd\n\norganizationalUnitName\t\t= Organizational Unit Name (eg, section)\n#organizationalUnitName_default\t=\n\ncommonName\t\t\t= Common Name (e.g. server FQDN or YOUR name)\ncommonName_max\t\t\t= 64\n\nemailAddress\t\t\t= Email Address\nemailAddress_max\t\t= 64\n\n# SET-ex3\t\t\t= SET extension number 3\n\n[ req_attributes ]\nchallengePassword\t\t= A challenge password\nchallengePassword_min\t\t= 4\nchallengePassword_max\t\t= 20\n\nunstructuredName\t\t= An optional company name\n\n[ usr_cert ]\n\n# These extensions are added when 'ca' signs a request.\n\n# This goes against PKIX guidelines but some CAs do it and some software\n# requires this to avoid interpreting an end user certificate as a CA.\n\nbasicConstraints=CA:FALSE\n\n# This is typical in keyUsage for a client certificate.\n# keyUsage = nonRepudiation, digitalSignature, keyEncipherment\n\n# PKIX recommendations harmless if included in all certificates.\nsubjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid,issuer\n\n# This stuff is for subjectAltName and issuerAltname.\n# Import the email address.\n# subjectAltName=email:copy\n# An alternative to produce certificates that aren't\n# deprecated according to PKIX.\n# subjectAltName=email:move\n\n# Copy subject details\n# issuerAltName=issuer:copy\n\n# This is required for TSA certificates.\n# extendedKeyUsage = critical,timeStamping\n\n[ v3_req ]\n\n# Extensions to add to a certificate request\n\nbasicConstraints = CA:FALSE\nkeyUsage = nonRepudiation, digitalSignature, keyEncipherment\n\n[ v3_ca ]\n\n\n# Extensions for a typical CA\n\n\n# PKIX recommendation.\n\nsubjectKeyIdentifier=hash\n\nauthorityKeyIdentifier=keyid:always,issuer\n\nbasicConstraints = critical,CA:true\n\n# Key usage: this is typical for a CA certificate. However since it will\n# prevent it being used as an test self-signed certificate it is best\n# left out by default.\n# keyUsage = cRLSign, keyCertSign\n\n# Include email address in subject alt name: another PKIX recommendation\n# subjectAltName=email:copy\n# Copy issuer details\n# issuerAltName=issuer:copy\n\n# DER hex encoding of an extension: beware experts only!\n# obj=DER:02:03\n# Where 'obj' is a standard or added object\n# You can even override a supported extension:\n# basicConstraints= critical, DER:30:03:01:01:FF\n\n[ crl_ext ]\n\n# CRL extensions.\n# Only issuerAltName and authorityKeyIdentifier make any sense in a CRL.\n\n# issuerAltName=issuer:copy\nauthorityKeyIdentifier=keyid:always\n\n[ proxy_cert_ext ]\n# These extensions should be added when creating a proxy certificate\n\n# This goes against PKIX guidelines but some CAs do it and some software\n# requires this to avoid interpreting an end user certificate as a CA.\n\nbasicConstraints=CA:FALSE\n\n# This is typical in keyUsage for a client certificate.\n# keyUsage = nonRepudiation, digitalSignature, keyEncipherment\n\n# PKIX recommendations harmless if included in all certificates.\nsubjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid,issuer\n\n# This stuff is for subjectAltName and issuerAltname.\n# Import the email address.\n# subjectAltName=email:copy\n# An alternative to produce certificates that aren't\n# deprecated according to PKIX.\n# subjectAltName=email:move\n\n# Copy subject details\n# issuerAltName=issuer:copy\n\n# This really needs to be in place for it to be a proxy certificate.\nproxyCertInfo=critical,language:id-ppl-anyLanguage,pathlen:3,policy:foo\n\n####################################################################\n[ tsa ]\n\ndefault_tsa = tsa_config1\t# the default TSA section\n\n[ tsa_config1 ]\n\n# These are used by the TSA reply generation only.\ndir\t\t= ./demoCA\t\t# TSA root directory\nserial\t\t= $dir/tsaserial\t# The current serial number (mandatory)\ncrypto_device\t= builtin\t\t# OpenSSL engine to use for signing\nsigner_cert\t= $dir/tsacert.pem \t# The TSA signing certificate\n\t\t\t\t\t# (optional)\ncerts\t\t= $dir/cacert.pem\t# Certificate chain to include in reply\n\t\t\t\t\t# (optional)\nsigner_key\t= $dir/private/tsakey.pem # The TSA private key (optional)\nsigner_digest  = sha256\t\t\t# Signing digest to use. (Optional)\ndefault_policy\t= tsa_policy1\t\t# Policy if request did not specify it\n\t\t\t\t\t# (optional)\nother_policies\t= tsa_policy2, tsa_policy3\t# acceptable policies (optional)\ndigests     = sha1, sha256, sha384, sha512  # Acceptable message digests (mandatory)\naccuracy\t= secs:1, millisecs:500, microsecs:100\t# (optional)\nclock_precision_digits  = 0\t# number of digits after dot. (optional)\nordering\t\t= yes\t# Is ordering defined for timestamps?\n\t\t\t\t# (optional, default: no)\ntsa_name\t\t= yes\t# Must the TSA name be included in the reply?\n\t\t\t\t# (optional, default: no)\ness_cert_id_chain\t= no\t# Must the ESS cert id chain be included?\n\t\t\t\t# (optional, default: no)\ness_cert_id_alg\t\t= sha256\t# algorithm to compute certificate\n\t\t\t\t# identifier (optional, default: sha256)\n\n[insta] # CMP using Insta Demo CA\n# Message transfer\nserver = pki.certificate.fi:8700\n# proxy = # set this as far as needed, e.g., http://192.168.1.1:8080\n# tls_use = 0\npath = pkix/\n\n# Server authentication\nrecipient = \"/C=FI/O=Insta Demo/CN=Insta Demo CA\" # or set srvcert or issuer\nignore_keyusage = 1 # quirk needed to accept Insta CA cert not including digitalsignature\nunprotected_errors = 1 # quirk needed to accept negative responses possibly not protected\nextracertsout = insta.extracerts.pem\n\n# Client authentication\nref = 3078 # user identification\nsecret = pass:insta # can be used for both client and server side\n\n# Generic message options\ncmd = ir # default operation, can be overridden on cmd line with, e.g., kur\n\n# Certificate enrollment\nsubject = \"/CN=openssl-cmp-test\"\nnewkey = insta.priv.pem\nout_trusted = apps/insta.ca.crt # does not include keyUsage digitalSignature\ncertout = insta.cert.pem\n\n[pbm] # Password-based protection for Insta CA\n# Server and client authentication\nref = $insta::ref # 3078\nsecret = $insta::secret # pass:insta\n\n[signature] # Signature-based protection for Insta CA\n# Server authentication\ntrusted = $insta::out_trusted # apps/insta.ca.crt\n\n# Client authentication\nsecret = # disable PBM\nkey = $insta::newkey # insta.priv.pem\ncert = $insta::certout # insta.cert.pem\n\n[ir]\ncmd = ir\n\n[cr]\ncmd = cr\n\n[kur]\n# Certificate update\ncmd = kur\noldcert = $insta::certout # insta.cert.pem\n\n[rr]\n# Certificate revocation\ncmd = rr\noldcert = $insta::certout # insta.cert.pem\n"
+  }
+}

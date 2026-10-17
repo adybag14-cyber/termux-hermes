@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "status": "ready_for_native_scientific_diagnostics_pip_compatibility_unresolved",
+  "failed_run_id": 39055038031,
+  "failed_run_head": "fe09f997597f7d576e9a70f0d0569df57583f5e1",
+  "failed_artifact": {
+    "id": 12108784675,
+    "bytes": 10775936,
+    "sha256": "018f13303993f7fcc0d94a03029598de2b45c631ddae6b12b4fb1aa9141514e0"
+  },
+  "diagnosis": "Complete dependency graph and escaping passed; pip rejected only the seven original APT scientific distributions legacy android_aarch64 WHEEL tags.",
+  "apt_wheel_metadata_sha256": {
+    "llvmlite": "05d94d41cb53e5b01ecf10839cd3590e7f740654a0237676c6e73a955e7d9501",
+    "numpy": "a20faf9d5aaa10c4de3ffaef30aaf997af4aa80cce1e8d234f1e60f8f6da53d0",
+    "scipy": "a20faf9d5aaa10c4de3ffaef30aaf997af4aa80cce1e8d234f1e60f8f6da53d0",
+    "soxr": "e07b9b81cf17f8809c2b11d3901b3d6dc621fbcf8104f87d0bc5b8fd282dd540",
+    "torch": "ffdbc8fb24da49c70951e582e00ac5885ef338aa509f182f31d9ea4f75abbffa",
+    "torchaudio": "05d94d41cb53e5b01ecf10839cd3590e7f740654a0237676c6e73a955e7d9501",
+    "torchcodec": "ffdbc8fb24da49c70951e582e00ac5885ef338aa509f182f31d9ea4f75abbffa"
+  },
+  "pip_check_passed": false,
+  "pip_wheel_tag_compatibility": "unresolved",
+  "tags_rewritten": false,
+  "diagnostic_continuation_scope": "All other pip errors fail. Native diagnostic continuation requires the exact seven unsupported-platform lines and original installed WHEEL bytes with incompatible tags.",
+  "inputs": {
+    "scripts/compatibility_probe_neutts.py": "137200bd63a1916079a8344349eeb3783281a08121489f9045d15f997dc64ce0",
+    "scripts/compatibility_probe_neutts.sh": "6b3e1ef9a711766de0a51d632e070825a41b9eef105d7e7390245871136511df",
+    "tests/test_neutts_probe.py": "2337873590044ec1d182f3db9f69d07d1fa69163563595ba059b1b623ffb173f"
+  },
+  "focused_host_test": {
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_neutts_probe.py"
+    ],
+    "exit_code": 0,
+    "stdout": "........................................                                 [100%]\r\n40 passed in 0.15s\r\n"
+  },
+  "native_scientific_cases_tested": false,
+  "engine_installed": false,
+  "synthesis_tested": false,
+  "managed_hermes_runtime_modified": false,
+  "pm_admission_changed": false
+}

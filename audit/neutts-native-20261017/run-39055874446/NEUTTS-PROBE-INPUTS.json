@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "purpose": "unpublished APT native core with frozen Python dependency completion",
+  "run_id": "39055874446",
+  "head_sha": "d439e8100bc89dbfe681fc03aa22017f175b8b2d",
+  "workflow_ref_commit": "d439e8100bc89dbfe681fc03aa22017f175b8b2d",
+  "native_image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
+  "inputs": {
+    "scripts/compatibility_probe_neutts.sh": "6b3e1ef9a711766de0a51d632e070825a41b9eef105d7e7390245871136511df",
+    "scripts/compatibility_probe_neutts.py": "137200bd63a1916079a8344349eeb3783281a08121489f9045d15f997dc64ce0",
+    ".github/workflows/neutts-termux-probe.yml": "e7b477dff174ba0d5ea98f2db924a936225e617646795e567f3b7671ef3083af"
+  },
+  "recipe_repository": "termux/termux-packages",
+  "reviewed_recipe_commit": "ae877f2c6a2b2318abeb43699d6ec5f619c216a6",
+  "reviewed_index_url": "https://packages.termux.dev/apt/termux-main/dists/stable/main/binary-aarch64/Packages.gz",
+  "reviewed_index_sha256": "0f9ea9b4cd6c0f7c3ffe90bea8afb7e25a61adc319fc90eca3d0979da6dcb923",
+  "declared_engine_commit": "b7a3427d0d25e20e8b9e92cbaae688f732916baf",
+  "engine_source_url": "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/pyproject.toml",
+  "engine_source_sha256": "3d74df60f0db27733b308c93b88ae95f9deaa8f396f48183b0cf4f14eb3deb94",
+  "engine_version": "1.4.1",
+  "engine_requires_python": ">=3.10, <3.14",
+  "engine_dependencies": [
+    "librosa==0.11.0",
+    "neucodec>=0.0.4",
+    "numpy>=2.2.6",
+    "phonemizer>=3.0.0",
+    "resemble-perth==1.0.1",
+    "soundfile==0.13.1",
+    "torch>=2.8.0",
+    "torchaudio>=2.8.0",
+    "transformers==5.1.0"
+  ],
+  "engine_optional_dependencies": {
+    "llama": [
+      "llama-cpp-python",
+      "gguf"
+    ],
+    "onnx": [
+      "onnxruntime"
+    ],
+    "all": [
+      "llama-cpp-python",
+      "gguf",
+      "onnxruntime"
+    ]
+  },
+  "managed_python_supported_by_declared_engine": false,
+  "apt_core_is_engine_dependency_lock": false,
+  "rolling_base_upgrade": true,
+  "apt_postinst_dependency_resolution": false,
+  "supplemental_python_dependencies_checked_separately": true,
+  "engine_installed": false,
+  "synthesis_tested": false,
+  "physical_device_tested": false,
+  "hermes_candidate_installed": false,
+  "pm_admission_changed": false,
+  "release_output": false
+}

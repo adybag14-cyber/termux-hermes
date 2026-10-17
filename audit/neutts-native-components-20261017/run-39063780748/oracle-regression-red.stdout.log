@@ -1,0 +1,50 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_____ test_llama_oracle_reads_pinned_load_modes_without_obsolete_use_mmap _____
+
+pinned_llama_api = (namespace(load_mode=-1, lazy_mode=1), ['init', 'free'])
+
+    def test_llama_oracle_reads_pinned_load_modes_without_obsolete_use_mmap(pinned_llama_api):
+        _, calls = pinned_llama_api
+>       result = probe.llama_case()
+                 ^^^^^^^^^^^^^^^^^^
+
+tests\test_neutts_native_components.py:297: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def llama_case():
+        import llama_cpp
+        from llama_cpp import llama_cpp as api
+    
+        require(llama_cpp.__version__ == "0.3.36", "Built llama Python version differs")
+        require(Path(llama_cpp.__file__).resolve().is_relative_to(Path(sys.prefix).resolve()),
+                "llama import escaped its newly built venv")
+        library = Path(api._lib._name).resolve()
+        library_root = Path(llama_cpp.__file__).resolve().parent / "lib"
+        require(library.is_relative_to(library_root), "An arbitrary system libllama was loaded")
+        api.llama_backend_init()
+        try:
+            text = api.llama_print_system_info().decode("utf-8")
+            model = api.llama_model_default_params()
+            context = api.llama_context_default_params()
+            require(text and "CPU" in text, "No real CPU backend system information")
+            require(context.n_ctx > 0 and context.n_batch > 0 and context.n_threads > 0,
+                    "Invalid real default context parameters")
+            require(api.llama_supports_gpu_offload() is False and api.llama_supports_rpc() is False,
+                    "Unexpected accelerator or remote backend in portable CPU result")
+            result = {
+                "backend_initialized": True, "system_info": text,
+                "default_context": {"n_ctx": context.n_ctx, "n_batch": context.n_batch,
+                                    "n_threads": context.n_threads},
+>               "default_model_use_mmap": bool(model.use_mmap),
+                                               ^^^^^^^^^^^^^^
+                "supports_mmap": api.llama_supports_mmap(), "supports_mlock": api.llama_supports_mlock(),
+                "supports_gpu_offload": False, "supports_rpc": False,
+                "library": elf(library, dynamic=True), "model_loaded": False, "inference_tested": False,
+            }
+E           AttributeError: 'types.SimpleNamespace' object has no attribute 'use_mmap'
+
+scripts\compatibility_probe_neutts_native.py:665: AttributeError
+=========================== short test summary info ===========================
+FAILED tests/test_neutts_native_components.py::test_llama_oracle_reads_pinned_load_modes_without_obsolete_use_mmap
+1 failed in 0.19s

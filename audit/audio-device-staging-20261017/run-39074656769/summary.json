@@ -1,0 +1,647 @@
+{
+  "aggregate_result_written": false,
+  "all_transfer_archive_members_crc_and_sha256_verified": true,
+  "artifacts": {
+    "bundle": {
+      "archive": {
+        "all_member_crc_and_sha256_verified": true,
+        "bytes": 319503661,
+        "sha256": "ce518bbe30e47df87b7c0bc2d6f439504729dfa737792cb3e4fc3246cdee0152"
+      },
+      "expires_at": "2026-10-31T22:23:59Z",
+      "id": 12116682145,
+      "members": [
+        {
+          "bytes": 1793,
+          "crc32": "b9a1b9fd",
+          "extracted": true,
+          "name": "BUNDLE-RECEIPT.json",
+          "sha256": "f711f00ef0f838f1acb90ff5b7e6654650669230189312d22eb8549cc9896f29"
+        },
+        {
+          "bytes": 313855769,
+          "crc32": "eb98c881",
+          "extracted": false,
+          "name": "payload.tar.gz",
+          "sha256": "1de4214f6503a38bfdf13ea8a56848040a8701a233faa98ba73bd893af3b51d5"
+        },
+        {
+          "bytes": 5643205,
+          "crc32": "a0f9cbc3",
+          "extracted": true,
+          "name": "manifest.json",
+          "sha256": "6b4a4abb24a48b09d3cf2b30471d2606ab6b5ee046aad85fb1147beed09f4619"
+        },
+        {
+          "bytes": 2392,
+          "crc32": "e86beae0",
+          "extracted": true,
+          "name": "prepare.sh",
+          "sha256": "f492f7cfc8e6846cda1742b10188860e78338f999c6024237e96d43a9382c2cc"
+        }
+      ],
+      "name": "hermes-isolated-audio-device-bundle"
+    },
+    "evidence": {
+      "archive": {
+        "all_member_crc_and_sha256_verified": true,
+        "bytes": 2154791,
+        "sha256": "d456d0633090a1dbb1a54ea98b758e9fe1a9e722a19f03fa2a9cd1999fa4b476"
+      },
+      "expires_at": "2026-10-31T22:24:02Z",
+      "id": 12116741991,
+      "members": [
+        {
+          "bytes": 2526,
+          "crc32": "04637e0d",
+          "extracted": true,
+          "name": "AUDIO-STAGING-INPUTS.json",
+          "sha256": "c62d3322ac56c5ba633f62ff4278c13527528e6fa9723d8272553e17995882fa"
+        },
+        {
+          "bytes": 2668,
+          "crc32": "45dc8eda",
+          "extracted": true,
+          "name": "BUILDER-IMAGE.json",
+          "sha256": "509f7ab9b12b9a24993a32712de8602de2fa5a2b6b5f2da010b046599a9b9a3a"
+        },
+        {
+          "bytes": 1793,
+          "crc32": "b9a1b9fd",
+          "extracted": true,
+          "name": "BUNDLE-RECEIPT.json",
+          "sha256": "f711f00ef0f838f1acb90ff5b7e6654650669230189312d22eb8549cc9896f29"
+        },
+        {
+          "bytes": 4174,
+          "crc32": "e4be61be",
+          "extracted": true,
+          "name": "environment-1/assembly-receipt.json",
+          "sha256": "ed14a002b37ec98c10a26b5fd2091a04efbb7a2e7916e1df44ce8191fcd7b58a"
+        },
+        {
+          "bytes": 1308,
+          "crc32": "8247492f",
+          "extracted": true,
+          "name": "environment-1/audio-diagnostic.json",
+          "sha256": "a5fc971017ba0accdde164b536ba84f5a72c064b86d68854cc6974a9e43daa7e"
+        },
+        {
+          "bytes": 1908685,
+          "crc32": "23972888",
+          "extracted": true,
+          "name": "environment-1/environment-manifest.json",
+          "sha256": "a0559030387a922210da6782d7369ed8ac304de6fc8d58615fe9a14c379753e4"
+        },
+        {
+          "bytes": 0,
+          "crc32": "00000000",
+          "extracted": true,
+          "name": "environment-1/hermes-cli-help.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 14064,
+          "crc32": "331e3317",
+          "extracted": true,
+          "name": "environment-1/hermes-cli-help.stdout",
+          "sha256": "052128a388a1aaa78e457b9c7f8cdd8946be6a7a85dfbbb21be81fb05e47411b"
+        },
+        {
+          "bytes": 115630,
+          "crc32": "3f4f6dca",
+          "extracted": true,
+          "name": "environment-1/native-validation.json",
+          "sha256": "8cc74c82abd86aee887cf5092c7370330ea056cd05055822fd9cd747b0c01428"
+        },
+        {
+          "bytes": 102407,
+          "crc32": "cc92204c",
+          "extracted": true,
+          "name": "native-staging.log",
+          "sha256": "7f4eb296d308240d8021cfe62c32f2dcfca69d0937ac2b4b3652c0c1fdfb3657"
+        }
+      ],
+      "name": "hermes-isolated-audio-device-evidence"
+    }
+  },
+  "audio_diagnostic": {
+    "ambient_library_admitted": false,
+    "device_readiness": false,
+    "device_stream_opened": false,
+    "earlier_portaudio_code": -9999,
+    "earlier_portaudio_code_basis": "Inferred from the preserved expected_portaudio_failure=true flag and exact frozen source: this flag is set only after requiring a real PortAudioError with integer argument -9999. The final error object was then replaced by the mapped-library provenance rejection; the earlier exception text is not retained.",
+    "error": {
+      "message": "native library resolved from an undeclared ambient directory: /data/data/com.termux/files/usr/lib/libtermux-platform-ns.so",
+      "type": "StagingError"
+    },
+    "expected_portaudio_failure": true,
+    "guard_relaxed": false,
+    "input_device_status": "initialization-unavailable",
+    "microphone_accessed": false,
+    "protocol_valid": false,
+    "readiness": false,
+    "receipt": "environment-1/audio-diagnostic.json",
+    "recording_tested": false,
+    "status": "failed",
+    "vad_tested": false
+  },
+  "audio_diagnostic_attempted": true,
+  "audio_diagnostic_completed_successfully": false,
+  "audio_readiness": false,
+  "builder_image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
+  "builder_image_id": "sha256:5226204b4f02255155374bdd74ff0aafca66cc66224fa7c780c2db1cc13def25",
+  "candidate_head_sha": "635ec13c9d0f264f508d1bdbaa7670d4eaa00787",
+  "candidate_package_sha256": "2d5435d0fb19fa9f8ed0a5da5c66cabf59585a8e8bcd35ad2ebf9cb161f5e810",
+  "candidate_run_id": 39057745675,
+  "cli_help_smoke_completed": true,
+  "container_network": "none",
+  "container_uid": 1000,
+  "created_at": "2026-10-17T22:47:37.592553+00:00",
+  "device_stream_opened": false,
+  "exit_code": 2,
+  "failed_step": "Recreate and verify two isolated environments with networking disabled",
+  "failure_stage": "First destination audio diagnostic, after successful assembly, native validation and CLI help; the final mapped-library audit rejected an ambient Android namespace helper.",
+  "files": {
+    "AUDIO-STAGING-INPUTS.json": {
+      "bytes": 2526,
+      "sha256": "c62d3322ac56c5ba633f62ff4278c13527528e6fa9723d8272553e17995882fa"
+    },
+    "BUILDER-IMAGE.json": {
+      "bytes": 2668,
+      "sha256": "509f7ab9b12b9a24993a32712de8602de2fa5a2b6b5f2da010b046599a9b9a3a"
+    },
+    "BUNDLE-RECEIPT.json": {
+      "bytes": 1793,
+      "sha256": "f711f00ef0f838f1acb90ff5b7e6654650669230189312d22eb8549cc9896f29"
+    },
+    "bundle-verification.json": {
+      "bytes": 18067,
+      "sha256": "4e01cac9f36b04cb2f002caa5a49d0f8a12ea1a47ee0cc0f49a6400355d0c24a"
+    },
+    "environment-1/assembly-receipt.json": {
+      "bytes": 4174,
+      "sha256": "ed14a002b37ec98c10a26b5fd2091a04efbb7a2e7916e1df44ce8191fcd7b58a"
+    },
+    "environment-1/audio-diagnostic.json": {
+      "bytes": 1308,
+      "sha256": "a5fc971017ba0accdde164b536ba84f5a72c064b86d68854cc6974a9e43daa7e"
+    },
+    "environment-1/environment-manifest.json": {
+      "bytes": 1908685,
+      "sha256": "a0559030387a922210da6782d7369ed8ac304de6fc8d58615fe9a14c379753e4"
+    },
+    "environment-1/hermes-cli-help.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "environment-1/hermes-cli-help.stdout": {
+      "bytes": 14064,
+      "sha256": "052128a388a1aaa78e457b9c7f8cdd8946be6a7a85dfbbb21be81fb05e47411b"
+    },
+    "environment-1/native-validation.json": {
+      "bytes": 115630,
+      "sha256": "8cc74c82abd86aee887cf5092c7370330ea056cd05055822fd9cd747b0c01428"
+    },
+    "evidence-verification.json": {
+      "bytes": 19424,
+      "sha256": "d76006a611716e77c36b45dc76ff221c648dda299e6a9d3e718f57fef62a9da3"
+    },
+    "job.json": {
+      "bytes": 3059,
+      "sha256": "6a96cf417c95e6f3b61b4e847edf8b861d585f50d0b74f66a5ab2f7a9a22d876"
+    },
+    "job.log": {
+      "bytes": 134483,
+      "sha256": "0a2e49ba573377e06bfbd4b3e4457d2a676393cf435bd52d0b12a8185c346f5c"
+    },
+    "native-staging.log": {
+      "bytes": 102407,
+      "sha256": "7f4eb296d308240d8021cfe62c32f2dcfca69d0937ac2b4b3652c0c1fdfb3657"
+    },
+    "run.json": {
+      "bytes": 13880,
+      "sha256": "719de74b3e99519f72d585c4d8940671e378d28fc56349f1de53d84fe0418530"
+    }
+  },
+  "first_destination": {
+    "active_dependency_edges": 167,
+    "active_extras": [
+      "acp",
+      "cron",
+      "matrix",
+      "mcp",
+      "telegram",
+      "termux",
+      "uvloop",
+      "audio-io"
+    ],
+    "application_source_origins": [
+      {
+        "module": "pm",
+        "path": "app/pm/__init__.py",
+        "sha256": "67adcba1f0e4db2b2967d07e6b630aca4214b1fac9bd8649dcf221b4bf3fcfac"
+      },
+      {
+        "module": "tools.voice_mode",
+        "path": "app/tools/voice_mode.py",
+        "sha256": "2080ba077ec94146d06cbd704a7e21763e5cf37f4221561145b4c45de6a78a58"
+      },
+      {
+        "module": "tools.voice_mode_capture",
+        "path": "app/tools/voice_mode_capture.py",
+        "sha256": "492c013f8473acdd58dff027ffc4f787347dc27524e801692bf32efe67516d60"
+      },
+      {
+        "module": "tools.transcription_tools",
+        "path": "app/tools/transcription_tools.py",
+        "sha256": "bd0402c231fa38da0679d3b58c0502de8b878b0c5e6410cbd6b17d6a227c0291"
+      }
+    ],
+    "assembly_claims": {
+      "assembly_only": true,
+      "candidate_published": false,
+      "ci_venv_copied": false,
+      "default_extras_changed": false,
+      "device_readiness": false,
+      "microphone_accessed": false,
+      "recording_tested": false,
+      "vad_tested": false
+    },
+    "assembly_receipt": "environment-1/assembly-receipt.json",
+    "assembly_receipt_sha256": "ed14a002b37ec98c10a26b5fd2091a04efbb7a2e7916e1df44ce8191fcd7b58a",
+    "assembly_status": "passed",
+    "audio_resolver": {
+      "audio_imported_at_startup": false,
+      "library_sha256": "116ff3e80f1b29042cad96e3f923d25dfe5325420d4b5140653fa2226ba47073",
+      "name": "portaudio",
+      "native_loading_replaced": false,
+      "other_names_delegated": true,
+      "path": "venv/lib/python3.14/site-packages/sitecustomize.py",
+      "resolved": "/data/data/com.termux/files/usr/tmp/hermes-audio-validation-a/runtime-libs/lib/libportaudio.so.2",
+      "sha256": "9cdffa77fa93eb7e3b2697aea493e22d2f2227e3d7ebc2da5df2278e137eb9b6"
+    },
+    "cli_help": {
+      "command": [
+        "bin/audio-python",
+        "-m",
+        "hermes_cli.main",
+        "--help"
+      ],
+      "exit_code": 0,
+      "exit_code_basis": "The exact source enables set -Eeuo pipefail, and the real diagnostic ran after the bounded CLI command and nonempty-stdout check. Exit 0 is inferred from that completed control flow; the final aggregate result was never written.",
+      "stderr": {
+        "bytes": 0,
+        "path": "environment-1/hermes-cli-help.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 14064,
+        "path": "environment-1/hermes-cli-help.stdout",
+        "sha256": "052128a388a1aaa78e457b9c7f8cdd8946be6a7a85dfbbb21be81fb05e47411b"
+      },
+      "timeout_seconds": 60
+    },
+    "environment_manifest": "environment-1/environment-manifest.json",
+    "environment_manifest_sha256": "a0559030387a922210da6782d7369ed8ac304de6fc8d58615fe9a14c379753e4",
+    "hermes_source_metadata_count": 1,
+    "installed_distribution_count": 102,
+    "installed_wheel_checks": 101,
+    "manager_fresh": true,
+    "native_libraries_before_audio_initialization": {
+      "ambient_termux_library_directory_used": false,
+      "payload_library_count": 46,
+      "platform_library_count": 5,
+      "recorded_mapped_library_count": 51
+    },
+    "native_operations": {
+      "cffi_sum": 16,
+      "numpy_linalg_finite": true,
+      "numpy_matrix_product": [
+        [
+          14.0,
+          38.0,
+          62.0
+        ],
+        [
+          38.0,
+          126.0,
+          214.0
+        ],
+        [
+          62.0,
+          214.0,
+          366.0
+        ]
+      ]
+    },
+    "native_validation": "environment-1/native-validation.json",
+    "native_validation_sha256": "8cc74c82abd86aee887cf5092c7370330ea056cd05055822fd9cd747b0c01428",
+    "native_validation_status": "passed",
+    "openssl_runtime": {
+      "cryptography_legacy_provider_loaded": true,
+      "environment": {
+        "OPENSSL_CONF": "/data/data/com.termux/files/usr/tmp/hermes-audio-validation-a/runtime-libs/etc/ssl/openssl.cnf",
+        "OPENSSL_CONF_INCLUDE": "/data/data/com.termux/files/usr/tmp/hermes-audio-validation-a/runtime-libs/etc/ssl",
+        "OPENSSL_MODULES": "/data/data/com.termux/files/usr/tmp/hermes-audio-validation-a/runtime-libs/lib/ossl-modules"
+      },
+      "inputs": {
+        "config": {
+          "file": "runtime-libs/etc/ssl/openssl.cnf",
+          "sha256": "a65a2cb9f4ee8ffdc7ef4f0ac600c0bdafb95b7b1ab457188ac610a62f5ad6b3",
+          "size": 12411
+        },
+        "libcrypto": {
+          "file": "runtime-libs/lib/libcrypto.so.3",
+          "sha256": "5dddfd86746aabaca2c13eea108c8968811a4f9dcccf5889e34ebff6be920949",
+          "size": 5213680
+        },
+        "libssl": {
+          "file": "runtime-libs/lib/libssl.so.3",
+          "sha256": "595ce9fe0189a24ceae2eaa07721ac428a6df26794f5bfcfe4347013cbd4b9f2",
+          "size": 880976
+        },
+        "provider": {
+          "file": "runtime-libs/lib/ossl-modules/legacy.so",
+          "sha256": "d961c814c22295278c8a9f1944e5957c2f0ff19b1f69285f0264e112f4369e22",
+          "size": 124000
+        }
+      },
+      "legacy_crypto_disabled": false,
+      "legacy_provider_loaded": true,
+      "legacy_provider_origins": [
+        {
+          "path": "runtime-libs/lib/ossl-modules/legacy.so",
+          "scope": "payload",
+          "sha256": "d961c814c22295278c8a9f1944e5957c2f0ff19b1f69285f0264e112f4369e22"
+        }
+      ],
+      "legacy_provider_required": true,
+      "library_origins": {
+        "libcrypto": [
+          {
+            "path": "runtime-libs/lib/libcrypto.so.3",
+            "scope": "payload",
+            "sha256": "5dddfd86746aabaca2c13eea108c8968811a4f9dcccf5889e34ebff6be920949"
+          }
+        ],
+        "libssl": [
+          {
+            "path": "runtime-libs/lib/libssl.so.3",
+            "scope": "payload",
+            "sha256": "595ce9fe0189a24ceae2eaa07721ac428a6df26794f5bfcfe4347013cbd4b9f2"
+          }
+        ]
+      },
+      "original_config_bytes_preserved": true,
+      "python_ssl_version": "OpenSSL 3.6.5 29 Sep 2026"
+    },
+    "private_manager": {
+      "active_dependency_edges": 0,
+      "ambient_termux_library_directory_used": false,
+      "cryptography_legacy_provider_loaded": null,
+      "installed_wheel_checks": 4,
+      "openssl_legacy_provider_required": false,
+      "recorded_mapped_library_count": 35,
+      "status": "passed",
+      "versions": {
+        "packaging": "26.0",
+        "ruamel-yaml": "0.18.16",
+        "tomli-w": "1.2.0",
+        "truststore": "0.10.4"
+      }
+    },
+    "requirement_parser": {
+      "adapted_optional_declarations": 2,
+      "all_adapted_optional_markers_inactive": true,
+      "marker_contexts_per_adaptation": 9,
+      "marker_environment": {
+        "implementation_name": "cpython",
+        "implementation_version": "3.14.6",
+        "os_name": "posix",
+        "platform_machine": "aarch64",
+        "platform_python_implementation": "CPython",
+        "platform_release": "",
+        "platform_system": "Android",
+        "platform_version": "#22-Ubuntu SMP Mon Jul 27 17:12:01 UTC 2026",
+        "python_full_version": "3.14.6",
+        "python_version": "3.14",
+        "sys_platform": "android"
+      },
+      "parser": {
+        "name": "packaging",
+        "version": "26.0"
+      },
+      "sole_active_frozen_direct_url": "hermes-agent -> psutil 8.0.0",
+      "source_build_executed": false,
+      "source_metadata_rewritten": false,
+      "url_accessed": false
+    },
+    "root": "/data/data/com.termux/files/usr/tmp/hermes-audio-validation-a"
+  },
+  "frozen_entry_count": 25274,
+  "head_sha": "bd9b6350705429d8002b0aeda2aefe9e26d8d967",
+  "host_native_comparison": {
+    "all_other_manifest_fields_identical": true,
+    "frozen_entry_count": 25274,
+    "host_archive": {
+      "file": "payload.tar.gz",
+      "sha256": "7d35215f00e5a2b6d6e22cfba95cf0377c82cfbb53971f7bd13eb6664568e035",
+      "size": 315057002
+    },
+    "host_checkpoint": "checkpoint-6",
+    "host_manifest": {
+      "bytes": 5643205,
+      "sha256": "cec6b5b01c391b087e61201b6a31a77322d03094d16267169198cf4d3cdca627"
+    },
+    "native_archive": {
+      "file": "payload.tar.gz",
+      "sha256": "1de4214f6503a38bfdf13ea8a56848040a8701a233faa98ba73bd893af3b51d5",
+      "size": 313855769
+    },
+    "native_manifest": {
+      "bytes": 5643205,
+      "sha256": "6b4a4abb24a48b09d3cf2b30471d2606ab6b5ee046aad85fb1147beed09f4619"
+    },
+    "note": "Different compressed payload bytes are retained as separate identities; all 25274 frozen entry declarations and every other manifest field agree.",
+    "only_different_manifest_field": "archive",
+    "same_original_candidate_identity": true,
+    "same_two_production_patch_outputs": true,
+    "same_wheel_catalog_rows": true,
+    "wheel_count": 102
+  },
+  "independent_curation_verification": {
+    "all_receipt_hash_links_verified": true,
+    "all_ten_extracted_evidence_members_match_original_zip_bytes": true,
+    "bundle_verification_scope": "The original full 319503661-byte archive verification is retained. Curation independently checked all three extracted bundle members and every crossreceipt binding without repeating the full payload read.",
+    "diagnostic_equals_original_native_log_json": true,
+    "evidence_zip_all_ten_crc32_and_sha256_verified": true,
+    "evidence_zip_full_sha256_matches_github_digest": true,
+    "installed_wheel_receipt_hashes_match_generated_environment_manifest": {
+      "application": 101,
+      "private_manager": 4
+    },
+    "job_log_diagnostic_line": 302,
+    "native_log_diagnostic_line": 9,
+    "raw_files_copied_as_bytes_without_newline_conversion": true,
+    "recorded_module_and_payload_library_origins_match_frozen_or_generated_manifests": true,
+    "source_checks": {
+      ".github/workflows/audio-device-staging.yml": {
+        "api_request_path": "repos/adybag14-cyber/termux-hermes/contents/.github/workflows/audio-device-staging.yml?ref=bd9b6350705429d8002b0aeda2aefe9e26d8d967",
+        "bytes": 2948,
+        "git_blob_sha": "205acb67270a6d882895e59e1af5c557a3cc9444",
+        "original_api_response": {
+          "bytes": 5295,
+          "sha256": "b7340e050612f909cda68f0d880f2fb05a0c43342ad2ca8ea25538a4db305f8e"
+        },
+        "sha256": "791d7de087de01f9d3f2bd1439eb91da49a08e7d06ddb28af614e3c3891f3630"
+      },
+      "manifest/release.json": {
+        "api_request_path": "repos/adybag14-cyber/termux-hermes/contents/manifest/release.json?ref=bd9b6350705429d8002b0aeda2aefe9e26d8d967",
+        "bytes": 413,
+        "git_blob_sha": "2b68c1283cdb8713d3d43d41fc65c921f15b2e7a",
+        "original_api_response": {
+          "bytes": 1664,
+          "sha256": "9f9627ebd8881e4fd8c102d2574f7d130aa52330938335f86ee502b9faf97c55"
+        },
+        "sha256": "b6582a3a54974ab12774adc0cb51671db16147a25237a62865581b8cc6a37219"
+      },
+      "patches/next-stable/audio-readiness.patch": {
+        "api_request_path": "repos/adybag14-cyber/termux-hermes/contents/patches/next-stable/audio-readiness.patch?ref=bd9b6350705429d8002b0aeda2aefe9e26d8d967",
+        "bytes": 8470,
+        "git_blob_sha": "9f6a20652e2865ee107a6e159f61cde476d7e796",
+        "original_api_response": {
+          "bytes": 12896,
+          "sha256": "f898acdb19340ef98ddcc7b938b73333c0214800a8ffe4eabbba2ec0aee73305"
+        },
+        "sha256": "82b92d5095ceabc05f0200569da1cc16b861c77b166095982b05d57940573db7"
+      },
+      "scripts/audio_device_bundle_lock.json": {
+        "api_request_path": "repos/adybag14-cyber/termux-hermes/contents/scripts/audio_device_bundle_lock.json?ref=bd9b6350705429d8002b0aeda2aefe9e26d8d967",
+        "bytes": 21537,
+        "git_blob_sha": "ac36d470fa831481ef3b1a571d8e80df1ca9a67d",
+        "original_api_response": {
+          "bytes": 30881,
+          "sha256": "96ff3481ef56351036c35bbd604b0212fda0fd4407371f30677f53b7d293b1e8"
+        },
+        "sha256": "664efe4fc15300a4cb33da28aab1352da0255d530a8427ace17298d09f5f14d6"
+      },
+      "scripts/check_audio_device_staging.sh": {
+        "api_request_path": "repos/adybag14-cyber/termux-hermes/contents/scripts/check_audio_device_staging.sh?ref=bd9b6350705429d8002b0aeda2aefe9e26d8d967",
+        "bytes": 9453,
+        "git_blob_sha": "738b66c824dce8aec6ff82753124570cfc1f8ec2",
+        "original_api_response": {
+          "bytes": 14232,
+          "sha256": "b1d86f9e92f00baaf3bf87b1c5db5bf01b93ed36b9d5838602d9bf4825a08e2b"
+        },
+        "sha256": "44adb83c232247f49dbf3ac1c9cd0e095422e67c5242b078bc5e43e083fbeef3"
+      },
+      "scripts/fetch_compatibility_candidate.py": {
+        "api_request_path": "repos/adybag14-cyber/termux-hermes/contents/scripts/fetch_compatibility_candidate.py?ref=bd9b6350705429d8002b0aeda2aefe9e26d8d967",
+        "bytes": 19415,
+        "git_blob_sha": "e1359b94b5450bcd3b262f1a3c73e7c207dbf0b0",
+        "original_api_response": {
+          "bytes": 27980,
+          "sha256": "549013a133f0b3a614abdd3f4803f4bbf75faf3e4dcf3fba094b9ae101eeafa8"
+        },
+        "sha256": "dc075415b46e14f3f09fb6a889fdf38279564b2f2e6e6008b21232545d1d6d8a"
+      },
+      "scripts/prepare_audio_device_bundle.py": {
+        "api_request_path": "repos/adybag14-cyber/termux-hermes/contents/scripts/prepare_audio_device_bundle.py?ref=bd9b6350705429d8002b0aeda2aefe9e26d8d967",
+        "bytes": 37568,
+        "git_blob_sha": "d500330e2c2315ce4d982998e9425ee02a986c8b",
+        "original_api_response": {
+          "bytes": 52976,
+          "sha256": "e5a0d50a6c364b52f8bfc0db77309fdfeb3b21d1d67fe2346203ca1c98289372"
+        },
+        "sha256": "456d3d32a393c1dbddda08d99036c3b3e60f3339172bb5dd42f064faa0f8f8b3"
+      },
+      "scripts/prepare_audio_device_environment.py": {
+        "api_request_path": "repos/adybag14-cyber/termux-hermes/contents/scripts/prepare_audio_device_environment.py?ref=bd9b6350705429d8002b0aeda2aefe9e26d8d967",
+        "bytes": 63097,
+        "git_blob_sha": "90d9146e2d86e0d76248e1560ab87f912be6c221",
+        "original_api_response": {
+          "bytes": 88187,
+          "sha256": "60d2c07c57723efc2f35ec53ee02f9c1d2616fa4ec15a0f81535c790c12888f2"
+        },
+        "sha256": "bd72d882ae712f84b636e6266f60a0037055dfb3ad656ed80ca7d1cb80255197"
+      },
+      "tests/test_audio_device_staging.py": {
+        "api_request_path": "repos/adybag14-cyber/termux-hermes/contents/tests/test_audio_device_staging.py?ref=bd9b6350705429d8002b0aeda2aefe9e26d8d967",
+        "bytes": 68033,
+        "git_blob_sha": "cd1b06cc17efe70ae6f5b13d02ccc9ad5c06571a",
+        "original_api_response": {
+          "bytes": 94924,
+          "sha256": "87418f2ac1c0134da280db9f3c90b9b193cb65e1fe7ac9aad7efb449051a855e"
+        },
+        "sha256": "8d835c3d3c110c904e3fe6debac5f2ffc8c05fdf8a21342a2dda9dce1cd8e5b4"
+      }
+    },
+    "source_method": "Nine exact-ref GitHub Contents API responses were decoded and checked for declared size, Git blob SHA-1 and SHA-256 against AUDIO-STAGING-INPUTS.json. No current worktree bytes were substituted."
+  },
+  "job_id": 117519202556,
+  "job_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39074656769/job/117519202556",
+  "microphone_accessed": false,
+  "native_dependency_graph_validation_receipt_written": true,
+  "native_recreation_receipts_completed": 1,
+  "observed_error": "native library resolved from an undeclared ambient directory: /data/data/com.termux/files/usr/lib/libtermux-platform-ns.so",
+  "observed_error_type": "StagingError",
+  "physical_device_tested": false,
+  "post_diagnostic_validation_completed": false,
+  "prior_native_failure": "../run-39072136395/summary.json",
+  "purpose": "Preserve the fourth native isolated-audio staging failure and its completed first-root assembly, validation and CLI evidence without certifying the failed diagnostic or a second destination.",
+  "recording_tested": false,
+  "release_created": false,
+  "repository": "adybag14-cyber/termux-hermes",
+  "run_attempt": 1,
+  "run_id": 39074656769,
+  "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39074656769",
+  "schema_version": 1,
+  "second_destination_receipts_present": false,
+  "second_destination_started": false,
+  "source_inputs": {
+    ".github/workflows/audio-device-staging.yml": {
+      "bytes": 2948,
+      "sha256": "791d7de087de01f9d3f2bd1439eb91da49a08e7d06ddb28af614e3c3891f3630"
+    },
+    "manifest/release.json": {
+      "bytes": 413,
+      "sha256": "b6582a3a54974ab12774adc0cb51671db16147a25237a62865581b8cc6a37219"
+    },
+    "patches/next-stable/audio-readiness.patch": {
+      "bytes": 8470,
+      "sha256": "82b92d5095ceabc05f0200569da1cc16b861c77b166095982b05d57940573db7"
+    },
+    "scripts/audio_device_bundle_lock.json": {
+      "bytes": 21537,
+      "sha256": "664efe4fc15300a4cb33da28aab1352da0255d530a8427ace17298d09f5f14d6"
+    },
+    "scripts/check_audio_device_staging.sh": {
+      "bytes": 9453,
+      "sha256": "44adb83c232247f49dbf3ac1c9cd0e095422e67c5242b078bc5e43e083fbeef3"
+    },
+    "scripts/fetch_compatibility_candidate.py": {
+      "bytes": 19415,
+      "sha256": "dc075415b46e14f3f09fb6a889fdf38279564b2f2e6e6008b21232545d1d6d8a"
+    },
+    "scripts/prepare_audio_device_bundle.py": {
+      "bytes": 37568,
+      "sha256": "456d3d32a393c1dbddda08d99036c3b3e60f3339172bb5dd42f064faa0f8f8b3"
+    },
+    "scripts/prepare_audio_device_environment.py": {
+      "bytes": 63097,
+      "sha256": "bd72d882ae712f84b636e6266f60a0037055dfb3ad656ed80ca7d1cb80255197"
+    },
+    "tests/test_audio_device_staging.py": {
+      "bytes": 68033,
+      "sha256": "8d835c3d3c110c904e3fe6debac5f2ffc8c05fdf8a21342a2dda9dce1cd8e5b4"
+    }
+  },
+  "source_inputs_match_exact_commit": true,
+  "transfer_bundle_built": true,
+  "two_destinations_certified": false,
+  "vad_tested": false,
+  "verification_limit": "This run proves completed first-root assembly, application/private-PM native validation and bounded CLI help at bd9b635. Audio initialization then reached its expected unavailable path, but the unchanged library-origin guard rejected libtermux-platform-ns.so from the ambient Termux prefix, so protocol_valid remains false. No post-diagnostic validation, second destination or aggregate result exists. These positives do not certify the subsequently changed namespace bundle, physical audio, microphone permission, recording, VAD, model inference or release readiness.",
+  "wheel_count": 102,
+  "workflow_conclusion": "failure"
+}

@@ -26,6 +26,7 @@ import stat
 import struct
 import subprocess
 import sys
+import sysconfig
 import tempfile
 import traceback
 import zipfile
@@ -82,6 +83,8 @@ def support():
 
 
 def native_runtime():
+    require("_PYTHON_HOST_PLATFORM" not in os.environ,
+            "Native runtime requires the actual platform without a host override")
     require(sys.platform == "android" and os.uname().machine == "aarch64"
             and os.getuid() == 1000 and sys.version_info[:3] == (3, 14, 6),
             "Real native Bionic aarch64 Python3.14.6 UID1000 is required")
@@ -89,7 +92,10 @@ def native_runtime():
             and Path("/proc/self/exe").resolve() == (PREFIX / "bin/python3.14").resolve(),
             "Unexpected base Python origin")
     require(sys.getandroidapilevel() >= 24, "Android API24 or newer is required")
+    actual_platform = sysconfig.get_platform()
+    require(actual_platform == "android-24-arm64_v8a", "Actual native build platform differs")
     return {"sys_platform": sys.platform, "machine": os.uname().machine,
+            "sysconfig_platform": actual_platform, "host_platform_override": None,
             "uid": os.getuid(), "python": sys.version, "api_level": sys.getandroidapilevel(),
             "prefix": sys.prefix, "base_prefix": sys.base_prefix,
             "executable": elf(Path("/proc/self/exe"))}
@@ -431,10 +437,13 @@ def verify_built_wheel(path, package, lock):
 def build_packages(lock, inputs, out, work):
     venv = work / "venv"
     base_python = str(PREFIX / "bin/python")
-    bounded_command([base_python, "-I", "-B", "-m", "venv", "--system-site-packages",
-                     "--without-pip", str(venv)], out, "native-create-venv", 60)
-    python = str(venv / "bin/python")
+    # Native CPython already reports Android API24/arm64_v8a. A build override
+    # corrupts its machine parsing before pip can enumerate supported tags.
     env = dict(os.environ)
+    env.pop("_PYTHON_HOST_PLATFORM", None)
+    bounded_command([base_python, "-I", "-B", "-m", "venv", "--system-site-packages",
+                     "--without-pip", str(venv)], out, "native-create-venv", 60, env=env)
+    python = str(venv / "bin/python")
     env.update({"PIP_NO_INDEX": "1", "PIP_CONFIG_FILE": os.devnull,
                 "PIP_DISABLE_PIP_VERSION_CHECK": "1", "PIP_NO_CACHE_DIR": "1",
                 "PYTHONDONTWRITEBYTECODE": "1", "PYTHONNOUSERSITE": "1"})
@@ -449,7 +458,6 @@ def build_packages(lock, inputs, out, work):
         "LDFLAGS": "--target=aarch64-linux-android24",
         "CMAKE_BUILD_PARALLEL_LEVEL": "2", "MAKEFLAGS": "-j2",
         "CMAKE_GENERATOR": "Ninja", "SOURCE_DATE_EPOCH": str(lock["build"]["source_date_epoch"]),
-        "_PYTHON_HOST_PLATFORM": "android-24-arm64_v8a",
         "CMAKE_ARGS": " ".join("-D" + k + "=" + v for k, v in lock["build"]["llama_cmake"].items()),
         "SKBUILD_BUILD_DIR": str(work / "llama-cmake"), "SKBUILD_CMAKE_BUILD_TYPE": "Release",
     })
@@ -497,8 +505,7 @@ def build_packages(lock, inputs, out, work):
                      "--find-links", str(out / "wheels"), "-r", str(out / "built-requirements.txt")],
                     out, "native-install-built-wheels", 90, env=env)
     save_json(out / "NEUTTS-NATIVE-BUILT-WHEELS.json", {"schema_version": 1, "wheels": builds})
-    # Platform stamping is scoped to construction, never a runtime tag override.
-    env.pop("_PYTHON_HOST_PLATFORM", None)
+    # Build backends and runtime cases retain the same actual native platform.
     return venv, builds, env
 
 
@@ -647,6 +654,9 @@ def llama_case():
         model = api.llama_model_default_params()
         context = api.llama_context_default_params()
         require(text and "CPU" in text, "No real CPU backend system information")
+        require(model.load_mode == api.LLAMA_LOAD_MODE_AUTO
+                and model.lazy_mode == api.LLAMA_LAZY_MODE_AUTO,
+                "Unexpected native default model load modes")
         require(context.n_ctx > 0 and context.n_batch > 0 and context.n_threads > 0,
                 "Invalid real default context parameters")
         require(api.llama_supports_gpu_offload() is False and api.llama_supports_rpc() is False,
@@ -655,7 +665,7 @@ def llama_case():
             "backend_initialized": True, "system_info": text,
             "default_context": {"n_ctx": context.n_ctx, "n_batch": context.n_batch,
                                 "n_threads": context.n_threads},
-            "default_model_use_mmap": bool(model.use_mmap),
+            "default_model": {"load_mode": model.load_mode, "lazy_mode": model.lazy_mode},
             "supports_mmap": api.llama_supports_mmap(), "supports_mlock": api.llama_supports_mlock(),
             "supports_gpu_offload": False, "supports_rpc": False,
             "library": elf(library, dynamic=True), "model_loaded": False, "inference_tested": False,

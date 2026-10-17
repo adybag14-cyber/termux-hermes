@@ -1,0 +1,47 @@
+{
+  "all_source_archive_version_abi_and_build_pins_unchanged": true,
+  "corrected_helper_bytes": 43205,
+  "corrected_helper_sha256": "160d073c2db074f1870698e72ba57da3eb4b4a7af0729fdc6f7996f726357a7e",
+  "corrected_native_oracle_retested": false,
+  "correction": "Read and assert the actual default load/lazy enums. Preserve context, CPU-only capability, backend cleanup, ELF and mapped-library checks.",
+  "failure": {
+    "message": "'llama_model_params' object has no attribute 'use_mmap'",
+    "source": "original/native-components/native-llama.stderr.log",
+    "type": "AttributeError"
+  },
+  "host_controls": {
+    "green": "oracle-focused-test-result.json",
+    "red": "oracle-regression-red.stdout.log",
+    "scope": "Host API-boundary regression only; not native execution"
+  },
+  "lock_sha256": "822aeabc9dca027f2f940dfb63a96fa5d015f81f293e138b67d126bd6914cc25",
+  "matching_source_commits": {
+    "llama-cpp-python": "1652066e0af45f2313b339670ef9555e8a54e545",
+    "llama.cpp": "0c1e57098bba43ac29e6e3b677cdceebdd22334f"
+  },
+  "pinned_sources": {
+    "binding": {
+      "bytes": 189135,
+      "member": "native-inputs/sources/llama-cpp-python/llama_cpp/llama_cpp.py",
+      "sha256": "db8d48ce5003d8ed1bb690b3b529ae112ca71881110a43fb9acd164210848fd0"
+    },
+    "defaults": {
+      "bytes": 162018,
+      "member": "native-inputs/sources/llama-cpp-python/vendor/llama.cpp/src/llama-model.cpp",
+      "sha256": "be90575de2cf5248ea42fbe7136a93325b394d3cdb7f9920e2f429f213f08493"
+    },
+    "header": {
+      "bytes": 89978,
+      "member": "native-inputs/sources/llama-cpp-python/vendor/llama.cpp/include/llama.h",
+      "sha256": "d5cf9203bea63b575e76cba4881f29cfd1b611451578b01582b75b72ecbb04bc"
+    }
+  },
+  "schema_version": 1,
+  "source_facts": [
+    "The pinned ctypes llama_model_params and matching C struct have load_mode and lazy_mode, without use_mmap.",
+    "llama_model_default_params returns LLAMA_LOAD_MODE_AUTO (-1) and LLAMA_LAZY_MODE_AUTO (1).",
+    "The independent supports_mmap capability remains available; AUTO does not imply an observed mmap policy before model loading."
+  ],
+  "tested_helper_sha256": "8d34f192f6597a4980566e622ca8acac6d27f0cf6efcffcb37562048aeda0eb7",
+  "tests_sha256": "f36518d3c1872952d40737e55d14b366348f1d4c2846f88be914c2daba8a44df"
+}

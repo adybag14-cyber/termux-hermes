@@ -45,7 +45,7 @@ if engine["version"] != "1.4.1" or engine["requires-python"] != ">=3.10, <3.14":
     raise SystemExit("review the engine Python boundary before changing this experiment")
 (out / "NEUTTS-ENGINE-pyproject.toml").write_bytes(engine_source)
 data = {
-    "schema_version": 1, "purpose": "unpublished NeuTTS native core with verified Python dependencies",
+    "schema_version": 1, "purpose": "unpublished APT native scientific behavior with strict dependency provenance",
     "run_id": os.environ.get("GITHUB_RUN_ID"), "head_sha": head,
     "workflow_ref_commit": os.environ.get("GITHUB_SHA"), "native_image": sys.argv[3],
     "inputs": {p: hashlib.sha256((root / p).read_bytes()).hexdigest() for p in names},
@@ -60,6 +60,9 @@ data = {
     "engine_optional_dependencies": engine["optional-dependencies"],
     "managed_python_supported_by_declared_engine": False,
     "apt_core_is_engine_dependency_lock": False,
+    "python_wheelhouse": "exact frozen archives; native MarkupSafe 3.0.4",
+    "apt_postinst_dependency_resolution": "offline from the verified wheelhouse",
+    "pip_wheel_tag_compatibility": "unresolved",
     "rolling_base_upgrade": True,
     "engine_installed": False, "synthesis_tested": False, "physical_device_tested": False,
     "native_source_components_requested": native_components,
@@ -336,7 +339,7 @@ cp "$(dirname "$0")/compatibility_probe_neutts.py" "$work/native_core.py"
 
 stage=native-scientific-behavior
 "$PREFIX/bin/python" -I -B "$work/native_core.py" "$out"
-echo "NATIVE_APT_CORE_PASSED: dependency feasibility only; NeuTTS synthesis remains untested"
+echo "NATIVE_APT_CORE_PASSED: measured scientific behavior and strict dependency provenance; pip check remains failed with unresolved WHEEL tags; NeuTTS synthesis remains untested"
 if [[ "$native_components" == 1 ]]; then
   # The full scientific foundation must pass before adding any compiler. Download
   # the exact build closure into the retained cache; the separate native helper

@@ -1,0 +1,34 @@
+{
+  "pytest_exit": 0,
+  "schema_version": 1,
+  "scope": "Focused host checks of OpenSSL helper environment and activation guards; packer integration not yet included",
+  "selection": "(openssl and not openssl_package and not openssl_member and not verified_openssl_package) or mapped_provider_alone",
+  "source_after": {
+    "scripts/prepare_audio_device_environment.py": {
+      "sha256": "bd72d882ae712f84b636e6266f60a0037055dfb3ad656ed80ca7d1cb80255197",
+      "size": 63097
+    },
+    "tests/test_audio_device_staging.py": {
+      "sha256": "8d835c3d3c110c904e3fe6debac5f2ffc8c05fdf8a21342a2dda9dce1cd8e5b4",
+      "size": 68033
+    }
+  },
+  "source_before": {
+    "scripts/prepare_audio_device_environment.py": {
+      "sha256": "bd72d882ae712f84b636e6266f60a0037055dfb3ad656ed80ca7d1cb80255197",
+      "size": 63097
+    },
+    "tests/test_audio_device_staging.py": {
+      "sha256": "8d835c3d3c110c904e3fe6debac5f2ffc8c05fdf8a21342a2dda9dce1cd8e5b4",
+      "size": 68033
+    }
+  },
+  "stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  "stdout": {
+    "sha256": "b995d0d556bdb9810ac4156c76731bf8fa0d30b8a8ea360528ee515a46101d92",
+    "size": 117
+  }
+}

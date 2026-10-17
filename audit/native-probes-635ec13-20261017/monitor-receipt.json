@@ -1,0 +1,948 @@
+{
+  "schema_version": 1,
+  "captured_at_utc": "2026-10-17T18:50:12.942351+00:00",
+  "purpose": "Read-only final monitoring evidence for PR7 native component lanes",
+  "repository": "adybag14-cyber/termux-hermes",
+  "expected_head_sha": "635ec13c9d0f264f508d1bdbaa7670d4eaa00787",
+  "source_run_command": [
+    "gh",
+    "run",
+    "view",
+    "39057745666",
+    "--repo",
+    "adybag14-cyber/termux-hermes",
+    "--json",
+    "databaseId,status,conclusion,headSha,headBranch,event,url,createdAt,startedAt,updatedAt,name,number,attempt,jobs"
+  ],
+  "raw_run_json_bytes": 15919,
+  "raw_run_json_sha256": "051d57ad449f552e02def60fa9400e3d27496f4cb4b538740038f3f3ad36beb5",
+  "run": {
+    "attempt": 1,
+    "conclusion": "failure",
+    "createdAt": "2026-10-17T18:21:45Z",
+    "databaseId": 39057745666,
+    "event": "pull_request",
+    "headBranch": "prepare/termux-compatibility-resume-20261017",
+    "headSha": "635ec13c9d0f264f508d1bdbaa7670d4eaa00787",
+    "jobs": [
+      {
+        "completedAt": "2026-10-17T18:21:51Z",
+        "conclusion": "success",
+        "databaseId": 117469113634,
+        "name": "plan",
+        "startedAt": "2026-10-17T18:21:47Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-17T18:21:48Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-17T18:21:48Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:49Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd",
+            "number": 2,
+            "startedAt": "2026-10-17T18:21:48Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:49Z",
+            "conclusion": "success",
+            "name": "Select checks whose inputs changed",
+            "number": 3,
+            "startedAt": "2026-10-17T18:21:49Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:49Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd",
+            "number": 6,
+            "startedAt": "2026-10-17T18:21:49Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:49Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 7,
+            "startedAt": "2026-10-17T18:21:49Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469113634"
+      },
+      {
+        "completedAt": "2026-10-17T18:48:13Z",
+        "conclusion": "success",
+        "databaseId": 117469130486,
+        "name": "Native nemo probe",
+        "startedAt": "2026-10-17T18:21:55Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-17T18:21:56Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-17T18:21:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:57Z",
+            "conclusion": "success",
+            "name": "Checkout proposed packaging changes",
+            "number": 2,
+            "startedAt": "2026-10-17T18:21:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:57Z",
+            "conclusion": "success",
+            "name": "Read the immutable source baseline",
+            "number": 3,
+            "startedAt": "2026-10-17T18:21:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:22:00Z",
+            "conclusion": "success",
+            "name": "Checkout the exact upstream source",
+            "number": 4,
+            "startedAt": "2026-10-17T18:21:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:22:06Z",
+            "conclusion": "success",
+            "name": "Apply released adapters and the proposed compatibility patch",
+            "number": 5,
+            "startedAt": "2026-10-17T18:22:00Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:48:10Z",
+            "conclusion": "success",
+            "name": "Build the isolated locked closure and exercise native behavior",
+            "number": 6,
+            "startedAt": "2026-10-17T18:22:06Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:48:11Z",
+            "conclusion": "success",
+            "name": "Preserve candidate evidence and diagnostics",
+            "number": 7,
+            "startedAt": "2026-10-17T18:48:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:48:12Z",
+            "conclusion": "success",
+            "name": "Post Checkout the exact upstream source",
+            "number": 13,
+            "startedAt": "2026-10-17T18:48:11Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:48:12Z",
+            "conclusion": "success",
+            "name": "Post Checkout proposed packaging changes",
+            "number": 14,
+            "startedAt": "2026-10-17T18:48:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:48:12Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 15,
+            "startedAt": "2026-10-17T18:48:12Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130486"
+      },
+      {
+        "completedAt": "2026-10-17T18:23:26Z",
+        "conclusion": "success",
+        "databaseId": 117469130513,
+        "name": "Native gateway probe",
+        "startedAt": "2026-10-17T18:21:55Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-17T18:21:56Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-17T18:21:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:57Z",
+            "conclusion": "success",
+            "name": "Checkout proposed packaging changes",
+            "number": 2,
+            "startedAt": "2026-10-17T18:21:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:57Z",
+            "conclusion": "success",
+            "name": "Read the immutable source baseline",
+            "number": 3,
+            "startedAt": "2026-10-17T18:21:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:22:02Z",
+            "conclusion": "success",
+            "name": "Checkout the exact upstream source",
+            "number": 4,
+            "startedAt": "2026-10-17T18:21:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:22:07Z",
+            "conclusion": "success",
+            "name": "Apply released adapters and the proposed compatibility patch",
+            "number": 5,
+            "startedAt": "2026-10-17T18:22:02Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:23Z",
+            "conclusion": "success",
+            "name": "Build the isolated locked closure and exercise native behavior",
+            "number": 6,
+            "startedAt": "2026-10-17T18:22:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:24Z",
+            "conclusion": "success",
+            "name": "Preserve candidate evidence and diagnostics",
+            "number": 7,
+            "startedAt": "2026-10-17T18:23:23Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:24Z",
+            "conclusion": "success",
+            "name": "Post Checkout the exact upstream source",
+            "number": 13,
+            "startedAt": "2026-10-17T18:23:24Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:24Z",
+            "conclusion": "success",
+            "name": "Post Checkout proposed packaging changes",
+            "number": 14,
+            "startedAt": "2026-10-17T18:23:24Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:24Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 15,
+            "startedAt": "2026-10-17T18:23:24Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130513"
+      },
+      {
+        "completedAt": "2026-10-17T18:23:40Z",
+        "conclusion": "success",
+        "databaseId": 117469130514,
+        "name": "Native browser probe",
+        "startedAt": "2026-10-17T18:21:55Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-17T18:21:56Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-17T18:21:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:57Z",
+            "conclusion": "success",
+            "name": "Checkout proposed packaging changes",
+            "number": 2,
+            "startedAt": "2026-10-17T18:21:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:57Z",
+            "conclusion": "success",
+            "name": "Read the immutable source baseline",
+            "number": 3,
+            "startedAt": "2026-10-17T18:21:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:22:01Z",
+            "conclusion": "success",
+            "name": "Checkout the exact upstream source",
+            "number": 4,
+            "startedAt": "2026-10-17T18:21:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:22:07Z",
+            "conclusion": "success",
+            "name": "Apply released adapters and the proposed compatibility patch",
+            "number": 5,
+            "startedAt": "2026-10-17T18:22:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:36Z",
+            "conclusion": "success",
+            "name": "Build the isolated locked closure and exercise native behavior",
+            "number": 6,
+            "startedAt": "2026-10-17T18:22:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:38Z",
+            "conclusion": "success",
+            "name": "Preserve candidate evidence and diagnostics",
+            "number": 7,
+            "startedAt": "2026-10-17T18:23:36Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:38Z",
+            "conclusion": "success",
+            "name": "Post Checkout the exact upstream source",
+            "number": 13,
+            "startedAt": "2026-10-17T18:23:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:38Z",
+            "conclusion": "success",
+            "name": "Post Checkout proposed packaging changes",
+            "number": 14,
+            "startedAt": "2026-10-17T18:23:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:38Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 15,
+            "startedAt": "2026-10-17T18:23:38Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130514"
+      },
+      {
+        "completedAt": "2026-10-17T18:23:26Z",
+        "conclusion": "success",
+        "databaseId": 117469130516,
+        "name": "Native desktop probe",
+        "startedAt": "2026-10-17T18:21:55Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-17T18:21:56Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-17T18:21:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:57Z",
+            "conclusion": "success",
+            "name": "Checkout proposed packaging changes",
+            "number": 2,
+            "startedAt": "2026-10-17T18:21:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:58Z",
+            "conclusion": "success",
+            "name": "Read the immutable source baseline",
+            "number": 3,
+            "startedAt": "2026-10-17T18:21:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:22:15Z",
+            "conclusion": "success",
+            "name": "Checkout the exact upstream source",
+            "number": 4,
+            "startedAt": "2026-10-17T18:21:58Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:22:21Z",
+            "conclusion": "success",
+            "name": "Apply released adapters and the proposed compatibility patch",
+            "number": 5,
+            "startedAt": "2026-10-17T18:22:15Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:22Z",
+            "conclusion": "success",
+            "name": "Build the isolated locked closure and exercise native behavior",
+            "number": 6,
+            "startedAt": "2026-10-17T18:22:21Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:24Z",
+            "conclusion": "success",
+            "name": "Preserve candidate evidence and diagnostics",
+            "number": 7,
+            "startedAt": "2026-10-17T18:23:22Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:24Z",
+            "conclusion": "success",
+            "name": "Post Checkout the exact upstream source",
+            "number": 13,
+            "startedAt": "2026-10-17T18:23:24Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:24Z",
+            "conclusion": "success",
+            "name": "Post Checkout proposed packaging changes",
+            "number": 14,
+            "startedAt": "2026-10-17T18:23:24Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:24Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 15,
+            "startedAt": "2026-10-17T18:23:24Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130516"
+      },
+      {
+        "completedAt": "2026-10-17T18:25:13Z",
+        "conclusion": "failure",
+        "databaseId": 117469130530,
+        "name": "Native audio probe",
+        "startedAt": "2026-10-17T18:21:55Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-17T18:21:56Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-17T18:21:55Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:57Z",
+            "conclusion": "success",
+            "name": "Checkout proposed packaging changes",
+            "number": 2,
+            "startedAt": "2026-10-17T18:21:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:57Z",
+            "conclusion": "success",
+            "name": "Read the immutable source baseline",
+            "number": 3,
+            "startedAt": "2026-10-17T18:21:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:22:02Z",
+            "conclusion": "success",
+            "name": "Checkout the exact upstream source",
+            "number": 4,
+            "startedAt": "2026-10-17T18:21:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:22:07Z",
+            "conclusion": "success",
+            "name": "Apply released adapters and the proposed compatibility patch",
+            "number": 5,
+            "startedAt": "2026-10-17T18:22:02Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:25:09Z",
+            "conclusion": "failure",
+            "name": "Build the isolated locked closure and exercise native behavior",
+            "number": 6,
+            "startedAt": "2026-10-17T18:22:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:25:10Z",
+            "conclusion": "success",
+            "name": "Preserve candidate evidence and diagnostics",
+            "number": 7,
+            "startedAt": "2026-10-17T18:25:09Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:25:10Z",
+            "conclusion": "success",
+            "name": "Post Checkout the exact upstream source",
+            "number": 13,
+            "startedAt": "2026-10-17T18:25:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:25:11Z",
+            "conclusion": "success",
+            "name": "Post Checkout proposed packaging changes",
+            "number": 14,
+            "startedAt": "2026-10-17T18:25:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:25:11Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 15,
+            "startedAt": "2026-10-17T18:25:11Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130530"
+      },
+      {
+        "completedAt": "2026-10-17T18:25:40Z",
+        "conclusion": "success",
+        "databaseId": 117469130531,
+        "name": "Native matrix probe",
+        "startedAt": "2026-10-17T18:21:55Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-17T18:21:56Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-17T18:21:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:57Z",
+            "conclusion": "success",
+            "name": "Checkout proposed packaging changes",
+            "number": 2,
+            "startedAt": "2026-10-17T18:21:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:57Z",
+            "conclusion": "success",
+            "name": "Read the immutable source baseline",
+            "number": 3,
+            "startedAt": "2026-10-17T18:21:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:22:02Z",
+            "conclusion": "success",
+            "name": "Checkout the exact upstream source",
+            "number": 4,
+            "startedAt": "2026-10-17T18:21:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:22:06Z",
+            "conclusion": "success",
+            "name": "Apply released adapters and the proposed compatibility patch",
+            "number": 5,
+            "startedAt": "2026-10-17T18:22:02Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:25:36Z",
+            "conclusion": "success",
+            "name": "Build the isolated locked closure and exercise native behavior",
+            "number": 6,
+            "startedAt": "2026-10-17T18:22:06Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:25:37Z",
+            "conclusion": "success",
+            "name": "Preserve candidate evidence and diagnostics",
+            "number": 7,
+            "startedAt": "2026-10-17T18:25:36Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:25:37Z",
+            "conclusion": "success",
+            "name": "Post Checkout the exact upstream source",
+            "number": 13,
+            "startedAt": "2026-10-17T18:25:37Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:25:38Z",
+            "conclusion": "success",
+            "name": "Post Checkout proposed packaging changes",
+            "number": 14,
+            "startedAt": "2026-10-17T18:25:37Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:25:38Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 15,
+            "startedAt": "2026-10-17T18:25:38Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130531"
+      },
+      {
+        "completedAt": "2026-10-17T18:23:58Z",
+        "conclusion": "success",
+        "databaseId": 117469130532,
+        "name": "Native uvloop probe",
+        "startedAt": "2026-10-17T18:21:55Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-17T18:21:56Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-17T18:21:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:57Z",
+            "conclusion": "success",
+            "name": "Checkout proposed packaging changes",
+            "number": 2,
+            "startedAt": "2026-10-17T18:21:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:21:57Z",
+            "conclusion": "success",
+            "name": "Read the immutable source baseline",
+            "number": 3,
+            "startedAt": "2026-10-17T18:21:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:22:02Z",
+            "conclusion": "success",
+            "name": "Checkout the exact upstream source",
+            "number": 4,
+            "startedAt": "2026-10-17T18:21:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:22:07Z",
+            "conclusion": "success",
+            "name": "Apply released adapters and the proposed compatibility patch",
+            "number": 5,
+            "startedAt": "2026-10-17T18:22:02Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:55Z",
+            "conclusion": "success",
+            "name": "Build the isolated locked closure and exercise native behavior",
+            "number": 6,
+            "startedAt": "2026-10-17T18:22:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:56Z",
+            "conclusion": "success",
+            "name": "Preserve candidate evidence and diagnostics",
+            "number": 7,
+            "startedAt": "2026-10-17T18:23:55Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:56Z",
+            "conclusion": "success",
+            "name": "Post Checkout the exact upstream source",
+            "number": 13,
+            "startedAt": "2026-10-17T18:23:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:56Z",
+            "conclusion": "success",
+            "name": "Post Checkout proposed packaging changes",
+            "number": 14,
+            "startedAt": "2026-10-17T18:23:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-17T18:23:56Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 15,
+            "startedAt": "2026-10-17T18:23:56Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130532"
+      }
+    ],
+    "name": "Probe next-stable Termux compatibility",
+    "number": 21,
+    "startedAt": "2026-10-17T18:21:45Z",
+    "status": "completed",
+    "updatedAt": "2026-10-17T18:48:14Z",
+    "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666"
+  },
+  "seven_native_job_summary": [
+    {
+      "name": "Native nemo probe",
+      "job_id": 117469130486,
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T18:21:55Z",
+      "completed_at": "2026-10-17T18:48:13Z",
+      "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130486"
+    },
+    {
+      "name": "Native gateway probe",
+      "job_id": 117469130513,
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T18:21:55Z",
+      "completed_at": "2026-10-17T18:23:26Z",
+      "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130513"
+    },
+    {
+      "name": "Native browser probe",
+      "job_id": 117469130514,
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T18:21:55Z",
+      "completed_at": "2026-10-17T18:23:40Z",
+      "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130514"
+    },
+    {
+      "name": "Native desktop probe",
+      "job_id": 117469130516,
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T18:21:55Z",
+      "completed_at": "2026-10-17T18:23:26Z",
+      "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130516"
+    },
+    {
+      "name": "Native audio probe",
+      "job_id": 117469130530,
+      "status": "completed",
+      "conclusion": "failure",
+      "started_at": "2026-10-17T18:21:55Z",
+      "completed_at": "2026-10-17T18:25:13Z",
+      "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130530"
+    },
+    {
+      "name": "Native matrix probe",
+      "job_id": 117469130531,
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T18:21:55Z",
+      "completed_at": "2026-10-17T18:25:40Z",
+      "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130531"
+    },
+    {
+      "name": "Native uvloop probe",
+      "job_id": 117469130532,
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T18:21:55Z",
+      "completed_at": "2026-10-17T18:23:58Z",
+      "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130532"
+    }
+  ],
+  "native_lane_counts": {
+    "success": 6,
+    "failure": 1,
+    "other": 0
+  },
+  "failure_evidence": [
+    {
+      "job_id": 117469130530,
+      "name": "Native audio probe",
+      "conclusion": "failure",
+      "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666/job/117469130530",
+      "failed_steps": [
+        {
+          "completedAt": "2026-10-17T18:25:09Z",
+          "conclusion": "failure",
+          "name": "Build the isolated locked closure and exercise native behavior",
+          "number": 6,
+          "startedAt": "2026-10-17T18:22:07Z",
+          "status": "completed"
+        }
+      ],
+      "raw_log_source_command": [
+        "gh",
+        "api",
+        "repos/adybag14-cyber/termux-hermes/actions/jobs/117469130530/logs"
+      ],
+      "raw_log_bytes": 130225,
+      "raw_log_sha256": "304ef5ffbb3b9f4bb2bd34adbaaa2b2f44f40cc7f06e613ddb083e541ff972ee",
+      "raw_log_lines": 1769,
+      "utf8_replacement_required_for_excerpts": false,
+      "raw_log_gzip": {
+        "filename": "job-117469130530-audio.raw.log.gz",
+        "bytes": 23450,
+        "sha256": "8d922f6d83673d67e62cbf9041fa623caf40440e5674492f07d48b2eba3cda0e",
+        "unmodified_raw_log_round_trip_verified": true
+      },
+      "failure_excerpts": [
+        {
+          "start_line": 1659,
+          "end_line": 1666,
+          "text": "2026-10-17T18:25:05.2107894Z     ~~~~~~~~~~~^^\n2026-10-17T18:25:05.2108244Z   File \"/out/environment/lib/python3.14/site-packages/sounddevice.py\", line 2936, in _initialize\n2026-10-17T18:25:05.2108736Z     _check(_lib.Pa_Initialize(), 'Error initializing PortAudio')\n2026-10-17T18:25:05.2109073Z     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n2026-10-17T18:25:05.2109496Z   File \"/out/environment/lib/python3.14/site-packages/sounddevice.py\", line 2836, in _check\n2026-10-17T18:25:05.2109955Z     raise PortAudioError(errormsg, err, hosterror_info)\n2026-10-17T18:25:05.2110716Z sounddevice.PortAudioError: Error initializing PortAudio: Unanticipated host error [PaErrorCode -9999]: 'Initializing engine failed' [<error getting host API: -10000> error -9999]\n2026-10-17T18:25:06.4644946Z Traceback (most recent call last):",
+          "truncated": false
+        },
+        {
+          "start_line": 1682,
+          "end_line": 1689,
+          "text": "2026-10-17T18:25:06.4657963Z     ~~~~~~~~~~~^^\n2026-10-17T18:25:06.4658315Z   File \"/out/environment/lib/python3.14/site-packages/sounddevice.py\", line 2936, in _initialize\n2026-10-17T18:25:06.4658808Z     _check(_lib.Pa_Initialize(), 'Error initializing PortAudio')\n2026-10-17T18:25:06.4659537Z     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n2026-10-17T18:25:06.4659958Z   File \"/out/environment/lib/python3.14/site-packages/sounddevice.py\", line 2836, in _check\n2026-10-17T18:25:06.4660412Z     raise PortAudioError(errormsg, err, hosterror_info)\n2026-10-17T18:25:06.4661171Z sounddevice.PortAudioError: Error initializing PortAudio: Unanticipated host error [PaErrorCode -9999]: 'Initializing engine failed' [<error getting host API: -10000> error -9999]\n2026-10-17T18:25:06.5274610Z Traceback (most recent call last):",
+          "truncated": false
+        },
+        {
+          "start_line": 1692,
+          "end_line": 1700,
+          "text": "2026-10-17T18:25:06.5278535Z                      ~~~~^^\n2026-10-17T18:25:06.5278863Z   File \"/probes/scripts/probe_native_compatibility.py\", line 567, in main\n2026-10-17T18:25:06.5279230Z     build(args.source, args.out, args.group)\n2026-10-17T18:25:06.5279496Z     ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n2026-10-17T18:25:06.5279853Z   File \"/probes/scripts/probe_native_compatibility.py\", line 551, in build\n2026-10-17T18:25:06.5280427Z     raise RuntimeError(\"Native runtime proof is incomplete; inspect BUILD-PROBE.json and NATIVE-LINKAGE.json\")\n2026-10-17T18:25:06.5281087Z RuntimeError: Native runtime proof is incomplete; inspect BUILD-PROBE.json and NATIVE-LINKAGE.json\n2026-10-17T18:25:09.1783981Z ##[error]Process completed with exit code 1.\n2026-10-17T18:25:09.1899071Z ##[group]Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "truncated": false
+        }
+      ],
+      "excerpt_char_limit": 16000
+    }
+  ],
+  "assessment": {
+    "overall_run_passed": false,
+    "audio_classification": "unresolved PortAudio host initialization limitation",
+    "audio_observation": "cffi and NumPy built and imported; sounddevice import failed at Pa_Initialize with error -9999 and Initializing engine failed in both ordinary and private-runtime exercises",
+    "microphone_ready_demonstrated": false,
+    "gate_result_reclassified": false,
+    "monitor_changed_repository": false,
+    "monitor_dispatched_additional_probes": false
+  },
+  "nemo_timing_comparison": {
+    "previous_run_id": 39039959324,
+    "previous_job_metadata": {
+      "completed_at": "2026-10-17T14:41:43Z",
+      "conclusion": "success",
+      "id": 117417226739,
+      "labels": [
+        "ubuntu-24.04-arm"
+      ],
+      "name": "Native nemo probe",
+      "runner_name": "GitHub Actions 1000184955",
+      "started_at": "2026-10-17T14:15:23Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completed_at": "2026-10-17T14:15:24Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "started_at": "2026-10-17T14:15:24Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-17T14:15:25Z",
+          "conclusion": "success",
+          "name": "Checkout proposed packaging changes",
+          "started_at": "2026-10-17T14:15:24Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-17T14:15:25Z",
+          "conclusion": "success",
+          "name": "Read the immutable source baseline",
+          "started_at": "2026-10-17T14:15:25Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-17T14:15:29Z",
+          "conclusion": "success",
+          "name": "Checkout the exact upstream source",
+          "started_at": "2026-10-17T14:15:25Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-17T14:15:33Z",
+          "conclusion": "success",
+          "name": "Apply released adapters and the proposed compatibility patch",
+          "started_at": "2026-10-17T14:15:29Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-17T14:41:40Z",
+          "conclusion": "success",
+          "name": "Build the isolated locked closure and exercise native behavior",
+          "started_at": "2026-10-17T14:15:33Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-17T14:41:41Z",
+          "conclusion": "success",
+          "name": "Preserve candidate evidence and diagnostics",
+          "started_at": "2026-10-17T14:41:40Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-17T14:41:41Z",
+          "conclusion": "success",
+          "name": "Post Checkout the exact upstream source",
+          "started_at": "2026-10-17T14:41:41Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-17T14:41:42Z",
+          "conclusion": "success",
+          "name": "Post Checkout proposed packaging changes",
+          "started_at": "2026-10-17T14:41:41Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-17T14:41:42Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "started_at": "2026-10-17T14:41:42Z",
+          "status": "completed"
+        }
+      ]
+    },
+    "current_job_seconds": 1578.0,
+    "previous_job_seconds": 1580.0,
+    "current_build_exercise_seconds": 1564.0,
+    "previous_build_exercise_seconds": 1567.0
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-17T21:20:00.868724+00:00",
+  "status": "host-correction-verified-native-rerun-pending",
+  "parent_source_commit": "38e99c23e8adae66825fc1dff73dcce7f373dac2",
+  "source_inputs": {
+    "scripts/audio_device_bundle_lock.json": {
+      "bytes": 19413,
+      "sha256": "ab203853f6d4d7e827bffb821ab07524fae7c25a1a4282cbb23fdf7322f5d6c9"
+    },
+    "scripts/prepare_audio_device_bundle.py": {
+      "bytes": 34453,
+      "sha256": "a94f646258967e0cd12f83a491690cf9db4bc3589edd45da12d53062f40c526d"
+    },
+    "scripts/prepare_audio_device_environment.py": {
+      "bytes": 54155,
+      "sha256": "7fad3957b49e0c0aa4422e2ca8f308da64ee34f82a17b06d9d196ebac9a10efa"
+    },
+    "tests/test_audio_device_staging.py": {
+      "bytes": 48244,
+      "sha256": "1b1f878b44ff841cb88deab1716ca92fe0704b7c667f36205fc8e1f24c55ff60"
+    }
+  },
+  "first_native_run": {
+    "id": 39068820175,
+    "conclusion": "failure",
+    "source_commit": "38e99c23e8adae66825fc1dff73dcce7f373dac2",
+    "evidence": "../run-39068820175/summary.json",
+    "reason": "The complete private PM and application installs passed, then the active original Hermes psutil Git requirement was rejected by the blanket direct-URL guard."
+  },
+  "correction": {
+    "scope": "Accept only the original Hermes 0.0.0 to psutil 8.0.0 Android/Python 3.14 Git requirement when original parent metadata, project, UV graph, candidate catalog, source fingerprint, selected version and wheel bytes all match.",
+    "original_source_preserved": true,
+    "unknown_direct_urls_rejected": true,
+    "private_pm_graph_exception": false,
+    "url_accessed": false,
+    "source_build_executed": false,
+    "dependency_pins_changed": false,
+    "candidate_package_changed": false,
+    "full_binding": "allowed-binding.json"
+  },
+  "focused_tests": {
+    "passed": 138,
+    "skipped": 0,
+    "exit_code": 0,
+    "seconds": 0.89,
+    "stdout": "pytest.stdout",
+    "stderr": "pytest.stderr"
+  },
+  "original_input_factory": {
+    "status": "passed",
+    "controlled_copied_wheel_corruption": "rejected",
+    "original_input_count": 5,
+    "evidence": "receipt.json",
+    "note": "The factory check used original baseline members from checkpoint-3. Checkpoint-4 preserves those original bytes and embeds the corrected helper."
+  },
+  "checkpoint_4": {
+    "status": "prepared-input-bundle",
+    "entry_count": 25269,
+    "wheel_count": 102,
+    "receipt": "LOCAL-BUNDLE-RECEIPT.json",
+    "bundle_receipt_sha256": "64f6770c47ede7669b3db458331e07b6fa7dd978a82681d31a65b8847e529d01",
+    "assembly_validated_natively": false,
+    "files": {
+      "manifest.json": {
+        "sha256": "a2517d111db582cdd50fc129be58df631d36aa0e11237c155843bb12f0021fb0",
+        "size": 5640268
+      },
+      "payload.tar.gz": {
+        "sha256": "409a22336ce5554036bad733b77229d7570c419b8e1122203719dab2893c9770",
+        "size": 315006906
+      },
+      "prepare.sh": {
+        "sha256": "73988bc119557170631c12db8dc147838036f884f0eabaa7198e32414c193187",
+        "size": 2145
+      }
+    }
+  },
+  "boundaries": {
+    "fresh_native_validation_pending": true,
+    "audio_readiness": false,
+    "physical_device_readiness": false,
+    "microphone_accessed": false,
+    "recording_tested": false,
+    "default_audio_io_enabled": false,
+    "release_created": false
+  },
+  "files": {
+    "allowed-binding.json": {
+      "bytes": 1461,
+      "sha256": "9db5ac89d0d6dcd578aca6f9df744d6bb514ca604dfdf3e782cf2f1ba282ceea"
+    },
+    "LOCAL-BUNDLE-RECEIPT.json": {
+      "bytes": 1793,
+      "sha256": "64f6770c47ede7669b3db458331e07b6fa7dd978a82681d31a65b8847e529d01"
+    },
+    "pytest.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "pytest.stdout": {
+      "bytes": 183,
+      "sha256": "27766bce82a7f07c4ed38a5f75ce58eaf446195bbc6959922d0c739253dc2ec7"
+    },
+    "receipt.json": {
+      "bytes": 2964,
+      "sha256": "6969b6392c98ff63729fe1a6e3073f272f3663085541885fee0e8a8c47221908"
+    }
+  }
+}

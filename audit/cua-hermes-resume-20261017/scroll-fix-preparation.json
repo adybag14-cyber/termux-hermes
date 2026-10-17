@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "status": "scroll_schema_fix_host_verified_native_integration_pending",
+  "baseline_reference_tree": "f49c77b666cef7fd5235cdd786556908527b532e",
+  "patched_reference_tree": "d2cfed7c6e84682ce2c8656215226cff2778e1d2",
+  "runtime_fix": "Forward requested scroll x/y when the actual driver advertises the coordinate capability OR explicitly advertises both schema properties; absent or incomplete support remains unchanged.",
+  "inputs": {
+    "patches/next-stable/cua-hermes-integration.patch": "4de54e137b2f7c8a8736e6afd91405690e401d85baa7df9224300fcde31a4437",
+    "scripts/compatibility_probe_cua_hermes.py": "23d853223f077d5ba738ddf112ef417ceb634b705b35f47dd21a7278704cad67",
+    "patches/next-stable/compatibility.patch": "77ac41bc11a6facd928f4cef577642b9eeb042ce3da7d820478aa49e1d98fa1e"
+  },
+  "host_test_evidence": "scroll-source-tests.json",
+  "observed_native_failure": "run-39054744052/verification.json",
+  "loader_native_regression": "run-39054744052/hermes-integration/hermes-cua-result.json",
+  "loader_manifest_before_desktop_passed": true,
+  "fixture_observation_before_scroll_fix": {
+    "requested": [
+      80,
+      60
+    ],
+    "delivered": [
+      160,
+      120
+    ],
+    "wheel_events": 2
+  },
+  "all_added_test_paths_are_new_files_for_trimmed_app_replay": true,
+  "included_in_main_candidate": false,
+  "default_pm_admission_changed": false,
+  "foreground_only": true,
+  "release_created": false
+}

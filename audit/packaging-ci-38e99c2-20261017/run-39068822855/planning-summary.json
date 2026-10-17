@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "run_id": 39068822855,
+  "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39068822855",
+  "event": "pull_request",
+  "run_head_sha": "38e99c23e8adae66825fc1dff73dcce7f373dac2",
+  "checkout_sha": "38e99c23e8adae66825fc1dff73dcce7f373dac2",
+  "frozen_pr_base_sha": "3d9086cfc190ba981e48e0276234064903315539",
+  "run_status": "completed",
+  "run_conclusion": "success",
+  "job_id": 117501981533,
+  "job_name": "plan",
+  "artifacts_count": 0,
+  "raw_job_log": {
+    "job_id": 117501981533,
+    "job_name": "plan",
+    "bytes": 21174,
+    "sha256": "f11b72902894bfc6e5cf817648c4cf10c298053cc641460343a9e4e2020cdd1e",
+    "line_count": 231,
+    "gzip_file": "job-117501981533.raw.log.gz",
+    "gzip_roundtrip_verified": true,
+    "byte_capture": "GitHub job-log API stdout captured by subprocess in binary mode; no newline conversion."
+  },
+  "checkout_evidence": {
+    "command_line": 143,
+    "sha_line": 144
+  },
+  "kind": "components",
+  "planner_command": "python3 scripts/plan_next_stable_validation.py --kind components",
+  "planner_invocation_evidence": [
+    {
+      "line": 173,
+      "text": "2026-10-17T20:56:31.5778068Z ##[group]Run python3 scripts/plan_next_stable_validation.py --kind components"
+    }
+  ],
+  "planner_report": {
+    "required": false,
+    "groups": [],
+    "change_basis": "exact previous PR head",
+    "changed_paths": [
+      ".gitattributes",
+      ".github/workflows/audio-device-staging.yml",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/LOCAL-BUNDLE-RECEIPT.json",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/focused/pytest.stderr",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/focused/pytest.stdout",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/focused/receipt.json",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/full-pytest.stderr",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/full-pytest.stdout",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/guide-bash-1.stderr",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/guide-bash-1.stdout",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/guide-bash-2.stderr",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/guide-bash-2.stdout",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/guide-bash-3.stderr",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/guide-bash-3.stdout",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/guide-bash-4.stderr",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/guide-bash-4.stdout",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/receipt.json",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/runner-bash-syntax.stderr",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/runner-bash-syntax.stdout",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/workflow-actionlint.stderr",
+      "audit/audio-device-staging-20261017/preparation-15c62e3/workflow-actionlint.stdout",
+      "docs/audio-readiness-device-validation.md",
+      "scripts/audio_device_bundle_lock.json",
+      "scripts/check_audio_device_staging.sh",
+      "scripts/prepare_audio_device_bundle.py",
+      "scripts/prepare_audio_device_environment.py",
+      "tests/test_audio_device_staging.py"
+    ]
+  },
+  "planner_report_log_lines": {
+    "first": 179,
+    "last": 212
+  },
+  "report_derivation": "Only per-line GitHub timestamp prefixes were removed to parse this JSON object. Full original job bytes remain in the referenced gzip.",
+  "independent_parent_diff": {
+    "from_sha": "7fe51dd96c6523d7336906cedef29cdc6304daaf",
+    "to_sha": "38e99c23e8adae66825fc1dff73dcce7f373dac2",
+    "changed_path_count": 27,
+    "exactly_matches_recorded_changed_paths": true,
+    "scope": "This independently checks the recorded path list. The original planner log records its change basis but does not print a previous-head SHA."
+  },
+  "native_jobs_skipped": [
+    {
+      "id": 117502006667,
+      "name": "Native ${{ matrix.group }} probe",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "new_native_build_or_probe_performed": false,
+  "scope": "Successful selection/planning only; the downstream native job was skipped. This does not create new candidate, lifecycle or component validation evidence. Separate audio-staging and NeuTTS native workflows are outside this collection."
+}

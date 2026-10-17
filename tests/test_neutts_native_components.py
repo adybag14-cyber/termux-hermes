@@ -217,3 +217,96 @@ def test_compiler_timeout_stops_its_process_group_and_stays_failed(tmp_path, mon
     assert [pid for pid, _ in kills] == [54321, 54321]
     assert len(waits) == 3
     assert (tmp_path / "compiler-fixture.stderr.log").exists()
+
+
+def test_native_build_commands_cannot_inherit_or_inject_a_platform_override(tmp_path, lock, monkeypatch):
+    # Reproduce the observed build environment, without pretending this host is Android.
+    monkeypatch.setenv("_PYTHON_HOST_PLATFORM", "android-24-arm64_v8a")
+    inputs, out, work = (tmp_path / name for name in ("inputs", "out", "work"))
+    (inputs / "sources").mkdir(parents=True)
+    out.mkdir()
+    work.mkdir()
+    commands = []
+
+    class ReachedCompilerBoundary(Exception):
+        pass
+
+    def capture(command, destination, label, timeout, env=None, cwd=None):
+        commands.append((label, env))
+        if label == "native-build-numba":
+            assert env is not None
+            assert "_PYTHON_HOST_PLATFORM" not in env
+            raise ReachedCompilerBoundary
+        return {"exit_code": 0}
+
+    monkeypatch.setattr(probe, "bounded_command", capture)
+    with pytest.raises(ReachedCompilerBoundary):
+        probe.build_packages(lock, inputs, out, work)
+    assert [label for label, _ in commands] == [
+        "native-create-venv", "native-build-python-inputs", "native-build-numba",
+    ]
+    assert all(env is not None and "_PYTHON_HOST_PLATFORM" not in env for _, env in commands)
+    assert probe.os.environ["_PYTHON_HOST_PLATFORM"] == "android-24-arm64_v8a"
+
+
+def test_native_runtime_refuses_an_inherited_override_before_platform_queries(monkeypatch):
+    monkeypatch.setenv("_PYTHON_HOST_PLATFORM", "android-24-arm64_v8a")
+
+    def unexpected_platform_query():
+        pytest.fail("an inherited override must be rejected before querying native tags")
+
+    monkeypatch.setattr(probe.sysconfig, "get_platform", unexpected_platform_query)
+    with pytest.raises(probe.ProbeError, match="actual platform without a host override"):
+        probe.native_runtime()
+
+
+@pytest.fixture
+def pinned_llama_api(monkeypatch):
+    """Model the pinned C/Python API surface; this does not execute native code."""
+    from types import ModuleType, SimpleNamespace
+
+    calls = []
+    package = ModuleType("llama_cpp")
+    package.__version__ = "0.3.36"
+    package.__file__ = str(Path(probe.sys.prefix) / "llama-oracle-fixture" / "llama_cpp" / "__init__.py")
+    library = Path(package.__file__).resolve().parent / "lib" / "libllama.so"
+    model = SimpleNamespace(load_mode=-1, lazy_mode=1)
+    api = SimpleNamespace(
+        _lib=SimpleNamespace(_name=str(library)),
+        LLAMA_LOAD_MODE_AUTO=-1,
+        LLAMA_LAZY_MODE_AUTO=1,
+        llama_backend_init=lambda: calls.append("init"),
+        llama_backend_free=lambda: calls.append("free"),
+        llama_print_system_info=lambda: b"CPU : host oracle fixture",
+        llama_model_default_params=lambda: model,
+        llama_context_default_params=lambda: SimpleNamespace(n_ctx=512, n_batch=2048, n_threads=4),
+        llama_supports_gpu_offload=lambda: False,
+        llama_supports_rpc=lambda: False,
+        llama_supports_mmap=lambda: True,
+        llama_supports_mlock=lambda: True,
+    )
+    package.llama_cpp = api
+    monkeypatch.setitem(probe.sys.modules, "llama_cpp", package)
+    monkeypatch.setattr(probe, "elf", lambda path, **kwargs: {"host_fixture_path": str(path)})
+    monkeypatch.setattr(probe, "mapped_libraries", lambda: [{"path": str(library)}])
+    return model, calls
+
+
+def test_llama_oracle_reads_pinned_load_modes_without_obsolete_use_mmap(pinned_llama_api):
+    _, calls = pinned_llama_api
+    result = probe.llama_case()
+    assert result["default_model"] == {"load_mode": -1, "lazy_mode": 1}
+    assert "default_model_use_mmap" not in result
+    assert result["supports_mmap"] is True
+    assert result["backend_initialized"] is True and result["backend_freed"] is True
+    assert result["model_loaded"] is False and result["inference_tested"] is False
+    assert calls == ["init", "free"]
+
+
+@pytest.mark.parametrize("field,value", [("load_mode", 0), ("lazy_mode", 2)])
+def test_llama_oracle_rejects_changed_pinned_defaults_and_frees_backend(pinned_llama_api, field, value):
+    model, calls = pinned_llama_api
+    setattr(model, field, value)
+    with pytest.raises(probe.ProbeError, match="Unexpected native default model load modes"):
+        probe.llama_case()
+    assert calls == ["init", "free"]

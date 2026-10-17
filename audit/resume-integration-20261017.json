@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "scope": "Merge committed concurrent preparation into the isolated resume branch only",
+  "resume_checkpoint": "0ea44fcac049869b36f21fb1202223477addb19e",
+  "original_preparation_commit": "fbf7c029b8df66618f520a47e6c07ff722129a43",
+  "original_worktree_modified": false,
+  "main_modified": false,
+  "release_created": false,
+  "conflict_resolution": {
+    "retain_native_validated_resume_inputs": {
+      ".github/workflows/neutts-termux-probe.yml": "e7b477dff174ba0d5ea98f2db924a936225e617646795e567f3b7671ef3083af",
+      "patches/next-stable/cua-hermes-integration.patch": "4de54e137b2f7c8a8736e6afd91405690e401d85baa7df9224300fcde31a4437",
+      "scripts/compatibility_probe_neutts.py": "137200bd63a1916079a8344349eeb3783281a08121489f9045d15f997dc64ce0",
+      "scripts/compatibility_probe_neutts.sh": "6b3e1ef9a711766de0a51d632e070825a41b9eef105d7e7390245871136511df",
+      "tests/test_neutts_probe.py": "2337873590044ec1d182f3db9f69d07d1fa69163563595ba059b1b623ffb173f"
+    },
+    "reason": "CUA scroll condition is semantically the same on both branches; resume additionally retains the proven pre-desktop loader fix. NeuTTS uses the exact dependency completion and bounded pip-tag diagnostic path that passed all six native scientific cases.",
+    "retain_original_independent_preparation_files": [
+      "audit/cua-native-20261017/run-39054088793.json",
+      "audit/neutts-core-python-metadata-20261017.json",
+      "audit/neutts-core-python-preparation-20261017.json",
+      "scripts/neutts_core_python_lock.json",
+      "scripts/prepare_neutts_core_python.py",
+      "tests/test_neutts_core_python.py"
+    ]
+  },
+  "native_validation_preserved": {
+    "cua_run_id": 39056472835,
+    "cua_tested_head": "37bf89d09a2a68a41585389d59b19e5e583c1f23",
+    "neutts_run_id": 39055874446,
+    "neutts_tested_head": "d439e8100bc89dbfe681fc03aa22017f175b8b2d",
+    "all_native_input_bytes_unchanged": true
+  },
+  "post_merge_host_packaging_tests": {
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "-q"
+    ],
+    "passed": 287,
+    "skipped": 4,
+    "failed": 0,
+    "elapsed_seconds": 4.07,
+    "raw_summary": "287 passed, 4 skipped in 4.07s"
+  },
+  "whitespace_check": "git diff --cached --check passed",
+  "other_session_uncommitted_work": "Preserved in its original checkout; not copied or overwritten.",
+  "follow_up_reconciliation": {
+    "original_preparation_commit": "48c07cf68dc388450fb10f18b3c823d29c799f19",
+    "source_checkpoint_before_merge": "0d36accab4984004fde50e7ce057990f3ab717be",
+    "retained_current_native_input_hashes": {
+      "scripts/compatibility_probe_neutts.py": "137200bd63a1916079a8344349eeb3783281a08121489f9045d15f997dc64ce0",
+      "scripts/compatibility_probe_neutts.sh": "6b3e1ef9a711766de0a51d632e070825a41b9eef105d7e7390245871136511df"
+    },
+    "reason": "Both approaches retain the APT pip-tag failure; the active resumed probe explicitly labels success as measured scientific behavior only, admits only the exactly known tag diagnostics, and retains pip_check_passed=false. Its six native cases are already verified.",
+    "original_additions_preserved": [
+      ".gitattributes",
+      "audit/audio-readiness-preparation-20261017.json",
+      "audit/neutts-native-20261017/run-39055594718.json",
+      "audit/neutts-native-20261017/run-39055594718/NEUTTS-BASE-PACKAGES.tsv",
+      "audit/neutts-native-20261017/run-39055594718/NEUTTS-BOOTSTRAP-ARCHIVES.sha256",
+      "audit/neutts-native-20261017/run-39055594718/NEUTTS-ENGINE-pyproject.toml",
+      "audit/neutts-native-20261017/run-39055594718/NEUTTS-EXIT.json",
+      "audit/neutts-native-20261017/run-39055594718/NEUTTS-INSTALLED-PACKAGES.tsv",
+      "audit/neutts-native-20261017/run-39055594718/NEUTTS-PINNED-APT.tsv",
+      "audit/neutts-native-20261017/run-39055594718/NEUTTS-PROBE-INPUTS.json",
+      "audit/neutts-native-20261017/run-39055594718/NEUTTS-PYTHON-CHECK.log",
+      "audit/neutts-native-20261017/run-39055594718/NEUTTS-PYTHON-INSTALL.log",
+      "audit/neutts-native-20261017/run-39055594718/NEUTTS-UPGRADED-BASE-PACKAGES.tsv",
+      "audit/neutts-native-20261017/run-39055594718/native-job.log",
+      "audit/neutts-native-20261017/run-39055594718/neutts-native-probe.log",
+      "audit/neutts-native-20261017/run-39055594718/python-wheelhouse/neutts_core_python_lock.json",
+      "audit/neutts-native-20261017/run-39055594718/python-wheelhouse/python-wheelhouse-receipt.json",
+      "audit/neutts-native-20261017/run-39055594718/python-wheelhouse/requirements.txt",
+      "audit/neutts-native-20261017/run-39055594718/signed-apt/packages.termux.dev_apt_termux-main_dists_stable_InRelease",
+      "docs/audio-readiness-device-validation.md",
+      "patches/next-stable/audio-readiness.patch"
+    ],
+    "all_cua_and_neutts_recorded_native_inputs_unchanged": true,
+    "packaging_test_files_unchanged_from_passed_3414585": true,
+    "main_candidate_build_inputs_unchanged": true,
+    "original_worktree_modified": false,
+    "public_release_modified": false,
+    "additional_audio_readiness_patch_in_main_candidate": false
+  }
+}

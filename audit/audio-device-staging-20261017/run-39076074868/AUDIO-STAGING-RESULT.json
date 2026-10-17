@@ -1,0 +1,568 @@
+{
+  "cases": [
+    {
+      "assembly_and_validation_exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "audio_diagnostic": {
+        "assembly_receipt_sha256": "ae25194a177c00974bc29642fcd89a6e34975ffeed51e1b7722527828c7f33bf",
+        "audio_resolver": {
+          "audio_imported_at_startup": false,
+          "library_sha256": "116ff3e80f1b29042cad96e3f923d25dfe5325420d4b5140653fa2226ba47073",
+          "name": "portaudio",
+          "native_loading_replaced": false,
+          "other_names_delegated": true,
+          "path": "venv/lib/python3.14/site-packages/sitecustomize.py",
+          "resolved": "/data/data/com.termux/files/usr/tmp/hermes-audio-validation-a/runtime-libs/lib/libportaudio.so.2",
+          "sha256": "9cdffa77fa93eb7e3b2697aea493e22d2f2227e3d7ebc2da5df2278e137eb9b6"
+        },
+        "bundle_manifest_sha256": "a86e362fc62df905d3b2e77fca28dc28b5b8d23f4129aaa694552749b0596e15",
+        "device_readiness": false,
+        "device_stream_opened": false,
+        "error": {
+          "cause_message": "Error initializing PortAudio: Unanticipated host error [PaErrorCode -9999]: 'Initializing engine failed' [<error getting host API: -10000> error -9999]",
+          "cause_type": "PortAudioError",
+          "message": "Audio library initialization failed: Error initializing PortAudio: Unanticipated host error [PaErrorCode -9999]: 'Initializing engine failed' [<error getting host API: -10000> error -9999]",
+          "portaudio_code": -9999,
+          "type": "AudioInitializationError"
+        },
+        "expected_portaudio_failure": true,
+        "framework_input": {
+          "package": "libandroid-stub",
+          "provides_real_android_framework": false,
+          "real_android_framework_mapped": false,
+          "role": "forwarder to the real Android framework",
+          "sha256": "87c61d872767541e332783d85f70bfdc1b2d48e373ef3025380345171bac4db9",
+          "system_framework_libraries": []
+        },
+        "input_device_status": "initialization-unavailable",
+        "microphone_accessed": false,
+        "native_libraries": {
+          "ambient_termux_library_directory_used": false,
+          "origins": [
+            {
+              "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libc++.so",
+              "scope": "platform",
+              "sha256": "3b3a556e1a175baa03cd5e82a4a9189182ad1b1824319f15c681a13fdfdc42f0"
+            },
+            {
+              "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libc.so",
+              "scope": "platform",
+              "sha256": "f9eacc7c6402ae1cca97e6e080340e12203bcd43cb44b054522239a7eed64fc4"
+            },
+            {
+              "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libdl.so",
+              "scope": "platform",
+              "sha256": "cfee715580eac1a5cf3a7713ceebd61e83544a2889bd4799be7c23272356815b"
+            },
+            {
+              "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/liblog.so",
+              "scope": "platform",
+              "sha256": "af8872cb6e476b8d66bbf6d84eb6fb12e3312ea79a5c947a63a8428256b45a81"
+            },
+            {
+              "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libm.so",
+              "scope": "platform",
+              "sha256": "d99e586652e539e4840c4466d6a8d8a7fe169b662a48935000226eb7f1c41f9b"
+            },
+            {
+              "path": "runtime-libs/lib/libOpenSLES.so",
+              "scope": "payload",
+              "sha256": "87c61d872767541e332783d85f70bfdc1b2d48e373ef3025380345171bac4db9"
+            },
+            {
+              "path": "runtime-libs/lib/libandroid-support.so",
+              "scope": "payload",
+              "sha256": "739cf829511d71dafd6c67fdbb70f3f0c6048642ea2e1967790ee961fde14430"
+            },
+            {
+              "path": "runtime-libs/lib/libbz2.so.1.0",
+              "scope": "payload",
+              "sha256": "667055cac259f6a9404a24a6e927f410e2f41141709d27d5cce0071cbf525407"
+            },
+            {
+              "path": "runtime-libs/lib/libcrypto.so.3",
+              "scope": "payload",
+              "sha256": "5dddfd86746aabaca2c13eea108c8968811a4f9dcccf5889e34ebff6be920949"
+            },
+            {
+              "path": "runtime-libs/lib/libffi.so",
+              "scope": "payload",
+              "sha256": "e118d741361c64015c074c5e1f24e42e44292d0d694ca3ba1e109205c10421f9"
+            },
+            {
+              "path": "runtime-libs/lib/liblzma.so.5",
+              "scope": "payload",
+              "sha256": "ba3a66a34cb61713f004c3c35d808007cb41c21a8f396e0678219fef1ec25e71"
+            },
+            {
+              "path": "runtime-libs/lib/libportaudio.so.2",
+              "scope": "payload",
+              "sha256": "116ff3e80f1b29042cad96e3f923d25dfe5325420d4b5140653fa2226ba47073"
+            },
+            {
+              "path": "runtime-libs/lib/libtermux-platform-ns.so",
+              "scope": "payload",
+              "sha256": "6c39c6a3318accd5e34f4f2c9e5c9e14eed113fb3a92e8c0be86006dc9256e34"
+            },
+            {
+              "path": "runtime-libs/lib/libz.so",
+              "scope": "payload",
+              "sha256": "c47748ed4b6ca6a2ecd664bab04795f3493956ab1f5cddc4ba0efa737ef3b711"
+            },
+            {
+              "path": "runtime-libs/lib/libz.so.1",
+              "scope": "payload",
+              "sha256": "c47748ed4b6ca6a2ecd664bab04795f3493956ab1f5cddc4ba0efa737ef3b711"
+            },
+            {
+              "path": "runtime-libs/lib/libzstd.so.1",
+              "scope": "payload",
+              "sha256": "1677d5e828c1839f111f0261697c08f99a5e4e80434659ab88e5ff859a1374f7"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/libpython3.14.so",
+              "scope": "payload",
+              "sha256": "ca65f712012251e4ae5abf4a96d9d83ed5d125d56cb025b6fc6fa373055b6e1c"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_bisect.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "aa7706e11f2eb81001b958488e4c0aca39660af6ac4240c2d22a0035df791961"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_blake2.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "a94868ae6a9b37ff8908f1d21c39696207d109b8588cf9f09cb134a7ea57e39d"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_bz2.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "a2f26b2013bfbdc12f4c60012bae618edf1d4bee136b2ce0d5d2d1ed3c380e80"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_csv.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "0650968274af97bf4a21be5babc971328b98f2ead060cb27ee92b2a3609daf9d"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_ctypes.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "a76ae396679a73a027c4b9a00e47e230b9a1ad9a8a1e9dd33cdcd51dd8008e55"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_hashlib.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "a5d35eb2c7fde826026a4a4ef9ef650fa7abb24c9e322b8f3d558a6957afd29f"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_json.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "8b2c265bb0aa0f81ea56da62b2b0083c3cd668937aeaaf844318b67296c15e03"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_lzma.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "4c66b98275ce9d05d3cd7d3f4f02f3061b8dc13886afcaa943d56c7ab9c3087a"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_posixsubprocess.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "638c49c607560b403f9f2a2590a91c310faa59a12b382071db0087f069c043f4"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_random.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "6743baa21630606a342a61230130c8b8236997ec3a2d76a5ba3a9792557b2e9a"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_struct.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "289c6eb099c4678cafb738e0f4ad4d4b96886d71b5e277fee88574eccdf7861a"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_zstd.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "b8f5a4a435d3dd53a7461fd56b82e1c6004d7c94223293171d59c3da30de692a"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/binascii.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "94b6bbe65b2e04120e905d4cf326fa6c662d389f62347b2d976aab4e07eebdd5"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/fcntl.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "c515e7021f4a39a6f7f0ff5188eec9f35474d214ea22483c5e5a8cc55eff46fa"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/grp.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "8c75865004da678534bb86e6a132cc40cd84336e426cf58991229c15f7f8bdb8"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/math.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "b63ae8690fd6723890885cd4a39c706afb861297bb2ee344c4f18c9064ab5046"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/select.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "93a78c90fc81810810bb221983e8fb77446f16e62c65b4bb56722b4d05603a30"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/zlib.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "9c80e40d31953cdafa942b465d18138186b37b3c56530bb68043e2e1aeeb9225"
+            },
+            {
+              "path": "venv/lib/python3.14/site-packages/_cffi_backend.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "c8322dcc98136a84268d292bf4b52f988ca7399b9b9fabc2acc5a7740dd9593c"
+            }
+          ]
+        },
+        "protocol_valid": true,
+        "readiness": false,
+        "recording_tested": false,
+        "root": "/data/data/com.termux/files/usr/tmp/hermes-audio-validation-a",
+        "schema_version": 1,
+        "status": "audio-unavailable",
+        "vad_tested": false
+      },
+      "diagnostic_command_exit_code": 0,
+      "diagnostic_outcome_is_separate_from_assembly": true,
+      "hermes_cli_smoke": {
+        "command": [
+          "bin/audio-python",
+          "-m",
+          "hermes_cli.main",
+          "--help"
+        ],
+        "exit_code": 0,
+        "full_immutable_validation_passed_after_startup": true,
+        "outputs": {
+          "hermes-cli-help.stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "hermes-cli-help.stdout": {
+            "bytes": 14064,
+            "sha256": "052128a388a1aaa78e457b9c7f8cdd8946be6a7a85dfbbb21be81fb05e47411b"
+          }
+        },
+        "timeout_seconds": 60
+      },
+      "receipts": {
+        "assembly-receipt.json": {
+          "bytes": 4174,
+          "sha256": "ae25194a177c00974bc29642fcd89a6e34975ffeed51e1b7722527828c7f33bf"
+        },
+        "audio-diagnostic.json": {
+          "bytes": 10289,
+          "sha256": "c32ab1a17394a23a161c4b7b00273508503329a4c1a505a5e449c677b7ad4e97"
+        },
+        "environment-manifest.json": {
+          "bytes": 1908685,
+          "sha256": "53647384ad633205ea3125dcc6e360d21493f2e7fdd0200a3839350c520dbeda"
+        },
+        "native-validation.json": {
+          "bytes": 115630,
+          "sha256": "7fdebbfdc35675998313c18ae4d524c6758d06c44243421825c6013b381db725"
+        }
+      },
+      "root": "/data/data/com.termux/files/usr/tmp/hermes-audio-validation-a"
+    },
+    {
+      "assembly_and_validation_exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "audio_diagnostic": {
+        "assembly_receipt_sha256": "df444f0483e75aadf2fafc746b21980760c024e7a97a55171e5a8399cf700feb",
+        "audio_resolver": {
+          "audio_imported_at_startup": false,
+          "library_sha256": "116ff3e80f1b29042cad96e3f923d25dfe5325420d4b5140653fa2226ba47073",
+          "name": "portaudio",
+          "native_loading_replaced": false,
+          "other_names_delegated": true,
+          "path": "venv/lib/python3.14/site-packages/sitecustomize.py",
+          "resolved": "/data/data/com.termux/files/usr/tmp/hermes audio validation b/runtime-libs/lib/libportaudio.so.2",
+          "sha256": "b1eeec3d874e19d633c73c46148d66120a7e0f51f0a94ec8af4e4dd3460c9ae8"
+        },
+        "bundle_manifest_sha256": "a86e362fc62df905d3b2e77fca28dc28b5b8d23f4129aaa694552749b0596e15",
+        "device_readiness": false,
+        "device_stream_opened": false,
+        "error": {
+          "cause_message": "Error initializing PortAudio: Unanticipated host error [PaErrorCode -9999]: 'Initializing engine failed' [<error getting host API: -10000> error -9999]",
+          "cause_type": "PortAudioError",
+          "message": "Audio library initialization failed: Error initializing PortAudio: Unanticipated host error [PaErrorCode -9999]: 'Initializing engine failed' [<error getting host API: -10000> error -9999]",
+          "portaudio_code": -9999,
+          "type": "AudioInitializationError"
+        },
+        "expected_portaudio_failure": true,
+        "framework_input": {
+          "package": "libandroid-stub",
+          "provides_real_android_framework": false,
+          "real_android_framework_mapped": false,
+          "role": "forwarder to the real Android framework",
+          "sha256": "87c61d872767541e332783d85f70bfdc1b2d48e373ef3025380345171bac4db9",
+          "system_framework_libraries": []
+        },
+        "input_device_status": "initialization-unavailable",
+        "microphone_accessed": false,
+        "native_libraries": {
+          "ambient_termux_library_directory_used": false,
+          "origins": [
+            {
+              "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libc++.so",
+              "scope": "platform",
+              "sha256": "3b3a556e1a175baa03cd5e82a4a9189182ad1b1824319f15c681a13fdfdc42f0"
+            },
+            {
+              "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libc.so",
+              "scope": "platform",
+              "sha256": "f9eacc7c6402ae1cca97e6e080340e12203bcd43cb44b054522239a7eed64fc4"
+            },
+            {
+              "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libdl.so",
+              "scope": "platform",
+              "sha256": "cfee715580eac1a5cf3a7713ceebd61e83544a2889bd4799be7c23272356815b"
+            },
+            {
+              "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/liblog.so",
+              "scope": "platform",
+              "sha256": "af8872cb6e476b8d66bbf6d84eb6fb12e3312ea79a5c947a63a8428256b45a81"
+            },
+            {
+              "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libm.so",
+              "scope": "platform",
+              "sha256": "d99e586652e539e4840c4466d6a8d8a7fe169b662a48935000226eb7f1c41f9b"
+            },
+            {
+              "path": "runtime-libs/lib/libOpenSLES.so",
+              "scope": "payload",
+              "sha256": "87c61d872767541e332783d85f70bfdc1b2d48e373ef3025380345171bac4db9"
+            },
+            {
+              "path": "runtime-libs/lib/libandroid-support.so",
+              "scope": "payload",
+              "sha256": "739cf829511d71dafd6c67fdbb70f3f0c6048642ea2e1967790ee961fde14430"
+            },
+            {
+              "path": "runtime-libs/lib/libbz2.so.1.0",
+              "scope": "payload",
+              "sha256": "667055cac259f6a9404a24a6e927f410e2f41141709d27d5cce0071cbf525407"
+            },
+            {
+              "path": "runtime-libs/lib/libcrypto.so.3",
+              "scope": "payload",
+              "sha256": "5dddfd86746aabaca2c13eea108c8968811a4f9dcccf5889e34ebff6be920949"
+            },
+            {
+              "path": "runtime-libs/lib/libffi.so",
+              "scope": "payload",
+              "sha256": "e118d741361c64015c074c5e1f24e42e44292d0d694ca3ba1e109205c10421f9"
+            },
+            {
+              "path": "runtime-libs/lib/liblzma.so.5",
+              "scope": "payload",
+              "sha256": "ba3a66a34cb61713f004c3c35d808007cb41c21a8f396e0678219fef1ec25e71"
+            },
+            {
+              "path": "runtime-libs/lib/libportaudio.so.2",
+              "scope": "payload",
+              "sha256": "116ff3e80f1b29042cad96e3f923d25dfe5325420d4b5140653fa2226ba47073"
+            },
+            {
+              "path": "runtime-libs/lib/libtermux-platform-ns.so",
+              "scope": "payload",
+              "sha256": "6c39c6a3318accd5e34f4f2c9e5c9e14eed113fb3a92e8c0be86006dc9256e34"
+            },
+            {
+              "path": "runtime-libs/lib/libz.so",
+              "scope": "payload",
+              "sha256": "c47748ed4b6ca6a2ecd664bab04795f3493956ab1f5cddc4ba0efa737ef3b711"
+            },
+            {
+              "path": "runtime-libs/lib/libz.so.1",
+              "scope": "payload",
+              "sha256": "c47748ed4b6ca6a2ecd664bab04795f3493956ab1f5cddc4ba0efa737ef3b711"
+            },
+            {
+              "path": "runtime-libs/lib/libzstd.so.1",
+              "scope": "payload",
+              "sha256": "1677d5e828c1839f111f0261697c08f99a5e4e80434659ab88e5ff859a1374f7"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/libpython3.14.so",
+              "scope": "payload",
+              "sha256": "ca65f712012251e4ae5abf4a96d9d83ed5d125d56cb025b6fc6fa373055b6e1c"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_bisect.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "aa7706e11f2eb81001b958488e4c0aca39660af6ac4240c2d22a0035df791961"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_blake2.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "a94868ae6a9b37ff8908f1d21c39696207d109b8588cf9f09cb134a7ea57e39d"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_bz2.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "a2f26b2013bfbdc12f4c60012bae618edf1d4bee136b2ce0d5d2d1ed3c380e80"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_csv.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "0650968274af97bf4a21be5babc971328b98f2ead060cb27ee92b2a3609daf9d"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_ctypes.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "a76ae396679a73a027c4b9a00e47e230b9a1ad9a8a1e9dd33cdcd51dd8008e55"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_hashlib.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "a5d35eb2c7fde826026a4a4ef9ef650fa7abb24c9e322b8f3d558a6957afd29f"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_json.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "8b2c265bb0aa0f81ea56da62b2b0083c3cd668937aeaaf844318b67296c15e03"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_lzma.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "4c66b98275ce9d05d3cd7d3f4f02f3061b8dc13886afcaa943d56c7ab9c3087a"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_posixsubprocess.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "638c49c607560b403f9f2a2590a91c310faa59a12b382071db0087f069c043f4"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_random.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "6743baa21630606a342a61230130c8b8236997ec3a2d76a5ba3a9792557b2e9a"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_struct.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "289c6eb099c4678cafb738e0f4ad4d4b96886d71b5e277fee88574eccdf7861a"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/_zstd.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "b8f5a4a435d3dd53a7461fd56b82e1c6004d7c94223293171d59c3da30de692a"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/binascii.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "94b6bbe65b2e04120e905d4cf326fa6c662d389f62347b2d976aab4e07eebdd5"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/fcntl.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "c515e7021f4a39a6f7f0ff5188eec9f35474d214ea22483c5e5a8cc55eff46fa"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/grp.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "8c75865004da678534bb86e6a132cc40cd84336e426cf58991229c15f7f8bdb8"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/math.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "b63ae8690fd6723890885cd4a39c706afb861297bb2ee344c4f18c9064ab5046"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/select.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "93a78c90fc81810810bb221983e8fb77446f16e62c65b4bb56722b4d05603a30"
+            },
+            {
+              "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/lib-dynload/zlib.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "9c80e40d31953cdafa942b465d18138186b37b3c56530bb68043e2e1aeeb9225"
+            },
+            {
+              "path": "venv/lib/python3.14/site-packages/_cffi_backend.cpython-314-aarch64-linux-android.so",
+              "scope": "payload",
+              "sha256": "c8322dcc98136a84268d292bf4b52f988ca7399b9b9fabc2acc5a7740dd9593c"
+            }
+          ]
+        },
+        "protocol_valid": true,
+        "readiness": false,
+        "recording_tested": false,
+        "root": "/data/data/com.termux/files/usr/tmp/hermes audio validation b",
+        "schema_version": 1,
+        "status": "audio-unavailable",
+        "vad_tested": false
+      },
+      "diagnostic_command_exit_code": 0,
+      "diagnostic_outcome_is_separate_from_assembly": true,
+      "hermes_cli_smoke": {
+        "command": [
+          "bin/audio-python",
+          "-m",
+          "hermes_cli.main",
+          "--help"
+        ],
+        "exit_code": 0,
+        "full_immutable_validation_passed_after_startup": true,
+        "outputs": {
+          "hermes-cli-help.stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "hermes-cli-help.stdout": {
+            "bytes": 14063,
+            "sha256": "5d4ba42e2861079376bf1b185e214651d8fdf8a5be8ba9eb0969f8a668cddefd"
+          }
+        },
+        "timeout_seconds": 60
+      },
+      "receipts": {
+        "assembly-receipt.json": {
+          "bytes": 4174,
+          "sha256": "df444f0483e75aadf2fafc746b21980760c024e7a97a55171e5a8399cf700feb"
+        },
+        "audio-diagnostic.json": {
+          "bytes": 10289,
+          "sha256": "64e42ba59e2f820b2c7838366cae3548028e5199446ec76460c3075030c8048a"
+        },
+        "environment-manifest.json": {
+          "bytes": 1908685,
+          "sha256": "cc2f0cf83756ca36c28659d739d5d40cea5ba1b610ed16a0f62f2c49d1d494bc"
+        },
+        "native-validation.json": {
+          "bytes": 115630,
+          "sha256": "10a45fe8cf353bced6627e763d0c36aa36cbc813b2e1fb9b3ef57ef5873ea903"
+        }
+      },
+      "root": "/data/data/com.termux/files/usr/tmp/hermes audio validation b"
+    }
+  ],
+  "container_network": "none",
+  "copied_virtual_environment": false,
+  "main_candidate_changed": false,
+  "microphone_accessed": false,
+  "native_environment_count": 2,
+  "physical_device_tested": false,
+  "purpose": "Two fresh isolated full Hermes audio environment recreations",
+  "recording_tested": false,
+  "recreated_at_distinct_final_paths": true,
+  "release_created": false,
+  "schema_version": 1,
+  "second_destination_contains_spaces": true,
+  "status": "passed",
+  "vad_tested": false
+}
