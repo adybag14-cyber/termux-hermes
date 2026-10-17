@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "audited_at": "2026-10-17",
+  "baseline": {
+    "package": "hermes-agent_0.22.2-1_aarch64.deb",
+    "package_version": "0.22.2-1",
+    "sha256": "deb163351554ca03f7104f91a50f4f8dc4d9247ce0cf5f2cca2608be3b319add",
+    "upstream_tag": "v0.22.2",
+    "upstream_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+    "packaging_commit": "91e096aec63aafd55700675e07148285522dcc70",
+    "python": "3.14.6",
+    "abi": "cp314",
+    "platform": "android_24_arm64_v8a",
+    "selected_extras": [
+      "acp",
+      "cron",
+      "mcp",
+      "telegram",
+      "termux"
+    ],
+    "installed_distributions": 81,
+    "android_admitted_resolved_distributions": 81,
+    "missing_selected_distributions": [],
+    "mismatched_selected_versions": [],
+    "shipped_uv_cache": false,
+    "shipped_wheelhouse": false,
+    "recorded_venv_state": false
+  },
+  "groups": {
+    "selected": [
+      "acp",
+      "cron",
+      "mcp",
+      "telegram",
+      "termux"
+    ],
+    "core_already_supplies_dependencies": [
+      "doc-extract",
+      "pty",
+      "vision",
+      "web"
+    ],
+    "partial_default_backend_unavailable": [
+      "computer-use"
+    ],
+    "aggregate_alias_unselected": [
+      "all",
+      "termux-all",
+      "messaging",
+      "voice",
+      "wake"
+    ],
+    "explicit_compatibility_exclusion": [
+      "uvloop",
+      "matrix",
+      "neutts",
+      "nemo-relay"
+    ],
+    "deliberately_opt_in": [
+      "kittentts"
+    ],
+    "unselected_not_proven_incompatible": [
+      "anthropic",
+      "audio-io",
+      "azure-identity",
+      "bedrock",
+      "daytona",
+      "ddgs",
+      "dingtalk",
+      "discord",
+      "edge-tts",
+      "exa",
+      "fal",
+      "feishu",
+      "firecrawl",
+      "google",
+      "google-chat",
+      "google-meet",
+      "mistral",
+      "modal",
+      "otlp",
+      "parallel-web",
+      "piper",
+      "silk",
+      "slack",
+      "sms",
+      "stt-whisper",
+      "teams",
+      "trace-upload",
+      "tts-premium",
+      "vercel",
+      "vertex",
+      "wake-openwakeword",
+      "wake-porcupine",
+      "wake-sherpa",
+      "wecom",
+      "youtube"
+    ]
+  },
+  "counting": {
+    "optional_groups": 55,
+    "explicit_dependency_group_exclusions": 4,
+    "additional_runtime_capabilities": 5,
+    "named_restricted_capabilities": 9,
+    "rule": "Count product capabilities, not package counts or every unselected extra. Merge AgentBrowser and Chromium into local browser. Computer-use extra is the same default CUA restriction, not an additional item. Count the missing cache and three broken adapter paths separately as defects."
+  },
+  "runtime_restrictions": [
+    {
+      "id": "local-browser",
+      "components": [
+        "PM AgentBrowser",
+        "PM Chromium"
+      ],
+      "baseline": "No managed Android artifacts; local managed browser cannot be provisioned.",
+      "status": "native_probe_pending"
+    },
+    {
+      "id": "native-cua",
+      "baseline": "Default local CUA driver does not support Android; MCP dependency alone is not a native backend.",
+      "status": "port_feasibility_review"
+    },
+    {
+      "id": "bot-desktop",
+      "baseline": "Linux virtual desktop host only.",
+      "status": "port_feasibility_review"
+    },
+    {
+      "id": "gateway-service",
+      "baseline": "Managed service installation/start/uninstall refuses Termux/APT provenance; manual gateway remains usable.",
+      "status": "runit_adapter_review"
+    },
+    {
+      "id": "recorder-silence-vad",
+      "baseline": "Termux:API recorder does not provide the sounddevice silence/VAD auto-stop path.",
+      "status": "port_feasibility_review"
+    }
+  ],
+  "adjacent_defects": [
+    {
+      "id": "text-clipboard",
+      "status": "adapter_and_focused_tests_passed_device_pending"
+    },
+    {
+      "id": "android-audio-playback",
+      "status": "adapter_and_focused_tests_passed_device_pending"
+    },
+    {
+      "id": "recorder-max-duration",
+      "status": "adapter_and_focused_tests_passed_device_pending"
+    },
+    {
+      "id": "optional-install-cold-cache",
+      "status": "fix_in_progress"
+    }
+  ],
+  "unbundled_frontends": [
+    "built web dashboard assets",
+    "Electron desktop runtime"
+  ],
+  "release_policy": {
+    "publish": false,
+    "version_bump": false,
+    "main_merge": false,
+    "installer_pin_change": false,
+    "scope": "preparation branch and candidate-only validation for the next stable version"
+  }
+}

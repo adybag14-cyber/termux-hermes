@@ -174,6 +174,13 @@ partial-download fixture and cache names must change with the release. The APT
 publisher keeps the newest active package, so old active-pool URLs are not
 permanent fixtures; historical packages should use immutable GitHub URLs.
 
+## Next stable compatibility preparation
+
+The [0.22.2-1 compatibility audit](docs/compatibility-0.22.2-1.md) records all
+55 optional groups, explicit Android exclusions, runtime restrictions, and the
+proposed repairs. The isolated preparation patch and native component probes do
+not change the current package version or publish a release.
+
 ## Historical builds and device evidence
 
 The [Hermes 0.20.6 / CPython 3.13 build documentation](docs/legacy-cp313.md),
