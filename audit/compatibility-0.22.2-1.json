@@ -610,22 +610,46 @@
       "physical_microphone_or_vad_certified": false,
       "included_in_main_candidate": false,
       "isolated_complete_environment": {
-        "status": "initial_native_bootstrap_failure_fixed_56_host_tests_passed_native_retry_pending",
+        "status": "both_canonical_environments_built_first_path_bytecode_source_fixed_62_host_tests_native_retry_pending",
         "workflow": "../.github/workflows/audio-hermes-preparation.yml",
         "evidence": "audio-hermes-environment-preparation-20261017.json",
-        "host_tests_passed": 56,
+        "host_tests_passed": 62,
         "full_four_path_patch_applied": true,
         "catalog_wheels": 102,
         "independent_fresh_preparations_required": 2,
         "physical_microphone_or_vad_certified": false,
         "canonical_pm_tests_passed": 17,
         "host_tests_skipped": 0,
-        "failure_run": 39067100543,
-        "failure_evidence": "audio-hermes-native-20261017/run-39067100543/packaged-tool-verification-fix.json",
-        "independent_review": "audio-hermes-packaged-tool-root-review-20261017.json",
-        "failure_stage": "build-cache verifier rejected the published flat Python tool entry before manager construction",
-        "current_preparer_sha256": "04663ed192171d14866a49c33a45e16ca34eef1a2325d9403dd578029414be3b",
-        "real_microphone_started": false
+        "failure_run": 39068675759,
+        "failure_evidence": "audio-hermes-native-20261017/run-39068675759/marker-bytecode-failure-fix.json",
+        "independent_review": "audio-hermes-native-20261017/run-39068675759/marker-bytecode-root-review.json",
+        "failure_stage": "strict final inventory rejected cache writes from isolated canonical interpreter marker subprocess",
+        "current_preparer_sha256": "1c72eb23756959612ac854d0fff1dc7486015a64adb20cf886da9a255fa298e4",
+        "real_microphone_started": false,
+        "original_bootstrap_failure": {
+          "failure_run": 39067100543,
+          "failure_evidence": "audio-hermes-native-20261017/run-39067100543/packaged-tool-verification-fix.json",
+          "failure_stage": "build-cache verifier rejected the published flat Python tool entry before manager construction"
+        },
+        "supplemental_patch": {
+          "path": "../patches/next-stable/audio-pm-marker-bytecode.patch",
+          "bytes": 533,
+          "sha256": "f4e63265aa3a71ceb0f69f11f7876a7e32e1f7e8a0704de5c8df96860e3aa390"
+        },
+        "first_path_canonical_build": {
+          "application_distributions": 101,
+          "manager_distributions": 4,
+          "original_catalog_rows_preserved": 100,
+          "catalog_rows": 102,
+          "final_payload_integrity": "failed_before_supplemental_patch"
+        },
+        "canonical_marker_regression": {
+          "original_cache_files": 25,
+          "patched_cache_files": 0,
+          "marker_facts_equal": true
+        },
+        "native_audio_initialization": "not-probed",
+        "complete_independent_preparations_passed": 0
       }
     },
     "neutts_default_gguf_source_review": {
@@ -801,13 +825,16 @@
       "model_downloaded": false
     },
     "packaging_ci_latest_saved": {
-      "head": "4fd661e1b3586a6480c20ec6ca3c8fb17aaba05d",
-      "run": 39066622371,
-      "job": 117495538199,
+      "head": "ce1e4eaebf523c4d58ea81848f3a5f7130a339ec",
+      "run": 39068678772,
+      "job": 117501552075,
       "status": "passed",
-      "tests_passed": 493,
-      "duration_seconds": 3.01,
-      "evidence": "ci-boundary-4fd661e-20261017"
+      "tests_passed": 520,
+      "tests_skipped": 29,
+      "duration_seconds": 2.66,
+      "evidence": "ci-boundary-ce1e4ea-20261017",
+      "merge_checkout": "b00322f",
+      "raw_job_log_sha256": "2b8b61b2dd7ca01456ad497cfeab4c2c24fdd91297f7a1b64d08d260b145e0bc"
     }
   }
 }

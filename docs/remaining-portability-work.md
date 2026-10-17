@@ -222,14 +222,30 @@ entries. The narrow [packaged-tool correction](../audit/audio-hermes-native-2026
 preserves the original lock, facts, tree digests, link policy and environment
 checks. It passes 56 focused host tests with no skips, including 17 cases using
 the actual canonical PM classes. The [independent root review](../audit/audio-hermes-packaged-tool-root-review-20261017.json)
-records the same result. A complete native retry is required. It prepares a complete isolated Hermes-plus-audio environment from the
-exact main candidate, its original 100 wheel entries, and the two exact NumPy
-and sounddevice additions. Both PM and the application environment must be built
-fresh at the final destination through canonical APIs. Original candidate,
-installed payload, lock files and existing wheel bytes must remain unchanged.
-The native preparation workflow will repeat this at two independent paths,
-preserving a reconstruction-input bundle separately from its build/probe
-evidence. A CI venv is not a phone installer.
+records the same result.
+
+The next [native run, 39068675759](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39068675759),
+successfully built both canonical environments at the first final path: the
+application contains 101 selected distributions and the manager contains four.
+All 100 original catalog entries are retained alongside the two audio additions.
+Its strict final payload check then detected new interpreter cache files. The
+canonical marker helper used isolated Python, which ignores the environment's
+bytecode setting. A separate [one-line source patch](../patches/next-stable/audio-pm-marker-bytecode.patch)
+adds the explicit no-bytecode flag to that helper. The actual canonical
+subprocess regression demonstrates 25 original cache files versus zero after
+the patch, with identical interpreter facts. All 62 focused tests pass with no
+skips in both the agent and [independent root run](../audit/audio-hermes-native-20261017/run-39068675759/marker-bytecode-root-review.json).
+The [failure and correction record](../audit/audio-hermes-native-20261017/run-39068675759/marker-bytecode-failure-fix.json)
+retains the successful builds and the failed final check; no cache cleanup or
+relaxed payload comparison conceals the write.
+
+A complete native retry must still pass the final integrity check, execute the
+audio dependency probe, and repeat construction at a second independent path.
+Both environments are built fresh through canonical APIs from the exact main
+candidate and original wheel catalog. The original candidate, installed payload,
+lock files and existing wheels must remain unchanged. The workflow preserves a
+reconstruction-input bundle separately from build/probe evidence; each phone
+must construct its own environment at its final private destination.
 
 After that staging gate, the [device guide](audio-readiness-device-validation.md)
 covers the remaining physical tests: real microphone permission and PCM capture,

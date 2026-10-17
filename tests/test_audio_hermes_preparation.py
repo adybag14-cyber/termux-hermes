@@ -207,7 +207,7 @@ def test_real_audio_patch_keeps_its_complete_reviewed_path_contract():
     prep.pinned(patch, prep.PATCH_BYTES, prep.PATCH_SHA)
     sections = prep.patch_sections(patch.read_bytes())
     assert set(sections) == prep.PATCH_PATHS
-    assert set(prep.SOURCE_FILES) == set(sections)
+    assert set(prep.AUDIO_SOURCE_FILES) == set(sections)
     assert prep.PRODUCTION_FILES < set(sections)
     assert all(name.startswith("tests/") for name in set(sections) - prep.PRODUCTION_FILES)
 
@@ -480,3 +480,98 @@ def test_published_flat_admission_keeps_canonical_link_policy(canonical_packaged
                 source_store=fixture.store, target=prep.TARGET, lock=fixture.lock,
             )
     assert packaged_store_snapshot(fixture.store) == before
+
+
+def test_marker_patch_has_one_reviewed_source_and_preserves_audio_contract():
+    patch = ROOT / prep.MARKER_PATCH_RELATIVE
+    prep.pinned(patch, prep.MARKER_PATCH_BYTES, prep.MARKER_PATCH_SHA)
+    assert set(prep.patch_sections(patch.read_bytes())) == {prep.MARKER_SOURCE_FILE}
+    assert set(prep.SOURCE_FILES) == prep.PATCH_PATHS | {prep.MARKER_SOURCE_FILE}
+    assert set(prep.AUDIO_SOURCE_FILES) == prep.PATCH_PATHS
+
+
+def test_actual_canonical_marker_probe_keeps_markers_without_writing_bytecode(
+    canonical_packaged_tools, tmp_path, monkeypatch, record_property,
+):
+    import os
+    import subprocess
+    import pm.bundled_wheels as original
+
+    baseline = Path(original.__file__)
+    prep.pinned(baseline, *prep.MARKER_SOURCE_BEFORE)
+    app = tmp_path / "owned-app"
+    source = app / prep.MARKER_SOURCE_FILE
+    source.parent.mkdir(parents=True)
+    source.write_bytes(baseline.read_bytes())
+    result = prep.patch_marker_probe(app, ROOT / prep.MARKER_PATCH_RELATIVE)
+    assert result == {prep.MARKER_SOURCE_FILE: {
+        "bytes": prep.MARKER_SOURCE_AFTER[0], "sha256": prep.MARKER_SOURCE_AFTER[1],
+    }}
+    spec = importlib.util.spec_from_file_location("audio_patched_canonical_markers_test", source)
+    patched = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = patched
+    spec.loader.exec_module(patched)
+    original_run = subprocess.run
+
+    def inspect(module, cache):
+        calls = []
+
+        def owned_cache_run(command, *args, **kwargs):
+            # Redirect the actual child's caches away from the host's stdlib.
+            # Keep the canonical helper's own isolation/bytecode switches intact.
+            assert Path(command[0]).resolve() == Path(sys.executable).resolve()
+            calls.append(list(command))
+            return original_run(
+                [command[0], "-X", "pycache_prefix=" + str(cache), *command[1:]],
+                *args, **kwargs,
+            )
+
+        with monkeypatch.context() as guard:
+            guard.setattr(subprocess, "run", owned_cache_run)
+            markers = module.interpreter_markers(
+                Path(sys.executable), {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+            )
+        assert len(calls) == 1
+        assert "-I" in calls[0] and "-S" in calls[0]
+        return markers, sorted(cache.rglob("*.pyc"))
+
+    original_markers, old_cache_files = inspect(original, tmp_path / "original-cache")
+    patched_markers, new_cache_files = inspect(patched, tmp_path / "patched-cache")
+    assert old_cache_files, "The baseline must demonstrate -I ignoring the environment bytecode flag"
+    assert not new_cache_files
+    assert original_markers == patched_markers
+    record_property("original_bytecode_files", len(old_cache_files))
+    record_property("patched_bytecode_files", len(new_cache_files))
+    record_property("marker_values_equal", original_markers == patched_markers)
+    record_property("marker_facts", json.dumps(patched_markers, sort_keys=True))
+    assert patched_markers["sys_platform"] == sys.platform
+    assert patched_markers["python_full_version"] == ".".join(map(str, sys.version_info[:3]))
+    prep.pinned(baseline, *prep.MARKER_SOURCE_BEFORE)
+
+
+@pytest.mark.parametrize("mutation", ["source-byte", "patch-byte"])
+def test_marker_patch_rejects_unknown_source_or_patch_without_writing(
+    canonical_packaged_tools, tmp_path, mutation,
+):
+    import pm.bundled_wheels as original
+    app = tmp_path / "owned-app"
+    source = app / prep.MARKER_SOURCE_FILE
+    source.parent.mkdir(parents=True)
+    source.write_bytes(Path(original.__file__).read_bytes())
+    patch = tmp_path / "marker.patch"
+    patch.write_bytes((ROOT / prep.MARKER_PATCH_RELATIVE).read_bytes())
+    target = source if mutation == "source-byte" else patch
+    target.write_bytes(target.read_bytes() + b"\n")
+    before = source.read_bytes()
+    with pytest.raises(prep.PreparationError, match="identity differs"):
+        prep.patch_marker_probe(app, patch)
+    assert source.read_bytes() == before
+
+
+@pytest.mark.parametrize("suffix", ["__pycache__", "__pycache__/platform.cpython-314.pyc"])
+def test_payload_oracle_still_refuses_generated_tool_bytecode(suffix):
+    original = {"tools/python/lib/platform.py": {"kind": "file", "sha256": "abc", "mode": 420}}
+    changed = copy.deepcopy(original)
+    changed["tools/python/lib/" + suffix] = {"kind": "file", "sha256": "generated", "mode": 420}
+    with pytest.raises(prep.PreparationError, match="unreviewed staged payload change"):
+        prep.allowed_changes(original, changed)

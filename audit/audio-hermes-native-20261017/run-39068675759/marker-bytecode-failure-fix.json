@@ -1,0 +1,306 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-10-17T21:09:13.159381+00:00",
+  "status": "host-regression-passed-native-retry-required",
+  "native_failure": {
+    "run_id": 39068675759,
+    "head_sha": "ce1e4eaebf523c4d58ea81848f3a5f7130a339ec",
+    "conclusion": "failure",
+    "completed_utc": "2026-10-17T20:55:10Z",
+    "job_id": 117501542263,
+    "failure": "unreviewed staged payload change: tools/python/data/data/com.termux/files/usr/lib/python3.14/__pycache__",
+    "failure_artifact": {
+      "path": "audit/audio-hermes-native-20261017/run-39068675759/artifact-files/prepared/audio-environment-failure.json",
+      "bytes": 3568,
+      "sha256": "81955c26f4331089c3209534c23adcc8b37a71dd0432f2cf0d4708448064f303"
+    },
+    "proof_artifact": {
+      "id": 12114247218,
+      "bytes": 6876332,
+      "sha256": "b24b40c8f4cd7fd3863c7044d61c0d0d483ae67bc1159be63e7f7352fb6a6182",
+      "all_members_crc_verified": true,
+      "member_count": 16,
+      "raw_member_manifest": {
+        "path": "audit/audio-hermes-native-20261017/run-39068675759/verified-proof-artifact.json",
+        "bytes": 5922,
+        "sha256": "eae12658c93060285d943bd9e8ac910cbdb6df367aeb2d8436db5db84a1bc6b4"
+      }
+    },
+    "physical_vad": "not-tested",
+    "native_audio_initialization": "not-probed",
+    "independent_second_preparation": "not-reached"
+  },
+  "completed_native_builds_before_failure": {
+    "evidence": {
+      "path": "audit/audio-hermes-native-20261017/run-39068675759/artifact-files/prepared/evidence/canonical-build.json",
+      "bytes": 5017,
+      "sha256": "c797577a4dc7d1af41bef7da9be7d80124bd3e76b1a74ddac59da8b49148fdee"
+    },
+    "catalog": {
+      "path": "bundled-wheels.json",
+      "sha256": "50d1fb2c684e92b336435f2df545de29c3e20674320484e9da9335bdfd722c11"
+    },
+    "catalog_union": {
+      "additional_rows": 2,
+      "original_rows": 100,
+      "original_rows_preserved": true,
+      "total_rows": 102
+    },
+    "application": {
+      "fresh": true,
+      "distributions": 101,
+      "wheel_owned_files_checked": 6906
+    },
+    "manager": {
+      "fresh": true,
+      "distributions": 4,
+      "wheel_owned_files_checked": 75
+    },
+    "final_payload": "/out/prepared/payload",
+    "interpreter": {
+      "base_prefix": "/out/prepared/payload/tools/python/data/data/com.termux/files/usr",
+      "executable": "/out/prepared/payload/pm-runtime/bin/python",
+      "machine": "aarch64",
+      "platform": "android",
+      "version": "3.14.6 (main, Jul  5 2026, 10:35:55) [Clang 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 5e96669f0"
+    },
+    "build_arguments": {
+      "all_extras": false,
+      "explicit": true,
+      "frozen": true,
+      "no_install_project": true,
+      "offline": true,
+      "sealed": true
+    }
+  },
+  "diagnosis": {
+    "canonical_path": "pm/bundled_wheels.py",
+    "function": "interpreter_markers",
+    "line_before": 51,
+    "original_argv": [
+      "selected Python",
+      "-I",
+      "-S",
+      "-c",
+      "unchanged PEP 508 marker code"
+    ],
+    "corrected_argv": [
+      "selected Python",
+      "-I",
+      "-B",
+      "-S",
+      "-c",
+      "unchanged PEP 508 marker code"
+    ],
+    "cause": "The isolated child ignores PYTHONDONTWRITEBYTECODE from its environment. Its standard-library imports can create caches in the selected interpreter tree. Explicit -B prevents the write without changing marker facts.",
+    "original_source_matches_exact_candidate_inventory": {
+      "bytes": 16412,
+      "kind": "file",
+      "mode": 420,
+      "sha256": "53cb1f02d52a601bc796a6b1156dd57510de8aaba892bd70b8b65c4faa15a975"
+    },
+    "original_source": {
+      "bytes": 16412,
+      "sha256": "53cb1f02d52a601bc796a6b1156dd57510de8aaba892bd70b8b65c4faa15a975"
+    },
+    "corrected_source": {
+      "bytes": 16418,
+      "sha256": "f3e49e498184a212d02a5c4dcaeb1e0b529b15ebc01bfd752463159f24616a35"
+    }
+  },
+  "correction": {
+    "supplemental_patch": "patches/next-stable/audio-pm-marker-bytecode.patch",
+    "source_paths_changed": 1,
+    "semantic_change": "Add -B to the canonical selected-interpreter marker subprocess",
+    "original_audio_patch_bytes_preserved": true,
+    "original_audio_patch_path_count": 4,
+    "combined_preparation_source_path_count": 5,
+    "source_patch_inputs": "Original audio patch plus exact supplemental patch, each verified before use",
+    "original_payload_comparison": "Still rejects added __pycache__ paths and any undeclared tool change; no cleanup or facts rehash masks generated files",
+    "application_source_correction": "Applied only to the freshly extracted preparation-owned app; original candidate and source checkout remain unchanged",
+    "workflow_change": "Copy the supplemental patch into offline reconstruction inputs and include its exact path in the existing narrow preparation-branch push filter; permissions, native runner and invocation remain unchanged",
+    "source_reference": "The prior full-source replay describes only the unchanged four-path audio patch and is now labeled audio_patch_source_reference; the supplemental source correction has independent exact before/after identities"
+  },
+  "host_regression": {
+    "command": [
+      "python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-o",
+      "junit_family=xunit1",
+      "--junitxml",
+      "marker-bytecode-host-tests-attempt1.xml",
+      "tests/test_audio_hermes_preparation.py"
+    ],
+    "environment": {
+      "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "HERMES_AUDIO_CANONICAL_PM_SOURCE": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\hermes-agent-audio-readiness-v0.22.2-20261017"
+    },
+    "passed": 62,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 1.02,
+    "actual_canonical_subprocess": {
+      "original_bytecode_files": "25",
+      "patched_bytecode_files": "0",
+      "marker_values_equal": "True",
+      "marker_facts": "{\"extra\": \"\", \"implementation_name\": \"cpython\", \"implementation_version\": \"3.14.2\", \"os_name\": \"nt\", \"platform_machine\": \"AMD64\", \"platform_python_implementation\": \"CPython\", \"platform_release\": \"11\", \"platform_system\": \"Windows\", \"platform_version\": \"10.0.26200\", \"python_full_version\": \"3.14.2\", \"python_version\": \"3.14\", \"sys_platform\": \"win32\"}"
+    },
+    "cache_test_isolation": "The original and patched canonical helper each execute real host CPython. A test-only -X pycache_prefix redirects their generated caches into separate owned temporary directories while keeping each helper's original -I/-S/-B arguments intact.",
+    "extra_checks": [
+      "Reject changed supplemental patch bytes",
+      "Reject changed canonical source bytes before writing",
+      "Preserve original audio patch path contract",
+      "Keep generated tool-bytecode paths rejected"
+    ],
+    "log": {
+      "path": "audit/audio-hermes-native-20261017/run-39068675759/marker-bytecode-host-tests-attempt1.log",
+      "bytes": 101,
+      "sha256": "0c9856b601daa58a1142561b20fba9e404c59ed00312f9479bbe13a2be92293f"
+    },
+    "junit": {
+      "path": "audit/audio-hermes-native-20261017/run-39068675759/marker-bytecode-host-tests-attempt1.xml",
+      "bytes": 13312,
+      "sha256": "972177bb617ee5dd8e442783bb3d608016d669c0ab8e220faf7fda4c18e4656d"
+    },
+    "diff_check": {
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  },
+  "other_canonical_subprocess_review": {
+    "observed": [
+      {
+        "path": "pm/runtime_stage.py",
+        "matches": [
+          {
+            "line": 47,
+            "context": "        else:\n            environment.install_wheelhouse(snapshot, wheelhouse, timeout=600)\n    checked = subprocess.run(\n        [str(environment.executable), \"-I\", \"-B\", \"-c\",\n         \"import packaging, tomli_w, truststore; from ruamel.yaml import YAML\"],\n        env=env, capture_output=True, text=True, timeout=30,\n        check=False,\n    )\n    if checked.returncode:\n        raise InstallError(\"pm-runtime\", f\"dependency validation failed: {checked.stderr.strip()}\")"
+          }
+        ]
+      },
+      {
+        "path": "pm/runtime.py",
+        "matches": [
+          {
+            "line": 22,
+            "context": "from pm.package import InstallError\n\n\ndef runtime_environment() -> dict[str, str]:\n    \"\"\"Do not let an activated application or a uv caller select PM's imports.\"\"\"\n    from hermes_constants import get_hermes_home\n    from pm.paths import store_root\n\n    from pm.environment import _base_environment\n"
+          },
+          {
+            "line": 103,
+            "context": "def _validate(python: Path, env: dict[str, str]) -> str:\n    try:\n        checked = subprocess.run(\n            [str(python), \"-I\", \"-B\", \"-c\",\n             \"import packaging, tomli_w, truststore; from ruamel.yaml import YAML\"],\n            env=env, capture_output=True, text=True, timeout=30,\n            check=False,\n        )\n    except (OSError, subprocess.TimeoutExpired) as exc:\n        return str(exc)"
+          },
+          {
+            "line": 265,
+            "context": "    resident = _resident_runtime()\n    if resident is None:\n        python = runtime_python(bootstrap=bootstrap, cache=cache)\n        return [str(python), \"-I\", \"-B\", str(script), *args]\n    python, site = resident\n    launcher = (\n        \"import runpy,sys; sys.path.insert(0,sys.argv.pop(1)); \"\n        \"script=sys.argv.pop(1); sys.argv[0]=script; runpy.run_path(script,run_name='__main__')\"\n    )\n    return [str(python), \"-I\", \"-S\", \"-B\", \"-c\", launcher, str(site), str(script), *args]"
+          },
+          {
+            "line": 271,
+            "context": "        \"import runpy,sys; sys.path.insert(0,sys.argv.pop(1)); \"\n        \"script=sys.argv.pop(1); sys.argv[0]=script; runpy.run_path(script,run_name='__main__')\"\n    )\n    return [str(python), \"-I\", \"-S\", \"-B\", \"-c\", launcher, str(site), str(script), *args]\n\n\ndef run_cli(argv: list[str]) -> int:\n    result = subprocess.run(runtime_command(Path(__file__).with_name(\"launch.py\"), argv),\n                            env=runtime_environment(), check=False)\n    return result.returncode"
+          }
+        ]
+      },
+      {
+        "path": "pm/features.py",
+        "matches": [
+          {
+            "line": 128,
+            "context": "\"\"\"\n    try:\n        child = subprocess.run(\n            [str(python_exe), \"-B\", \"-I\", \"-S\", \"-c\", probe,\n             str(venv_dir.resolve()), json.dumps(anchors)],\n            cwd=repo_dir, capture_output=True, text=True, encoding=\"utf-8\",\n            errors=\"replace\", timeout=60, check=True,\n        )\n    except (OSError, subprocess.SubprocessError) as exc:\n        detail = (getattr(exc, \"stderr\", None) or str(exc)).strip()"
+          }
+        ]
+      },
+      {
+        "path": "pm/plugin_eviction.py",
+        "matches": [
+          {
+            "line": 43,
+            "context": "    tools = _toolchain(explicit=True)\n    if tools is None:\n        raise InstallError(\"venv\", \"PM's pinned toolchain is unavailable\")\n    probe = subprocess.run([native(tools[1]), \"-I\", \"-c\", \"import platform; print(platform.python_version())\"],\n                           capture_output=True, text=True, check=True, timeout=60)\n    return probe.stdout.strip()\n\n\ndef static_verdicts(entries: list[Entry], python_version: str) -> tuple[dict[Path, str], dict[Path, str]]:\n    \"\"\"``(disable, sit out)`` reasons found without a resolver, keyed by resolved dir.\"\"\""
+          }
+        ]
+      },
+      {
+        "path": "pm/recovery.py",
+        "matches": [
+          {
+            "line": 23,
+            "context": ")\n\n\ndef validate_environment(python: Path | list[str], *, env: dict, cwd: Path) -> None:\n    \"\"\"Run startup import checks in the candidate, never the repairing process.\n\n    *python* is the candidate's interpreter or its argv prefix (``venv_command``).\"\"\"\n    script = (\n        \"import importlib, importlib.metadata, pathlib, re, tomllib\\n\"\n        \"project = tomllib.loads(pathlib.Path('pyproject.toml').read_text(encoding='utf-8-sig'))['project']\\n\""
+          },
+          {
+            "line": 46,
+            "context": "        \"        bundle = pathlib.Path(loaded.where())\\n\"\n        \"        assert bundle.is_file() and bundle.stat().st_size >= 1024, 'CA bundle is missing'\\n\"\n    )\n    command = [str(python), \"-I\"] if isinstance(python, (str, Path)) else [*python]\n    result = subprocess.run([*command, \"-c\", script], cwd=cwd, env=env,\n                            capture_output=True, text=True, encoding=\"utf-8\", errors=\"replace\", timeout=60, check=False)\n    if result.returncode:\n        raise InstallError(\"venv\", f\"startup validation failed: {result.stderr.strip()[-1000:]}\")\n\n"
+          }
+        ]
+      },
+      {
+        "path": "pm/environment.py",
+        "matches": [
+          {
+            "line": 250,
+            "context": "    return base\n\n\ndef managed_environment(destination: Path, *, python: Path | None = None,\n                        cache: Path | None = None, env: Mapping[str, str] | None = None,\n                        offline: bool = False, explicit: bool = False,\n                        output: TextIO | None = None, realize: bool = True) -> PythonEnvironment:\n    from pm._uv import _toolchain\n    from pm.packages import uv_cache_dir\n"
+          },
+          {
+            "line": 433,
+            "context": "            if result.returncode:\n                raise classify_uv_failure(\"export\", result.returncode, result.stderr or result.stdout)\n            try:\n                markers = interpreter_markers(self.python, _base_environment(self.env))\n                return catalog.select(exported.read_text(encoding=\"utf-8-sig\"),\n                                      source / \"uv.lock\", markers)\n            except (OSError, ValueError, TypeError, KeyError) as exc:\n                raise InstallError(\"venv\", f\"invalid bundled wheel selection: {exc}\") from exc\n\n    def _run_with_bytecode_retry(self, command: list[str], *, cwd: Path,"
+          }
+        ]
+      },
+      {
+        "path": "pm/packages.py",
+        "matches": [
+          {
+            "line": 502,
+            "context": "            if repair:\n                from pm.environments import venv_command\n                from pm.recovery import validate_environment\n                validate_environment(venv_command(project, candidate, (\"-I\",)),\n                                     env=dict(environment.env), cwd=resolved_lock.parent)\n        except BaseException:\n            shutil.rmtree(generation, ignore_errors=True)\n            raise\n        (generation / \".lease-managed\").touch()\n        return {\"environment\": candidate, \"resolved_lock\": resolved_lock}"
+          }
+        ]
+      }
+    ],
+    "in_preparation_path": "PM runtime_stage, runtime validation/worker commands and feature inspection already use explicit -B.",
+    "other_paths": "plugin_eviction and repair/recovery contain other isolated commands without explicit -B. This preparation does not request plugin eviction or repair. Their behavior was not changed or certified by this fix."
+  },
+  "file_pins": [
+    {
+      "path": "scripts/prepare_audio_hermes_environment.py",
+      "bytes": 60357,
+      "sha256": "1c72eb23756959612ac854d0fff1dc7486015a64adb20cf886da9a255fa298e4"
+    },
+    {
+      "path": "tests/test_audio_hermes_preparation.py",
+      "bytes": 24971,
+      "sha256": "8b5c7097dccfa3d91ac27198b0e3c8c33226fde9e7da1c98277cf53b6db3ec6f"
+    },
+    {
+      "path": ".github/workflows/audio-hermes-preparation.yml",
+      "bytes": 6314,
+      "sha256": "901dafcc4b4f7cdc5e88318d30cd4452355da2ebe283ef74e9cb78f6ce151705"
+    },
+    {
+      "path": "patches/next-stable/audio-pm-marker-bytecode.patch",
+      "bytes": 533,
+      "sha256": "f4e63265aa3a71ceb0f69f11f7876a7e32e1f7e8a0704de5c8df96860e3aa390"
+    },
+    {
+      "path": "scripts/compatibility_probe_audio_hermes.py",
+      "bytes": 12881,
+      "sha256": "487b35edf7f65c0c1482095486a12d021473e73fceac11038e3769d490a8c85b"
+    },
+    {
+      "path": "scripts/run_audio_hermes_preparation.sh",
+      "bytes": 4646,
+      "sha256": "db04f7c51f18ffe1f5e2fab6ac2303d337ea657bb7199b5349a8a460f2b9ef2d"
+    },
+    {
+      "path": "patches/next-stable/audio-readiness.patch",
+      "bytes": 8470,
+      "sha256": "82b92d5095ceabc05f0200569da1cc16b861c77b166095982b05d57940573db7"
+    }
+  ],
+  "shared_locks_changed": false,
+  "normal_package_patch_set_changed": false,
+  "release_created": false,
+  "version_bumped": false,
+  "next_gate": "Root review, save and native retry must prove final payload integrity and both independent reconstruction paths before this is called device-ready."
+}

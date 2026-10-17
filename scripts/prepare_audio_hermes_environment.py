@@ -46,13 +46,20 @@ PATCH_PATHS = {
     "tests/tools/test_voice_wsl_pipewire.py", "tests/tools/test_voice_audio_readiness.py",
 }
 PRODUCTION_FILES = {"tools/voice_mode.py", "tools/voice_mode_capture.py"}
-SOURCE_FILES = {
+AUDIO_SOURCE_FILES = {
     "tools/voice_mode.py": (70749, "2080ba077ec94146d06cbd704a7e21763e5cf37f4221561145b4c45de6a78a58"),
     "tools/voice_mode_capture.py": (7542, "492c013f8473acdd58dff027ffc4f787347dc27524e801692bf32efe67516d60"),
     "tests/tools/test_voice_wsl_pipewire.py": (2233, "3ac8ad669799f3c23b1bfda02996619e7f71d8ed08c58a80fd61234981870be0"),
     "tests/tools/test_voice_audio_readiness.py": (3281, "d94b5bc0db75dff255c4f1ef5cd155d5605ce907d2606c2e71052457b5c470ef"),
 }
 NEW_SOURCE_FILES = {"tests/tools/test_voice_audio_readiness.py"}
+MARKER_PATCH_RELATIVE = "patches/next-stable/audio-pm-marker-bytecode.patch"
+MARKER_PATCH_BYTES = 533
+MARKER_PATCH_SHA = "f4e63265aa3a71ceb0f69f11f7876a7e32e1f7e8a0704de5c8df96860e3aa390"
+MARKER_SOURCE_FILE = "pm/bundled_wheels.py"
+MARKER_SOURCE_BEFORE = (16412, "53cb1f02d52a601bc796a6b1156dd57510de8aaba892bd70b8b65c4faa15a975")
+MARKER_SOURCE_AFTER = (16418, "f3e49e498184a212d02a5c4dcaeb1e0b529b15ebc01bfd752463159f24616a35")
+SOURCE_FILES = {**AUDIO_SOURCE_FILES, MARKER_SOURCE_FILE: MARKER_SOURCE_AFTER}
 ASSEMBLY = {
     "scripts/build/agent.py": (8754, "f59ed0dc39a37814a43f2465e1391311a3ce8203e42a69257e58db6f3cda3652"),
     "scripts/build/inputs.py": (5846, "36fb218726fce97505d7dfd50002046bb9c19b25c0b7cc546bae0b9c586083d9"),
@@ -533,7 +540,7 @@ def patch_app(app, patch):
     sections = patch_sections(patch.read_bytes())
     require(set(sections) == PATCH_PATHS, "audio patch path set differs")
     results = {}
-    for name, (size, digest) in SOURCE_FILES.items():
+    for name, (size, digest) in AUDIO_SOURCE_FILES.items():
         path = contained(app, name)
         if name in NEW_SOURCE_FILES:
             require(not path.exists() and not path.is_symlink(), "new patch source already exists")
@@ -550,6 +557,21 @@ def patch_app(app, patch):
         (app / name).write_bytes(raw)
         (app / name).chmod(0o644)
     return {n: {"bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest()} for n, raw in results.items()}
+
+
+def patch_marker_probe(app, patch):
+    """Apply the exact canonical marker-probe correction to the owned app only."""
+    pinned(patch, MARKER_PATCH_BYTES, MARKER_PATCH_SHA)
+    sections = patch_sections(patch.read_bytes())
+    require(set(sections) == {MARKER_SOURCE_FILE}, "marker patch path set differs")
+    path = contained(app, MARKER_SOURCE_FILE)
+    pinned(path, *MARKER_SOURCE_BEFORE)
+    raw = apply_text_hunks(path.read_bytes(), sections[MARKER_SOURCE_FILE])
+    size, digest = MARKER_SOURCE_AFTER
+    require(len(raw) == size and hashlib.sha256(raw).hexdigest() == digest,
+            "marker probe patched source output differs")
+    path.write_bytes(raw)
+    return {MARKER_SOURCE_FILE: {"bytes": size, "sha256": digest}}
 
 
 def wheel_members(path):
@@ -954,14 +976,17 @@ def verify_links(payload):
 def prepare(options):
     native_identity()
     candidate, audio, patch = options.candidate_dir.resolve(), options.audio_inputs.resolve(), options.patch.resolve()
-    out = fresh_output(options.out, (candidate, audio, patch, INSTALLED))
+    marker_patch = Path(__file__).resolve().parents[1] / MARKER_PATCH_RELATIVE
+    out = fresh_output(options.out, (candidate, audio, patch, marker_patch, INSTALLED))
     candidate_receipt = verify_candidate(candidate)
     pinned(patch, PATCH_BYTES, PATCH_SHA)
+    pinned(marker_patch, MARKER_PATCH_BYTES, MARKER_PATCH_SHA)
     verify_audio_archive(audio / AUDIO_ARCHIVE)
     pinned(audio / STUB_FILE, STUB_BYTES, STUB_SHA)
     for name, (size, digest) in ASSEMBLY.items():
         pinned(audio / "assembly" / name, size, digest)
-    input_before = {"candidate": inventory(candidate), "audio": inventory(audio), "patch_sha256": sha256(patch)}
+    input_before = {"candidate": inventory(candidate), "audio": inventory(audio), "patch_sha256": sha256(patch),
+                    "supplemental_patch_sha256": sha256(marker_patch)}
     installed_before = inventory(INSTALLED) if INSTALLED.is_dir() else None
     out.mkdir(parents=True)  # Exclusive ownership begins here; never move this final path.
     evidence, state, payload = out / "evidence", out / "state", out / "payload"
@@ -986,6 +1011,7 @@ def prepare(options):
                              ("app/pyproject.toml", PYPROJECT_SHA)):
             require(sha256(payload / name) == digest, "candidate source lock or project differs")
         source = patch_app(payload / "app", patch)
+        source.update(patch_marker_probe(payload / "app", marker_patch))
         unpack = out / "verified-audio"
         unpack.mkdir()
         verify_audio_archive(audio / AUDIO_ARCHIVE, unpack)
@@ -1030,7 +1056,8 @@ def prepare(options):
         links = verify_links(payload)
         gate = json_object((evidence / "canonical-build.json").read_bytes())
         require(gate["status"] == "passed" and gate["catalog_union"]["total_rows"] == 102, "canonical build did not pass")
-        require(input_before == {"candidate": inventory(candidate), "audio": inventory(audio), "patch_sha256": sha256(patch)},
+        require(input_before == {"candidate": inventory(candidate), "audio": inventory(audio), "patch_sha256": sha256(patch),
+                    "supplemental_patch_sha256": sha256(marker_patch)},
                 "reconstruction inputs changed during preparation")
         require(installed_before == (inventory(INSTALLED) if INSTALLED.is_dir() else None),
                 "installed payload changed during preparation")
@@ -1052,7 +1079,12 @@ def prepare(options):
                       native_audio_initialization="not-probed", physical_vad="not-tested",
                       source_patch={"sha256": PATCH_SHA, "bytes": PATCH_BYTES, "applied_source_files": source,
                                     "production_paths": sorted(PRODUCTION_FILES),
-                                    "full_source_reference": {"baseline": "f49c77b666cef7fd5235cdd786556908527b532e",
+                                    "supplemental_patch": {"file": MARKER_PATCH_RELATIVE,
+                                                           "bytes": MARKER_PATCH_BYTES,
+                                                           "sha256": MARKER_PATCH_SHA,
+                                                           "source_before": MARKER_SOURCE_BEFORE,
+                                                           "source_after": MARKER_SOURCE_AFTER},
+                                    "audio_patch_source_reference": {"baseline": "f49c77b666cef7fd5235cdd786556908527b532e",
                                                               "replay": "aa90e9a6eca74835dacc2dc55f376bddfd499c25"}},
                       catalog=gate["catalog"], extras=EXTRAS, canonical_build=gate,
                       original_inventory_sha256=inventory_sha(before),
