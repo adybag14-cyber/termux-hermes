@@ -120,8 +120,8 @@
     {
       "id": "native-cua",
       "baseline": "Default local CUA driver does not support Android; MCP dependency alone is not a native backend.",
-      "status": "standalone_native_foreground_x11_passed_hermes_integration_pending",
-      "evidence": "cua-native-20261017/run-39052290704.json"
+      "status": "explicit_external_driver_native_hermes_foreground_x11_passed_default_pm_backend_unavailable",
+      "evidence": "cua-hermes-resume-20261017/run-39056472835.json"
     },
     {
       "id": "bot-desktop",
@@ -248,9 +248,11 @@
       "failed": 0
     },
     "packaging_regressions": {
-      "passed": 205,
+      "passed": 287,
       "failed": 0,
-      "skipped_host_specific": 4
+      "skipped_host_specific": 4,
+      "scope": "combined preparation after merging frozen concurrent commit fbf7c02",
+      "evidence": "resume-integration-20261017.json"
     },
     "native_gateway_evidence": "native-probes-4b3d121-20261017/gateway-summary.json",
     "native_audio_evidence": "native-probes-9fcd31c-20261017/audio-summary.json",
@@ -268,7 +270,7 @@
         "x11rb-protocol==0.13.2"
       ],
       "unchanged_other_cargo_package_records": 602,
-      "status": "standalone_native_bionic_foreground_x11_all_eleven_checks_passed_hermes_integration_pending",
+      "status": "standalone_native_bionic_foreground_x11_and_explicit_hermes_integration_passed",
       "included_in_hermes_candidate": false,
       "physical_android_phone_ui": false,
       "native_progress_evidence": "cua-native-20261017/",
@@ -281,7 +283,9 @@
       "native_behavior_checks_passed": 11,
       "foreground_virtual_x11_probe_passed": true,
       "accessibility_tree_certified": false,
-      "hermes_native_integration_executed": false
+      "hermes_native_integration_executed": true,
+      "hermes_native_integration_passed": true,
+      "hermes_native_integration_evidence": "cua-hermes-resume-20261017/run-39056472835.json"
     },
     "termux_host_assembly_regressions": {
       "passed": 3,
@@ -300,7 +304,7 @@
     },
     "cua_hermes_integration": {
       "patch": "../patches/next-stable/cua-hermes-integration.patch",
-      "status": "native_loader_verified_scroll_coordinate_loss_fixed_31_focused_tests_passed_full_native_integration_pending",
+      "status": "passed_real_hermes_foreground_x11_integration",
       "included_in_main_candidate": false,
       "preparation_evidence": "cua-hermes-preparation-20261017.json",
       "canonical_host_test_evidence": "cua-hermes-host-tests-20261017.json",
@@ -308,7 +312,18 @@
       "native_source_strategy": "copy the exact proven candidate's trimmed app tree outside the installed payload and apply only the experimental CUA patch; full-source reference Git tree equality is not asserted",
       "current_preparation_evidence": "cua-hermes-resume-20261017/scroll-fix-preparation.json",
       "current_patch_sha256": "4de54e137b2f7c8a8736e6afd91405690e401d85baa7df9224300fcde31a4437",
-      "current_host_test_evidence": "cua-hermes-resume-20261017/scroll-source-tests.json"
+      "current_host_test_evidence": "cua-hermes-resume-20261017/scroll-source-tests.json",
+      "native_run_id": 39056472835,
+      "native_head_sha": "37bf89d09a2a68a41585389d59b19e5e583c1f23",
+      "native_evidence": "cua-hermes-resume-20261017/run-39056472835.json",
+      "current_helper_sha256": "23d853223f077d5ba738ddf112ef417ceb634b705b35f47dd21a7278704cad67",
+      "installed_payload_unchanged": true,
+      "experimental_source_unchanged_after_execution": true,
+      "source_bytes_match_host_validated_reference": true,
+      "default_pm_admission_changed": false,
+      "foreground_only": true,
+      "physical_android_phone_ui": false,
+      "scoped_lint_evidence": "cua-hermes-resume-20261017/scoped-lint.json"
     },
     "main_candidate_repaired_restrictions": {
       "count": 6,
@@ -323,14 +338,11 @@
       "standalone_cua_success_counted_as_main_candidate_repair": false
     },
     "packaging_ci": {
-      "run_id": 39052294622,
-      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39052294622",
-      "job_id": 117453149639,
-      "job_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39052294622/job/117453149639",
-      "event": "pull_request",
-      "head_sha": "3e63be4a65dcb0d6d2c0c2fec86f94546fbba8ed",
-      "checked_out_ref": "refs/remotes/pull/6/merge",
-      "checked_out_sha": "e6fd5fcfb260ab72ef77e87f109c51aa69444a34",
+      "schema_version": 1,
+      "run_id": 39057092320,
+      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057092320",
+      "event": "push",
+      "head_sha": "34145858cdf215fb971534537ee3ef294813d6a0",
       "conclusion": "success",
       "command": [
         "python",
@@ -338,13 +350,16 @@
         "pytest",
         "-q"
       ],
-      "passed": 209,
-      "failed": 0,
+      "passed": 291,
       "skipped": 0,
-      "elapsed_seconds": 1.53,
-      "raw_summary_line": "209 passed in 1.53s",
+      "failed": 0,
+      "elapsed_seconds": 2.23,
+      "raw_summary_line": "291 passed in 2.23s",
       "counts_not_aggregated_with_host_runs": true,
-      "detail_evidence": "cua-hermes-preparation-20261017.json"
+      "raw_log": "resume-ci-3414585-20261017.log.gz",
+      "raw_log_sha256": "9ae6965c70f122ff9107bca05d7614f88b62368ff21575b2c299e045d9197ebe",
+      "compressed_log_sha256": "0dc217d146ed67548f89c59f33d3a9f12256f2390e23ed22b4459da79fb4b5c1",
+      "detail_evidence": "resume-ci-3414585-20261017.json"
     },
     "neutts_apt_core_probe": {
       "status": "all_six_native_scientific_behavior_cases_passed_pip_wheel_tags_unresolved_engine_excluded",
@@ -395,6 +410,7 @@
       "pip_tag_failure_evidence": "neutts-native-20261017/run-39055038031/verification.json",
       "dependency_completion_preparation": "neutts-native-20261017/python-dependency-preparation.json",
       "next_step": "Resolve a supported engine/runtime and frozen complete NeuTTS codec/inference graph, repair honest wheel metadata compatibility, then validate synthesis and cancellation."
-    }
+    },
+    "resume_integration_evidence": "resume-integration-20261017.json"
   }
 }

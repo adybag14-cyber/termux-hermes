@@ -16,10 +16,12 @@ the counting rule below.
 
 Six of these restrictions have repairs in the main candidate with passing native
 checks: **uvloop, Matrix, Nemo Relay, local managed browser, Bot Desktop, and
-managed gateway service**. The separate CUA foreground-X11 experiment has now
-passed its standalone probe; it remains outside that candidate and still needs
-native validation through Hermes. NeuTTS and microphone/VAD retain their stated
-runtime and device limits. The baseline count remains nine.
+managed gateway service**. The separate CUA foreground-X11 experiment now passes
+both standalone and real Hermes integration checks; it remains outside that
+candidate and requires an explicitly selected external driver. The separate
+NeuTTS scientific dependency experiment passes all six native cases, while pip
+wheel tagging, the full speech engine and physical microphone/VAD retain their
+stated limits. The baseline count remains nine.
 
 The audit also found three broken Android adapter paths (text clipboard, audio
 playback, and microphone maximum duration), and a missing native dependency cache
@@ -120,7 +122,7 @@ The reviewed exact source digests are also embedded in the preparation helpers.
 | Capability | Published behavior | Preparation status |
 | --- | --- | --- |
 | Local managed browser | PM has no Bionic artifact for either AgentBrowser or Chromium. Remote browser/CDP paths are distinct and can remain usable. | Fixed and passed native ARM validation under UID 1000: raw static driver, real PM installation/discovery, built-in browser tools, and the default `browser_exec` handler with the backend unset. Navigation, exact loopback URL/heading, DOM interaction, PNG screenshot and product cleanup all passed. Product PM/discovery integration also passed 139 regression tests. Chromium remains an explicitly APT-owned dependency. See the [final browser evidence](../audit/native-probes-e20e8c4-20261017/browser-summary.json). |
-| Default native computer use | Default CUA driver rejects Android. Having the MCP dependency does not supply this native backend. | Fixed the separate remote Linux provider routing bug. The isolated native CUA driver passed all eleven foreground-X11 checks in [run 39052290704](../audit/cua-native-20261017/run-39052290704.json): real MCP registration, independent screenshot/input/clipboard/geometry oracles, native ABI checks and cleanup. Default background input and AT-SPI trees remain uncertified. The separate explicit-driver Hermes adapter retains manifest validation, standard approvals and desktop leases; its native Hermes integration is still pending. The driver and experimental adapter remain outside the main candidate and PM admission. Android phone UI requires an Android-specific backend. |
+| Default native computer use | Default CUA driver rejects Android. Having the MCP dependency does not supply this native backend. | Fixed the separate remote Linux provider routing bug. The isolated native CUA driver passed all eleven foreground-X11 checks in [run 39052290704](../audit/cua-native-20261017/run-39052290704.json): real MCP registration, independent screenshot/input/clipboard/geometry oracles, native ABI checks and cleanup. Default background input and AT-SPI trees remain uncertified. The [explicit-driver Hermes integration](../audit/cua-hermes-resume-20261017/run-39056472835.json) now passes native manifest discovery before desktop startup, the real registered tool, exact screenshot/click/scroll/text observations, three individual approvals, viewer-lease refusal and owned cleanup. The lost scroll coordinates and pre-desktop native loader are fixed. The driver and experimental adapter remain outside the main candidate and PM admission. Android phone UI requires an Android-specific backend. |
 | Bot Desktop | Virtual display host is Linux-only. | Added a local Termux Xvnc/Xfce adapter, prefix-aware runtime paths and screenshot capture through scrot. Desktop/remote-provider regressions pass, including real resolver result types. Native ARM UID 1000 validation passed: Xfce, an 800x600 RFB framebuffer, private Xauthority/socket permissions, no TCP display listener, real product screenshot capture and cleanup. |
 | Managed gateway service | Service install/start/uninstall paths reject Termux/APT provenance. Manual foreground/background gateway paths remain available. | Added a per-home Termux runit adapter with owned service directories, separate start-now/login policy, graceful stop and crash supervision. Twenty-four gateway tests pass. Native ARM install/start/status/restart/stop/crash-respawn/uninstall checks also passed, including same-basename home isolation and preservation of the shared supervisor. |
 | Recorder silence auto-stop | The Termux:API recorder does not provide the sounddevice VAD/silence path. Manual stop remains available. | Added explicit auto, sounddevice and termux-api capture selection with accurate diagnostics. The PCM path retains the existing VAD implementation. Exact NumPy 2.4.3 built and passed native numerical checks with both build and original payload libraries. PortAudio loaded, but measured runtime evidence shows only the Termux OpenSL ES wrapper: the actual Android audio framework, Binder devices and audio services are absent. Engine initialization failed in that environment; microphone/VAD remains unverified. Termux:API itself has no PCM stream for this VAD path. |
@@ -248,23 +250,37 @@ that Android ports are impossible.
 
 ## Validation and release boundary
 
-The [standalone CUA success record](../audit/cua-native-20261017/run-39052290704.json)
-binds its native result to head `3e63be4a65dcb0d6d2c0c2fec86f94546fbba8ed`
-and the authenticated Actions artifact. It preserves the exact archive
-reconstruction method, the real Xlib observations, the earlier background-input
-failure and the still-degraded accessibility result. This proof does not exercise
-Hermes' registered tool, action approvals or viewer lease.
+The [native Hermes integration record](../audit/cua-hermes-resume-20261017/run-39056472835.json)
+binds the successful standalone and registered-tool results to exact head
+`37bf89d09a2a68a41585389d59b19e5e583c1f23` and a fully SHA-256/CRC-verified
+Actions artifact. The independent Xlib log confirms the requested coordinates
+and text. Missing/consumed approvals and viewer takeover correctly block actions;
+the installed candidate payload remains unchanged. The current patch is still
+an external-driver experiment, separate from the main candidate.
 
-The separate [Hermes preparation receipt](../audit/cua-hermes-preparation-20261017.json)
-links the [canonical host tests](../audit/cua-hermes-host-tests-20261017.json).
-Their first run passed 58 tests with three host-specific skips; the final
-readiness run passed 14 tests and repeated seven earlier cases. These are separate
-runs, not an aggregate count. The production patch was unchanged between them.
-Separate packaging [CI run 39052294622](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39052294622)
-passed 209 tests in 1.53 seconds on merge checkout
-`e6fd5fcfb260ab72ef77e87f109c51aa69444a34`, for branch head
-`3e63be4a65dcb0d6d2c0c2fec86f94546fbba8ed`; the preparation receipt retains
-the API identity and exact checkout/test log evidence.
+The [native scientific result](../audit/neutts-native-20261017/run-39055874446.json)
+records all six NeuTTS-adjacent dependency cases passing at
+`d439e8100bc89dbfe681fc03aa22017f175b8b2d`. Its dependency closure passed,
+while the original APT wheel tags still fail pip compatibility. The engine,
+model loading and synthesis were not exercised.
+
+The final source validation comprises
+[73 loader tests with three host skips](../audit/cua-hermes-resume-20261017/host-tests.json),
+a separate [31-test focused scroll run](../audit/cua-hermes-resume-20261017/scroll-source-tests.json),
+and [eight passing scoped lint checks](../audit/cua-hermes-resume-20261017/scoped-lint.json).
+Counts are not aggregated. Three broader Windows fixture failures reproduced
+before both fixes; the detailed source record preserves them.
+
+The [combined preparation CI](../audit/resume-ci-3414585-20261017.json)
+passed **291 tests** with no failures or skips at
+`34145858cdf215fb971534537ee3ef294813d6a0`. Compile, shell syntax and JSON
+validation passed too. The matching Windows host run passed 287 tests with four
+host-specific skips. The [merge receipt](../audit/resume-integration-20261017.json)
+records preserved concurrent preparation work and confirms that native-tested
+inputs remain byte-identical. The earlier
+[standalone](../audit/cua-native-20261017/run-39052290704.json) and
+[host preparation](../audit/cua-hermes-host-tests-20261017.json) evidence remains
+available with its original source bindings.
 
 [Probe next-stable Termux compatibility](../.github/workflows/compatibility-probes.yml)
 runs seven native ARM lanes against the immutable released package and the proposed

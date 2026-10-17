@@ -155,39 +155,69 @@ its existing failure behavior is preserved. TigerVNC does not provide the
 parallel uinput devices expected by CUA's multiple-pointer implementation.
 Android phone application control still requires an Android-specific backend.
 
-A [separate Hermes integration patch](../patches/next-stable/cua-hermes-integration.patch)
-allows an explicitly selected native Termux X11 executable. It leaves the full
-runtime manifest check, action approval gate and viewer lease in place. The
-[native integration helper](../scripts/compatibility_probe_cua_hermes.py) uses the
-real registered tool and product Bot Desktop, with exact fixture image/input
-observations, three one-action foreground approvals, refusal without an approver,
-viewer takeover/hand-back, and owned cleanup. Its [candidate fetcher](../scripts/fetch_compatibility_candidate.py)
-verifies the already-proven package and source identities before the test. These
-files are prepared and reviewed; native Hermes integration is still pending and
-the experimental patch is not included in the full main candidate. The
-[preparation receipt](../audit/cua-hermes-preparation-20261017.json) distinguishes
-the full-source reference/replay Git trees from the forthcoming runtime input:
-the native probe will copy the exact proven candidate's trimmed `app/` tree
-outside the installed payload and apply only the experimental CUA patch. The
-full-source trees `f49c77b666cef7fd5235cdd786556908527b532e` and
-`d4e6233dc147ca2595d37e9a76a03878ee137498` prove the reference patch replay;
-they do not assert that the candidate's trimmed app tree is identical to either.
+### Native Hermes integration completed
 
-The [canonical host-validation record](../audit/cua-hermes-host-tests-20261017.json)
-preserves the initial 58-pass/three-skip run and the final 14-pass readiness run,
-with seven overlapping cases and unchanged production code. Those results are
-not summed and do not establish native Hermes-to-MCP behavior. The standalone
-driver result therefore does not increase the six main-candidate repairs or
-change the nine-restriction baseline count.
+The [separate Hermes integration patch](../patches/next-stable/cua-hermes-integration.patch)
+now **passes the real registered Hermes tool path** in
+[run 39056472835](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39056472835)
+at exact head `37bf89d09a2a68a41585389d59b19e5e583c1f23`.
+The [verified result](../audit/cua-hermes-resume-20261017/run-39056472835.json)
+preserves the complete artifact digest, inner preparation and helper receipts,
+actual Xlib events and the screenshot. All three completion signals passed:
+native preparation, the Hermes helper, and the outer completed/exit-zero receipt.
 
-A subsequent [isolated preparation](../audit/cua-hermes-resume-20261017/preparation.json)
-fixes the shared native-driver environment before any Bot Desktop exists. The
-external Termux driver now uses APT libraries for manifest discovery, readiness,
-CLI fallback and persistent MCP, while the managed Python parent retains its
-bundled loader path. Its canonical host run passed **73 tests with three
-macOS-only skips**. This result replaces neither the historical 58/14-test
-receipts nor the still-required native Bionic integration test. The native helper
-now runs the actual driver manifest before desktop startup to check this seam.
+The test installs the already-proven same-version candidate, copies its trimmed
+`app/` tree into a private directory, and applies only this experimental patch.
+The candidate's own managed Python executes the registered `computer_use`
+handler against the external Bionic driver and real product Bot Desktop.
+The complete installed payload and experimental source remained unchanged after
+execution. All 12 changed source-file hashes match the host-validated reference
+tree `d2cfed7c6e84682ce2c8656215226cff2778e1d2`; the trimmed installed app
+is not claimed to equal the full-source Git tree.
+
+Two concrete integration defects are repaired:
+
+- Before a desktop exists, manifest discovery now launches the native driver with
+  Termux's system libraries while preserving the managed Python parent's bundled
+  loader environment. The actual pre-desktop driver contract passed.
+- Scroll coordinates are forwarded when the live driver advertises either the
+  existing coordinate capability or both schema properties `x` and `y`.
+  The native driver advertises the two properties without the legacy capability.
+  Its independently recorded wheel events now land at the requested `(80,60)`;
+  the prior run delivered them at `(160,120)`.
+
+The integration also proved a 320x240 two-color capture, the exact click, exactly
+two scroll ticks, and the full text `hermes-native-input`. Each input received
+one separate `once` approval; requests without an approver and reuse of a
+consumed approval were refused. A real viewer lease blocked both input and
+capture until hand-back. Product session release, the fixture and observed owned
+child processes, the virtual desktop and the private workspace were cleaned up.
+
+[Canonical loader tests](../audit/cua-hermes-resume-20261017/host-tests.json)
+passed **73 tests with three macOS-only skips**.
+[Scroll regression evidence](../audit/cua-hermes-resume-20261017/scroll-source-tests.json)
+shows the new case failing before the fix and the final focused run passing
+**31 tests**. These are separate runs and are not added together. The broader
+computer-use file had the same **83 passes, three failures and one skip** before
+and after the fix. Those three Windows fixture failures also reproduced before
+the loader change: an extensionless shell fixture, an unescaped Windows path in
+JSON, and a fixture that removes the home-directory environment. Their actual
+failures remain in the record.
+
+All eight [scoped lint checks](../audit/cua-hermes-resume-20261017/scoped-lint.json)
+passed for the final integration diff, including pinned Ruff and the unmodified
+code-health engine with zero blocking or advisory findings. This is scoped lint,
+not a claim that the entire all-tree checker lane ran. The earlier
+[58/14-test preparation evidence](../audit/cua-hermes-host-tests-20261017.json)
+and [failed native runs](../audit/cua-hermes-resume-20261017/) remain historical
+records.
+
+This completed integration still requires an explicitly selected external driver
+and foreground delivery. The driver and experimental adapter are **outside the
+main package candidate and default PM admission**. Default background input,
+AT-SPI trees, secure encrypted history and Android phone-app control retain the
+limits described above. This result therefore does not increase the six
+main-candidate repairs or change the nine-restriction baseline count.
 
 ## Microphone silence detection
 
