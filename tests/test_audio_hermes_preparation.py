@@ -747,3 +747,224 @@ def test_actual_canonical_uv_environment_strips_the_ambient_bytecode_flag(
     assert actual == {"PATH": "selected-tools"}
     record_property("canonical_uv_base_environment_removes_python_flags", True)
     record_property("canonical_environment_source", str(Path(environment.__file__).resolve()))
+
+
+@pytest.fixture
+def baseline_documentation_payload(tmp_path, monkeypatch):
+    """Small real filesystem fixture; native input pins are replayed separately."""
+    from types import SimpleNamespace
+
+    payload = tmp_path / "payload"
+    pin = copy.deepcopy(prep.BASELINE_MISSING_DOCUMENTATION_LINK)
+    link = payload / pin["path"]
+    link.parent.mkdir(parents=True)
+    try:
+        link.symlink_to(pin["target"])
+    except OSError as exc:
+        pytest.skip(f"Host cannot create the documentation link fixture: {exc}")
+
+    license_file = payload / pin["preserved_license"]["path"]
+    license_file.parent.mkdir(parents=True)
+    license_raw = b"unchanged license bytes for the filesystem policy fixture\n"
+    license_file.write_bytes(license_raw)
+    pin["preserved_license"].update(
+        bytes=len(license_raw), sha256=hashlib.sha256(license_raw).hexdigest(),
+    )
+    for directory, filename, target in [
+        ("bin", "program", "runner"),
+        ("runtime-libs/lib", "libdemo.so.1", "libdemo.so"),
+    ]:
+        real = payload / directory / filename
+        real.parent.mkdir(parents=True, exist_ok=True)
+        real.write_bytes(b"unexecuted filesystem fixture\n")
+        (real.parent / target).symlink_to(filename)
+    (payload / "bin/runner-chain").symlink_to("runner")
+    original = prep.inventory(payload)
+    # The real source pin is deliberately replaced only for this small host
+    # fixture. Production accepts the complete, verified native inventory hash.
+    pin["original_inventory_sha256"] = prep.inventory_sha(original)
+    monkeypatch.setattr(prep, "BASELINE_MISSING_DOCUMENTATION_LINK", pin)
+    return SimpleNamespace(
+        payload=payload, pin=pin, link=link, original=original,
+        license_file=license_file, license_raw=license_raw,
+    )
+
+
+def test_baseline_documentation_gap_is_reported_without_changing_payload(baseline_documentation_payload):
+    fixture = baseline_documentation_payload
+    before = prep.inventory(fixture.payload)
+    report = prep.verify_links(fixture.payload, fixture.original)
+    assert report["contained_links"] == {
+        "bin/runner": "program",
+        "bin/runner-chain": "runner",
+        "runtime-libs/lib/libdemo.so": "libdemo.so.1",
+    }
+    assert set(report["baseline_missing_documentation_links"]) == {fixture.pin["path"]}
+    gap = report["baseline_missing_documentation_links"][fixture.pin["path"]]
+    assert gap["status"] == "preexisting-missing-documentation-target"
+    assert gap["working"] is False and gap["original_link_preserved"] is True
+    assert gap["target"] == fixture.pin["target"]
+    assert gap["missing_destination"] == fixture.pin["missing_destination"]
+    assert gap["preserved_license"] == fixture.pin["preserved_license"]
+    assert gap["original_inventory_sha256"] == prep.inventory_sha(fixture.original)
+    assert fixture.pin["path"] not in report["contained_links"]
+    assert not fixture.link.exists() and fixture.link.is_symlink()
+    assert fixture.license_file.read_bytes() == fixture.license_raw
+    assert prep.inventory(fixture.payload) == before
+
+
+def test_baseline_documentation_exception_requires_verified_original_inventory(baseline_documentation_payload):
+    fixture = baseline_documentation_payload
+    with pytest.raises(prep.PreparationError, match="target is missing"):
+        prep.verify_links(fixture.payload)
+    with pytest.raises(prep.PreparationError, match="source inventory differs"):
+        prep.verify_links(fixture.payload, {})
+
+
+@pytest.mark.parametrize("mutation", ["unrelated-byte", "unrelated-mode", "missing-link", "link-target", "license"])
+def test_baseline_documentation_exception_is_bound_to_entire_source_inventory(
+    baseline_documentation_payload, mutation,
+):
+    fixture = baseline_documentation_payload
+    original = copy.deepcopy(fixture.original)
+    if mutation == "unrelated-byte":
+        original["bin/program"]["sha256"] = "0" * 64
+    elif mutation == "unrelated-mode":
+        original["bin/program"]["mode"] ^= 0o100
+    elif mutation == "missing-link":
+        del original[fixture.pin["path"]]
+    elif mutation == "link-target":
+        original[fixture.pin["path"]]["target"] = "another-missing-document"
+    else:
+        del original[fixture.pin["preserved_license"]["path"]]
+    with pytest.raises(prep.PreparationError, match="source inventory differs"):
+        prep.verify_links(fixture.payload, original)
+
+
+@pytest.mark.parametrize("relative", [
+    "bin/missing-executable",
+    "runtime-libs/lib/libmissing.so",
+    "tools/python/missing-link",
+    "tools/ffmpeg/another-missing-link",
+    "tools/ffmpeg/data/data/com.termux/files/usr/share/doc/other/copyright",
+    "runtime-libs/share/doc/other/copyright",
+])
+def test_only_the_exact_baseline_documentation_gap_can_be_recorded(
+    baseline_documentation_payload, relative,
+):
+    fixture = baseline_documentation_payload
+    extra = fixture.payload / relative
+    extra.parent.mkdir(parents=True, exist_ok=True)
+    extra.symlink_to("absent")
+    with pytest.raises(prep.PreparationError, match="target is missing"):
+        prep.verify_links(fixture.payload, fixture.original)
+
+
+@pytest.mark.parametrize("mutation", ["target", "mode"])
+def test_baseline_documentation_link_row_must_be_unchanged(
+    baseline_documentation_payload, monkeypatch, mutation,
+):
+    fixture = baseline_documentation_payload
+    if mutation == "target":
+        fixture.link.unlink()
+        fixture.link.symlink_to("../../LICENSES/another-missing-document")
+    else:
+        # Windows does not expose POSIX symlink chmod. Exercise the native
+        # inventory row comparison without pretending to have changed an ABI.
+        rows = prep.inventory(fixture.payload)
+        rows[fixture.pin["path"]]["mode"] ^= 0o100
+        monkeypatch.setattr(prep, "inventory", lambda path: rows)
+    with pytest.raises(prep.PreparationError, match="documentation link changed"):
+        prep.verify_links(fixture.payload, fixture.original)
+
+
+@pytest.mark.parametrize("mutation", ["removed", "byte", "mode", "symlink"])
+def test_baseline_gap_requires_the_original_unchanged_license(
+    baseline_documentation_payload, monkeypatch, mutation,
+):
+    fixture = baseline_documentation_payload
+    if mutation == "removed":
+        fixture.license_file.unlink()
+    elif mutation == "byte":
+        fixture.license_file.write_bytes(fixture.license_raw + b"changed")
+    elif mutation == "mode":
+        rows = prep.inventory(fixture.payload)
+        rows[fixture.pin["preserved_license"]["path"]]["mode"] ^= 0o100
+        monkeypatch.setattr(prep, "inventory", lambda path: rows)
+    else:
+        sibling = fixture.license_file.with_name("copied-license")
+        sibling.write_bytes(fixture.license_raw)
+        fixture.license_file.unlink()
+        fixture.license_file.symlink_to(sibling.name)
+    with pytest.raises(prep.PreparationError, match="preserved license differs"):
+        prep.verify_links(fixture.payload, fixture.original)
+
+
+def test_preserved_license_bytes_are_rechecked_against_stale_inventory(
+    baseline_documentation_payload, monkeypatch,
+):
+    fixture = baseline_documentation_payload
+    rows = prep.inventory(fixture.payload)
+    fixture.license_file.write_bytes(b"x" * len(fixture.license_raw))
+    monkeypatch.setattr(prep, "inventory", lambda path: rows)
+    with pytest.raises(prep.PreparationError, match="input identity differs"):
+        prep.verify_links(fixture.payload, fixture.original)
+
+
+@pytest.mark.parametrize("kind", ["absolute-internal", "relative-escape", "ancestor-escape", "loop"])
+def test_documentation_exception_keeps_runtime_link_containment_strict(
+    baseline_documentation_payload, tmp_path, kind,
+):
+    fixture = baseline_documentation_payload
+    link = fixture.payload / "runtime-libs/lib/invalid-link"
+    if kind == "absolute-internal":
+        link.symlink_to(fixture.payload / "bin/program")
+    elif kind == "relative-escape":
+        outside = tmp_path / "outside"
+        outside.write_bytes(b"outside")
+        link.symlink_to(Path("../../../outside"))
+    elif kind == "ancestor-escape":
+        outside = tmp_path / "outside-dir"
+        outside.mkdir()
+        (outside / "library").write_bytes(b"outside")
+        ancestor = fixture.payload / "escape-dir"
+        ancestor.symlink_to(Path("../outside-dir"), target_is_directory=True)
+        link.symlink_to(Path("../../escape-dir/library"))
+    else:
+        link.symlink_to(link.name)
+    with pytest.raises(prep.PreparationError):
+        prep.verify_links(fixture.payload, fixture.original)
+
+
+def test_missing_documentation_destination_cannot_be_redirected_inside_payload(
+    baseline_documentation_payload,
+):
+    fixture = baseline_documentation_payload
+    destination = fixture.payload / fixture.pin["missing_destination"]
+    destination.parent.mkdir(parents=True)
+    redirected = destination.parent.with_name("other-license-dir")
+    redirected.mkdir()
+    # Keep it missing, but redirect the lexical destination's parent elsewhere.
+    destination.parent.rmdir()
+    destination.parent.symlink_to(redirected.name, target_is_directory=True)
+    with pytest.raises(prep.PreparationError, match="documentation destination differs"):
+        prep.verify_links(fixture.payload, fixture.original)
+
+
+@pytest.mark.parametrize("mutation", ["new-target", "retargeted-link", "replaced-link"])
+def test_original_payload_oracle_still_rejects_documentation_repairs(
+    baseline_documentation_payload, mutation,
+):
+    fixture = baseline_documentation_payload
+    if mutation == "new-target":
+        destination = fixture.payload / fixture.pin["missing_destination"]
+        destination.parent.mkdir(parents=True)
+        destination.write_bytes(fixture.license_raw)
+    elif mutation == "retargeted-link":
+        fixture.link.unlink()
+        fixture.link.symlink_to(fixture.license_file)
+    else:
+        fixture.link.unlink()
+        fixture.link.write_bytes(fixture.license_raw)
+    with pytest.raises(prep.PreparationError, match="unreviewed staged payload change"):
+        prep.allowed_changes(fixture.original, prep.inventory(fixture.payload))

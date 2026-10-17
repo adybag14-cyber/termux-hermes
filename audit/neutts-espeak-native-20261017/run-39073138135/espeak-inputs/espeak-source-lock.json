@@ -1,0 +1,127 @@
+{
+  "configure": {
+    "BUILD_SHARED_LIBS": "ON",
+    "BUILD_TESTING": "OFF",
+    "CMAKE_BUILD_TYPE": "Release",
+    "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+    "CMAKE_POSITION_INDEPENDENT_CODE": "ON",
+    "COMPILE_INTONATIONS": "ON",
+    "ENABLE_TESTS": "OFF",
+    "ESPEAK_BUILD_MANPAGES": "OFF",
+    "EXTRA_cmn": "ON",
+    "EXTRA_ru": "ON",
+    "FETCHCONTENT_FULLY_DISCONNECTED": "ON",
+    "FETCHCONTENT_UPDATES_DISCONNECTED": "ON",
+    "USE_ASYNC": "OFF",
+    "USE_KLATT": "OFF",
+    "USE_LIBPCAUDIO": "OFF",
+    "USE_LIBSONIC": "OFF",
+    "USE_MBROLA": "OFF",
+    "USE_SPEECHPLAYER": "OFF"
+  },
+  "fixtures": [
+    {
+      "expected_ascii": "h@l'oU",
+      "language": "en",
+      "source_file": "tests/translate.test",
+      "source_lines": [
+        6,
+        6
+      ],
+      "source_sha256": "fd6bdf8d4cc7796c3f6a257df6d0e59bb84ef0a642bebcf35611547eef1ce476",
+      "text": "hello"
+    },
+    {
+      "expected_ascii": "D@ kw'Ik br'aUn f'0ks dZ'Vmps ,oUv3 D@ l'eIzi d'0g",
+      "language": "en",
+      "source_file": "tests/language-pronunciation.test",
+      "source_lines": [
+        72,
+        72
+      ],
+      "source_sha256": "ece352071ddab681f5b23c650efc3c63cfbb5840d8eb2ced0413b6f54a5b24a8",
+      "text": "The quick brown fox jumps over the lazy dog"
+    },
+    {
+      "expected_ascii": "byv'e d@- s@- (en)w'Iski(fr) k@ l@- patr'O~ Z'yZ fam'Y\nsa m@- f'E p'Wr d@- fEt'e nO'El l'a\nsyr sEt 'il bizarO'id u yn m'Er e sa- m'o:m es'E d@- m@- ty'e_! av,Ek W~ gat'o a la- sig'y bryl'e",
+      "language": "fr",
+      "source_file": "tests/language-pronunciation.test",
+      "source_lines": [
+        92,
+        94
+      ],
+      "source_sha256": "ece352071ddab681f5b23c650efc3c63cfbb5840d8eb2ced0413b6f54a5b24a8",
+      "text": "Buvez de ce whisky que le patron juge fameux. Ça me fait peur de fêter noël là, sur cette île bizarroïde où une mère et sa môme essaient de me tuer avec un gâteau à la cigüe brûlé."
+    },
+    {
+      "expected_ascii": "Syr'okVja E#l;ikt@-r;if;ik'Atsyja 'juZnyx gub;'ern;ij d'Ast m'oS;nyj tVltS;'ok pVdj'8mu s;'elskVvV xVz;'Ajstva#",
+      "language": "ru",
+      "source_file": "tests/language-pronunciation.test",
+      "source_lines": [
+        227,
+        227
+      ],
+      "source_sha256": "ece352071ddab681f5b23c650efc3c63cfbb5840d8eb2ced0413b6f54a5b24a8",
+      "text": "Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства."
+    },
+    {
+      "expected_ascii": "thiE55nt'i51_|",
+      "language": "cmn",
+      "source_file": "tests/translate.test",
+      "source_lines": [
+        107,
+        107
+      ],
+      "source_sha256": "fd6bdf8d4cc7796c3f6a257df6d0e59bb84ef0a642bebcf35611547eef1ce476",
+      "text": "天地"
+    }
+  ],
+  "native_compiler_lock_sha256": "a06e595179fad6f437ca95210d685beb339baa0867cd527dba5f5083d94b36ce",
+  "native_probe_support_sha256": "862efa59b3c967fd360e1d9ce86d4ebadc5bbf9a4b0a3023f2990a66da130c74",
+  "patch": {
+    "after_sha256": "deffe5428e5a8c94e32777c07ef6998892d7ff60eeb9a586a8401566eb666a52",
+    "before_sha256": "312539333dd476d726ddea0a4886d191eb7ac3b53a41a47419f34643cea7af92",
+    "bytes": 345,
+    "path": "patches/next-stable/espeak-ng-explicit-off-sonic.patch",
+    "sha256": "934c9d9a5d3cc76e0011321cfea7270b91dc954fed2a4c03857a7a6ea42b7d4a",
+    "source_path": "cmake/deps.cmake"
+  },
+  "patched_manifest": {
+    "bytes": 63434219,
+    "file_count": 2606,
+    "sha256": "69e5228b663815a4fa4b20bfca13242826d132128f1ee5a43f03091ce608ff50"
+  },
+  "schema_version": 1,
+  "scope": {
+    "audio_io_requested": false,
+    "model_downloaded": false,
+    "real_python_wrapper_proved": false,
+    "release_output": false,
+    "synthesis_tested": false
+  },
+  "source": {
+    "artifact": {
+      "bytes": 18493532,
+      "filename": "espeak-ng-69bfd1efde0236654ccc117a28d04aef27673a30.tar.gz",
+      "sha256": "0d36c8e81e972805d343e2b93d77baf3b57dd6c7a18a12df6782c80fe9f11d15",
+      "url": "https://codeload.github.com/espeak-ng/espeak-ng/tar.gz/69bfd1efde0236654ccc117a28d04aef27673a30"
+    },
+    "commit": "69bfd1efde0236654ccc117a28d04aef27673a30",
+    "exact_symlink": {
+      "git_blob_sha1": "aef4ce539b7a20c99eecca7d95fb1e4761839583",
+      "path": "src/include/espeak/speak_lib.h",
+      "target": "../espeak-ng/speak_lib.h"
+    },
+    "git_blobs_verified_against_official_tree": 2606,
+    "manifest": {
+      "bytes": 63434177,
+      "file_count": 2606,
+      "sha256": "6872687c996bb3f48c6627431ef376ffe9d354d496907826dd5978e8299f8f4e"
+    },
+    "regular_source_bytes": 63434153,
+    "repository": "https://github.com/espeak-ng/espeak-ng.git",
+    "root": "espeak-ng-69bfd1efde0236654ccc117a28d04aef27673a30",
+    "tree": "c8d05b9f7d8a1fe9c38ca909e152ee4cec20dd97"
+  },
+  "source_date_epoch": 1765779173
+}

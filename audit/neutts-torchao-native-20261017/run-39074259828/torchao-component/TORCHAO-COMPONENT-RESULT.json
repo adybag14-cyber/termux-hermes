@@ -1,0 +1,145 @@
+{
+  "candidate_modified": false,
+  "commands": [
+    {
+      "command": [
+        "/data/data/com.termux/files/usr/bin/python",
+        "-I",
+        "-B",
+        "-m",
+        "venv",
+        "--system-site-packages",
+        "--without-pip",
+        "/data/data/com.termux/files/usr/tmp/torchao-component-9bkv8ath/runtime"
+      ],
+      "exit_code": 0,
+      "logs": {
+        "stderr": {
+          "bytes": 0,
+          "path": "create-venv.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "truncated": false
+        },
+        "stdout": {
+          "bytes": 0,
+          "path": "create-venv.stdout.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "truncated": false
+        }
+      },
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/data/data/com.termux/files/usr/bin/python",
+        "-I",
+        "-B",
+        "-m",
+        "pip",
+        "--python",
+        "/data/data/com.termux/files/usr/tmp/torchao-component-9bkv8ath/runtime/bin/python",
+        "install",
+        "--no-index",
+        "--no-deps",
+        "--no-compile",
+        "--no-cache-dir",
+        "--only-binary=:all:",
+        "--report",
+        "/out/torchao-component/TORCHAO-PIP-INSTALL.json",
+        "/out/torchao-inputs/torchao-0.12.0-py3-none-any.whl"
+      ],
+      "exit_code": 0,
+      "logs": {
+        "stderr": {
+          "bytes": 0,
+          "path": "install-exact-wheel.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "truncated": false
+        },
+        "stdout": {
+          "bytes": 140,
+          "path": "install-exact-wheel.stdout.log",
+          "sha256": "011a781fac0b1e09395a6b4ee1860bed548c7384a59a1cdd7de924ff306c8dd6",
+          "truncated": false
+        }
+      },
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/data/data/com.termux/files/usr/tmp/torchao-component-9bkv8ath/runtime/bin/python",
+        "-I",
+        "-B",
+        "/probes/scripts/compatibility_probe_neutts_torchao.py",
+        "--phase",
+        "runtime",
+        "--inputs",
+        "/out/torchao-inputs",
+        "--foundation-receipt",
+        "/out/NEUTTS-CORE-RESULT.json",
+        "--out",
+        "/out/torchao-component"
+      ],
+      "exit_code": 1,
+      "logs": {
+        "stderr": {
+          "bytes": 2806,
+          "path": "actual-native-runtime.stderr.log",
+          "sha256": "25223b5e9d091ade7babdad7c881d53480d31b3af82f98d9f230e0d51bc60c3f",
+          "truncated": false
+        },
+        "stdout": {
+          "bytes": 0,
+          "path": "actual-native-runtime.stdout.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "truncated": false
+        }
+      },
+      "timed_out": false
+    }
+  ],
+  "complete_engine_tested": false,
+  "error": {
+    "message": "Component command failed: actual-native-runtime",
+    "type": "RuntimeError"
+  },
+  "foundation": {
+    "apt_validation_sha256": "9bba3eaa7f2dc1281d3edd856ae5638066d153f6d7ef4e00de0119c7a21ac203",
+    "case_count": 7,
+    "current_selected_apt_files_rechecked": 474,
+    "current_selected_apt_manifest_sha256": "1873b3eb283cf4833800e08bd29030a61fb81d3bbcedd497ff6ecb086b36a2ff",
+    "path": "/out/NEUTTS-CORE-RESULT.json",
+    "raw_pip_exit_code": 1,
+    "sha256": "4d5a63472b06cc2c9be5510975bd0dee77ae72bc0f0d54c9b4ca0916f44f1b75",
+    "status": "passed"
+  },
+  "lock_sha256": "8c3303018c326f63540c59855df19d7fc3cef139040c90d64b4e7f4cbc264c22",
+  "model_downloaded": false,
+  "production_admission_changed": false,
+  "release_output": false,
+  "runtime": {
+    "api_level": 24,
+    "base_prefix": "/data/data/com.termux/files/usr",
+    "executable": {
+      "bytes": 4448,
+      "class": 64,
+      "endianness": "little",
+      "machine": 183,
+      "path": "/data/data/com.termux/files/usr/bin/python3.14",
+      "sha256": "4f8d78ede7fc26e96e99342dd83ce42d32c9b4d0806bc9a99ff7151396269b25"
+    },
+    "machine": "aarch64",
+    "prefix": "/data/data/com.termux/files/usr",
+    "python": "3.14.6 (main, Jul  5 2026, 10:35:55) [Clang 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 5e96669f0",
+    "sys_platform": "android",
+    "uid": 1000
+  },
+  "runtime_receipt": {
+    "path": "TORCHAO-RUNTIME-RESULT.json",
+    "sha256": "6d8c425b13c410024a111e97383450728f4b10c41af4546c5b10333f07b527e2"
+  },
+  "schema_version": 1,
+  "scope": "One exact TorchAO wheel, real import and CPU NF4 operations over native APT foundation",
+  "stage": "actual-native-runtime",
+  "status": "failed"
+}

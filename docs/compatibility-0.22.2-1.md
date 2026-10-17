@@ -23,8 +23,8 @@ state preservation, optional installation without compilers, and repeated
 environment reuse. These computer-use results concern the owned virtual X11
 desktop; they do not certify arbitrary Android phone UI control.
 
-NeuTTS's scientific foundation and its native Numba/Llama CPU components now
-pass. Its complete engine dependency environment, codec/model behavior and
+NeuTTS's scientific foundation, its native Numba/Llama CPU components, and the
+complete 23-package eSpeak/Phonemizer runtime now pass. Its complete engine dependency environment, codec/model behavior and
 synthesis remain separate gates. Microphone/VAD still needs a complete isolated
 audio preparation and real Android audio services. Source repairs and preparation
 for these two remaining restrictions continue below; neither is counted as a

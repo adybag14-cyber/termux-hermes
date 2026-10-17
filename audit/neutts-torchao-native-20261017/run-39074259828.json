@@ -1,0 +1,85 @@
+{
+  "artifact": {
+    "all_member_crc_sha256_verified": true,
+    "bytes": 11201574,
+    "full_member_ledger_sha256": "eda387ceb039505a715cad3cbfa178097d229cae39fb83c53aa25a95b77452b1",
+    "full_zip_saved_outside_git": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\torchao-termux-native-evidence-20261017\\39074259828\\artifact.zip",
+    "id": 12116536631,
+    "retained_members": 51,
+    "sha256": "cb37a410088ad778ad36b1ba3befac78f94263c4ee3ebaef17dc44f89bd5ec90",
+    "zip_members": 61
+  },
+  "captured_utc": "2026-10-17T22:22:18.581957+00:00",
+  "existing_preparation_evidence_unchanged": "audit/neutts-torchao-preparation-20261017.json",
+  "failure": {
+    "child_exit_code": 1,
+    "child_timed_out": false,
+    "error": {
+      "message": "No module named 'torch._inductor.kernel.flex_attention'",
+      "type": "ModuleNotFoundError"
+    },
+    "proposed_followup": "Review lazy loading of the optional compiler pass at its requested-operation boundary, preserving ordinary compiler behavior and all real CPU gates.",
+    "source_grounded_import_path": [
+      "torchao",
+      "torchao.quantization",
+      "torchao.dtypes",
+      "torchao.dtypes.uintx.dyn_int8_act_int4_wei_cpu_layout",
+      "torchao.prototype.inductor.fx_passes",
+      "torchao.prototype.inductor.fx_passes.int8_sdpa_fusion",
+      "torchao.prototype.inductor.int8_sdpa_lowering",
+      "torch._inductor.kernel.flex_attention"
+    ],
+    "stage": "Real installed TorchAO package import, before CPU NF4 checks"
+  },
+  "foundation_raw_pip_check_exit_code": 1,
+  "foundation_separate_requirements_and_provenance_gate": "passed",
+  "head_sha": "1fc3dde05aca3786d28d656ced9a807e872bff4f",
+  "job_id": 117518048072,
+  "native_child_stderr": {
+    "bytes": 2806,
+    "sha256": "25223b5e9d091ade7babdad7c881d53480d31b3af82f98d9f230e0d51bc60c3f"
+  },
+  "native_job_log": {
+    "bytes": 189485,
+    "sha256": "846c3a184900efbf44a53b6e07a5bccf533da548d9326f0bb95a3699cdc65e02"
+  },
+  "not_proved": [
+    "TorchAO real package import",
+    "Five CPU NF4 operations",
+    "Complete NeuTTS or Torchtune",
+    "Model inference",
+    "Audio I/O",
+    "Physical device behavior",
+    "Release readiness"
+  ],
+  "production_admission_changed": false,
+  "proved": {
+    "current_foundation_files_rechecked_in_native_runtime": 474,
+    "exact_original_torchao_wheel": {
+      "bytes": 962232,
+      "filename": "torchao-0.12.0-py3-none-any.whl",
+      "sha256": "103f2a9164d2e4f705332af1aafbb8473eadd14d9164e45857ca187cde1f13d2",
+      "url": "https://files.pythonhosted.org/packages/6c/5f/6bf9b5bed6d31e286516d23e1db7320d2ccfbf1b2234749833ad1e3d25a5/torchao-0.12.0-py3-none-any.whl"
+    },
+    "fresh_venv_and_one_wheel_install": true,
+    "installed_files_verified_in_native_runtime": 351,
+    "installed_record_verified_in_native_runtime": true,
+    "original_files_verified_in_native_runtime": 347,
+    "scientific_foundation_cases": 7
+  },
+  "raw_evidence": {
+    "binary_wheels_excluded_from_git": true,
+    "directory": "audit/neutts-torchao-native-20261017/run-39074259828",
+    "file_count": 81,
+    "preserved_exact_bytes": true,
+    "result_recheck_sha256": "110b00703aa7f6922b533849c4ea1fde358085b23802eb8c9bbde7d1af75bb75",
+    "saved_files_sha256": "873e44b12eb21eae76de4ef69a9a7897735bda8ffb7b8ea927f0458ae1358358",
+    "total_bytes": 1408985
+  },
+  "release_output": false,
+  "repository": "adybag14-cyber/termux-hermes",
+  "run_id": 39074259828,
+  "schema_version": 1,
+  "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39074259828",
+  "workflow_conclusion": "failure"
+}

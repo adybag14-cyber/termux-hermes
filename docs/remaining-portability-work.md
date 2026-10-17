@@ -33,7 +33,7 @@ and [Hermes resolver configuration](https://github.com/NousResearch/hermes-agent
 | Numba 0.67.0 | Exact native source wheel builds. Nopython JIT returns the expected result, and the parallel workqueue generalized-ufunc test returns the exact matrix. | CPU behavior only; no speech synthesis claim. |
 | llama-cpp-python 0.3.36 | Exact source and matching vendored llama.cpp build with the Android loader repair. Backend initialization/free, real default parameters, CPU capability calls and mapped-library verification pass. | No model is loaded; token generation and synthesis are not tested. |
 | NeuCodec Hub adapter | The source adapter passes 34 focused tests and retains revision, token, cache, local-files-only and error behavior. Unsupported per-call proxy settings fail before the download. | Real codec/model operations still need the complete native environment and weights. |
-| Phonemizer discovery | The repair passes 30 focused tests. Explicit existing library paths no longer trigger an unnecessary Bionic-incompatible dlinfo import. All 55 other original source files and dependency metadata remain unchanged. | Exact eSpeak C ABI and language-data checks now pass; the real public Phonemizer wrapper remains a separate gate. |
+| Phonemizer discovery | The repair passes 30 focused tests. Explicit existing library paths no longer trigger an unnecessary Bionic-incompatible dlinfo import. All 55 other original source files and dependency metadata remain unchanged. | The complete 23-package runtime now passes native public-wrapper phonemization, stress/punctuation, Regex and RPDS operations; complete NeuTTS inference remains unproved. |
 
 The [first complete foundation run](../audit/neutts-native-20261017/run-39058569758.json)
 verifies all 2,829 installed files from nine Python wheels, native MarkupSafe,
@@ -86,9 +86,9 @@ The [frozen runtime routes](neutts-runtime-preparation.md) bind exact artifacts
 and the separately [saved APT index pair](../audit/neutts-runtime-index-20261017/SAVED-FILES.json).
 Preparation is now executing these routes. It will use the separate
 scientific APT interpreter and preserve the published Hermes runtime. The first
-additional executable slice is the complete 23-distribution Phonemizer subset,
+additional completed executable slice is the 23-distribution Phonemizer subset,
 including a real Regex build, the patched Phonemizer wheel and exact native
-eSpeak library/data. A C-ABI-only eSpeak result will remain distinct from real
+eSpeak library/data. The passing eSpeak C ABI result is recorded separately from the passing real
 Phonemizer package import and public-wrapper phonemization.
 
 The [complete Phonemizer input preparation](phonemizer-runtime-preparation.md)
@@ -97,11 +97,11 @@ and 26 active dependency edges were independently recomputed. The exact eSpeak
 source also has a reviewed CMake repair for the explicit Sonic-OFF setting;
 all four real configuration regression cases passed. The
 [integrated native runner](../audit/neutts-espeak-integration-v2-20261017.json)
-will build eSpeak, test its C ABI and full language data, then build Regex and
-patched Phonemizer and run the real public wrapper. It retains the original
+builds eSpeak, tests its C ABI and full language data, then builds Regex and
+patched Phonemizer and runs the real public wrapper. It retains the original
 44 compiler archives plus the original pip archive needed for runtime
-provenance. These complete preparations do not yet establish a native wrapper
-pass or complete NeuTTS engine compatibility.
+provenance. The native wrapper now passes as described below; complete NeuTTS engine
+compatibility remains a separate gate.
 
 The first [native eSpeak/Phonemizer run](../audit/neutts-espeak-native-20261017/run-39068675792.json)
 passed the seven scientific foundation gates but stopped during source
@@ -111,7 +111,7 @@ directory with no regular files, so that parent had never been created. The
 now creates the verified parent. Two focused host tests pass, reproducing the
 original missing-directory error and checking all 2,606 source entries, the sole
 24-byte link and the target's containment after correction. Exact POSIX link
-following and the native C ABI/public-wrapper gates remain for the retry.
+following and the native C ABI/public-wrapper gates were deferred at that checkpoint.
 The complete failed artifact and all 190 member hashes are preserved.
 
 The [next native run](../audit/neutts-espeak-native-20261017/run-39071928457.json)
@@ -123,7 +123,31 @@ move it across the separate temporary/output filesystems, before Regex or the
 23-package public API gate. The [reviewed transfer fix](../audit/phonemizer-wheel-transfer-fix-20261017/WHEEL-TRANSFER-FIX.json)
 copies the already-verified bytes into an exclusive new destination and verifies
 both size and hash. All 48 focused preparation/transfer tests pass with no skips.
-The public-wrapper result remains pending.
+The [successful retry, 39073138135](../audit/neutts-espeak-native-20261017/run-39073138135.json),
+now passes all seven foundation cases, all 14 C ABI checks, both source wheel
+builds, and the real public Phonemizer API in its complete 23-distribution runtime.
+The 26 active dependency edges and 1,756 original installed file hashes are
+verified. Public phonemization, stress removal, punctuated batches, Regex
+Unicode/grapheme/fuzzy behavior and RPDS persistent maps pass; dlinfo is retained
+as a dependency but is not imported on the explicit-library path. The runtime's
+raw pip check exits zero. Root verified the complete 55,254,989-byte artifact and
+all 654 members; the earlier failures remain preserved.
+
+The [six C/C++ component preparations](neutts-nonrust-preparation.md) have 48
+passing host tests and exact verified sources/wheels. Their first native run
+39073990223 failed and is being diagnosed; none of those six is admitted from a
+host-only result. The [TorchAO component preparation](../audit/neutts-torchao-preparation-20261017.json)
+also reached a real native import failure after the exact wheel was installed:
+an eagerly imported optional compiler pass requires a missing Termux PyTorch
+Inductor module. Its [failure evidence](../audit/neutts-torchao-native-20261017/run-39074259828.json)
+is retained, and a narrow lazy-import repair is in progress. No CPU NF4 pass is
+claimed yet.
+
+The [NeuTTS offline source hook](neutts-engine-source-preparation.md) is saved
+with six passing host tests, complete verification of all 56 original files,
+and independent five-case real CMake acquisition replays. It changes only the
+source-selection CMake file; native wheel construction and the full engine
+still need verification, and the original Python upper bound is unchanged.
 
 The exact eSpeak source's optional Sonic fetch is covered by the reviewed
 explicit-OFF guard and native phonemization probe described above. This
@@ -269,15 +293,28 @@ checks every new cache's CPython format, exact original source, header and
 recursive code equality against a fresh compile. It archives every verified
 cache byte before removal and restores the complete original Python inventory.
 Baseline files and caches remain unchanged, and the final full-payload comparison
-is unchanged. Seven native stage inventories will identify where caches first
-appear in the next run. All 90 focused host tests pass with no skips in the
+is unchanged. The following native run uses seven stage inventories to identify where caches
+first appear. All 90 focused host tests pass with no skips in the
 [independent root replay](../audit/audio-hermes-native-20261017/run-39070305665/root-normalization-review.json);
 the actual UV host reproduction also restored all original entries after
 archiving and removing its 50 new cache files and six new directories.
 
-A complete native retry must still verify that normalization, pass the final
-integrity check, execute the audio dependency probe, and repeat construction at
-a second independent path.
+The [fourth native run, 39072170354](../audit/audio-hermes-native-20261017/run-39072170354.json),
+now confirms that normalization: all 50 new caches and six new directories were
+archived/removed, no original files changed, the complete original Python
+inventory was restored, and the unchanged payload-change oracle passed. The
+stage inventories locate cache creation at the canonical application build.
+
+The final link check then found the exact preexisting missing FFmpeg copyright
+destination. Of 77 post-build links, 76 have present destinations and one retains
+that original documentation gap. The reviewed correction separately reports
+the missing documentation, binds it to the complete original inventory and
+unchanged GPL text, and leaves every executable/library containment and
+existence check in place. It makes no payload repair. All 118 focused host
+tests pass with no skips, including all 90 earlier cases.
+
+The next native retry must pass the final link gate, execute the audio dependency
+probe, and repeat construction at a second independent path.
 Both environments are built fresh through canonical APIs from the exact main
 candidate and original wheel catalog. The original candidate, installed payload,
 lock files and existing wheels must remain unchanged. The workflow preserves a

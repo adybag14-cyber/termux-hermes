@@ -88,6 +88,22 @@ NEW_WHEELS = [
     "numpy-2.4.3-cp314-cp314-android_24_arm64_v8a.whl",
     "sounddevice-0.5.5-py3-none-any.whl",
 ]
+# The exact e271 payload contains one unresolved documentation link. Preserve its
+# original bytes and report that limitation; this is not a general missing-link
+# allowance. The source inventory is captured immediately after verified .deb
+# extraction, before any audio preparation changes.
+BASELINE_MISSING_DOCUMENTATION_LINK = {
+    "path": "tools/ffmpeg/data/data/com.termux/files/usr/share/doc/ffmpeg/copyright",
+    "target": "../../LICENSES/GPL-3.0.txt",
+    "missing_destination": "tools/ffmpeg/data/data/com.termux/files/usr/share/LICENSES/GPL-3.0.txt",
+    "original_inventory_sha256": "dade6143af33f29c3d219578e68683269c1664f036e556f8399ff8a225be48b6",
+    "preserved_license": {
+        "path": "runtime-libs/share/LICENSES/GPL-3.0.txt",
+        "bytes": 35149,
+        "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+    },
+}
+
 SHARED_WHEELS = {
     "cffi-2.1.1-cp314-cp314-android_24_arm64_v8a.whl": (201386, "026bdab93fdadca4ddf85071c35736ec1b98b1cec575d2bf9280684940642165"),
     "pycparser-3.0-py3-none-any.whl": (48172, "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992"),
@@ -1152,16 +1168,57 @@ def allowed_changes(before, after):
     return changed
 
 
-def verify_links(payload):
-    links = {}
-    for name, row in inventory(payload).items():
+def verify_links(payload, original=None):
+    """Validate working links and separately report the exact inherited doc gap."""
+    payload = Path(payload)
+    rows = inventory(payload)
+    root = payload.resolve()
+    links, missing_documentation = {}, {}
+    for name, row in rows.items():
         if row["kind"] != "symlink":
             continue
         path = payload / name
-        require(not os.path.isabs(row["target"]) and path.exists()
-                and path.resolve().is_relative_to(payload), "payload link is not contained: " + name)
-        links[name] = row["target"]
-    return links
+        require(not os.path.isabs(row["target"]), "payload link is absolute: " + name)
+        try:
+            resolved = path.resolve()
+        except (OSError, RuntimeError) as exc:
+            raise PreparationError("payload link cannot be resolved: " + name) from exc
+        require(resolved.is_relative_to(root), "payload link is not contained: " + name)
+        if path.exists():
+            links[name] = row["target"]
+            continue
+
+        pin = BASELINE_MISSING_DOCUMENTATION_LINK
+        require(name == pin["path"] and original is not None,
+                "payload link target is missing: " + name)
+        require(inventory_sha(original) == pin["original_inventory_sha256"],
+                "baseline missing documentation source inventory differs")
+        require(original.get(name) == row and row["target"] == pin["target"],
+                "baseline missing documentation link changed")
+        destination = root / pin["missing_destination"]
+        require(pin["missing_destination"] not in original
+                and pin["missing_destination"] not in rows
+                and resolved == destination and destination.resolve() == destination
+                and not destination.exists() and not destination.is_symlink(),
+                "baseline missing documentation destination differs")
+        license_pin = pin["preserved_license"]
+        license_row = rows.get(license_pin["path"])
+        require(license_row is not None and license_row == original.get(license_pin["path"])
+                and license_row["kind"] == "file"
+                and license_row["bytes"] == license_pin["bytes"]
+                and license_row["sha256"] == license_pin["sha256"],
+                "baseline preserved license differs")
+        pinned(payload / license_pin["path"], license_pin["bytes"], license_pin["sha256"])
+        missing_documentation[name] = {
+            "target": row["target"],
+            "missing_destination": pin["missing_destination"],
+            "status": "preexisting-missing-documentation-target",
+            "working": False,
+            "original_link_preserved": True,
+            "original_inventory_sha256": pin["original_inventory_sha256"],
+            "preserved_license": dict(license_pin),
+        }
+    return {"contained_links": links, "baseline_missing_documentation_links": missing_documentation}
 
 
 def prepare(options):
@@ -1245,7 +1302,8 @@ def prepare(options):
         after = inventory(payload)
         write_json(evidence / "post-build-payload-inventory.json", {"files": after})
         changes = allowed_changes(before, after)
-        links = verify_links(payload)
+        link_report = verify_links(payload, before)
+        write_json(evidence / "payload-links.json", link_report)
         gate = json_object((evidence / "canonical-build.json").read_bytes())
         require(gate["status"] == "passed" and gate["catalog_union"]["total_rows"] == 102, "canonical build did not pass")
         require(input_before == {"candidate": inventory(candidate), "audio": inventory(audio), "patch_sha256": sha256(patch),
@@ -1281,7 +1339,8 @@ def prepare(options):
                       catalog=gate["catalog"], extras=EXTRAS, canonical_build=gate,
                       original_inventory_sha256=inventory_sha(before),
                       prepared_inventory_sha256=inventory_sha(after),
-                      payload_changes=changes, contained_links=links,
+                      payload_changes=changes, contained_links=link_report["contained_links"],
+                      baseline_missing_documentation_links=link_report["baseline_missing_documentation_links"],
                       generated_tool_bytecode=gate["generated_tool_bytecode"],
                       cffi_reuse={"main_wheel_sha256": sha256(main_cffi), "audio_wheel_sha256": sha256(old_cffi),
                                  "uncompressed_members_identical": len(cffi_members)},

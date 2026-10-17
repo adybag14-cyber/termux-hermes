@@ -1,0 +1,36 @@
+WARNING:torchao.kernel.intmm:Warning: Detected no triton, on systems without Triton certain kernels will not work
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_neutts_torchao.py", line 223, in runtime_case
+    import torchao
+  File "/data/data/com.termux/files/usr/tmp/torchao-component-9bkv8ath/runtime/lib/python3.14/site-packages/torchao/__init__.py", line 41, in <module>
+    from torchao.quantization import (
+    ...<2 lines>...
+    )
+  File "/data/data/com.termux/files/usr/tmp/torchao-component-9bkv8ath/runtime/lib/python3.14/site-packages/torchao/quantization/__init__.py", line 6, in <module>
+    from .autoquant import (
+    ...<8 lines>...
+    )
+  File "/data/data/com.termux/files/usr/tmp/torchao-component-9bkv8ath/runtime/lib/python3.14/site-packages/torchao/quantization/autoquant.py", line 11, in <module>
+    from torchao.dtypes import (
+    ...<6 lines>...
+    )
+  File "/data/data/com.termux/files/usr/tmp/torchao-component-9bkv8ath/runtime/lib/python3.14/site-packages/torchao/dtypes/__init__.py", line 1, in <module>
+    from . import affine_quantized_tensor_ops
+  File "/data/data/com.termux/files/usr/tmp/torchao-component-9bkv8ath/runtime/lib/python3.14/site-packages/torchao/dtypes/affine_quantized_tensor_ops.py", line 28, in <module>
+    from torchao.dtypes.uintx.block_sparse_layout import (
+    ...<2 lines>...
+    )
+  File "/data/data/com.termux/files/usr/tmp/torchao-component-9bkv8ath/runtime/lib/python3.14/site-packages/torchao/dtypes/uintx/__init__.py", line 7, in <module>
+    from .dyn_int8_act_int4_wei_cpu_layout import (
+        Int8DynamicActInt4WeightCPULayout,
+    )
+  File "/data/data/com.termux/files/usr/tmp/torchao-component-9bkv8ath/runtime/lib/python3.14/site-packages/torchao/dtypes/uintx/dyn_int8_act_int4_wei_cpu_layout.py", line 320, in <module>
+    from ...prototype.inductor.fx_passes import register_da8w4_concat_linear_cpu_pass
+  File "/data/data/com.termux/files/usr/tmp/torchao-component-9bkv8ath/runtime/lib/python3.14/site-packages/torchao/prototype/inductor/fx_passes/__init__.py", line 2, in <module>
+    from .int8_sdpa_fusion import _int8_sdpa_init
+  File "/data/data/com.termux/files/usr/tmp/torchao-component-9bkv8ath/runtime/lib/python3.14/site-packages/torchao/prototype/inductor/fx_passes/int8_sdpa_fusion.py", line 22, in <module>
+    from ..int8_sdpa_lowering import register_int8_sdpa  # noqa: F401
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/tmp/torchao-component-9bkv8ath/runtime/lib/python3.14/site-packages/torchao/prototype/inductor/int8_sdpa_lowering.py", line 6, in <module>
+    from torch._inductor.kernel.flex_attention import construct_strides, maybe_realize
+ModuleNotFoundError: No module named 'torch._inductor.kernel.flex_attention'

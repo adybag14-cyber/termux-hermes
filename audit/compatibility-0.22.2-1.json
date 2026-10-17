@@ -610,21 +610,21 @@
       "physical_microphone_or_vad_certified": false,
       "included_in_main_candidate": false,
       "isolated_complete_environment": {
-        "status": "both_canonical_environments_built_generated_cache_normalization_90_host_tests_passed_native_retry_pending",
+        "status": "native_cache_normalization_and_strict_payload_oracle_passed_exact_baseline_doclink_fix_118_host_tests_passed_retry_pending",
         "workflow": "../.github/workflows/audio-hermes-preparation.yml",
         "evidence": "audio-hermes-environment-preparation-20261017.json",
-        "host_tests_passed": 90,
+        "host_tests_passed": 118,
         "full_four_path_patch_applied": true,
         "catalog_wheels": 102,
         "independent_fresh_preparations_required": 2,
         "physical_microphone_or_vad_certified": false,
         "canonical_pm_tests_passed": 17,
         "host_tests_skipped": 0,
-        "failure_run": 39070305665,
-        "failure_evidence": "audio-hermes-native-20261017/run-39070305665/generated-tool-bytecode-normalization.json",
-        "independent_review": "audio-hermes-native-20261017/run-39070305665/root-normalization-review.json",
-        "failure_stage": "strict final inventory still rejected newly generated stdlib caches after the marker no-bytecode repair; exact native writer stage pending",
-        "current_preparer_sha256": "2f45fc5e4ede6dfa895ef56d51c05888ac04ed8fedcf2cd612fe7e1f6f7087ad",
+        "failure_run": 39072170354,
+        "failure_evidence": "audio-hermes-native-20261017/run-39072170354.json",
+        "independent_review": "audio-hermes-native-20261017/run-39072170354/root-review/ROOT-REVIEW.json",
+        "failure_stage": "final link existence check rejected exact preexisting missing FFmpeg copyright destination",
+        "current_preparer_sha256": "9c0186ac96cb897fee764a51995b0834586b7c953439092e6b184097753dad88",
         "real_microphone_started": false,
         "original_bootstrap_failure": {
           "failure_run": 39067100543,
@@ -641,7 +641,7 @@
           "manager_distributions": 4,
           "original_catalog_rows_preserved": 100,
           "catalog_rows": 102,
-          "final_payload_integrity": "failed_before_supplemental_patch"
+          "final_payload_integrity": "strict_allowed_changes_passed_link_gate_failed_on_exact_baseline_documentation_gap"
         },
         "canonical_marker_regression": {
           "original_cache_files": 25,
@@ -659,7 +659,7 @@
           "marker_facts_equal": true
         },
         "generated_tool_bytecode_normalization": {
-          "status": "host_passed_native_pending",
+          "status": "native_passed",
           "actual_canonical_uv_compile_host_cache_files": 50,
           "host_validated_archived_and_removed": 50,
           "host_original_inventory_restored": true,
@@ -667,7 +667,40 @@
           "original_source_changes": false,
           "final_payload_oracle_relaxed": false,
           "native_stage_inventories": 7,
-          "validation": "Selected CPython314 magic, canonical filename/path, PEP552 header, original source SHA, recursive fresh-compile equality, archive all bytes, restore exact original Python inventory"
+          "validation": "Selected CPython314 magic, canonical filename/path, PEP552 header, original source SHA, recursive fresh-compile equality, archive all bytes, restore exact original Python inventory",
+          "native_run": 39072170354,
+          "native_validated_archived_and_removed": 50,
+          "native_new_directories_removed": 6,
+          "native_original_inventory_restored": true,
+          "native_original_python_inventory_sha256": "30ae06924f786a6b8818497717bb848fb34c646f6c7e417772e8c1b2e6a402a8",
+          "native_final_python_inventory_sha256": "30ae06924f786a6b8818497717bb848fb34c646f6c7e417772e8c1b2e6a402a8"
+        },
+        "previous_cache_failure": {
+          "failure_run": 39070305665,
+          "failure_evidence": "audio-hermes-native-20261017/run-39070305665/generated-tool-bytecode-normalization.json",
+          "failure_stage": "strict final inventory still rejected newly generated stdlib caches after the marker no-bytecode repair; exact native writer stage pending"
+        },
+        "baseline_documentation_gap": {
+          "stage": "final-link-validation",
+          "cause": "One unchanged FFmpeg copyright link points to a missing documentation target already absent from exact candidate e271. All other runtime link checks remain strict.",
+          "link": "tools/ffmpeg/data/data/com.termux/files/usr/share/doc/ffmpeg/copyright",
+          "target": "../../LICENSES/GPL-3.0.txt",
+          "post_build_symlinks": 77,
+          "post_build_relative_symlinks": 77,
+          "other_destinations_present_by_inventory": 76,
+          "original_symlink_rows_unchanged": 76,
+          "canonical_venv_python_absolute_to_relative_conversion": 1
+        },
+        "baseline_documentation_gap_fix": {
+          "preparer_sha256": "9c0186ac96cb897fee764a51995b0834586b7c953439092e6b184097753dad88",
+          "tests_sha256": "060a870039f6af702ce2e59b8399d01fb712effe4a8b5423104d1fb42f9bcc98",
+          "host_tests_passed": 118,
+          "host_tests_skipped": 0,
+          "original_90_tests_preserved": true,
+          "baseline_inventory_sha256": "dade6143af33f29c3d219578e68683269c1664f036e556f8399ff8a225be48b6",
+          "missing_documentation_reported_as_working": false,
+          "payload_changes_for_documentation_fix": 0,
+          "native_recheck_passed": false
         }
       }
     },
@@ -821,7 +854,7 @@
       "metadata_unchanged": true
     },
     "neutts_espeak_phonemizer_preparation": {
-      "status": "native_espeak_C_ABI_and_data_passed_public_wrapper_transfer_fixed_retry_pending",
+      "status": "native_espeak_C_ABI_data_and_complete_23_distribution_public_Phonemizer_API_passed",
       "espeak_commit": "69bfd1efde0236654ccc117a28d04aef27673a30",
       "espeak_patch": "../patches/next-stable/espeak-ng-explicit-off-sonic.patch",
       "espeak_source_git_blobs_independently_verified": 2606,
@@ -839,11 +872,11 @@
       "retained_provenance_archives": 45,
       "extra_archive": "Original already-installed python-pip26.2.1 archive, downloaded only for provenance; no additional install",
       "native_c_abi_passed": true,
-      "native_public_wrapper_passed": false,
+      "native_public_wrapper_passed": true,
       "complete_neutts_engine_passed": false,
       "model_downloaded": false,
-      "last_native_run": 39071928457,
-      "last_native_evidence": "neutts-espeak-native-20261017/run-39071928457.json",
+      "last_native_run": 39073138135,
+      "last_native_evidence": "neutts-espeak-native-20261017/run-39073138135.json",
       "native_foundation_cases_passed": 7,
       "native_C_ABI_cases_reached": 14,
       "source_extraction_fix": "neutts-espeak-source-extraction-fix-20261017/SOURCE-EXTRACTION-FIX.json",
@@ -854,7 +887,14 @@
       "native_espeak_data_files": 371,
       "wrapper_wheel_transfer_fix": "phonemizer-wheel-transfer-fix-20261017/WHEEL-TRANSFER-FIX.json",
       "wrapper_transfer_host_tests_passed": 48,
-      "current_wrapper_probe_sha256": "6387ecead23b7777e879588d7e76bd4c8d462de5574de1d77092053efc596211"
+      "current_wrapper_probe_sha256": "6387ecead23b7777e879588d7e76bd4c8d462de5574de1d77092053efc596211",
+      "native_runtime_pip_check_exit_code": 0,
+      "native_installed_original_files_verified": 1756,
+      "native_regex_operations_passed": true,
+      "native_rpds_operation_passed": true,
+      "native_public_output": "həlˈoʊ",
+      "native_without_stress": "həloʊ",
+      "native_dlinfo_imported": false
     },
     "packaging_ci_latest_saved": {
       "head": "ce1e4eaebf523c4d58ea81848f3a5f7130a339ec",
@@ -867,6 +907,48 @@
       "evidence": "ci-boundary-ce1e4ea-20261017",
       "merge_checkout": "b00322f",
       "raw_job_log_sha256": "2b8b61b2dd7ca01456ad497cfeab4c2c24fdd91297f7a1b64d08d260b145e0bc"
+    },
+    "neutts_engine_source_preparation": {
+      "status": "source_hook_and_real_CMake_acquisition_host_verified_native_wheel_pending",
+      "evidence": "neutts-engine-source-preparation-20261017.json",
+      "guide": "../docs/neutts-engine-source-preparation.md",
+      "source_files": 56,
+      "unchanged_files": 55,
+      "host_tests_passed": 6,
+      "host_tests_skipped": 0,
+      "cmake_cases_per_replay": 5,
+      "requires_python_unchanged": ">=3.10, <3.14",
+      "native_wheel_built": false,
+      "complete_engine_passed": false
+    },
+    "neutts_nonrust_components": {
+      "status": "host_preparation_48_tests_passed_first_native_run_failed_diagnosis_in_progress",
+      "evidence": "neutts-nonrust-preparation-20261017.json",
+      "guide": "../docs/neutts-nonrust-preparation.md",
+      "host_tests_passed": 48,
+      "host_tests_skipped": 0,
+      "source_packages": 6,
+      "source_files_verified": 7787,
+      "input_wheels_verified": 15,
+      "runtime_nodes": 14,
+      "runtime_edges": 10,
+      "native_run": 39073990223,
+      "native_run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39073990223",
+      "complete_component_group_passed": false
+    },
+    "neutts_torchao_component": {
+      "status": "original_wheel_installed_but_native_import_failed_on_optional_Inductor_module_repair_in_progress",
+      "evidence": "neutts-torchao-preparation-20261017.json",
+      "native_failure_evidence": "neutts-torchao-native-20261017/run-39074259828.json",
+      "host_test_methods_passed": 20,
+      "additional_root_subtests_passed": 3,
+      "host_tests_skipped": 0,
+      "native_run": 39074259828,
+      "native_foundation_cases_passed": 7,
+      "native_original_wheel_files_verified": 347,
+      "native_installed_files": 351,
+      "native_NF4_cases_passed": 0,
+      "full_engine_passed": false
     }
   }
 }

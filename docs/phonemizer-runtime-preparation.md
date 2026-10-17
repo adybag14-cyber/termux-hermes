@@ -2,20 +2,30 @@
 
 ## Latest native checkpoint
 
-[Run 39071928457](../audit/neutts-espeak-native-20261017/run-39071928457.json)
-passes all 14 eSpeak C ABI checks and verifies 371 language-data files, including
-117 dictionaries. The subsequent pure Phonemizer build completed, but retaining
-its wheel with a cross-filesystem rename failed before Regex and public-wrapper
-execution. The [exclusive verified-copy fix](../audit/phonemizer-wheel-transfer-fix-20261017/WHEEL-TRANSFER-FIX.json)
-now passes 48 focused host checks with no skips. The complete 23-distribution
-installed public API still requires the next native run.
+[Run 39073138135](../audit/neutts-espeak-native-20261017/run-39073138135.json)
+passes the unchanged seven-case scientific foundation, all 14 eSpeak C ABI checks,
+and the complete installed 23-distribution public Phonemizer API. It verifies
+371 language-data files, including 117 dictionaries, and builds both the patched
+Phonemizer wheel and the Android API 24/ARM64/CPython 3.14 Regex wheel.
 
+The real public call returns `həlˈoʊ`; disabling stress returns `həloʊ`.
+Punctuated batch output, Regex Unicode/grapheme/fuzzy operations, and an RPDS
+persistent-map update also pass. The selected explicit eSpeak library and the
+wrapper's own temporary copy have matching bytes. The declared dlinfo dependency
+remains installed but is not imported on this path. The complete runtime's raw
+`pip check` exits zero.
+
+Root independently verified the 55,254,989-byte artifact and all 654 members'
+CRC and SHA-256 values. The saved native record includes the 23-node/26-edge
+closure, original metadata, installed-file verification, actual loaded-library
+provenance, and both earlier failures. The successful component does not yet
+establish full NeuTTS synthesis, model, or audio-device behavior.
 
 ## Purpose and current evidence
 
 This component prepares Phonemizer 3.3.0 with its complete selected runtime dependency graph: **23 distributions and 26 active dependency edges**. It provides the first model-free executable slice of the larger NeuTTS preparation. The source patch moves dlinfo discovery behind the existing unresolved-library fallback; the declared dlinfo dependency is retained.
 
-The host preparation is verified. Actual archive extraction and source patch replay succeeded, and **69 host checks passed with no skips** on Windows CPython 3.14.2: 39 new input/provenance contract checks and the unchanged 30 Phonemizer patch regression cases. The sibling eSpeak preparation independently replayed extraction followed by preparation. These results do not establish native ABI compatibility. The real Android build and public-wrapper gate must run separately.
+The host preparation is verified. Actual archive extraction and source patch replay succeeded, and **69 host checks passed with no skips** on Windows CPython 3.14.2: 39 new input/provenance contract checks and the unchanged 30 Phonemizer patch regression cases. The sibling eSpeak preparation independently replayed extraction followed by preparation. Those host checks are separate from the successful native build and public-wrapper gate recorded above.
 
 The frozen input lock is `scripts/phonemizer_runtime_lock.json`, 78,659 bytes, SHA-256 `48d43784778817bd4a907b63f11738ff910cafc6aac2eed6bc27349b6d5d8c82`. Exact wheel, source, patch, original main catalog and active dependency identities are contained in that file. Host receipts and raw test output are under `audit/phonemizer-runtime-preparation-20261017/`, with the summary in `audit/phonemizer-runtime-preparation-20261017.json`.
 
@@ -28,7 +38,7 @@ The frozen input lock is `scripts/phonemizer_runtime_lock.json`, 78,659 bytes, S
 | Exact source builds | Regex 2026.9.10; Phonemizer 3.3.0 with the independently reviewed lazy-dlinfo patch |
 | Separate build environment | Existing Setuptools 83.0.0 and Packaging 26.0 wheels; Setuptools's existing bundled wheel 0.46.3 implementation is retained |
 
-The twelve public runtime wheels total 11,635,293 compressed bytes. All 21 prebuilt runtime wheels were read completely and verified by exact artifact hash, every ZIP CRC and RECORD digest, distribution identity, complete declared requirements and WHEEL metadata. The original 100-wheel main catalog is preserved unchanged. RPDS's native wheel must still prove its ABI against the separate APT Python.
+The twelve public runtime wheels total 11,635,293 compressed bytes. All 21 prebuilt runtime wheels were read completely and verified by exact artifact hash, every ZIP CRC and RECORD digest, distribution identity, complete declared requirements and WHEEL metadata. The original 100-wheel main catalog is preserved unchanged. RPDS's native wheel passes its actual persistent-map operation and exact module/library provenance checks against the separate APT Python in the native result above.
 
 Regex's exact 417,072-byte source archive has SHA-256 `1e321e2c84f0e52c457f5ea5944f796d6e8e09cb99738ea98dcc1bfe402a128d`; its backend requires Setuptools `>77.0.3`. Phonemizer's exact 88,564-byte source archive has SHA-256 `5e0c38122effe0b331a24e674aff256874ece169d70a9cf1120337b56f8e3d0c`; its backend requires Setuptools `>=61.0`. The prepared source export preserves all 55 other original Phonemizer files unchanged, modifies the reviewed API file, and includes the reviewed regression test.
 
