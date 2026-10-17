@@ -1,0 +1,46 @@
+name: Prepare NeuTTS original APT extensions
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [prepare/termux-compatibility-next-stable]
+    paths:
+      - '.github/workflows/neutts-apt-extensions.yml'
+      - 'scripts/compatibility_probe_neutts_apt_extensions.sh'
+      - 'scripts/compatibility_probe_neutts_apt_extensions.py'
+      - 'scripts/prepare_neutts_apt_extensions.py'
+      - 'scripts/neutts_apt_extensions_lock.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neutts-apt-extensions-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  native-apt-extensions:
+    name: Scientific foundation and five original APT extensions
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 45
+    steps:
+      - name: Checkout the reviewed source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact archives and run native extension operations
+        env:
+          NEUTTS_PROBE_HEAD_SHA: ${{ github.sha }}
+        run: bash scripts/compatibility_probe_neutts_apt_extensions.sh --out probe-results/neutts-apt-extensions
+
+      - name: Preserve separate foundation, provenance and native operation evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-neutts-apt-extensions
+          path: probe-results/neutts-apt-extensions/
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 14
