@@ -1399,3 +1399,95 @@ def test_openssl_member_identity_is_checked_even_with_matching_archive_hash(pinn
     pin["archive"] = {"size": path.stat().st_size, "sha256": staging.file_digest(path)}
     with pytest.raises(staging.StagingError):
         staging.verified_openssl_additions(path, pin)
+
+
+@pytest.fixture
+def pinned_opensles_namespace_deb(tmp_path):
+    rows = {
+        "opensles": ("runtime-libs/lib/libOpenSLES.so",
+                     "./data/data/com.termux/files/usr/lib/libOpenSLES.so"),
+        "platform_namespace": ("runtime-libs/lib/libtermux-platform-ns.so",
+                               "./data/data/com.termux/files/usr/lib/libtermux-platform-ns.so"),
+    }
+    members, pins = {}, {}
+    for key, (destination, member) in rows.items():
+        content = ("original namespace package fixture " + key + "\n").encode()
+        members[member] = content
+        pins[key] = {"file": destination, "member": member, "size": len(content), "sha256": digest(content)}
+    members["./data/data/com.termux/files/usr/lib/libandroid.so"] = b"unselected original wrapper\n"
+    path = tmp_path / "libandroid-stub.deb"
+    write_tiny_openssl_deb(path, members)
+    pin = {**pins["opensles"], "platform_namespace": pins["platform_namespace"],
+           "archive": {"size": path.stat().st_size, "sha256": staging.file_digest(path)},
+           "package": "libandroid-stub", "version": "30-2"}
+    return path, pin, members
+
+
+def test_opensles_additions_preserve_both_original_wrapper_and_namespace(pinned_opensles_namespace_deb):
+    path, pin, members = pinned_opensles_namespace_deb
+    additions = staging.verified_opensles_additions(path, pin)
+    rows = [pin, pin["platform_namespace"]]
+    assert additions == {row["file"]: members[row["member"]] for row in rows}
+    assert staging.file_digest(path) == pin["archive"]["sha256"]
+    assert not any(name.endswith("/libandroid.so") for name in additions)
+
+
+def test_opensles_namespace_requires_complete_original_archive_hash(pinned_opensles_namespace_deb):
+    path, pin, _ = pinned_opensles_namespace_deb
+    original = path.read_bytes()
+    path.write_bytes(original[:-1] + bytes([original[-1] ^ 1]))
+    with pytest.raises(staging.StagingError):
+        staging.verified_opensles_additions(path, pin)
+
+
+@pytest.mark.parametrize("selected", ["opensles", "platform_namespace"])
+def test_opensles_namespace_checks_each_original_member_with_matching_archive(pinned_opensles_namespace_deb, selected):
+    path, pin, members = pinned_opensles_namespace_deb
+    row = pin if selected == "opensles" else pin[selected]
+    raw = members[row["member"]]
+    members[row["member"]] = bytes([raw[0] ^ 1]) + raw[1:]
+    write_tiny_openssl_deb(path, members)
+    pin["archive"] = {"size": path.stat().st_size, "sha256": staging.file_digest(path)}
+    with pytest.raises(staging.StagingError):
+        staging.verified_opensles_additions(path, pin)
+
+
+def test_opensles_wrapper_alone_does_not_satisfy_namespace_closure(pinned_opensles_namespace_deb):
+    path, pin, members = pinned_opensles_namespace_deb
+    del members[pin["platform_namespace"]["member"]]
+    write_tiny_openssl_deb(path, members)
+    pin["archive"] = {"size": path.stat().st_size, "sha256": staging.file_digest(path)}
+    with pytest.raises(staging.StagingError):
+        staging.verified_opensles_additions(path, pin)
+
+
+@pytest.mark.parametrize("origin", ["private", "ambient"])
+def test_platform_namespace_mapping_preserves_the_ambient_library_guard(tmp_path, monkeypatch, origin):
+    root = tmp_path / "isolated destination with spaces"
+    relative = "runtime-libs/lib/libtermux-platform-ns.so"
+    private = root / relative
+    private.parent.mkdir(parents=True)
+    private.write_bytes(b"exact namespace fixture\n")
+    virtual_root = "/isolated destination with spaces"
+    spelling = (virtual_root + "/" + relative if origin == "private" else
+                "/data/data/com.termux/files/usr/lib/libtermux-platform-ns.so")
+    maps = tmp_path / "maps"
+    maps.write_text("1000-2000 r-xp 00000000 00:00 123 " + spelling + "\n")
+    actual_path = Path
+    def test_path(value):
+        if value == "/proc/self/maps":
+            return maps
+        if isinstance(value, str) and value.startswith(virtual_root + "/"):
+            return root / value[len(virtual_root) + 1:]
+        return actual_path(value)
+    monkeypatch.setattr(native, "Path", test_path)
+    lock = {"external_runtime_policy": {"allowed_system_roots": ["/system", "/apex"],
+                                        "container_bionic_roots": ["/lib", "/lib64"]}}
+    if origin == "ambient":
+        with pytest.raises(staging.StagingError, match="native library resolved from an undeclared ambient directory"):
+            native.mapped_libraries(root, lock)
+    else:
+        evidence = native.mapped_libraries(root, lock)
+        assert evidence == {"origins": [{"scope": "payload", "path": relative,
+                                         "sha256": digest(private.read_bytes())}],
+                            "ambient_termux_library_directory_used": False}

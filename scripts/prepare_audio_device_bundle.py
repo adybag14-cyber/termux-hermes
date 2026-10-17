@@ -279,6 +279,34 @@ def deb_data(path: Path) -> bytes:
     return result
 
 
+def verified_opensles_additions(archive_path: Path, pin: dict) -> dict[str, bytes]:
+    """Retain the original OpenSL ES wrapper and its linked namespace helper."""
+    verify_file(archive_path, pin["archive"], "official OpenSL ES archive")
+    require(isinstance(pin.get("platform_namespace"), dict), "OpenSL ES namespace pin missing")
+    rows = [pin, pin["platform_namespace"]]
+    expected = {row["member"]: row for row in rows}
+    require(len(expected) == 2 and len({row["file"] for row in rows}) == 2,
+            "duplicate OpenSL ES member or destination")
+    for row in rows:
+        safe_relative_path(row["member"].removeprefix("./"))
+        safe_relative_path(row["file"])
+    seen, additions = set(), {}
+    with tarfile.open(fileobj=io.BytesIO(deb_data(archive_path)), mode="r:*") as archive:
+        for member in archive:
+            if member.name not in expected:
+                continue
+            row = expected[member.name]
+            require(member.name not in seen and member.isfile(), "OpenSL ES member missing or ambiguous")
+            require(member.size == row["size"], "OpenSL ES member size differs")
+            data = archive.extractfile(member).read()
+            require((len(data), digest_bytes(data)) == (row["size"], row["sha256"]),
+                    "OpenSL ES member bytes differ")
+            seen.add(member.name)
+            additions[row["file"]] = data
+    require(seen == set(expected) and len(additions) == 2, "OpenSL ES frozen member set incomplete")
+    return additions
+
+
 def verified_openssl_additions(archive_path: Path, pin: dict) -> dict[str, bytes]:
     """Bind the missing provider/config to the candidate's exact OpenSSL libraries."""
     verify_file(archive_path, pin["archive"], "official OpenSSL archive")
@@ -474,13 +502,9 @@ def build_bundle(candidate_archive: Path, audio_archive: Path, opensles_deb: Pat
             require((len(data), digest_bytes(data)) == (lock["audio"]["portaudio"]["size"], lock["audio"]["portaudio"]["sha256"]),
                     "PortAudio native bytes differ")
             additions["runtime-libs/lib/" + name] = data
-    with tarfile.open(fileobj=io.BytesIO(deb_data(opensles_deb)), mode="r:*") as archive:
-        matches = [m for m in archive if m.name == lock["opensles"]["member"]]
-        require(len(matches) == 1 and matches[0].isfile(), "official OpenSL ES member missing or ambiguous")
-        data = archive.extractfile(matches[0]).read()
-        require((len(data), digest_bytes(data)) == (lock["opensles"]["size"], lock["opensles"]["sha256"]),
-                "official OpenSL ES bytes differ")
-        additions[lock["opensles"]["file"]] = data
+    for name, data in verified_opensles_additions(opensles_deb, lock["opensles"]).items():
+        require(name not in additions, "OpenSL ES addition collides with another frozen input")
+        additions[name] = data
     source_changes = {row["path"]: row for row in lock["source_changes"]}
     candidate_rows, entries, originals, baseline_wheels = None, {}, {}, {}
     with tempfile.TemporaryDirectory(prefix=".audio-bundle-", dir=out.parent) as temporary:

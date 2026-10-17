@@ -1,0 +1,125 @@
+{
+  "completed_utc": "2026-10-17T22:34:31.553225+00:00",
+  "device_readiness": false,
+  "driver": {
+    "sha256": "d9a9520b590701d60ad0d73e5898b596eece28115496badcff6ee8fde1d27e6a",
+    "size": 7187
+  },
+  "focused_regressions": {
+    "command": [
+      "C:\\Python314\\python.exe",
+      "-c",
+      "import sys;sys.path.insert(0,'C:\\\\Users\\\\adyba\\\\docker-chatgpt-devbox\\\\workspace\\\\audio-staging-input-audit-20261017\\\\requirement-parser-adaptation-20261017\\\\packaging-26.0-py3-none-any.whl');import packaging;assert packaging.__version__=='26.0';import pytest;raise SystemExit(pytest.main(['-q','tests/test_audio_device_staging.py']))"
+    ],
+    "exit_code": 0,
+    "packaging": {
+      "sha256": "b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529",
+      "size": 74366,
+      "version": "26.0"
+    },
+    "passed": 196,
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "a1c2fd9245bdee916d317c0c0137b0e702a8d5ab48eb7ee08b0044f0c20d8d4a",
+      "size": 264
+    },
+    "working_directory": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-resume-20261017"
+  },
+  "host": {
+    "platform": "win32",
+    "python": "3.14.2 (tags/v3.14.2:df79316, Dec  5 2025, 17:18:21) [MSC v.1944 64 bit (AMD64)]"
+  },
+  "native_execution_performed": false,
+  "network_or_install_operations": false,
+  "observed_native_failure": {
+    "diagnostic": {
+      "assembly_receipt_sha256": "ed14a002b37ec98c10a26b5fd2091a04efbb7a2e7916e1df44ce8191fcd7b58a",
+      "audio_resolver": {
+        "audio_imported_at_startup": false,
+        "library_sha256": "116ff3e80f1b29042cad96e3f923d25dfe5325420d4b5140653fa2226ba47073",
+        "name": "portaudio",
+        "native_loading_replaced": false,
+        "other_names_delegated": true,
+        "path": "venv/lib/python3.14/site-packages/sitecustomize.py",
+        "resolved": "/data/data/com.termux/files/usr/tmp/hermes-audio-validation-a/runtime-libs/lib/libportaudio.so.2",
+        "sha256": "9cdffa77fa93eb7e3b2697aea493e22d2f2227e3d7ebc2da5df2278e137eb9b6"
+      },
+      "bundle_manifest_sha256": "6b4a4abb24a48b09d3cf2b30471d2606ab6b5ee046aad85fb1147beed09f4619",
+      "device_readiness": false,
+      "device_stream_opened": false,
+      "error": {
+        "message": "native library resolved from an undeclared ambient directory: /data/data/com.termux/files/usr/lib/libtermux-platform-ns.so",
+        "type": "StagingError"
+      },
+      "expected_portaudio_failure": true,
+      "input_device_status": "initialization-unavailable",
+      "microphone_accessed": false,
+      "protocol_valid": false,
+      "readiness": false,
+      "recording_tested": false,
+      "root": "/data/data/com.termux/files/usr/tmp/hermes-audio-validation-a",
+      "schema_version": 1,
+      "status": "failed",
+      "vad_tested": false
+    },
+    "raw_diagnostic_line": {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\audio-staging-input-audit-20261017\\platform-namespace-routing-20261017\\observed-native-diagnostic.log",
+      "sha256": "0dd2e21fbc178facc2bb507fb86c155d438a920a97891f76c4b40a3d6b096133",
+      "size": 1255
+    },
+    "raw_job": {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\audio-native-verification-resume-20261017\\run-39074656769-raw\\job.log",
+      "sha256": "0a2e49ba573377e06bfbd4b3e4457d2a676393cf435bd52d0b12a8185c346f5c",
+      "size": 134483
+    },
+    "run_id": 39074656769
+  },
+  "original_input_binding": {
+    "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\audio-staging-input-audit-20261017\\platform-namespace-routing-20261017\\original-namespace-input-binding.json",
+    "sha256": "2d2b6f052715c56a961893ca06d8cbf8b604d5a9892667a78b53ad8a62f3225a",
+    "size": 2402
+  },
+  "passed": true,
+  "schema_version": 1,
+  "scope": "Focused host namespace-input regressions and exact original input verification",
+  "source_after": {
+    "scripts/audio_device_bundle_lock.json": {
+      "sha256": "d2ef118edb68335f49f43db563ab966b08dcfd217fabe44980956bd4eb9162a9",
+      "size": 21815
+    },
+    "scripts/prepare_audio_device_bundle.py": {
+      "sha256": "828e5d5e78ac9dd1bebe8b7eb446add51cfc1f2112a9c7fead8cee794494629c",
+      "size": 38774
+    },
+    "scripts/prepare_audio_device_environment.py": {
+      "sha256": "bd72d882ae712f84b636e6266f60a0037055dfb3ad656ed80ca7d1cb80255197",
+      "size": 63097
+    },
+    "tests/test_audio_device_staging.py": {
+      "sha256": "7c36a03efecdae97e42c620522e048ae0fa1143cda3aeb19d51b1ad572a01701",
+      "size": 72797
+    }
+  },
+  "source_before": {
+    "scripts/audio_device_bundle_lock.json": {
+      "sha256": "d2ef118edb68335f49f43db563ab966b08dcfd217fabe44980956bd4eb9162a9",
+      "size": 21815
+    },
+    "scripts/prepare_audio_device_bundle.py": {
+      "sha256": "828e5d5e78ac9dd1bebe8b7eb446add51cfc1f2112a9c7fead8cee794494629c",
+      "size": 38774
+    },
+    "scripts/prepare_audio_device_environment.py": {
+      "sha256": "bd72d882ae712f84b636e6266f60a0037055dfb3ad656ed80ca7d1cb80255197",
+      "size": 63097
+    },
+    "tests/test_audio_device_staging.py": {
+      "sha256": "7c36a03efecdae97e42c620522e048ae0fa1143cda3aeb19d51b1ad572a01701",
+      "size": 72797
+    }
+  },
+  "started_utc": "2026-10-17T22:34:29.181010+00:00"
+}
