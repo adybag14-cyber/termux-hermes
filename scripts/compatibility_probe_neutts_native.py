@@ -435,6 +435,10 @@ def build_packages(lock, inputs, out, work):
                      "--without-pip", str(venv)], out, "native-create-venv", 60)
     python = str(venv / "bin/python")
     env = dict(os.environ)
+    # These are native builds. CPython expects an OS/machine cross-build pair,
+    # whereas scikit-build-core treats that override as a finished platform tag.
+    # Let both backends derive the API24 Android tag from the exact interpreter.
+    env.pop("_PYTHON_HOST_PLATFORM", None)
     env.update({"PIP_NO_INDEX": "1", "PIP_CONFIG_FILE": os.devnull,
                 "PIP_DISABLE_PIP_VERSION_CHECK": "1", "PIP_NO_CACHE_DIR": "1",
                 "PYTHONDONTWRITEBYTECODE": "1", "PYTHONNOUSERSITE": "1"})
@@ -449,7 +453,6 @@ def build_packages(lock, inputs, out, work):
         "LDFLAGS": "--target=aarch64-linux-android24",
         "CMAKE_BUILD_PARALLEL_LEVEL": "2", "MAKEFLAGS": "-j2",
         "CMAKE_GENERATOR": "Ninja", "SOURCE_DATE_EPOCH": str(lock["build"]["source_date_epoch"]),
-        "_PYTHON_HOST_PLATFORM": "android-24-arm64_v8a",
         "CMAKE_ARGS": " ".join("-D" + k + "=" + v for k, v in lock["build"]["llama_cmake"].items()),
         "SKBUILD_BUILD_DIR": str(work / "llama-cmake"), "SKBUILD_CMAKE_BUILD_TYPE": "Release",
     })
@@ -497,7 +500,7 @@ def build_packages(lock, inputs, out, work):
                      "--find-links", str(out / "wheels"), "-r", str(out / "built-requirements.txt")],
                     out, "native-install-built-wheels", 90, env=env)
     save_json(out / "NEUTTS-NATIVE-BUILT-WHEELS.json", {"schema_version": 1, "wheels": builds})
-    # Platform stamping is scoped to construction, never a runtime tag override.
+    # Keep runtime cases free of cross-build platform overrides as well.
     env.pop("_PYTHON_HOST_PLATFORM", None)
     return venv, builds, env
 

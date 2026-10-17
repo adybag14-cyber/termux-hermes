@@ -67,7 +67,9 @@ curl -fL --retry 6 --retry-all-errors \
   https://github.com/adybag14-cyber/termux-hermes/releases/download/hermes-agent-termux-0.22.2-20261016.1/hermes-agent_0.22.2-1_aarch64.deb \
   -o "$baseline"
 printf '%s  %s\n' deb163351554ca03f7104f91a50f4f8dc4d9247ce0cf5f2cca2608be3b319add "$baseline" | sha256sum -c -
-chmod a+r "$baseline" "$candidate"
+# The candidate is already readable and belongs to the native UID1000 builder.
+# Preserve the verified input; the host runner may have a different UID.
+chmod a+r "$baseline"
 chmod 0777 "$out"
 docker run --rm --platform linux/arm64 --user 1000:1000 \
   -v "$baseline:/fixtures/baseline.deb:ro" -v "$candidate:/fixtures/candidate.deb:ro" \

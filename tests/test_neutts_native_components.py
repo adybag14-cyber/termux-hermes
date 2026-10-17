@@ -10,6 +10,8 @@ from pathlib import Path
 import stat
 import struct
 import subprocess
+import sysconfig
+from types import FunctionType, SimpleNamespace
 import zipfile
 
 import pytest
@@ -217,3 +219,52 @@ def test_compiler_timeout_stops_its_process_group_and_stays_failed(tmp_path, mon
     assert [pid for pid, _ in kills] == [54321, 54321]
     assert len(waits) == 3
     assert (tmp_path / "compiler-fixture.stderr.log").exists()
+
+
+@pytest.mark.parametrize("inherited_platform", [
+    None, "android-24-arm64_v8a", "android-aarch64", "linux-x86_64",
+])
+def test_native_build_uses_actual_android_platform(tmp_path, lock, monkeypatch, inherited_platform):
+    """Exercise CPython's real parser using the environment passed to pip.
+
+    This is a host-side build-command control, not a Bionic compilation. Clone
+    the stdlib function with only its OS/configuration inputs replaced so the
+    actual Android platform parser is exercised without mutating host globals.
+    """
+    if inherited_platform is None:
+        monkeypatch.delenv("_PYTHON_HOST_PLATFORM", raising=False)
+    else:
+        monkeypatch.setenv("_PYTHON_HOST_PLATFORM", inherited_platform)
+    inputs, out, work = (tmp_path / name for name in ("inputs", "out", "work"))
+    (inputs / "sources").mkdir(parents=True)
+    out.mkdir()
+    work.mkdir()
+    observed = []
+
+    class BuildReached(Exception):
+        pass
+
+    def command(argv, output, label, timeout, env=None, cwd=None):
+        if label not in ("native-build-python-inputs", "native-build-numba"):
+            return {}
+        namespace = dict(sysconfig.get_platform.__globals__)
+        namespace.update({
+            "os": SimpleNamespace(name="posix", environ=env,
+                                  uname=lambda: ("Linux", "owned-fixture", "6.1", "", "aarch64")),
+            "sys": SimpleNamespace(platform="android"),
+            "get_config_var": lambda name: 24 if name == "ANDROID_API_LEVEL" else None,
+        })
+        platform_name = FunctionType(sysconfig.get_platform.__code__, namespace)()
+        assert platform_name.replace("-", "_") == lock["target"]["wheel_platform"]
+        # scikit-build-core reads this variable directly instead of expanding
+        # CPython's OS/machine pair, so neither form is valid across both backends.
+        assert "_PYTHON_HOST_PLATFORM" not in env
+        observed.append(label)
+        if label == "native-build-numba":
+            raise BuildReached
+        return {}
+
+    monkeypatch.setattr(probe, "bounded_command", command)
+    with pytest.raises(BuildReached):
+        probe.build_packages(lock, inputs, out, work)
+    assert observed == ["native-build-python-inputs", "native-build-numba"]
