@@ -102,15 +102,27 @@ def python_dependencies_case():
                     rewritten.append({"member": item.filename, "reason": "installer regenerates RECORD"})
                     continue
                 parts = relative.parts
+                actual = None
                 if parts[0].endswith(".data"):
                     require(len(parts) >= 3, "invalid wheel data path")
                     if parts[1] == "scripts":
                         rewritten.append({"member": item.filename, "reason": "installer rewrites script shebang"})
                         continue
-                    require(parts[1] in ("purelib", "platlib"), "unreviewed wheel installation scheme")
                     relative = PurePosixPath(*parts[2:])
+                    if parts[1] == "data":
+                        import sysconfig
+                        data_root = Path(sysconfig.get_path("data"))
+                        require(data_root.resolve() == Path(os.environ["PREFIX"]).resolve(),
+                                "native wheel data destination differs from the APT prefix")
+                        actual = data_root.joinpath(*relative.parts)
+                    else:
+                        require(parts[1] in ("purelib", "platlib"),
+                                "unreviewed wheel installation scheme: " + item.filename)
                 expected = hashlib.sha256(archive.read(item)).hexdigest()
-                actual = Path(dist.locate_file(str(relative)))
+                if actual is None:
+                    actual = Path(dist.locate_file(str(relative)))
+                require(actual.resolve().is_relative_to(Path(os.environ["PREFIX"]).resolve()),
+                        "installed wheel file escapes the APT prefix: " + item.filename)
                 require(actual.is_file() and not actual.is_symlink() and sha(actual) == expected,
                         "installed wheel file differs: " + item.filename)
                 verified_files.append({"member": item.filename, "installed_file": str(actual), "sha256": expected})
@@ -362,6 +374,40 @@ def apt_python_metadata(out):
                 if not row["supported_tag_overlap"]]}
 
 
+
+def apt_python_validation(out, pip_code, validation_code, metadata_sha):
+    """Require this invocation's provenance result and retain pip's raw failure."""
+    path = out / "NEUTTS-APT-PYTHON-VALIDATION.json"
+    require(path.is_file() and not path.is_symlink() and path.stat().st_size <= 2_000_000,
+            "missing or invalid APT Python validation receipt")
+    result = json.loads(path.read_text(encoding="utf-8"))
+    require(isinstance(result, dict) and result.get("schema_version") == 1,
+            "APT Python validation receipt schema differs")
+    require(validation_code == 0 and result.get("status") == "requirements-and-provenance-passed",
+            "APT Python requirements or provenance validation failed")
+    require(result.get("overall_compatibility_passed") is False
+            and result.get("native_behavior", {}).get("status") == "required-pending",
+            "provenance receipt cannot substitute for native behavior")
+    require(result.get("metadata_modified") is False and result.get("supported_tags_modified") is False,
+            "APT metadata or native supported tags were modified")
+    require(result.get("engine_synthesis_tested") is False and result.get("pm_admission_changed") is False,
+            "unexpected engine or PM scope in APT validation")
+    require(result.get("metadata_ledger", {}).get("sha256") == metadata_sha,
+            "APT Python metadata ledger identity differs")
+    for key in ("apt_provenance", "apt_dependencies", "requirements"):
+        require(result.get(key, {}).get("status") == "passed",
+                "missing successful APT Python gate: " + key)
+    raw = result.get("raw_pip_check", {})
+    require(raw.get("exit_code") == pip_code
+            and raw.get("sha256") == sha(out / "NEUTTS-PYTHON-CHECK.log")
+            and raw.get("passed") is (pip_code == 0),
+            "APT validation does not describe this invocation's raw pip check")
+    return {"status": result["status"], "exit_code": validation_code,
+            "receipt": path.name, "sha256": sha(path),
+            "metadata_ledger_sha256": metadata_sha,
+            "raw_pip_check_preserved": True}
+
+
 def main(out):
     require(sys.platform == "android" and os.uname().machine == "aarch64" and os.getuid() == 1000,
             "native Bionic UID1000 interpreter required")
@@ -386,8 +432,19 @@ def main(out):
     except Exception as exc:
         packaging_metadata = {"error": {"type": type(exc).__name__, "message": str(exc)}}
         traceback.print_exc()
+    validation_code = int(os.environ["NEUTTS_APT_VALIDATION_EXIT_CODE"])
+    require(0 <= validation_code <= 255, "invalid APT validation status")
+    try:
+        provenance_validation = apt_python_validation(
+            out, pip_check_code, validation_code, os.environ["NEUTTS_APT_METADATA_SHA256"]
+        )
+    except Exception as exc:
+        provenance_validation = {"status": "failed", "exit_code": validation_code,
+                                 "error": {"type": type(exc).__name__, "message": str(exc)}}
+        traceback.print_exc()
     receipt = {
         "schema_version": 1, "status": "running", "scope": "APT native scientific ABI/behavior with verified Python dependencies",
+        "apt_python_validation": provenance_validation,
         "pip_check": {"exit_code": pip_check_code, "log": pip_check_log.name,
                       "log_sha256": sha(pip_check_log)},
         "apt_python_metadata": packaging_metadata,
@@ -404,11 +461,12 @@ def main(out):
     for name in CASES:
         receipt["cases"].append(execute_case(name, out))
         result_path.write_text(json.dumps(receipt, indent=2) + "\n")
-    receipt["status"] = "passed" if (pip_check_code == 0 and "error" not in packaging_metadata and all(
+    receipt["status"] = "passed" if ("error" not in provenance_validation and "error" not in packaging_metadata and all(
         row["exit_code"] == 0 and row["status"] == "passed" for row in receipt["cases"])) else "failed"
     result_path.write_text(json.dumps(receipt, indent=2) + "\n")
     print(json.dumps({"status": receipt["status"], "pip_check": receipt["pip_check"],
-                      "apt_python_metadata": packaging_metadata, "cases": receipt["cases"]}), flush=True)
+                      "apt_python_metadata": packaging_metadata,
+                      "apt_python_validation": provenance_validation, "cases": receipt["cases"]}), flush=True)
     return 0 if receipt["status"] == "passed" else 1
 
 

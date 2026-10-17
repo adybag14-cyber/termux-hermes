@@ -24,6 +24,7 @@ if json.loads((root / "manifest/release.json").read_text())["termux_image"] != s
     raise SystemExit("review the native image pin before changing this experiment")
 names = ("scripts/compatibility_probe_neutts.sh", "scripts/compatibility_probe_neutts.py",
          "scripts/prepare_neutts_core_python.py", "scripts/neutts_core_python_lock.json",
+         "scripts/validate_neutts_apt_python.py", "scripts/neutts_apt_python_metadata.json",
          ".github/workflows/neutts-termux-probe.yml")
 engine_url = "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/pyproject.toml"
 engine_hash = "3d74df60f0db27733b308c93b88ae95f9deaa8f396f48183b0cf4f14eb3deb94"
@@ -291,11 +292,24 @@ stage=pinned-python-install
   --find-links "$NEUTTS_PYTHON_WHEELHOUSE" \
   -r "$NEUTTS_PYTHON_WHEELHOUSE/requirements.txt" \
   > "$out/NEUTTS-PYTHON-INSTALL.log" 2>&1
-# Keep the dependency failure authoritative, but still collect independent native
-# behavior and the exact APT-owned wheel tags which pip rejected.
+# Preserve pip check verbatim. Only the exact APT archive convention may pass
+# the separate requirements/provenance validator; native behavior is also required.
 neutts_pip_check_status=0
 "$PREFIX/bin/python" -I -m pip check > "$out/NEUTTS-PYTHON-CHECK.log" 2>&1 || neutts_pip_check_status=$?
 export NEUTTS_PIP_CHECK_EXIT_CODE="$neutts_pip_check_status"
+
+stage=apt-python-provenance
+read -r neutts_metadata_sha neutts_metadata_file < <(sha256sum /probes/scripts/neutts_apt_python_metadata.json)
+export NEUTTS_APT_METADATA_SHA256="$neutts_metadata_sha"
+neutts_validation_status=0
+"$PREFIX/bin/python" -I -B /probes/scripts/validate_neutts_apt_python.py \
+  --archives "$work/archives" \
+  --metadata /probes/scripts/neutts_apt_python_metadata.json \
+  --pip-check-log "$out/NEUTTS-PYTHON-CHECK.log" \
+  --pip-check-exit-code "$neutts_pip_check_status" \
+  --out "$out/NEUTTS-APT-PYTHON-VALIDATION.json" \
+  > "$out/NEUTTS-APT-PYTHON-VALIDATION.log" 2>&1 || neutts_validation_status=$?
+export NEUTTS_APT_VALIDATION_EXIT_CODE="$neutts_validation_status"
 
 cp "$(dirname "$0")/compatibility_probe_neutts.py" "$work/native_core.py"
 

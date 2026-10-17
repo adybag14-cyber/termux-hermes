@@ -155,3 +155,75 @@ def test_exact_engine_source_provenance_block_compiles():
     script = (Path(__file__).resolve().parents[1] / "scripts/compatibility_probe_neutts.sh").read_text(encoding="utf-8")
     block = script.split("<<'PY'\n", 1)[1].split("\nPY\n", 1)[0]
     compile(block, "neutts-host-provenance", "exec")
+
+
+def validation_receipt(out):
+    (out / "NEUTTS-PYTHON-CHECK.log").write_bytes(b"exact platform-tag diagnostics\n")
+    return {
+        "schema_version": 1, "status": "requirements-and-provenance-passed",
+        "overall_compatibility_passed": False,
+        "native_behavior": {"status": "required-pending"},
+        "metadata_modified": False, "supported_tags_modified": False,
+        "engine_synthesis_tested": False, "pm_admission_changed": False,
+        "metadata_ledger": {"sha256": "a" * 64},
+        "apt_provenance": {"status": "passed"},
+        "apt_dependencies": {"status": "passed"},
+        "requirements": {"status": "passed"},
+        "raw_pip_check": {
+            "exit_code": 1, "passed": False,
+            "sha256": probe.sha(out / "NEUTTS-PYTHON-CHECK.log"),
+        },
+    }
+
+
+def save_validation(out, result):
+    (out / "NEUTTS-APT-PYTHON-VALIDATION.json").write_text(
+        json.dumps(result), encoding="utf-8"
+    )
+
+
+def test_provenance_admission_keeps_raw_pip_failure_and_requires_native_behavior(tmp_path):
+    result = validation_receipt(tmp_path)
+    save_validation(tmp_path, result)
+    admitted = probe.apt_python_validation(tmp_path, 1, 0, "a" * 64)
+    assert admitted["status"] == "requirements-and-provenance-passed"
+    assert admitted["raw_pip_check_preserved"] is True
+    assert result["raw_pip_check"]["passed"] is False
+    assert result["overall_compatibility_passed"] is False
+    assert admitted["sha256"] == probe.sha(tmp_path / "NEUTTS-APT-PYTHON-VALIDATION.json")
+
+
+@pytest.mark.parametrize("change", [
+    {"schema_version": 2},
+    {"status": "failed"},
+    {"overall_compatibility_passed": True},
+    {"native_behavior": {"status": "passed"}},
+    {"metadata_modified": True},
+    {"supported_tags_modified": True},
+    {"engine_synthesis_tested": True},
+    {"pm_admission_changed": True},
+    {"metadata_ledger": {"sha256": "b" * 64}},
+    {"apt_provenance": {"status": "failed"}},
+    {"apt_dependencies": {"status": "failed"}},
+    {"requirements": {"status": "failed"}},
+    {"raw_pip_check": {"exit_code": 0, "passed": True, "sha256": "c" * 64}},
+])
+def test_incomplete_or_mismatched_provenance_cannot_admit_native_dependencies(tmp_path, change):
+    result = validation_receipt(tmp_path)
+    result.update(change)
+    save_validation(tmp_path, result)
+    with pytest.raises(RuntimeError):
+        probe.apt_python_validation(tmp_path, 1, 0, "a" * 64)
+
+
+def test_failed_validator_exit_cannot_pass_with_a_success_receipt(tmp_path):
+    save_validation(tmp_path, validation_receipt(tmp_path))
+    with pytest.raises(RuntimeError, match="validation failed"):
+        probe.apt_python_validation(tmp_path, 1, 1, "a" * 64)
+
+
+def test_replaced_pip_log_cannot_reuse_a_previous_validation_receipt(tmp_path):
+    save_validation(tmp_path, validation_receipt(tmp_path))
+    (tmp_path / "NEUTTS-PYTHON-CHECK.log").write_bytes(b"different requirements failure\n")
+    with pytest.raises(RuntimeError, match="this invocation"):
+        probe.apt_python_validation(tmp_path, 1, 0, "a" * 64)

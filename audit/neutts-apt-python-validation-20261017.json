@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "scope": "Unpublished strict APT Python requirement/provenance validator. This host validation does not certify native behavior, NeuTTS synthesis, Hermes PM admission, or a release.",
+  "cli": {
+    "program": "$PREFIX/bin/python",
+    "arguments": [
+      "-I",
+      "-B",
+      "/source/scripts/validate_neutts_apt_python.py",
+      "--archives",
+      "$work/archives",
+      "--metadata",
+      "/source/scripts/neutts_apt_python_metadata.json",
+      "--pip-check-log",
+      "$out/NEUTTS-PYTHON-CHECK.log",
+      "--pip-check-exit-code",
+      "$neutts_pip_check_status",
+      "--out",
+      "$out/NEUTTS-APT-PYTHON-VALIDATION.json"
+    ],
+    "exit_zero_meaning": "Only requirements and exact APT provenance passed; original pip check remains a recorded failure and all independent collector gates remain mandatory.",
+    "success_status": "requirements-and-provenance-passed",
+    "failure_status": "failed",
+    "overall_compatibility_passed": false,
+    "native_behavior_status": "required-pending"
+  },
+  "source_authority": {
+    "apt_repository": "https://packages.termux.dev/apt/termux-main/",
+    "termux_recipe_commit": "ae877f2c6a2b2318abeb43699d6ec5f619c216a6",
+    "metadata_derivation": "Read original official APT archives; verified complete archive size/SHA and control fields before reading selected metadata/source members. Raw WHEEL bytes and METADATA identities are unchanged.",
+    "apt_legacy_platform": "android_aarch64",
+    "native_platform": "android_arm64_v8a",
+    "native_api_platform": "android_24_arm64_v8a",
+    "runtime_python": "3.14.6",
+    "pinned_pip": "26.2.1",
+    "pinned_vendored_packaging": "26.2"
+  },
+  "host_tests": {
+    "program": "python",
+    "arguments": [
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_neutts_apt_python.py"
+    ],
+    "working_directory": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017",
+    "exit_code": 0,
+    "per_file": [
+      {
+        "file": "tests/test_neutts_apt_python.py",
+        "passed": 36,
+        "failed": 0,
+        "skipped": 0
+      }
+    ],
+    "stdout_captured_text": "....................................                                     [100%]\r\n36 passed in 0.40s\r\n",
+    "stderr_captured_text": "",
+    "capture_note": "Exact text returned by Devbox; no original process-byte digest is asserted.",
+    "summary": "36 passed in 0.40s",
+    "aggregation_note": "Final suite only; earlier overlapping 30- and 31-case development runs are not added.",
+    "behavior_coverage": [
+      "Frozen metadata cannot expand the seven-package exception.",
+      "Original ar/tar data is checked without extraction; corruption, wrong control, missing, duplicate, symlink, and traversal members fail.",
+      "Actual file bytes and unique dpkg ownership are required; INSTALLER=pip grants no exception.",
+      "Duplicate distribution metadata, Requires-Python incompatibility, malformed requirements, and unreviewed active extras fail.",
+      "Real pip26.2.1 dependency APIs detect a missing dependency, a conflicting version, and unreadable metadata; the complete closure passes.",
+      "Direct metadata edges must equal the edges selected by pip; no ignore callback is used.",
+      "Only the seven exact legacy tags can be recorded; unknown distributions, version drift, missing rows, and CPython ABI mismatch fail.",
+      "Raw pip failure remains nonzero and unmodified; extra diagnostics are not discarded.",
+      "APT simulated dependency-check failure, timeout, and launch failure are retained and reject admission.",
+      "The actual Windows host is refused before native validation; stale JSON output is not overwritten."
+    ],
+    "lint": "No lint pass claimed: direct Ruff executable was not admitted by the Devbox program allowlist."
+  },
+  "original_archive_reader_check": {
+    "program": "python",
+    "arguments": [
+      "-c",
+      "import sys,json,tempfile,urllib.request,hashlib,platform\nfrom pathlib import Path\nfrom concurrent.futures import ThreadPoolExecutor\nfrom scripts import validate_neutts_apt_python as v\nfrom pip._internal.operations import check\nsys.stdout.reconfigure(encoding=\"utf-8\")\nmanifest=v.load_manifest(Path(\"scripts/neutts_apt_python_metadata.json\"))\npins=manifest[\"runtime\"][\"archives\"]+[r[\"apt\"] for r in manifest[\"apt_distributions\"]]\ndef verify(pin,directory):\n    url=\"https://packages.termux.dev/apt/termux-main/\"+pin[\"repository_path\"]\n    with urllib.request.urlopen(url,timeout=20) as stream: raw=stream.read(pin[\"bytes\"]+1)\n    path=directory/pin[\"filename\"];path.write_bytes(raw)\n    wanted={f[\"path\"] for f in manifest[\"runtime\"][\"files\"] if f[\"package\"]==pin[\"package\"]}\n    for row in manifest[\"apt_distributions\"]:\n        if row[\"apt\"][\"package\"]==pin[\"package\"]:\n            wanted.update((row[\"metadata\"][\"path\"],row[\"wheel\"][\"path\"]))\n    data=v.inspect_archive(path,pin,wanted,include_pip=pin[\"package\"]==\"python-pip\")\n    frozen=manifest[\"runtime\"][\"files\"]+[f for row in manifest[\"apt_distributions\"] for f in (row[\"metadata\"],row[\"wheel\"])]\n    for item in frozen:\n        if item[\"path\"] in data:\n            assert hashlib.sha256(data[item[\"path\"]]).hexdigest()==item[\"sha256\"]\n            assert \"bytes\" not in item or len(data[item[\"path\"]])==item[\"bytes\"]\n    return {\"package\":pin[\"package\"],\"version\":pin[\"version\"],\"archive_bytes\":len(raw),\"archive_sha256\":hashlib.sha256(raw).hexdigest(),\"verified_selected_members\":len(data),\"verified_frozen_members\":len(wanted)}\nwith tempfile.TemporaryDirectory(prefix=\"hermes-neutts-apt-readonly-\") as tmp:\n    with ThreadPoolExecutor(max_workers=3) as pool:\n        rows=list(pool.map(lambda pin:verify(pin,Path(tmp)),pins))\nprint(json.dumps({\"purpose\":\"Host read-only verification of original pinned APT archive contents; no native/install claim\",\"archives\":rows,\"host_python\":sys.executable,\"host_version\":platform.python_version(),\"host_platform\":sys.platform,\"host_pip_check_source\":str(Path(check.__file__).resolve()),\"host_pip_check_sha256\":hashlib.sha256(Path(check.__file__).read_bytes()).hexdigest()},ensure_ascii=False))\n"
+    ],
+    "exit_code": 0,
+    "stdout_captured_text": "{\"purpose\": \"Host read-only verification of original pinned APT archive contents; no native/install claim\", \"archives\": [{\"package\": \"python\", \"version\": \"3.14.6-1\", \"archive_bytes\": 4816756, \"archive_sha256\": \"3166e56c2b6c03fff41191fbb9d736302978e7c484702814d9f6dc99dd6006bd\", \"verified_selected_members\": 4, \"verified_frozen_members\": 4}, {\"package\": \"python-pip\", \"version\": \"26.2.1\", \"archive_bytes\": 1190440, \"archive_sha256\": \"92a9cb4b3c99dd20086f90fedc95c604eefc5bd0f88d1862690884474f82de44\", \"verified_selected_members\": 456, \"verified_frozen_members\": 7}, {\"package\": \"python-llvmlite\", \"version\": \"0.49.0-3\", \"archive_bytes\": 22032852, \"archive_sha256\": \"ebee367165f9f5036a47d44b45704dff28956fba4149abd35c04c59d1c929771\", \"verified_selected_members\": 2, \"verified_frozen_members\": 2}, {\"package\": \"python-numpy\", \"version\": \"2.5.4\", \"archive_bytes\": 3620880, \"archive_sha256\": \"a99ae20cd33c77553cc94d402aefc4bed96b7ec9f18e9fb6e2e5a7943693c802\", \"verified_selected_members\": 2, \"verified_frozen_members\": 2}, {\"package\": \"python-scipy\", \"version\": \"1.18.1-1\", \"archive_bytes\": 12589288, \"archive_sha256\": \"27900dbbc1db0d6fb63d2a2039d12b5af84cddf81d0d2cb27716dff6782cc710\", \"verified_selected_members\": 2, \"verified_frozen_members\": 2}, {\"package\": \"python-soxr\", \"version\": \"1.1.0-2\", \"archive_bytes\": 81320, \"archive_sha256\": \"323d99f19e5854c8312432e5778ce43dcdfd0b5f7db392632a7650833ae95409\", \"verified_selected_members\": 2, \"verified_frozen_members\": 2}, {\"package\": \"python-torch\", \"version\": \"2.14.1-2\", \"archive_bytes\": 36675500, \"archive_sha256\": \"cb5d96877f30bca10a0a19bcd32934a4f477ec7e5bfd00c2a82ac5c9e7d0eb73\", \"verified_selected_members\": 2, \"verified_frozen_members\": 2}, {\"package\": \"python-torchaudio\", \"version\": \"2.11.0-4\", \"archive_bytes\": 216044, \"archive_sha256\": \"54b02d1e68f142af1330da6fb318173082066473e4a7c8f570165ffa23b48723\", \"verified_selected_members\": 2, \"verified_frozen_members\": 2}, {\"package\": \"python-torchcodec\", \"version\": \"0.17.0-1\", \"archive_bytes\": 571432, \"archive_sha256\": \"743240ce85592ed31f05e95e139490c5a94c3bc8fe3c519b32d52e1585a5117f\", \"verified_selected_members\": 2, \"verified_frozen_members\": 2}], \"host_python\": \"C:\\\\Python314\\\\python.exe\", \"host_version\": \"3.14.2\", \"host_platform\": \"win32\", \"host_pip_check_source\": \"C:\\\\Users\\\\adyba\\\\AppData\\\\Roaming\\\\Python\\\\Python314\\\\site-packages\\\\pip\\\\_internal\\\\operations\\\\check.py\", \"host_pip_check_sha256\": \"93b9938cb6f9c996e2758c3c36df6fbbbfeed4bd5e90b3b350409e378a9c36c0\"}\r\n",
+    "stderr_captured_text": "",
+    "result": {
+      "purpose": "Host read-only verification of original pinned APT archive contents; no native/install claim",
+      "archives": [
+        {
+          "package": "python",
+          "version": "3.14.6-1",
+          "archive_bytes": 4816756,
+          "archive_sha256": "3166e56c2b6c03fff41191fbb9d736302978e7c484702814d9f6dc99dd6006bd",
+          "verified_selected_members": 4,
+          "verified_frozen_members": 4
+        },
+        {
+          "package": "python-pip",
+          "version": "26.2.1",
+          "archive_bytes": 1190440,
+          "archive_sha256": "92a9cb4b3c99dd20086f90fedc95c604eefc5bd0f88d1862690884474f82de44",
+          "verified_selected_members": 456,
+          "verified_frozen_members": 7
+        },
+        {
+          "package": "python-llvmlite",
+          "version": "0.49.0-3",
+          "archive_bytes": 22032852,
+          "archive_sha256": "ebee367165f9f5036a47d44b45704dff28956fba4149abd35c04c59d1c929771",
+          "verified_selected_members": 2,
+          "verified_frozen_members": 2
+        },
+        {
+          "package": "python-numpy",
+          "version": "2.5.4",
+          "archive_bytes": 3620880,
+          "archive_sha256": "a99ae20cd33c77553cc94d402aefc4bed96b7ec9f18e9fb6e2e5a7943693c802",
+          "verified_selected_members": 2,
+          "verified_frozen_members": 2
+        },
+        {
+          "package": "python-scipy",
+          "version": "1.18.1-1",
+          "archive_bytes": 12589288,
+          "archive_sha256": "27900dbbc1db0d6fb63d2a2039d12b5af84cddf81d0d2cb27716dff6782cc710",
+          "verified_selected_members": 2,
+          "verified_frozen_members": 2
+        },
+        {
+          "package": "python-soxr",
+          "version": "1.1.0-2",
+          "archive_bytes": 81320,
+          "archive_sha256": "323d99f19e5854c8312432e5778ce43dcdfd0b5f7db392632a7650833ae95409",
+          "verified_selected_members": 2,
+          "verified_frozen_members": 2
+        },
+        {
+          "package": "python-torch",
+          "version": "2.14.1-2",
+          "archive_bytes": 36675500,
+          "archive_sha256": "cb5d96877f30bca10a0a19bcd32934a4f477ec7e5bfd00c2a82ac5c9e7d0eb73",
+          "verified_selected_members": 2,
+          "verified_frozen_members": 2
+        },
+        {
+          "package": "python-torchaudio",
+          "version": "2.11.0-4",
+          "archive_bytes": 216044,
+          "archive_sha256": "54b02d1e68f142af1330da6fb318173082066473e4a7c8f570165ffa23b48723",
+          "verified_selected_members": 2,
+          "verified_frozen_members": 2
+        },
+        {
+          "package": "python-torchcodec",
+          "version": "0.17.0-1",
+          "archive_bytes": 571432,
+          "archive_sha256": "743240ce85592ed31f05e95e139490c5a94c3bc8fe3c519b32d52e1585a5117f",
+          "verified_selected_members": 2,
+          "verified_frozen_members": 2
+        }
+      ],
+      "host_python": "C:\\Python314\\python.exe",
+      "host_version": "3.14.2",
+      "host_platform": "win32",
+      "host_pip_check_source": "C:\\Users\\adyba\\AppData\\Roaming\\Python\\Python314\\site-packages\\pip\\_internal\\operations\\check.py",
+      "host_pip_check_sha256": "93b9938cb6f9c996e2758c3c36df6fbbbfeed4bd5e90b3b350409e378a9c36c0"
+    },
+    "scope": "Host-only archive parsing and hash/control validation using the final production reader; temporary downloaded copies removed, no packages installed or native code executed."
+  },
+  "boundaries": {
+    "files_rewritten_in_apt": false,
+    "supported_tags_modified": false,
+    "native_run_started": false,
+    "native_apt_check_executed_by_host_validation": false,
+    "python_dependencies_installed": false,
+    "engine_installed": false,
+    "microphone_access": false,
+    "pm_admission_changed": false,
+    "release_created": false
+  },
+  "review": {
+    "peer": "/root/bootstrap_fix_review",
+    "scope": "Read-only review of source/provenance, dependency APIs, exact APT tag convention and separate mandatory native gates.",
+    "result": "No concrete blocker found before final APT graph check and archive namespace regression were added; root reviews the final frozen files."
+  },
+  "files": [
+    {
+      "file": "scripts/validate_neutts_apt_python.py",
+      "bytes": 25625,
+      "sha256": "7c051b0143675594aadd52f9a0b66ec71e6950e9953feef3f773acceafcb0a29"
+    },
+    {
+      "file": "scripts/neutts_apt_python_metadata.json",
+      "bytes": 18069,
+      "sha256": "2031c8a6915915ffffb980b268ad5107d42a186682cb2ca7009d803fe2abe200"
+    },
+    {
+      "file": "tests/test_neutts_apt_python.py",
+      "bytes": 20703,
+      "sha256": "c63d60247ff4d6184f25e96019861e57ed49588c47a417ff6dde08ec2bc18bdb"
+    }
+  ],
+  "recorded_utc": "2026-10-17T18:29:51.434417+00:00",
+  "syntax": "Final Python ASTs and JSON parsed successfully."
+}
