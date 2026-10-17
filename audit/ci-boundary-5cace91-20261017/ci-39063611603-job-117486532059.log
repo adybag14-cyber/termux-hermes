@@ -1,0 +1,254 @@
+﻿2026-10-17T19:42:29.4805460Z Current runner version: '2.337.0'
+2026-10-17T19:42:29.4829094Z ##[group]Runner Image Provisioner
+2026-10-17T19:42:29.4830404Z Hosted Compute Agent
+2026-10-17T19:42:29.4831130Z Version: 20261012.601
+2026-10-17T19:42:29.4831842Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-17T19:42:29.4832614Z Build Date: 2026-10-12T17:48:21Z
+2026-10-17T19:42:29.4833386Z Worker ID: {d28ebd48-dd14-4163-85cf-d55f78063aba}
+2026-10-17T19:42:29.4834131Z Region: westus2
+2026-10-17T19:42:29.4834668Z Cloud: Azure
+2026-10-17T19:42:29.4835263Z ##[endgroup]
+2026-10-17T19:42:29.4836887Z ##[group]Operating System
+2026-10-17T19:42:29.4837590Z Ubuntu
+2026-10-17T19:42:29.4838176Z 24.04.5
+2026-10-17T19:42:29.4838697Z LTS
+2026-10-17T19:42:29.4839551Z ##[endgroup]
+2026-10-17T19:42:29.4840211Z ##[group]Runner Image
+2026-10-17T19:42:29.4840917Z Image: ubuntu-24.04
+2026-10-17T19:42:29.4841537Z Version: 20261012.334.1
+2026-10-17T19:42:29.4842816Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-17T19:42:29.4844378Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-17T19:42:29.4845400Z ##[endgroup]
+2026-10-17T19:42:29.4846484Z ##[group]GITHUB_TOKEN Permissions
+2026-10-17T19:42:29.4848982Z Contents: read
+2026-10-17T19:42:29.4850046Z Metadata: read
+2026-10-17T19:42:29.4850613Z ##[endgroup]
+2026-10-17T19:42:29.4852743Z Secret source: Actions
+2026-10-17T19:42:29.4853727Z Cache mode: write
+2026-10-17T19:42:29.4854493Z Prepare workflow directory
+2026-10-17T19:42:29.5213035Z Prepare all required actions
+2026-10-17T19:42:29.5283455Z Getting action download info
+2026-10-17T19:42:29.8955383Z Download action repository 'actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd' (SHA:de0fac2e4500dabe0009e67214ff5f5447ce83dd)
+2026-10-17T19:42:30.0195495Z Download action repository 'actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405' (SHA:a309ff8b426b58ec0e2a45f0f869d46889d02405)
+2026-10-17T19:42:30.2190763Z Complete job name: tests
+2026-10-17T19:42:30.2946727Z ##[group]Run actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+2026-10-17T19:42:30.2947807Z with:
+2026-10-17T19:42:30.2948284Z   repository: adybag14-cyber/termux-hermes
+2026-10-17T19:42:30.2952229Z   token: ***
+2026-10-17T19:42:30.2952676Z   ssh-strict: true
+2026-10-17T19:42:30.2953123Z   ssh-user: git
+2026-10-17T19:42:30.2953577Z   persist-credentials: true
+2026-10-17T19:42:30.2954067Z   clean: true
+2026-10-17T19:42:30.2954527Z   sparse-checkout-cone-mode: true
+2026-10-17T19:42:30.2955045Z   fetch-depth: 1
+2026-10-17T19:42:30.2955477Z   fetch-tags: false
+2026-10-17T19:42:30.2955924Z   show-progress: true
+2026-10-17T19:42:30.2956373Z   lfs: false
+2026-10-17T19:42:30.2956796Z   submodules: false
+2026-10-17T19:42:30.2957247Z   set-safe-directory: true
+2026-10-17T19:42:30.2957992Z ##[endgroup]
+2026-10-17T19:42:30.3934543Z Syncing repository: adybag14-cyber/termux-hermes
+2026-10-17T19:42:30.3936380Z ##[group]Getting Git version info
+2026-10-17T19:42:30.3937926Z Working directory is '/home/runner/work/termux-hermes/termux-hermes'
+2026-10-17T19:42:30.3939950Z [command]/usr/bin/git version
+2026-10-17T19:42:30.4049565Z git version 2.55.0
+2026-10-17T19:42:30.4074889Z ##[endgroup]
+2026-10-17T19:42:30.4091571Z Temporarily overriding HOME='/home/runner/work/_temp/dd7501f0-95b9-474f-be2b-638c702739c8' before making global git config changes
+2026-10-17T19:42:30.4093845Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-17T19:42:30.4097590Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/termux-hermes/termux-hermes
+2026-10-17T19:42:30.4149546Z Deleting the contents of '/home/runner/work/termux-hermes/termux-hermes'
+2026-10-17T19:42:30.4153467Z ##[group]Initializing the repository
+2026-10-17T19:42:30.4158162Z [command]/usr/bin/git init /home/runner/work/termux-hermes/termux-hermes
+2026-10-17T19:42:30.4296478Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-17T19:42:30.4298696Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-17T19:42:30.4300517Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-17T19:42:30.4301768Z hint: call:
+2026-10-17T19:42:30.4302401Z hint:
+2026-10-17T19:42:30.4303256Z hint: 	git config --global init.defaultBranch <name>
+2026-10-17T19:42:30.4304371Z hint:
+2026-10-17T19:42:30.4305351Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-17T19:42:30.4306855Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-17T19:42:30.4308089Z hint:
+2026-10-17T19:42:30.4308823Z hint: 	git branch -m <name>
+2026-10-17T19:42:30.4309965Z hint:
+2026-10-17T19:42:30.4310996Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-17T19:42:30.4313160Z Initialized empty Git repository in /home/runner/work/termux-hermes/termux-hermes/.git/
+2026-10-17T19:42:30.4319012Z [command]/usr/bin/git remote add origin https://github.com/adybag14-cyber/termux-hermes
+2026-10-17T19:42:30.4374611Z ##[endgroup]
+2026-10-17T19:42:30.4375912Z ##[group]Disabling automatic garbage collection
+2026-10-17T19:42:30.4377955Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-17T19:42:30.4428752Z ##[endgroup]
+2026-10-17T19:42:30.4430667Z ##[group]Setting up auth
+2026-10-17T19:42:30.4431582Z Removing SSH command configuration
+2026-10-17T19:42:30.4433179Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-17T19:42:30.4455960Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-17T19:42:30.4875608Z Removing HTTP extra header
+2026-10-17T19:42:30.4882979Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-17T19:42:30.4921586Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-17T19:42:30.5138041Z Removing includeIf entries pointing to credentials config files
+2026-10-17T19:42:30.5144176Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-17T19:42:30.5180046Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-17T19:42:30.5413301Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-da44fc5d-c4bc-4fdb-8061-3f7206277685.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-17T19:42:30.5461879Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git.path /home/runner/work/_temp/git-credentials-da44fc5d-c4bc-4fdb-8061-3f7206277685.config
+2026-10-17T19:42:30.5504403Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-da44fc5d-c4bc-4fdb-8061-3f7206277685.config
+2026-10-17T19:42:30.5548825Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-da44fc5d-c4bc-4fdb-8061-3f7206277685.config
+2026-10-17T19:42:30.5590846Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-da44fc5d-c4bc-4fdb-8061-3f7206277685.config
+2026-10-17T19:42:30.5661895Z ##[endgroup]
+2026-10-17T19:42:30.5662918Z ##[group]Fetching the repository
+2026-10-17T19:42:30.5676587Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +5cace91a4253642d2597c7712b7cf119ade8d892:refs/remotes/origin/prepare/termux-compatibility-next-stable
+2026-10-17T19:42:31.0122929Z From https://github.com/adybag14-cyber/termux-hermes
+2026-10-17T19:42:31.0124122Z  * [new ref]         5cace91a4253642d2597c7712b7cf119ade8d892 -> origin/prepare/termux-compatibility-next-stable
+2026-10-17T19:42:31.0134987Z [command]/usr/bin/git branch --list --remote origin/prepare/termux-compatibility-next-stable
+2026-10-17T19:42:31.0162789Z   origin/prepare/termux-compatibility-next-stable
+2026-10-17T19:42:31.0172071Z [command]/usr/bin/git rev-parse refs/remotes/origin/prepare/termux-compatibility-next-stable
+2026-10-17T19:42:31.0196389Z 5cace91a4253642d2597c7712b7cf119ade8d892
+2026-10-17T19:42:31.0200806Z ##[endgroup]
+2026-10-17T19:42:31.0201723Z ##[group]Determining the checkout info
+2026-10-17T19:42:31.0202708Z ##[endgroup]
+2026-10-17T19:42:31.0206306Z [command]/usr/bin/git sparse-checkout disable
+2026-10-17T19:42:31.0259102Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-17T19:42:31.0292299Z ##[group]Checking out the ref
+2026-10-17T19:42:31.0297123Z [command]/usr/bin/git checkout --progress --force -B prepare/termux-compatibility-next-stable refs/remotes/origin/prepare/termux-compatibility-next-stable
+2026-10-17T19:42:31.0765761Z Switched to a new branch 'prepare/termux-compatibility-next-stable'
+2026-10-17T19:42:31.0772776Z branch 'prepare/termux-compatibility-next-stable' set up to track 'origin/prepare/termux-compatibility-next-stable'.
+2026-10-17T19:42:31.0779922Z ##[endgroup]
+2026-10-17T19:42:31.0826544Z [command]/usr/bin/git log -1 --format=%H
+2026-10-17T19:42:31.0854897Z 5cace91a4253642d2597c7712b7cf119ade8d892
+2026-10-17T19:42:31.1134355Z ##[group]Run actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+2026-10-17T19:42:31.1135138Z with:
+2026-10-17T19:42:31.1135550Z   python-version: 3.14
+2026-10-17T19:42:31.1136019Z   check-latest: false
+2026-10-17T19:42:31.1139752Z   token: ***
+2026-10-17T19:42:31.1140185Z   update-environment: true
+2026-10-17T19:42:31.1140676Z   allow-prereleases: false
+2026-10-17T19:42:31.1141150Z   freethreaded: false
+2026-10-17T19:42:31.1141601Z ##[endgroup]
+2026-10-17T19:42:31.2472386Z ##[group]Installed versions
+2026-10-17T19:42:31.2573093Z Successfully set up CPython (3.14.8)
+2026-10-17T19:42:31.2574609Z ##[endgroup]
+2026-10-17T19:42:31.2837640Z ##[group]Run python -m pip install packaging==26.0 pytest==9.0.2 Pillow==12.3.0
+2026-10-17T19:42:31.2839546Z [36;1mpython -m pip install packaging==26.0 pytest==9.0.2 Pillow==12.3.0[0m
+2026-10-17T19:42:31.3275018Z shell: /usr/bin/bash -e {0}
+2026-10-17T19:42:31.3275593Z env:
+2026-10-17T19:42:31.3276133Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:31.3276977Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.8/x64/lib/pkgconfig
+2026-10-17T19:42:31.3277812Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:31.3278592Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:31.3279556Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:31.3280343Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.8/x64/lib
+2026-10-17T19:42:31.3281012Z ##[endgroup]
+2026-10-17T19:42:33.9989853Z Collecting packaging==26.0
+2026-10-17T19:42:34.0585110Z   Downloading packaging-26.0-py3-none-any.whl.metadata (3.3 kB)
+2026-10-17T19:42:34.1013955Z Collecting pytest==9.0.2
+2026-10-17T19:42:34.1088136Z   Downloading pytest-9.0.2-py3-none-any.whl.metadata (7.6 kB)
+2026-10-17T19:42:34.2983078Z Collecting Pillow==12.3.0
+2026-10-17T19:42:34.3063846Z   Downloading pillow-12.3.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (9.1 kB)
+2026-10-17T19:42:34.3262646Z Collecting iniconfig>=1.0.1 (from pytest==9.0.2)
+2026-10-17T19:42:34.3335328Z   Downloading iniconfig-2.3.1-py3-none-any.whl.metadata (2.8 kB)
+2026-10-17T19:42:34.3492912Z Collecting pluggy<2,>=1.5 (from pytest==9.0.2)
+2026-10-17T19:42:34.3567779Z   Downloading pluggy-1.7.0-py3-none-any.whl.metadata (5.0 kB)
+2026-10-17T19:42:34.3769846Z Collecting pygments>=2.7.2 (from pytest==9.0.2)
+2026-10-17T19:42:34.3843452Z   Downloading pygments-2.21.0-py3-none-any.whl.metadata (2.5 kB)
+2026-10-17T19:42:34.3956870Z Downloading packaging-26.0-py3-none-any.whl (74 kB)
+2026-10-17T19:42:34.4131574Z Downloading pytest-9.0.2-py3-none-any.whl (374 kB)
+2026-10-17T19:42:34.4355949Z Downloading pillow-12.3.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (6.9 MB)
+2026-10-17T19:42:34.4887229Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.9/6.9 MB 147.6 MB/s  0:00:00
+2026-10-17T19:42:34.4962412Z Downloading pluggy-1.7.0-py3-none-any.whl (27 kB)
+2026-10-17T19:42:34.5053992Z Downloading iniconfig-2.3.1-py3-none-any.whl (7.6 kB)
+2026-10-17T19:42:34.5151438Z Downloading pygments-2.21.0-py3-none-any.whl (1.3 MB)
+2026-10-17T19:42:34.5215749Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 249.4 MB/s  0:00:00
+2026-10-17T19:42:34.6803518Z Installing collected packages: pygments, pluggy, Pillow, packaging, iniconfig, pytest
+2026-10-17T19:42:36.3867396Z 
+2026-10-17T19:42:36.3882066Z Successfully installed Pillow-12.3.0 iniconfig-2.3.1 packaging-26.0 pluggy-1.7.0 pygments-2.21.0 pytest-9.0.2
+2026-10-17T19:42:36.4480524Z ##[group]Run python -m compileall -q scripts tests
+2026-10-17T19:42:36.4481087Z [36;1mpython -m compileall -q scripts tests[0m
+2026-10-17T19:42:36.4546447Z shell: /usr/bin/bash -e {0}
+2026-10-17T19:42:36.4546756Z env:
+2026-10-17T19:42:36.4547081Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:36.4547589Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.8/x64/lib/pkgconfig
+2026-10-17T19:42:36.4548125Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:36.4548582Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:36.4549037Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:36.4549849Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.8/x64/lib
+2026-10-17T19:42:36.4550288Z ##[endgroup]
+2026-10-17T19:42:36.7023546Z ##[group]Run python -m pytest -q
+2026-10-17T19:42:36.7023940Z [36;1mpython -m pytest -q[0m
+2026-10-17T19:42:36.7087800Z shell: /usr/bin/bash -e {0}
+2026-10-17T19:42:36.7088105Z env:
+2026-10-17T19:42:36.7088414Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:36.7088923Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.8/x64/lib/pkgconfig
+2026-10-17T19:42:36.7089741Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:36.7090202Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:36.7090641Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:36.7091078Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.8/x64/lib
+2026-10-17T19:42:36.7091459Z ##[endgroup]
+2026-10-17T19:42:38.5975166Z ........................................................................ [ 15%]
+2026-10-17T19:42:38.9817966Z ........................................................................ [ 31%]
+2026-10-17T19:42:39.1768503Z ........................................................................ [ 47%]
+2026-10-17T19:42:39.2969658Z ........................................................................ [ 63%]
+2026-10-17T19:42:39.5275033Z ........................................................................ [ 79%]
+2026-10-17T19:42:40.3552218Z ........................................................................ [ 95%]
+2026-10-17T19:42:40.4888913Z ....................                                                     [100%]
+2026-10-17T19:42:40.4890014Z 452 passed in 2.85s
+2026-10-17T19:42:40.5565396Z ##[group]Run for script in install.sh scripts/*.sh; do
+2026-10-17T19:42:40.5565854Z [36;1mfor script in install.sh scripts/*.sh; do[0m
+2026-10-17T19:42:40.5566192Z [36;1m  bash -n "$script"[0m
+2026-10-17T19:42:40.5566434Z [36;1mdone[0m
+2026-10-17T19:42:40.5632317Z shell: /usr/bin/bash -e {0}
+2026-10-17T19:42:40.5632599Z env:
+2026-10-17T19:42:40.5632890Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:40.5633352Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.8/x64/lib/pkgconfig
+2026-10-17T19:42:40.5633798Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:40.5634195Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:40.5634817Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:40.5635215Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.8/x64/lib
+2026-10-17T19:42:40.5635547Z ##[endgroup]
+2026-10-17T19:42:40.5998584Z ##[group]Run python -m json.tool manifest/wheels.json >/dev/null
+2026-10-17T19:42:40.5999107Z [36;1mpython -m json.tool manifest/wheels.json >/dev/null[0m
+2026-10-17T19:42:40.5999832Z [36;1mpython -m json.tool manifest/release.json >/dev/null[0m
+2026-10-17T19:42:40.6000251Z [36;1mpython -m json.tool audit/emulator-audit.json >/dev/null[0m
+2026-10-17T19:42:40.6000673Z [36;1mpython -m json.tool audit/build-metadata.json >/dev/null[0m
+2026-10-17T19:42:40.6001096Z [36;1mpython -m json.tool audit/upstream-lock.json >/dev/null[0m
+2026-10-17T19:42:40.6062212Z shell: /usr/bin/bash -e {0}
+2026-10-17T19:42:40.6062472Z env:
+2026-10-17T19:42:40.6062777Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:40.6063260Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.8/x64/lib/pkgconfig
+2026-10-17T19:42:40.6063714Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:40.6064102Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:40.6064506Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+2026-10-17T19:42:40.6064890Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.8/x64/lib
+2026-10-17T19:42:40.6065215Z ##[endgroup]
+2026-10-17T19:42:40.8942006Z Post job cleanup.
+2026-10-17T19:42:41.0261153Z Post job cleanup.
+2026-10-17T19:42:41.1134651Z [command]/usr/bin/git version
+2026-10-17T19:42:41.1178993Z git version 2.55.0
+2026-10-17T19:42:41.1224905Z Temporarily overriding HOME='/home/runner/work/_temp/f7351fff-ea29-4a2a-91e8-50408021c5d3' before making global git config changes
+2026-10-17T19:42:41.1226583Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-17T19:42:41.1230887Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/termux-hermes/termux-hermes
+2026-10-17T19:42:41.1263258Z Removing SSH command configuration
+2026-10-17T19:42:41.1270195Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-17T19:42:41.1305959Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-17T19:42:41.1576039Z Removing HTTP extra header
+2026-10-17T19:42:41.1581555Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-17T19:42:41.1625058Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-17T19:42:41.1895901Z Removing includeIf entries pointing to credentials config files
+2026-10-17T19:42:41.1911251Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-17T19:42:41.1949751Z includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git.path
+2026-10-17T19:42:41.1963839Z includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git/worktrees/*.path
+2026-10-17T19:42:41.1965144Z includeif.gitdir:/github/workspace/.git.path
+2026-10-17T19:42:41.1966183Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-17T19:42:41.1982042Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git.path
+2026-10-17T19:42:41.2024855Z /home/runner/work/_temp/git-credentials-da44fc5d-c4bc-4fdb-8061-3f7206277685.config
+2026-10-17T19:42:41.2088076Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git.path /home/runner/work/_temp/git-credentials-da44fc5d-c4bc-4fdb-8061-3f7206277685.config
+2026-10-17T19:42:41.2110756Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git/worktrees/*.path
+2026-10-17T19:42:41.2130370Z /home/runner/work/_temp/git-credentials-da44fc5d-c4bc-4fdb-8061-3f7206277685.config
+2026-10-17T19:42:41.2153747Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-da44fc5d-c4bc-4fdb-8061-3f7206277685.config
+2026-10-17T19:42:41.2197315Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-10-17T19:42:41.2224210Z /github/runner_temp/git-credentials-da44fc5d-c4bc-4fdb-8061-3f7206277685.config
+2026-10-17T19:42:41.2233060Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-da44fc5d-c4bc-4fdb-8061-3f7206277685.config
+2026-10-17T19:42:41.2269637Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-17T19:42:41.2296116Z /github/runner_temp/git-credentials-da44fc5d-c4bc-4fdb-8061-3f7206277685.config
+2026-10-17T19:42:41.2304583Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-da44fc5d-c4bc-4fdb-8061-3f7206277685.config
+2026-10-17T19:42:41.2343000Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-17T19:42:41.2568491Z Removing credentials config '/home/runner/work/_temp/git-credentials-da44fc5d-c4bc-4fdb-8061-3f7206277685.config'
+2026-10-17T19:42:41.2710052Z Cleaning up orphan processes

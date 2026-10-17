@@ -1,0 +1,668 @@
+{
+  "schema_version": 1,
+  "status": "source_model_and_metadata_feasibility_only_not_full_engine_compatibility",
+  "recorded_at": "2026-10-17T19:51:05.786849+00:00",
+  "release_scope": "next stable preparation; no release",
+  "boundaries": {
+    "model_payload_bytes_downloaded": 0,
+    "authentication_supplied": false,
+    "model_gates_accepted": false,
+    "packages_installed": false,
+    "existing_locks_changed": false,
+    "requires_python_changed": false,
+    "default_codec_or_precision_changed": false,
+    "watermark_behavior_changed": false,
+    "native_engine_or_synthesis_claimed": false
+  },
+  "engine": {
+    "name": "neutts",
+    "version": "1.4.1",
+    "source_commit": "b7a3427d0d25e20e8b9e92cbaae688f732916baf",
+    "requires_python": ">=3.10,<3.14",
+    "hermes_helper_source_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+    "hermes_helper_sha256": "b618b1dca838650fc00d79f3eb7ed3b4f10c1388b970e2c8081dc59544e7f5df",
+    "selected_default_path": "AIR Q4 GGUF + full NeuCodec 0.0.4 CPU encoder/decoder; encode_reference then infer",
+    "reference_audio_and_transcript_required": true,
+    "neucodec_source_sdist_sha256": "994c9367b691b96c30247ebe5f3d9b7088411ff640b8df2f0dd9e1efe39f6f42"
+  },
+  "models": [
+    {
+      "repo": "neuphonic/neutts-air-q4-gguf",
+      "revision": "0f54a5513ee49708713e49c5122c274df2737047",
+      "gated": "auto",
+      "metadata_license": "apache-2.0",
+      "required_weight": {
+        "rfilename": "neutts-air-Q4_0.gguf",
+        "blobId": "b009641549892c50a6cf96c35bc6eea6291ba6ac",
+        "size": 527054304,
+        "lfs": {
+          "sha256": "bf66dc21b7588fe720cbdfeac1595e7b7c780515f8d8f1ff9a29062e4ac9119e",
+          "size": 527054304,
+          "pointerSize": 134
+        }
+      },
+      "auxiliary_assets": [
+        {
+          "rfilename": "meta.yaml",
+          "blobId": "3a2807f7088719f9837edd74197697c0747aa078",
+          "size": 37
+        }
+      ],
+      "metadata_raw": {
+        "file": "model-neutts-air-q4-gguf.json",
+        "bytes": 4745,
+        "sha256": "4cbf15a3ff4f305532917aae965b5011712fc9944ef265592cd16ee59f23ca6f"
+      },
+      "metadata_receipt": {
+        "name": "model-neutts-air-q4-gguf.json",
+        "url": "https://huggingface.co/api/models/neuphonic/neutts-air-q4-gguf?blobs=true",
+        "bytes": 4745,
+        "sha256": "4cbf15a3ff4f305532917aae965b5011712fc9944ef265592cd16ee59f23ca6f",
+        "cached": false,
+        "checked_at": "2026-10-17T19:22:52.081996+00:00"
+      },
+      "weight_bytes_downloaded": 0,
+      "weight_digest_verification": "remote LFS metadata only; no downloaded weight byte verification"
+    },
+    {
+      "repo": "neuphonic/neucodec",
+      "revision": "a940021324df13a07f44185f0a17c6dac3698179",
+      "gated": "auto",
+      "metadata_license": "apache-2.0",
+      "required_weight": {
+        "rfilename": "pytorch_model.bin",
+        "blobId": "3c65ca7f7999f0670c017d8192e1d2cfbf7c0df0",
+        "size": 1160509432,
+        "lfs": {
+          "sha256": "30c3ea13ceeb2de693c56e5e33a1b7e00d44c95dcdd08a4ed0d552d0bf59ebdf",
+          "size": 1160509432,
+          "pointerSize": 135
+        }
+      },
+      "auxiliary_assets": [
+        {
+          "rfilename": "config.json",
+          "blobId": "255bfe67365240a951e68bbfda4b9f2f9fd983f4",
+          "size": 2958
+        },
+        {
+          "rfilename": "meta.yaml",
+          "blobId": "3a2807f7088719f9837edd74197697c0747aa078",
+          "size": 37
+        }
+      ],
+      "metadata_raw": {
+        "file": "model-neucodec.json",
+        "bytes": 4315,
+        "sha256": "70433ca319843f0eb4a9864d572f4ad3028bf66c8063b47964970fb468f6df5e"
+      },
+      "metadata_receipt": {
+        "name": "model-neucodec.json",
+        "url": "https://huggingface.co/api/models/neuphonic/neucodec?blobs=true",
+        "bytes": 4315,
+        "sha256": "70433ca319843f0eb4a9864d572f4ad3028bf66c8063b47964970fb468f6df5e",
+        "cached": false,
+        "checked_at": "2026-10-17T19:22:52.082110+00:00"
+      },
+      "weight_bytes_downloaded": 0,
+      "weight_digest_verification": "remote LFS metadata only; no downloaded weight byte verification"
+    },
+    {
+      "repo": "facebook/w2v-bert-2.0",
+      "revision": "da985ba0987f70aaeb84a80f2851cfac8c697a7b",
+      "gated": false,
+      "metadata_license": "mit",
+      "required_weight": {
+        "rfilename": "model.safetensors",
+        "blobId": "cb7c6d08fe4cc20b2748c5525de64964d50190fa",
+        "size": 2322063736,
+        "lfs": {
+          "sha256": "eb890c9660ed6e3414b6812e27257b8ce5454365d5490d3ad581ea60b93be043",
+          "size": 2322063736,
+          "pointerSize": 135
+        }
+      },
+      "auxiliary_assets": [
+        {
+          "rfilename": "config.json",
+          "blobId": "a383a594dac18459628cd2837168cd276342a31a",
+          "size": 1874
+        },
+        {
+          "rfilename": "preprocessor_config.json",
+          "blobId": "5db61951cdf5edab6337fd84ee619500c27aaa3d",
+          "size": 275
+        }
+      ],
+      "metadata_raw": {
+        "file": "model-w2v-bert-2.0.json",
+        "bytes": 5348,
+        "sha256": "87294ca2d3e94802695765e6753544e5d5aff62da46aab4e11a6e59b33e9b6e0"
+      },
+      "metadata_receipt": {
+        "name": "model-w2v-bert-2.0.json",
+        "url": "https://huggingface.co/api/models/facebook/w2v-bert-2.0?blobs=true",
+        "bytes": 5348,
+        "sha256": "87294ca2d3e94802695765e6753544e5d5aff62da46aab4e11a6e59b33e9b6e0",
+        "cached": false,
+        "checked_at": "2026-10-17T19:22:52.081932+00:00"
+      },
+      "weight_bytes_downloaded": 0,
+      "weight_digest_verification": "remote LFS metadata only; no downloaded weight byte verification"
+    }
+  ],
+  "models_total_advertised_weight_bytes": 4009627472,
+  "model_access_probe_file": "neutts-engine-closure-20261017/model-head-access.json",
+  "model_access_interpretation": "The exact default GGUF and codec bin both returned unauthenticated 401 GatedRepo. W2V returned 302 with expected linked identity. No payload body read or redirects followed.",
+  "metadata_graph": {
+    "file": "neutts-engine-closure-20261017/dependency-candidate.json",
+    "node_count": 117,
+    "active_dependency_edge_count": 194,
+    "version_conflicts": [],
+    "python_requirement_failures": [
+      {
+        "name": "neutts",
+        "version": "1.4.1",
+        "requires_python": "<3.14,>=3.10"
+      }
+    ],
+    "root_extras": [
+      "llama"
+    ],
+    "all_declared_neucodec_torchtune_librosa_requirements_preserved": true,
+    "scope_limits": [
+      "Build-system requirements are not recursively frozen in this witness.",
+      "APT Depends closure is additional to the 117 Python distributions.",
+      "Pure/Android wheel availability is not proof of import, native ABI or runtime compatibility.",
+      "Candidate selections are separate from all existing locks."
+    ]
+  },
+  "artifact_routes": {
+    "no_pure_or_android_wheel_nodes": [
+      "audioop-lts",
+      "cffi",
+      "hf-xet",
+      "llama-cpp-python",
+      "lxml",
+      "msgpack",
+      "neutts",
+      "numba",
+      "pandas",
+      "pillow",
+      "psutil",
+      "pyarrow",
+      "pycryptodomex",
+      "pyyaml",
+      "regex",
+      "rpds-py",
+      "safetensors",
+      "scikit-learn",
+      "sentencepiece",
+      "tiktoken",
+      "tokenizers"
+    ],
+    "no_pure_or_android_wheel_count": 21,
+    "already_running_cpu_component_routes": [
+      "numba",
+      "llama-cpp-python"
+    ],
+    "exact_version_apt_routes": [
+      "pyarrow",
+      "lxml",
+      "msgpack",
+      "pillow",
+      "psutil"
+    ],
+    "remaining_source_or_verified_reuse_routes": [
+      "audioop-lts",
+      "cffi",
+      "hf-xet",
+      "neutts",
+      "pandas",
+      "pycryptodomex",
+      "pyyaml",
+      "regex",
+      "rpds-py",
+      "safetensors",
+      "scikit-learn",
+      "sentencepiece",
+      "tiktoken",
+      "tokenizers"
+    ],
+    "apt_availability": {
+      "index_sha256": "0f9ea9b4cd6c0f7c3ffe90bea8afb7e25a61adc319fc90eca3d0979da6dcb923",
+      "packages": [
+        {
+          "Package": "espeak",
+          "Version": "1.52.0-1",
+          "Architecture": "aarch64",
+          "Depends": "libc++, pcaudiolib",
+          "Filename": "pool/main/e/espeak/espeak_1.52.0-1_aarch64.deb",
+          "Size": "8843796",
+          "SHA256": "e8a73c52e95489d3da9bb46117f3e2078000f24da8e4723dc1d6a77ef6642a89"
+        },
+        {
+          "Package": "libsndfile",
+          "Version": "1.2.2-3",
+          "Architecture": "aarch64",
+          "Depends": "libflac, libmp3lame, libmpg123, libogg, libopus, libvorbis",
+          "Filename": "pool/main/libs/libsndfile/libsndfile_1.2.2-3_aarch64.deb",
+          "Size": "223576",
+          "SHA256": "1e1fb77b14ec26f3ff6ded069e9ec816ab7535ae5d074122c6727b0f59d8aff3"
+        },
+        {
+          "Package": "python-cryptography",
+          "Version": "50.0.2",
+          "Architecture": "aarch64",
+          "Depends": "openssl, python, python-pip",
+          "Filename": "pool/main/p/python-cryptography/python-cryptography_50.0.2_aarch64.deb",
+          "Size": "1133776",
+          "SHA256": "14c13359867626d15e457c8b8359c063b950ae96c7449b9c3d8551f4a35fe88f"
+        },
+        {
+          "Package": "python-lxml",
+          "Version": "6.1.3",
+          "Architecture": "aarch64",
+          "Depends": "libxml2, libxslt, python, python-pip",
+          "Filename": "pool/main/p/python-lxml/python-lxml_6.1.3_aarch64.deb",
+          "Size": "1053080",
+          "SHA256": "f89558649586d55c813b30a379f7df44056ee0213fd028e18df095ec8d5c65ef"
+        },
+        {
+          "Package": "python-msgpack",
+          "Version": "1.2.3",
+          "Architecture": "aarch64",
+          "Depends": "libc++, python",
+          "Filename": "pool/main/p/python-msgpack/python-msgpack_1.2.3_aarch64.deb",
+          "Size": "61724",
+          "SHA256": "74fab03e5b5beba74b137e931c35fdf03e02225853262b4c100cebd1e0b029b4"
+        },
+        {
+          "Package": "python-pillow",
+          "Version": "12.3.0",
+          "Architecture": "aarch64",
+          "Depends": "freetype, libavif, libimagequant, libjpeg-turbo, libraqm, libtiff, libwebp, libxcb, littlecms, openjpeg, python, python-pip, zlib",
+          "Filename": "pool/main/p/python-pillow/python-pillow_12.3.0_aarch64.deb",
+          "Size": "407220",
+          "SHA256": "3add75907c16921a32d2c6053a69086b25adcdf746269a0d2c62e712443e3073"
+        },
+        {
+          "Package": "python-psutil",
+          "Version": "7.2.2-2",
+          "Architecture": "aarch64",
+          "Depends": "python, python-pip",
+          "Filename": "pool/main/p/python-psutil/python-psutil_7.2.2-2_aarch64.deb",
+          "Size": "82672",
+          "SHA256": "61147cf1b656b58e61f0293d25ecde85ca1a20b25f8d57338d424b649cddbef0"
+        },
+        {
+          "Package": "python-pyarrow",
+          "Version": "26.0.0-2",
+          "Architecture": "aarch64",
+          "Depends": "python, python-numpy, libarrow-cpp (= 26.0.0-2)",
+          "Filename": "pool/main/p/python-pyarrow/python-pyarrow_26.0.0-2_aarch64.deb",
+          "Size": "3444216",
+          "SHA256": "d9cc369295b3e6eabd93a835cdc963bb1c37631136b6d9d665dd3cba9855b531"
+        }
+      ]
+    },
+    "artifact_availability_is_not_native_success": true
+  },
+  "source_build_observations_file": "neutts-engine-closure-20261017/source-build-observations.json",
+  "scikit_learn_primary_build_source": {
+    "url": "https://raw.githubusercontent.com/scikit-learn/scikit-learn/1.9.1/pyproject.toml",
+    "sha256": "69e625c729bbf603a32f9c9b4c7f09d715a0f2389e60a767ee152eaadbde41cb",
+    "build_requirements_intersection_with_pandas": [
+      "meson-python>=0.17.1,<0.22",
+      "Cython>=3.1.2,<3.2.6",
+      "numpy>=2,<2.6",
+      "scipy>=1.10,<1.19"
+    ],
+    "inspection_reference": "audit/neutts-default-gguf-source-20261017.json"
+  },
+  "confirmed_software_boundaries": [
+    {
+      "package": "neucodec 0.0.4",
+      "finding": "obsolete Hub proxies/resume_download keyword arguments conflict with required Hub 1.x",
+      "preparation": "separate patches/next-stable/neucodec-hub1-download.patch; 34 source-contract regressions"
+    },
+    {
+      "package": "phonemizer 3.3.0 / dlinfo 2.0.0",
+      "finding": "eager non-Windows dlinfo import binds libdl.dlinfo; Bionic declaration/export map has no such symbol even though explicit library path bypasses discovery",
+      "preparation": "narrow lazy fallback import authorized separately; not claimed fixed in this audit"
+    }
+  ],
+  "sources": [
+    {
+      "name": "neutts.py",
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-engine-closure-research-20261017\\neutts.py",
+      "bytes": 25116,
+      "sha256": "88295403fdf5bb14dfc0df712231c57f5000afc470c9f197c590cf082f8bd7ed",
+      "receipt": {
+        "name": "neutts.py",
+        "url": "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/neutts/neutts.py",
+        "bytes": 25116,
+        "sha256": "88295403fdf5bb14dfc0df712231c57f5000afc470c9f197c590cf082f8bd7ed",
+        "cached": false,
+        "checked_at": "2026-10-17T19:22:52.134662+00:00"
+      }
+    },
+    {
+      "name": "neutts-pyproject.toml",
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-engine-closure-research-20261017\\neutts-pyproject.toml",
+      "bytes": 908,
+      "sha256": "3d74df60f0db27733b308c93b88ae95f9deaa8f396f48183b0cf4f14eb3deb94",
+      "receipt": {
+        "name": "neutts-pyproject.toml",
+        "url": "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/pyproject.toml",
+        "bytes": 908,
+        "sha256": "3d74df60f0db27733b308c93b88ae95f9deaa8f396f48183b0cf4f14eb3deb94",
+        "cached": false,
+        "checked_at": "2026-10-17T19:22:52.286596+00:00"
+      }
+    },
+    {
+      "name": "neutts-phonemizers.py",
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-engine-closure-research-20261017\\neutts-phonemizers.py",
+      "bytes": 5581,
+      "sha256": "737d1138839271f06bf762552de376f1c6816460bbf5855b51192b717d67d9cb",
+      "receipt": {
+        "name": "neutts-phonemizers.py",
+        "url": "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/neutts/phonemizers.py",
+        "bytes": 5581,
+        "sha256": "737d1138839271f06bf762552de376f1c6816460bbf5855b51192b717d67d9cb",
+        "cached": false,
+        "checked_at": "2026-10-17T19:22:52.302049+00:00"
+      }
+    },
+    {
+      "name": "neutts-CMakeLists.txt",
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-engine-closure-research-20261017\\neutts-CMakeLists.txt",
+      "bytes": 2246,
+      "sha256": "bafe8e5131ebcf804a27679b2de91ad7d8a901e70c9d22c4688d5d49a2f5e267",
+      "receipt": {
+        "name": "neutts-CMakeLists.txt",
+        "url": "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/CMakeLists.txt",
+        "bytes": 2246,
+        "sha256": "bafe8e5131ebcf804a27679b2de91ad7d8a901e70c9d22c4688d5d49a2f5e267",
+        "cached": false,
+        "checked_at": "2026-10-17T19:22:52.311597+00:00"
+      }
+    },
+    {
+      "name": "neutts-git-tree.json",
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-engine-closure-research-20261017\\neutts-git-tree.json",
+      "bytes": 14317,
+      "sha256": "655caf2b15aadaa1595dd0ad8bac5645893a063364221708717691227d3b03d9",
+      "receipt": {
+        "name": "neutts-git-tree.json",
+        "url": "https://api.github.com/repos/neuphonic/neutts/git/trees/b7a3427d0d25e20e8b9e92cbaae688f732916baf?recursive=1",
+        "bytes": 14317,
+        "sha256": "655caf2b15aadaa1595dd0ad8bac5645893a063364221708717691227d3b03d9",
+        "cached": false,
+        "checked_at": "2026-10-17T19:40:28.787101+00:00"
+      }
+    },
+    {
+      "name": "neutts-LICENSE",
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-engine-closure-research-20261017\\neutts-LICENSE",
+      "bytes": 11078,
+      "sha256": "c3308963748766e2617138a754a0f6915564aae7a4cc31c7d60dc30abf326224",
+      "receipt": {
+        "name": "neutts-LICENSE",
+        "url": "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/LICENSE",
+        "bytes": 11078,
+        "sha256": "c3308963748766e2617138a754a0f6915564aae7a4cc31c7d60dc30abf326224",
+        "cached": false,
+        "checked_at": "2026-10-17T19:23:53.106383+00:00"
+      }
+    },
+    {
+      "name": "perth-git-tree.json",
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-engine-closure-research-20261017\\perth-git-tree.json",
+      "bytes": 16228,
+      "sha256": "db63fa7836e7426d1ac10cb8c3a68c4ff31142835ddda3eff9af700b9e3b93dd",
+      "receipt": {
+        "name": "perth-git-tree.json",
+        "url": "https://api.github.com/repos/resemble-ai/Perth/git/trees/d6cc38cc9ab9da71c6b64d8c741bc13049eb881e?recursive=1",
+        "bytes": 16228,
+        "sha256": "db63fa7836e7426d1ac10cb8c3a68c4ff31142835ddda3eff9af700b9e3b93dd",
+        "cached": false,
+        "checked_at": "2026-10-17T19:23:52.967544+00:00"
+      }
+    },
+    {
+      "name": "perth-LICENSE",
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-engine-closure-research-20261017\\perth-LICENSE",
+      "bytes": 1068,
+      "sha256": "4543f6777abede354f09bc2ba6580bd475c364e7d6f39315bf9d315d033b48f4",
+      "receipt": {
+        "name": "perth-LICENSE",
+        "url": "https://raw.githubusercontent.com/resemble-ai/Perth/d6cc38cc9ab9da71c6b64d8c741bc13049eb881e/LICENSE",
+        "bytes": 1068,
+        "sha256": "4543f6777abede354f09bc2ba6580bd475c364e7d6f39315bf9d315d033b48f4",
+        "cached": false,
+        "checked_at": "2026-10-17T19:40:28.696109+00:00"
+      }
+    },
+    {
+      "name": "perth-watermarker.py",
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-engine-closure-research-20261017\\perth-watermarker.py",
+      "bytes": 2437,
+      "sha256": "a9140231e1f563c9a2a7f903f1be9a060889062a927b7ac795ba6b0fdc5bd5a5",
+      "receipt": {
+        "name": "perth-watermarker.py",
+        "url": "https://raw.githubusercontent.com/resemble-ai/Perth/d6cc38cc9ab9da71c6b64d8c741bc13049eb881e/perth/perth_net/perth_net_implicit/perth_watermarker.py",
+        "bytes": 2437,
+        "sha256": "a9140231e1f563c9a2a7f903f1be9a060889062a927b7ac795ba6b0fdc5bd5a5",
+        "cached": false,
+        "checked_at": "2026-10-17T19:23:52.874813+00:00"
+      }
+    },
+    {
+      "name": "perth-hparams.yaml",
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-engine-closure-research-20261017\\perth-hparams.yaml",
+      "bytes": 257,
+      "sha256": "c66e8f8ce5b09d100e719843a064d37a97c5aec13510824343bf4e096b3184db",
+      "receipt": {
+        "name": "perth-hparams.yaml",
+        "url": "https://raw.githubusercontent.com/resemble-ai/Perth/d6cc38cc9ab9da71c6b64d8c741bc13049eb881e/perth/perth_net/pretrained/implicit/hparams.yaml",
+        "bytes": 257,
+        "sha256": "c66e8f8ce5b09d100e719843a064d37a97c5aec13510824343bf4e096b3184db",
+        "cached": false,
+        "checked_at": "2026-10-17T19:40:28.907014+00:00"
+      }
+    },
+    {
+      "name": "espeak-COPYING",
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-engine-closure-research-20261017\\espeak-COPYING",
+      "bytes": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "receipt": {
+        "name": "espeak-COPYING",
+        "url": "https://raw.githubusercontent.com/espeak-ng/espeak-ng/69bfd1efde0236654ccc117a28d04aef27673a30/COPYING",
+        "bytes": 35147,
+        "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+        "cached": false,
+        "checked_at": "2026-10-17T19:40:28.960145+00:00"
+      }
+    },
+    {
+      "name": "bionic-dlfcn.h",
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-engine-closure-research-20261017\\bionic-dlfcn.h",
+      "bytes": 8537,
+      "sha256": "134558a19eaed3763c7f2b304b91637f67820363569571da67c3ac257f338d90"
+    },
+    {
+      "name": "bionic-libdl-map.txt",
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-engine-closure-research-20261017\\bionic-libdl-map.txt",
+      "bytes": 1182,
+      "sha256": "66f84b25cbf6548d0bf27eec414e872d51709be9a478281c49d54ded9d7f0823"
+    },
+    {
+      "name": "phonemizer-3.3.0-py3-none-any.whl",
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-engine-closure-research-20261017\\phonemizer-3.3.0-py3-none-any.whl",
+      "bytes": 103800,
+      "sha256": "17afaa98691fe73b025dd8d8727b0e67cc376c5e7ee27590853e457fb3f43602",
+      "receipt": {
+        "name": "phonemizer-3.3.0-py3-none-any.whl",
+        "url": "https://files.pythonhosted.org/packages/b6/23/e8d67c2052e132181c4c9027c2d8ed9e37e8acb27acfc13ed2d0c41ed850/phonemizer-3.3.0-py3-none-any.whl",
+        "bytes": 103800,
+        "sha256": "17afaa98691fe73b025dd8d8727b0e67cc376c5e7ee27590853e457fb3f43602",
+        "cached": false,
+        "checked_at": "2026-10-17T19:27:32.486052+00:00"
+      }
+    }
+  ],
+  "bundled_assets": {
+    "perth_source_commit": "d6cc38cc9ab9da71c6b64d8c741bc13049eb881e",
+    "perth_implicit_checkpoint_tree_entries": [
+      {
+        "path": "perth/perth_net/pretrained/implicit/perth_net_250000.pth.tar",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "22fbc47e03a4df700425819e9b5a1f81304f3a60",
+        "size": 37429684,
+        "url": "https://api.github.com/repos/resemble-ai/Perth/git/blobs/22fbc47e03a4df700425819e9b5a1f81304f3a60"
+      }
+    ],
+    "neutts_builtin_reference_tree_entries": [
+      {
+        "path": "samples/emily.pt",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "d917abdc766536070de7e06ad9893725224fec21",
+        "size": 3163,
+        "url": "https://api.github.com/repos/neuphonic/neutts/git/blobs/d917abdc766536070de7e06ad9893725224fec21"
+      },
+      {
+        "path": "samples/emily.txt",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "9346f75099b8989afe2f8df25b36b4f7bc2e7a26",
+        "size": 147,
+        "url": "https://api.github.com/repos/neuphonic/neutts/git/blobs/9346f75099b8989afe2f8df25b36b4f7bc2e7a26"
+      },
+      {
+        "path": "samples/paul.pt",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "b237fcd3bb160c6f8087830da5ae921056104848",
+        "size": 2644,
+        "url": "https://api.github.com/repos/neuphonic/neutts/git/blobs/b237fcd3bb160c6f8087830da5ae921056104848"
+      },
+      {
+        "path": "samples/paul.txt",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "84cdc834e9d7e8c23b23e6f48a921a304b108924",
+        "size": 104,
+        "url": "https://api.github.com/repos/neuphonic/neutts/git/blobs/84cdc834e9d7e8c23b23e6f48a921a304b108924"
+      },
+      {
+        "path": "samples/sophie.pt",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "b38e5b2fadae21ec10877e061e21a4af03d4f4f9",
+        "size": 2210,
+        "url": "https://api.github.com/repos/neuphonic/neutts/git/blobs/b38e5b2fadae21ec10877e061e21a4af03d4f4f9"
+      },
+      {
+        "path": "samples/sophie.txt",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "51f41a08d1e6f622ab457865bcf155ed5307a9af",
+        "size": 57,
+        "url": "https://api.github.com/repos/neuphonic/neutts/git/blobs/51f41a08d1e6f622ab457865bcf155ed5307a9af"
+      },
+      {
+        "path": "samples/steven.pt",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "e7ef98ffbb58fecf20dc32e8ae67353a7c8ac1d5",
+        "size": 2594,
+        "url": "https://api.github.com/repos/neuphonic/neutts/git/blobs/e7ef98ffbb58fecf20dc32e8ae67353a7c8ac1d5"
+      },
+      {
+        "path": "samples/steven.txt",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "15682514365069154f108e5a578c8aa5cff0a0b1",
+        "size": 114,
+        "url": "https://api.github.com/repos/neuphonic/neutts/git/blobs/15682514365069154f108e5a578c8aa5cff0a0b1"
+      }
+    ],
+    "payloads_downloaded": false,
+    "git_blob_hashes_are_not_sha256_payload_verification": true
+  },
+  "capacity": {
+    "default_weight_advertised_bytes": 4009627472,
+    "w2v_bert_f32_parameters": 580493120,
+    "w2v_bert_f32_tensor_bytes": 2321972480,
+    "peak_rss_measured": false,
+    "latency_measured": false,
+    "initial_cpu_test_allocation_gib": 8,
+    "allocation_status": "planning allowance only, not a measured minimum or hardware support guarantee",
+    "normal_precision_and_watermark_required": true
+  },
+  "saved_evidence_files": [
+    {
+      "relative_path": "audit/neutts-engine-closure-20261017/dependency-candidate.json",
+      "bytes": 295584,
+      "sha256": "673d878e6fdc6fca65dfb40f8af8cade74e627b4d45f48ca995bc337cf445f06"
+    },
+    {
+      "relative_path": "audit/neutts-engine-closure-20261017/model-head-access.json",
+      "bytes": 2650,
+      "sha256": "926c1daec7af05adef49c835b8fb842dd7129b659e033cf6117e76d33bfa66b8"
+    },
+    {
+      "relative_path": "audit/neutts-engine-closure-20261017/model-neucodec.json",
+      "bytes": 4315,
+      "sha256": "70433ca319843f0eb4a9864d572f4ad3028bf66c8063b47964970fb468f6df5e"
+    },
+    {
+      "relative_path": "audit/neutts-engine-closure-20261017/model-neucodec.json.receipt.json",
+      "bytes": 288,
+      "sha256": "913614f87bf00e7a8ec288eded006a8a5ea2db3b3e5a2bd959f4b1aa4dc351d8"
+    },
+    {
+      "relative_path": "audit/neutts-engine-closure-20261017/model-neutts-air-q4-gguf.json",
+      "bytes": 4745,
+      "sha256": "4cbf15a3ff4f305532917aae965b5011712fc9944ef265592cd16ee59f23ca6f"
+    },
+    {
+      "relative_path": "audit/neutts-engine-closure-20261017/model-neutts-air-q4-gguf.json.receipt.json",
+      "bytes": 308,
+      "sha256": "1892b8e0af241e0468dff1566bb5f68157b7a3451d9cd6373bd5081258cf61c1"
+    },
+    {
+      "relative_path": "audit/neutts-engine-closure-20261017/model-w2v-bert-2.0.json",
+      "bytes": 5348,
+      "sha256": "87294ca2d3e94802695765e6753544e5d5aff62da46aab4e11a6e59b33e9b6e0"
+    },
+    {
+      "relative_path": "audit/neutts-engine-closure-20261017/model-w2v-bert-2.0.json.receipt.json",
+      "bytes": 295,
+      "sha256": "67890ee6f089684e2fe468bdc779772bfc4e6946d6bb9ec90b72b0f5ef8d1d4c"
+    },
+    {
+      "relative_path": "audit/neutts-engine-closure-20261017/remaining-apt-availability.json",
+      "bytes": 3054,
+      "sha256": "49daa38ed2b613a0658847df844d1e06a961622d4a4f7baf9800193505d33e02"
+    },
+    {
+      "relative_path": "audit/neutts-engine-closure-20261017/source-build-observations.json",
+      "bytes": 23547,
+      "sha256": "d4b20c32ac9a9d1b0603534cf885e87c560dfc979968b01531ac7d0219b2d61d"
+    }
+  ],
+  "next_non_model_steps": [
+    "Finish separate Numba and llama.cpp native gates.",
+    "Replay narrow source repairs while preserving dependency declarations.",
+    "Freeze five APT extension closures and exact build dependency closures.",
+    "Build remaining exact compiled artifacts in a separate engine environment.",
+    "Run model-free eSpeak, audio, tensor, tokenization and feature extraction operations.",
+    "Only after legitimate access and exact model byte verification, run reference encoding, default synthesis and watermark checks with measured RSS/latency."
+  ]
+}

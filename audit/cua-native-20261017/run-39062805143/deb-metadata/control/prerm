@@ -1,0 +1,13 @@
+#!/data/data/com.termux/files/usr/bin/sh
+set -eu
+PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+case "${1:-remove}" in
+    remove|deconfigure) ;;
+    *) exit 0 ;;
+esac
+for name in hermes hermes-agent hermes-acp; do
+    link="$PREFIX/bin/$name"
+    if [ -L "$link" ] && [ "$(readlink "$link")" = "../lib/hermes-agent/bin/$name" ]; then
+        rm -f "$link"
+    fi
+done

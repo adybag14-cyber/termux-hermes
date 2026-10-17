@@ -1,0 +1,117 @@
+   Compiling cua-driver-contract v0.21.0 (/data/data/com.termux/files/usr/tmp/cua-probe.ZuVZ7w/source/libs/cua-driver/rust/crates/cua-driver-contract)
+   Compiling x11rb-protocol v0.13.2 (/data/data/com.termux/files/usr/tmp/cua-probe.ZuVZ7w/source/libs/cua-driver/rust/termux-vendor/x11rb-protocol-0.13.2)
+   Compiling cua-driver-core v0.21.0 (/data/data/com.termux/files/usr/tmp/cua-probe.ZuVZ7w/source/libs/cua-driver/rust/crates/cua-driver-core)
+   Compiling x11rb v0.13.2
+warning: unused variable: `cmd`
+   --> crates/cua-driver-core/src/video_ffmpeg.rs:292:24
+    |
+292 | fn platform_input_args(cmd: &mut Command) {
+    |                        ^^^ help: if this is intentional, prefix it with an underscore: `_cmd`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `framerate`
+   --> crates/cua-driver-core/src/video_ffmpeg.rs:293:9
+    |
+293 |     let framerate = "30";
+    |         ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_framerate`
+
+warning: function `cmd_exists` is never used
+  --> crates/cua-driver-core/src/ffmpeg_install.rs:26:4
+   |
+26 | fn cmd_exists(name: &str) -> bool {
+   |    ^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+   Compiling clipboard-rs v0.3.5 (/data/data/com.termux/files/usr/tmp/cua-probe.ZuVZ7w/source/libs/cua-driver/rust/termux-vendor/clipboard-rs-0.3.5)
+warning: unused import: `x11::ClipboardContextX11Options`
+  --> termux-vendor/clipboard-rs-0.3.5/src/platform/mod.rs:44:9
+   |
+44 | pub use x11::ClipboardContextX11Options;
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `clipboard-rs` (lib) generated 1 warning (run `cargo fix --lib -p clipboard-rs` to apply 1 suggestion)
+   Compiling cursor-overlay v0.21.0 (/data/data/com.termux/files/usr/tmp/cua-probe.ZuVZ7w/source/libs/cua-driver/rust/crates/cursor-overlay)
+   Compiling pip-preview v0.21.0 (/data/data/com.termux/files/usr/tmp/cua-probe.ZuVZ7w/source/libs/cua-driver/rust/crates/pip-preview)
+   Compiling cua-driver-sdk v0.21.0 (/data/data/com.termux/files/usr/tmp/cua-probe.ZuVZ7w/source/libs/cua-driver/rust/crates/cua-driver-sdk)
+   Compiling platform-linux v0.21.0 (/data/data/com.termux/files/usr/tmp/cua-probe.ZuVZ7w/source/libs/cua-driver/rust/crates/platform-linux)
+warning: function `build_registry` is never used
+    --> crates/platform-linux/src/tools/impl_.rs:7823:8
+     |
+7823 | pub fn build_registry(compat: bool) -> ToolRegistry {
+     |        ^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `omnibox_holds_setup_url` is never used
+   --> crates/platform-linux/src/browser_setup_ui.rs:165:4
+    |
+165 | fn omnibox_holds_setup_url(node: &AtspiNode, descriptor: &BrowserSetupDescriptor) -> bool {
+    |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `cua-driver-core` (lib) generated 3 warnings (run `cargo fix --lib -p cua-driver-core` to apply 2 suggestions)
+   Compiling cua-driver v0.21.0 (/data/data/com.termux/files/usr/tmp/cua-probe.ZuVZ7w/source/libs/cua-driver/rust/crates/cua-driver)
+warning: `platform-linux` (lib) generated 2 warnings
+warning: function `app_bundle_path` is never used
+  --> crates/cua-driver/src/bundle.rs:88:8
+   |
+88 | pub fn app_bundle_path() -> String {
+   |        ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `permission_flag` is never used
+    --> crates/cua-driver/src/cli.rs:3269:4
+     |
+3269 | fn permission_flag(structured: &serde_json::Value, key: &str) -> bool {
+     |    ^^^^^^^^^^^^^^^
+
+warning: function `permission_grant_is_ready` is never used
+    --> crates/cua-driver/src/cli.rs:3276:4
+     |
+3276 | fn permission_grant_is_ready(structured: &serde_json::Value) -> bool {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `permission_grant_needs_direct_capture` is never used
+    --> crates/cua-driver/src/cli.rs:3282:4
+     |
+3282 | fn permission_grant_needs_direct_capture(structured: &serde_json::Value) -> bool {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `permission_status_request` is never used
+    --> crates/cua-driver/src/cli.rs:3287:4
+     |
+3287 | fn permission_status_request() -> crate::serve::DaemonRequest {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `capture_permissions_gate_completed` is never used
+    --> crates/cua-driver/src/telemetry.rs:1169:15
+     |
+1169 | pub(crate) fn capture_permissions_gate_completed(
+     |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `permissions_gate_resolution` is never used
+    --> crates/cua-driver/src/telemetry.rs:1203:21
+     |
+1203 | pub(crate) const fn permissions_gate_resolution(
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `capture_permissions_gate_started` is never used
+    --> crates/cua-driver/src/telemetry.rs:1216:15
+     |
+1216 | pub(crate) fn capture_permissions_gate_started(
+     |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `capture_permissions_gate_dismissed` is never used
+    --> crates/cua-driver/src/telemetry.rs:1233:15
+     |
+1233 | pub(crate) fn capture_permissions_gate_dismissed(
+     |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `cua-driver` (bin "cua-driver") generated 9 warnings
+    Finished `dev` profile [unoptimized] target(s) in 47.79s
+warning: the following packages contain code that will be rejected by a future version of Rust: nom v1.2.4
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`

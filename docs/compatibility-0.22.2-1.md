@@ -14,17 +14,21 @@ native computer use, Bot Desktop, managed gateway service integration, and
 microphone silence auto-stop. That is **nine named capability restrictions** under
 the counting rule below.
 
-Six of these restrictions have repairs in the main candidate with passing native
-checks: **uvloop, Matrix, Nemo Relay, local managed browser, Bot Desktop, and
-managed gateway service**. A separate CUA port now passes the eleven standalone
-X11 checks and five real Hermes integration checks with an explicit driver and
-foreground input. Normal package discovery and a foreground default resolved
-before approval are implemented and awaiting their own packaged native gate.
-NeuTTS's complete scientific foundation passes all seven gates: six native
-scientific-library checks plus strict dependency/provenance and installed-file
-validation. Its complete engine remains outside the package graph.
-Microphone/VAD still requires real Android audio services. The baseline count
-remains nine.
+**Seven of the nine restrictions now have repairs with passing native checks.**
+The main candidate covers **uvloop, Matrix, Nemo Relay, local managed browser,
+Bot Desktop, and managed gateway service**. Its separate CUA-augmented package
+also passes **all eleven standalone and seven packaged-default computer-use
+checks**, same-version reinstall, a fresh published-to-candidate upgrade, user
+state preservation, optional installation without compilers, and repeated
+environment reuse. These computer-use results concern the owned virtual X11
+desktop; they do not certify arbitrary Android phone UI control.
+
+NeuTTS's scientific foundation and its native Numba/Llama CPU components now
+pass. Its complete engine dependency environment, codec/model behavior and
+synthesis remain separate gates. Microphone/VAD still needs a complete isolated
+audio preparation and real Android audio services. Source repairs and preparation
+for these two remaining restrictions continue below; neither is counted as a
+fully repaired feature. The baseline count remains nine.
 
 The audit also found three broken Android adapter paths (text clipboard, audio
 playback, and microphone maximum duration), and a missing native dependency cache
@@ -105,7 +109,7 @@ source-reviewed judgment, distinct from distribution inventory.
 | uvloop event-loop acceleration | Android marker excludes uvloop 0.22.1. Its setup backend runs shell/configure commands assuming a conventional Unix shell path; the old preconfigure workaround is overwritten by setup.py's later copy/configure sequence. Standard asyncio remains available. | Verify the exact locked source archive, patch the commands actually executed to use Termux's `CONFIG_SHELL`, and admit Android aarch64. Supply the resulting wheel through the reusable bundle cache. | Corrected native ARM TCP/task/shutdown job passed in run 39039959324, including original-payload runtime and successful artifact capture. |
 | Matrix messaging with encryption | Five requirements and the PM extra gate admit Linux only. The encrypted backend's python-olm 3.2.16 builds an older vendored libolm with CMake compatibility assumptions and an incorrectly const-qualified pointer rejected by current Clang. | Preserve bundled static libolm, apply Termux's CMake policy and const-pointer corrections, and admit Android aarch64 for the complete encrypted dependency group. Bundle reusable native wheels. | Native ARM Olm/Megolm, AES, asyncpg codec, HTTP and SQLite probes passed with original payload libraries; no undeclared runtime libraries. |
 | Nemo Relay | Core platform marker excludes Android. The 0.10.0 Rust source unconditionally requests a vendored protoc binary whose platform table lacks Android, ignoring the available system `PROTOC`. The old builder also silently skipped Nemo if it reached the build list. | Verify the locked sdist, honor the system protoc executable, remove the silent omission paths, and require Nemo in completeness checks. | Android Rust build, native plugin validation and scope/trace behavior passed in run 39039959324, including original-payload execution and successful artifact capture. |
-| NeuTTS local speech engine | The declared NeuTTS 1.4.1 pin requires Python >=3.10 and <3.14; its full dependency group is excluded from the current resolved lock. Its published release has platform wheels but **no source distribution**; the closure also needs native Torch/Torchaudio, codec and inference libraries. This package uses Python 3.14.6 on Bionic. | Retain the honest exclusion. Public upstream source exists, but enabling this engine requires a supported Python/runtime arrangement plus the complete native Torch, codec and inference closure. No speculative marker-only enablement is made. | All six native scientific checks now pass after installing nine verified Python wheels: Torch computation, Torchaudio resampling, Torchcodec decoding a real WAV, SciPy, llvmlite JIT and soxr. The original pip failure is retained: seven exact APT wheel tags use a different architecture spelling. The complete foundation passed in run 39058569758: strict original-archive/Python/APT dependency validation, all 2,829 installed files from the nine wheels, and all six native scientific checks. The seven original pip tag errors remain recorded without package metadata changes. A separate Android llama-cpp-python loader fix passes 15 focused host tests; its native build and the full codec/model path remain pending. No NeuTTS engine is installed or admitted. See [remaining portability work](remaining-portability-work.md#neutts-141). |
+| NeuTTS local speech engine | NeuTTS 1.4.1 declares Python >=3.10,<3.14; the Hermes lock excludes its full group under CPython 3.14.6. Its PyPI release has platform wheels but no sdist; exact public source exists. | Prepare a separate complete, pinned native runtime. Fix the actual Android Llama loader, native build invocation, NeuCodec Hub compatibility and Phonemizer library discovery. Keep the original engine exclusion until complete runtime and synthesis validation support changing it. | All seven scientific-foundation gates pass. [Run 39064666810](../audit/neutts-native-20261017/run-39064666810.json) also builds both exact native wheels and passes installed-input verification, Numba nopython JIT/workqueue operations, and Llama backend initialization/cleanup with verified mapped libraries. NeuCodec and Phonemizer patches pass 34 and 30 focused host tests respectively. The full [117-package/194-edge dependency review](neutts-engine-closure.md) is a metadata witness, not an installable lock. Remaining native runtime, codec and model tests are explicit; no engine or synthesis is certified. |
 
 The uvloop, Olm and Nemo adapters reject unexpected source bytes or changed build
 hooks. They do not bypass checksums or substitute unpinned upstream branches.
@@ -125,7 +129,7 @@ The reviewed exact source digests are also embedded in the preparation helpers.
 | Capability | Published behavior | Preparation status |
 | --- | --- | --- |
 | Local managed browser | PM has no Bionic artifact for either AgentBrowser or Chromium. Remote browser/CDP paths are distinct and can remain usable. | Fixed and passed native ARM validation under UID 1000: raw static driver, real PM installation/discovery, built-in browser tools, and the default `browser_exec` handler with the backend unset. Navigation, exact loopback URL/heading, DOM interaction, PNG screenshot and product cleanup all passed. Product PM/discovery integration also passed 139 regression tests. Chromium remains an explicitly APT-owned dependency. See the [final browser evidence](../audit/native-probes-e20e8c4-20261017/browser-summary.json). |
-| Default native computer use | Default CUA driver rejects Android. Having the MCP dependency does not supply this native backend. | Fixed the separate remote Linux provider routing bug. The isolated native CUA driver passed all eleven foreground-X11 checks in [run 39052290704](../audit/cua-native-20261017/run-39052290704.json): real MCP registration, independent screenshot/input/clipboard/geometry oracles, native ABI checks and cleanup. Default background input and AT-SPI trees remain uncertified. The explicit-driver Hermes adapter passes five real native integration checks in [run 39056267366](../audit/cua-native-20261017/run-39056267366.json), including three separate foreground once approvals, exact click/scroll/type events, viewer leases and cleanup. A paired-scroll-coordinate schema defect was found and fixed through that run. Normal PM discovery and a pre-approval foreground default are prepared separately; the driver and adapter remain outside the main candidate. Android phone UI requires an Android-specific backend. |
+| Default native computer use | The default CUA driver rejects Android; the MCP dependency does not supply a native backend. | The separate CUA-augmented candidate now passes [the complete native workflow](../audit/cua-native-20261017/run-39063611615.json): 11 standalone and 7 registered-Hermes checks with normal bundled PM discovery and omitted delivery mode. Foreground is resolved before approval; absent approvers, explicit background requests and background-only grants are refused. Three once approvals, real image/input oracles, viewer leases, cleanup, reinstall, fresh published-package upgrade and compiler-free optional install/reuse pass. The candidate contains the other six repairs and retains the same package version. Scope is its owned virtual X11 desktop. Android phone UI, AT-SPI trees, encrypted history and parallel uinput/background input remain uncertified. |
 | Bot Desktop | Virtual display host is Linux-only. | Added a local Termux Xvnc/Xfce adapter, prefix-aware runtime paths and screenshot capture through scrot. Desktop/remote-provider regressions pass, including real resolver result types. Native ARM UID 1000 validation passed: Xfce, an 800x600 RFB framebuffer, private Xauthority/socket permissions, no TCP display listener, real product screenshot capture and cleanup. |
 | Managed gateway service | Service install/start/uninstall paths reject Termux/APT provenance. Manual foreground/background gateway paths remain available. | Added a per-home Termux runit adapter with owned service directories, separate start-now/login policy, graceful stop and crash supervision. Twenty-four gateway tests pass. Native ARM install/start/status/restart/stop/crash-respawn/uninstall checks also passed, including same-basename home isolation and preservation of the shared supervisor. |
 | Recorder silence auto-stop | The Termux:API recorder does not provide the sounddevice VAD/silence path. Manual stop remains available. | Added explicit auto, sounddevice and termux-api capture selection with accurate diagnostics. The PCM path retains the existing VAD implementation. Exact NumPy 2.4.3 built and passed native numerical checks with both build and original payload libraries. PortAudio loaded, but measured runtime evidence shows only the Termux OpenSL ES wrapper: the actual Android audio framework, Binder devices and audio services are absent. Engine initialization failed in that environment; microphone/VAD remains unverified. Termux:API itself has no PCM stream for this VAD path. A separate [audio-readiness patch](../patches/next-stable/audio-readiness.patch) catches import-time PortAudio failures and rejects output-only device inventories. The [device guide](audio-readiness-device-validation.md) preserves the remaining physical capture/VAD gate. |
@@ -264,16 +268,47 @@ The later [real Hermes integration success](../audit/cua-native-20261017/run-390
 does exercise the registered tool, standard action approvals, a real viewer lease
 and cleanup. It records three distinct once approvals, the requested (80,60)
 click/scroll coordinates and 19 exact typed bytes. All 29,809 original candidate
-file/symlink entries were unchanged across the experiment. This result uses an
-explicit driver and explicit foreground input; bundled-driver selection remains
-a separate gate.
+file/symlink entries were unchanged across the experiment. This earlier result used an
+explicit driver and explicit foreground input. The later packaged-default gate
+below covers normal bundled-driver selection and omitted input delivery mode.
 
 The [complete NeuTTS foundation result](../audit/neutts-native-20261017/run-39058569758.json)
 records all seven passing foundation gates, all 2,829 verified installed wheel
 files, the exact seven retained APT wheel-tag diagnostics, and successful Python
 and APT dependency validation. The validator, collector and wheel preparation
 passed 113 focused host tests before that native run. The [engine source review](neutts-default-gguf-feasibility.md)
-records the remaining exact Numba, llama, codec, eSpeak and model requirements.
+records the exact Numba, llama, codec, eSpeak and model requirements; the later
+CPU result below supersedes its initial native-build-pending checkpoint.
+
+The later [complete packaged CUA result](../audit/cua-native-20261017/run-39063611615.json)
+binds the source patch `8bbfddbb...` and head `5cace91...` to the
+same-version augmented package with SHA-256
+`2b4c01a400622c45cf0f0f7af39fa5cdca4b37e311cebb71cdbacc770aa4f529`.
+All 32,515 prepared payload entries remain unchanged during its probes and
+reinstall. A fresh runtime-only container installs the exact published baseline,
+upgrades to that candidate, verifies all three state fixtures twice, preserves
+100 initial distributions, adds the two exact optional dependencies, and reuses
+the completed environment. Its 56-member Actions artifact was fully reconstructed
+and verified; the earlier [host chmod failure](../audit/cua-native-20261017/run-39062805143.json)
+remains recorded.
+
+The [native speech CPU result](../audit/neutts-native-20261017/run-39064666810.json)
+at head `954a439...` passes the repeated seven foundation gates and all
+three additional component cases. Numba 0.67.0 compiles and executes actual
+nopython JIT and workqueue operations. Matching llama-cpp-python 0.3.36 initializes
+and frees its native backend, reports the real AUTO load mode and CPU
+capabilities, and verifies its loaded libraries. No model is loaded or inference
+performed. The [earlier Llama probe failure](../audit/neutts-native-20261017/run-39063611598.json)
+and [the exact API correction](../audit/neutts-llama-load-mode-probe-fix-20261017.json)
+are preserved.
+
+The [NeuCodec Hub adapter](neucodec-hub1-compatibility.md) and
+[Phonemizer dlinfo repair](phonemizer-android-dlinfo-compatibility.md) preserve
+their declared dependencies and expose actual errors. Their focused host tests
+cover 34 and 30 cases. The [full engine dependency and model audit](neutts-engine-closure.md)
+records every declared runtime edge, the unchanged Python upper bound and the
+two exact default Neuphonic weight downloads that require authenticated model
+access. Public metadata and advertised sizes are not downloaded-weight proof.
 
 The separate [Hermes preparation receipt](../audit/cua-hermes-preparation-20261017.json)
 links the [canonical host tests](../audit/cua-hermes-host-tests-20261017.json).

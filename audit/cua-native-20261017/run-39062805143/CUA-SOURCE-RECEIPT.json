@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "purpose": "isolated native Termux X11 experiment; no PM admission",
+  "source_repository": "trycua/cua",
+  "source_tag": "cua-driver-rs-v0.21.0",
+  "source_commit": "70db98d1bcd92890d778f4978e0eb107a4b66c1b",
+  "source_lock_sha256": "27b025bc4fd81074cf18ae614597bec5b7c9d8ea99b2a7aaf45072aec72c64ce",
+  "prepared_lock_sha256": "fd6e9eb4984e8af3de23f38822bd91ca2e700cd20d0ad81b44142e33991116b9",
+  "source_patch_sha256": "8b7c3453bed12feabd319436eae1abc791b4127a4fe485adcc96eb90ce780b6a",
+  "preparer_sha256": "093c12378c2f04e07da58dce83ac8e77c3d9edf86e5f2ad7bb2d14bd855c1d57",
+  "registry_adapters": [
+    {
+      "name": "clipboard-rs",
+      "version": "0.3.5",
+      "registry": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/clipboard-rs/clipboard-rs-0.3.5.crate",
+      "archive_sha256": "d1c988a897ea030e32f0668c90b0192800e0c561b3d941fc366f9ad5a1bf26ba",
+      "archive_bytes": 52800,
+      "edits": [
+        {
+          "path": "termux-vendor/clipboard-rs-0.3.5/Cargo.toml",
+          "before_sha256": "b188ce2135a516a06aad98efe4f685bad2c9ae813aefbd3ea01f7384495a67fb",
+          "after_sha256": "4525342aaa290f10569af864713ab5b4106feea0b203f357c8764fc04d4b4d3b"
+        },
+        {
+          "path": "termux-vendor/clipboard-rs-0.3.5/src/lib.rs",
+          "before_sha256": "83013190c29b099f546f949ea081e2250c71d3b8efcb02847dd671c270693ccb",
+          "after_sha256": "b92834fab8520e730f1a73c09f31c4dbbba5c90fe807cc98918f8d444cd960e5"
+        },
+        {
+          "path": "termux-vendor/clipboard-rs-0.3.5/src/platform/mod.rs",
+          "before_sha256": "85e216513925da0627cbba22d2c18d2b5e736d106c0cee73e1f366dd0c0e75be",
+          "after_sha256": "0fa9e139aa12793e2bd04dba876a677b0e17a1c6a16b7d5f39c353210582da72"
+        }
+      ],
+      "prepared_tree_sha256": "1ef3400cc7a4783b94cfa2257472fd0835d665da7b82acea6cf557e5e90ad8f8"
+    },
+    {
+      "name": "x11rb-protocol",
+      "version": "0.13.2",
+      "registry": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/x11rb-protocol/x11rb-protocol-0.13.2.crate",
+      "archive_sha256": "ea6fc2961e4ef194dcbfe56bb845534d0dc8098940c7e5c012a258bfec6701bd",
+      "archive_bytes": 514069,
+      "edits": [
+        {
+          "path": "termux-vendor/x11rb-protocol-0.13.2/src/parse_display/connect_instruction.rs",
+          "before_sha256": "e3a05c67ea9b2f9a1e25dcd482fecc2443b1dc5c8b49a6f0e2f2d35b223ef6ae",
+          "after_sha256": "8d00aee51662b8bb3957284a55ee97efd75202a350d3d9041f271dc703b803f6"
+        }
+      ],
+      "prepared_tree_sha256": "0a92a477359ee4a531611c0aee6cea581d3c0daf1c03a9919159bb1ff35a588f"
+    }
+  ],
+  "changed_source_sha256": {
+    "libs/cua-driver/rust/Cargo.lock": "fd6e9eb4984e8af3de23f38822bd91ca2e700cd20d0ad81b44142e33991116b9",
+    "libs/cua-driver/rust/Cargo.toml": "f5da03c2d5bbc708e7f3128b9352f5a28be81bee8d8f6ff7c08e5cd49b6c84d4",
+    "libs/cua-driver/rust/crates/cua-driver-core/src/daemon.rs": "cb6146fa127323ea56fe768a650c2ea51ac5d8b37c0c178c5e6f44083c935817",
+    "libs/cua-driver/rust/crates/cua-driver-sdk/Cargo.toml": "e02368be5bb91d7af696e5c211493a82c3489507a4588b5b12d1e74bd3f92e0e",
+    "libs/cua-driver/rust/crates/cua-driver-sdk/src/runtime.rs": "8d738591bc71e790a02dc063306ecc6192181dacdac4bee54c60cde2baf6851c",
+    "libs/cua-driver/rust/crates/cua-driver/Cargo.toml": "8f79bbb544e37895b7857a9b61eb55cfb757f78e24c659fdf2458712a5a66dac",
+    "libs/cua-driver/rust/crates/cua-driver/src/cli.rs": "c23a58bce4dd883c14d53dbf531d88fdda1f7be3cf8cfbc92e78394a53c7bafa",
+    "libs/cua-driver/rust/crates/cua-driver/src/history_runtime.rs": "ba7babdd9113def18260d1580a29ac6f0cf37f2cf9a8e28d92d55f5c77fa90af",
+    "libs/cua-driver/rust/crates/cua-driver/src/serve.rs": "bd90fd6604e17a0f2b5b71fcbaa8cea6c0758155f09e919f1862a03d46a0ed49",
+    "libs/cua-driver/rust/crates/cua-driver/src/telemetry.rs": "8f7c29316184426b540829c046ba4d297839531a269962651f84ede2654610b7",
+    "libs/cua-driver/rust/crates/platform-linux/Cargo.toml": "0a7310d56d6d9fb6a92abf5847e825230d987c7339f9a1c382c35fbb69b95eba",
+    "libs/cua-driver/rust/crates/platform-linux/src/health_report.rs": "ac21dcf8bc667311e65a33d2eb74d1a85de669c02b45054803d2ac67470bdd66",
+    "libs/cua-driver/rust/crates/platform-linux/src/lib.rs": "fb2f5ded1f5476de9f6d461702ea82736b23873d7f4c7315dbb2005acf6d50ff",
+    "libs/cua-driver/rust/crates/platform-linux/src/overlay.rs": "c8554c4a6733b10fa04ad6a979418ec05e082416e3b49721c49a58621c2b2a2c",
+    "libs/cua-driver/rust/crates/platform-linux/src/recording_hooks.rs": "d9923feaea12aff97102a8bccf017d67fbb9ab08a878d42555c943690c76cd01",
+    "libs/cua-driver/rust/crates/platform-linux/src/terminal.rs": "997d7a231973e835cffd328ae614c9c9f874d63dab793a302f381be5d9436f2e",
+    "libs/cua-driver/rust/crates/platform-linux/src/tools/mod.rs": "d7b51b99ea266fa333c8de49f15b1eb12a6c18754c490cf06e1fcb29d87f8847",
+    "libs/cua-driver/rust/crates/platform-linux/src/tty.rs": "bb517faa6f9e800e1c3a54ee63a0450f458a9356665e0e24b6d8b1b5185b8637",
+    "libs/cua-driver/rust/crates/platform-linux/src/wayland/mod.rs": "f2acde71fe7b71455590850092def1dc6b196482014df3aa4549d637ad66aa60",
+    "libs/cua-driver/rust/crates/platform-linux/src/wayland/virtual_keyboard.rs": "359f22aac6df43b9878734b097e5d249007c3244b3b456dbcda486593c51fd03"
+  },
+  "unchanged_registry_package_rows": 602,
+  "unavailable_claims": [
+    "Android phone UI",
+    "TigerVNC parallel uinput pointers",
+    "encrypted history without a supported secure credential store"
+  ]
+}

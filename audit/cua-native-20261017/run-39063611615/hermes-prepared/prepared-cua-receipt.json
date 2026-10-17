@@ -1,0 +1,597 @@
+{
+  "assembly_source": {
+    "files": {
+      "scripts/build/agent.py": {
+        "bytes": 8754,
+        "sha256": "f59ed0dc39a37814a43f2465e1391311a3ce8203e42a69257e58db6f3cda3652"
+      },
+      "scripts/build/inputs.py": {
+        "bytes": 5846,
+        "sha256": "36fb218726fce97505d7dfd50002046bb9c19b25c0b7cc546bae0b9c586083d9"
+      },
+      "scripts/build/launcher_wrapper.py": {
+        "bytes": 6327,
+        "sha256": "bfab043b63b8faa588ea1fa6f9143ff33b319df71ef6a7e3855f8574c2b07155"
+      },
+      "scripts/build/launchers.py": {
+        "bytes": 4861,
+        "sha256": "cf5c225ded65193042a330f69b217a5ffcd5201032cca9e288cebea681cb37b3"
+      }
+    },
+    "upstream_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8"
+  },
+  "bundled_tools": {
+    "descriptor": {
+      "path": "bundled-tools.json",
+      "sha256": "a87cb211f069b91ad5672cfc406d8fd2f6419f53ef6e18e5c3c4f4595d410f54"
+    },
+    "tool": {
+      "binary": "cua-driver",
+      "binary_sha256": "97abdcfdbddc55c20c9ea4a2e897be9e3183458df83475cee0e3d152212f0b53",
+      "entry": "tools/cua-driver-0.21.0-linux-arm64-bionic",
+      "name": "cua-driver",
+      "source_receipt": "source-receipt.json",
+      "source_receipt_sha256": "47c43e002a868f0387e02142a9c623e5790c2656076959688abc3e93a6ec6167",
+      "target": "linux-arm64-bionic",
+      "tree_sha256": "20f27658cd05c52b9c053fd1058bd48d1098fdaf9d9658a199df11c66a05bcd8",
+      "version": "0.21.0"
+    }
+  },
+  "checks": {
+    "canonical_agent_assembly": "passed",
+    "deb_roundtrip_identity": "passed",
+    "exact_patch_paths_and_output_hashes": "passed",
+    "installed_package_reinstall_and_optional_pm_lifecycle": "required-pending",
+    "native_default_cua_integration": "required-pending",
+    "native_dependency_identity": "passed",
+    "original_input_and_installed_payload_preserved": "passed",
+    "passive_resident_selection": "passed",
+    "unchanged_dependency_bytes": "passed"
+  },
+  "control": {
+    "declared_runtime_libraries": {
+      "libX11.so": "libx11",
+      "libXi.so": "libxi"
+    },
+    "installed_size_kib": {
+      "after": "992248",
+      "before": "884264"
+    },
+    "original": {
+      "control": {
+        "bytes": 195,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "fe562832c7e807ece0d82c3312f6fb667b72a9e6985896e66f344e2b51c0ac2f"
+      },
+      "postinst": {
+        "bytes": 509,
+        "kind": "file",
+        "mode": 493,
+        "sha256": "9c4333832be51fc5ebdc5bab16f9e51a6faf02b8e2b7229a5f8d71b392f5e678"
+      },
+      "prerm": {
+        "bytes": 374,
+        "kind": "file",
+        "mode": 493,
+        "sha256": "25eb3c8d7518f79f5452ddf012ff7fea3fc0dfe30e8d2aa795d8e25bf228843a"
+      }
+    },
+    "original_fields": {
+      "Architecture": "aarch64",
+      "Description": "Hermes Agent CLI for Termux (self-contained bundled python/node/venv)",
+      "Installed-Size": "884264",
+      "Maintainer": "adybag14-cyber",
+      "Package": "hermes-agent",
+      "Version": "0.22.2-1"
+    },
+    "prepared": {
+      "control": {
+        "bytes": 218,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "c03049576e2015e8356d801896aa8bcc92200ca1af0045c5fc62d7cbabd3fcbb"
+      },
+      "postinst": {
+        "bytes": 509,
+        "kind": "file",
+        "mode": 493,
+        "sha256": "9c4333832be51fc5ebdc5bab16f9e51a6faf02b8e2b7229a5f8d71b392f5e678"
+      },
+      "prerm": {
+        "bytes": 374,
+        "kind": "file",
+        "mode": 493,
+        "sha256": "25eb3c8d7518f79f5452ddf012ff7fea3fc0dfe30e8d2aa795d8e25bf228843a"
+      }
+    },
+    "prepared_fields": {
+      "Architecture": "aarch64",
+      "Depends": "libx11, libxi",
+      "Description": "Hermes Agent CLI for Termux (self-contained bundled python/node/venv)",
+      "Installed-Size": "992248",
+      "Maintainer": "adybag14-cyber",
+      "Package": "hermes-agent",
+      "Version": "0.22.2-1"
+    }
+  },
+  "dependency_identity": {
+    "environment_rebuilt": false,
+    "facts_sha256": "a6f4930d619eaf8c86f14bd98421baa47ee5ddf6da1dd3b01b81c7568dd7d3fc",
+    "locks_and_catalog_preserved": true,
+    "method": "Native PM recomputation; unchanged exact graph/catalog and final interpreter path.",
+    "original_pm_runtime_inventory_sha256": "07b31614b4756d5453ad3d5c747e7d40b4a94b94496e05749d0daff535b8c708",
+    "original_venv_inventory_sha256": "7a7bfa3334b7cd17f73d65c3be4a1832af0b7bf9bd0a4a6614f74578ae10a15e",
+    "original_wheel_count": 100,
+    "original_wheels_preserved": true,
+    "pm_runtime_inputs_original": "4de3e31fb23069e9ef4d0b748ee2d78fe890205d50a8c6571d2f3de72df2a379",
+    "pm_runtime_inputs_recomputed": "4de3e31fb23069e9ef4d0b748ee2d78fe890205d50a8c6571d2f3de72df2a379",
+    "venv_stamp_original": "3b2935496d2e947be1904f37052d1fcbae409418e892a52973d5a46fc1df4d7f",
+    "venv_stamp_recomputed": "3b2935496d2e947be1904f37052d1fcbae409418e892a52973d5a46fc1df4d7f"
+  },
+  "driver_input": {
+    "bytes": 110459288,
+    "file": "cua-driver",
+    "sha256": "97abdcfdbddc55c20c9ea4a2e897be9e3183458df83475cee0e3d152212f0b53"
+  },
+  "driver_linkage": {
+    "apt_depends": "libx11, libxi",
+    "interpreter": "/system/bin/linker64",
+    "method": "Read actual ELF PT_DYNAMIC/DT_NEEDED/PT_INTERP; no driver execution.",
+    "needed": [
+      "libX11.so",
+      "libXi.so",
+      "libdl.so",
+      "libm.so",
+      "libc.so"
+    ],
+    "platform_libraries": [
+      "libc.so",
+      "libdl.so",
+      "libm.so"
+    ],
+    "search_path": [
+      "/data/data/com.termux/files/usr/bin/../../usr/lib"
+    ]
+  },
+  "input_candidate": {
+    "artifact_id": 12107225801,
+    "candidate_receipt_sha256": "2bf694eec468c10a4d3820092813d8b2734c2b212954888009e3867a8a88dbf3",
+    "head_sha": "e271e922a2e71fd18591c45e9b98b8c7f9fffe02",
+    "package_sha256": "1e4e58fe17a1800f23ababcb2724e92b8904829eae3284569db52dbc672ca76a",
+    "run_id": 39048514731
+  },
+  "interpreter": {
+    "base_prefix": "/data/data/com.termux/files/usr/lib/hermes-agent/tools/python/data/data/com.termux/files/usr",
+    "executable": "/data/data/com.termux/files/usr/lib/hermes-agent/venv/bin/python",
+    "machine": "aarch64",
+    "sha256": "4f8d78ede7fc26e96e99342dd83ce42d32c9b4d0806bc9a99ff7151396269b25",
+    "sys_platform": "android",
+    "version": "3.14.6 (main, Jul  5 2026, 10:35:55) [Clang 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 5e96669f0"
+  },
+  "native_selection": {
+    "bundled_wheels": {
+      "path": "bundled-wheels.json",
+      "sha256": "d2dc66575cf8aa5ef828e5e536b4d55b8801143101b7e608f6fb4878c2397904"
+    },
+    "extras": [
+      "acp",
+      "cron",
+      "matrix",
+      "mcp",
+      "telegram",
+      "termux",
+      "uvloop"
+    ],
+    "pm_lock_sha256": "49b79259220160f147255078a19af541a5f328d3871c8041cc1eb909d19eb549",
+    "requirements_sha256": "f3e32ca1cae5bb50a30e0957ed136f992d546e4475fb8bc73350790e9e762698",
+    "schema": 1,
+    "stamp": "3b2935496d2e947be1904f37052d1fcbae409418e892a52973d5a46fc1df4d7f",
+    "target": "linux-arm64-bionic",
+    "uv_lock_sha256": "72abb87a634769baaf30830cd317892053c6e15f8e9519b085524fa0ed542829"
+  },
+  "package": {
+    "architecture": "aarch64",
+    "bytes": 235252088,
+    "depends": "libx11, libxi",
+    "file": "hermes-agent_0.22.2-1_aarch64-cua-candidate.deb",
+    "name": "hermes-agent",
+    "pre_depends": "",
+    "sha256": "2b4c01a400622c45cf0f0f7af39fa5cdca4b37e311cebb71cdbacc770aa4f529",
+    "version": "0.22.2-1"
+  },
+  "packaging_commit": "5cace91a4253642d2597c7712b7cf119ade8d892",
+  "patch": {
+    "bytes": 67709,
+    "file": "cua-hermes-integration.patch",
+    "sha256": "8bbfddbbacfd508db35de6158e4c1a2c06423b84cd5f4ed621d4955fcd529edd"
+  },
+  "payload": {
+    "inventory": {
+      "bytes": 6788659,
+      "file": "CUA-PREPARED-PAYLOAD.json",
+      "sha256": "a64a3e7f99f39a2307f1cd536b374812dc464bb496277cff670f4088eac5e354"
+    },
+    "inventory_sha256": "58d150406bd900a0e6c92328097b54c8a8b8a510bd5de47590c582fb8d4efa6d",
+    "manifest_sha256": "cc0bd22d50a3c1881b85e21ec0cf985e407b85b64bcacf2ffac2190f575a9087",
+    "root": "/data/data/com.termux/files/usr/lib/hermes-agent"
+  },
+  "payload_changes": {
+    "app/hermes_cli/tools_config.py": {
+      "after": {
+        "bytes": 62528,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "0917e0ba72ebcec3f9ef25fc2912881d93e957c69d9d5c588bbbd043e400352a"
+      },
+      "before": {
+        "bytes": 62413,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "43fe9f97de62893fd7d372067adb979e41ecec32f5fec9fd6d0fba7474f91664"
+      }
+    },
+    "app/hermes_cli/tools_config_cua.py": {
+      "after": {
+        "bytes": 13367,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "2b3a21ebe23a5cf73a760bb50674e450d9bbc29ed639494506cca265cce3c6a5"
+      },
+      "before": {
+        "bytes": 12609,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "1c59fa3b0893ae5ad9a9935fbe08d8217a470a742eaca1c7eebb2a127cd826c4"
+      }
+    },
+    "app/hermes_cli/tools_config_providers.py": {
+      "after": {
+        "bytes": 57967,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "ac8f72e9f4ba724e2d6f7d5815cbe949e106d05d0fc28470f384824dcccb29bc"
+      },
+      "before": {
+        "bytes": 57975,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "feb6278c87923ce2ae0e232af926ac04e0a033c273bad57128527aa24ed442a5"
+      }
+    },
+    "app/plugins/computer_use/cua/__init__.py": {
+      "after": {
+        "bytes": 2184,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "8c641bf2d6a455c46c93d5d3b5c025a618810a0938f3039ef81a25153e7c3661"
+      },
+      "before": {
+        "bytes": 1497,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "b2d0cc91e57dc01be5088287a3efa98b5aa174f347d2822bd180ac0bac31f37c"
+      }
+    },
+    "app/pm/bundled_tools.py": {
+      "after": {
+        "bytes": 10485,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "ffa6a1e2c608d22034e7242e056936a7f306f400dd9ebd0e4a527b6ae4c8eabe"
+      },
+      "before": null
+    },
+    "app/pm/install.py": {
+      "after": {
+        "bytes": 44976,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "8976fae19e0fb96f78b6a30629b34b12eb4a3281aa5349ddfd0f2fac7fa5d4d1"
+      },
+      "before": {
+        "bytes": 43978,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "03cdcda0964e93c7f02a9a1565e02e9b614c7b3a970fa2e646832bfdb5d3c354"
+      }
+    },
+    "app/pm/packages.py": {
+      "after": {
+        "bytes": 59135,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "afd5805ee887176b7abd187a5ebf7ef82dcb88e766551214a440b27657026311"
+      },
+      "before": {
+        "bytes": 58757,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "2d7e25f30ecc223279893bebe2cbba44f6677a009aec929706343770bda00c6c"
+      }
+    },
+    "app/tests/hermes_cli/test_cua_termux_setup.py": {
+      "after": {
+        "bytes": 1313,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "727bfcef24f4c7d64b7a2819b4dee00ab0ffb999224e432d0a56c13fe5611fd6"
+      },
+      "before": null
+    },
+    "app/tests/pm/test_bundled_tools.py": {
+      "after": {
+        "bytes": 10409,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "55e8b51da40511748c911b24dbe166135aa03b22b81620c13da8aaa8b8bc1afa"
+      },
+      "before": null
+    },
+    "app/tests/tools/test_computer_use_termux_override.py": {
+      "after": {
+        "bytes": 5306,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "78b012f260821bc13c072f1517402f7cde3a2a70e15f1cec8b23d11555a5e3f7"
+      },
+      "before": null
+    },
+    "app/tests/tools/test_cua_scroll_schema.py": {
+      "after": {
+        "bytes": 2667,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "fa40a2af52bd3e5e3a7946af91b0082dd1fd52f8dcf10234b69af1a6867008a5"
+      },
+      "before": null
+    },
+    "app/tests/tools/test_cua_termux_delivery.py": {
+      "after": {
+        "bytes": 9580,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "fce4feb09e70d8fd7870127159d979e487310ec6e72fced729b0852c71793021"
+      },
+      "before": null
+    },
+    "app/tools/computer_use/cua_backend.py": {
+      "after": {
+        "bytes": 28820,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "f45d94d5d844e87d857b72a854f29eb6edabf13777e01cf922835f976ac9bd35"
+      },
+      "before": {
+        "bytes": 28305,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "6c0287de53eb3fbfd3307d961898554343271e406c4e6bd31ba4a43194ab5821"
+      }
+    },
+    "app/tools/computer_use/cua_backend_driver.py": {
+      "after": {
+        "bytes": 10146,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "c24c0cc00914e7450dcd7dcb2dc8d9cba1811894b64f1a248e62cbbc153932b8"
+      },
+      "before": {
+        "bytes": 9939,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "8031564bf9e19111b295496a4312ce96087163ba6b9f9ff6e0b1da6796159d67"
+      }
+    },
+    "app/tools/computer_use/cua_backend_input.py": {
+      "after": {
+        "bytes": 11650,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "e9bab44b82580a11015d631727a272d044711b2a096d74898725dcf5f172aab2"
+      },
+      "before": {
+        "bytes": 11477,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "a34c327a5526f2250d2c9a520b999a75f693d42b10fced4ef5270911044d1004"
+      }
+    },
+    "app/tools/computer_use/cua_backend_platform.py": {
+      "after": {
+        "bytes": 3453,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "05be45b88ec4378d3c87d5549bf85990bb193c233fb6724777ed5d6fe3d2ca2f"
+      },
+      "before": null
+    },
+    "app/tools/computer_use/permissions.py": {
+      "after": {
+        "bytes": 8792,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "4c13f04af424f04e34448a9485564c9c5070862f7e54fbe752de937dbb72c995"
+      },
+      "before": {
+        "bytes": 7981,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "1723fcfb656581149daeb8bc6f4a59f35048ba1772e828832835fb5b9abae729"
+      }
+    },
+    "app/tools/computer_use/schema.py": {
+      "after": {
+        "bytes": 8769,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "97b6171c49506bfd15883e9f438b4ffa73c8fb28f3864b7085ecd9f708ce5fba"
+      },
+      "before": {
+        "bytes": 8671,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "b3a476af8599f7936e8eebd0f552e5eaf82c4261199f9bf07aa3837a67ade726"
+      }
+    },
+    "app/tools/computer_use/tool.py": {
+      "after": {
+        "bytes": 65590,
+        "kind": "file",
+        "mode": 384,
+        "sha256": "c6a9123bdc171f5e106d85dc30440cebdfe061476939987607c272eeaf2b5a36"
+      },
+      "before": {
+        "bytes": 64523,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "0f61a487c96ef94fde4e1ecfb52df6efafbd37c055433618a6d6f8aebb2d28fc"
+      }
+    },
+    "bundled-tools.json": {
+      "after": {
+        "bytes": 565,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "a87cb211f069b91ad5672cfc406d8fd2f6419f53ef6e18e5c3c4f4595d410f54"
+      },
+      "before": null
+    },
+    "manifest.json": {
+      "after": {
+        "bytes": 802,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "cc0bd22d50a3c1881b85e21ec0cf985e407b85b64bcacf2ffac2190f575a9087"
+      },
+      "before": {
+        "bytes": 661,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "92c526401eb6b48e6aab07fe70c73efad9e1aeef0ee7126954c288b56e15b0c5"
+      }
+    },
+    "tools/cua-driver-0.21.0-linux-arm64-bionic": {
+      "after": {
+        "kind": "directory",
+        "mode": 448
+      },
+      "before": null
+    },
+    "tools/cua-driver-0.21.0-linux-arm64-bionic/cua-driver": {
+      "after": {
+        "bytes": 110459288,
+        "kind": "file",
+        "mode": 493,
+        "sha256": "97abdcfdbddc55c20c9ea4a2e897be9e3183458df83475cee0e3d152212f0b53"
+      },
+      "before": null
+    },
+    "tools/cua-driver-0.21.0-linux-arm64-bionic/source-receipt.json": {
+      "after": {
+        "bytes": 5571,
+        "kind": "file",
+        "mode": 420,
+        "sha256": "47c43e002a868f0387e02142a9c623e5790c2656076959688abc3e93a6ec6167"
+      },
+      "before": null
+    }
+  },
+  "published": false,
+  "purpose": "Unpublished native default-CUA and package-lifecycle validation only.",
+  "schema_version": 1,
+  "source": {
+    "changed_files": {
+      "hermes_cli/tools_config.py": {
+        "bytes": 62528,
+        "sha256": "0917e0ba72ebcec3f9ef25fc2912881d93e957c69d9d5c588bbbd043e400352a"
+      },
+      "hermes_cli/tools_config_cua.py": {
+        "bytes": 13367,
+        "sha256": "2b3a21ebe23a5cf73a760bb50674e450d9bbc29ed639494506cca265cce3c6a5"
+      },
+      "hermes_cli/tools_config_providers.py": {
+        "bytes": 57967,
+        "sha256": "ac8f72e9f4ba724e2d6f7d5815cbe949e106d05d0fc28470f384824dcccb29bc"
+      },
+      "plugins/computer_use/cua/__init__.py": {
+        "bytes": 2184,
+        "sha256": "8c641bf2d6a455c46c93d5d3b5c025a618810a0938f3039ef81a25153e7c3661"
+      },
+      "pm/bundled_tools.py": {
+        "bytes": 10485,
+        "sha256": "ffa6a1e2c608d22034e7242e056936a7f306f400dd9ebd0e4a527b6ae4c8eabe"
+      },
+      "pm/install.py": {
+        "bytes": 44976,
+        "sha256": "8976fae19e0fb96f78b6a30629b34b12eb4a3281aa5349ddfd0f2fac7fa5d4d1"
+      },
+      "pm/packages.py": {
+        "bytes": 59135,
+        "sha256": "afd5805ee887176b7abd187a5ebf7ef82dcb88e766551214a440b27657026311"
+      },
+      "tests/hermes_cli/test_cua_termux_setup.py": {
+        "bytes": 1313,
+        "sha256": "727bfcef24f4c7d64b7a2819b4dee00ab0ffb999224e432d0a56c13fe5611fd6"
+      },
+      "tests/pm/test_bundled_tools.py": {
+        "bytes": 10409,
+        "sha256": "55e8b51da40511748c911b24dbe166135aa03b22b81620c13da8aaa8b8bc1afa"
+      },
+      "tests/tools/test_computer_use_termux_override.py": {
+        "bytes": 5306,
+        "sha256": "78b012f260821bc13c072f1517402f7cde3a2a70e15f1cec8b23d11555a5e3f7"
+      },
+      "tests/tools/test_cua_scroll_schema.py": {
+        "bytes": 2667,
+        "sha256": "fa40a2af52bd3e5e3a7946af91b0082dd1fd52f8dcf10234b69af1a6867008a5"
+      },
+      "tests/tools/test_cua_termux_delivery.py": {
+        "bytes": 9580,
+        "sha256": "fce4feb09e70d8fd7870127159d979e487310ec6e72fced729b0852c71793021"
+      },
+      "tools/computer_use/cua_backend.py": {
+        "bytes": 28820,
+        "sha256": "f45d94d5d844e87d857b72a854f29eb6edabf13777e01cf922835f976ac9bd35"
+      },
+      "tools/computer_use/cua_backend_driver.py": {
+        "bytes": 10146,
+        "sha256": "c24c0cc00914e7450dcd7dcb2dc8d9cba1811894b64f1a248e62cbbc153932b8"
+      },
+      "tools/computer_use/cua_backend_input.py": {
+        "bytes": 11650,
+        "sha256": "e9bab44b82580a11015d631727a272d044711b2a096d74898725dcf5f172aab2"
+      },
+      "tools/computer_use/cua_backend_platform.py": {
+        "bytes": 3453,
+        "sha256": "05be45b88ec4378d3c87d5549bf85990bb193c233fb6724777ed5d6fe3d2ca2f"
+      },
+      "tools/computer_use/permissions.py": {
+        "bytes": 8792,
+        "sha256": "4c13f04af424f04e34448a9485564c9c5070862f7e54fbe752de937dbb72c995"
+      },
+      "tools/computer_use/schema.py": {
+        "bytes": 8769,
+        "sha256": "97b6171c49506bfd15883e9f438b4ffa73c8fb28f3864b7085ecd9f708ce5fba"
+      },
+      "tools/computer_use/tool.py": {
+        "bytes": 65590,
+        "sha256": "c6a9123bdc171f5e106d85dc30440cebdfe061476939987607c272eeaf2b5a36"
+      }
+    },
+    "full_source_reference_only": {
+      "baseline_tree": "f49c77b666cef7fd5235cdd786556908527b532e",
+      "replay_tree": "dfac85279351daafa64350b6bfc7fcb3ac3ce02b"
+    },
+    "method": "Exact candidate trimmed app plus the pinned experimental patch; not the full reference Git tree.",
+    "original_app_inventory_sha256": "03f3225745f91885150e7a000d4557c73e7f951305753340a74b65cfac828f8f",
+    "prepared_app_inventory_sha256": "adcd8c39b22572385c53e9152e1a4b3519949b7074ed51a2baa69f8c7568f236"
+  },
+  "source_receipt": {
+    "bytes": 5571,
+    "file": "CUA-SOURCE-RECEIPT.json",
+    "sha256": "47c43e002a868f0387e02142a9c623e5790c2656076959688abc3e93a6ec6167"
+  },
+  "status": "prepared-candidate",
+  "version_bumped": false
+}

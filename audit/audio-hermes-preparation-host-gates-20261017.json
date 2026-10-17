@@ -1,0 +1,67 @@
+{
+  "actual_four_path_patch_replay": [
+    {
+      "baseline_bytes": 70132,
+      "baseline_sha256": "f5be589a9807016958af833cdabb4e1f965db1b3935bdacad72a89f7b0ac88eb",
+      "path": "tools/voice_mode.py",
+      "prepared_bytes": 70749,
+      "prepared_sha256": "2080ba077ec94146d06cbd704a7e21763e5cf37f4221561145b4c45de6a78a58"
+    },
+    {
+      "baseline_bytes": 6870,
+      "baseline_sha256": "3fe427ceac71c7a4680f4d9e88b6ffe957b46753bc7683d468dbb4f3ab0b96d0",
+      "path": "tools/voice_mode_capture.py",
+      "prepared_bytes": 7542,
+      "prepared_sha256": "492c013f8473acdd58dff027ffc4f787347dc27524e801692bf32efe67516d60"
+    },
+    {
+      "baseline_bytes": 2208,
+      "baseline_sha256": "25c0db303a87391b64f2c3863fbd11534a146575ce26a32c5e76f96c9e5bee95",
+      "path": "tests/tools/test_voice_wsl_pipewire.py",
+      "prepared_bytes": 2233,
+      "prepared_sha256": "3ac8ad669799f3c23b1bfda02996619e7f71d8ed08c58a80fd61234981870be0"
+    },
+    {
+      "baseline_bytes": 0,
+      "baseline_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path": "tests/tools/test_voice_audio_readiness.py",
+      "prepared_bytes": 3281,
+      "prepared_sha256": "d94b5bc0db75dff255c4f1ef5cd155d5605ce907d2606c2e71052457b5c470ef"
+    }
+  ],
+  "embedded_workflow_python_ast": "passed",
+  "files": {
+    ".github/workflows/audio-hermes-preparation.yml": {
+      "bytes": 5740,
+      "sha256": "5f8cefb7454431a7408a49522ff383394af56cbdc7330c85cb6ffadc4d4ed780"
+    },
+    "scripts/compatibility_probe_audio_hermes.py": {
+      "bytes": 12881,
+      "sha256": "487b35edf7f65c0c1482095486a12d021473e73fceac11038e3769d490a8c85b"
+    },
+    "scripts/prepare_audio_hermes_environment.py": {
+      "bytes": 55237,
+      "sha256": "9fd482258e43aa2472dbaefb787b757855a5f905c7acb303133c75321c49fe94"
+    },
+    "scripts/run_audio_hermes_preparation.sh": {
+      "bytes": 4646,
+      "sha256": "db04f7c51f18ffe1f5e2fab6ac2303d337ea657bb7199b5349a8a460f2b9ef2d"
+    },
+    "tests/test_audio_hermes_preparation.py": {
+      "bytes": 12494,
+      "sha256": "78ca16d81246c004fcd35237d6f9f9868a2f126d0f5777809ebaaeec2733a000"
+    }
+  },
+  "native_execution": false,
+  "python_ast": "passed",
+  "runner_bash_syntax": "passed",
+  "schema_version": 1,
+  "status": "passed",
+  "workflow_run_blocks_bash_syntax": [
+    "Fetch the exact verified main candidate",
+    "Fetch exact audio wheels, official wrapper and canonical source",
+    "Complete the offline reconstruction input bundle",
+    "Prepare and probe twice at independent final paths"
+  ],
+  "workflow_yaml": "passed"
+}
