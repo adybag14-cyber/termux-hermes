@@ -16,6 +16,7 @@ RUN_ID = "123456789"
 COMMIT = "d923a5eb487a17c0a68801bba9ef0f56c81040a8"
 HEAD = "9a82cb98862edee817da4f9648a3d16d12fe5e7b"
 TAG = "hermes-agent-termux-0.22.2-20261016.1"
+DRAFT_ID = 415483610
 VERSION = "0.22.2-1"
 FILENAME = f"hermes-agent_{VERSION}_aarch64.deb"
 PINS = {
@@ -170,7 +171,8 @@ def test_stale_installer_pins_block_publication(
 
 def release_assets(candidate: Path) -> dict:
     return {
-        "tag_name": TAG, "draft": True,
+        "id": DRAFT_ID, "tag_name": TAG, "draft": True, "prerelease": False,
+        "published_at": None, "target_commitish": HEAD,
         "assets": [
             {"name": path.name, "digest": f"sha256:{checksum(path)}",
              "size": path.stat().st_size, "state": "uploaded"}
@@ -182,11 +184,11 @@ def release_assets(candidate: Path) -> dict:
 def test_every_uploaded_draft_asset_must_match_before_publication(tmp_path: Path) -> None:
     candidate, _ = candidate_files(tmp_path)
     release = release_assets(candidate)
-    promote.verify_release_assets(candidate, release, TAG)
+    promote.verify_release_assets(candidate, release, TAG, DRAFT_ID, HEAD)
     package = next(asset for asset in release["assets"] if asset["name"] == FILENAME)
     package["digest"] = None
     with pytest.raises(ValueError, match="digest/size/state mismatch"):
-        promote.verify_release_assets(candidate, release, TAG)
+        promote.verify_release_assets(candidate, release, TAG, DRAFT_ID, HEAD)
 
 
 def test_tag_availability_errors_do_not_masquerade_as_absence(
@@ -200,6 +202,141 @@ def test_tag_availability_errors_do_not_masquerade_as_absence(
     )
     with pytest.raises(ValueError, match="could not establish"):
         promote.ensure_new_release(REPO, TAG)
+
+
+def draft_release(**changed: object) -> dict:
+    return {
+        "id": DRAFT_ID, "tag_name": TAG, "draft": True, "prerelease": False,
+        "published_at": None, "target_commitish": HEAD, **changed,
+    }
+
+
+def mock_release_pages(monkeypatch: pytest.MonkeyPatch, pages: list) -> list[list[str]]:
+    calls: list[list[str]] = []
+
+    def run(args: list[str], **kwargs: object) -> SimpleNamespace:
+        calls.append(args)
+        assert "--paginate" in args and "--slurp" in args
+        assert args[-1] == f"repos/{REPO}/releases?per_page=100"
+        return SimpleNamespace(returncode=0, stdout=json.dumps(pages), stderr="")
+
+    monkeypatch.setattr(promote.subprocess, "run", run)
+    return calls
+
+
+def test_new_release_rejects_hidden_draft_on_later_page_before_checking_tag(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = mock_release_pages(monkeypatch, [
+        [draft_release(tag_name="older-release", id=DRAFT_ID - 1)],
+        [draft_release()],
+    ])
+    with pytest.raises(ValueError, match="immutable release or draft already exists"):
+        promote.ensure_new_release(REPO, TAG)
+    assert len(calls) == 1
+
+
+def test_draft_id_comes_from_creation_response_without_network_readback(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture,
+) -> None:
+    created = tmp_path / "created-draft.json"
+    created.write_text(json.dumps(draft_release()), encoding="utf-8")
+    monkeypatch.setattr(promote.sys, "argv", [
+        "verify_release_candidate", "draft-id", "--release-json", str(created),
+        "--release-tag", TAG, "--target-commit", HEAD,
+    ])
+
+    def unexpected_readback(*args: object, **kwargs: object) -> None:
+        pytest.fail("draft creation response must not need a list or tag endpoint lookup")
+
+    monkeypatch.setattr(promote.subprocess, "run", unexpected_readback)
+    assert promote.main() == 0
+    assert capsys.readouterr().out == f"{DRAFT_ID}\n"
+
+
+@pytest.mark.parametrize("changed", [
+    {"id": None}, {"id": True}, {"id": 0}, {"id": -1}, {"id": str(DRAFT_ID)},
+    {"tag_name": "untagged-a852d1b6ec5675f3389b"},
+    {"target_commitish": "a" * 40}, {"target_commitish": "main"},
+    {"draft": False}, {"prerelease": True}, {"prerelease": None},
+    {"published_at": "2026-10-17T00:00:00Z"},
+])
+def test_creation_response_requires_expected_draft_identity(changed: dict) -> None:
+    with pytest.raises(ValueError, match="numeric release ID|unpublished draft"):
+        promote.validate_draft(draft_release(**changed), TAG, HEAD)
+
+
+@pytest.mark.parametrize("payload", ["[]", '{"id": true}', "invalid JSON"])
+def test_draft_id_cli_rejects_invalid_creation_response(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture,
+    payload: str,
+) -> None:
+    created = tmp_path / "created-draft.json"
+    created.write_text(payload, encoding="utf-8")
+    monkeypatch.setattr(promote.sys, "argv", [
+        "verify_release_candidate", "draft-id", "--release-json", str(created),
+        "--release-tag", TAG, "--target-commit", HEAD,
+    ])
+    with pytest.raises(SystemExit) as error:
+        promote.main()
+    assert error.value.code == 1
+    assert not capsys.readouterr().out
+
+
+@pytest.mark.parametrize("payload", [
+    "invalid JSON", "null", "{}", "[]", '[{"tag_name": "release"}]',
+    '[[null]]', '[[{"id": 1}]]', '[[{"tag_name": null}]]',
+])
+def test_malformed_release_list_cannot_establish_absence(
+    monkeypatch: pytest.MonkeyPatch, payload: str,
+) -> None:
+    monkeypatch.setattr(
+        promote.subprocess, "run",
+        lambda *args, **kwargs: SimpleNamespace(returncode=0, stdout=payload, stderr=""),
+    )
+    with pytest.raises(ValueError, match="invalid .*release list"):
+        promote.ensure_new_release(REPO, TAG)
+
+
+@pytest.mark.parametrize("status,returncode,accepted", [
+    ("HTTP/2.0 404 Not Found", 1, True),
+    ("HTTP/2.0 200 OK", 0, False),
+    ("HTTP/2.0 503 Service Unavailable", 1, False),
+    ("", 1, False),
+])
+def test_absent_release_requires_explicit_git_tag_404(
+    monkeypatch: pytest.MonkeyPatch, status: str, returncode: int, accepted: bool,
+) -> None:
+    calls: list[list[str]] = []
+
+    def run(args: list[str], **kwargs: object) -> SimpleNamespace:
+        calls.append(args)
+        if len(calls) == 1:
+            return SimpleNamespace(returncode=0, stdout="[[]]", stderr="")
+        assert args[-1] == f"repos/{REPO}/git/ref/tags/{TAG}"
+        return SimpleNamespace(returncode=returncode, stdout=status + "\n", stderr=status)
+
+    monkeypatch.setattr(promote.subprocess, "run", run)
+    if accepted:
+        promote.ensure_new_release(REPO, TAG)
+    else:
+        with pytest.raises(ValueError, match="Git tag already exists|could not establish tag absence"):
+            promote.ensure_new_release(REPO, TAG)
+    assert len(calls) == 2
+
+
+@pytest.mark.parametrize("changed", [
+    {"id": DRAFT_ID + 1},
+    {"target_commitish": "b" * 40},
+    {"draft": False}, {"prerelease": True},
+])
+def test_assets_response_must_be_the_selected_unpublished_draft(
+    tmp_path: Path, changed: dict,
+) -> None:
+    candidate, _ = candidate_files(tmp_path)
+    release = {**release_assets(candidate), **changed}
+    with pytest.raises(ValueError, match="selected numeric release ID|unpublished draft"):
+        promote.verify_release_assets(candidate, release, TAG, DRAFT_ID, HEAD)
 
 
 @pytest.mark.skipif(shutil.which("dpkg-deb") is None, reason="dpkg-deb is required")

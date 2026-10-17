@@ -24,10 +24,10 @@ fi
 
 EXPECTED_PREFIX=/data/data/com.termux/files/usr
 PRIMARY_SOURCE='deb https://packages.termux.dev/apt/termux-main stable main'
-PACKAGE_VERSION='0.20.6+termux2'
+PACKAGE_VERSION='0.22.2-1'
 PACKAGE_FILENAME="hermes-agent_${PACKAGE_VERSION}_aarch64.deb"
-PACKAGE_SHA256='4e87ebff34c92498b8fe7474a0d74d7aa8e34d0cc02ccc5df8fab2cca3e417af'
-PACKAGE_RELEASE_URL="https://github.com/adybag14-cyber/termux-hermes/releases/download/hermes-agent-termux-0.20.6-20260829.1/hermes-agent_0.20.6%2Btermux2_aarch64.deb"
+PACKAGE_SHA256='deb163351554ca03f7104f91a50f4f8dc4d9247ce0cf5f2cca2608be3b319add'
+PACKAGE_RELEASE_URL='https://github.com/adybag14-cyber/termux-hermes/releases/download/hermes-agent-termux-0.22.2-20261016.1/hermes-agent_0.22.2-1_aarch64.deb'
 PACKAGE_ORACLE_URL="http://144.21.61.111/termux/pool/main/$PACKAGE_FILENAME"
 MIN_PACKAGE_VERSION="$PACKAGE_VERSION"
 RECOVERY_MAX_TOKENS="${HERMES_RECOVERY_MAX_TOKENS:-8192}"
