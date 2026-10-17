@@ -11,6 +11,12 @@ on:
       - 'scripts/compatibility_probe_neutts.sh'
       - 'scripts/compatibility_probe_neutts.py'
       - 'tests/test_neutts_probe.py'
+      - 'scripts/prepare_neutts_core_python.py'
+      - 'scripts/neutts_core_python_lock.json'
+      - 'tests/test_neutts_core_python.py'
+      - 'scripts/validate_neutts_apt_python.py'
+      - 'scripts/neutts_apt_python_metadata.json'
+      - 'tests/test_neutts_apt_python.py'
 
 permissions:
   contents: read
@@ -31,7 +37,7 @@ jobs:
           ref: ${{ github.sha }}
           persist-credentials: false
 
-      - name: Verify exact APT and Python inputs and exercise native behavior
+      - name: Verify exact dependency provenance and exercise native scientific behavior
         env:
           NEUTTS_PROBE_HEAD_SHA: ${{ github.sha }}
         run: bash scripts/compatibility_probe_neutts.sh --out probe-results/neutts

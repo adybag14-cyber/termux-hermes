@@ -102,7 +102,7 @@ source-reviewed judgment, distinct from distribution inventory.
 | uvloop event-loop acceleration | Android marker excludes uvloop 0.22.1. Its setup backend runs shell/configure commands assuming a conventional Unix shell path; the old preconfigure workaround is overwritten by setup.py's later copy/configure sequence. Standard asyncio remains available. | Verify the exact locked source archive, patch the commands actually executed to use Termux's `CONFIG_SHELL`, and admit Android aarch64. Supply the resulting wheel through the reusable bundle cache. | Corrected native ARM TCP/task/shutdown job passed in run 39039959324, including original-payload runtime and successful artifact capture. |
 | Matrix messaging with encryption | Five requirements and the PM extra gate admit Linux only. The encrypted backend's python-olm 3.2.16 builds an older vendored libolm with CMake compatibility assumptions and an incorrectly const-qualified pointer rejected by current Clang. | Preserve bundled static libolm, apply Termux's CMake policy and const-pointer corrections, and admit Android aarch64 for the complete encrypted dependency group. Bundle reusable native wheels. | Native ARM Olm/Megolm, AES, asyncpg codec, HTTP and SQLite probes passed with original payload libraries; no undeclared runtime libraries. |
 | Nemo Relay | Core platform marker excludes Android. The 0.10.0 Rust source unconditionally requests a vendored protoc binary whose platform table lacks Android, ignoring the available system `PROTOC`. The old builder also silently skipped Nemo if it reached the build list. | Verify the locked sdist, honor the system protoc executable, remove the silent omission paths, and require Nemo in completeness checks. | Android Rust build, native plugin validation and scope/trace behavior passed in run 39039959324, including original-payload execution and successful artifact capture. |
-| NeuTTS local speech engine | The declared NeuTTS 1.4.1 pin requires Python >=3.10 and <3.14; its full dependency group is excluded from the current resolved lock. Its published release has platform wheels but **no source distribution**; the closure also needs native Torch/Torchaudio, codec and inference libraries. This package uses Python 3.14.6 on Bionic. | Retain the honest exclusion. Public upstream source exists, but enabling this engine requires a supported Python/runtime arrangement plus the complete native Torch, codec and inference closure. No speculative marker-only enablement is made. | Exact PyPI/source requirements remain incompatible with managed Python 3.14.6. The separate [native scientific probe](../audit/neutts-native-20261017/run-39055874446.json) now passes all six Torch, Torchaudio, TorchCodec, SciPy, llvmlite and Soxr behavior cases with all 122 pinned APT archives and exact supplemental Python dependencies. Pip still rejects seven original APT WHEEL tags; that failure is explicitly retained. This does not install or admit NeuTTS, provide its complete engine closure, or certify synthesis. See [remaining portability work](remaining-portability-work.md#neutts-141). |
+| NeuTTS local speech engine | The declared NeuTTS 1.4.1 pin requires Python >=3.10 and <3.14; its full dependency group is excluded from the current resolved lock. Its published release has platform wheels but **no source distribution**; the closure also needs native Torch/Torchaudio, codec and inference libraries. This package uses Python 3.14.6 on Bionic. | Retain the honest exclusion. Public upstream source exists, but enabling this engine requires a supported Python/runtime arrangement plus the complete native Torch, codec and inference closure. No speculative marker-only enablement is made. | Exact PyPI/source requirements remain incompatible with managed Python 3.14.6. The earlier [native scientific probe](../audit/neutts-native-20261017/run-39055874446.json) passed all six Torch, Torchaudio, TorchCodec, SciPy, llvmlite and Soxr behavior cases with all 122 pinned APT archives and exact supplemental Python dependencies. Pip still rejects seven original APT WHEEL tags; that failure is explicitly retained. This does not install or admit NeuTTS, provide its complete engine closure, or certify synthesis. See [remaining portability work](remaining-portability-work.md#neutts-141). |
 
 The uvloop, Olm and Nemo adapters reject unexpected source bytes or changed build
 hooks. They do not bypass checksums or substitute unpinned upstream branches.
@@ -264,6 +264,15 @@ records all six NeuTTS-adjacent dependency cases passing at
 while the original APT wheel tags still fail pip compatibility. The engine,
 model loading and synthesis were not exercised.
 
+The active scientific probe has since adopted the incoming strict APT provenance
+validator and its separate frozen nine-wheel closure, including native
+MarkupSafe 3.0.4. It verifies original archives, installed metadata and pip source
+ownership, the actual requirements graph, and the exact seven original pip tag
+failures. The older native result used different supplemental dependency inputs
+and remains historical evidence. Fresh native validation of this stricter
+implementation is pending; its [reconciliation record](../audit/neutts-provenance-reconciliation-20261017.json)
+tracks the changed inputs and retained limits.
+
 The final source validation comprises
 [73 loader tests with three host skips](../audit/cua-hermes-resume-20261017/host-tests.json),
 a separate [31-test focused scroll run](../audit/cua-hermes-resume-20261017/scroll-source-tests.json),
@@ -287,9 +296,10 @@ passed **291 tests** with no failures or skips in each of the separate push and
 pull-request runs at `635ec13c9d0f264f508d1bdbaa7670d4eaa00787`. Compile, shell
 syntax and JSON validation passed too. The [earlier combined CI](../audit/resume-ci-3414585-20261017.json)
 and its separate Windows host run remain recorded at `3414585`; that host run
-passed 287 tests with four host-specific skips. The [merge receipt](../audit/resume-integration-20261017.json)
-records preserved concurrent preparation work and confirms that native-tested
-inputs remain byte-identical. The earlier
+passed 287 tests with four host-specific skips. The [earlier merge receipt](../audit/resume-integration-20261017.json)
+records preserved concurrent preparation work and confirms unchanged native-test
+inputs at that earlier checkpoint. The stricter NeuTTS reconciliation above
+changes the separate scientific experiment and requires its own native run. The earlier
 [standalone](../audit/cua-native-20261017/run-39052290704.json) and
 [host preparation](../audit/cua-hermes-host-tests-20261017.json) evidence remains
 available with its original source bindings.

@@ -157,151 +157,159 @@ def test_exact_engine_source_provenance_block_compiles():
     compile(block, "neutts-host-provenance", "exec")
 
 
-ANDROID_MARKERS = {
-    "python_full_version": "3.14.6", "python_version": "3.14",
-    "sys_platform": "android", "platform_machine": "aarch64", "platform_system": "Android",
-}
-
-
-def test_missing_transitive_python_dependency_is_rejected():
-    graph = {
-        "torch": {"version": "2.14.1", "requires_dist": ["jinja2"]},
-        "jinja2": {"version": "3.1.6", "requires_dist": ["MarkupSafe>=2.0"]},
+def validation_receipt(out):
+    (out / "NEUTTS-PYTHON-CHECK.log").write_bytes(b"exact platform-tag diagnostics\n")
+    return {
+        "schema_version": 1, "status": "requirements-and-provenance-passed",
+        "overall_compatibility_passed": False,
+        "native_behavior": {"status": "required-pending"},
+        "metadata_modified": False, "supported_tags_modified": False,
+        "engine_synthesis_tested": False, "pm_admission_changed": False,
+        "metadata_ledger": {"sha256": "a" * 64},
+        "apt_provenance": {"status": "passed"},
+        "apt_dependencies": {"status": "passed"},
+        "requirements": {"status": "passed"},
+        "raw_pip_check": {
+            "exit_code": 1, "passed": False,
+            "sha256": probe.sha(out / "NEUTTS-PYTHON-CHECK.log"),
+        },
     }
-    with pytest.raises(RuntimeError, match="missing pinned runtime dependency: jinja2"):
-        probe.validate_metadata_closure(graph, ANDROID_MARKERS)
 
 
-def test_complete_closure_checks_active_markers_without_unrequested_extras():
-    graph = {
-        "torch": {"version": "2.14.1", "requires_python": ">=3.10",
-                  "requires_dist": ["typing_extensions>=4.10.0", "optree; extra == 'optree'",
-                                    "cuda; sys_platform == 'linux'"]},
-        "typing-extensions": {"version": "4.16.0", "requires_dist": []},
-    }
-    edges = probe.validate_metadata_closure(graph, ANDROID_MARKERS)
-    assert [edge["active"] for edge in edges] == [True, False, False]
-    assert edges[0]["selected_version"] == "4.16.0"
+def save_validation(out, result):
+    (out / "NEUTTS-APT-PYTHON-VALIDATION.json").write_text(
+        json.dumps(result), encoding="utf-8"
+    )
 
 
-def test_incompatible_pinned_dependency_is_rejected():
-    graph = {"torch": {"version": "2.14.1", "requires_dist": ["sympy>=1.13.3"]},
-             "sympy": {"version": "1.12.0", "requires_dist": []}}
-    with pytest.raises(RuntimeError, match="incompatible pinned runtime dependency"):
-        probe.validate_metadata_closure(graph, ANDROID_MARKERS)
+def test_provenance_admission_keeps_raw_pip_failure_and_requires_native_behavior(tmp_path):
+    result = validation_receipt(tmp_path)
+    save_validation(tmp_path, result)
+    admitted = probe.apt_python_validation(tmp_path, 1, 0, "a" * 64)
+    assert admitted["status"] == "requirements-and-provenance-passed"
+    assert admitted["raw_pip_check_preserved"] is True
+    assert result["raw_pip_check"]["passed"] is False
+    assert result["overall_compatibility_passed"] is False
+    assert admitted["sha256"] == probe.sha(tmp_path / "NEUTTS-APT-PYTHON-VALIDATION.json")
 
 
-def test_engine_python_boundary_cannot_be_erased_by_a_complete_dependency_list():
-    with pytest.raises(RuntimeError, match="excludes this interpreter"):
-        probe.validate_metadata_closure({"neutts": {"version": "1.4.1", "requires_python": ">=3.10,<3.14",
-                                                    "requires_dist": []}}, ANDROID_MARKERS)
-
-
-@pytest.mark.parametrize("requirement", [
-    "child @ https://example.invalid/child.whl", "child[unreviewed]",
+@pytest.mark.parametrize("change", [
+    {"schema_version": 2},
+    {"status": "failed"},
+    {"overall_compatibility_passed": True},
+    {"native_behavior": {"status": "passed"}},
+    {"metadata_modified": True},
+    {"supported_tags_modified": True},
+    {"engine_synthesis_tested": True},
+    {"pm_admission_changed": True},
+    {"metadata_ledger": {"sha256": "b" * 64}},
+    {"apt_provenance": {"status": "failed"}},
+    {"apt_dependencies": {"status": "failed"}},
+    {"requirements": {"status": "failed"}},
+    {"raw_pip_check": {"exit_code": 0, "passed": True, "sha256": "c" * 64}},
 ])
-def test_unreviewed_runtime_dependency_arrangements_fail(requirement):
-    graph = {"parent": {"version": "1.0", "requires_dist": [requirement]},
-             "child": {"version": "1.0", "requires_dist": []}}
-    with pytest.raises(RuntimeError, match="requires? review"):
-        probe.validate_metadata_closure(graph, ANDROID_MARKERS)
+def test_incomplete_or_mismatched_provenance_cannot_admit_native_dependencies(tmp_path, change):
+    result = validation_receipt(tmp_path)
+    result.update(change)
+    save_validation(tmp_path, result)
+    with pytest.raises(RuntimeError):
+        probe.apt_python_validation(tmp_path, 1, 0, "a" * 64)
 
 
-def test_registry_wheel_rejects_native_payload_even_with_universal_tag(tmp_path):
-    import zipfile
-    path = tmp_path / "fixture-1.0-py3-none-any.whl"
-    with zipfile.ZipFile(path, "w") as wheel:
-        wheel.writestr("fixture-1.0.dist-info/METADATA", "Name: fixture\nVersion: 1.0\n")
-        wheel.writestr("fixture-1.0.dist-info/WHEEL", "Wheel-Version: 1.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n")
-        wheel.writestr("fixture/native.so", b"unreviewed native code fixture")
-    with pytest.raises(RuntimeError, match="universal pure Python"):
-        probe.inspect_wheel(path, {"name": "fixture", "version": "1.0"}, universal=True)
+def test_failed_validator_exit_cannot_pass_with_a_success_receipt(tmp_path):
+    save_validation(tmp_path, validation_receipt(tmp_path))
+    with pytest.raises(RuntimeError, match="validation failed"):
+        probe.apt_python_validation(tmp_path, 1, 1, "a" * 64)
 
 
-def test_exact_artifact_download_rejects_changed_bytes(monkeypatch):
-    import io
-    monkeypatch.setattr(probe.urllib.request, "urlopen", lambda *args, **kwargs: io.BytesIO(b"changed"))
-    with pytest.raises(RuntimeError, match="bytes/hash differ"):
-        probe.read_pinned_url("https://files.pythonhosted.org/fixture.whl", 7, "0" * 64)
+def test_replaced_pip_log_cannot_reuse_a_previous_validation_receipt(tmp_path):
+    save_validation(tmp_path, validation_receipt(tmp_path))
+    (tmp_path / "NEUTTS-PYTHON-CHECK.log").write_bytes(b"different requirements failure\n")
+    with pytest.raises(RuntimeError, match="this invocation"):
+        probe.apt_python_validation(tmp_path, 1, 0, "a" * 64)
 
 
-def test_native_dependency_installer_refuses_host_python_before_reading_inputs(tmp_path, monkeypatch):
-    monkeypatch.setattr(probe.sys, "platform", "win32")
-    with pytest.raises(RuntimeError, match="native Bionic"):
-        probe.install_python_inputs(tmp_path / "missing", tmp_path)
+def complete_core_fixture():
+    cases = [
+        {"component": name, "status": "passed", "exit_code": 0, "timed_out": False}
+        for name in probe.CASES
+    ]
+    provenance = {"status": "requirements-and-provenance-passed", "exit_code": 0}
+    metadata = {"unsupported_distribution_names": list(probe.EXPECTED)}
+    return cases, provenance, metadata
 
 
-def apt_platform_output():
-    return "\n".join(f"{name} {probe.EXPECTED[name]} is not supported on this platform"
-                     for name in probe.APT_WHEEL_SHA256) + "\n"
-
-
-def apt_wheel_fixture():
-    return {name: {"version": probe.EXPECTED[name], "wheel_metadata_sha256": digest,
-                   "matches_current_supported_tags": False}
-            for name, digest in probe.APT_WHEEL_SHA256.items()}
-
-
-def test_exact_apt_tag_diagnostic_retains_failed_pip_compatibility(monkeypatch):
-    evidence = apt_wheel_fixture()
-    monkeypatch.setattr(probe, "installed_apt_wheel_evidence", lambda: evidence)
-    result = probe.classify_pip_check(1, apt_platform_output(), "")
-    assert result["status"] == "failed"
+def test_successful_scientific_core_does_not_claim_pip_or_engine_compatibility():
+    cases, provenance, metadata = complete_core_fixture()
+    result = probe.summarize_core_results(cases, provenance, metadata, 1)
+    assert result["status"] == "passed"
+    assert result["scientific_behavior_passed"] is True
+    assert result["python_installed_files_passed"] is True
+    assert result["dependency_closure_passed"] is True
     assert result["pip_check_passed"] is False
-    assert result["wheel_tag_compatibility"] == "unresolved"
-    assert result["apt_wheel_evidence"] == evidence
-    assert result["diagnostic_continuation"] == "only measured native scientific behavior"
+    assert result["pip_wheel_tag_compatibility"] == "unresolved"
+    assert result["overall_compatibility_passed"] is False
 
 
-@pytest.mark.parametrize("line", [
-    "torch 2.14.1 requires filelock, which is not installed.",
-    "torch 2.14.1 has requirement sympy>=1.13.3, but you have sympy 1.12.0.",
-    "unknown 1.0 is not supported on this platform",
+def test_six_scientific_passes_cannot_hide_failed_installed_wheel_evidence():
+    cases, provenance, metadata = complete_core_fixture()
+    cases[0].update(status="failed", exit_code=1)
+    result = probe.summarize_core_results(cases, provenance, metadata, 1)
+    assert result["status"] == "failed"
+    assert result["scientific_behavior_passed"] is True
+    assert result["python_installed_files_passed"] is False
+
+
+@pytest.mark.parametrize("provenance", [
+    {"status": "failed", "exit_code": 1},
+    {"status": "requirements-and-provenance-passed", "exit_code": 1},
+    {"status": "requirements-and-provenance-passed", "exit_code": 0, "error": {}},
+    {},
 ])
-def test_missing_conflicting_or_unknown_pip_error_cannot_continue(line):
-    with pytest.raises(RuntimeError, match="beyond the reviewed"):
-        probe.classify_pip_check(1, apt_platform_output() + line + "\n", "")
+def test_seven_native_passes_cannot_replace_strict_dependency_provenance(provenance):
+    cases, _, metadata = complete_core_fixture()
+    result = probe.summarize_core_results(cases, provenance, metadata, 1)
+    assert result["status"] == "failed"
+    assert result["scientific_behavior_passed"] is True
+    assert result["dependency_closure_passed"] is False
 
 
-@pytest.mark.parametrize("code,stderr", [(2, ""), (1, "unexpected stderr")])
-def test_other_pip_status_or_stderr_cannot_continue(code, stderr):
-    with pytest.raises(RuntimeError, match="beyond the reviewed"):
-        probe.classify_pip_check(code, apt_platform_output(), stderr)
+@pytest.mark.parametrize("metadata", [
+    {"error": {"message": "unreadable original WHEEL"}},
+    {"unsupported_distribution_names": ["unreviewed"]},
+    {},
+])
+def test_summary_requires_the_exact_original_apt_tag_evidence(metadata):
+    cases, provenance, _ = complete_core_fixture()
+    assert probe.summarize_core_results(cases, provenance, metadata, 1)["status"] == "failed"
 
 
-def test_partial_apt_unsupported_set_cannot_continue():
-    with pytest.raises(RuntimeError, match="beyond the reviewed"):
-        probe.classify_pip_check(1, "\n".join(apt_platform_output().splitlines()[:-1]), "")
-
-
-@pytest.mark.parametrize("change", ["hash", "version", "compatible"])
-def test_apt_diagnostic_requires_exact_original_wheel_evidence(monkeypatch, change):
-    evidence = apt_wheel_fixture()
-    row = evidence["torch"]
-    if change == "hash":
-        row["wheel_metadata_sha256"] = "0" * 64
-    elif change == "version":
-        row["version"] = "0.0"
+@pytest.mark.parametrize("kind", ["omitted", "duplicated", "unreviewed"])
+def test_partial_or_ambiguous_case_collection_cannot_certify_the_scientific_core(kind):
+    cases, provenance, metadata = complete_core_fixture()
+    if kind == "omitted":
+        cases.pop()
+    elif kind == "duplicated":
+        cases.append(dict(cases[-1]))
     else:
-        row["matches_current_supported_tags"] = True
-    monkeypatch.setattr(probe, "installed_apt_wheel_evidence", lambda: evidence)
-    with pytest.raises(RuntimeError, match="unverified APT"):
-        probe.classify_pip_check(1, apt_platform_output(), "")
+        cases.append({"component": "unreviewed", "status": "passed", "exit_code": 0, "timed_out": False})
+    result = probe.summarize_core_results(cases, provenance, metadata, 1)
+    assert result["status"] == "failed"
+    assert result["native_case_set_complete"] is False
 
 
-def test_genuine_successful_pip_check_is_reported_as_passed():
-    result = probe.classify_pip_check(0, "No broken requirements found.\n", "")
-    assert result == {"status": "passed", "pip_check_passed": True, "wheel_tag_compatibility": "passed"}
+@pytest.mark.parametrize("updates", [{"exit_code": 9}, {"timed_out": True}])
+def test_success_receipt_cannot_hide_a_failed_or_timed_out_scientific_child(updates):
+    cases, provenance, metadata = complete_core_fixture()
+    cases[-1].update(updates)
+    result = probe.summarize_core_results(cases, provenance, metadata, 1)
+    assert result["status"] == "failed"
+    assert result["scientific_behavior_passed"] is False
 
 
-def test_installed_apt_wheel_evidence_rejects_changed_bytes(monkeypatch):
-    class Distribution:
-        version = probe.EXPECTED[next(iter(probe.APT_WHEEL_SHA256))]
-
-        def read_text(self, name):
-            assert name == "WHEEL"
-            return "Wheel-Version: 1.0\nTag: invented\n"
-
-    monkeypatch.setattr(probe.importlib.metadata, "distribution", lambda name: Distribution())
-    with pytest.raises(RuntimeError, match="APT WHEEL metadata changed"):
-        probe.installed_apt_wheel_evidence()
+def test_changed_pip_exit_is_outside_the_frozen_provenance_convention():
+    cases, provenance, metadata = complete_core_fixture()
+    result = probe.summarize_core_results(cases, provenance, metadata, 0)
+    assert result["status"] == "failed"
+    assert result["pip_check_passed"] is True
+    assert result["overall_compatibility_passed"] is False

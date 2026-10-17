@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Separate native APT/Python dependency experiment. Does not install NeuTTS or modify Hermes.
+# Separate native ABI experiment with pinned APT and Python dependencies. Does not install NeuTTS or modify Hermes.
 set -Eeuo pipefail
 
 mode=host
@@ -23,6 +23,8 @@ if os.environ.get("NEUTTS_PROBE_HEAD_SHA", head) != head:
 if json.loads((root / "manifest/release.json").read_text())["termux_image"] != sys.argv[3]:
     raise SystemExit("review the native image pin before changing this experiment")
 names = ("scripts/compatibility_probe_neutts.sh", "scripts/compatibility_probe_neutts.py",
+         "scripts/prepare_neutts_core_python.py", "scripts/neutts_core_python_lock.json",
+         "scripts/validate_neutts_apt_python.py", "scripts/neutts_apt_python_metadata.json",
          ".github/workflows/neutts-termux-probe.yml")
 engine_url = "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/pyproject.toml"
 engine_hash = "3d74df60f0db27733b308c93b88ae95f9deaa8f396f48183b0cf4f14eb3deb94"
@@ -35,7 +37,7 @@ if engine["version"] != "1.4.1" or engine["requires-python"] != ">=3.10, <3.14":
     raise SystemExit("review the engine Python boundary before changing this experiment")
 (out / "NEUTTS-ENGINE-pyproject.toml").write_bytes(engine_source)
 data = {
-    "schema_version": 1, "purpose": "unpublished APT native core with frozen Python dependency completion",
+    "schema_version": 1, "purpose": "unpublished APT native scientific behavior with strict dependency provenance",
     "run_id": os.environ.get("GITHUB_RUN_ID"), "head_sha": head,
     "workflow_ref_commit": os.environ.get("GITHUB_SHA"), "native_image": sys.argv[3],
     "inputs": {p: hashlib.sha256((root / p).read_bytes()).hexdigest() for p in names},
@@ -50,15 +52,17 @@ data = {
     "engine_optional_dependencies": engine["optional-dependencies"],
     "managed_python_supported_by_declared_engine": False,
     "apt_core_is_engine_dependency_lock": False,
+    "python_wheelhouse": "exact frozen archives; native MarkupSafe 3.0.4",
+    "apt_postinst_dependency_resolution": "offline from the verified wheelhouse",
+    "pip_wheel_tag_compatibility": "unresolved",
     "rolling_base_upgrade": True,
-    "apt_postinst_dependency_resolution": False,
-    "supplemental_python_dependencies_checked_separately": True,
     "engine_installed": False, "synthesis_tested": False, "physical_device_tested": False,
     "hermes_candidate_installed": False, "pm_admission_changed": False, "release_output": False,
 }
 (out / "NEUTTS-PROBE-INPUTS.json").write_text(json.dumps(data, indent=2) + "\n")
 PY
-  python3 "$packaging/scripts/compatibility_probe_neutts.py" --prepare-python "$out/python-inputs"
+  python3 "$packaging/scripts/prepare_neutts_core_python.py" \
+    --lock "$packaging/scripts/neutts_core_python_lock.json" --out "$out/python-wheelhouse"
   chmod 0777 "$out"
   docker pull "$image"
   [[ "$(docker image inspect "$image" --format '{{.Architecture}}')" == arm64 ]]
@@ -69,6 +73,7 @@ PY
     --platform linux/arm64 --user 1000:1000 --cpus 2 --memory 8g --pids-limit 512 \
     --tmpfs /bin:mode=1777 \
     -v "$packaging:/probes:ro" -v "$out:/out" \
+    -v "$out/python-wheelhouse:/out/python-wheelhouse:ro" \
     "$image" bash /probes/scripts/compatibility_probe_neutts.sh --in-container --out /out \
     2>&1 | tee "$out/neutts-native-probe.log"
   exit 0
@@ -80,9 +85,10 @@ export TMPDIR="$PREFIX/tmp"
 export PATH="$PREFIX/bin:/system/bin:/system/xbin"
 export DEBIAN_FRONTEND=noninteractive TERMUX_PKG_NO_MIRROR_SELECT=1
 export PIP_NO_INDEX=1 PIP_DISABLE_PIP_VERSION_CHECK=1 PYTHONDONTWRITEBYTECODE=1
-# Some APT postinst scripts run pip without a complete Python dependency set.
-# Complete that graph explicitly from verified local artifacts after APT setup.
-export PIP_NO_DEPS=1
+export NEUTTS_PYTHON_WHEELHOUSE="$out/python-wheelhouse"
+export PIP_FIND_LINKS="$NEUTTS_PYTHON_WHEELHOUSE"
+read -r neutts_lock_sha neutts_lock_file < <(sha256sum /probes/scripts/neutts_core_python_lock.json)
+export NEUTTS_PYTHON_LOCK_SHA256="$neutts_lock_sha"
 export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2
 unset LD_LIBRARY_PATH LD_PRELOAD PYTHONPATH PYTHONHOME HERMES_RUNTIME_DIR HERMES_HOME
 umask 077
@@ -283,12 +289,34 @@ while IFS=$'\t' read -r name version arch sha bytes archive_path; do
 done < "$work/PINNED-APT.tsv"
 export LD_LIBRARY_PATH="$PREFIX/lib"
 
-cp "$(dirname "$0")/compatibility_probe_neutts.py" "$work/native_core.py"
+stage=pinned-python-install
+"$PREFIX/bin/python" -I -m pip install --no-index --no-deps --require-hashes \
+  --only-binary=:all: --force-reinstall --no-compile \
+  --find-links "$NEUTTS_PYTHON_WHEELHOUSE" \
+  -r "$NEUTTS_PYTHON_WHEELHOUSE/requirements.txt" \
+  > "$out/NEUTTS-PYTHON-INSTALL.log" 2>&1
+# Preserve pip check verbatim. Only the exact APT archive convention may pass
+# the separate requirements/provenance validator; native behavior is also required.
+neutts_pip_check_status=0
+"$PREFIX/bin/python" -I -m pip check > "$out/NEUTTS-PYTHON-CHECK.log" 2>&1 || neutts_pip_check_status=$?
+export NEUTTS_PIP_CHECK_EXIT_CODE="$neutts_pip_check_status"
 
-stage=pinned-python-dependencies
-"$PREFIX/bin/python" -I -B "$work/native_core.py" --install-python "$out/python-inputs" "$out"
+stage=apt-python-provenance
+read -r neutts_metadata_sha neutts_metadata_file < <(sha256sum /probes/scripts/neutts_apt_python_metadata.json)
+export NEUTTS_APT_METADATA_SHA256="$neutts_metadata_sha"
+neutts_validation_status=0
+"$PREFIX/bin/python" -I -B /probes/scripts/validate_neutts_apt_python.py \
+  --archives "$work/archives" \
+  --metadata /probes/scripts/neutts_apt_python_metadata.json \
+  --pip-check-log "$out/NEUTTS-PYTHON-CHECK.log" \
+  --pip-check-exit-code "$neutts_pip_check_status" \
+  --out "$out/NEUTTS-APT-PYTHON-VALIDATION.json" \
+  > "$out/NEUTTS-APT-PYTHON-VALIDATION.log" 2>&1 || neutts_validation_status=$?
+export NEUTTS_APT_VALIDATION_EXIT_CODE="$neutts_validation_status"
+
+cp "$(dirname "$0")/compatibility_probe_neutts.py" "$work/native_core.py"
 
 stage=native-scientific-behavior
 "$PREFIX/bin/python" -I -B "$work/native_core.py" "$out"
 stage=complete
-echo "NATIVE_APT_CORE_PASSED: measured scientific behavior; pip/WHEEL compatibility is recorded separately; NeuTTS synthesis remains untested"
+echo "NATIVE_APT_CORE_PASSED: measured scientific behavior and strict dependency provenance; pip check remains failed with unresolved WHEEL tags; NeuTTS synthesis remains untested"

@@ -363,6 +363,57 @@
       "push_and_pr_run_evidence": "resume-ci-635ec13-20261017.json"
     },
     "neutts_apt_core_probe": {
+      "status": "strict_provenance_implementation_awaiting_native_validation",
+      "script": "../scripts/compatibility_probe_neutts.sh",
+      "workflow": "../.github/workflows/neutts-termux-probe.yml",
+      "scope": "Separate APT native scientific ABI/behavior with strict provenance and frozen nine-wheel dependencies",
+      "incoming_preparation_commit": "19ab7a1ce9f496dd8dd291d19e3818bb5f878048",
+      "prior_native_result_inputs_differ": true,
+      "previous_native_evidence": "neutts-native-20261017/run-39055874446.json",
+      "evidence": "neutts-provenance-reconciliation-20261017.json",
+      "pip_wheel_tag_compatibility": "unresolved",
+      "wheel_tags_rewritten": false,
+      "native_run_completed": false,
+      "engine_installed": false,
+      "synthesis_tested": false,
+      "hermes_pm_admission_changed": false
+    },
+    "resume_integration_evidence": "resume-integration-20261017.json",
+    "audio_readiness_diagnostics": {
+      "status": "host_contract_tests_passed_separate_patch_outside_main_candidate",
+      "patch": "../patches/next-stable/audio-readiness.patch",
+      "evidence": "audio-readiness-preparation-20261017.json",
+      "device_validation_notes": "../docs/audio-readiness-device-validation.md",
+      "included_in_main_candidate": false,
+      "candidate_selects_audio_io": false,
+      "full_isolated_audio_environment_prepared": false,
+      "physical_capture_vad_certified": false
+    },
+    "previous_packaging_ci_evidence": "resume-ci-3414585-20261017.json",
+    "full_component_revalidation": {
+      "run_id": 39057745666,
+      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666",
+      "head_sha": "635ec13c9d0f264f508d1bdbaa7670d4eaa00787",
+      "status": "completed",
+      "workflow_conclusion": "failure",
+      "passed_lanes": [
+        "uvloop",
+        "matrix",
+        "nemo",
+        "browser",
+        "desktop",
+        "gateway"
+      ],
+      "failed_lanes": [
+        "audio"
+      ],
+      "failure_reason": "PortAudio initialization fails in the observed environment without the real Android audio framework and Binder services.",
+      "numpy_numerical_behavior_passed_both_contexts": true,
+      "hardware_capture_tested": false,
+      "all_seven_artifact_archives_sha256_crc_and_member_hashes_verified": true,
+      "evidence": "native-probes-635ec13-20261017/summary.json"
+    },
+    "previous_neutts_apt_core_probe": {
       "status": "all_six_native_scientific_behavior_cases_passed_pip_wheel_tags_unresolved_engine_excluded",
       "script": "../scripts/compatibility_probe_neutts.sh",
       "workflow": "../.github/workflows/neutts-termux-probe.yml",
@@ -411,41 +462,6 @@
       "pip_tag_failure_evidence": "neutts-native-20261017/run-39055038031/verification.json",
       "dependency_completion_preparation": "neutts-native-20261017/python-dependency-preparation.json",
       "next_step": "Resolve a supported engine/runtime and frozen complete NeuTTS codec/inference graph, repair honest wheel metadata compatibility, then validate synthesis and cancellation."
-    },
-    "resume_integration_evidence": "resume-integration-20261017.json",
-    "audio_readiness_diagnostics": {
-      "status": "host_contract_tests_passed_separate_patch_outside_main_candidate",
-      "patch": "../patches/next-stable/audio-readiness.patch",
-      "evidence": "audio-readiness-preparation-20261017.json",
-      "device_validation_notes": "../docs/audio-readiness-device-validation.md",
-      "included_in_main_candidate": false,
-      "candidate_selects_audio_io": false,
-      "full_isolated_audio_environment_prepared": false,
-      "physical_capture_vad_certified": false
-    },
-    "previous_packaging_ci_evidence": "resume-ci-3414585-20261017.json",
-    "full_component_revalidation": {
-      "run_id": 39057745666,
-      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745666",
-      "head_sha": "635ec13c9d0f264f508d1bdbaa7670d4eaa00787",
-      "status": "completed",
-      "workflow_conclusion": "failure",
-      "passed_lanes": [
-        "uvloop",
-        "matrix",
-        "nemo",
-        "browser",
-        "desktop",
-        "gateway"
-      ],
-      "failed_lanes": [
-        "audio"
-      ],
-      "failure_reason": "PortAudio initialization fails in the observed environment without the real Android audio framework and Binder services.",
-      "numpy_numerical_behavior_passed_both_contexts": true,
-      "hardware_capture_tested": false,
-      "all_seven_artifact_archives_sha256_crc_and_member_hashes_verified": true,
-      "evidence": "native-probes-635ec13-20261017/summary.json"
     }
   }
 }

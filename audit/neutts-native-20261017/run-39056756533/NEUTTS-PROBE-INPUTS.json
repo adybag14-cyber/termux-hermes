@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "purpose": "unpublished NeuTTS native core with verified Python dependencies",
+  "run_id": "39056756533",
+  "head_sha": "48c07cf68dc388450fb10f18b3c823d29c799f19",
+  "workflow_ref_commit": "48c07cf68dc388450fb10f18b3c823d29c799f19",
+  "native_image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
+  "inputs": {
+    "scripts/compatibility_probe_neutts.sh": "5c505662cb874a752b8ff12b9f2a635954128f56787797f53713d1b85a1ceb79",
+    "scripts/compatibility_probe_neutts.py": "13c1d9d278c8028d5ba7b8f567cdd3690d31e7e9636e5194bbec9a78e3ba606f",
+    "scripts/prepare_neutts_core_python.py": "b78a252eb1c3d1872b64f7ffe5e16bf16c161057b6579732a7af966317e0b19e",
+    "scripts/neutts_core_python_lock.json": "ba927bae7ec87c331e23136ba883da86876ca24044485288d9866649130fab38",
+    ".github/workflows/neutts-termux-probe.yml": "cd348ed82c933b89e7267cf00e90fb5d25474f0ddd5619f031eca9a500f8f0a5"
+  },
+  "recipe_repository": "termux/termux-packages",
+  "reviewed_recipe_commit": "ae877f2c6a2b2318abeb43699d6ec5f619c216a6",
+  "reviewed_index_url": "https://packages.termux.dev/apt/termux-main/dists/stable/main/binary-aarch64/Packages.gz",
+  "reviewed_index_sha256": "0f9ea9b4cd6c0f7c3ffe90bea8afb7e25a61adc319fc90eca3d0979da6dcb923",
+  "declared_engine_commit": "b7a3427d0d25e20e8b9e92cbaae688f732916baf",
+  "engine_source_url": "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/pyproject.toml",
+  "engine_source_sha256": "3d74df60f0db27733b308c93b88ae95f9deaa8f396f48183b0cf4f14eb3deb94",
+  "engine_version": "1.4.1",
+  "engine_requires_python": ">=3.10, <3.14",
+  "engine_dependencies": [
+    "librosa==0.11.0",
+    "neucodec>=0.0.4",
+    "numpy>=2.2.6",
+    "phonemizer>=3.0.0",
+    "resemble-perth==1.0.1",
+    "soundfile==0.13.1",
+    "torch>=2.8.0",
+    "torchaudio>=2.8.0",
+    "transformers==5.1.0"
+  ],
+  "engine_optional_dependencies": {
+    "llama": [
+      "llama-cpp-python",
+      "gguf"
+    ],
+    "onnx": [
+      "onnxruntime"
+    ],
+    "all": [
+      "llama-cpp-python",
+      "gguf",
+      "onnxruntime"
+    ]
+  },
+  "managed_python_supported_by_declared_engine": false,
+  "apt_core_is_engine_dependency_lock": false,
+  "rolling_base_upgrade": true,
+  "engine_installed": false,
+  "synthesis_tested": false,
+  "physical_device_tested": false,
+  "hermes_candidate_installed": false,
+  "pm_admission_changed": false,
+  "release_output": false
+}

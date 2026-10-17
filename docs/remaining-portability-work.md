@@ -39,8 +39,8 @@ contains PyTorch 2.14.0, while the NeuTTS
 dependency group is excluded for the managed interpreter. No Android wheel for
 the locked PyTorch or ONNX Runtime entries is present in that lock.
 
-The separate [scientific dependency experiment](../scripts/compatibility_probe_neutts.sh)
-now **passes all six native behavior cases** in
+The earlier version of the separate scientific dependency experiment
+**passed all six native behavior cases** in
 [run 39055874446](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39055874446)
 at exact head `d439e8100bc89dbfe681fc03aa22017f175b8b2d`. The
 [verified result](../audit/neutts-native-20261017/run-39055874446.json)
@@ -72,6 +72,29 @@ observed unsupported-platform messages, expected versions, and original WHEEL
 file hashes from the pinned APT archives. Missing dependencies, version conflicts
 or any other pip error stop the probe. No wheel tags are rewritten and no
 interpreter platform is spoofed.
+
+### Stricter provenance preparation
+
+The [active experiment](../scripts/compatibility_probe_neutts.sh) now incorporates
+the incoming preparation through commit
+`19ab7a1ce9f496dd8dd291d19e3818bb5f878048`. Its frozen nine-wheel closure
+uses official native MarkupSafe 3.0.4; the earlier passing experiment used an
+upstream MarkupSafe 3.0.3 source fallback. These are different inputs.
+
+The added validator binds the original APT archives and package identities,
+installed interpreter and metadata bytes, all recorded pip source files and
+their unique package ownership, the installed dependency inventory and
+Requires-Python requirements. Diagnostic continuation still requires the exact
+seven original pip platform-tag failures, with interpreter and ABI checks.
+It does not rewrite metadata or supported tags. A SymPy installed-file check now
+accounts for its wheel data-directory installation path.
+
+Fresh native validation of this combined implementation is pending. The
+[reconciliation record](../audit/neutts-provenance-reconciliation-20261017.json)
+preserves the older six-case proof under its original inputs and records the new
+validation separately. The [GGUF feasibility study](neutts-default-gguf-feasibility.md)
+and isolated llama-cpp-python Android loader patch remain source preparation,
+outside the main package candidate and without a native inference claim.
 
 This disposable Termux system-Python experiment records the rolling base upgrade
 separately from the pinned dependency archives. Its
