@@ -366,6 +366,20 @@ def run_probe(args: argparse.Namespace, receipt: dict[str, Any]) -> None:
         require(any(row["function"]["name"] == "computer_use" for row in registry.get_definitions({"computer_use"})),
                 "provider availability did not expose the registered tool definition")
         receipt["availability"] = {"default_without_override": False, "explicit_provider": True, "registered_toolset": True}
+        require(not runtime.published_env(), "the fresh profile already has a published desktop")
+        parent_loader_path = os.environ.get("LD_LIBRARY_PATH")
+        require(parent_loader_path and str(payload) in parent_loader_path,
+                "the candidate Python must retain its actual bundled loader path")
+        before_desktop_env = cua_backend.sanitized_cua_driver_env()
+        require("LD_LIBRARY_PATH" not in before_desktop_env,
+                "native CUA inherited the candidate loader path before desktop startup")
+        early_contract = cua_driver_runtime_contract_status(str(driver))
+        require(early_contract.get("ready") is True,
+                f"native driver manifest failed before desktop startup: {early_contract}")
+        require(os.environ.get("LD_LIBRARY_PATH") == parent_loader_path,
+                "pre-desktop native CUA inspection changed the parent Python loader environment")
+        receipt["pre_desktop_runtime_contract"] = early_contract
+        receipt["checks"].append("pre-desktop-native-driver-uses-system-libraries")
         require(runtime.is_supported_host() and not runtime.missing_binaries(),
                 f"caller must provision product Bot Desktop packages: {runtime.missing_binaries()}")
         desktop = runtime.start(wait_seconds=45)

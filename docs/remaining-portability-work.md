@@ -155,6 +155,15 @@ not summed and do not establish native Hermes-to-MCP behavior. The standalone
 driver result therefore does not increase the six main-candidate repairs or
 change the nine-restriction baseline count.
 
+A subsequent [isolated preparation](../audit/cua-hermes-resume-20261017/preparation.json)
+fixes the shared native-driver environment before any Bot Desktop exists. The
+external Termux driver now uses APT libraries for manifest discovery, readiness,
+CLI fallback and persistent MCP, while the managed Python parent retains its
+bundled loader path. Its canonical host run passed **73 tests with three
+macOS-only skips**. This result replaces neither the historical 58/14-test
+receipts nor the still-required native Bionic integration test. The native helper
+now runs the actual driver manifest before desktop startup to check this seam.
+
 ## Microphone silence detection
 
 Termux:API records a finalized audio file; it does not expose the live PCM stream

@@ -307,10 +307,21 @@ index 00000000..b04e6ba4
 +    assert json.loads(result.stdout) == {**published, "CUA_DRIVER_RS_TELEMETRY_ENABLED": "0"}
 +    assert os.environ.get("DISPLAY") == ambient_display
 diff --git a/tools/computer_use/cua_backend.py b/tools/computer_use/cua_backend.py
-index ec903cbf..5c8bf845 100644
+index ec903cbf..39f904da 100644
 --- a/tools/computer_use/cua_backend.py
 +++ b/tools/computer_use/cua_backend.py
-@@ -285,6 +285,9 @@ class CuaDriverBackend(_CaptureMixin, _InputMixin, ComputerUseBackend):
+@@ -143,7 +143,9 @@ def cua_driver_child_env(base_env: Optional[dict[str, str]] = None) -> dict[str,
+     # A running Bot Desktop for this profile owns the agent's screen: DISPLAY/XAUTHORITY/DBUS point there so
+     # cua-driver never acts on a seat the human is sitting at (#90374 class) and headless hosts get a display.
+     from tools.bot_desktop.runtime import desktop_env as _bot_desktop_env
+-    env = _bot_desktop_env(env)
++    from tools.bot_desktop.termux import system_env as _termux_system_env
++    # The external Termux driver needs APT libraries before a desktop is published too.
++    env = _termux_system_env(_bot_desktop_env(env))
+     if _cua_telemetry_disabled():
+         env[_CUA_TELEMETRY_ENV_VAR] = "0"
+     if sys.platform == "linux" and env.get("WAYLAND_DISPLAY") and bool(_computer_use_cfg().get("native_wayland", False)):
+@@ -285,6 +287,9 @@ class CuaDriverBackend(_CaptureMixin, _InputMixin, ComputerUseBackend):
          if sandbox_mcp_invocation() is not None:
              contract = {"ready": True}
          else:
@@ -320,7 +331,7 @@ index ec903cbf..5c8bf845 100644
              if not os.environ.get(_CUA_DRIVER_CMD_ENV, "").strip():
                  from pm import ensure
                  ensure("cua-driver")
-@@ -347,7 +350,8 @@ class CuaDriverBackend(_CaptureMixin, _InputMixin, ComputerUseBackend):
+@@ -347,7 +352,8 @@ class CuaDriverBackend(_CaptureMixin, _InputMixin, ComputerUseBackend):
              logger.debug("cua-driver %s: %s", what, e)
  
      def is_available(self) -> bool:

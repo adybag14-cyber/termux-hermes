@@ -1,0 +1,52 @@
+{
+  "scope": "Current isolated CUA integration including native Termux pre-desktop loader isolation",
+  "started_at": "2026-10-17T17:32:26.778899+00:00",
+  "completed_at": "2026-10-17T17:33:11.554565+00:00",
+  "command": [
+    "C:\\Program Files\\Git\\bin\\bash.exe",
+    "scripts/run_tests.sh",
+    "tests/tools/test_computer_use_termux_override.py",
+    "tests/hermes_cli/test_cua_termux_setup.py",
+    "tests/tools/test_computer_use_remote_availability.py",
+    "tests/hermes_cli/test_install_cua_driver.py",
+    "tests/hermes_cli/test_computer_use_cli.py",
+    "tests/tools/test_computer_use_backend_plugins.py",
+    "tests/computer_use/test_cua_spawn_env_sanitization.py",
+    "tests/tools/test_bot_desktop_termux.py",
+    "-j",
+    "1",
+    "--file-timeout",
+    "30",
+    "-q"
+  ],
+  "hermes_source_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+  "result_tree": "7244db4e6256b7dc47267077709d45547de89aac",
+  "integration_patch_sha256": "6424636d7d5b590724365eb8b952fa164ac6dfc26a9d7c1a9a70ac8baf7b591b",
+  "native_helper_sha256": "310ca4e826fad5badad3750ea25fafe941a01c65311c3c5488afa4c2dc494b08",
+  "exit_code": 0,
+  "output_bytes": 2678,
+  "output_sha256": "bec7ff517e1df2a48ea869cdcaaf3934950cc8fc36721668acb4c07b10f7d14a",
+  "physical_android_device_test": false,
+  "native_loader_regression": "Requires native CUA Hermes workflow; this Windows regression run cannot certify Bionic loader behavior.",
+  "result": {
+    "files": 8,
+    "passed": 73,
+    "failed": 0,
+    "skipped": 3,
+    "runner_elapsed_seconds": 42.3,
+    "skips": "macOS-only cases on actual Windows host"
+  },
+  "capture_wrapper_note": "The canonical runner returned exit 0 and its exact output bytes were saved. A later display-only print in the capture wrapper failed under the host cp1252 encoding; it did not affect execution or this saved evidence.",
+  "raw_capture": {
+    "file": "host-tests.raw.log.gz",
+    "compression": "gzip",
+    "archive_sha256": "7a3a9677134a7e04d4d49a9014839feb9a50aa5e1b07b99e5127353324a56928",
+    "decoded_bytes": 2678,
+    "decoded_sha256": "bec7ff517e1df2a48ea869cdcaaf3934950cc8fc36721668acb4c07b10f7d14a"
+  },
+  "readable_log": {
+    "file": "host-tests.log",
+    "normalization": "CRLF to LF only",
+    "sha256": "d8a2e4423323bd434952770f40b24ec5796eac3fcb32219f6ecf38660b1c1b43"
+  }
+}
