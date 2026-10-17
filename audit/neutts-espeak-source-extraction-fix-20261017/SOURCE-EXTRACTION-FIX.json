@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "recorded_utc": "2026-10-17T21:32:36.837537+00:00",
+  "status": "source_extractor_fixed_host_manifest_regression_passed_native_retry_pending",
+  "failure_run": 39068675792,
+  "failure_evidence": "../neutts-espeak-native-20261017/run-39068675792.json",
+  "change": "Create the verified sole header symlink parent directory after validating target containment and before symlink_to",
+  "production_change_lines": 1,
+  "original_source_sha256": "6ae148eeefdea830908d14c3db9431678c5b382303f0e5ca6a2f33c41214c25a",
+  "current_source_sha256": "179e21b665c7f05f4fee8b97e109a90767b6b4048e85bda42e281d931d05bba5",
+  "host_tests": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 4.76,
+    "properties": {
+      "all_source_entries_verified": "2606",
+      "regular_source_files": "2605",
+      "symlinks": "1",
+      "exact_link_bytes": "24",
+      "symlink_target_contained": "True",
+      "native_posix_symlink_follow_checked": "False",
+      "baseline_failure": "FileNotFoundError: missing symlink-only parent directory"
+    },
+    "first_attempt": "First host test attempted to follow the exact POSIX slash-containing link through NTFS and failed with WinError123; source bytes were correct. Corrected host oracle resolves the literal target as a host path; actual POSIX following remains mandatory on Linux/Android and is not claimed by this Windows result."
+  },
+  "source_commit": "69bfd1efde0236654ccc117a28d04aef27673a30",
+  "source_lock_changed": false,
+  "full_source_rows": 2606,
+  "regular_source_files": 2605,
+  "sole_link_bytes": 24,
+  "native_C_ABI_passed": false,
+  "native_Phonemizer_passed": false,
+  "release_output": false,
+  "files": [
+    {
+      "path": "scripts/prepare_neutts_espeak_source.py",
+      "bytes": 11227,
+      "sha256": "179e21b665c7f05f4fee8b97e109a90767b6b4048e85bda42e281d931d05bba5"
+    },
+    {
+      "path": "tests/test_neutts_espeak_source_extraction.py",
+      "bytes": 3870,
+      "sha256": "3ea6966f8f711ac2c1816b44bcbc8983120bbd6685722e13a313a61e0cc710e2"
+    },
+    {
+      "path": "scripts/neutts_espeak_source_lock.json",
+      "bytes": 4837,
+      "sha256": "02e4469a3b7b3e6594d7b1bc9c6816c72adf1ea9eb917256cefefc9c12763baa"
+    },
+    {
+      "path": "scripts/compatibility_probe_neutts_espeak.sh",
+      "bytes": 12148,
+      "sha256": "69553e28d224e2654b485b68190ec111ce01c5381ea3aea59dbee45167399185"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+.F                                                                       [100%]
+================================== FAILURES ===================================
+_______ test_exact_source_extracts_the_verified_symlink_only_directory ________
+
+tmp_path = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-891/test_exact_source_extracts_the0')
+record_property = <function record_property.<locals>.append_property at 0x000001B59A3BF060>
+
+    def test_exact_source_extracts_the_verified_symlink_only_directory(tmp_path, record_property):
+        directory = os.environ.get("HERMES_ESPEAK_SOURCE_INPUTS")
+        if not directory:
+            pytest.skip("Exact eSpeak source inputs were not supplied")
+        lock, _ = prep.load_lock()
+        archive = Path(directory) / lock["source"]["artifact"]["filename"]
+        if not archive.is_file():
+            pytest.fail("Configured exact eSpeak source archive is missing")
+        original_source = PATH.read_bytes().replace(
+            b"        path.parent.mkdir(parents=True, exist_ok=True)\n", b"", 1)
+        assert hashlib.sha256(original_source).hexdigest() == ORIGINAL_SHA256
+        original = types.ModuleType("_espeak_extract_original")
+        original.__file__ = str(PATH)
+        exec(compile(original_source, str(PATH), "exec"), original.__dict__)
+        baseline = tmp_path / "original-extraction"
+        with pytest.raises(FileNotFoundError):
+            original.inspect_archive(archive, lock, baseline)
+        link_pin = lock["source"]["exact_symlink"]
+        assert not (baseline / link_pin["path"]).parent.exists()
+        destination = tmp_path / "corrected-extraction"
+        before, after = prep.inspect_archive(archive, lock, destination)
+        link = destination / link_pin["path"]
+        assert link.is_symlink()
+        assert os.readlink(link) == link_pin["target"]
+>       target = link.resolve(strict=True)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_neutts_espeak_source_extraction.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Python314\Lib\pathlib\__init__.py:938: in resolve
+    return self.with_segments(os.path.realpath(self, strict=strict))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:\\Users\\adyba\\AppData\\Local\\Temp\\pytest-of-adyba\\pytest-891\\test_exact_source_extracts_the0\\corrected-extraction\\src\\include\\espeak\\speak_lib.h'
+
+>   ???
+E   OSError: [WinError 123] The filename, directory name, or volume label syntax is incorrect: 'C:\\Users\\adyba\\AppData\\Local\\Temp\\pytest-of-adyba\\pytest-891\\test_exact_source_extracts_the0\\corrected-extraction\\src\\include\\espeak\\speak_lib.h'
+
+<frozen ntpath>:694: OSError
+=========================== short test summary info ===========================
+FAILED tests/test_neutts_espeak_source_extraction.py::test_exact_source_extracts_the_verified_symlink_only_directory
+1 failed, 1 passed in 5.56s

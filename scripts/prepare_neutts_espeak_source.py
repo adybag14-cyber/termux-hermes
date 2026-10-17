@@ -112,6 +112,7 @@ def inspect_archive(path, lock, destination=None):
         resolved = (path.parent / link[1]).resolve()
         helper.require(resolved.is_relative_to(destination.resolve()) and resolved.is_file(),
                        "eSpeak source symlink escaped its source")
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.symlink_to(link[1])
     return original, patched
 

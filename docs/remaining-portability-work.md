@@ -103,6 +103,17 @@ patched Phonemizer and run the real public wrapper. It retains the original
 provenance. These complete preparations do not yet establish a native wrapper
 pass or complete NeuTTS engine compatibility.
 
+The first [native eSpeak/Phonemizer run](../audit/neutts-espeak-native-20261017/run-39068675792.json)
+passed the seven scientific foundation gates but stopped during source
+extraction, before compilation. Its sole compatibility-header symlink lives in a
+directory with no regular files, so that parent had never been created. The
+[one-line extractor correction](../audit/neutts-espeak-source-extraction-fix-20261017/SOURCE-EXTRACTION-FIX.json)
+now creates the verified parent. Two focused host tests pass, reproducing the
+original missing-directory error and checking all 2,606 source entries, the sole
+24-byte link and the target's containment after correction. Exact POSIX link
+following and the native C ABI/public-wrapper gates remain for the retry.
+The complete failed artifact and all 190 member hashes are preserved.
+
 The exact eSpeak source also attempts an optional Sonic fetch even when the
 caller explicitly disables Sonic. A small explicit-OFF guard and a native
 phonemization probe are being prepared. This work does not use Android audio
