@@ -16,15 +16,17 @@ Primary sources:
 
 - [Exact PyPI release metadata](https://pypi.org/pypi/neutts/1.4.1/json).
 - [Public source at the reviewed version declaration](https://github.com/neuphonic/neutts/blob/b7a3427d0d25e20e8b9e92cbaae688f732916baf/pyproject.toml).
-- [Official Termux PyTorch recipe](https://github.com/termux/termux-packages/blob/master/packages/python-torch/build.sh).
-- [Official Termux Torchaudio recipe](https://github.com/termux/termux-packages/blob/master/packages/python-torchaudio/build.sh).
-- [Official Termux SciPy recipe](https://github.com/termux/termux-packages/blob/master/packages/python-scipy/build.sh).
+- [Official Termux PyTorch recipe](https://github.com/termux/termux-packages/blob/ae877f2c6a2b2318abeb43699d6ec5f619c216a6/packages/python-torch/build.sh).
+- [Official Termux Torchaudio recipe](https://github.com/termux/termux-packages/blob/ae877f2c6a2b2318abeb43699d6ec5f619c216a6/packages/python-torchaudio/build.sh).
+- [Official Termux SciPy recipe](https://github.com/termux/termux-packages/blob/ae877f2c6a2b2318abeb43699d6ec5f619c216a6/packages/python-scipy/build.sh).
 
 Official Termux already builds native PyTorch and Torchaudio. Their existence is
 evidence that Android ML support is feasible; it does not make their current
 versions interchangeable with Hermes' frozen Python dependency graph. The
 recipes inspected on 17 October 2026 declare PyTorch 2.14.1, Torchaudio 2.11.0
-and SciPy 1.18.1. Hermes' current lock contains PyTorch 2.14.0, while the NeuTTS
+and SciPy 1.18.1. The [reviewed recipe pins](../audit/termux-recipe-pins-20261017.json)
+record the immutable source commit and file digests. Hermes' current lock
+contains PyTorch 2.14.0, while the NeuTTS
 dependency group is excluded for the managed interpreter. No Android wheel for
 the locked PyTorch or ONNX Runtime entries is present in that lock.
 
@@ -73,8 +75,13 @@ The driver/SDK platform configuration admits Android to the existing X11 code.
 Two local crate adapters enable clipboard-rs's Unix X11 implementation and align
 x11rb-protocol's socket location with Termux's PREFIX/tmp. Both retain their
 locked versions; the preparer verifies that all 602 other Cargo package records
-remain unchanged. Source preparation has passed. Native compilation and actual
-input/capture behavior are the next gate.
+remain unchanged. Source preparation, the adapted platform backend compilation,
+and an owned-PTY check against Android's installed ioctl header have passed.
+The driver now compiles through its Android OS-version branch; final linking
+exposed two Wayland helper calls to an unavailable Bionic libc export. That
+specific link correction and actual X11 input/capture behavior remain pending.
+[Native progress records](../audit/cua-native-20261017/) preserve the exact tested
+inputs, real failure messages and completed PTY proof.
 
 The experiment checks a private, owned Xvnc desktop using real MCP operations
 and independent fixture observations. Its scope includes screenshot capture,
@@ -93,7 +100,7 @@ exposes the existing PCM backend explicitly and keeps Termux:API as an
 independent choice. It does not substitute Android speech recognition for the
 user's configured transcription provider.
 
-[Official Termux PortAudio recipe](https://github.com/termux/termux-packages/blob/master/packages/portaudio/build.sh).
+[Official Termux PortAudio recipe](https://github.com/termux/termux-packages/blob/ae877f2c6a2b2318abeb43699d6ec5f619c216a6/packages/portaudio/build.sh).
 
 That recipe uses an OpenSL ES backend and requires Android's real libOpenSLES.so.
 It disables ALSA, JACK, OSS and PulseAudio backends. The native audio probe
@@ -113,6 +120,8 @@ duration, playback/audio focus and cancellation remain device gates.
 ## Stable-release prerequisites
 
 The compatibility preparation is saved independently from the released recipe.
-A future stable release needs the complete candidate package lifecycle gate plus
-device checks for the Android permission-dependent paths. This branch does not
+The current same-version candidate passed the complete native package and
+optional-install lifecycle gate; its [saved evidence](../audit/candidate-lifecycle-e271e92-20261017/summary.json)
+records the exact tested inputs. A future stable release must keep that gate
+passing for its final source and complete the Android device checks. This branch does not
 publish a release or promote the candidate into the signed APT feed.

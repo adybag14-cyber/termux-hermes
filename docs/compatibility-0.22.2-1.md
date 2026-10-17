@@ -105,7 +105,7 @@ Primary dependency evidence: [uvloop 0.22.1 metadata](https://pypi.org/pypi/uvlo
 [python-olm 3.2.16 metadata](https://pypi.org/pypi/python-olm/3.2.16/json),
 [Nemo Relay 0.10.0 metadata](https://pypi.org/pypi/nemo-relay/0.10.0/json),
 [NeuTTS 1.4.1 metadata](https://pypi.org/pypi/neutts/1.4.1/json), and
-[Termux libolm recipe](https://github.com/termux/termux-packages/blob/master/packages/libolm/build.sh).
+[Termux libolm recipe](https://github.com/termux/termux-packages/blob/ae877f2c6a2b2318abeb43699d6ec5f619c216a6/packages/libolm/build.sh).
 The reviewed exact source digests are also embedded in the preparation helpers.
 
 ## Five additional runtime restrictions
@@ -113,7 +113,7 @@ The reviewed exact source digests are also embedded in the preparation helpers.
 | Capability | Published behavior | Preparation status |
 | --- | --- | --- |
 | Local managed browser | PM has no Bionic artifact for either AgentBrowser or Chromium. Remote browser/CDP paths are distinct and can remain usable. | Fixed and passed native ARM validation under UID 1000: raw static driver, real PM installation/discovery, built-in browser tools, and the default `browser_exec` handler with the backend unset. Navigation, exact loopback URL/heading, DOM interaction, PNG screenshot and product cleanup all passed. Product PM/discovery integration also passed 139 regression tests. Chromium remains an explicitly APT-owned dependency. See the [final browser evidence](../audit/native-probes-e20e8c4-20261017/browser-summary.json). |
-| Default native computer use | Default CUA driver rejects Android. Having the MCP dependency does not supply this native backend. | Fixed the separate routing bug that rejected Android before evaluating a configured remote Linux provider. Prepared an exact-source Android/Bionic port of the locked CUA driver for a private Termux virtual X11 desktop; source integrity checks passed, while native compilation and actual input/capture behavior remain pending. The experiment is separate from Hermes PM/package admission. Android phone UI control still requires an Android-specific backend. |
+| Default native computer use | Default CUA driver rejects Android. Having the MCP dependency does not supply this native backend. | Fixed the separate routing bug that rejected Android before evaluating a configured remote Linux provider. Prepared an exact-source Android/Bionic port of the locked CUA driver for a private Termux virtual X11 desktop. Source integrity, the platform backend build and native PTY ABI checks passed; final linking is being repaired and actual input/capture behavior remains pending. The experiment is separate from Hermes PM/package admission. Android phone UI control still requires an Android-specific backend. |
 | Bot Desktop | Virtual display host is Linux-only. | Added a local Termux Xvnc/Xfce adapter, prefix-aware runtime paths and screenshot capture through scrot. Desktop/remote-provider regressions pass, including real resolver result types. Native ARM UID 1000 validation passed: Xfce, an 800x600 RFB framebuffer, private Xauthority/socket permissions, no TCP display listener, real product screenshot capture and cleanup. |
 | Managed gateway service | Service install/start/uninstall paths reject Termux/APT provenance. Manual foreground/background gateway paths remain available. | Added a per-home Termux runit adapter with owned service directories, separate start-now/login policy, graceful stop and crash supervision. Twenty-four gateway tests pass. Native ARM install/start/status/restart/stop/crash-respawn/uninstall checks also passed, including same-basename home isolation and preservation of the shared supervisor. |
 | Recorder silence auto-stop | The Termux:API recorder does not provide the sounddevice VAD/silence path. Manual stop remains available. | Added explicit auto, sounddevice and termux-api capture selection with accurate diagnostics. The PCM path retains the existing VAD implementation. Exact NumPy 2.4.3 built and passed native numerical checks with both build and original payload libraries. PortAudio loaded, but measured runtime evidence shows only the Termux OpenSL ES wrapper: the actual Android audio framework, Binder devices and audio services are absent. Engine initialization failed in that environment; microphone/VAD remains unverified. Termux:API itself has no PCM stream for this VAD path. |
@@ -165,9 +165,29 @@ selection receipt during assembly. The receipt binds the actual Android target, 
 hashes and catalog digest. The PM environment stamp includes that digest, so
 corrected wheel bytes invalidate an older optional environment even when upstream
 versions stay the same. Receipt, stamp and existing baked-selection tests pass
-(22 tests). A candidate-only workflow builds a same-version disposable package and
-checks upgrade preservation plus a real cold-cache optional install without a
-native compiler. That complete-package proof is pending.
+(22 tests). The complete candidate also passed native package assembly, fresh
+offline install/reinstall, the terminal UI, CLI/tool checks, and actual replacement
+of the published package while preserving configuration, session and profile
+fixtures. Its optional-install check preserved all 100 initial candidate
+distributions, then added exactly anthropic 0.87.0 and docstring-parser 0.18.0 with
+an empty cache and no native build toolchain. Lock and wheel bytes stayed
+unchanged; a repeated request reused the completed environment.
+
+The [successful lifecycle evidence](../audit/candidate-lifecycle-e271e92-20261017/summary.json)
+binds these results to exact source, package and workflow identities in
+[run 39048514731](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39048514731).
+The target wheelhouse contains 100 wheels, including pure-Python wheels.
+The same-version package remains an Actions validation artifact. A separate
+[inventory comparison](../audit/candidate-lifecycle-e271e92-20261017/release-to-candidate-inventory.json)
+confirms all 81 published distributions remain at identical versions. The
+candidate's 19 additional distribution records include the application's own
+metadata record; they are not 19 additional user-facing features.
+
+[Two initial assembly failures](../audit/candidate-assembly-20261017/summary.json)
+identified a host script running outside PM's locked environment. The corrected
+entry point now uses the existing PM runtime and preserves child failure status;
+three focused assembly/handoff regressions passed. The source-side wheel-cache
+verifier retained every input and content check during cache reuse.
 
 The explicit capture-backend changes passed 101 voice-related tests, with 31
 existing Linux/macOS cases skipped on the Windows host. This includes all 14 new
@@ -231,9 +251,10 @@ installation, meaningful native behavior, ELF runtime linkage, and a second
 behavior pass using the original payload library path. Build-tool libraries must
 not accidentally conceal a missing package runtime dependency.
 
-Passing a component probe is recorded as **candidate-built**. It does not certify
-the complete next-stable package, optional-install lifecycle, external account
-credentials, or physical device permissions. Those are separate validation gates.
+Passing a component probe is recorded as **candidate-built**. The complete
+package and optional-install lifecycle passed their separate native validation
+gate. External account pairing and physical device permissions remain separate
+checks; the container results do not certify those Android device paths.
 
 The additional [gateway evidence](../audit/native-probes-4b3d121-20261017/gateway-summary.json) and
 [audio evidence](../audit/native-probes-9fcd31c-20261017/audio-summary.json) bind their results to

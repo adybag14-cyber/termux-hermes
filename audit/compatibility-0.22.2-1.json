@@ -198,7 +198,28 @@
       "failed": 0,
       "scope": "8 current Termux desktop tests plus 7 remote CUA availability tests"
     },
-    "candidate_package": "pending; Actions artifact only, never a release",
+    "candidate_package": {
+      "status": "native_full_package_and_optional_install_lifecycle_passed",
+      "tested_commit": "e271e922a2e71fd18591c45e9b98b8c7f9fffe02",
+      "run": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39048514731",
+      "patch_sha256": "77ac41bc11a6facd928f4cef577642b9eeb042ce3da7d820478aa49e1d98fa1e",
+      "candidate_sha256": "1e4e58fe17a1800f23ababcb2724e92b8904829eae3284569db52dbc672ca76a",
+      "published": false,
+      "version_bumped": false,
+      "baseline_distributions_before_optional_install": 100,
+      "preserved_baseline_distributions": 100,
+      "distributions_after_optional_install": 102,
+      "added_dependencies": {
+        "anthropic": "0.87.0",
+        "docstring-parser": "0.18.0"
+      },
+      "native_build_toolchain_present": false,
+      "repeat_generation_reused": true,
+      "evidence": "candidate-lifecycle-e271e92-20261017/summary.json",
+      "previous_assembly_failures": "candidate-assembly-20261017/summary.json",
+      "published_distributions_retained_at_same_versions": 81,
+      "published_distribution_inventory_evidence": "candidate-lifecycle-e271e92-20261017/release-to-candidate-inventory.json"
+    },
     "pm_bundled_wheel_regressions": {
       "passed": 21,
       "failed": 0,
@@ -246,14 +267,16 @@
         "x11rb-protocol==0.13.2"
       ],
       "unchanged_other_cargo_package_records": 602,
-      "status": "source_preparation_passed_native_build_and_operations_pending",
+      "status": "native_platform_and_pty_abi_passed_final_driver_linking_under_repair",
       "included_in_hermes_candidate": false,
-      "physical_android_phone_ui": false
+      "physical_android_phone_ui": false,
+      "native_progress_evidence": "cua-native-20261017/"
     },
     "termux_host_assembly_regressions": {
       "passed": 3,
       "failed": 0,
       "scope": "fixed-prefix assembly, bare-host PM runtime handoff, corrupt native catalog exit propagation"
-    }
+    },
+    "reviewed_termux_recipe_pins": "termux-recipe-pins-20261017.json"
   }
 }
