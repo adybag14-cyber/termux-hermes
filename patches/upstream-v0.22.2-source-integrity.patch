@@ -1,0 +1,151 @@
+diff --git a/scripts/termux/build_wheels.py b/scripts/termux/build_wheels.py
+--- a/scripts/termux/build_wheels.py
++++ b/scripts/termux/build_wheels.py
+@@ -27,6 +27,11 @@
+ import tomllib
+ from pathlib import Path, PurePosixPath
+ from urllib.parse import urlsplit
++
++if __package__:
++    from .locked_sources import native_requirement, wheel_requirement
++else:
++    from locked_sources import native_requirement, wheel_requirement
+ 
+ 
+ def parse_args() -> argparse.Namespace:
+@@ -135,7 +140,7 @@
+                  *, python: str = sys.executable) -> None:
+     for name in build_set:
+         spec = specs.get(name, "")
+-        req = f"{name}{spec}" if spec else name
++        req = native_requirement(name, spec)
+         ver = _dist_version(name, spec)
+         if ver is not None and any(
+             wheelhouse.glob(f"{name.replace('-', '_')}-{ver}-*.whl")
+@@ -285,18 +290,24 @@
+             continue
+         if not _marker_admits(marker):
+             continue
+-        reqs.append(f"{name}{spec.strip()}" if spec.strip() else name)
++        if source:
++            raise ValueError(f"Source requirement must be built from its pinned source: {name}")
++        reqs.append(wheel_requirement(name, spec))
+     # Build-backend deps the deb-venv's app install resolves offline:
+     # the app dir install (even --no-deps) prepares metadata through
+     # build-system.requires, which needs setuptools in the find-links.
+-    reqs.append("setuptools==83.0.0")
++    reqs.append(wheel_requirement("setuptools", "==83.0.0"))
+     if not reqs:
+         return
+-    proc = subprocess.run(
+-        [sys.executable, "-m", "pip", "download", "--no-deps",
+-         "--only-binary", ":all:", "-d", str(wheelhouse), *reqs],
+-        check=False, capture_output=True, text=True, encoding="utf-8",
+-    )
++    with tempfile.TemporaryDirectory(prefix="hermes-locked-wheels-") as tmp:
++        requirements = Path(tmp) / "requirements.txt"
++        requirements.write_text("\n".join(reqs) + "\n", encoding="utf-8")
++        proc = subprocess.run(
++            [sys.executable, "-m", "pip", "download", "--no-deps",
++             "--only-binary", ":all:", "--require-hashes", "-r", str(requirements),
++             "-d", str(wheelhouse)],
++            check=False, capture_output=True, text=True, encoding="utf-8",
++        )
+     if proc.returncode != 0:
+         print("PURE-WHEEL FETCH FAILED")
+         print("stdout:", proc.stdout[-1500:])
+diff --git a/scripts/termux/wheelhouse_cache.py b/scripts/termux/wheelhouse_cache.py
+--- a/scripts/termux/wheelhouse_cache.py
++++ b/scripts/termux/wheelhouse_cache.py
+@@ -13,6 +13,7 @@
+         "uv.lock", "pyproject.toml", "pm/lock.json", "pm/termux_runtime_libs.json",
+         "scripts/termux/build_config.sh",
+         "scripts/termux/termux_build.sh", "scripts/termux/build_wheels.py",
++        "scripts/termux/locked_sources.py",
+         "scripts/termux/retag_wheel.py", "scripts/termux/python_linkage.py",
+         "scripts/termux/wheelhouse_cache.py", "scripts/termux/build_environment.py",
+         "pm/environment.py", "pm/build_operations.py", "pm/operations.py",
+diff --git a/scripts/termux/locked_sources.py b/scripts/termux/locked_sources.py
+new file mode 100644
+--- /dev/null
++++ b/scripts/termux/locked_sources.py
+@@ -0,0 +1,79 @@
++"""Resolve build inputs from the committed locks; never use an unhashed registry fallback."""
++from __future__ import annotations
++
++import re
++import tomllib
++from pathlib import Path
++from urllib.parse import urlsplit
++
++
++def _name(name: str) -> str:
++    if not re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?", name):
++        raise ValueError(f"Invalid package name: {name!r}")
++    return re.sub(r"[-_.]+", "-", name).lower()
++
++
++def _package(name: str, spec: str, lock_paths: tuple[Path, ...] | None) -> dict:
++    spec = spec.strip()
++    if not re.fullmatch(r"==[A-Za-z0-9][A-Za-z0-9.!+_-]*", spec):
++        raise ValueError(f"Registry input needs an exact version: {name}{spec}")
++    root = Path(__file__).resolve().parents[2]
++    paths = lock_paths if lock_paths is not None else (root / "uv.lock", root / "pm/uv.lock")
++    for path in paths:
++        packages = tomllib.loads(path.read_text(encoding="utf-8-sig"))["package"]
++        matches = [
++            row for row in packages
++            if _name(row["name"]) == name and row["version"] == spec[2:]
++        ]
++        if not matches:
++            continue
++        if len(matches) != 1 or not matches[0].get("source", {}).get("registry"):
++            raise ValueError(f"Expected one locked registry source for {name}{spec}: {path}")
++        return matches[0]
++    raise ValueError(f"No locked registry source for {name}{spec}")
++
++
++def _artifact(artifact: dict, name: str) -> tuple[str, str]:
++    url = artifact.get("url", "")
++    digest = artifact.get("hash", "")
++    parsed = urlsplit(url)
++    if parsed.scheme != "https" or not parsed.netloc or parsed.fragment:
++        raise ValueError(f"Missing or invalid locked artifact URL for {name}")
++    if not re.fullmatch(r"sha256:[a-f0-9]{64}", digest):
++        raise ValueError(f"Missing or invalid locked SHA-256 for {name}")
++    return url, digest
++
++
++def native_requirement(
++    name: str, spec: str, *, lock_paths: tuple[Path, ...] | None = None,
++) -> str:
++    """Use the exact hashed sdist, or preserve a Git source already checked by normalize_reqs."""
++    name = _name(name)
++    spec = spec.strip()
++    if spec.startswith("@"):
++        source = spec[1:].strip()
++        repository, separator, commit = source.rpartition("@")
++        if (
++            not repository.startswith("git+")
++            or not separator
++            or not re.fullmatch(r"[a-f0-9]{40}", commit)
++            or any(c.isspace() for c in source)
++        ):
++            raise ValueError(f"Source requirement needs an exact Git commit: {name}")
++        return f"{name} @ {source}"
++    row = _package(name, spec, lock_paths)
++    url, digest = _artifact(row.get("sdist", {}), name)
++    return f"{name} @ {url}#sha256={digest.removeprefix('sha256:')}"
++
++
++def wheel_requirement(
++    name: str, spec: str, *, lock_paths: tuple[Path, ...] | None = None,
++) -> str:
++    """Allow pip to select a compatible wheel only from the locked artifact hashes."""
++    name = _name(name)
++    row = _package(name, spec, lock_paths)
++    wheels = row.get("wheels", [])
++    if not wheels:
++        raise ValueError(f"No locked wheel artifacts for {name}{spec}")
++    hashes = sorted({_artifact(wheel, name)[1] for wheel in wheels})
++    return f"{name}=={row['version']} " + " ".join(f"--hash={digest}" for digest in hashes)

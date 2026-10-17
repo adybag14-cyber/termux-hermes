@@ -1,61 +1,77 @@
-# Termux Hermes Immutable Wheelhouse
+# Hermes for Termux
 
-This repository builds the native Python wheels required by the Hermes Agent
-Termux profile so phones can install binary wheels instead of compiling C and
-Rust packages locally.
+This repository packages [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+for native **Termux aarch64**. Phones install a prepared Debian package; the C and
+Rust dependencies are built and checked on native ARM GitHub Actions runners.
 
-## One-command install and recovery
+## Install or recover
 
-For an existing native Termux aarch64 installation—including an interrupted
-Git update with a stale `.git/index.lock`—run:
+Run this in Termux:
 
 ```bash
 curl -fsSL --retry 6 --retry-all-errors https://raw.githubusercontent.com/adybag14-cyber/termux-hermes/main/install.sh | bash
 ```
 
-The recovery path verifies the signed APT repository, repairs upstream Termux
-mirror skew only when package simulation proves it is broken, downloads the
-latest immutable `hermes-agent` package with resumable transfers and two
-independent sources, repairs an incomplete dpkg transaction, and accepts an
-existing official Termux Python 3.13 instead of installing a conflicting second
-owner. It preserves `~/.hermes`, migrates the configuration, caps OpenRouter
-output at 8,192 tokens to avoid unaffordable 32K–65K requests, verifies that
-future updates use `pkg upgrade`, and restarts the gateway without requiring
-users to paste a multi-line shell fragment.
+The installer checks the signed package repository, downloads the reviewed
+immutable package with resumable transfers, verifies its SHA-256, and repairs an
+interrupted installation. It preserves `~/.hermes`, migrates existing
+configuration, retains the established 8,192-token output cap, and restarts the
+gateway. Set `HERMES_RECOVERY_MAX_TOKENS` to choose a different positive cap.
 
-The package download prefers the immutable GitHub release asset, falls back to
-the Oracle APT origin, and verifies the pinned package SHA-256 before local APT
-installation. It also recovers an existing APT partial download when present,
-including bytes left by a failed `pkg install`. An interrupted transfer remains in
-`~/.cache/hermes-recovery/` so rerunning the same one-line command resumes the
-existing bytes instead of starting the 63.9 MB download again. A successful
-installation removes that cache file.
+The current package bundles its own Python and native libraries under
+`$PREFIX/lib/hermes-agent`. It can coexist with an existing Termux Python 3.13
+or 3.14 installation. There is no need to replace the system Python to run Hermes.
 
-Set `HERMES_RECOVERY_MAX_TOKENS` before the command to choose a different
-positive output cap.
-
-## Native `pkg install hermes-agent` package
-
-The current Debian package version is `0.20.6+termux2`. Its Python dependency
-accepts an installed Termux `python` package in the 3.13 series; otherwise it
-uses the signed side-by-side `python3.13` package. This avoids overlapping
-ownership of `pydoc3.13` while keeping Hermes on its verified CPython 3.13 ABI
-after rolling Termux advances to Python 3.14.
-
-This repository also builds a complete native Termux `.deb` for Hermes Agent. The package is not a thin Python wheel: it contains the full Hermes runtime/source assets and a prevalidated CPython 3.13 virtual environment produced by the existing immutable Android wheelhouse flow. The package is stamped as an APT-managed install, so `hermes update` does not mutate package-owned files and instead directs users to `pkg upgrade hermes-agent`.
-
-The signed third-party repository is enabled once with:
+For an installation already using the signed repository:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh | bash
+pkg update
+pkg upgrade hermes-agent
 ```
 
-Then Hermes and the companion native packages are ordinary Termux packages:
+Hermes remains owned by APT. `hermes update` explains that updates use
+`pkg upgrade hermes-agent` and exits with status 2.
+
+## Release target
+
+The reviewed release inputs are in [manifest/release.json](manifest/release.json).
+
+| Item | Target |
+| --- | --- |
+| Hermes | [v0.22.2](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.2) |
+| Exact source | `d923a5eb487a17c0a68801bba9ef0f56c81040a8` |
+| Debian package | `hermes-agent_0.22.2-1_aarch64.deb` |
+| Architecture | aarch64 / arm64-v8a |
+| Python | Bundled Termux CPython 3.14.6 |
+| Wheel ABI and platform | `cp314`, `android_24_arm64_v8a` |
+| Feature profile | Hermes `termux`: Telegram, cron, MCP and ACP |
+| Build userspace | `termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303` |
+
+The v0.22.2 package uses the upstream PM runtime and builds the Node terminal
+interface. It includes Python, Node, npm, uv, FFmpeg, ripgrep, runtime shared
+libraries, the application source and its native dependency environment.
+The Python 3.13 wheelhouse from Hermes 0.20.6 is not used for this release.
+
+The package layout is:
+
+- `lib/hermes-agent/app`: application source and release stamp.
+- `lib/hermes-agent/venv`: application dependency environment.
+- `lib/hermes-agent/pm-runtime`: isolated package-manager environment.
+- `lib/hermes-agent/tools`: bundled tool binaries.
+- `lib/hermes-agent/runtime-libs`: the verified native library closure.
+- `lib/hermes-agent/bin`: generated launchers; Termux's `bin` directory links to them.
+
+The release stamp records the upstream tag and commit, `apt-termux`
+distribution, and external update ownership. The separate package revision
+`-1` follows the upstream Termux builder's Debian version format.
+
+## Signed APT repository
+
+Enable the contributor-operated repository once if you prefer to use APT directly:
 
 ```bash
+curl -fsSL --retry 6 --retry-all-errors https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh | bash
 pkg install hermes-agent
-pkg install wrangler
-pkg install python3.13
 ```
 
 Repository signing fingerprint:
@@ -64,110 +80,107 @@ Repository signing fingerprint:
 EAD24A2124EFA7393A78B7B14699F966313F7A6B
 ```
 
-`build-hermes-package.yml` builds on a native ARM GitHub runner in the pinned official Termux Docker userspace, installs Hermes through the native installer, validates the runtime imports, assembles the `.deb`, and installs that `.deb` into a second clean Termux container before an immutable GitHub release may be published. `apt-hermes-smoke.yml` separately validates installation from the live signed APT repository.
+The existing publisher imports verified, non-prerelease GitHub release assets,
+checks their package metadata and GitHub SHA-256 digest, then publishes a signed
+APT snapshot. Candidate Actions artifacts do not enter that feed. Published
+releases and their assets are immutable.
 
-The public APT repository is a contributor-operated distribution/proving path. It does **not** replace the separate upstream requirement that canonical Hermes Termux binary artifacts eventually be built and released by NousResearch-owned CI.
+This is an independent contributor distribution. The application comes from the
+identified NousResearch release; the packaging adaptations and validation
+evidence are maintained here.
 
-## Locked target
+## Build and release
 
-- Hermes source: `NousResearch/hermes-agent@5fc308a70719a83cccdbba4c0e39c23f5a8239d5` (`v2026.8.27`, Hermes 0.20.6)
-- Audited runtime: official Termux app GitHub build `v0.118.3` on Android 15/API 35
-- ARM build environment: official `termux/termux-docker` image pinned to `sha256:3aed9c7fbcf9195a9919deaad418da006232864a779fb4f322d68a34887a2e15`
-- Python: `3.13.15` from the immutable `termux-aarch64-20260824.43.1` release
-- Architecture: `aarch64`
-- Wheel platform: `android_24_arm64_v8a`
-- Dependency profile: Hermes `termux`
+[Build native Hermes Termux package](.github/workflows/build-hermes-package.yml)
+uses the exact reviewed source and applies the checked patches in
+[patches](patches). The build retains the full Termux feature profile and upgrades
+the rolling build container before installing current build tools.
 
-Every source distribution URL, version and SHA-256 is stored in
-[`manifest/wheels.json`](manifest/wheels.json). A release is never updated in
-place: the workflow refuses to publish when its tag already exists.
+The workflow:
 
-## Current native wheel set
+1. Confirms that the stable upstream tag resolves to the exact recorded commit.
+2. Provisions the locked host toolchain through upstream PM.
+3. Stages digest-verified bionic tools and runtime libraries. Upstream's public,
+   content-addressed mirror supplies archived inputs removed from Termux's rolling pool.
+4. Exports the frozen upstream dependency graph for the Termux profile.
+5. Builds native wheels with the bundled target Python inside the pinned aarch64
+   Termux userspace, then performs a complete offline dependency installation and
+   native import checks.
+6. Builds the terminal UI and assembles the canonical PM-based Debian bundle.
+7. Installs the actual package into a fresh pinned container with networking
+   disabled and checks CLI, ACP, native extensions, PM integrity, Node/npm,
+   ripgrep, FFmpeg and the terminal UI's setup screen.
+8. Upgrades a real installation of the previous package with existing Python
+   3.13 and user configuration, then checks preserved state and launcher ownership.
+9. Records the package and dependency provenance and uploads the
+   `hermes-agent-termux-aarch64` candidate artifact.
 
-The current Hermes Termux lock resolves to 74 exact packages under Python 3.13.
-Ten packages require Android-native wheels from this repository; the remaining
-packages are satisfied by compatible binary or universal wheels during the
-binary-only verification install. The native set is:
-
-| Package | Version | Backend | Locked source SHA-256 |
-| --- | ---: | --- | --- |
-| cffi | 2.0.0 | setuptools/C | `44d1b5909021139fe36001ae048dbdde8214afa20200eda0f64c068cac5d5529` |
-| cryptography | 50.0.0 | maturin/Rust+CFFI | `eeac2acb5a20ed25e0ad6d1df9891a520b78b404266b6d11778f25d5d691a6c9` |
-| jiter | 0.13.0 | maturin/Rust | `f2839f9c2c7e2dffc1bc5929a510e14ce0a946be9365fd1219e7ef342dae14f4` |
-| MarkupSafe | 3.0.3 | setuptools/C | `722695808f4b6457b320fdc131280796bdceb04ab50fe1795cd540799ebe1698` |
-| Pillow | 12.3.0 | setuptools/C | `3b8182a766685eaa002637e28b4ec8d6b18819a0c71f579bf0dbaa5830297cce` |
-| psutil | 7.2.2 | setuptools/C + Android patch | `0746f5f8d406af344fd547f1c8daa5f5c33dbc293bb8d6a16d80b4bb88f59372` |
-| pydantic-core | 2.46.4 | maturin/Rust | `62f875393d7f270851f20523dd2e29f082bcc82292d66db2b64ea71f64b6e1c1` |
-| PyYAML | 6.0.3 | setuptools/Cython/libyaml | `d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f` |
-| rpds-py | 0.30.0 | maturin/Rust | `dd8ff7cf90014af0c0f787eea34794ebf6415242ee1d6fa91eaba725cc441e84` |
-| ruamel.yaml.clib | 0.2.15 | setuptools/Cython | `46e4cc8c43ef6a94885f72512094e482114a8a706d3c555a34ed4b0d20200600` |
-
-The prior 91-package Android-emulator discovery snapshot is retained as historical
-evidence in [`audit/emulator-audit.json`](audit/emulator-audit.json). It describes
-the earlier lock and is not republished as evidence for a refreshed release. The
-current exact 74-package resolver output is [`audit/resolved.txt`](audit/resolved.txt),
-with direct requirements and lock constraints stored beside it.
-
-## Build design
-
-The `Build immutable arm64 wheelhouse` workflow runs on a native arm64 Ubuntu runner
-and executes the build inside Termux's official aarch64 Docker image at a fixed
-registry digest. Package discovery and final installation behavior were separately
-verified in the official Termux v0.118.3 Android app. The builder:
-
-1. verifies the pinned Python `.deb` and every PyPI sdist before extraction;
-2. rejects traversal, symlink and device members in source archives;
-3. builds serially with pinned setuptools, Cython, pybind11 and maturin versions;
-4. patches psutil's Android platform detection;
-5. emits or normalizes PEP 738 Android wheel tags;
-6. rewrites `WHEEL` and `RECORD` correctly when normalization is required;
-7. verifies package/version/tag, ZIP integrity and native extension presence;
-8. installs the complete current 74-package graph with `--only-binary :all:` in a clean venv;
-9. imports every native package and runs `uv pip check`;
-10. records the exact installed Termux system package versions;
-11. publishes wheels, `index.json`, `system-packages.txt`, and `SHA256SUMS` under a new immutable release tag.
-
-## Run locally in native aarch64 Termux
+This workflow creates a candidate without publishing it. Run it manually with:
 
 ```bash
-git clone https://github.com/adybag14-cyber/termux-hermes.git
-cd termux-hermes
-bash scripts/termux_build.sh "$PWD"
+gh workflow run build-hermes-package.yml --ref <reviewed-build-branch>
 ```
 
-The complete wheelhouse is written to
-`~/termux-hermes-build/wheelhouse/`. This build is intentionally resource-heavy;
-normal users should consume the published release assets instead.
-
-The automated arm64 release build uses the official Termux Docker image by immutable
-digest. The image exists specifically to run the Termux environment off-device; it
-contains the Termux bootstrap and the AOSP/Bionic runtime components needed by the
-Android-targeted Python toolchain.
-The workflow invokes `scripts/termux_build.sh /workspace /build docker`; the explicit
-mode keeps Docker validation independent of environment variables sanitized by the
-Termux container entrypoint.
-
-## Refreshing the lock
-
-Do not edit package versions without regenerating the Termux requirements and
-resolver inputs against an exact Hermes commit. A refresh must update together:
-
-- `audit/direct.in`
-- `audit/lock-constraints.txt`
-- `audit/resolved.txt`
-- `manifest/wheels.json`
-- this README table
-
-`audit/emulator-audit.json` and the older `audit/build-metadata.json` are retained
-as historical evidence for the release that produced them; do not silently relabel
-them as proof of a newer lock. Current compatibility metadata can be generated in
-native Termux with:
+After it succeeds, review and merge the packaging and release workflow changes.
+Keep the public installer's existing release pins until the new asset is published.
+Record the candidate's checksum, package version and immutable release URL in
+`install.sh` on a reviewed release branch. Dispatch
+[Publish verified Hermes Termux candidate](.github/workflows/publish-hermes-package.yml)
+on that branch with the successful build's run ID and the new release tag:
 
 ```bash
-python3.13 scripts/audit_pypi.py \
-  --resolved audit/resolved.txt \
-  --output audit/refreshed-emulator-audit.json
+gh workflow run publish-hermes-package.yml --ref <reviewed-release-branch> \
+  -f build_run_id=<successful-native-run-id> \
+  -f release_tag=<new-release-tag>
 ```
 
-A new wheelhouse must use a new release tag. Existing release assets must never
-be replaced.
+Promotion downloads that exact candidate without rebuilding it. It verifies the
+successful run, package identity, upstream pins, checksums and installer pins;
+reruns the existing-package upgrade; and tests the checked-in streamed recovery
+installer with a real interrupted HTTP transfer. It then creates a draft release,
+checks every uploaded asset's GitHub digest and size, and publishes the release.
+An existing tag or release is rejected. Recovery also reproduces the older
+Termux base's GPG/libgcrypt incompatibility and requires the installer to repair
+that dependency set while preserving the system Python.
+
+Once publication succeeds, merge the installer pins into `main`. After the new
+package appears in the signed APT repository, run the live APT smoke on that
+commit. This ordering ensures the public installer points to an available asset.
+
+Each package release includes:
+
+- `SHA256SUMS`: checksums of the Debian package and attached evidence.
+- `BUILD-METADATA.json`: actual package hash, upstream and packaging commits,
+  build image, source patch hashes and runtime contract inspection.
+- `WHEELHOUSE-MANIFEST.json`: wheel hashes and the complete cache input identity.
+- `RESOLVED.txt`: locked versions, target markers and source references.
+- `RELEASE-PINS.json`: the reviewed release target.
+
+The separate [live APT smoke](.github/workflows/apt-hermes-smoke.yml) verifies
+installation through the signed public repository and interrupted-download
+recovery. Release build validation and live APT validation are separate gates.
+
+## Updating the target
+
+Update the exact stable tag and commit together in `manifest/release.json`.
+Review upstream runtime, Python ABI, PM and native dependency changes before
+building. Refresh and review the build patches against that source. Do not infer
+the release version from the upstream development value in `pyproject.toml`;
+the verified stable tag and install stamp identify the release.
+
+After a candidate passes the native gates, update the recovery package version,
+immutable asset URL and SHA-256 together. The live smoke's expected version,
+partial-download fixture and cache names must change with the release. The APT
+publisher keeps the newest active package, so old active-pool URLs are not
+permanent fixtures; historical packages should use immutable GitHub URLs.
+
+## Historical builds and device evidence
+
+The [Hermes 0.20.6 / CPython 3.13 build documentation](docs/legacy-cp313.md),
+`manifest/wheels.json`, and existing `audit/` files describe the earlier
+release line. The legacy wheelhouse workflow and scripts remain available to
+reproduce that line. They are not evidence for v0.22.2.
+
+The new release's native container validation does not by itself certify a
+particular physical phone. Device-specific evidence, when collected, must name
+the Android version, Termux app and tested package checksum.

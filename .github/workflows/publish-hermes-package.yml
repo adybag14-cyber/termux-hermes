@@ -1,0 +1,147 @@
+name: Publish verified Hermes Termux candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: Successful Build native Hermes Termux package run ID
+        required: true
+        type: string
+      release_tag:
+        description: New immutable GitHub release tag matching install.sh
+        required: true
+        default: hermes-agent-termux-0.22.2-20261016.1
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: termux-hermes-agent-promotion
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 90
+    env:
+      GH_TOKEN: ${{ github.token }}
+      BUILD_RUN_ID: ${{ inputs.build_run_id }}
+      RELEASE_TAG: ${{ inputs.release_tag }}
+    steps:
+      - name: Checkout reviewed release pins and recovery installer
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Admit the completed native build
+        run: |
+          set -Eeuo pipefail
+          [[ "$BUILD_RUN_ID" =~ ^[1-9][0-9]*$ ]] || {
+            echo "build_run_id must be a positive numeric Actions run ID" >&2
+            exit 1
+          }
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID" > "$RUNNER_TEMP/build-run.json"
+          python3 scripts/verify_release_candidate.py run \
+            --run-json "$RUNNER_TEMP/build-run.json" \
+            --repository "$GITHUB_REPOSITORY" --run-id "$BUILD_RUN_ID"
+          python3 scripts/verify_release_candidate.py new-release \
+            --repository "$GITHUB_REPOSITORY" --release-tag "$RELEASE_TAG"
+
+      - name: Download the exact successful build artifact
+        run: |
+          set -Eeuo pipefail
+          gh run download "$BUILD_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+            --name hermes-agent-termux-aarch64 --dir candidate
+
+      - name: Verify package, provenance, checksums and installer pins
+        id: candidate
+        run: |
+          set -Eeuo pipefail
+          python3 scripts/verify_release_candidate.py candidate \
+            --candidate candidate --run-json "$RUNNER_TEMP/build-run.json" \
+            --repository "$GITHUB_REPOSITORY" --run-id "$BUILD_RUN_ID" \
+            --release-tag "$RELEASE_TAG" --pins manifest/release.json --installer install.sh \
+            --github-output "$GITHUB_OUTPUT" | tee "$RUNNER_TEMP/verified-candidate.json"
+
+      - name: Revalidate upgrade with the exact candidate bytes
+        env:
+          PACKAGE_FILENAME: ${{ steps.candidate.outputs.package_filename }}
+          PACKAGE_VERSION: ${{ steps.candidate.outputs.package_version }}
+          TERMUX_IMAGE: ${{ steps.candidate.outputs.termux_image }}
+        run: |
+          set -Eeuo pipefail
+          bash scripts/check_bundle_upgrade.sh \
+            "$GITHUB_WORKSPACE/candidate/$PACKAGE_FILENAME" "$PACKAGE_VERSION" \
+            2>&1 | tee "$RUNNER_TEMP/promotion-upgrade.log"
+
+      - name: Validate the checked-in recovery installer end to end
+        env:
+          PACKAGE_FILENAME: ${{ steps.candidate.outputs.package_filename }}
+          PACKAGE_VERSION: ${{ steps.candidate.outputs.package_version }}
+          TERMUX_IMAGE: ${{ steps.candidate.outputs.termux_image }}
+        run: |
+          set -Eeuo pipefail
+          bash scripts/check_bundle_recovery.sh \
+            "$GITHUB_WORKSPACE/candidate/$PACKAGE_FILENAME" "$PACKAGE_VERSION" \
+            "$GITHUB_WORKSPACE/install.sh" 2>&1 | tee "$RUNNER_TEMP/promotion-recovery.log"
+
+      - name: Create draft, verify uploaded digests and publish
+        env:
+          PACKAGE_VERSION: ${{ steps.candidate.outputs.package_version }}
+          PACKAGE_SHA256: ${{ steps.candidate.outputs.package_sha256 }}
+          SOURCE_TAG: ${{ steps.candidate.outputs.source_tag }}
+          SOURCE_COMMIT: ${{ steps.candidate.outputs.source_commit }}
+          BUILD_HEAD_SHA: ${{ steps.candidate.outputs.build_head_sha }}
+        run: |
+          set -Eeuo pipefail
+          # Recheck the unchanged candidate and tag immediately before publication.
+          python3 scripts/verify_release_candidate.py candidate \
+            --candidate candidate --run-json "$RUNNER_TEMP/build-run.json" \
+            --repository "$GITHUB_REPOSITORY" --run-id "$BUILD_RUN_ID" \
+            --release-tag "$RELEASE_TAG" --pins manifest/release.json --installer install.sh \
+            > "$RUNNER_TEMP/verified-candidate.json"
+          python3 scripts/verify_release_candidate.py new-release \
+            --repository "$GITHUB_REPOSITORY" --release-tag "$RELEASE_TAG"
+          cat > "$RUNNER_TEMP/release-notes.md" <<EOF
+          Hermes $SOURCE_TAG for Termux aarch64, package $PACKAGE_VERSION.
+
+          This release promotes the exact package from the successful native build:
+          https://github.com/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID
+
+          Upstream source: NousResearch/hermes-agent@$SOURCE_COMMIT.
+          Packaging source: $GITHUB_REPOSITORY@$BUILD_HEAD_SHA.
+          Package SHA-256: $PACKAGE_SHA256.
+
+          The self-contained runtime includes Python 3.14, Node, npm, uv, FFmpeg and ripgrep,
+          with the Termux feature profile: Telegram, cron, MCP and ACP.
+          The native build validated the fresh installed bundle and terminal UI. Promotion
+          revalidated the existing-package upgrade and the checked-in recovery installer
+          against these exact bytes, including its version, checksum and immutable release URL.
+
+          Package checksums, locked dependency evidence and build provenance are attached.
+          APT remains responsible for updates; use pkg upgrade hermes-agent.
+          EOF
+          gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "Hermes $SOURCE_TAG for Termux aarch64" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" --draft
+          gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" candidate/*
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" > "$RUNNER_TEMP/draft-release.json"
+          python3 scripts/verify_release_candidate.py assets --candidate candidate \
+            --release-json "$RUNNER_TEMP/draft-release.json" --release-tag "$RELEASE_TAG"
+          gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest=false
+          printf 'Published [Hermes %s](https://github.com/%s/releases/tag/%s) from [native build %s](https://github.com/%s/actions/runs/%s).\n\nPackage SHA-256: %s\n' \
+            "$SOURCE_TAG" "$GITHUB_REPOSITORY" "$RELEASE_TAG" "$BUILD_RUN_ID" \
+            "$GITHUB_REPOSITORY" "$BUILD_RUN_ID" "$PACKAGE_SHA256" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Preserve promotion verification evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: hermes-termux-promotion-evidence
+          path: |
+            ${{ runner.temp }}/build-run.json
+            ${{ runner.temp }}/verified-candidate.json
+            ${{ runner.temp }}/promotion-upgrade.log
+            ${{ runner.temp }}/promotion-recovery.log
+            ${{ runner.temp }}/draft-release.json
+          if-no-files-found: ignore

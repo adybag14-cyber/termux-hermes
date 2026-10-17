@@ -1,0 +1,15 @@
+diff --git a/scripts/termux/termux_build.sh b/scripts/termux/termux_build.sh
+--- a/scripts/termux/termux_build.sh
++++ b/scripts/termux/termux_build.sh
+@@ -224,6 +224,11 @@
+ snapshot(Path(sys.argv[1]), sys.argv[2], Path(sys.argv[3]))
+ PY
+ [ -f "$WORK/tree/pyproject.toml" ] || fail "archived tag tree has no pyproject.toml -- bad tag?"
++# Package the reviewed build adapters as well: installed validation executes
++# app/scripts/termux/build_wheels.py, and must use the same import and hash policy.
++for adapted in termux_build.sh build_wheels.py locked_sources.py wheelhouse_cache.py build_deb.sh payload_facts.py; do
++    cp "$REPO_ABS/scripts/termux/$adapted" "$WORK/tree/scripts/termux/$adapted"
++done
+ REPO_ROOT="$(cd "$HERE/../.." && pwd)"
+ DIGEST="$(cd "$REPO_ROOT" && python3 -c 'from pm.lock import termux_docker_digest; print(termux_docker_digest())')"
+ [ -n "$DIGEST" ] || fail "termux-docker digest missing from pm/lock.json"
