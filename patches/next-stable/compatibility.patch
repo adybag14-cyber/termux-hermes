@@ -49,6 +49,619 @@ index df6d4cff..0815c4d4 100644
      succeeded; callers fall back to OSC 52 on False."""
      for argv, kw in _write_clipboard_commands(text.encode("utf-8")):
          try:
+diff --git a/hermes_cli/config_defaults.py b/hermes_cli/config_defaults.py
+index 76b6fbd2..66b4e791 100644
+--- a/hermes_cli/config_defaults.py
++++ b/hermes_cli/config_defaults.py
+@@ -1226,6 +1226,7 @@ DEFAULT_CONFIG = {
+             # optional "api_key" / "base_url" keys override the OpenAI audio credentials for this mode only
+         },
+         "record_key": "ctrl+b",
++        "capture_backend": "auto",  # auto | sounddevice (PCM/VAD) | termux-api (file recording)
+         "submit_mode": "direct",  # TUI: direct submits immediately; draft = editable transcript
+         "max_recording_seconds": 120,
+         "auto_tts": False,
+diff --git a/plugins/computer_use/cua/__init__.py b/plugins/computer_use/cua/__init__.py
+index 230fc073..9c5573a2 100644
+--- a/plugins/computer_use/cua/__init__.py
++++ b/plugins/computer_use/cua/__init__.py
+@@ -3,10 +3,19 @@
+ from __future__ import annotations
+ 
+ import sys
++from collections.abc import Callable
+ 
+ from tools.computer_use.backend import ComputerUseBackend, ComputerUseProvider
+ 
+ 
++def _available_for_placement(platform: str, where: str, binary_available: Callable[[], bool]) -> bool:
++    """A remote desktop's driver belongs to that backend, independently of the client's OS."""
++    from tools.bot_desktop import placement
++    if where == placement.TERMINAL:
++        return True  # The sandbox's actual binary and contract are checked on first use.
++    return platform in ("darwin", "win32", "linux") and binary_available()
++
++
+ class CuaDriverProvider(ComputerUseProvider):
+     name = "cua"
+     display_name = "cua-driver (background)"
+@@ -16,17 +25,10 @@ class CuaDriverProvider(ComputerUseProvider):
+         return CuaDriverBackend(permission_mode=permission_mode)
+ 
+     def is_available(self) -> bool:
+-        """macOS/Windows/Linux + cua-driver binary (or env override). `hermes computer-use doctor` names blocked checks."""
+-        if sys.platform not in ("darwin", "win32", "linux"):
+-            return False
+-        from tools.computer_use.cua_backend_driver import cua_driver_binary_available
+-        if cua_driver_binary_available():
+-            return True
+-        # No host driver: the tool is still real when the desktop is placed inside a terminal backend whose image
+-        # carries cua-driver (nousresearch/hermes-sandbox:desktop). Placement is config; the binary is probed lazily
+-        # at first use, so this stays a cheap check_fn.
++        """Probe a local desktop driver, or admit the explicitly placed remote Linux desktop."""
+         from tools.bot_desktop import placement
+-        return placement.resolve().where == placement.TERMINAL
++        from tools.computer_use.cua_backend_driver import cua_driver_binary_available
++        return _available_for_placement(sys.platform, placement.resolve().where, cua_driver_binary_available)
+ 
+ 
+ def register(ctx):
+diff --git a/pm/bundled_wheels.py b/pm/bundled_wheels.py
+new file mode 100644
+index 00000000..c0e4cb6c
+--- /dev/null
++++ b/pm/bundled_wheels.py
+@@ -0,0 +1,353 @@
++"""Verified bundle wheels for frozen PM synchronization.
++
++The catalog is part of the sealed payload and is hashed by its manifest. It is
++not a uv cache: each row binds built wheel bytes to the original locked source.
++Only the current export's exact source and version may reuse a row.
++"""
++from __future__ import annotations
++
++from dataclasses import dataclass
++import hashlib
++import json
++from pathlib import Path
++import re
++from typing import Mapping, Sequence
++from urllib.parse import parse_qs, urlsplit, urlunsplit
++
++from pm.package import InstallError
++
++CATALOG_NAME = "bundled-wheels.json"
++
++
++
++def interpreter_markers(python: Path, environment: Mapping[str, str]) -> dict[str, str]:
++    """Read PEP 508 facts from the selected interpreter, without importing site."""
++    import subprocess
++
++    from pm.filesystem import native
++
++    code = """
++import json, os, platform, sys
++v = sys.implementation.version
++implementation_version = f"{v.major}.{v.minor}.{v.micro}"
++if v.releaselevel != "final":
++    implementation_version += v.releaselevel[0] + str(v.serial)
++print(json.dumps({
++    "implementation_name": sys.implementation.name,
++    "implementation_version": implementation_version,
++    "os_name": os.name,
++    "platform_machine": platform.machine(),
++    "platform_release": platform.release(),
++    "platform_system": platform.system(),
++    "platform_version": platform.version(),
++    "platform_python_implementation": platform.python_implementation(),
++    "python_full_version": platform.python_version(),
++    "python_version": ".".join(platform.python_version_tuple()[:2]),
++    "sys_platform": sys.platform,
++    "extra": "",
++}))
++"""
++    try:
++        result = subprocess.run([native(python), "-I", "-S", "-c", code],
++                                env=dict(environment), capture_output=True, text=True,
++                                encoding="utf-8", errors="replace", timeout=30, check=False)
++    except subprocess.TimeoutExpired as exc:
++        raise InstallError("venv", "selected Python marker inspection timed out") from exc
++    if result.returncode:
++        raise ValueError(f"selected Python marker inspection failed: {result.stderr[-600:]}")
++    markers = json.loads(result.stdout)
++    if not isinstance(markers, dict) or not all(isinstance(k, str) and isinstance(v, str) for k, v in markers.items()):
++        raise ValueError("selected Python returned malformed marker facts")
++    return markers
++
++def _hash(data: bytes) -> str:
++    return hashlib.sha256(data).hexdigest()
++
++
++def _source_fingerprint(source: dict) -> str:
++    return _hash(json.dumps(source, sort_keys=True, separators=(",", ":")).encode())
++
++
++def _artifact(artifact: dict) -> dict:
++    url, digest = artifact.get("url"), artifact.get("hash")
++    if not isinstance(url, str) or not url or not isinstance(digest, str) or not re.fullmatch(r"sha256:[a-f0-9]{64}", digest):
++        raise ValueError("Bundled wheel origin needs an exact locked artifact URL and SHA-256")
++    return {"url": url, "sha256": digest[7:]}
++
++
++def _git_identity(url: str) -> tuple[str, str, str]:
++    parsed = urlsplit(url)
++    if not re.fullmatch(r"[a-f0-9]{40}", parsed.fragment):
++        raise ValueError("Bundled Git wheel needs an exact locked commit")
++    query = parse_qs(parsed.query)
++    repository = urlunsplit(parsed._replace(query="", fragment=""))
++    return repository, parsed.fragment, query.get("subdirectory", [""])[0]
++
++
++def _origin(package: dict, wheel_sha: str) -> dict:
++    source = package.get("source", {})
++    if "git" in source:
++        _git_identity(source["git"])
++        return {"kind": "git", "locked": source["git"]}
++    registry = source.get("registry")
++    if not isinstance(registry, str) or not registry:
++        raise ValueError(f"Unsupported bundled wheel source for {package['name']}")
++    matches = [w for w in package.get("wheels", []) if w.get("hash") == f"sha256:{wheel_sha}"]
++    if matches:
++        return {"kind": "registry-wheel", "registry": registry, **_artifact(matches[0])}
++    return {"kind": "registry-sdist", "registry": registry, **_artifact(package.get("sdist", {}))}
++
++
++def _origin_matches(origin: dict, package: dict) -> bool:
++    source = package.get("source", {})
++    if origin["kind"] == "git":
++        return source.get("git") == origin["locked"]
++    if source.get("registry") != origin["registry"]:
++        return False
++    artifacts = package.get("wheels", []) if origin["kind"] == "registry-wheel" else [package.get("sdist", {})]
++    return any(a.get("url") == origin["url"] and a.get("hash") == f"sha256:{origin['sha256']}" for a in artifacts)
++
++
++def _wheel_identity(path: Path) -> tuple[str, str]:
++    from email.parser import BytesParser
++    import zipfile
++
++    from packaging.utils import canonicalize_name, parse_wheel_filename
++    from packaging.version import Version
++
++    name, version, _build, _tags = parse_wheel_filename(path.name)
++    with zipfile.ZipFile(path) as wheel:
++        metadata = [n for n in wheel.namelist() if n.endswith(".dist-info/METADATA") and n.count("/") == 1]
++        if len(metadata) != 1:
++            raise ValueError(f"Expected one wheel metadata record: {path.name}")
++        record = BytesParser().parsebytes(wheel.read(metadata[0]))
++    if canonicalize_name(record["Name"] or "") != name or Version(record["Version"] or "") != version:
++        raise ValueError(f"Wheel filename and metadata disagree: {path.name}")
++    return name, str(version)
++
++
++def write_catalog(payload: Path, *, wheelhouse: Path, lock_paths: Sequence[Path]) -> dict:
++    """Write the build-time catalog; return its manifest descriptor.
++
++    Call after wheel retag/linkage repair and copy wheelhouse/ into the payload.
++    Then add the returned descriptor to manifest.json as bundled_wheels.
++    """
++    import tomllib
++
++    from packaging.utils import canonicalize_name
++    from packaging.version import Version
++
++    payload, wheelhouse = payload.resolve(), wheelhouse.resolve()
++    if wheelhouse != payload / "wheelhouse":
++        raise ValueError("Bundled wheels must be staged at payload/wheelhouse")
++    packages = [p for path in lock_paths
++                for p in tomllib.loads(path.read_text(encoding="utf-8-sig"))["package"]]
++    rows, identities = [], set()
++    for path in sorted(wheelhouse.glob("*.whl")):
++        if path.is_symlink() or not path.resolve().is_relative_to(payload):
++            raise ValueError(f"Bundled wheel must be an internal regular file: {path.name}")
++        name, version = _wheel_identity(path)
++        data = path.read_bytes()
++        digest = _hash(data)
++        candidates = [p for p in packages if canonicalize_name(p["name"]) == name and Version(p["version"]) == Version(version)]
++        origins = {}
++        for package in candidates:
++            origin = _origin(package, digest)
++            origins[_source_fingerprint(origin)] = (package, origin)
++        if len(origins) != 1:
++            raise ValueError(f"Expected one locked source for bundled {name}=={version}")
++        fingerprint, (package, origin) = next(iter(origins.items()))
++        identity = (name, package["version"], fingerprint)
++        if identity in identities:
++            raise ValueError(f"Ambiguous bundled wheel for {name}=={version}")
++        identities.add(identity)
++        rows.append({"name": name, "version": package["version"], "source": origin,
++                     "source_fingerprint": fingerprint, "file": path.relative_to(payload).as_posix(),
++                     "sha256": digest, "size": len(data)})
++    if not rows:
++        raise ValueError("Cannot publish an empty bundled wheel catalog")
++    body = (json.dumps({"schema_version": 1, "wheels": rows}, sort_keys=True, indent=2) + "\n").encode()
++    (payload / CATALOG_NAME).write_bytes(body)
++    return {"path": CATALOG_NAME, "sha256": _hash(body)}
++
++
++def _validate_origin(origin: dict) -> None:
++    kind = origin.get("kind")
++    if kind == "git":
++        if set(origin) != {"kind", "locked"} or not isinstance(origin["locked"], str):
++            raise ValueError("Malformed bundled Git source")
++        _git_identity(origin["locked"])
++    elif kind in ("registry-wheel", "registry-sdist"):
++        if set(origin) != {"kind", "registry", "url", "sha256"}:
++            raise ValueError("Malformed bundled registry source")
++        if not all(isinstance(origin[k], str) and origin[k] for k in ("registry", "url", "sha256")):
++            raise ValueError("Malformed bundled registry source")
++        if not re.fullmatch(r"[a-f0-9]{64}", origin["sha256"]):
++            raise ValueError("Malformed bundled source SHA-256")
++    else:
++        raise ValueError("Unsupported bundled wheel source kind")
++
++
++def _validate_row(row: dict, payload: Path) -> None:
++    from packaging.utils import canonicalize_name
++    from packaging.version import Version
++
++    if not isinstance(row, dict) or set(row) != {"name", "version", "source", "source_fingerprint", "file", "sha256", "size"}:
++        raise ValueError("Malformed bundled wheel catalog row")
++    if (not isinstance(row["name"], str) or not re.fullmatch(r"[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", row["name"])
++            or canonicalize_name(row["name"]) != row["name"]):
++        raise ValueError("Bundled package name is not canonical")
++    if not isinstance(row["version"], str):
++        raise ValueError("Bundled version is not a string")
++    Version(row["version"])
++    if not isinstance(row["source"], dict):
++        raise ValueError("Malformed bundled source")
++    _validate_origin(row["source"])
++    if row["source_fingerprint"] != _source_fingerprint(row["source"]):
++        raise ValueError("Bundled source fingerprint mismatch")
++    if not isinstance(row["sha256"], str) or not re.fullmatch(r"[a-f0-9]{64}", row["sha256"]):
++        raise ValueError("Malformed bundled wheel SHA-256")
++    if type(row["size"]) is not int or row["size"] <= 0:
++        raise ValueError("Malformed bundled wheel size")
++    filename = row["file"]
++    if not isinstance(filename, str) or not re.fullmatch(r"wheelhouse/[A-Za-z0-9_.+!-]+\.whl", filename):
++        raise ValueError("Bundled wheel path must be a wheelhouse filename")
++    path = payload / filename
++    if path.is_symlink() or not path.resolve().is_relative_to(payload):
++        raise ValueError("Bundled wheel path escapes the payload")
++
++
++@dataclass(frozen=True)
++class BundledWheel:
++    name: str
++    path: Path
++    sha256: str
++
++    @property
++    def requirement(self) -> str:
++        return f"{self.name} @ {self.path.as_uri()} --hash=sha256:{self.sha256}"
++
++
++@dataclass(frozen=True)
++class Catalog:
++    sha256: str
++    payload: Path
++    rows: tuple[dict, ...]
++
++    def select(self, exported: str, lock: Path, marker_environment: Mapping[str, str]) -> list[BundledWheel]:
++        """Join UV's real selection to exact current lock sources, then verify bytes."""
++        import tomllib
++
++        from packaging.requirements import Requirement
++        from packaging.utils import canonicalize_name
++
++        packages = tomllib.loads(lock.read_text(encoding="utf-8-sig"))["package"]
++        selected = {}
++        for line in exported.splitlines():
++            if not line.strip() or line.lstrip().startswith("#"):
++                continue
++            req = Requirement(line)
++            if req.marker and not req.marker.evaluate(marker_environment):
++                continue
++            name = canonicalize_name(req.name)
++            available = [r for r in self.rows if r["name"] == name]
++            if not available:
++                continue
++            package = _selected_package(req, packages, marker_environment)
++            if package is None:
++                continue
++            choices = [r for r in available if r["version"] == package["version"]
++                       and _origin_matches(r["source"], package)]
++            if len(choices) > 1:
++                raise ValueError(f"Ambiguous bundled wheel for {name}")
++            if not choices:
++                continue
++            candidate = _verified_wheel(self.payload, choices[0])
++            if name in selected and selected[name] != candidate:
++                raise ValueError(f"Conflicting selected bundled wheels: {name}")
++            selected[name] = candidate
++        return [selected[name] for name in sorted(selected)]
++
++
++
++def _selected_package(requirement, packages: list[dict], marker_environment: Mapping[str, str]) -> dict | None:
++    from packaging.markers import Marker
++    from packaging.utils import canonicalize_name
++
++    name = canonicalize_name(requirement.name)
++    matching = [p for p in packages if canonicalize_name(p["name"]) == name
++                and _requirement_matches(requirement, p)
++                and (not p.get("resolution-markers")
++                     or any(Marker(m).evaluate(marker_environment) for m in p["resolution-markers"]))]
++    if len(matching) > 1:
++        raise ValueError(f"Ambiguous frozen source for bundled {name}")
++    return matching[0] if matching else None
++
++
++def _verified_wheel(payload: Path, row: dict) -> BundledWheel:
++    from packaging.version import Version
++
++    path = payload / row["file"]
++    data = path.read_bytes()
++    if len(data) != row["size"] or _hash(data) != row["sha256"]:
++        raise ValueError(f"Bundled wheel SHA-256 or size mismatch: {row['name']}")
++    actual_name, actual_version = _wheel_identity(path)
++    if actual_name != row["name"] or Version(actual_version) != Version(row["version"]):
++        raise ValueError(f"Bundled wheel metadata mismatch: {row['name']}")
++    return BundledWheel(row["name"], path, row["sha256"])
++
++
++def _requirement_matches(requirement, package: dict) -> bool:
++    source = package.get("source", {})
++    if requirement.url is None:
++        specs = list(requirement.specifier)
++        return ("registry" in source and len(specs) == 1 and specs[0].operator == "=="
++                and "*" not in specs[0].version
++                and requirement.specifier.contains(package["version"], prereleases=True))
++    if not requirement.url.startswith("git+") or "git" not in source:
++        return False
++    repository, commit, subdirectory = _git_identity(source["git"])
++    parsed = urlsplit(requirement.url.removeprefix("git+"))
++    path, separator, revision = parsed.path.rpartition("@")
++    requested_repository = urlunsplit(parsed._replace(path=path, fragment="", query=""))
++    return (bool(separator) and requested_repository == repository and revision == commit
++            and parse_qs(parsed.fragment).get("subdirectory", [""])[0] == subdirectory)
++
++
++def load_catalog() -> Catalog | None:
++    """Discover only the executing code's sealed payload, never the workspace."""
++    from pm.environments import _payload_manifest
++    from pm.paths import repo_root
++
++    root = repo_root().resolve()
++    manifest = _payload_manifest(root)
++    if not manifest or "bundled_wheels" not in manifest:
++        return None
++    try:
++        descriptor = manifest["bundled_wheels"]
++        if (not isinstance(descriptor, dict) or set(descriptor) != {"path", "sha256"}
++                or descriptor["path"] != CATALOG_NAME
++                or not isinstance(descriptor["sha256"], str)
++                or not re.fullmatch(r"[a-f0-9]{64}", descriptor["sha256"])):
++            raise ValueError("Malformed bundled wheel catalog descriptor")
++        path = root.parent / CATALOG_NAME
++        if path.is_symlink():
++            raise ValueError("Bundled wheel catalog must not be a symlink")
++        body = path.read_bytes()
++        if _hash(body) != descriptor["sha256"]:
++            raise ValueError("Bundled wheel catalog SHA-256 mismatch")
++        document = json.loads(body)
++        if (not isinstance(document, dict) or set(document) != {"schema_version", "wheels"}
++                or type(document["schema_version"]) is not int or document["schema_version"] != 1
++                or not isinstance(document["wheels"], list) or not document["wheels"]):
++            raise ValueError("Malformed bundled wheel catalog")
++        identities = set()
++        for row in document["wheels"]:
++            _validate_row(row, root.parent)
++            identity = (row["name"], row["version"], row["source_fingerprint"])
++            if identity in identities:
++                raise ValueError("Duplicate bundled wheel identity")
++            identities.add(identity)
++        return Catalog(descriptor["sha256"], root.parent, tuple(document["wheels"]))
++    except (OSError, ValueError, TypeError, KeyError) as exc:
++        raise InstallError("venv", f"invalid bundled wheel catalog: {exc}") from exc
+diff --git a/pm/environment.py b/pm/environment.py
+index 0a12a25e..54cbf15c 100644
+--- a/pm/environment.py
++++ b/pm/environment.py
+@@ -298,6 +298,7 @@ class PythonEnvironment:
+     offline: bool = False
+     output: TextIO | None = None
+     no_config: bool = False
++    use_bundled_wheels: bool = True
+ 
+     @property
+     def executable(self) -> Path:
+@@ -392,53 +393,109 @@ class PythonEnvironment:
+         if result.returncode:
+             raise classify_uv_failure("lock", result.returncode, result.stderr or result.stdout)
+ 
++    def _selection_args(self, source: Path, *, extras: Sequence[str], groups: Sequence[str],
++                        all_extras: bool, no_default_groups: bool) -> list[str]:
++        # Export and sync must select the same root, plugin members and groups.
++        args = ["--all-packages"]
++        if no_default_groups:
++            args.append("--no-default-groups")
++        if all_extras:
++            from pm.features import opt_in_extras
++
++            args.append("--all-extras")
++            for extra in opt_in_extras(source):
++                args += ["--no-extra", extra]
++        for extra in sorted(set(extras)):
++            args += ["--extra", extra]
++        for group in sorted(set(groups)):
++            args += ["--group", group]
++        return args
++
++    def _bundled_selection(self, source: Path, selection: list[str], *, timeout: int) -> list:
++        if not self.use_bundled_wheels:
++            return []
++        from pm.bundled_wheels import interpreter_markers, load_catalog
++
++        catalog = load_catalog()
++        if catalog is None:
++            return []
++        # UV selects the frozen graph, including workspace members. Local project
++        # rows cannot be bundled wheels; omitting them retains their dependencies.
++        with tempfile.TemporaryDirectory(prefix="pm-bundled-export-") as temporary:
++            exported = Path(temporary) / "requirements.txt"
++            command = ["export", "--frozen", "--python", str(self.python), *selection,
++                       "--no-emit-local", "--no-hashes", "--no-annotate", "--no-header",
++                       "--format", "requirements-txt", "--output-file", str(exported)]
++            result = self._run(command, cwd=source, timeout=timeout)
++            if result.returncode:
++                raise classify_uv_failure("export", result.returncode, result.stderr or result.stdout)
++            try:
++                markers = interpreter_markers(self.python, _base_environment(self.env))
++                return catalog.select(exported.read_text(encoding="utf-8-sig"),
++                                      source / "uv.lock", markers)
++            except (OSError, ValueError, TypeError, KeyError) as exc:
++                raise InstallError("venv", f"invalid bundled wheel selection: {exc}") from exc
++
++    def _run_with_bytecode_retry(self, command: list[str], *, cwd: Path,
++                                 timeout: int) -> subprocess.CompletedProcess:
++        result = self._run(command, cwd=cwd, timeout=timeout)
++        if _is_bytecode_compile_failure(result):
++            # Compile is an optimization. Retry once without the flag so a
++            # locked temp script cannot fail pm repair/bootstrap. Imports
++            # compile lazily on first use.
++            if self.output is not None:
++                self.output.write(
++                    "Bytecode compile failed; retrying the install without it. "
++                    "Modules will compile on first import.\n"
++                )
++            result = self._run([arg for arg in command if arg != "--compile-bytecode"],
++                               cwd=cwd, timeout=timeout)
++        return result
++
++    def _restore_bundled_wheels(self, wheels: list, *, timeout: int) -> None:
++        # Sync removes excluded packages, including ones already installed.
++        # Restore AFTER sync, with exact local bytes and no dependency resolution.
++        with tempfile.TemporaryDirectory(prefix="pm-bundled-install-") as temporary:
++            requirements = Path(temporary) / "requirements.txt"
++            requirements.write_text("\n".join(w.requirement for w in wheels) + "\n", encoding="utf-8")
++            command = ["pip", "install", "--no-config", "--python", str(self.executable),
++                       "--no-deps", "--no-index", "--only-binary", ":all:", "--require-hashes",
++                       "--reinstall", "--compile-bytecode", "--requirements", str(requirements)]
++            result = self._run_with_bytecode_retry(command, cwd=requirements.parent, timeout=timeout)
++            if result.returncode:
++                raise classify_uv_failure("bundled install", result.returncode, result.stderr or result.stdout)
++        self.check()
++
+     def sync(self, source: Path, *, extras: Sequence[str] = (), groups: Sequence[str] = (),
+              timeout: int = 1800, frozen: bool = True, all_extras: bool = False,
+              no_install_project: bool = False, locked: bool = False,
+              no_default_groups: bool = False) -> None:
+         """Install the root and every member; resolve only in a writable workspace.
+ 
+-        ``frozen=False`` is reserved for the caller-owned generated workspace,
++        Frozen=False is reserved for the caller-owned generated workspace,
+         never the original project's lock. Seed/replay policy belongs to PM.
+         """
+         if not frozen:
+             self.lock(source, timeout=timeout)
++        selection = self._selection_args(source, extras=extras, groups=groups,
++                                         all_extras=all_extras, no_default_groups=no_default_groups)
++        wheels = self._bundled_selection(source, selection, timeout=timeout)
+         # Locking members alone is insufficient: plain sync only installs root deps.
+-        # uv writes no __pycache__ (pip does): without --compile-bytecode the first import
+-        # of every module in the foreground of a user request compiles it (#100461).
+-        command = ["sync", "--locked" if locked else "--frozen", "--all-packages",
++        # Bytecode avoids foreground compilation on the first user request.
++        command = ["sync", "--locked" if locked else "--frozen", *selection,
+                    "--python", str(self.python), "--compile-bytecode"]
+-        if no_default_groups:
+-            command.append("--no-default-groups")
+-        if all_extras:
+-            from pm.features import opt_in_extras
+-
+-            command.append("--all-extras")
+-            for extra in opt_in_extras(source):
+-                command += ["--no-extra", extra]
+         if no_install_project:
+             # --all-packages has no single selected project in uv, so
+             # --no-install-project alone does not exclude the root. Name it
+             # explicitly without dropping member dependencies or installations.
+             command += ["--no-install-project", "--no-install-package", _project_name(source)]
+-        for extra in sorted(set(extras)):
+-            command += ["--extra", extra]
+-        for group in sorted(set(groups)):
+-            command += ["--group", group]
+-        result = self._run(command, cwd=source, timeout=timeout)
+-        if _is_bytecode_compile_failure(result):
+-            # Compile is an optimization. Retry once without the flag so a
+-            # locked temp script cannot fail pm repair/bootstrap. Imports
+-            # compile lazily on first use.
+-            if self.output is not None:
+-                self.output.write(
+-                    "Bytecode compile failed; retrying the install without it. "
+-                    "Modules will compile on first import.\n"
+-                )
+-            fallback = [arg for arg in command if arg != "--compile-bytecode"]
+-            result = self._run(fallback, cwd=source, timeout=timeout)
++        for wheel in wheels:
++            command += ["--no-install-package", wheel.name]
++        result = self._run_with_bytecode_retry(command, cwd=source, timeout=timeout)
+         if result.returncode:
+             raise classify_uv_failure("sync", result.returncode, result.stderr or result.stdout)
++        if wheels:
++            self._restore_bundled_wheels(wheels, timeout=timeout)
+ 
+     def export_requirements(self, source: Path, out: Path, *, extras: Sequence[str] = (),
+                             timeout: int = 1800) -> None:
+diff --git a/pm/packages.py b/pm/packages.py
+index 9ec2b07c..cabb7e16 100644
+--- a/pm/packages.py
++++ b/pm/packages.py
+@@ -410,7 +410,8 @@ class Venv(StatePackage):
+ 
+         return selected_venv(self.project_root())
+ 
+-    def expected_stamp(self, extras: list[str], *, plugin_dirs=None) -> str:
++    def expected_stamp(self, extras: list[str], *, plugin_dirs=None,
++                       bundled_wheels_sha256: str | None = None) -> str:
+         import hashlib
+         import json
+         from pm.lock import Lockfile
+@@ -430,6 +431,19 @@ class Venv(StatePackage):
+         from pm.workspace import enabled_member_dirs, members_stamp
+ 
+         h.update(members_stamp(enabled_member_dirs() if plugin_dirs is None else plugin_dirs).encode())
++        # A rebuilt native wheel can fix ABI/runtime behavior without changing
++        # its upstream version. Such a payload must invalidate old generations.
++        if bundled_wheels_sha256 is None:
++            from pm.bundled_wheels import load_catalog
++
++            catalog = load_catalog()
++            bundled_wheels_sha256 = catalog.sha256 if catalog is not None else None
++        if bundled_wheels_sha256 is not None:
++            import re
++
++            if re.fullmatch(r"[a-f0-9]{64}", bundled_wheels_sha256) is None:
++                raise ValueError("invalid bundled wheel catalog identity")
++            h.update(b"\0bundled-wheels\0" + bundled_wheels_sha256.encode("ascii"))
+         return h.hexdigest()
+ 
+     def apply(self, extras: list[str], *, plugin_dirs=None, repair: bool = False, explicit: bool = False,
+diff --git a/pm/runtime_stage.py b/pm/runtime_stage.py
+index 1e256bd1..e0c774eb 100644
+--- a/pm/runtime_stage.py
++++ b/pm/runtime_stage.py
+@@ -29,6 +29,8 @@ def stage_runtime(uv: Path, python: Path, destination: Path, *,
+         uv=uv, python=python, destination=destination,
+         cache=uv_cache_dir() if cache is None else cache.absolute(), env=env,
+         offline=offline or wheelhouse is not None, output=sys.stderr, no_config=True,
++        # Bootstrap has no packaging parser until this runtime exists.
++        use_bundled_wheels=False,
+     )
+     destination.parent.mkdir(parents=True, exist_ok=True)
+     with tempfile.TemporaryDirectory(prefix="pm-project-", dir=destination.parent) as temp:
 diff --git a/pyproject.toml b/pyproject.toml
 index 5145f275..3e3eefe2 100644
 --- a/pyproject.toml
@@ -128,6 +741,97 @@ index 5145f275..3e3eefe2 100644
  # grpcio (via google-cloud-pubsub) has no win_arm64 wheel.
  google-chat = "platform_machine != 'ARM64' or sys_platform != 'win32'"
  # Match the engine dependency markers so PM refuses an unsupported install.
+diff --git a/scripts/termux/build_deb.sh b/scripts/termux/build_deb.sh
+index 30d73c49..39129858 100644
+--- a/scripts/termux/build_deb.sh
++++ b/scripts/termux/build_deb.sh
+@@ -130,10 +130,9 @@ OUT_ABS="$(mkdir -p "$OUT" && cd "$OUT" && pwd)"
+ log "Creating application and PM environments with the bundled CPython (inside the container)"
+ if [ -d "$PAYLOAD_ABS/venv" ]; then rm -rf "$PAYLOAD_ABS/venv"; fi
+ if [ -d "$PAYLOAD_ABS/pm-runtime" ]; then rm -rf "$PAYLOAD_ABS/pm-runtime"; fi
+-# The venv's dep list: the resolved graph with markers intact (the installer
+-# evaluates them on bionic) and documented android build misses skipped --
+-# uv pip check tolerates the app importing without them (its relay exporter
+-# is the only casualty). Generated host-side; consumed in-container.
++# The complete explicitly selected graph keeps its target markers intact.
++# The native offline installation must contain every admitted requirement;
++# a missing wheel, including Nemo, is a hard failure.
+ python3 - "$HERE" "$PAYLOAD_ABS/.work/resolved.txt" "$PAYLOAD_ABS/.work/resolved-reqs.txt" <<'PYREQS' \
+     || fail "deb-venv reqs generation failed"
+ import sys
+@@ -224,8 +223,10 @@ mkdir -p "$STAGE/DEBIAN" "$DEST/tools"
+ for tool in python node uv npm ffmpeg ripgrep; do
+     cp -a "$PAYLOAD_ABS/$tool" "$DEST/tools/"
+ done
+-cp -a "$PAYLOAD_ABS/runtime-libs" "$PAYLOAD_ABS/app" "$PAYLOAD_ABS/venv" "$PAYLOAD_ABS/pm-runtime" "$DEST/"
+-python3 "$HERE/payload_facts.py" "$DEST" "$PAYLOAD_ABS/.work/build_set.txt" --tui-product "$TUI_PRODUCT"
++cp -a "$PAYLOAD_ABS/runtime-libs" "$PAYLOAD_ABS/app" "$PAYLOAD_ABS/venv" "$PAYLOAD_ABS/pm-runtime" "$PAYLOAD_ABS/wheelhouse" "$DEST/"
++python3 "$HERE/payload_facts.py" "$DEST" "$PAYLOAD_ABS/.work/build_set.txt" --tui-product "$TUI_PRODUCT" \
++    --venv-selection "$PAYLOAD_ABS/.work/venv-selection.json" \
++    --requirements "$PAYLOAD_ABS/.work/resolved-reqs.txt"
+ 
+ python3 "$HERE/launchers.py" --payload "$DEST" --control "$STAGE/DEBIAN"
+ 
+diff --git a/scripts/termux/build_environment.py b/scripts/termux/build_environment.py
+index dd27c278..70bb3df3 100644
+--- a/scripts/termux/build_environment.py
++++ b/scripts/termux/build_environment.py
+@@ -24,13 +24,19 @@ def prepare_tools(source: Path, root: Path) -> None:
+     record_tools(root, lockfile_path(), "linux-arm64-bionic", {name: name for name in ("python", "uv")})
+ 
+ 
+-def application(root: Path, requirements: Path, python: Path) -> None:
++def application(root: Path, requirements: Path, python: Path, *, record_selection: bool = False) -> None:
+     from pm import build_requirements_environment
+ 
++    if record_selection:
++        (root / ".work/venv-selection.json").unlink(missing_ok=True)
+     build_requirements_environment(
+         requirements.read_text(encoding="utf-8-sig").splitlines(), out=root / "venv",
+         python=python, wheelhouse=root / "wheelhouse", offline=True, sealed=True, explicit=True,
+     )
++    if record_selection:
++        from scripts.termux.selection_receipt import write_selection
++
++        write_selection(root, requirements)
+ 
+ 
+ def assemble(root: Path, requirements: Path, python: Path) -> None:
+@@ -46,7 +52,8 @@ def assemble(root: Path, requirements: Path, python: Path) -> None:
+     # build in it before sealing removes its build-time executable links.
+     subprocess.run(
+         [str(manager), "-I", "-B", str(Path(__file__).resolve()), "application",
+-         "--root", str(root), "--requirements", str(requirements), "--python", str(python)],
++         "--root", str(root), "--requirements", str(requirements), "--python", str(python),
++         "--record-selection"],
+         check=True,
+     )
+     seal_pm_runtime(root, python)
+@@ -59,7 +66,10 @@ def main() -> int:
+     parser.add_argument("--source-tools", type=Path)
+     parser.add_argument("--requirements", type=Path)
+     parser.add_argument("--python", type=Path)
++    parser.add_argument("--record-selection", action="store_true")
+     args = parser.parse_args()
++    if args.record_selection and args.phase != "application":
++        parser.error("--record-selection is only valid for the application phase")
+     root = args.root.resolve()
+     os.environ["HERMES_RUNTIME_DIR"] = str(root / "tools")
+     if args.phase == "prepare-tools":
+@@ -69,8 +79,11 @@ def main() -> int:
+     else:
+         if args.requirements is None or args.python is None:
+             parser.error("environment assembly requires --requirements and --python")
+-        operation = assemble if args.phase == "assemble" else application
+-        operation(root, args.requirements.resolve(), args.python.absolute())
++        if args.phase == "assemble":
++            assemble(root, args.requirements.resolve(), args.python.absolute())
++        else:
++            application(root, args.requirements.resolve(), args.python.absolute(),
++                        record_selection=args.record_selection)
+     return 0
+ 
+ 
 diff --git a/scripts/termux/build_wheels.py b/scripts/termux/build_wheels.py
 index 2449b9fe..ea890ea6 100644
 --- a/scripts/termux/build_wheels.py
@@ -314,16 +1018,16 @@ index 2449b9fe..ea890ea6 100644
          module = modules.get(name, name.replace("-", "_"))
 diff --git a/scripts/termux/compat_sources.py b/scripts/termux/compat_sources.py
 new file mode 100644
-index 00000000..27dc4938
+index 00000000..18251d53
 --- /dev/null
 +++ b/scripts/termux/compat_sources.py
-@@ -0,0 +1,101 @@
+@@ -0,0 +1,108 @@
 +"""Small, reviewed source-build adaptations for the Android wheel builder.
 +
 +Only the two locked releases below are changed. Downloading the archive before
 +running its backend avoids an unpatched metadata hook invoking the wrong shell
-+or an incompatible CMake policy. Runtime sources outside the build hooks remain
-+the original, SHA-256-verified upstream bytes.
++or an incompatible CMake policy. The only non-build-hook edit is Termux's
++reviewed libolm const-pointer correction for modern Clang.
 +"""
 +from __future__ import annotations
 +
@@ -375,7 +1079,7 @@ index 00000000..27dc4938
 +
 +
 +def patch_python_olm_source(source: Path) -> None:
-+    """Keep bundled static libolm usable with CMake 4, as in Termux's recipe."""
++    """Apply Termux's CMake policy and modern-Clang const-pointer correction."""
 +    path = source / "olm_build.py"
 +    text = path.read_text(encoding="utf-8")
 +    text = _replace_once(
@@ -384,7 +1088,14 @@ index 00000000..27dc4938
 +        '["cmake", ".", "-Bbuild", "-DBUILD_SHARED_LIBS=NO", '
 +        '"-DCMAKE_POLICY_VERSION_MINIMUM=3.5", "-DOLM_TESTS=OFF"]',
 +    )
++    header = source / "libolm/include/olm/list.hh"
++    list_text = _replace_once(
++        header.read_text(encoding="utf-8"),
++        "T * const other_pos = other._data;",
++        "T const * other_pos = other._data;",
++    )
 +    path.write_text(text, encoding="utf-8")
++    header.write_text(list_text, encoding="utf-8")
 +
 +
 +def prepare_compat_source(
@@ -419,6 +1130,19 @@ index 00000000..27dc4938
 +        return source, {"CONFIG_SHELL": str(shell)}
 +    patch_python_olm_source(source)
 +    return source, {}
+diff --git a/scripts/termux/feature_profile.py b/scripts/termux/feature_profile.py
+new file mode 100644
+index 00000000..04f72d7c
+--- /dev/null
++++ b/scripts/termux/feature_profile.py
+@@ -0,0 +1,7 @@
++"""Explicit dependency selection for the prepared next-stable Termux bundle."""
++
++BUNDLED_EXTRAS = ("acp", "cron", "matrix", "mcp", "telegram", "termux", "uvloop")
++
++
++if __name__ == "__main__":
++    print("\n".join(BUNDLED_EXTRAS))
 diff --git a/scripts/termux/nemo_source.py b/scripts/termux/nemo_source.py
 new file mode 100644
 index 00000000..7a480957
@@ -508,25 +1232,188 @@ index 00000000..7a480957
 +    source = extract(archive, work / "source")
 +    patch_worker_proto(source)
 +    return source, {"PROTOC": str(compiler)}
+diff --git a/scripts/termux/payload_facts.py b/scripts/termux/payload_facts.py
+index d50605b6..0ca1d0d2 100644
+--- a/scripts/termux/payload_facts.py
++++ b/scripts/termux/payload_facts.py
+@@ -9,8 +9,11 @@ import sys
+ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+ 
+ 
+-def write_facts(payload: Path, lock_path: Path, build_set: Path, tui: Path) -> None:
+-    from pm.lock import Lockfile
++def write_facts(payload: Path, lock_path: Path, build_set: Path, tui: Path,
++                selection: Path, requirements: Path) -> None:
++    from pm.lock import Facts, Lockfile
++    from pm.bundled_wheels import write_catalog
++    from scripts.termux.selection_receipt import read_selection
+     from pm.features import write_features
+     from pm.registry import get_package
+     from scripts.bundles.payload import record_tools
+@@ -18,7 +21,8 @@ def write_facts(payload: Path, lock_path: Path, build_set: Path, tui: Path) -> N
+     from scripts.build.inputs import AgentInputs, RESOURCE_ENV, dependency_site
+ 
+     payload = payload.resolve()
+-    target = "linux-arm64-bionic"
++    receipt = read_selection(payload, selection, requirements)
++    target = receipt["target"]
+     record_tools(payload, lock_path, target, {name: name for name in ("python", "node", "uv", "npm", "ffmpeg", "ripgrep")})
+     natives = [line.strip() for line in build_set.read_text(encoding="utf-8-sig").splitlines() if line.strip()]
+     (payload / "native-wheels.json").write_text(json.dumps(natives) + "\n", encoding="utf-8")
+@@ -28,15 +32,25 @@ def write_facts(payload: Path, lock_path: Path, build_set: Path, tui: Path) -> N
+     if version is None or python is None:
+         raise ValueError("bionic Python pin/executable missing")
+     repo = payload / "app"
+-    assemble(AgentInputs(
++    manifest = assemble(AgentInputs(
+         project=repo / "pyproject.toml", code=repo, repo="app", placement="fixed", target=target,
+         python=python,
+         site_packages=dependency_site(payload / "venv", version, target),
+         environment=payload / "venv", tools=payload / "tools", pm_runtime=payload / "pm-runtime",
+         resources={name: repo / name for name in RESOURCE_ENV}, frontends={"tui": tui.resolve()},
+         stamp=repo / "install-stamp.json",
+-        features=write_features(["termux", "telegram", "cron", "mcp", "acp"], payload),
++        features=write_features(receipt["extras"], payload),
+     ), payload)
++    manifest["bundled_wheels"] = write_catalog(
++        payload, wheelhouse=payload / "wheelhouse",
++        lock_paths=(repo / "uv.lock", repo / "pm/uv.lock"),
++    )
++    if manifest["bundled_wheels"] != receipt["bundled_wheels"]:
++        raise ValueError("native bundled wheel catalog changed during assembly")
++    Facts(payload / "tools/facts.json").record_state("venv", receipt["stamp"], receipt["extras"])
++    temporary = payload / ".manifest.json.tmp"
++    temporary.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
++    temporary.replace(payload / "manifest.json")
+ 
+ 
+ if __name__ == "__main__":
+@@ -44,5 +58,8 @@ if __name__ == "__main__":
+     parser.add_argument("payload", type=Path)
+     parser.add_argument("build_set", type=Path)
+     parser.add_argument("--tui-product", type=Path, required=True)
++    parser.add_argument("--venv-selection", type=Path, required=True)
++    parser.add_argument("--requirements", type=Path, required=True)
+     args = parser.parse_args()
+-    write_facts(args.payload, args.payload / "app/pm/lock.json", args.build_set, args.tui_product)
++    write_facts(args.payload, args.payload / "app/pm/lock.json", args.build_set, args.tui_product,
++                args.venv_selection, args.requirements)
+diff --git a/scripts/termux/selection_receipt.py b/scripts/termux/selection_receipt.py
+new file mode 100644
+index 00000000..cf760649
+--- /dev/null
++++ b/scripts/termux/selection_receipt.py
+@@ -0,0 +1,69 @@
++"""Transfer a verified native environment selection into cross-host packaging."""
++from __future__ import annotations
++
++import hashlib
++import json
++from pathlib import Path
++import re
++
++from scripts.termux.feature_profile import BUNDLED_EXTRAS
++
++TARGET = "linux-arm64-bionic"
++
++
++def _digest(path: Path) -> str:
++    return hashlib.sha256(path.read_bytes()).hexdigest()
++
++
++def write_selection(root: Path, requirements: Path) -> Path:
++    """Called only after the real Bionic PM installation and dependency check."""
++    from pm.packages import Venv
++    from pm.bundled_wheels import write_catalog
++    from pm.store import current_target
++
++    target = current_target()
++    if target != TARGET:
++        raise ValueError(f"Termux selection must be recorded on {TARGET}, got {target}")
++    extras = list(BUNDLED_EXTRAS)
++    descriptor = write_catalog(root, wheelhouse=root / "wheelhouse",
++                               lock_paths=(root / "app/uv.lock", root / "app/pm/uv.lock"))
++    receipt = {
++        "schema": 1,
++        "target": target,
++        "extras": extras,
++        "stamp": Venv(root / "app").expected_stamp(
++            extras, plugin_dirs=[], bundled_wheels_sha256=descriptor["sha256"],
++        ),
++        "bundled_wheels": descriptor,
++        "uv_lock_sha256": _digest(root / "app/uv.lock"),
++        "pm_lock_sha256": _digest(root / "app/pm/lock.json"),
++        "requirements_sha256": _digest(requirements),
++    }
++    destination = root / ".work/venv-selection.json"
++    destination.parent.mkdir(parents=True, exist_ok=True)
++    destination.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
++    return destination
++
++
++def read_selection(root: Path, receipt: Path, requirements: Path) -> dict:
++    """Refuse a stale receipt when any actual bundle input has changed."""
++    data = json.loads(receipt.read_text(encoding="utf-8-sig"))
++    if (data.get("schema") != 1 or data.get("target") != TARGET
++            or data.get("extras") != list(BUNDLED_EXTRAS)
++            or not isinstance(data.get("stamp"), str)
++            or re.fullmatch(r"[0-9a-f]{64}", data["stamp"]) is None):
++        raise ValueError("invalid native Termux environment selection")
++    descriptor = data.get("bundled_wheels")
++    if (not isinstance(descriptor, dict) or set(descriptor) != {"path", "sha256"}
++            or descriptor["path"] != "bundled-wheels.json"
++            or not isinstance(descriptor["sha256"], str)
++            or re.fullmatch(r"[0-9a-f]{64}", descriptor["sha256"]) is None):
++        raise ValueError("invalid native bundled wheel identity")
++    for field, source in (
++        ("uv_lock_sha256", root / "app/uv.lock"),
++        ("pm_lock_sha256", root / "app/pm/lock.json"),
++        ("requirements_sha256", requirements),
++    ):
++        if data.get(field) != _digest(source):
++            raise ValueError(f"native Termux selection no longer matches {source.name}")
++    return data
 diff --git a/scripts/termux/termux_build.sh b/scripts/termux/termux_build.sh
-index ffdae6ab..678fd3e9 100755
+index ffdae6ab..c3040d66 100755
 --- a/scripts/termux/termux_build.sh
 +++ b/scripts/termux/termux_build.sh
-@@ -229,9 +229,12 @@ PY
+@@ -229,9 +229,19 @@ PY
  [ -f "$WORK/tree/pyproject.toml" ] || fail "archived tag tree has no pyproject.toml -- bad tag?"
  # Package the reviewed build adapters as well: installed validation executes
  # app/scripts/termux/build_wheels.py, and must use the same import and hash policy.
 -for adapted in termux_build.sh build_wheels.py locked_sources.py wheelhouse_cache.py build_deb.sh payload_facts.py; do
-+for adapted in termux_build.sh build_wheels.py locked_sources.py compat_sources.py nemo_source.py wheelhouse_cache.py build_deb.sh payload_facts.py; do
++for adapted in termux_build.sh build_wheels.py locked_sources.py compat_sources.py nemo_source.py wheelhouse_cache.py build_environment.py build_deb.sh payload_facts.py feature_profile.py selection_receipt.py; do
      cp "$REPO_ABS/scripts/termux/$adapted" "$WORK/tree/scripts/termux/$adapted"
  done
-+for adapted in pyproject.toml uv.lock hermes_cli/clipboard.py tools/voice_mode.py tools/voice_mode_termux.py; do
++for adapted in \
++    pyproject.toml uv.lock \
++    pm/environment.py pm/bundled_wheels.py pm/runtime_stage.py pm/packages.py \
++    hermes_cli/clipboard.py hermes_cli/config_defaults.py \
++    tools/voice_mode.py tools/voice_mode_termux.py tools/voice_mode_capture.py \
++    plugins/computer_use/cua/__init__.py \
++    tools/bot_desktop/runtime.py tools/bot_desktop/install.py tools/bot_desktop/launcher.sh \
++    tools/bot_desktop/thumbnail.py tools/bot_desktop/termux.py; do
 +    cp "$REPO_ABS/$adapted" "$WORK/tree/$adapted"
 +done
  REPO_ROOT="$(cd "$HERE/../.." && pwd)"
  DIGEST="$(cd "$REPO_ROOT" && python3 -c 'from pm.lock import termux_docker_digest; print(termux_docker_digest())')"
  [ -n "$DIGEST" ] || fail "termux-docker digest missing from pm/lock.json"
-@@ -349,18 +352,8 @@ def probe(item):
+@@ -253,8 +263,13 @@ mkdir -p "$WHEELHOUSE"
+ rm -f "$OUT_ABS/index.json" "$OUT_ABS/SHA256SUMS" "$WORK/resolved.txt" "$WORK/build_set.txt"
+ # [d] Resolve the real graph from the tag's own lock.
+ log "Resolving dependency graph from the tag's uv.lock"
++python3 "$HERE/feature_profile.py" > "$WORK/selected-features.txt" \
++    || fail "explicit Termux feature profile missing"
++mapfile -t BUNDLE_EXTRAS < "$WORK/selected-features.txt"
++EXTRA_ARGS=()
++for extra in "${BUNDLE_EXTRAS[@]}"; do EXTRA_ARGS+=(--extra "$extra"); done
+ ( cd "$REPO_ROOT" && python3 -m pm.build_env --source "$WORK/tree" \
+-    --extra termux --export-requirements "$WORK/req.txt" ) \
++    "${EXTRA_ARGS[@]}" --export-requirements "$WORK/req.txt" ) \
+     || fail "PM requirements export failed (frozen lock at $REF)"
+ # Host parsing needs packaging too. Use the release lock, not runner packages.
+ PACKAGING_SPEC="$(python3 - "$WORK/tree/uv.lock" <<'PY'
+@@ -349,18 +364,8 @@ def probe(item):
  with ThreadPoolExecutor(max_workers=10) as ex:
      results = list(ex.map(probe, entries))
  
@@ -545,7 +1432,7 @@ index ffdae6ab..678fd3e9 100755
  for name, covered, err in results:
      if covered is None:
          excluded += 1
-@@ -368,14 +361,9 @@ for name, covered, err in results:
+@@ -368,14 +373,9 @@ for name, covered, err in results:
      if err is not None:
          print(f"  probe miss {name}: {err} -> building from sdist", file=sys.stderr)
      if not covered:
@@ -561,17 +1448,23 @@ index ffdae6ab..678fd3e9 100755
  PYEOF
  [ -s "$BUILD_SET" ] || fail "build set is empty -- nothing to build (probe bug?)"
 diff --git a/scripts/termux/wheelhouse_cache.py b/scripts/termux/wheelhouse_cache.py
-index dc196775..a05114a1 100644
+index dc196775..4ad062a9 100644
 --- a/scripts/termux/wheelhouse_cache.py
 +++ b/scripts/termux/wheelhouse_cache.py
-@@ -14,6 +14,7 @@ def build_identity(repo: Path, builder: str, platform_tag: str, python_abi: str)
+@@ -14,9 +14,12 @@ def build_identity(repo: Path, builder: str, platform_tag: str, python_abi: str)
          "scripts/termux/build_config.sh",
          "scripts/termux/termux_build.sh", "scripts/termux/build_wheels.py",
          "scripts/termux/locked_sources.py",
 +        "scripts/termux/compat_sources.py", "scripts/termux/nemo_source.py",
++        "scripts/termux/feature_profile.py", "scripts/termux/selection_receipt.py",
          "scripts/termux/retag_wheel.py", "scripts/termux/python_linkage.py",
          "scripts/termux/wheelhouse_cache.py", "scripts/termux/build_environment.py",
-         "pm/environment.py", "pm/build_operations.py", "pm/operations.py",
+-        "pm/environment.py", "pm/build_operations.py", "pm/operations.py",
++        "pm/environment.py", "pm/bundled_wheels.py", "pm/runtime_stage.py", "pm/packages.py",
++        "pm/build_operations.py", "pm/operations.py",
+         "pm/pyproject.toml", "pm/uv.lock",
+         "scripts/termux/termux-builder.Dockerfile",
+     )
 diff --git a/tests/hermes_cli/test_clipboard_termux.py b/tests/hermes_cli/test_clipboard_termux.py
 new file mode 100644
 index 00000000..8a44f2ec
@@ -607,6 +1500,345 @@ index 00000000..8a44f2ec
 +    monkeypatch.setattr(clipboard.subprocess, "run", run)
 +    assert clipboard.write_clipboard_text("text")
 +    assert calls[:2] == ["termux-clipboard-set", "xclip"]
+diff --git a/tests/pm/test_bundled_wheel_stamp.py b/tests/pm/test_bundled_wheel_stamp.py
+new file mode 100644
+index 00000000..a3edddb9
+--- /dev/null
++++ b/tests/pm/test_bundled_wheel_stamp.py
+@@ -0,0 +1,16 @@
++"""A rebuilt bundled wheel invalidates a previously reusable PM generation."""
++from pathlib import Path
++from types import SimpleNamespace
++
++from pm.packages import Venv
++
++
++def test_rebuilt_bundle_catalog_changes_environment_selection_stamp(monkeypatch):
++    project = Venv(Path(__file__).resolve().parents[2])
++    monkeypatch.setattr("pm.bundled_wheels.load_catalog", lambda: None)
++    legacy = project.expected_stamp(["termux"], plugin_dirs=[])
++    original = project.expected_stamp(["termux"], plugin_dirs=[], bundled_wheels_sha256="a" * 64)
++    rebuilt = project.expected_stamp(["termux"], plugin_dirs=[], bundled_wheels_sha256="b" * 64)
++    assert len({legacy, original, rebuilt}) == 3
++    monkeypatch.setattr("pm.bundled_wheels.load_catalog", lambda: SimpleNamespace(sha256="b" * 64))
++    assert project.expected_stamp(["termux"], plugin_dirs=[]) == rebuilt
+diff --git a/tests/pm/test_bundled_wheels.py b/tests/pm/test_bundled_wheels.py
+new file mode 100644
+index 00000000..a5a8ca59
+--- /dev/null
++++ b/tests/pm/test_bundled_wheels.py
+@@ -0,0 +1,311 @@
++"""Cold-cache bundle extension must reuse native bytes without changing locked sources."""
++from __future__ import annotations
++
++from dataclasses import replace
++import hashlib
++import io
++import json
++import os
++from pathlib import Path
++import shutil
++import sys
++import tarfile
++from types import SimpleNamespace
++
++import pytest
++from packaging.markers import default_environment
++
++from pm.bundled_wheels import interpreter_markers, load_catalog, write_catalog
++from pm.environment import PythonEnvironment
++from pm.package import InstallError
++from tests.pm._fixtures import _run, _wheel, served as served  # noqa: PLC0414
++
++
++def _sha(path: Path) -> str:
++    return hashlib.sha256(path.read_bytes()).hexdigest()
++
++
++def _native_sdist(directory: Path) -> Path:
++    """A metadata-valid source that cannot build on this simulated native target."""
++    files = {
++        "pyproject.toml": (
++            '[project]\nname="native-fixture"\nversion="1.0"\nrequires-python=">=3.11"\n'
++            '[build-system]\nrequires=[]\nbuild-backend="backend"\nbackend-path=["."]\n'
++        ),
++        "PKG-INFO": "Metadata-Version: 2.2\nName: native-fixture\nVersion: 1.0\nRequires-Python: >=3.11\n",
++        "backend.py": (
++            'def build_wheel(*args, **kwargs):\n'
++            '    raise RuntimeError("native compiler is deliberately unavailable")\n'
++        ),
++    }
++    path = directory / "native_fixture-1.0.tar.gz"
++    with tarfile.open(path, "w:gz") as archive:
++        for name, text in files.items():
++            body = text.encode()
++            info = tarfile.TarInfo(f"native_fixture-1.0/{name}")
++            info.size = len(body)
++            archive.addfile(info, io.BytesIO(body))
++    return path
++
++
++def _index(docroot: Path, artifact: Path, name: str) -> None:
++    entry = docroot / "simple" / name.replace("_", "-")
++    entry.mkdir(parents=True)
++    (entry / "index.html").write_text(
++        f'<a href="../../files/{artifact.name}#sha256={_sha(artifact)}">{artifact.name}</a>\n',
++        encoding="utf-8",
++    )
++
++
++@pytest.fixture
++def native_project(served, tmp_path, monkeypatch):
++    import pm.paths
++
++    docroot, url = served
++    artifacts = docroot / "files"
++    artifacts.mkdir()
++    original = _native_sdist(artifacts)
++    _index(docroot, original, "native_fixture")
++    names = ("optional_sdk", "member_fixture", "chosen_fixture", "other_fixture",
++             "optin_fixture", "default_fixture", "group_fixture")
++    wheels = {name: _wheel(artifacts, name) for name in names}
++    for name, artifact in wheels.items():
++        _index(docroot, artifact, name)
++    source = tmp_path / "generated workspace"
++    source.mkdir()
++    (source / "pyproject.toml").write_text(
++        '[project]\nname="fixture-root"\nversion="1.0"\nrequires-python=">=3.11"\n'
++        'dependencies=["native-fixture==1.0"]\n'
++        '[project.optional-dependencies]\nsdk=["optional-sdk==1.0"]\n'
++        'chosen=["chosen-fixture==1.0"]\nother=["other-fixture==1.0"]\n'
++        'manual=["optin-fixture==1.0"]\n'
++        '[dependency-groups]\ndev=["default-fixture==1.0"]\nselected=["group-fixture==1.0"]\n'
++        '[tool.uv]\npackage=false\n'
++        f'index-url={json.dumps(url + "/simple")}\n'
++        '[tool.uv.workspace]\nmembers=["member"]\n'
++        '[tool.hermes]\nopt-in-extras=["manual"]\n', encoding="utf-8",
++    )
++    member = source / "member"
++    member.mkdir()
++    (member / "pyproject.toml").write_text(
++        '[project]\nname="fixture-plugin"\nversion="1.0"\nrequires-python=">=3.11"\n'
++        'dependencies=["member-fixture==1.0"]\n[tool.uv]\npackage=false\n', encoding="utf-8",
++    )
++    uv = shutil.which("uv")
++    assert uv, "bundled native wheel behavior requires real uv"
++    env = {k: v for k, v in os.environ.items() if not k.startswith(("UV_", "PYTHON")) and k != "VIRTUAL_ENV"}
++    engine = PythonEnvironment(uv=Path(uv), python=Path(sys.executable),
++                               destination=tmp_path / "generation" / "venv",
++                               cache=tmp_path / "lock-cache", env=env)
++    engine.lock(source, timeout=60)
++    lock_bytes = (source / "uv.lock").read_bytes()
++    payload = tmp_path / "sealed payload"
++    (payload / "app").mkdir(parents=True)
++    bundled = payload / "wheelhouse"
++    bundled.mkdir()
++    _wheel(bundled, "native_fixture")
++    for name, wheel in wheels.items():
++        if name != "optional_sdk":
++            shutil.copy2(wheel, bundled / wheel.name)
++    descriptor = write_catalog(payload, wheelhouse=bundled, lock_paths=(source / "uv.lock",))
++    (payload / "manifest.json").write_text(json.dumps({"repo": "app", "bundled_wheels": descriptor}), encoding="utf-8")
++    monkeypatch.setattr(pm.paths, "repo_root", lambda: payload / "app")
++    # No resolver/build cache from the lock operation survives into installation.
++    shutil.rmtree(engine.cache)
++    yield SimpleNamespace(source=source, payload=payload, engine=replace(engine, cache=tmp_path / "cold-cache"),
++                          lock_bytes=lock_bytes, names=("native_fixture", *names), original=original)
++
++
++@pytest.mark.parametrize("selection, expected", [
++    ({"extras": ["sdk"], "no_default_groups": True},
++     {"native_fixture", "member_fixture", "optional_sdk"}),
++    ({"all_extras": True, "groups": ["selected"]},
++     {"native_fixture", "member_fixture", "optional_sdk", "chosen_fixture", "other_fixture",
++      "default_fixture", "group_fixture"}),
++    ({"extras": ["manual"], "groups": ["selected"], "no_default_groups": True},
++     {"native_fixture", "member_fixture", "optin_fixture", "group_fixture"}),
++])
++def test_cold_cache_extension_preserves_exact_native_wheel_and_actual_selection(native_project, selection, expected):
++    case = native_project
++    assert not case.engine.cache.exists()
++    case.engine.create()
++    case.engine.sync(case.source, **selection)
++    script = (
++        "import importlib.util, importlib.metadata, json; "
++        f"names = {case.names!r}; "
++        "print(json.dumps({n: importlib.metadata.version(n) for n in names "
++        "if importlib.util.find_spec(n) is not None}))"
++    )
++    result = json.loads(_run([str(case.engine.executable), "-I", "-c", script],
++                             cwd=case.source, env=dict(case.engine.env)))
++    assert result == {name: "1.0" for name in expected}
++    assert (case.source / "uv.lock").read_bytes() == case.lock_bytes
++    # A later sync removes excluded installed wheels before restoring them too.
++    case.engine.sync(case.source, **selection)
++    assert json.loads(_run([str(case.engine.executable), "-I", "-c", script],
++                           cwd=case.source, env=dict(case.engine.env))) == result
++
++
++def test_missing_catalog_keeps_the_real_native_build_failure(native_project):
++    case = native_project
++    (case.payload / "manifest.json").write_text('{"repo":"app"}', encoding="utf-8")
++    case.engine.create()
++    with pytest.raises(InstallError, match="native compiler is deliberately unavailable"):
++        case.engine.sync(case.source, extras=["sdk"], no_default_groups=True)
++    assert (case.source / "uv.lock").read_bytes() == case.lock_bytes
++
++
++def _write_lock(path: Path, package: dict) -> None:
++    def inline(values):
++        return "{ " + ", ".join(f"{k} = {json.dumps(v)}" for k, v in values.items()) + " }"
++    lines = ["version = 1", "[[package]]", f'name = {json.dumps(package["name"])}',
++             f'version = {json.dumps(package["version"])}', "source = " + inline(package["source"])]
++    if "sdist" in package:
++        lines.append("sdist = " + inline(package["sdist"]))
++    if "wheels" in package:
++        lines.append("wheels = [" + ", ".join(inline(v) for v in package["wheels"]) + "]")
++    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
++
++
++@pytest.fixture
++def catalog_fixture(tmp_path, monkeypatch):
++    import pm.paths
++
++    payload = tmp_path / "sealed"
++    root = payload / "app"
++    root.mkdir(parents=True)
++    wheelhouse = payload / "wheelhouse"
++    wheelhouse.mkdir()
++    wheel = _wheel(wheelhouse, "native_fixture")
++    lock = root / "uv.lock"
++    monkeypatch.setattr(pm.paths, "repo_root", lambda: root)
++
++    def prepare(kind="sdist"):
++        package = {"name": "native-fixture", "version": "1.0",
++                   "source": {"registry": "https://pypi.org/simple"},
++                   "sdist": {"url": "https://files.example.test/native_fixture-1.0.tar.gz",
++                             "hash": "sha256:" + "a" * 64}}
++        if kind == "wheel":
++            package["wheels"] = [{"url": "https://files.example.test/" + wheel.name, "hash": "sha256:" + _sha(wheel)}]
++        if kind == "git":
++            package.pop("sdist")
++            package["source"] = {"git": "https://example.test/native.git?rev=" + "a" * 40 + "#" + "a" * 40}
++        _write_lock(lock, package)
++        descriptor = write_catalog(payload, wheelhouse=wheelhouse, lock_paths=(lock,))
++        (payload / "manifest.json").write_text(json.dumps({"repo": "app", "bundled_wheels": descriptor}), encoding="utf-8")
++        return SimpleNamespace(payload=payload, root=root, wheel=wheel, lock=lock,
++                               package=package, catalog=load_catalog())
++    return prepare
++
++
++@pytest.mark.parametrize("change", ["version", "registry", "sdist-url", "sdist-hash", "direct-url"])
++def test_same_name_does_not_reuse_a_different_locked_source_or_version(catalog_fixture, change):
++    case = catalog_fixture()
++    assert [w.name for w in case.catalog.select("native-fixture==1.0", case.lock, default_environment())] == ["native-fixture"]
++    requirement = "native-fixture==1.0"
++    if change == "version":
++        case.package["version"] = "1.1"
++        requirement = "native-fixture==1.1"
++    elif change == "registry":
++        case.package["source"]["registry"] = "https://other.example.test/simple"
++    elif change == "sdist-url":
++        case.package["sdist"]["url"] = "https://other.example.test/native_fixture-1.0.tar.gz"
++    elif change == "sdist-hash":
++        case.package["sdist"]["hash"] = "sha256:" + "b" * 64
++    else:
++        case.package["source"] = {"url": "https://other.example.test/native_fixture-1.0.tar.gz"}
++        requirement = "native-fixture @ https://other.example.test/native_fixture-1.0.tar.gz"
++    _write_lock(case.lock, case.package)
++    assert case.catalog.select(requirement, case.lock, default_environment()) == []
++
++
++def test_git_wheel_requires_the_same_full_commit(catalog_fixture):
++    case = catalog_fixture("git")
++    requirement = "native-fixture @ git+https://example.test/native.git@" + "a" * 40
++    assert [w.name for w in case.catalog.select(requirement, case.lock, default_environment())] == ["native-fixture"]
++    case.package["source"]["git"] = case.package["source"]["git"].replace("a" * 40, "b" * 40)
++    _write_lock(case.lock, case.package)
++    assert case.catalog.select(requirement.replace("a" * 40, "b" * 40), case.lock, default_environment()) == []
++
++
++def test_registry_wheel_does_not_require_a_missing_sdist(catalog_fixture):
++    case = catalog_fixture("wheel")
++    case.package.pop("sdist")
++    _write_lock(case.lock, case.package)
++    descriptor = write_catalog(case.payload, wheelhouse=case.payload / "wheelhouse", lock_paths=(case.lock,))
++    (case.payload / "manifest.json").write_text(json.dumps({"repo": "app", "bundled_wheels": descriptor}), encoding="utf-8")
++    assert [w.name for w in load_catalog().select("native-fixture==1.0", case.lock, default_environment())] == ["native-fixture"]
++
++
++@pytest.mark.parametrize("damage", ["catalog-bytes", "wheel-bytes", "path-traversal", "duplicate-row"])
++def test_damaged_or_escaping_catalog_is_rejected(catalog_fixture, damage):
++    case = catalog_fixture()
++    path = case.payload / "bundled-wheels.json"
++    if damage == "catalog-bytes":
++        path.write_bytes(path.read_bytes() + b" ")
++        with pytest.raises(InstallError, match="catalog SHA-256 mismatch"):
++            load_catalog()
++    elif damage == "wheel-bytes":
++        case.wheel.write_bytes(case.wheel.read_bytes() + b"changed")
++        with pytest.raises(ValueError, match="SHA-256 or size mismatch"):
++            case.catalog.select("native-fixture==1.0", case.lock, default_environment())
++    else:
++        data = json.loads(path.read_text())
++        if damage == "path-traversal":
++            data["wheels"][0]["file"] = "../foreign.whl"
++        else:
++            data["wheels"].append(data["wheels"][0])
++        path.write_text(json.dumps(data), encoding="utf-8")
++        (case.payload / "manifest.json").write_text(json.dumps({
++            "repo": "app", "bundled_wheels": {"path": path.name, "sha256": _sha(path)},
++        }), encoding="utf-8")
++        with pytest.raises(InstallError, match="wheelhouse filename|Duplicate bundled wheel identity"):
++            load_catalog()
++
++
++def test_unselected_marker_never_restores_a_bundled_wheel(catalog_fixture):
++    case = catalog_fixture()
++    environment = dict(default_environment(), sys_platform="android")
++    assert case.catalog.select('native-fixture==1.0; sys_platform == "win32"', case.lock, environment) == []
++    assert len(case.catalog.select('native-fixture==1.0; sys_platform == "android"', case.lock, environment)) == 1
++
++
++def test_target_interpreter_marker_facts_match_its_actual_host():
++    expected = dict(default_environment(), extra="")
++    assert interpreter_markers(Path(sys.executable), os.environ) == expected
++
++
++def test_bootstrap_sync_runs_without_the_pm_dependencies_it_is_building(catalog_fixture, tmp_path):
++    case = catalog_fixture()
++    source = tmp_path / "empty-bootstrap-project"
++    source.mkdir()
++    (source / "pyproject.toml").write_text(
++        '[project]\nname="bootstrap-fixture"\nversion="1.0"\n'
++        'requires-python=">=3.11"\ndependencies=[]\n[tool.uv]\npackage=false\n', encoding="utf-8",
++    )
++    repo = Path(__file__).resolve().parents[2]
++    # -I -S is an actual interpreter without site-packages, not a fake OS or
++    # import mock. The payload still has a catalog that requires PM's parsers.
++    script = f"""
++import importlib.util, sys
++from pathlib import Path
++sys.path.insert(0, {str(repo)!r})
++assert importlib.util.find_spec("packaging") is None
++import pm.paths
++pm.paths.repo_root = lambda: Path({str(case.root)!r})
++from pm.environment import PythonEnvironment
++environment = PythonEnvironment(
++    uv=Path({shutil.which("uv")!r}), python=Path(sys.executable),
++    destination=Path({str(tmp_path / "bootstrap-venv")!r}),
++    cache=Path({str(tmp_path / "bootstrap-cache")!r}),
++    env=dict(__import__("os").environ), offline=True, use_bundled_wheels=False,
++)
++source = Path({str(source)!r})
++environment.lock(source)
++environment.create()
++environment.sync(source)
++environment.check()
++print("bootstrap complete")
++"""
++    assert _run([sys.executable, "-I", "-S", "-c", script],
++                cwd=source, env=dict(os.environ)) == "bootstrap complete"
 diff --git a/tests/scripts/test_pm_build_consumers.py b/tests/scripts/test_pm_build_consumers.py
 index 745c55fd..6c15e701 100644
 --- a/tests/scripts/test_pm_build_consumers.py
@@ -641,10 +1873,10 @@ index 745c55fd..6c15e701 100644
          build_wheels.wheelhouse_gates(resolved, wheels, ["native-probe"])
 diff --git a/tests/scripts/test_termux_compat_sources.py b/tests/scripts/test_termux_compat_sources.py
 new file mode 100644
-index 00000000..d378cb7c
+index 00000000..3cc26dd9
 --- /dev/null
 +++ b/tests/scripts/test_termux_compat_sources.py
-@@ -0,0 +1,70 @@
+@@ -0,0 +1,85 @@
 +"""Behavioral regressions for the two reviewed third-party build hooks."""
 +from pathlib import Path
 +from types import SimpleNamespace
@@ -688,6 +1920,9 @@ index 00000000..d378cb7c
 +        'subprocess.run(["cmake", ".", "-Bbuild", "-DBUILD_SHARED_LIBS=NO"], '
 +        'cwd="libolm", check=True)\n', encoding="utf-8",
 +    )
++    header = tmp_path / "libolm/include/olm/list.hh"
++    header.parent.mkdir(parents=True)
++    header.write_text("T * const other_pos = other._data;\n", encoding="utf-8")
 +    patch_python_olm_source(tmp_path)
 +    calls = []
 +    namespace = {"subprocess": SimpleNamespace(run=lambda *a, **kw: calls.append((a, kw)))}
@@ -715,6 +1950,18 @@ index 00000000..d378cb7c
 +    path.write_text('subprocess.run(["cmake", "--different"])\n', encoding="utf-8")
 +    with pytest.raises(ValueError, match="source-build hook changed"):
 +        patch_python_olm_source(tmp_path)
++
++
++def test_unknown_olm_cpp_hook_leaves_build_hook_unmodified(tmp_path):
++    hook = tmp_path / "olm_build.py"
++    original = 'subprocess.run(["cmake", ".", "-Bbuild", "-DBUILD_SHARED_LIBS=NO"])\n'
++    hook.write_text(original, encoding="utf-8")
++    header = tmp_path / "libolm/include/olm/list.hh"
++    header.parent.mkdir(parents=True)
++    header.write_text("changed upstream list implementation\n", encoding="utf-8")
++    with pytest.raises(ValueError, match="source-build hook changed"):
++        patch_python_olm_source(tmp_path)
++    assert hook.read_text(encoding="utf-8") == original
 diff --git a/tests/scripts/test_termux_nemo_source.py b/tests/scripts/test_termux_nemo_source.py
 new file mode 100644
 index 00000000..7d4f2d74
@@ -908,6 +2155,281 @@ index 00000000..7d4f2d74
 +    )
 +    assert without_compiler.returncode != 0
 +    assert "validated PROTOC" in without_compiler.stderr
+diff --git a/tests/scripts/test_termux_selection_receipt.py b/tests/scripts/test_termux_selection_receipt.py
+new file mode 100644
+index 00000000..8befb5e4
+--- /dev/null
++++ b/tests/scripts/test_termux_selection_receipt.py
+@@ -0,0 +1,53 @@
++"""A native selection receipt cannot outlive the inputs or a failed rebuild."""
++from __future__ import annotations
++
++import hashlib
++import json
++from pathlib import Path
++
++import pytest
++
++from scripts.termux.feature_profile import BUNDLED_EXTRAS
++from scripts.termux.selection_receipt import read_selection
++
++
++@pytest.mark.parametrize("changed", ["app/uv.lock", "app/pm/lock.json", "requirements.txt"])
++def test_native_selection_rejects_changed_bundle_inputs(tmp_path, changed):
++    paths = {
++        "uv_lock_sha256": tmp_path / "app/uv.lock",
++        "pm_lock_sha256": tmp_path / "app/pm/lock.json",
++        "requirements_sha256": tmp_path / "requirements.txt",
++    }
++    for path in paths.values():
++        path.parent.mkdir(parents=True, exist_ok=True)
++        path.write_bytes(b"reviewed native build input\n")
++    data = {
++        "schema": 1, "target": "linux-arm64-bionic", "extras": list(BUNDLED_EXTRAS),
++        "stamp": "a" * 64,
++        "bundled_wheels": {"path": "bundled-wheels.json", "sha256": "b" * 64},
++        **{key: hashlib.sha256(path.read_bytes()).hexdigest() for key, path in paths.items()},
++    }
++    receipt = tmp_path / "selection.json"
++    receipt.write_text(json.dumps(data), encoding="utf-8")
++    assert read_selection(tmp_path, receipt, paths["requirements_sha256"]) == data
++    (tmp_path / changed).write_bytes(b"different input\n")
++    with pytest.raises(ValueError, match="no longer matches"):
++        read_selection(tmp_path, receipt, paths["requirements_sha256"])
++
++
++def test_failed_native_install_removes_previous_selection_receipt(tmp_path, monkeypatch):
++    from scripts.termux.build_environment import application
++
++    receipt = tmp_path / ".work/venv-selection.json"
++    receipt.parent.mkdir()
++    receipt.write_text('{"stamp": "stale"}', encoding="utf-8")
++    requirements = tmp_path / "requirements.txt"
++    requirements.write_text("missing-native==1.0\n", encoding="utf-8")
++
++    def fail(*args, **kwargs):
++        raise RuntimeError("offline native wheel missing")
++
++    monkeypatch.setattr("pm.build_requirements_environment", fail)
++    with pytest.raises(RuntimeError, match="offline native wheel missing"):
++        application(tmp_path, requirements, Path("unused-python"), record_selection=True)
++    assert not receipt.exists()
+diff --git a/tests/tools/test_bot_desktop_termux.py b/tests/tools/test_bot_desktop_termux.py
+new file mode 100644
+index 00000000..ba878d03
+--- /dev/null
++++ b/tests/tools/test_bot_desktop_termux.py
+@@ -0,0 +1,96 @@
++"""Termux desktop behavior: user-owned installs, X11 paths, and isolated native capture."""
++
++from __future__ import annotations
++
++import os
++import shlex
++from pathlib import Path
++
++import pytest
++
++from tools.bot_desktop import runtime, termux
++
++
++def test_android_host_support_requires_the_termux_x11_environment():
++    assert runtime.is_supported_host(platform="android", termux=True)
++    assert not runtime.is_supported_host(platform="android", termux=False)
++    assert runtime.is_supported_host(platform="linux", termux=False)
++    assert not runtime.is_supported_host(platform="win32", termux=False)
++
++
++def test_termux_apt_never_requires_root_or_sudo(monkeypatch):
++    monkeypatch.setattr(runtime, "package_manager", lambda: "termux")
++    monkeypatch.setattr(runtime, "is_root", lambda: pytest.fail("Termux APT belongs to its app user"))
++    assert runtime.installable()
++    argv = shlex.split(runtime.install_command())
++    assert argv[:2] == ["bash", "-c"]
++    assert "sudo" not in argv[2]
++    assert argv[2].index("x11-repo") < argv[2].index(" update") < argv[2].index("tigervnc")
++    assert "--no-remove" in argv[2]
++
++
++def test_termux_manager_requires_its_actual_apt_command(monkeypatch):
++    seen = []
++    monkeypatch.setattr(termux, "locate_command", lambda command: seen.append(command) or "/prefix/bin/apt-get")
++    assert runtime.package_manager(termux=True) == "termux"
++    assert seen == ["apt-get"]
++    monkeypatch.setattr(termux, "locate_command", lambda command: None)
++    assert runtime.package_manager(termux=True) is None
++
++
++def test_termux_native_children_keep_profile_state_and_use_system_libraries(tmp_path):
++    base = {"LD_LIBRARY_PATH": "/bundle/runtime-libs", "XAUTHORITY": "/profile-a/auth", "DISPLAY": ":25"}
++    env = termux.launcher_env(base, termux=True, system_prefix=tmp_path)
++    assert "LD_LIBRARY_PATH" not in env
++    assert env["DISPLAY"] == ":25" and env["XAUTHORITY"] == "/profile-a/auth"
++    assert env["HERMES_BD_XLOCK_DIR"] == str(tmp_path / "tmp")
++    assert env["HERMES_BD_SYSTEM_SHARE"] == str(tmp_path / "share")
++    assert base["LD_LIBRARY_PATH"] == "/bundle/runtime-libs"
++    assert termux.launcher_env(base, termux=False) == base
++
++
++def test_termux_x11_socket_detection_uses_the_compiled_prefix(tmp_path, monkeypatch):
++    xdir = tmp_path / "usr"
++    sockets = termux.x_lock_dir(termux=True, system_prefix=xdir) / ".X11-unix"
++    table = tmp_path / "unix"
++    table.write_text(
++        "Header\n"
++        f"0000: 0002 0000 00010000 0001 01 123 @{(sockets / 'X20').as_posix()}\n"
++        f"0000: 0002 0000 00010000 0001 01 124 {(sockets / 'X200').as_posix()}\n",
++        encoding="utf-8",
++    )
++    monkeypatch.setattr(runtime, "_X_SOCKET_DIR", sockets)
++    monkeypatch.setattr(runtime, "_X_UNIX_TABLE", table)
++    assert runtime._x_socket_bound(20)
++    assert not runtime._x_socket_bound(2)
++    assert not runtime._x_socket_bound(21)
++
++
++def test_scrot_grabs_only_the_requested_profile_and_cleans_its_temporary_file(tmp_path, monkeypatch):
++    from PIL import Image
++    from tools.environments import local
++    parent_auth = os.environ.get("XAUTHORITY")
++    seen = []
++    monkeypatch.setattr(termux, "locate_command", lambda name: "/prefix/bin/scrot")
++    monkeypatch.setattr(local, "served_profile_child_env",
++                        lambda **kw: {"LD_LIBRARY_PATH": "/bundle", "DISPLAY": ":wrong"})
++    def run(argv, **kw):
++        assert argv[:3] == ["/prefix/bin/scrot", "--silent", "--overwrite"]
++        assert kw["env"]["DISPLAY"] == ":28"
++        assert kw["env"]["XAUTHORITY"] == "/profile-b/auth"
++        assert "LD_LIBRARY_PATH" not in kw["env"]
++        assert kw["timeout"] == 10 and kw["check"]
++        target = Path(argv[-1])
++        seen.append(target)
++        Image.new("RGB", (3, 2), "red").save(target)
++    monkeypatch.setattr(termux.subprocess, "run", run)
++    image = termux.grab_x11_image({"DISPLAY": ":28", "XAUTHORITY": "/profile-b/auth"})
++    assert image.size == (3, 2) and image.getpixel((0, 0)) == (255, 0, 0)
++    assert seen and not seen[0].exists()
++    assert os.environ.get("XAUTHORITY") == parent_auth
++
++
++def test_missing_scrot_reports_the_supported_install_path(monkeypatch):
++    monkeypatch.setattr(termux, "locate_command", lambda name: None)
++    with pytest.raises(RuntimeError, match="hermes screen install"):
++        termux.grab_x11_image({"DISPLAY": ":28"})
+diff --git a/tests/tools/test_computer_use_remote_availability.py b/tests/tools/test_computer_use_remote_availability.py
+new file mode 100644
+index 00000000..4f13e81e
+--- /dev/null
++++ b/tests/tools/test_computer_use_remote_availability.py
+@@ -0,0 +1,23 @@
++"""A remote Linux screen remains available from an Android client without a local CUA binary."""
++
++import pytest
++
++from plugins.computer_use.cua import _available_for_placement
++from tools.bot_desktop import placement
++
++
++@pytest.mark.parametrize("platform", ["android", "linux", "win32", "darwin"])
++def test_remote_desktop_does_not_probe_the_client_driver(platform):
++    def local_probe():
++        pytest.fail("the remote screen must not acquire or probe a client-side driver")
++    assert _available_for_placement(platform, placement.TERMINAL, local_probe)
++
++
++@pytest.mark.parametrize("where", [placement.GATEWAY, placement.REFUSED])
++def test_android_does_not_advertise_a_native_phone_driver(where):
++    assert not _available_for_placement("android", where, lambda: True)
++
++
++def test_local_desktop_still_requires_its_own_driver():
++    assert _available_for_placement("linux", placement.GATEWAY, lambda: True)
++    assert not _available_for_placement("linux", placement.GATEWAY, lambda: False)
+diff --git a/tests/tools/test_voice_capture_backend.py b/tests/tools/test_voice_capture_backend.py
+new file mode 100644
+index 00000000..2752c31a
+--- /dev/null
++++ b/tests/tools/test_voice_capture_backend.py
+@@ -0,0 +1,79 @@
++"""Recorder selection honors explicit choices and reports their own missing prerequisites."""
++
++import pytest
++
++from tools import voice_mode as vm
++from tools import voice_mode_capture as capture
++
++
++def unexpected_probe():
++    pytest.fail("an explicitly selected backend must not probe the alternative")
++
++
++def test_auto_retains_api_preference_and_pcm_fallback():
++    assert capture.choose_backend({}, termux_available=lambda: True) == "termux-api"
++    assert capture.choose_backend({}, termux_available=lambda: False) == "sounddevice"
++
++
++@pytest.mark.parametrize("name", ["sounddevice", "termux-api"])
++def test_explicit_choice_does_not_probe_an_alternative(name):
++    assert capture.choose_backend({"capture_backend": name}, termux_available=unexpected_probe) == name
++
++
++@pytest.mark.parametrize("value", [None, True, 1, "speech-recognizer"])
++def test_invalid_choice_reports_the_supported_configuration(value):
++    with pytest.raises(ValueError, match="voice.capture_backend"):
++        capture.choose_backend({"capture_backend": value}, termux_available=unexpected_probe)
++
++
++@pytest.mark.parametrize("name, expected", [("sounddevice", vm.AudioRecorder), ("termux-api", vm.TermuxAudioRecorder)])
++def test_factory_instantiates_the_explicit_backend_without_starting_a_microphone(monkeypatch, name, expected):
++    monkeypatch.setattr(vm, "_voice_config", lambda: {"capture_backend": name})
++    monkeypatch.setattr(vm, "_termux_voice_capture_available", unexpected_probe)
++    assert isinstance(vm.create_audio_recorder(), expected)
++
++
++def test_available_api_cannot_mask_missing_pcm_dependencies(monkeypatch):
++    monkeypatch.setattr(vm, "_termux_voice_capture_available", unexpected_probe)
++    monkeypatch.setattr(vm, "_audio_available", lambda: False)
++    monkeypatch.setattr(vm, "_audio_unavailable_reason", lambda: "NumPy native wheel is not available")
++    result = capture.capture_requirements({"capture_backend": "sounddevice"})
++    assert not result["available"]
++    assert result["missing_packages"] == ["sounddevice", "numpy"]
++    assert "NumPy native wheel" in result["detail"]
++
++
++def test_api_capture_does_not_import_or_provision_pcm_dependencies(monkeypatch):
++    monkeypatch.setattr(vm, "_termux_voice_capture_available", lambda: True)
++    monkeypatch.setattr(vm, "_audio_available", unexpected_probe)
++    result = capture.capture_requirements({"capture_backend": "termux-api"})
++    assert result["available"] and not result["missing_packages"]
++    assert "Termux:API" in result["detail"]
++
++
++def test_explicit_pcm_environment_diagnostics_disable_api_fallback(monkeypatch):
++    monkeypatch.setattr(vm, "_termux_voice_capture_available", unexpected_probe)
++    seen = []
++    def diagnose(*, api_fallback):
++        seen.append(api_fallback)
++        return {"available": False, "warnings": ["PortAudio input unavailable"], "notices": []}
++    monkeypatch.setattr(capture, "_sounddevice_environment", diagnose)
++    result = capture.detect_audio_environment({"capture_backend": "sounddevice"})
++    assert seen == [False] and result["warnings"] == ["PortAudio input unavailable"]
++
++
++def test_explicit_api_environment_preserves_missing_android_app_guidance(monkeypatch):
++    monkeypatch.setattr(vm, "_termux_microphone_command", lambda: "/prefix/bin/termux-microphone-record")
++    monkeypatch.setattr(vm, "_termux_api_app_installed", lambda: False)
++    monkeypatch.setattr(vm, "_import_audio", unexpected_probe)
++    result = capture.detect_audio_environment({"capture_backend": "termux-api"})
++    assert not result["available"]
++    assert vm._TERMUX_APP_MISSING_WARNING in result["warnings"]
++
++
++def test_invalid_configuration_is_a_diagnostic_without_attempting_installs(monkeypatch):
++    monkeypatch.setattr(vm, "_termux_voice_capture_available", unexpected_probe)
++    monkeypatch.setattr(vm, "_audio_available", unexpected_probe)
++    config = {"capture_backend": "invalid"}
++    assert "voice.capture_backend" in capture.capture_requirements(config)["detail"]
++    assert not capture.detect_audio_environment(config)["available"]
 diff --git a/tests/tools/test_voice_mode_termux.py b/tests/tools/test_voice_mode_termux.py
 new file mode 100644
 index 00000000..094efc12
@@ -1132,22 +2654,472 @@ index 00000000..094efc12
 +    assert active[-1] is None
 +    assert "OPENAI_API_KEY" not in captured["env"]
 +    assert "TELEGRAM_BOT_TOKEN" not in captured["env"]
+diff --git a/tools/bot_desktop/install.py b/tools/bot_desktop/install.py
+index 80b4f633..74f25580 100644
+--- a/tools/bot_desktop/install.py
++++ b/tools/bot_desktop/install.py
+@@ -26,7 +26,7 @@ import time
+ from typing import Callable, Optional
+ 
+ from hermes_constants import hermes_home_key
+-from tools.bot_desktop import runtime
++from tools.bot_desktop import runtime, termux as _termux
+ 
+ logger = logging.getLogger(__name__)
+ 
+@@ -101,7 +101,7 @@ def install_packages(*, ask_password: Callable[[], str], on_line: Callable[[str]
+     key = hermes_home_key() if claimed else None
+     try:
+         if not runtime.is_supported_host():
+-            raise RuntimeError("Bot Desktop runs on Linux gateway hosts only")
++            raise RuntimeError("Bot Desktop requires a Linux or Termux X11 gateway host")
+         cmd = runtime.install_command()
+         if cmd is None:
+             raise RuntimeError("no supported package manager (apt-get, dnf, pacman) found on this host")
+@@ -143,7 +143,7 @@ def _run(cmd: str, *, ask_password: Callable[[], str], on_line: Callable[[str],
+     env = {"DEBIAN_FRONTEND": "noninteractive", "LC_ALL": "C.UTF-8"}
+     proc = subprocess.Popen(  # windows-footgun: ok — Linux-only (is_supported_host)
+         argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+-        env={**os.environ, **env}, start_new_session=True)
++        env=_termux.system_env({**os.environ, **env}), start_new_session=True)
+     try:
+         if stdin_payload is not None:
+             proc.stdin.write(stdin_payload.encode("utf-8"))  # type: ignore[union-attr]
+diff --git a/tools/bot_desktop/launcher.sh b/tools/bot_desktop/launcher.sh
+index 93953fa3..128066b0 100755
+--- a/tools/bot_desktop/launcher.sh
++++ b/tools/bot_desktop/launcher.sh
+@@ -23,6 +23,8 @@ set -euo pipefail
+ : "${HERMES_BD_CONFIG_HOME:?}"  # per-profile XDG_CONFIG_HOME (xfconf lives here)
+ GEOM="${HERMES_BD_GEOMETRY:-1440x900}"
+ DEPTH=24
++XLOCK_DIR="${HERMES_BD_XLOCK_DIR:-/tmp}"  # no-tmp: ok — compiled Linux X11 default
++SYSTEM_SHARE="${HERMES_BD_SYSTEM_SHARE:-/usr/share}"
+ 
+ export XDG_CONFIG_HOME="$HERMES_BD_CONFIG_HOME"
+ export XDG_CACHE_HOME="${HERMES_BD_CACHE_HOME:-$HERMES_BD_CONFIG_HOME/.cache}"
+@@ -44,10 +46,10 @@ export XAUTHORITY="$HERMES_BD_XAUTH"
+ # running server (another profile may have taken this number) and is never touched — Xvnc then
+ # fails to start on it and runtime.py reports that instead of us disrupting the other desktop.
+ rm -f "$HERMES_BD_SOCKET"
+-# no-tmp: ok — the X11 protocol fixes its lock and socket under /tmp; this is not our scratch dir
+-xlock="/tmp/.X${HERMES_BD_DISPLAY_NUM}-lock"
++# The runtime supplies Termux's compiled prefix; ordinary Linux retains its X11 default.
++xlock="$XLOCK_DIR/.X${HERMES_BD_DISPLAY_NUM}-lock"
+ if [[ -e "$xlock" ]] && ! kill -0 "$(tr -d ' ' < "$xlock" 2>/dev/null)" 2>/dev/null; then
+-  rm -f "$xlock" "/tmp/.X11-unix/X${HERMES_BD_DISPLAY_NUM}"  # no-tmp: ok — X11 display socket, fixed by the protocol
++  rm -f "$xlock" "$XLOCK_DIR/.X11-unix/X${HERMES_BD_DISPLAY_NUM}"
+ fi
+ : > "$XAUTHORITY"; chmod 600 "$XAUTHORITY"
+ # The cookie goes in on stdin, not argv: a command line is readable by every local user via ps.
+@@ -56,8 +58,8 @@ add $DISPLAY MIT-MAGIC-COOKIE-1 $(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')
+ COOKIE
+ 
+ # ---- look: dark theme from whatever the host ships (first match wins), Hermes wallpaper ----
+-pick_theme() { local d t; for t in "$@"; do for d in /usr/share/themes "$HOME/.themes"; do [[ -d "$d/$t" ]] && { echo "$t"; return; }; done; done; echo "$1"; }
+-pick_icons() { local d t; for t in "$@"; do for d in /usr/share/icons "$HOME/.icons"; do [[ -d "$d/$t" ]] && { echo "$t"; return; }; done; done; echo "$1"; }
++pick_theme() { local d t; for t in "$@"; do for d in "$SYSTEM_SHARE/themes" "$HOME/.themes"; do [[ -d "$d/$t" ]] && { echo "$t"; return; }; done; done; echo "$1"; }
++pick_icons() { local d t; for t in "$@"; do for d in "$SYSTEM_SHARE/icons" "$HOME/.icons"; do [[ -d "$d/$t" ]] && { echo "$t"; return; }; done; done; echo "$1"; }
+ GTK_THEME_NAME=$(pick_theme Adwaita-dark Breeze-Dark Greybird-dark Arc-Dark Adwaita)
+ WM_THEME_NAME=$(pick_theme Default-hdpi Default)   # xfwm4 window themes ship with xfwm4 itself
+ ICON_THEME_NAME=$(pick_icons Papirus-Dark breeze-dark Adwaita hicolor)
+diff --git a/tools/bot_desktop/runtime.py b/tools/bot_desktop/runtime.py
+index 8107e5cc..935d1f2c 100644
+--- a/tools/bot_desktop/runtime.py
++++ b/tools/bot_desktop/runtime.py
+@@ -27,7 +27,7 @@ from pathlib import Path
+ from typing import Dict, Optional
+ 
+ from hermes_constants import get_hermes_home
+-from tools.bot_desktop import placement
++from tools.bot_desktop import placement, termux as _termux
+ 
+ logger = logging.getLogger(__name__)
+ 
+@@ -46,6 +46,7 @@ REQUIRED_BINARIES = ("Xvnc", "xfwm4", "xfce4-panel", "xfdesktop", "xfsettingsd",
+ # one unknown name, so every binary must map to a package that still resolves; the test suite checks that
+ # each mapped package is in PACKAGES for its manager.
+ BINARY_PACKAGES = {
++    "termux": _termux.BINARY_PACKAGES,
+     "apt": {"Xvnc": "tigervnc-standalone-server", "xfwm4": "xfwm4", "xfce4-panel": "xfce4-panel",
+             "xfdesktop": "xfdesktop4", "xfsettingsd": "xfce4-settings", "dbus-run-session": "dbus-x11",
+             "xauth": "xauth", "xdpyinfo": "x11-utils", "setxkbmap": "x11-xkb-utils", "xprop": "x11-utils"},
+@@ -60,6 +61,7 @@ BINARY_PACKAGES = {
+ }
+ 
+ PACKAGES = {
++    "termux": _termux.PACKAGES,
+     "apt": ["tigervnc-standalone-server", "xfce4-panel", "xfwm4", "xfdesktop4", "xfce4-settings",
+             "xfce4-terminal", "dbus-x11", "x11-xserver-utils", "x11-utils", "x11-xkb-utils", "xauth",
+             "fonts-dejavu-core"],
+@@ -76,15 +78,20 @@ def state_dir() -> Path:
+     return get_hermes_home() / "bot-desktop"
+ 
+ 
+-def is_supported_host() -> bool:
+-    return sys.platform.startswith("linux")
++def is_supported_host(*, platform: str | None = None, termux: bool | None = None) -> bool:
++    return ((sys.platform if platform is None else platform).startswith("linux")
++            or (_termux.is_termux() if termux is None else termux))
+ 
+ 
+ def missing_binaries() -> list[str]:
++    if _termux.is_termux():
++        return [b for b in (*REQUIRED_BINARIES, "scrot") if _termux.locate_command(b) is None]
+     return [b for b in REQUIRED_BINARIES if shutil.which(b) is None]
+ 
+ 
+-def package_manager() -> Optional[str]:
++def package_manager(*, termux: bool | None = None) -> Optional[str]:
++    if _termux.is_termux() if termux is None else termux:
++        return "termux" if _termux.locate_command("apt-get") else None
+     for pm in ("apt-get", "dnf", "pacman"):
+         if shutil.which(pm):
+             return "apt" if pm == "apt-get" else pm
+@@ -92,16 +99,14 @@ def package_manager() -> Optional[str]:
+ 
+ 
+ def install_command() -> Optional[str]:
+-    """The distro command that installs the Bot Desktop packages, as the human would type it on THIS host:
+-    prefixed with ``sudo`` unless Hermes already runs as root, so it is both what the pane shows and what
+-    :mod:`tools.bot_desktop.install` runs. ``None`` when no package manager is present.
+-
+-    Not a promise that it can run here: see :func:`installable`. The published Docker image supervises
+-    every service under ``s6-setuidgid hermes`` (UID 10000 by default) and ships no ``sudo`` binary, so an
+-    install on a hosted instance is impossible no matter what this returns."""
++    """The reviewed distro command; Termux APT belongs to its app user and never uses sudo.
++    A hosted Linux process may still lack privilege to run the shown command (see installable).
++    """
+     pm = package_manager()
+     if pm is None:
+         return None
++    if pm == "termux":
++        return _termux.install_command()
+     pkgs = " ".join(PACKAGES[pm])
+     body = {
+         "apt": f"apt-get install -y --no-install-recommends {pkgs}",
+@@ -116,17 +121,9 @@ def is_root() -> bool:
+ 
+ 
+ def installable() -> bool:
+-    """Whether :func:`install_command` could actually succeed on this host.
+-
+-    False on an unprivileged process with no ``sudo`` to reach for, which is exactly the published Docker
+-    image: services drop to the ``hermes`` user and no ``sudo`` binary is installed. The packages can only
+-    arrive in the image there, so :func:`start` says that instead of printing a sudo line the user has no
+-    way to run. ``status()`` still reports ``install_command`` for the pane; surfacing this there needs a
+-    wire-contract change and is deliberately out of scope.
+-    """
+-    if package_manager() is None:
+-        return False
+-    return is_root() or shutil.which("sudo") is not None
++    """Whether packages can be installed here: app-owned APT, root, or an available sudo."""
++    pm = package_manager()
++    return pm is not None and (pm == "termux" or is_root() or shutil.which("sudo") is not None)
+ 
+ 
+ @dataclass
+@@ -199,7 +196,8 @@ def _recorded_launcher_pid() -> Optional[int]:
+     return int(pid_s) if pid_s.isdigit() and born_s else None
+ 
+ 
+-_X_LOCK_DIR = Path("/tmp")  # no-tmp: ok — X servers write .X<n>-lock here by protocol (tests point it at a scratch dir)
++_X_LOCK_DIR = _termux.x_lock_dir()
++_X_SOCKET_DIR = _X_LOCK_DIR / ".X11-unix"
+ _X_UNIX_TABLE = Path("/proc/net/unix")  # the kernel's list of bound Unix sockets (tests point it at a fixture)
+ 
+ 
+@@ -218,8 +216,8 @@ def _x_socket_bound(num: int) -> bool:
+         lines = _X_UNIX_TABLE.read_text(encoding="utf-8-sig").splitlines()
+     except OSError:
+         return False
+-    # no-tmp: ok — detects the X server's display socket at the path the X11 protocol fixes
+-    return any(line.split()[-1].lstrip("@") == f"/tmp/.X11-unix/X{num}" for line in lines if line.strip())
++    socket_path = (_X_SOCKET_DIR / f"X{num}").as_posix()
++    return any(line.split()[-1].lstrip("@") == socket_path for line in lines if line.strip())
+ 
+ 
+ def _display_in_use(num: int) -> bool:
+@@ -353,6 +351,7 @@ def desktop_env(base_env: Optional[dict[str, str]] = None) -> dict[str, str]:
+         env.pop("WAYLAND_DISPLAY", None)  # X11 desktop; a leaked Wayland socket flips GTK/Chromium backends
+         from tools.bot_desktop.browser import env_for_agent
+         env_for_agent(env)  # same binary + user-data-dir as the dock's Browser icon
++        env = _termux.system_env(env)
+     return env
+ 
+ 
+@@ -669,7 +668,7 @@ def start(*, wait_seconds: float = 15.0) -> DesktopStatus:
+     if where.where == placement.TERMINAL:
+         return _start_in_sandbox(wait_seconds)
+     if not is_supported_host():
+-        raise RuntimeError("Bot Desktop runs on Linux gateway hosts only")
++        raise RuntimeError("Bot Desktop requires a Linux or Termux X11 gateway host")
+     missing = missing_binaries()
+     if missing:
+         # Three dead ends: an operator told "unprivileged, no sudo" while running as root hunts the wrong bug.
+@@ -723,7 +722,7 @@ def _spawn_and_wait(sd: Path, wait_seconds: float) -> DesktopStatus:
+         # The agent drives this desktop and its dock opens a terminal, so it starts from the
+         # scrubbed child env like any other agent child, keeping the user's HOME.
+         from tools.environments.local import served_profile_child_env
+-        child_env = served_profile_child_env(inherit_credentials=False)
++        child_env = _termux.launcher_env(served_profile_child_env(inherit_credentials=False))
+         child_env["HOME"] = child_env["HERMES_REAL_HOME"]
+         for key in ("DISPLAY", "XAUTHORITY", "WAYLAND_DISPLAY", "DBUS_SESSION_BUS_ADDRESS", "SESSION_MANAGER"):
+             child_env.pop(key, None)
+diff --git a/tools/bot_desktop/termux.py b/tools/bot_desktop/termux.py
+new file mode 100644
+index 00000000..814da24e
+--- /dev/null
++++ b/tools/bot_desktop/termux.py
+@@ -0,0 +1,88 @@
++"""Termux's user-owned X11 desktop packages and native process environment.
++
++This drives a private Xvnc desktop. It does not capture or control Android phone apps.
++"""
++
++from __future__ import annotations
++
++import os
++import shlex
++import subprocess
++import tempfile
++from collections.abc import Mapping
++from pathlib import Path
++
++from hermes_platform.host.runtime import is_termux
++from hermes_platform.resolver import locate_command
++
++BINARY_PACKAGES = {
++    "Xvnc": "tigervnc", "xfwm4": "xfwm4", "xfce4-panel": "xfce4-panel",
++    "xfdesktop": "xfdesktop", "xfsettingsd": "xfce4-settings", "dbus-run-session": "dbus",
++    "xauth": "xorg-xauth", "xdpyinfo": "xorg-xdpyinfo",
++    "setxkbmap": "xorg-setxkbmap", "xprop": "xorg-xprop",
++}
++PACKAGES = [
++    "tigervnc", "xfwm4", "xfce4-panel", "xfdesktop", "xfce4-settings", "xfce4-terminal",
++    "dbus", "xorg-xauth", "xorg-xdpyinfo", "xorg-setxkbmap", "xorg-xprop",
++    "xorg-xsetroot", "xorg-xset", "ttf-dejavu", "scrot",
++]
++
++
++def prefix() -> Path:
++    return Path(os.environ.get("PREFIX") or "/data/data/com.termux/files/usr")
++
++
++def x_lock_dir(*, termux: bool | None = None, system_prefix: Path | None = None) -> Path:
++    if is_termux() if termux is None else termux:
++        return (prefix() if system_prefix is None else system_prefix) / "tmp"
++    return Path("/tmp")  # no-tmp: ok — the ordinary Linux X server's compiled lock location
++
++
++def install_command() -> str:
++    """Enable the signed official X11 repo before resolving its packages, without sudo."""
++    apt = "apt-get -o Acquire::Retries=5"
++    script = (
++        "set -e; "
++        f"{apt} install -y --no-remove --no-install-recommends x11-repo; "
++        f"{apt} -o APT::Update::Error-Mode=any update; "
++        f"{apt} install -y --no-remove --no-install-recommends " + " ".join(PACKAGES)
++    )
++    return shlex.join(["bash", "-c", script])
++
++
++def system_env(base: Mapping[str, str], *, termux: bool | None = None) -> dict[str, str]:
++    """APT X11 binaries use their current system libraries, independently of the Hermes bundle."""
++    env = dict(base)
++    if is_termux() if termux is None else termux:
++        env.pop("LD_LIBRARY_PATH", None)
++    return env
++
++
++def launcher_env(base: Mapping[str, str], *, termux: bool | None = None,
++                 system_prefix: Path | None = None) -> dict[str, str]:
++    enabled = is_termux() if termux is None else termux
++    env = system_env(base, termux=enabled)
++    if enabled:
++        root = prefix() if system_prefix is None else system_prefix
++        env.update(HERMES_BD_XLOCK_DIR=str(root / "tmp"), HERMES_BD_SYSTEM_SHARE=str(root / "share"))
++    return env
++
++
++def grab_x11_image(published: Mapping[str, str]):
++    """Capture only this profile's X display, without requiring Pillow's optional XCB extension."""
++    command = locate_command("scrot")
++    if not command:
++        raise RuntimeError("Bot Desktop thumbnails on Termux require the scrot package; run hermes screen install.")
++    from PIL import Image
++    from tools.environments.local import served_profile_child_env
++    env = system_env(served_profile_child_env(inherit_credentials=False), termux=True)
++    env.update(published)
++    env.pop("WAYLAND_DISPLAY", None)
++    with tempfile.TemporaryDirectory(prefix="hermes-x11-") as scratch:
++        target = Path(scratch) / "screen.png"
++        subprocess.run(
++            [command, "--silent", "--overwrite", str(target)], env=env, stdin=subprocess.DEVNULL,
++            stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10, check=True,
++        )
++        with Image.open(target) as image:
++            return image.copy()
+diff --git a/tools/bot_desktop/thumbnail.py b/tools/bot_desktop/thumbnail.py
+index 2ae3ffa2..4d9e2b79 100644
+--- a/tools/bot_desktop/thumbnail.py
++++ b/tools/bot_desktop/thumbnail.py
+@@ -1,8 +1,4 @@
+-"""Thumbnail of a bot's screen: one JPEG grab of the profile's Xvnc display.
+-
+-Feeds the Screen hero in Hermes Desktop (the big preview at the top of a bot's pane). Read-only:
+-it never touches the lease, so a human in control is not disturbed and the bot is not blocked.
+-"""
++"""Thumbnail of a bot's private Xvnc screen, without disturbing its control lease."""
+ 
+ from __future__ import annotations
+ 
+@@ -12,14 +8,33 @@ import os
+ import threading
+ from typing import Optional
+ 
+-from tools.bot_desktop import runtime
++from tools.bot_desktop import runtime, termux as _termux
+ 
+ THUMB_MAX = (960, 600)
+ _grab_lock = threading.Lock()
+ 
+ 
++def _grab_local_image(env: dict[str, str], display: str):
++    if _termux.is_termux():
++        return _termux.grab_x11_image(env)
++    from PIL import ImageGrab
++
++    # Xlib's process-wide XAUTHORITY needs serialization across profile worker threads.
++    with _grab_lock:
++        previous = os.environ.get("XAUTHORITY")
++        if env.get("XAUTHORITY"):
++            os.environ["XAUTHORITY"] = env["XAUTHORITY"]
++        try:
++            return ImageGrab.grab(xdisplay=display)
++        finally:
++            if previous is None:
++                os.environ.pop("XAUTHORITY", None)
++            else:
++                os.environ["XAUTHORITY"] = previous
++
++
+ def thumbnail_data_url(max_size: tuple[int, int] = THUMB_MAX, quality: int = 72) -> Optional[str]:
+-    """``data:image/jpeg;base64,...`` of the running screen, or ``None`` when no screen is up."""
++    """JPEG of the running screen, or None when no screen is up; never changes the lease."""
+     env = runtime.published_env()
+     display = env.get("DISPLAY")
+     if not display:
+@@ -31,22 +46,7 @@ def thumbnail_data_url(max_size: tuple[int, int] = THUMB_MAX, quality: int = 72)
+         return "data:image/jpeg;base64," + base64.b64encode(jpeg).decode("ascii") if jpeg else None
+     if runtime._launcher_pid() is None:
+         return None
+-    from PIL import ImageGrab  # Pillow is a hard dependency; import lazily to keep status calls cheap
+-
+-    # Xlib reads XAUTHORITY from the process env; the launcher publishes a per-profile cookie file.
+-    # The swap is process-wide, so two profiles grabbed on worker threads at once serialise here or
+-    # one would grab with the other's cookie and restore the wrong value.
+-    with _grab_lock:
+-        previous = os.environ.get("XAUTHORITY")
+-        if env.get("XAUTHORITY"):
+-            os.environ["XAUTHORITY"] = env["XAUTHORITY"]
+-        try:
+-            image = ImageGrab.grab(xdisplay=display)
+-        finally:
+-            if previous is None:
+-                os.environ.pop("XAUTHORITY", None)
+-            else:
+-                os.environ["XAUTHORITY"] = previous
++    image = _grab_local_image(env, display)
+     image.thumbnail(max_size)
+     buf = io.BytesIO()
+     image.convert("RGB").save(buf, "JPEG", quality=quality, optimize=True)
 diff --git a/tools/voice_mode.py b/tools/voice_mode.py
-index d1d6323a..2dc99ab3 100644
+index d1d6323a..d7bccc11 100644
 --- a/tools/voice_mode.py
 +++ b/tools/voice_mode.py
-@@ -141,7 +141,9 @@ def _voice_capture_install_hint(error: BaseException | None = None) -> str:
+@@ -141,7 +141,8 @@ def _voice_capture_install_hint(error: BaseException | None = None) -> str:
      ``audio-io`` extra through PM, so the ImportError it raised IS the remediation."""
      # On Termux PortAudio is a system package a pip install can't provide (#18432).
      if _is_termux_environment():
 -        return "pkg install python-numpy portaudio && python -m pip install sounddevice"
-+        return ("Termux voice capture requires the termux-api package and the Termux:API Android app. "
-+                "Install with: pkg install termux-api; then install/update the Android app. "
-+                "The optional sounddevice backend also needs PortAudio and Hermes's audio-io extra.")
++        hint = "sounddevice capture on Termux requires: pkg install portaudio, plus Hermes's audio-io extra."
++        return f"{hint} {error}" if error else hint
      return str(error) if error else "audio-io extra unavailable"
  
  
-@@ -594,10 +596,17 @@ class TermuxAudioRecorder(_RecorderBase):
+@@ -288,67 +289,9 @@ def _probe_audio_libraries(warnings: list[str], notices: list[str], *, has_forwa
+ 
+ 
+ def detect_audio_environment() -> dict:
+-    """Return ``{'available', 'warnings' (hard-fail, block voice), 'notices' (informational)}``.
+-
+-    SSH, containers and WSL normally have no audio devices, but a reachable sound
+-    server (PulseAudio/PipeWire socket or forwarding env vars) is honored.
+-    """
+-    warnings, notices = [], []
+-    termux_mic_cmd = _termux_microphone_command()
+-    termux_app_installed = _termux_api_app_installed()
+-    has_forwarded_audio = bool(
+-        os.environ.get('PULSE_SERVER') or os.environ.get('PIPEWIRE_REMOTE') or _pulse_socket_reachable())
+-
+-    def report(notice: str, warning: str) -> None:
+-        (notices if has_forwarded_audio else warnings).append(notice if has_forwarded_audio else warning)
+-
+-    # SSH detection -- normally no audio devices, but honor a reachable sound server (PulseAudio/PipeWire
+-    # socket or forwarding env vars), which works fine over SSH (issue #35622).
+-    if any(os.environ.get(v) for v in ('SSH_CLIENT', 'SSH_TTY', 'SSH_CONNECTION')):
+-        report("Running over SSH with a reachable PulseAudio/PipeWire sound server",
+-               "Running over SSH -- no audio devices available.\n"
+-               "  If a sound server (PulseAudio/PipeWire) is running on this host,\n"
+-               "  point Hermes at it, e.g.:\n"
+-               "    export XDG_RUNTIME_DIR=/run/user/$(id -u)\n"
+-               "    # or: export PULSE_SERVER=unix:$XDG_RUNTIME_DIR/pulse/native")
+-
+-    # Docker/Podman container detection — honor host audio forwarding. When the user mounts a
+-    # PulseAudio/PipeWire socket into the container and points PULSE_SERVER / PIPEWIRE_REMOTE at it, audio
+-    # works fine (issue #21203). Only block when no forwarding is configured.
+-    from hermes_constants import is_container
+-    if is_container():
+-        report("Running inside container (Docker/Podman/LXC) with host audio forwarding",
+-               "Running inside container (Docker/Podman/LXC) -- no audio devices.\n"
+-               "  Forward host audio with one of (substitute $XDG_RUNTIME_DIR for your runtime dir,\n"
+-               "  typically /run/user/$UID):\n"
+-               "    PulseAudio:  -v $XDG_RUNTIME_DIR/pulse/native:$XDG_RUNTIME_DIR/pulse/native \\\n"
+-               "                 -e PULSE_SERVER=unix:$XDG_RUNTIME_DIR/pulse/native\n"
+-               "    PipeWire:    -e PIPEWIRE_REMOTE=$XDG_RUNTIME_DIR/pipewire-0")
+-
+-    # WSL: the PowerShell/Media.SoundPlayer fallback only covers OUTPUT, so when
+-    # it is all that's available downgrade to a notice (recording guidance stays
+-    # visible, TTS-only usage isn't blocked).
+-    if is_wsl():
+-        if has_forwarded_audio:
+-            notices.append("Running in WSL with a reachable PulseAudio/PipeWire sound server")
+-        elif _wsl_powershell_tts_available():
+-            notices.append(
+-                "Running in WSL without a PulseAudio bridge -- TTS playback "
+-                "will use the PowerShell/Media.SoundPlayer fallback. "
+-                "Voice INPUT (recording) still requires a PulseAudio bridge:\n"
+-                "  1. Set PULSE_SERVER=unix:/mnt/wslg/PulseServer\n"
+-                "  2. Create ~/.asoundrc pointing ALSA at PulseAudio\n"
+-                "  3. Verify with: arecord -d 3 test.wav && aplay test.wav")
+-        else:
+-            warnings.append(
+-                "Running in WSL -- audio requires a forwarded sound server.\n"
+-                "  PulseAudio: export PULSE_SERVER=unix:/mnt/wslg/PulseServer\n"
+-                "  PipeWire:   export PIPEWIRE_REMOTE=$XDG_RUNTIME_DIR/pipewire-0\n"
+-                "  Then verify: arecord -d 3 test.wav && aplay test.wav")
+-
+-    _probe_audio_libraries(warnings, notices, has_forwarded_audio=has_forwarded_audio,
+-                           termux_mic_cmd=termux_mic_cmd, termux_app_installed=termux_app_installed)
+-    return {"available": not warnings, "warnings": warnings, "notices": notices}
++    """Check prerequisites for the recorder selected by this profile."""
++    from tools.voice_mode_capture import detect_audio_environment as detect
++    return detect(_voice_config())
+ 
+ 
+ # ── Audio cues (beep tones) ──
+@@ -594,10 +537,17 @@ class TermuxAudioRecorder(_RecorderBase):
  
      def __init__(self) -> None:
          super().__init__()
@@ -1166,7 +3138,7 @@ index d1d6323a..2dc99ab3 100644
          mic_cmd = _termux_microphone_command()
          if not mic_cmd:
              raise RuntimeError(
-@@ -608,23 +617,51 @@ class TermuxAudioRecorder(_RecorderBase):
+@@ -608,23 +558,51 @@ class TermuxAudioRecorder(_RecorderBase):
              raise RuntimeError(
                  "Termux voice capture requires the Termux:API Android app.\n"
                  "Install/update the Termux:API app, then retry /voice on.")
@@ -1228,7 +3200,7 @@ index d1d6323a..2dc99ab3 100644
      def _stop_termux_recording(self) -> None:
          mic_cmd = _termux_microphone_command()
          if mic_cmd:
-@@ -633,27 +670,33 @@ class TermuxAudioRecorder(_RecorderBase):
+@@ -633,27 +611,33 @@ class TermuxAudioRecorder(_RecorderBase):
      def _reset_state(self) -> tuple:
          """Clear recording state under the lock; return (was_recording, path, started_at)."""
          with self._lock:
@@ -1270,7 +3242,20 @@ index d1d6323a..2dc99ab3 100644
          _unlink_quietly(path)
          logger.info("Termux voice recording cancelled")
  
-@@ -978,7 +1021,7 @@ def transcribe_recording(wav_path: str, model: Optional[str] = None) -> dict[str
+@@ -933,8 +917,10 @@ class AudioRecorder(_RecorderBase):
+ 
+ 
+ def create_audio_recorder() -> AudioRecorder | TermuxAudioRecorder:
+-    """Return the best recorder backend for the current environment."""
+-    return TermuxAudioRecorder() if _termux_voice_capture_available() else AudioRecorder()
++    """Honor voice.capture_backend; auto retains Termux:API preference without changing STT."""
++    from tools.voice_mode_capture import choose_backend
++    backend = choose_backend(_voice_config(), termux_available=_termux_voice_capture_available)
++    return TermuxAudioRecorder() if backend == "termux-api" else AudioRecorder()
+ 
+ 
+ # ── STT dispatch ──
+@@ -978,7 +964,7 @@ def transcribe_recording(wav_path: str, model: Optional[str] = None) -> dict[str
  
  
  # ── Audio playback (interruptable) ──
@@ -1279,7 +3264,7 @@ index d1d6323a..2dc99ab3 100644
  _playback_lock = threading.Lock()
  
  
-@@ -998,6 +1041,8 @@ def stop_playback() -> None:
+@@ -998,6 +984,8 @@ def stop_playback() -> None:
          with suppress(Exception):
              proc.terminate()
              logger.info("Audio playback interrupted")
@@ -1288,7 +3273,7 @@ index d1d6323a..2dc99ab3 100644
      with suppress(Exception):  # also stop sounddevice playback if active
          sd, _ = _import_audio()
          sd.stop()
-@@ -1127,6 +1172,10 @@ def _play_audio_file_impl(file_path: str) -> bool:
+@@ -1127,6 +1115,10 @@ def _play_audio_file_impl(file_path: str) -> bool:
      if not os.path.isfile(file_path):
          logger.warning("Audio file not found: %s", file_path)
          return False
@@ -1299,6 +3284,164 @@ index d1d6323a..2dc99ab3 100644
      # macOS skips sounddevice output (TCC media-library prompt); afplay handles all formats.
      if file_path.endswith(".wav") and _sounddevice_output_allowed() and _play_wav_via_sounddevice(file_path):
          return True
+@@ -1514,13 +1506,12 @@ def check_voice_requirements() -> dict[str, Any]:
+         stt_label = f"OK (plugin: {stt_provider})"
+     stt_available = stt_enabled and stt_label is not None
+ 
+-    termux_capture = _termux_voice_capture_available()
+-    has_audio = _audio_available() or termux_capture
++    from tools.voice_mode_capture import capture_requirements
++    capture = capture_requirements(_voice_config())
++    has_audio = capture["available"]
+     env_check = detect_audio_environment()
+     details = [
+-        "Audio capture: OK (Termux:API microphone)" if termux_capture
+-        else "Audio capture: OK" if has_audio
+-        else f"Audio capture: MISSING ({_audio_unavailable_reason()})",
++        capture["detail"],
+         "STT provider: DISABLED in config (stt.enabled: false)" if not stt_enabled
+         else f"STT provider: {stt_label}" if stt_label
+         else ("STT provider: MISSING (run `hermes tools` and configure "
+@@ -1532,7 +1523,7 @@ def check_voice_requirements() -> dict[str, Any]:
+         "available": has_audio and stt_available and env_check["available"],
+         "audio_available": has_audio,
+         "stt_available": stt_available,
+-        "missing_packages": [] if has_audio else ["sounddevice", "numpy"],
++        "missing_packages": capture["missing_packages"],
+         "details": "\n".join(details),
+         "environment": env_check,
+     }
+diff --git a/tools/voice_mode_capture.py b/tools/voice_mode_capture.py
+new file mode 100644
+index 00000000..30b63355
+--- /dev/null
++++ b/tools/voice_mode_capture.py
+@@ -0,0 +1,125 @@
++"""Explicit recorder choice and diagnostics; the configured transcription provider is unchanged."""
++
++from __future__ import annotations
++
++import os
++from collections.abc import Callable, Mapping
++
++_BACKENDS = {"auto", "sounddevice", "termux-api"}
++
++
++def choose_backend(config: Mapping[str, object], *, termux_available: Callable[[], bool]) -> str:
++    raw = config.get("capture_backend", "auto")
++    name = raw.strip().lower() if isinstance(raw, str) else ""
++    if name not in _BACKENDS:
++        raise ValueError("voice.capture_backend must be auto, sounddevice, or termux-api.")
++    if name == "auto":
++        return "termux-api" if termux_available() else "sounddevice"
++    return name
++
++
++def capture_requirements(config: Mapping[str, object]) -> dict:
++    from tools import voice_mode as vm
++    try:
++        backend = choose_backend(config, termux_available=vm._termux_voice_capture_available)
++    except ValueError as exc:
++        return {"available": False, "detail": f"Audio capture: MISSING ({exc})", "missing_packages": []}
++    if backend == "termux-api":
++        available = vm._termux_voice_capture_available()
++        detail = ("Audio capture: OK (Termux:API microphone)" if available else
++                  "Audio capture: MISSING (termux-api package and Termux:API Android app required)")
++        return {"available": available, "detail": detail, "missing_packages": []}
++    available = vm._audio_available()
++    detail = ("Audio capture: OK (sounddevice / PortAudio)" if available else
++              f"Audio capture: MISSING ({vm._audio_unavailable_reason()})")
++    return {"available": available, "detail": detail,
++            "missing_packages": [] if available else ["sounddevice", "numpy"]}
++
++
++def _termux_environment() -> dict:
++    from tools import voice_mode as vm
++    warnings = []
++    if not vm._termux_microphone_command():
++        warnings.append("Termux:API capture requires the termux-api package: pkg install termux-api")
++    elif not vm._termux_api_app_installed():
++        warnings.append(vm._TERMUX_APP_MISSING_WARNING)
++    notices = ([] if warnings else
++               ["Termux:API microphone capture selected; Android permissions are checked when recording starts."])
++    return {"available": not warnings, "warnings": warnings, "notices": notices}
++
++
++def detect_audio_environment(config: Mapping[str, object]) -> dict:
++    from tools import voice_mode as vm
++    try:
++        backend = choose_backend(config, termux_available=vm._termux_voice_capture_available)
++    except ValueError as exc:
++        return {"available": False, "warnings": [str(exc)], "notices": []}
++    if backend == "termux-api":
++        return _termux_environment()
++    requested = config.get("capture_backend", "auto")
++    return _sounddevice_environment(api_fallback=isinstance(requested, str) and requested.strip().lower() == "auto")
++
++
++def _sounddevice_environment(*, api_fallback: bool = False) -> dict:
++    """Return ``{'available', 'warnings' (hard-fail, block voice), 'notices' (informational)}``.
++
++    SSH, containers and WSL normally have no audio devices, but a reachable sound
++    server (PulseAudio/PipeWire socket or forwarding env vars) is honored.
++    """
++    from tools import voice_mode as vm
++    warnings, notices = [], []
++    termux_mic_cmd = vm._termux_microphone_command() if api_fallback else None
++    termux_app_installed = vm._termux_api_app_installed() if termux_mic_cmd else False
++    has_forwarded_audio = bool(
++        os.environ.get('PULSE_SERVER') or os.environ.get('PIPEWIRE_REMOTE') or vm._pulse_socket_reachable())
++
++    def report(notice: str, warning: str) -> None:
++        (notices if has_forwarded_audio else warnings).append(notice if has_forwarded_audio else warning)
++
++    # SSH detection -- normally no audio devices, but honor a reachable sound server (PulseAudio/PipeWire
++    # socket or forwarding env vars), which works fine over SSH (issue #35622).
++    if any(os.environ.get(v) for v in ('SSH_CLIENT', 'SSH_TTY', 'SSH_CONNECTION')):
++        report("Running over SSH with a reachable PulseAudio/PipeWire sound server",
++               "Running over SSH -- no audio devices available.\n"
++               "  If a sound server (PulseAudio/PipeWire) is running on this host,\n"
++               "  point Hermes at it, e.g.:\n"
++               "    export XDG_RUNTIME_DIR=/run/user/$(id -u)\n"
++               "    # or: export PULSE_SERVER=unix:$XDG_RUNTIME_DIR/pulse/native")
++
++    # Docker/Podman container detection — honor host audio forwarding. When the user mounts a
++    # PulseAudio/PipeWire socket into the container and points PULSE_SERVER / PIPEWIRE_REMOTE at it, audio
++    # works fine (issue #21203). Only block when no forwarding is configured.
++    from hermes_constants import is_container
++    if is_container():
++        report("Running inside container (Docker/Podman/LXC) with host audio forwarding",
++               "Running inside container (Docker/Podman/LXC) -- no audio devices.\n"
++               "  Forward host audio with one of (substitute $XDG_RUNTIME_DIR for your runtime dir,\n"
++               "  typically /run/user/$UID):\n"
++               "    PulseAudio:  -v $XDG_RUNTIME_DIR/pulse/native:$XDG_RUNTIME_DIR/pulse/native \\\n"
++               "                 -e PULSE_SERVER=unix:$XDG_RUNTIME_DIR/pulse/native\n"
++               "    PipeWire:    -e PIPEWIRE_REMOTE=$XDG_RUNTIME_DIR/pipewire-0")
++
++    # WSL: the PowerShell/Media.SoundPlayer fallback only covers OUTPUT, so when
++    # it is all that's available downgrade to a notice (recording guidance stays
++    # visible, TTS-only usage isn't blocked).
++    if vm.is_wsl():
++        if has_forwarded_audio:
++            notices.append("Running in WSL with a reachable PulseAudio/PipeWire sound server")
++        elif vm._wsl_powershell_tts_available():
++            notices.append(
++                "Running in WSL without a PulseAudio bridge -- TTS playback "
++                "will use the PowerShell/Media.SoundPlayer fallback. "
++                "Voice INPUT (recording) still requires a PulseAudio bridge:\n"
++                "  1. Set PULSE_SERVER=unix:/mnt/wslg/PulseServer\n"
++                "  2. Create ~/.asoundrc pointing ALSA at PulseAudio\n"
++                "  3. Verify with: arecord -d 3 test.wav && aplay test.wav")
++        else:
++            warnings.append(
++                "Running in WSL -- audio requires a forwarded sound server.\n"
++                "  PulseAudio: export PULSE_SERVER=unix:/mnt/wslg/PulseServer\n"
++                "  PipeWire:   export PIPEWIRE_REMOTE=$XDG_RUNTIME_DIR/pipewire-0\n"
++                "  Then verify: arecord -d 3 test.wav && aplay test.wav")
++
++    vm._probe_audio_libraries(warnings, notices, has_forwarded_audio=has_forwarded_audio,
++                           termux_mic_cmd=termux_mic_cmd, termux_app_installed=termux_app_installed)
++    return {"available": not warnings, "warnings": warnings, "notices": notices}
 diff --git a/tools/voice_mode_termux.py b/tools/voice_mode_termux.py
 new file mode 100644
 index 00000000..699fe66b

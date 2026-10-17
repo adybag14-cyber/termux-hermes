@@ -8,13 +8,14 @@ on:
       - 'patches/next-stable/**'
       - 'scripts/probe_native_compatibility.*'
       - 'scripts/compatibility_probe_browser.sh'
+      - 'scripts/compatibility_probe_desktop.sh'
       - 'tests/test_native_compatibility_probe.py'
 
 permissions:
   contents: read
 
 concurrency:
-  group: termux-compatibility-${{ github.ref }}
+  group: termux-compatibility-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: false
 
 jobs:
@@ -25,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        group: [uvloop, matrix, nemo, browser]
+        group: [uvloop, matrix, nemo, browser, desktop]
     steps:
       - name: Checkout proposed packaging changes
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -99,6 +100,7 @@ jobs:
             probe-results/${{ matrix.group }}/*.lock
             probe-results/${{ matrix.group }}/*.toml
             probe-results/${{ matrix.group }}/*.png
+            probe-results/${{ matrix.group }}/*.jpg
             probe-results/${{ matrix.group }}/wheelhouse/*.whl
             probe-results/${{ matrix.group }}/build-runtime-libs/*
           if-no-files-found: warn

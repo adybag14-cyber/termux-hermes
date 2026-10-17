@@ -8,7 +8,7 @@ if [[ "${1:-}" == --in-container ]]; then
   umask 022
   # Root-built evidence must remain readable by the Actions artifact uploader,
   # including diagnostics from a failed build and copied restrictive input files.
-  trap 'find /out -type d -exec chmod a+rx {} +; find /out -type f -exec chmod a+r {} +' EXIT
+  trap 'find /out -uid "$(id -u)" -type d -exec chmod a+rx {} +; find /out -uid "$(id -u)" -type f -exec chmod a+r {} +' EXIT
   export PREFIX=/data/data/com.termux/files/usr
   export TMPDIR="$PREFIX/tmp"
   export DEBIAN_FRONTEND=noninteractive TERMUX_PKG_NO_MIRROR_SELECT=1
@@ -28,8 +28,8 @@ if [[ "${1:-}" == --in-container ]]; then
   export PYTHONDONTWRITEBYTECODE=1
   [[ -e /bin/sh ]] || ln -s "$PREFIX/bin/sh" /bin/sh
   "$HERMES_PROBE_PYTHON" -c 'import sys,platform; assert sys.platform=="android"; assert platform.machine() in ("aarch64","arm64"); assert sys.version_info[:2]==(3,14); print(sys.version)'
-  if [[ "$group" == browser ]]; then
-    bash /probes/scripts/compatibility_probe_browser.sh --source /source --out /out
+  if [[ "$group" == browser || "$group" == desktop ]]; then
+    bash "/probes/scripts/compatibility_probe_${group}.sh" --source /source --out /out
     exit 0
   fi
 
@@ -77,7 +77,7 @@ fi
 
 [[ $# == 3 ]] || { echo "usage: $0 GROUP PATCHED_SOURCE OUT" >&2; exit 2; }
 group="$1"
-case "$group" in uvloop|matrix|nemo|browser) ;; *) echo "Unknown probe group: $group" >&2; exit 2;; esac
+case "$group" in uvloop|matrix|nemo|browser|desktop) ;; *) echo "Unknown probe group: $group" >&2; exit 2;; esac
 case "$(uname -m)" in aarch64|arm64) ;; *) echo "Native ARM runner required" >&2; exit 1;; esac
 source="$(realpath "$2")"
 mkdir -p "$3"
@@ -122,7 +122,9 @@ chmod 0777 "$out"
 chmod a+r "$deb"
 docker pull "$TERMUX_IMAGE"
 test "$(docker image inspect --format '{{.Architecture}}' "$TERMUX_IMAGE")" = arm64
-docker run --rm --platform linux/arm64 --user root --tmpfs /bin \
+container_user=root
+if [[ "$group" == browser || "$group" == desktop ]]; then container_user=1000:1000; fi
+docker run --rm --platform linux/arm64 --user "$container_user" --tmpfs /bin:mode=1777 \
   -v "$source:/source:ro" -v "$packaging:/probes:ro" \
   -v "$deb:/baseline/package.deb:ro" -v "$out:/out" \
   "$TERMUX_IMAGE" bash /probes/scripts/probe_native_compatibility.sh --in-container "$group" \

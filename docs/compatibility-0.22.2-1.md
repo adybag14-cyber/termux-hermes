@@ -65,10 +65,10 @@ result is [compatibility-0.22.2-1.json](../audit/compatibility-0.22.2-1.json).
 
 | Capability | Released restriction and actual cause | Proposed next-stable remedy | Current evidence |
 | --- | --- | --- | --- |
-| uvloop event-loop acceleration | Android marker excludes uvloop 0.22.1. Its setup backend runs shell/configure commands assuming a conventional Unix shell path; the old preconfigure workaround is overwritten by setup.py's later copy/configure sequence. Standard asyncio remains available. | Verify the exact locked source archive, patch the commands actually executed to use Termux's `CONFIG_SHELL`, and admit Android aarch64. Supply the resulting wheel through the reusable bundle cache. | Source-hook behavioral tests pass; native ARM TCP/task/shutdown probe pending. |
-| Matrix messaging with encryption | Five requirements and the PM extra gate admit Linux only. The encrypted backend's python-olm 3.2.16 builds an older vendored libolm with CMake compatibility assumptions. | Preserve bundled static libolm, set the CMake compatibility policy as in Termux's libolm recipe, and admit Android aarch64 for the complete encrypted dependency group. Bundle reusable native wheels. | Source-hook and closure tests pass; native Olm/Megolm, AES, asyncpg, HTTP and SQLite probes pending. |
-| Nemo Relay | Core platform marker excludes Android. The 0.10.0 Rust source unconditionally requests a vendored protoc binary whose platform table lacks Android, ignoring the available system `PROTOC`. The old builder also silently skipped Nemo if it reached the build list. | Verify the locked sdist, honor the system protoc executable, remove the silent omission paths, and require Nemo in completeness checks. | Source preparation and missing-wheel regression pass; inspected native API smoke passes on Windows; Android Rust/native probe pending. |
-| NeuTTS local speech engine | Locked NeuTTS 1.4.1 requires Python >=3.10 and <3.14. Its published release has platform wheels but **no source distribution**; the closure also needs native Torch/Torchaudio, codec and inference libraries. This package uses Python 3.14.6 on Bionic. | Retain the honest exclusion. A compatible upstream build/source release and complete Android native dependency closure, or a separately managed supported runtime, is needed before enabling it. | Exact PyPI release metadata inspected; merely removing the Python marker cannot produce a compatible engine. |
+| uvloop event-loop acceleration | Android marker excludes uvloop 0.22.1. Its setup backend runs shell/configure commands assuming a conventional Unix shell path; the old preconfigure workaround is overwritten by setup.py's later copy/configure sequence. Standard asyncio remains available. | Verify the exact locked source archive, patch the commands actually executed to use Termux's `CONFIG_SHELL`, and admit Android aarch64. Supply the resulting wheel through the reusable bundle cache. | Native ARM TCP/task/shutdown probe passed in run 39037495656. The artifact-upload permission defect is fixed; repeat evidence capture is pending. |
+| Matrix messaging with encryption | Five requirements and the PM extra gate admit Linux only. The encrypted backend's python-olm 3.2.16 builds an older vendored libolm with CMake compatibility assumptions and an incorrectly const-qualified pointer rejected by current Clang. | Preserve bundled static libolm, apply Termux's CMake policy and const-pointer corrections, and admit Android aarch64 for the complete encrypted dependency group. Bundle reusable native wheels. | Source-hook and closure tests pass; native Olm/Megolm, AES, asyncpg, HTTP and SQLite probes pending. |
+| Nemo Relay | Core platform marker excludes Android. The 0.10.0 Rust source unconditionally requests a vendored protoc binary whose platform table lacks Android, ignoring the available system `PROTOC`. The old builder also silently skipped Nemo if it reached the build list. | Verify the locked sdist, honor the system protoc executable, remove the silent omission paths, and require Nemo in completeness checks. | Android Rust build and native behavior probe passed in run 39037495656. The artifact-upload permission defect is fixed; repeat evidence capture is pending. |
+| NeuTTS local speech engine | Locked NeuTTS 1.4.1 requires Python >=3.10 and <3.14. Its published release has platform wheels but **no source distribution**; the closure also needs native Torch/Torchaudio, codec and inference libraries. This package uses Python 3.14.6 on Bionic. | Retain the honest exclusion. Public upstream source exists, but enabling this locked engine requires a supported Python/runtime arrangement plus the complete native Torch, codec and inference closure. No speculative marker-only enablement is made. | Exact PyPI release metadata inspected; merely removing the Python marker cannot produce a compatible engine. |
 
 The uvloop, Olm and Nemo adapters reject unexpected source bytes or changed build
 hooks. They do not bypass checksums or substitute unpinned upstream branches.
@@ -88,10 +88,10 @@ The reviewed exact source digests are also embedded in the preparation helpers.
 | Capability | Published behavior | Preparation status |
 | --- | --- | --- |
 | Local managed browser | PM has no Bionic artifact for either AgentBrowser or Chromium. Remote browser/CDP paths are distinct and can remain usable. | Probe the locked static musl ARM64 AgentBrowser executable with official Termux Chromium, including real navigation, interaction, and screenshot. Do not declare Chromium managed until its binary/library closure is accounted for. |
-| Default native computer use | Default CUA driver rejects Android. Having the MCP dependency does not supply this native backend. | Inspect the driver and display/input requirements before proposing a bounded Android port. |
-| Bot Desktop | Virtual display host is Linux-only. | Inspect its window-system and process requirements. A remote Linux desktop is a different backend from a local Android desktop. |
+| Default native computer use | Default CUA driver rejects Android. Having the MCP dependency does not supply this native backend. | The locked driver is a glibc Linux/X11/Wayland executable, not an Android UI backend. Fixed the separate routing bug that rejected Android before evaluating a configured remote Linux provider. Remote availability regressions pass; native phone UI control still needs an Android backend. |
+| Bot Desktop | Virtual display host is Linux-only. | Added a local Termux Xvnc/Xfce adapter, prefix-aware runtime paths and screenshot capture through scrot. Twenty focused desktop/remote-provider and existing regression tests pass; native user-owned desktop probe pending. |
 | Managed gateway service | Service install/start/uninstall paths reject Termux/APT provenance. Manual foreground/background gateway paths remain available. | Investigate a Termux runit adapter with native service lifecycle semantics. |
-| Recorder silence auto-stop | The Termux:API recorder does not provide the sounddevice VAD/silence path. Manual stop remains available. | Investigate the recorder API limitations. Maximum duration is a separate defect and has a tested fix below. |
+| Recorder silence auto-stop | The Termux:API recorder does not provide the sounddevice VAD/silence path. Manual stop remains available. | Added explicit auto, sounddevice and termux-api capture selection with accurate diagnostics. The PCM path retains the existing VAD implementation. Native NumPy/audio provisioning and physical microphone proof remain pending; Termux:API itself has no PCM stream for this VAD path. |
 
 Source guards: upstream [pm/packages.py](https://github.com/NousResearch/hermes-agent/blob/d923a5eb487a17c0a68801bba9ef0f56c81040a8/pm/packages.py),
 [CUA backend](https://github.com/NousResearch/hermes-agent/blob/d923a5eb487a17c0a68801bba9ef0f56c81040a8/tools/computer_use/cua_backend.py),
@@ -129,12 +129,24 @@ construct a new environment and rebuild the whole native core graph on the phone
 The Termux source adaptations run during packaging; normal lazy PM installation
 does not automatically apply those adaptations.
 
-The preparation is adding a reusable wheel catalog owned by PM. Reuse must bind
+The preparation now includes a reusable wheel catalog owned by PM. Reuse binds
 the exact wheel hash, package version, and original registry/Git source identity.
 A changed lock source must never reuse an unrelated wheel with the same version.
 The frozen current selection determines which wheels apply; optional SDKs still
-use the ordinary resolver and their exact lock entries. A cold-cache regression
-must prove that the core native wheels survive installing an additional feature.
+use the ordinary resolver and their exact lock entries. A real isolated-index regression proves that an intentionally unbuildable source dependency can be preserved from its verified wheel while an additional SDK installs with an empty cache.
+
+The package now carries its wheelhouse and a native-verified selection receipt.
+The receipt binds the actual Android target, seven selected extras, frozen input
+hashes and catalog digest. The PM environment stamp includes that digest, so
+corrected wheel bytes invalidate an older optional environment even when upstream
+versions stay the same. Receipt, stamp and existing baked-selection tests pass
+(22 tests). A candidate-only workflow builds a same-version disposable package and
+checks upgrade preservation plus a real cold-cache optional install without a
+native compiler. That complete-package proof is pending.
+
+The explicit capture-backend changes passed 101 voice-related tests, with 31
+existing Linux/macOS cases skipped on the Windows host. This includes all 14 new
+selector and diagnostic tests; it does not certify Android microphone hardware.
 
 This also provides the installation path for the proposed uvloop and Matrix
 wheels. Removing their platform markers without shipping reusable native wheels
@@ -177,7 +189,7 @@ execution still needs a host that supports Docker.
 ## Validation and release boundary
 
 [Probe next-stable Termux compatibility](../.github/workflows/compatibility-probes.yml)
-runs four native ARM lanes against the immutable released package and the proposed
+runs five native ARM lanes against the immutable released package and the proposed
 source patch. It has read-only repository permissions and uploads candidate
 diagnostics/wheels only. It does not construct or publish a new release.
 
@@ -189,6 +201,11 @@ not accidentally conceal a missing package runtime dependency.
 Passing a component probe is recorded as **candidate-built**. It does not certify
 the complete next-stable package, optional-install lifecycle, external account
 credentials, or physical device permissions. Those are separate validation gates.
+
+[Validate next-stable Termux candidate](../.github/workflows/next-stable-candidate.yml)
+also builds a disposable candidate package as an Actions artifact. It keeps the
+existing version for upgrade testing and has no release or APT publication steps.
+Its package is deliberately separate from the release-promotion artifact.
 
 The changes live in [patches/next-stable/compatibility.patch](../patches/next-stable/compatibility.patch),
 applied after the four released v0.22.2 packaging patches. The normal release

@@ -117,12 +117,12 @@
     {
       "id": "native-cua",
       "baseline": "Default local CUA driver does not support Android; MCP dependency alone is not a native backend.",
-      "status": "port_feasibility_review"
+      "status": "remote_routing_fixed_native_android_backend_unavailable"
     },
     {
       "id": "bot-desktop",
       "baseline": "Linux virtual desktop host only.",
-      "status": "port_feasibility_review"
+      "status": "adapter_regressions_passed_native_probe_pending"
     },
     {
       "id": "gateway-service",
@@ -132,7 +132,7 @@
     {
       "id": "recorder-silence-vad",
       "baseline": "Termux:API recorder does not provide the sounddevice silence/VAD auto-stop path.",
-      "status": "port_feasibility_review"
+      "status": "explicit_pcm_backend_selection_tested_native_audio_provisioning_pending"
     }
   ],
   "adjacent_defects": [
@@ -150,7 +150,7 @@
     },
     {
       "id": "optional-install-cold-cache",
-      "status": "fix_in_progress"
+      "status": "real_pm_fixture_passed_complete_candidate_pending"
     }
   ],
   "unbundled_frontends": [
@@ -163,5 +163,37 @@
     "main_merge": false,
     "installer_pin_change": false,
     "scope": "preparation branch and candidate-only validation for the next stable version"
+  },
+  "preparation": {
+    "selected_extras": [
+      "acp",
+      "cron",
+      "matrix",
+      "mcp",
+      "telegram",
+      "termux",
+      "uvloop"
+    ],
+    "dependency_probes": {
+      "uvloop": "native_behavior_passed_artifact_permissions_fixed_repeat_pending",
+      "matrix": "cmake_and_clang_source_fixes_prepared_native_repeat_pending",
+      "nemo-relay": "native_build_and_behavior_passed_artifact_permissions_fixed_repeat_pending",
+      "neutts": "blocked_by_python_and_native_ml_runtime_closure"
+    },
+    "initial_native_run": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39037495656",
+    "pm_selection_stamp_catalog_tests": {
+      "passed": 22,
+      "failed": 0
+    },
+    "voice_regressions": {
+      "passed": 101,
+      "skipped_host_specific": 31,
+      "failed": 0
+    },
+    "desktop_and_remote_cua_regressions": {
+      "passed": 20,
+      "failed": 0
+    },
+    "candidate_package": "pending; Actions artifact only, never a release"
   }
 }

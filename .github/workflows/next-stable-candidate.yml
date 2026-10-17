@@ -1,0 +1,208 @@
+name: Validate next-stable Termux candidate (no release)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/next-stable-candidate.yml"
+      - "patches/next-stable/**"
+      - "scripts/check_next_stable_candidate.sh"
+      - "scripts/check_next_stable_lifecycle.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: termux-next-stable-candidate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 180
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout Termux packaging repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Read the reviewed release pins
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          data = json.loads(Path("manifest/release.json").read_text())
+          assert re.fullmatch(r"[a-f0-9]{40}", data["source_commit"])
+          assert re.fullmatch(r"v\d+\.\d+\.\d+", data["source_tag"])
+          assert data["package_version"] == data["source_tag"][1:] + "-1"
+          assert data["feature_profile"] == "termux"
+          assert re.fullmatch(r"termux/termux-docker@sha256:[a-f0-9]{64}", data["termux_image"])
+          with open(os.environ["GITHUB_ENV"], "a") as stream:
+              for name, key in (("HERMES_COMMIT", "source_commit"), ("HERMES_TAG", "source_tag"),
+                                ("PACKAGE_VERSION", "package_version"), ("TERMUX_IMAGE", "termux_image")):
+                  stream.write(f"{name}={data[key]}\n")
+          PY
+
+      - name: Checkout exact upstream release source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: NousResearch/hermes-agent
+          ref: ${{ env.HERMES_COMMIT }}
+          path: hermes-source
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Verify immutable source and apply reviewed build adaptations
+        run: |
+          set -Eeuo pipefail
+          test "$(git -C hermes-source rev-parse HEAD)" = "$HERMES_COMMIT"
+          git -C hermes-source fetch --depth=1 origin "refs/tags/$HERMES_TAG:refs/tags/$HERMES_TAG"
+          test "$(git -C hermes-source rev-parse "$HERMES_TAG^{commit}")" = "$HERMES_COMMIT"
+          gh release view "$HERMES_TAG" --repo NousResearch/hermes-agent --json tagName,isDraft,isPrerelease \
+            --jq 'select(.isDraft == false and .isPrerelease == false) | .tagName' | grep -Fx "$HERMES_TAG"
+          for patch in "$GITHUB_WORKSPACE"/patches/upstream-v0.22.2-*.patch; do
+            git -C hermes-source apply --check "$patch"
+            git -C hermes-source apply "$patch"
+          done
+          git -C hermes-source apply --check "$GITHUB_WORKSPACE/patches/next-stable/compatibility.patch"
+          git -C hermes-source apply "$GITHUB_WORKSPACE/patches/next-stable/compatibility.patch"
+          git -C hermes-source diff --check
+          test "$(python3 -c 'import json; print(json.load(open("hermes-source/pm/lock.json"))["packages"]["termux-docker"]["version"])')" = "${TERMUX_IMAGE#*@}"
+          case "$(uname -m)" in aarch64|arm64) ;; *) exit 1 ;; esac
+          docker pull "$TERMUX_IMAGE"
+          test "$(docker image inspect --format '{{.Architecture}}' "$TERMUX_IMAGE")" = arm64
+
+      - name: Set up the upstream locked host toolchain
+        uses: ./hermes-source/.github/actions/setup-pm
+        with:
+          toolchain: all
+          cache: false
+          cache-python: false
+          cache-node: false
+
+      - name: Restore verified binary inputs
+        id: payload-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            hermes-source/termux-build/payload/python
+            hermes-source/termux-build/payload/node
+            hermes-source/termux-build/payload/uv
+            hermes-source/termux-build/payload/npm
+            hermes-source/termux-build/payload/ffmpeg
+            hermes-source/termux-build/payload/ripgrep
+            hermes-source/termux-build/payload/runtime-libs
+          key: termux314-payload-${{ hashFiles('hermes-source/pm/**', 'hermes-source/scripts/termux/*.py', 'patches/*.patch', '!hermes-source/**/__pycache__/**') }}
+
+      - name: Stage the complete pinned Termux runtime
+        working-directory: hermes-source
+        run: |
+          set -Eeuo pipefail
+          for tool in python node uv npm ffmpeg ripgrep; do
+            bash scripts/termux/termux_pkg_build.sh "$tool" "$tool" termux-build/payload
+          done
+          python3 scripts/termux/stage_runtime_libs.py termux-build/payload
+
+      - name: Save verified binary inputs
+        if: success() && steps.payload-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            hermes-source/termux-build/payload/python
+            hermes-source/termux-build/payload/node
+            hermes-source/termux-build/payload/uv
+            hermes-source/termux-build/payload/npm
+            hermes-source/termux-build/payload/ffmpeg
+            hermes-source/termux-build/payload/ripgrep
+            hermes-source/termux-build/payload/runtime-libs
+          key: ${{ steps.payload-cache.outputs.cache-primary-key }}
+
+      - name: Restore the native wheelhouse
+        id: wheel-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            hermes-source/termux-build/payload/wheelhouse
+            hermes-source/termux-build/payload/index.json
+            hermes-source/termux-build/payload/SHA256SUMS
+            hermes-source/termux-build/payload/.work/resolved.txt
+            hermes-source/termux-build/payload/.work/build_set.txt
+          key: termux314-wheels-${{ hashFiles('hermes-source/uv.lock', 'hermes-source/pyproject.toml', 'hermes-source/pm/**', 'hermes-source/scripts/termux/**', 'patches/*.patch', '!hermes-source/**/__pycache__/**') }}
+
+      - name: Build all Termux profile dependencies with the bundled Python
+        working-directory: hermes-source
+        run: |
+          bash scripts/termux/termux_build.sh --repo . \
+            --tag "$HERMES_TAG" --release-commit "$HERMES_COMMIT" \
+            --out termux-build/payload
+
+      - name: Save the verified native wheelhouse
+        if: success() && steps.wheel-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            hermes-source/termux-build/payload/wheelhouse
+            hermes-source/termux-build/payload/index.json
+            hermes-source/termux-build/payload/SHA256SUMS
+            hermes-source/termux-build/payload/.work/resolved.txt
+            hermes-source/termux-build/payload/.work/build_set.txt
+          key: ${{ steps.wheel-cache.outputs.cache-primary-key }}
+
+      - name: Build the terminal UI and validate the installed bundle offline
+        working-directory: hermes-source
+        run: |
+          python3 scripts/termux/build.py --repo . \
+            --tag "$HERMES_TAG" --release-commit "$HERMES_COMMIT" \
+            --payload termux-build/payload --out termux-build/deb
+
+      - name: Validate published-package upgrade and optional install with an empty cache
+        run: |
+          bash scripts/check_next_stable_candidate.sh \
+            "$GITHUB_WORKSPACE/hermes-source/termux-build/deb/hermes-agent_${PACKAGE_VERSION}_aarch64.deb" \
+            "$GITHUB_WORKSPACE/next-stable-evidence"
+
+      - name: Record the candidate identity without changing release pins
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          out = Path("next-stable-evidence")
+          out.mkdir(exist_ok=True)
+          package, = Path("hermes-source/termux-build/deb").glob("hermes-agent_*.deb")
+          patches = sorted(Path("patches").glob("upstream-v0.22.2-*.patch")) + [Path("patches/next-stable/compatibility.patch")]
+          data = {
+              "purpose": "next-stable compatibility candidate; do not publish",
+              "published": False, "version_bumped": False,
+              "package": package.name, "package_sha256": hashlib.sha256(package.read_bytes()).hexdigest(),
+              "packaging_commit": os.environ["GITHUB_SHA"],
+              "upstream_commit": os.environ["HERMES_COMMIT"], "upstream_tag": os.environ["HERMES_TAG"],
+              "patches": {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in patches},
+          }
+          (out / "CANDIDATE-IDENTITY.json").write_text(json.dumps(data, indent=2) + "\n")
+          PY
+
+      - name: Preserve the candidate package and completed lifecycle evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: hermes-termux-next-stable-candidate
+          path: |
+            hermes-source/termux-build/deb/hermes-agent_*.deb
+            next-stable-evidence/
+            hermes-source/termux-build/payload/.work/venv-selection.json
+            hermes-source/termux-build/payload/.work/selected-features.txt
+          if-no-files-found: warn
+          compression-level: 0
+
+      - name: Retain native build diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: hermes-next-stable-build-diagnostics
+          path: |
+            hermes-source/termux-build/payload/.work/resolved.txt
+            hermes-source/termux-build/payload/.work/build_set.txt
+            hermes-source/termux-build/payload/index.json
+          if-no-files-found: ignore
