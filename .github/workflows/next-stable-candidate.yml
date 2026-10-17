@@ -152,6 +152,9 @@ jobs:
             hermes-source/termux-build/payload/.work/resolved.txt
             hermes-source/termux-build/payload/.work/build_set.txt
           key: termux314-wheels-${{ hashFiles('hermes-source/uv.lock', 'hermes-source/pyproject.toml', 'hermes-source/pm/**', 'hermes-source/scripts/termux/**', 'patches/*.patch', '!hermes-source/**/__pycache__/**') }}
+          # The source-side manifest still verifies every build input and wheel hash.
+          restore-keys: |
+            termux314-wheels-
 
       - name: Build all Termux profile dependencies with the bundled Python
         working-directory: hermes-source

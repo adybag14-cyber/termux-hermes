@@ -2197,10 +2197,16 @@ index 00000000..d8de3e61
 +        stream.write(data)
 +    return extract(archive, work / "source"), {}
 diff --git a/scripts/termux/payload_facts.py b/scripts/termux/payload_facts.py
-index d50605b6..0ca1d0d2 100644
+index d50605b6..6d43ff76 100644
 --- a/scripts/termux/payload_facts.py
 +++ b/scripts/termux/payload_facts.py
-@@ -9,8 +9,11 @@ import sys
+@@ -4,13 +4,17 @@ from __future__ import annotations
+ import argparse
+ import json
+ from pathlib import Path
++import subprocess
+ import sys
+ 
  sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
  
  
@@ -2214,7 +2220,7 @@ index d50605b6..0ca1d0d2 100644
      from pm.features import write_features
      from pm.registry import get_package
      from scripts.bundles.payload import record_tools
-@@ -18,7 +21,8 @@ def write_facts(payload: Path, lock_path: Path, build_set: Path, tui: Path) -> N
+@@ -18,7 +22,8 @@ def write_facts(payload: Path, lock_path: Path, build_set: Path, tui: Path) -> N
      from scripts.build.inputs import AgentInputs, RESOURCE_ENV, dependency_site
  
      payload = payload.resolve()
@@ -2224,7 +2230,7 @@ index d50605b6..0ca1d0d2 100644
      record_tools(payload, lock_path, target, {name: name for name in ("python", "node", "uv", "npm", "ffmpeg", "ripgrep")})
      natives = [line.strip() for line in build_set.read_text(encoding="utf-8-sig").splitlines() if line.strip()]
      (payload / "native-wheels.json").write_text(json.dumps(natives) + "\n", encoding="utf-8")
-@@ -28,15 +32,25 @@ def write_facts(payload: Path, lock_path: Path, build_set: Path, tui: Path) -> N
+@@ -28,21 +33,43 @@ def write_facts(payload: Path, lock_path: Path, build_set: Path, tui: Path) -> N
      if version is None or python is None:
          raise ValueError("bionic Python pin/executable missing")
      repo = payload / "app"
@@ -2252,7 +2258,16 @@ index d50605b6..0ca1d0d2 100644
  
  
  if __name__ == "__main__":
-@@ -44,5 +58,8 @@ if __name__ == "__main__":
++    from pm.runtime import is_runtime, runtime_command, runtime_environment
++
++    # Host setup provides Python, while catalog validation needs PM's locked dependencies.
++    if not is_runtime():
++        raise SystemExit(subprocess.run(
++            runtime_command(Path(__file__).resolve(), sys.argv[1:]),
++            env=runtime_environment(), check=False,
++        ).returncode)
++
+     parser = argparse.ArgumentParser(description=__doc__)
      parser.add_argument("payload", type=Path)
      parser.add_argument("build_set", type=Path)
      parser.add_argument("--tui-product", type=Path, required=True)
@@ -3255,6 +3270,166 @@ index 745c55fd..6c15e701 100644
          wheel.unlink()
      with pytest.raises(InstallError):
          build_wheels.wheelhouse_gates(resolved, wheels, ["native-probe"])
+diff --git a/tests/scripts/test_termux_agent_assembly.py b/tests/scripts/test_termux_agent_assembly.py
+index b2b12c9f..d32d43ef 100644
+--- a/tests/scripts/test_termux_agent_assembly.py
++++ b/tests/scripts/test_termux_agent_assembly.py
+@@ -1,15 +1,27 @@
+ """Bionic assembly consumes prepared bytes without running foreign binaries."""
++from __future__ import annotations
++
++import hashlib
+ import json
++import os
+ from pathlib import Path
+ import shutil
++import subprocess
++import sys
++import zipfile
++
++import pytest
+ 
+ from scripts.build.inputs import RESOURCE_ENV, dependency_site
+ from scripts.termux.payload_facts import write_facts
+ 
+ 
+-def test_bionic_facts_and_agent_keep_fixed_prefix_and_tui_only(tmp_path):
+-    from pm.lock import Lockfile, Facts
++@pytest.fixture
++def prepared_payload(tmp_path):
++    from pm.bundled_wheels import write_catalog
++    from pm.lock import Lockfile
+     from pm.registry import get_package
++    from scripts.termux.feature_profile import BUNDLED_EXTRAS
+ 
+     payload = tmp_path / "payload"
+     repo = payload / "app"
+@@ -33,18 +45,122 @@ def test_bionic_facts_and_agent_keep_fixed_prefix_and_tui_only(tmp_path):
+     pm = payload / "pm-runtime"
+     (pm / "deps").mkdir(parents=True)
+     (pm / "pm-runtime.json").write_text(json.dumps({"python": "../" + python.relative_to(payload).as_posix(), "sitePackages": "deps"}), encoding="utf-8")
+-    tui = tmp_path / "tui-product"
++    tui = tmp_path / "tui product"
+     (tui / "dist").mkdir(parents=True)
+     (tui / "dist/entry.js").write_text("built", encoding="utf-8")
+     (tui / "package.json").write_text('{"type":"module"}', encoding="utf-8")
+     build_set = tmp_path / "build-set.txt"
+     build_set.write_bytes(b"\xef\xbb\xbfnative-fixture\n")
+-    write_facts(payload, lock, build_set, tui)
++    (repo / "uv.lock").write_text(
++        '[[package]]\nname="native-fixture"\nversion="1.0"\n'
++        'source={registry="https://pypi.org/simple"}\n'
++        'sdist={url="https://example.invalid/native-fixture-1.0.tar.gz",hash="sha256:'
++        + "b" * 64 + '"}\n', encoding="utf-8",
++    )
++    (repo / "pm/uv.lock").write_text("package=[]\n", encoding="utf-8")
++    wheelhouse = payload / "wheelhouse"
++    wheelhouse.mkdir()
++    with zipfile.ZipFile(wheelhouse / "native_fixture-1.0-py3-none-any.whl", "w") as wheel:
++        wheel.writestr("native_fixture-1.0.dist-info/METADATA",
++                       "Metadata-Version: 2.1\nName: native-fixture\nVersion: 1.0\n")
++    requirements = tmp_path / "requirements.txt"
++    requirements.write_text("native-fixture==1.0\n", encoding="utf-8")
++    receipt = {
++        "schema": 1, "target": target, "extras": list(BUNDLED_EXTRAS), "stamp": "a" * 64,
++        "bundled_wheels": write_catalog(payload, wheelhouse=wheelhouse,
++                                       lock_paths=(repo / "uv.lock", repo / "pm/uv.lock")),
++        **{field: hashlib.sha256(path.read_bytes()).hexdigest() for field, path in (
++            ("uv_lock_sha256", repo / "uv.lock"),
++            ("pm_lock_sha256", lock),
++            ("requirements_sha256", requirements),
++        )},
++    }
++    selection = tmp_path / "venv-selection.json"
++    selection.write_text(json.dumps(receipt), encoding="utf-8")
++    return payload, lock, build_set, tui, selection, requirements
++
++
++def test_bionic_facts_and_agent_keep_fixed_prefix_and_tui_only(prepared_payload):
++    from pm.lock import Facts, Lockfile
++
++    payload, lock, build_set, tui, selection, requirements = prepared_payload
++    write_facts(*prepared_payload)
++    repo = payload / "app"
++    target = "linux-arm64-bionic"
++    site = dependency_site(payload / "venv", Lockfile(lock).version("python"), target)
+     manifest = json.loads((payload / "manifest.json").read_text())
+     assert manifest["runtime"]["commands"] == {"probe": "bin/probe"}
+     assert manifest["runtime"]["sitePackages"] == site.relative_to(payload).as_posix()
+     assert (repo / "hermes_cli/tui_dist/entry.js").read_text() == "built"
+     assert not (repo / "hermes_cli/web_dist").exists()
+     assert json.loads((payload / "native-wheels.json").read_text()) == ["native-fixture"]
++    receipt = json.loads(selection.read_text(encoding="utf-8"))
++    assert manifest["bundled_wheels"] == receipt["bundled_wheels"]
+     facts = Facts(payload / "tools/facts.json", strict=True)
+-    assert all(facts.get(name)["target"] == target for name in tools)
++    assert all(facts.get(name)["target"] == target
++               for name in ("python", "node", "uv", "npm", "ffmpeg", "ripgrep"))
++    assert facts.get("venv") == {"stamp": receipt["stamp"], "extras": receipt["extras"]}
++
++
++@pytest.mark.parametrize("corrupt_catalog", [False, True])
++def test_bare_host_hands_off_before_catalog_import_and_preserves_child_failure(
++        prepared_payload, tmp_path, corrupt_catalog):
++    payload, _lock, build_set, tui, selection, requirements = prepared_payload
++    if corrupt_catalog:
++        receipt = json.loads(selection.read_text(encoding="utf-8"))
++        receipt["bundled_wheels"]["sha256"] = "0" * 64
++        selection.write_text(json.dumps(receipt), encoding="utf-8")
++    source = Path(__file__).resolve().parents[2]
++    entry = source / "scripts/termux/payload_facts.py"
++    entered = tmp_path / "manager-entered.json"
++    # Exercise a real bare host and a real PM-provisioned interpreter child. Only
++    # the manager acquisition seam is substituted, avoiding network provisioning.
++    worker = (
++        "import json, os, runpy, sys\n"
++        "from pathlib import Path\n"
++        "import packaging\n"
++        "assert sys.flags.isolated and not sys.flags.no_site\n"
++        "assert 'PYTHONPATH' not in os.environ\n"
++        "source, entered, script, *args = sys.argv[1:]\n"
++        "sys.path.insert(0, source)\n"
++        "from pm import runtime\n"
++        "runtime.is_runtime = lambda: True\n"
++        "Path(entered).write_text(json.dumps(args), encoding='utf-8')\n"
++        "sys.argv = [script, *args]\n"
++        "try:\n"
++        "    runpy.run_path(script, run_name='__main__')\n"
++        "except ValueError as exc:\n"
++        "    print(str(exc), file=sys.stderr)\n"
++        "    sys.exit(17)\n"
++    )
++    bootstrap = (
++        "import importlib.util, runpy, sys\n"
++        "from pathlib import Path\n"
++        "assert sys.flags.isolated and sys.flags.no_site\n"
++        "assert importlib.util.find_spec('packaging') is None\n"
++        "source, entered, worker, script, *args = sys.argv[1:]\n"
++        "sys.path.insert(0, source)\n"
++        "from pm import runtime\n"
++        "assert not runtime.is_runtime()\n"
++        "def command(entry, argv):\n"
++        "    assert Path(entry) == Path(script) and list(argv) == args\n"
++        "    return [sys.executable, '-I', '-B', '-c', worker, source, entered, str(entry), *argv]\n"
++        "runtime.runtime_command = command\n"
++        "sys.argv = [script, *args]\n"
++        "runpy.run_path(script, run_name='__main__')\n"
++    )
++    args = [str(payload), str(build_set), "--tui-product", str(tui),
++            "--venv-selection", str(selection), "--requirements", str(requirements)]
++    env = {**os.environ, "PYTHONPATH": str(tmp_path / "foreign-imports")}
++    result = subprocess.run(
++        [sys.executable, "-I", "-S", "-B", "-c", bootstrap,
++         str(source), str(entered), worker, str(entry), *args],
++        env=env, capture_output=True, text=True, check=False, timeout=30,
++    )
++    assert result.returncode == (17 if corrupt_catalog else 0), result.stderr
++    assert json.loads(entered.read_text(encoding="utf-8")) == args
++    if corrupt_catalog:
++        assert "native bundled wheel catalog changed during assembly" in result.stderr
++    else:
++        manifest = json.loads((payload / "manifest.json").read_text(encoding="utf-8"))
++        assert manifest["bundled_wheels"] == json.loads(selection.read_text())["bundled_wheels"]
 diff --git a/tests/scripts/test_termux_compat_sources.py b/tests/scripts/test_termux_compat_sources.py
 new file mode 100644
 index 00000000..3cc26dd9

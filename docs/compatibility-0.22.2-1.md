@@ -34,6 +34,8 @@ before that graph is installed.
 | Upstream release | [v0.22.2](https://github.com/NousResearch/hermes-agent/tree/d923a5eb487a17c0a68801bba9ef0f56c81040a8) |
 | Exact upstream commit | `d923a5eb487a17c0a68801bba9ef0f56c81040a8` |
 | Packaging main baseline | `91e096aec63aafd55700675e07148285522dcc70` |
+| Package build commit | `25e82b34c019bcac4127d4519d5498e73de87c1d` |
+| Release tag commit | `7c272cfeeb6cbb387d9993acad3130a258b95fdb` |
 | Runtime | Bundled CPython 3.14.6; `cp314`; `android_24_arm64_v8a` |
 | Explicit selection | `acp`, `cron`, `mcp`, `telegram`, `termux` |
 | Installed / Android-admitted distributions | 81 / 81; zero missing; zero version mismatches |
@@ -41,6 +43,10 @@ before that graph is installed.
 | Complete resolved export | 95 rows; 14 excluded by target markers |
 | Reusable dependency material in package | No `uv-cache/`, `wheelhouse/`, or `.whl` files |
 | PM selection receipt | Explicit feature list exists; `tools/facts.json` lacks venv state |
+
+The package build, release tag and subsequent packaging main are distinct commits;
+[release identity evidence](../audit/release-boundary-20261017.json) records each
+against the unchanged published asset.
 
 The package's `pyproject.toml` and `uv.lock` match this upstream release.
 The released adapters change packaging/build behavior. The census compares
