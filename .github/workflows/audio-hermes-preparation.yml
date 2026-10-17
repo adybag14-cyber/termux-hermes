@@ -12,6 +12,7 @@ on:
       - 'scripts/fetch_compatibility_candidate.py'
       - 'patches/next-stable/audio-readiness.patch'
       - 'patches/next-stable/audio-pm-marker-bytecode.patch'
+      - 'patches/next-stable/sounddevice-android-discovery.patch'
       - 'tests/test_audio_hermes_preparation.py'
 
 permissions:
@@ -60,6 +61,7 @@ jobs:
               "scripts/fetch_compatibility_candidate.py",
               "patches/next-stable/audio-readiness.patch",
               "patches/next-stable/audio-pm-marker-bytecode.patch",
+              "patches/next-stable/sounddevice-android-discovery.patch",
           ):
               target = root / name
               target.parent.mkdir(parents=True, exist_ok=True)
@@ -69,7 +71,9 @@ jobs:
           This is an offline reconstruction input bundle for an unpublished experiment.
           It contains the exact main candidate, original 100-wheel catalog, two added
           audio wheels, pinned official PortAudio/OpenSL ES inputs, the reviewed source
-          patches, and canonical PM/launcher preparation code.
+          patches, and canonical PM/launcher preparation code. The original sounddevice
+          wheel is retained as an input; preparation applies the exact Android library
+          discovery patch and records the derived wheel with its original provenance.
 
           On AArch64 Termux at the standard com.termux prefix, unpack this bundle in a
           private app directory. Choose a NEW final output path; existing paths are

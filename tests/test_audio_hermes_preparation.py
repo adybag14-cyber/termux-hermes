@@ -28,15 +28,22 @@ prep = load("audio_preparation_test", "prepare_audio_hermes_environment.py")
 probe = load("audio_probe_test", "compatibility_probe_audio_hermes.py")
 
 
-def catalog_pair():
+def catalog_pair(*, sounddevice_patched=True):
     before = {"wheels": [{"file": f"wheelhouse/item{i}-1-py3-none-any.whl",
                           "name": f"item{i}", "version": "1", "size": 1, "sha256": f"{i:064x}",
                           "source": {"kind": "registry-sdist"}} for i in range(100)]}
     after = copy.deepcopy(before)
     for name in prep.NEW_WHEELS:
         pin = prep.AUDIO_MEMBERS["wheelhouse/" + name]
-        after["wheels"].append({"file": "wheelhouse/" + name, "name": name.split("-")[0],
-                                 "version": name.split("-")[1], "size": pin["bytes"], "sha256": pin["sha256"]})
+        size, digest = (prep.SOUNDDEVICE_WHEEL_AFTER if name == prep.SOUNDDEVICE_FILE and sounddevice_patched
+                        else (pin["bytes"], pin["sha256"]))
+        row = {"file": "wheelhouse/" + name, "name": name.split("-")[0],
+               "version": name.split("-")[1], "size": size, "sha256": digest}
+        if name == prep.SOUNDDEVICE_FILE:
+            row["source"] = copy.deepcopy(prep.SOUNDDEVICE_ORIGIN)
+            row["source_fingerprint"] = hashlib.sha256(
+                json.dumps(row["source"], sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        after["wheels"].append(row)
     return before, after
 
 
@@ -1073,3 +1080,292 @@ def test_orchestrator_failure_keeps_full_trace_and_nonzero_exit(tmp_path, monkey
     assert "Traceback (most recent call last):" in stderr
     assert "RuntimeError: child failed; original raw logs remain authoritative" in stderr
     assert not list(tmp_path.iterdir())
+
+# The unchanged 32 KiB original wheel is a self-contained, pinned input fixture.
+# These tests read code/data and control loader calls; they do not run PortAudio.
+SOUNDDEVICE_FIXTURE = ROOT / "tests/fixtures/audio_sounddevice" / prep.SOUNDDEVICE_FILE
+SOUNDDEVICE_PATCH = ROOT / prep.SOUNDDEVICE_PATCH_RELATIVE
+
+
+def sounddevice_members(raw=None):
+    source = io.BytesIO(raw) if raw is not None else SOUNDDEVICE_FIXTURE
+    with zipfile.ZipFile(source) as archive:
+        return {info.filename: archive.read(info) for info in archive.infolist()}
+
+
+def test_actual_sounddevice_derivative_preserves_original_members_and_full_record():
+    import base64
+    import csv
+
+    original_wheel = SOUNDDEVICE_FIXTURE.read_bytes()
+    original_patch = SOUNDDEVICE_PATCH.read_bytes()
+    first, proof = prep.patched_sounddevice_wheel(SOUNDDEVICE_FIXTURE, SOUNDDEVICE_PATCH)
+    second, repeated = prep.patched_sounddevice_wheel(SOUNDDEVICE_FIXTURE, SOUNDDEVICE_PATCH)
+    assert first == second and proof == repeated
+    assert SOUNDDEVICE_FIXTURE.read_bytes() == original_wheel
+    assert SOUNDDEVICE_PATCH.read_bytes() == original_patch
+    before, after = sounddevice_members(), sounddevice_members(first)
+    assert set(before) == set(after)
+    assert {name for name in before if before[name] != after[name]} == {
+        "sounddevice.py", "sounddevice-0.5.5.dist-info/RECORD",
+    }
+    assert proof["unchanged_member_count"] == 6
+    rows = list(csv.reader(io.StringIO(after["sounddevice-0.5.5.dist-info/RECORD"].decode())))
+    assert len(rows) == len(after) == 8
+    for name, digest, size in rows:
+        if name.endswith("/RECORD"):
+            assert digest == size == ""
+        else:
+            assert int(size) == len(after[name])
+            assert base64.urlsafe_b64decode(digest.removeprefix("sha256=") + "=") == hashlib.sha256(after[name]).digest()
+    assert (len(first), hashlib.sha256(first).hexdigest()) == prep.SOUNDDEVICE_WHEEL_AFTER
+
+
+def test_actual_sounddevice_patch_independently_applies_with_git(tmp_path):
+    import subprocess
+
+    (tmp_path / "sounddevice.py").write_bytes(sounddevice_members()["sounddevice.py"])
+    result = subprocess.run(["git", "apply", "--check", str(SOUNDDEVICE_PATCH)],
+                            cwd=tmp_path, capture_output=True)
+    assert result.returncode == 0, result.stderr.decode()
+    result = subprocess.run(["git", "apply", str(SOUNDDEVICE_PATCH)], cwd=tmp_path, capture_output=True)
+    assert result.returncode == 0, result.stderr.decode()
+    body, _ = prep.patched_sounddevice_wheel(SOUNDDEVICE_FIXTURE, SOUNDDEVICE_PATCH)
+    assert (tmp_path / "sounddevice.py").read_bytes() == sounddevice_members(body)["sounddevice.py"]
+
+
+def loader_observation(source, *, platform="android", system="Android", answers=(None, None, None),
+                       load_error=None, find_error=None):
+    """Execute the real module's complete top-level loading try/except only."""
+    import ast
+    import os
+    from types import SimpleNamespace
+
+    tree = ast.parse(source)
+    block = next(node for node in tree.body
+                 if isinstance(node, ast.Try) and any(
+                     isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute)
+                     and isinstance(call.func.value, ast.Name) and call.func.value.id == "_ffi"
+                     and call.func.attr == "dlopen" for call in ast.walk(node)))
+    calls, loads = [], []
+    answer_iter = iter(answers)
+    handle = object()
+
+    def find_library(name):
+        calls.append(name)
+        if find_error is not None:
+            raise find_error
+        return next(answer_iter)
+
+    def dlopen(name):
+        loads.append(name)
+        if load_error is not None:
+            raise load_error
+        return handle
+
+    namespace = {
+        "_sys": SimpleNamespace(platform=platform),
+        "_platform": SimpleNamespace(system=lambda: system, machine=lambda: "AMD64"),
+        "_os": os, "_find_library": find_library, "_ffi": SimpleNamespace(dlopen=dlopen),
+    }
+    result = {"find": calls, "dlopen": loads}
+    try:
+        exec(compile(ast.Module(body=[block], type_ignores=[]), "<actual-sounddevice-loader>", "exec"), namespace)
+    except Exception as exc:
+        result["error"] = exc
+    else:
+        result["handle_is_loader_result"] = namespace["_lib"] is handle
+    return result
+
+
+def patched_sounddevice_source():
+    body, _ = prep.patched_sounddevice_wheel(SOUNDDEVICE_FIXTURE, SOUNDDEVICE_PATCH)
+    return sounddevice_members(body)["sounddevice.py"]
+
+
+def test_android_resolves_packaged_soname_after_all_original_lookups_fail():
+    result = loader_observation(patched_sounddevice_source())
+    assert len(result["find"]) == 3
+    assert result["find"][0] == "portaudio"
+    assert result["dlopen"] == ["libportaudio.so"]
+    assert result["handle_is_loader_result"] is True
+    original = loader_observation(sounddevice_members()["sounddevice.py"])
+    assert result["find"] == original["find"]
+    assert original["dlopen"] == []
+    assert type(original["error"]) is OSError
+    assert str(original["error"]) == "PortAudio library not found"
+
+
+@pytest.mark.parametrize("found_index", [0, 1, 2])
+@pytest.mark.parametrize("platform,system", [("android", "Android"), ("linux", "Linux"), ("darwin", "Darwin"), ("win32", "Windows")])
+def test_existing_successful_library_discovery_keeps_its_exact_result(found_index, platform, system):
+    answers = [None] * found_index + ["/original/found-portaudio"]
+    before = loader_observation(sounddevice_members()["sounddevice.py"],
+                                platform=platform, system=system, answers=answers)
+    after = loader_observation(patched_sounddevice_source(),
+                               platform=platform, system=system, answers=answers)
+    assert before == after
+    assert after["dlopen"] == ["/original/found-portaudio"]
+    assert after["handle_is_loader_result"] is True
+
+
+@pytest.mark.parametrize("platform", ["linux", "freebsd14", "android-other"])
+def test_unsuccessful_non_android_lookup_retains_original_exception(platform):
+    results = [loader_observation(source, platform=platform, system="Linux")
+               for source in [sounddevice_members()["sounddevice.py"], patched_sounddevice_source()]]
+    assert results[0]["find"] == results[1]["find"]
+    for result in results:
+        assert result["dlopen"] == []
+        assert type(result["error"]) is OSError
+        assert str(result["error"]) == "PortAudio library not found"
+
+
+@pytest.mark.parametrize("where", ["discovery", "loading"])
+def test_android_fallback_preserves_the_actual_failure_object(where):
+    failure = OSError("original native operation failure")
+    kw = {"find_error": failure} if where == "discovery" else {"load_error": failure}
+    result = loader_observation(patched_sounddevice_source(), **kw)
+    assert result["error"] is failure
+    assert result["dlopen"] == ([] if where == "discovery" else ["libportaudio.so"])
+
+
+def test_android_patch_does_not_change_initialization_or_other_module_code():
+    import ast
+
+    trees = [ast.parse(s) for s in [sounddevice_members()["sounddevice.py"], patched_sounddevice_source()]]
+    for tree in trees:
+        tree.body = [node for node in tree.body if not (
+            isinstance(node, ast.Try) and any(
+                isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute)
+                and isinstance(call.func.value, ast.Name) and call.func.value.id == "_ffi"
+                and call.func.attr == "dlopen" for call in ast.walk(node)))]
+    assert ast.dump(trees[0], include_attributes=False) == ast.dump(trees[1], include_attributes=False)
+
+
+@pytest.mark.parametrize("mutation", ["member-missing", "member-extra", "body", "record-duplicate", "record-self", "record-hash"])
+def test_sounddevice_record_rejects_missing_extra_or_changed_content(mutation):
+    import csv
+
+    members = sounddevice_members()
+    record = "sounddevice-0.5.5.dist-info/RECORD"
+    rows = list(csv.reader(io.StringIO(members[record].decode())))
+    if mutation == "member-missing":
+        members.pop("_sounddevice.py")
+    elif mutation == "member-extra":
+        members["unreviewed_native.so"] = b"extra"
+    elif mutation == "body":
+        members["_sounddevice.py"] += b"# changed\n"
+    else:
+        if mutation == "record-duplicate":
+            rows.append(rows[0])
+        elif mutation == "record-self":
+            rows[-1][1] = "sha256=" + "0" * 43
+        else:
+            rows[0][1] = "sha256=" + "0" * 43
+        stream = io.StringIO()
+        csv.writer(stream, lineterminator="\n").writerows(rows)
+        members[record] = stream.getvalue().encode()
+    with pytest.raises(prep.PreparationError):
+        prep.verify_sounddevice_record(members)
+
+
+@pytest.mark.parametrize("changed", ["wheel", "patch"])
+def test_sounddevice_derivation_refuses_changed_inputs_without_mutating_them(tmp_path, changed):
+    wheel = tmp_path / prep.SOUNDDEVICE_FILE
+    patch = tmp_path / "patch"
+    wheel.write_bytes(SOUNDDEVICE_FIXTURE.read_bytes())
+    patch.write_bytes(SOUNDDEVICE_PATCH.read_bytes())
+    target = wheel if changed == "wheel" else patch
+    target.write_bytes(target.read_bytes() + b"x")
+    before = (wheel.read_bytes(), patch.read_bytes())
+    with pytest.raises(prep.PreparationError, match="identity differs"):
+        prep.patched_sounddevice_wheel(wheel, patch)
+    assert before == (wheel.read_bytes(), patch.read_bytes())
+
+
+def original_audio_catalog_payload(tmp_path):
+    before, after = catalog_pair(sounddevice_patched=False)
+    payload = tmp_path / "payload"
+    (payload / "wheelhouse").mkdir(parents=True)
+    (payload / "wheelhouse" / prep.SOUNDDEVICE_FILE).write_bytes(SOUNDDEVICE_FIXTURE.read_bytes())
+    raw = (json.dumps(after, sort_keys=True, indent=2) + "\n").encode()
+    (payload / "bundled-wheels.json").write_bytes(raw)
+    descriptor = {"path": "bundled-wheels.json", "sha256": hashlib.sha256(raw).hexdigest()}
+    return payload, before, after, descriptor
+
+
+def test_sounddevice_catalog_changes_only_new_wheel_bytes_and_preserves_origin(tmp_path):
+    payload, original, canonical, descriptor = original_audio_catalog_payload(tmp_path)
+    new_descriptor, after, proof = prep.patch_catalogued_sounddevice(
+        payload, original, SOUNDDEVICE_PATCH, descriptor)
+    before_rows = {row["file"]: row for row in canonical["wheels"]}
+    after_rows = {row["file"]: row for row in after["wheels"]}
+    filename = "wheelhouse/" + prep.SOUNDDEVICE_FILE
+    assert {name for name in before_rows if before_rows[name] != after_rows[name]} == {filename}
+    assert {k for k in before_rows[filename] if before_rows[filename][k] != after_rows[filename][k]} == {"size", "sha256"}
+    assert proof["original_registry_wheel_source_and_fingerprint_preserved"] is True
+    assert proof["original_100_catalog_rows_preserved"] is True
+    assert proof["catalog_original_row"]["source"]["sha256"] == hashlib.sha256(SOUNDDEVICE_FIXTURE.read_bytes()).hexdigest()
+    assert new_descriptor["sha256"] == hashlib.sha256((payload / "bundled-wheels.json").read_bytes()).hexdigest()
+    assert new_descriptor["sha256"] == proof["catalog_after_sha256"]
+    prep.verify_catalog_union(original, after)
+
+
+@pytest.mark.parametrize("mutation", ["sdist", "url", "origin-sha", "fingerprint", "name", "version", "descriptor", "already-patched"])
+def test_sounddevice_catalog_rejects_false_provenance_and_stale_inputs_without_writes(tmp_path, mutation):
+    payload, original, canonical, descriptor = original_audio_catalog_payload(tmp_path)
+    row = canonical["wheels"][-1]
+    if mutation == "sdist":
+        row["source"]["kind"] = "registry-sdist"
+    elif mutation == "url":
+        row["source"]["url"] = "https://wrong.invalid/sounddevice.whl"
+    elif mutation == "origin-sha":
+        row["source"]["sha256"] = "0" * 64
+    elif mutation == "fingerprint":
+        row["source_fingerprint"] = "0" * 64
+    elif mutation == "name":
+        row["name"] = "other"
+    elif mutation == "version":
+        row["version"] = "0.5.6"
+    elif mutation == "already-patched":
+        row["size"], row["sha256"] = prep.SOUNDDEVICE_WHEEL_AFTER
+    raw = (json.dumps(canonical, sort_keys=True, indent=2) + "\n").encode()
+    (payload / "bundled-wheels.json").write_bytes(raw)
+    descriptor["sha256"] = "0" * 64 if mutation == "descriptor" else hashlib.sha256(raw).hexdigest()
+    before_files = {p.relative_to(payload): p.read_bytes() for p in payload.rglob("*") if p.is_file()}
+    with pytest.raises(prep.PreparationError):
+        prep.patch_catalogued_sounddevice(payload, original, SOUNDDEVICE_PATCH, descriptor)
+    assert before_files == {p.relative_to(payload): p.read_bytes() for p in payload.rglob("*") if p.is_file()}
+
+
+def test_canonical_pm_selects_derived_bytes_against_original_locked_wheel_source(
+    canonical_packaged_tools, tmp_path,
+):
+    import pm
+    import pm.bundled_wheels as bundled
+
+    source = Path(pm.__file__).resolve().parent.parent
+    assert prep.sha256(source / "uv.lock") == prep.UV_LOCK_SHA
+    payload = tmp_path / "canonical-wheel"
+    wheelhouse = payload / "wheelhouse"
+    wheelhouse.mkdir(parents=True)
+    path = wheelhouse / prep.SOUNDDEVICE_FILE
+    path.write_bytes(SOUNDDEVICE_FIXTURE.read_bytes())
+    original_descriptor = bundled.write_catalog(payload, wheelhouse=wheelhouse, lock_paths=(source / "uv.lock",))
+    catalog = json.loads((payload / "bundled-wheels.json").read_bytes())
+    assert len(catalog["wheels"]) == 1
+    row = catalog["wheels"][0]
+    assert row["source"] == prep.SOUNDDEVICE_ORIGIN
+    original_origin = copy.deepcopy(row["source"])
+    original_fingerprint = row["source_fingerprint"]
+    derived, _ = prep.patched_sounddevice_wheel(path, SOUNDDEVICE_PATCH)
+    path.write_bytes(derived)
+    row.update(sha256=hashlib.sha256(derived).hexdigest(), size=len(derived))
+    selected = bundled.Catalog(original_descriptor["sha256"], payload, tuple(catalog["wheels"])).select(
+        "sounddevice==0.5.5\n", source / "uv.lock",
+        {"sys_platform": "android", "python_version": "3.14", "python_full_version": "3.14.6",
+         "platform_machine": "aarch64", "platform_system": "Android", "extra": ""},
+    )
+    assert len(selected) == 1 and selected[0].path == path
+    assert selected[0].sha256 == prep.SOUNDDEVICE_WHEEL_AFTER[1]
+    assert row["source"] == original_origin and row["source_fingerprint"] == original_fingerprint

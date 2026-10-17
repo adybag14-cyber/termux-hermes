@@ -2,13 +2,15 @@
 """Prepare an isolated Hermes + audio-io environment from exact unpublished inputs.
 
 Fetch mode runs on the host. Prepare mode runs on native Termux with the exact
-candidate interpreter. No package is installed or rebuilt, no user profile is
+candidate interpreter. No Debian package is installed or built, no user profile is
 selected, and no microphone is opened. A fresh PM environment is built at its
 final path. A CI venv is evidence, never a phone installer.
 """
 from __future__ import annotations
 
 import argparse
+import base64
+import csv
 from email.parser import BytesParser
 import hashlib
 import importlib.util
@@ -88,6 +90,20 @@ NEW_WHEELS = [
     "numpy-2.4.3-cp314-cp314-android_24_arm64_v8a.whl",
     "sounddevice-0.5.5-py3-none-any.whl",
 ]
+
+SOUNDDEVICE_FILE = "sounddevice-0.5.5-py3-none-any.whl"
+SOUNDDEVICE_PATCH_RELATIVE = "patches/next-stable/sounddevice-android-discovery.patch"
+SOUNDDEVICE_PATCH_PIN = (556, "7f655d5547c715ed62941d4b3bb5f0d87657a8fcede7dddb277e9afa516cf2e7")
+SOUNDDEVICE_SOURCE_BEFORE = (111663, "5f871d3a3ccc52d737e4507d25f785ec414da87115c0048d6b538d872792bce7")
+SOUNDDEVICE_SOURCE_AFTER = (111841, "7013191cabd99bbd5980fdf2d4c14ac65aeeb89c6effb5112289993806e8d49c")
+SOUNDDEVICE_WHEEL_AFTER = (130096, "b98585045e53173f589267e8ee543f034ba4229b0696ec32032b9f5f5637caf7")
+SOUNDDEVICE_ORIGIN = {
+    "kind": "registry-wheel", "registry": "https://pypi.org/simple",
+    "url": "https://files.pythonhosted.org/packages/1e/0a/478e441fd049002cf308520c0d62dd8333e7c6cc8d997f0dda07b9fbcc46/"
+           "sounddevice-0.5.5-py3-none-any.whl",
+    "sha256": "30ff99f6c107f49d25ad16a45cacd8d91c25a1bcdd3e81a206b921a3a6405b1f",
+}
+
 # The exact e271 payload contains one unresolved documentation link. Preserve its
 # original bytes and report that limitation; this is not a general missing-link
 # allowance. The source inventory is captured immediately after verified .deb
@@ -605,6 +621,132 @@ def wheel_members(path):
         return result
 
 
+
+def verify_sounddevice_record(members):
+    """Verify every original/derived member, including the RECORD self-entry."""
+    record = "sounddevice-0.5.5.dist-info/RECORD"
+    expected = {
+        "_sounddevice.py", "sounddevice.py", record,
+        "sounddevice-0.5.5.dist-info/licenses/LICENSE",
+        "sounddevice-0.5.5.dist-info/METADATA", "sounddevice-0.5.5.dist-info/WHEEL",
+        "sounddevice-0.5.5.dist-info/top_level.txt", "sounddevice-0.5.5.dist-info/zip-safe",
+    }
+    require(set(members) == expected, "sounddevice member set differs")
+    rows = list(csv.reader(io.StringIO(members[record].decode("utf-8"), newline="")))
+    require(all(len(row) == 3 for row in rows), "malformed sounddevice RECORD row")
+    require(len(rows) == len(expected) and {row[0] for row in rows} == expected,
+            "sounddevice RECORD member set differs")
+    for name, digest, size in rows:
+        if name == record:
+            require(digest == size == "", "sounddevice RECORD self-entry differs")
+        else:
+            body = members[name]
+            encoded = base64.urlsafe_b64encode(hashlib.sha256(body).digest()).rstrip(b"=").decode("ascii")
+            require(digest == "sha256=" + encoded and size == str(len(body)),
+                    "sounddevice RECORD bytes differ: " + name)
+    return rows
+
+
+def patched_sounddevice_wheel(wheel, patch):
+    """Derive one exact unpublished wheel without importing or rebuilding it."""
+    pin = AUDIO_MEMBERS["wheelhouse/" + SOUNDDEVICE_FILE]
+    pinned(wheel, pin["bytes"], pin["sha256"])
+    pinned(patch, *SOUNDDEVICE_PATCH_PIN)
+    with zipfile.ZipFile(wheel) as archive:
+        infos = archive.infolist()
+        require(len(infos) == 8 and len({i.filename for i in infos}) == 8
+                and all(not i.is_dir() and safe_zip_member(i) for i in infos),
+                "sounddevice archive member set or paths differ")
+        original = {i.filename: archive.read(i) for i in infos}  # also checks every CRC
+    rows = verify_sounddevice_record(original)
+    before = original["sounddevice.py"]
+    require((len(before), hashlib.sha256(before).hexdigest()) == SOUNDDEVICE_SOURCE_BEFORE,
+            "original sounddevice source differs")
+    sections = patch_sections(Path(patch).read_bytes())
+    require(set(sections) == {"sounddevice.py"}, "sounddevice patch path set differs")
+    source = apply_text_hunks(before, sections["sounddevice.py"])
+    require((len(source), hashlib.sha256(source).hexdigest()) == SOUNDDEVICE_SOURCE_AFTER,
+            "patched sounddevice source differs")
+    members = dict(original)
+    members["sounddevice.py"] = source
+    for row in rows:
+        if row[0] == "sounddevice.py":
+            row[1] = "sha256=" + base64.urlsafe_b64encode(hashlib.sha256(source).digest()).rstrip(b"=").decode("ascii")
+            row[2] = str(len(source))
+    record = "sounddevice-0.5.5.dist-info/RECORD"
+    stream = io.StringIO(newline="")
+    csv.writer(stream, lineterminator="\n").writerows(rows)
+    members[record] = stream.getvalue().encode("utf-8")
+    verify_sounddevice_record(members)
+    changed = {name for name in members if members[name] != original[name]}
+    require(changed == {"sounddevice.py", record}, "sounddevice patch changed another member")
+    result = io.BytesIO()
+    # Stored members and explicit ZIP metadata make the exact bytes independent
+    # of host zlib versions, filesystem modes and local clocks.
+    with zipfile.ZipFile(result, "w", compression=zipfile.ZIP_STORED) as archive:
+        for name in sorted(members):
+            info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+            info.create_system = 3
+            info.external_attr = (stat.S_IFREG | 0o644) << 16
+            info.compress_type = zipfile.ZIP_STORED
+            archive.writestr(info, members[name])
+    body = result.getvalue()
+    require((len(body), hashlib.sha256(body).hexdigest()) == SOUNDDEVICE_WHEEL_AFTER,
+            "derived sounddevice wheel differs")
+    proof = {
+        "original_wheel": {"bytes": pin["bytes"], "sha256": pin["sha256"]},
+        "derived_wheel": {"bytes": len(body), "sha256": hashlib.sha256(body).hexdigest()},
+        "patch": {"file": SOUNDDEVICE_PATCH_RELATIVE, "bytes": SOUNDDEVICE_PATCH_PIN[0],
+                  "sha256": SOUNDDEVICE_PATCH_PIN[1]},
+        "source_before": {"bytes": len(before), "sha256": hashlib.sha256(before).hexdigest()},
+        "source_after": {"bytes": len(source), "sha256": hashlib.sha256(source).hexdigest()},
+        "changed_members": sorted(changed), "unchanged_member_count": 6,
+        "metadata_version_dependencies_tags_and_license_unchanged": True,
+        "original_and_derived_records_verified": True,
+        "original_members": {n: {"bytes": len(b), "sha256": hashlib.sha256(b).hexdigest()}
+                             for n, b in sorted(original.items())},
+        "derived_members": {n: {"bytes": len(b), "sha256": hashlib.sha256(b).hexdigest()}
+                            for n, b in sorted(members.items())},
+        "scope": "Android loader fallback only after all existing find_library candidates return None",
+        "native_loading_and_PortAudio_initialization_errors_preserved": True,
+        "published": False,
+    }
+    return body, proof
+
+
+def patch_catalogued_sounddevice(payload, original, patch, descriptor):
+    """Preserve canonical original-wheel provenance while binding derived bytes."""
+    catalog_path = payload / "bundled-wheels.json"
+    raw = catalog_path.read_bytes()
+    before = json_object(raw)
+    require(descriptor == {"path": "bundled-wheels.json", "sha256": hashlib.sha256(raw).hexdigest()},
+            "canonical audio catalog descriptor differs")
+    verify_catalog_union(original, before, sounddevice_patched=False)
+    wheel_path = contained(payload, "wheelhouse/" + SOUNDDEVICE_FILE)
+    body, proof = patched_sounddevice_wheel(wheel_path, patch)
+    after = json_object(raw)
+    row = next(row for row in after["wheels"] if row["file"] == "wheelhouse/" + SOUNDDEVICE_FILE)
+    original_row = dict(row)
+    row.update(size=SOUNDDEVICE_WHEEL_AFTER[0], sha256=SOUNDDEVICE_WHEEL_AFTER[1])
+    verify_catalog_union(original, after)
+    require({k for k in row if row[k] != original_row[k]} == {"size", "sha256"},
+            "derived sounddevice origin or selection changed")
+    encoded = (json.dumps(after, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    proof.update(
+        catalog_original_row=original_row, catalog_derived_row=dict(row),
+        catalog_before_sha256=hashlib.sha256(raw).hexdigest(),
+        catalog_after_sha256=hashlib.sha256(encoded).hexdigest(),
+        original_registry_wheel_source_and_fingerprint_preserved=True,
+        original_100_catalog_rows_preserved=True,
+    )
+    # These two files belong to this invocation; all inputs and all checks above
+    # are complete before changing either. No canonical PM API or lock is edited.
+    wheel_path.write_bytes(body)
+    catalog_path.write_bytes(encoded)
+    pinned(wheel_path, *SOUNDDEVICE_WHEEL_AFTER)
+    return {"path": "bundled-wheels.json", "sha256": hashlib.sha256(encoded).hexdigest()}, after, proof
+
+
 def verify_base_catalog(payload):
     pinned(payload / "bundled-wheels.json", 68318, CATALOG_SHA)
     catalog = json_object((payload / "bundled-wheels.json").read_bytes())
@@ -621,7 +763,7 @@ def verify_base_catalog(payload):
     return catalog
 
 
-def verify_catalog_union(before, after):
+def verify_catalog_union(before, after, *, sounddevice_patched=True):
     old = {r["file"]: r for r in before["wheels"]}
     new = {r["file"]: r for r in after["wheels"]}
     require(len(old) == 100 and len(before["wheels"]) == 100, "base catalog is not the exact 100-row set")
@@ -631,7 +773,14 @@ def verify_catalog_union(before, after):
     for name in NEW_WHEELS:
         row = new["wheelhouse/" + name]
         pin = AUDIO_MEMBERS["wheelhouse/" + name]
-        require(row["size"] == pin["bytes"] and row["sha256"] == pin["sha256"], "new audio wheel identity differs")
+        expected = SOUNDDEVICE_WHEEL_AFTER if name == SOUNDDEVICE_FILE and sounddevice_patched else (pin["bytes"], pin["sha256"])
+        require((row["size"], row["sha256"]) == expected, "new audio wheel identity differs")
+        if name == SOUNDDEVICE_FILE:
+            fingerprint = hashlib.sha256(json.dumps(SOUNDDEVICE_ORIGIN, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+            require(row.get("name") == "sounddevice" and row.get("version") == "0.5.5"
+                    and row.get("source") == SOUNDDEVICE_ORIGIN
+                    and row.get("source_fingerprint") == fingerprint,
+                    "sounddevice original wheel provenance differs")
     return {"original_rows": 100, "additional_rows": 2, "total_rows": 102, "original_rows_preserved": True}
 
 
@@ -1068,7 +1217,9 @@ def application_worker(request):
     original = json_object((evidence / "original-bundled-wheels.json").read_bytes())
     descriptor = write_catalog(payload, wheelhouse=payload / "wheelhouse",
                                lock_paths=(payload / "app/uv.lock", payload / "app/pm/uv.lock"))
-    catalog = json_object((payload / "bundled-wheels.json").read_bytes())
+    descriptor, catalog, sounddevice_derivative = patch_catalogued_sounddevice(
+        payload, original, Path(request["sounddevice_patch"]), descriptor)
+    write_json(evidence / "sounddevice-android-derivative.json", sounddevice_derivative)
     union = verify_catalog_union(original, catalog)
     manifest = json_object((payload / "manifest.json").read_bytes())
     manifest["bundled_wheels"] = descriptor
@@ -1132,6 +1283,7 @@ def application_worker(request):
     write_json(evidence / "canonical-build.json", {
         "status": "passed", "target": TARGET, "extras": EXTRAS, "catalog": descriptor,
         "catalog_union": union, "application": app_check, "manager": manager_check,
+        "sounddevice_derivative": sounddevice_derivative,
         "pm_runtime_marker": marker, "selection_stamp": stamp,
         "final_payload": str(payload), "interpreter": native_identity(payload),
         "application_built_fresh": True, "manager_built_fresh": True,
@@ -1225,16 +1377,19 @@ def prepare(options):
     native_identity()
     candidate, audio, patch = options.candidate_dir.resolve(), options.audio_inputs.resolve(), options.patch.resolve()
     marker_patch = Path(__file__).resolve().parents[1] / MARKER_PATCH_RELATIVE
-    out = fresh_output(options.out, (candidate, audio, patch, marker_patch, INSTALLED))
+    sounddevice_patch = Path(__file__).resolve().parents[1] / SOUNDDEVICE_PATCH_RELATIVE
+    out = fresh_output(options.out, (candidate, audio, patch, marker_patch, sounddevice_patch, INSTALLED))
     candidate_receipt = verify_candidate(candidate)
     pinned(patch, PATCH_BYTES, PATCH_SHA)
     pinned(marker_patch, MARKER_PATCH_BYTES, MARKER_PATCH_SHA)
+    pinned(sounddevice_patch, *SOUNDDEVICE_PATCH_PIN)
     verify_audio_archive(audio / AUDIO_ARCHIVE)
     pinned(audio / STUB_FILE, STUB_BYTES, STUB_SHA)
     for name, (size, digest) in ASSEMBLY.items():
         pinned(audio / "assembly" / name, size, digest)
     input_before = {"candidate": inventory(candidate), "audio": inventory(audio), "patch_sha256": sha256(patch),
-                    "supplemental_patch_sha256": sha256(marker_patch)}
+                    "supplemental_patch_sha256": sha256(marker_patch),
+                    "sounddevice_patch_sha256": sha256(sounddevice_patch)}
     installed_before = inventory(INSTALLED) if INSTALLED.is_dir() else None
     out.mkdir(parents=True)  # Exclusive ownership begins here; never move this final path.
     evidence, state, payload = out / "evidence", out / "state", out / "payload"
@@ -1293,7 +1448,8 @@ def prepare(options):
             require(root.is_dir() and not root.is_symlink(), "candidate runtime is missing or symlinked")
             shutil.rmtree(root)
         request = {"payload": str(payload), "state": str(state), "evidence": str(evidence),
-                   "assembly": str(audio / "assembly"), "request_path": str(evidence / "build-request.json")}
+                   "assembly": str(audio / "assembly"), "request_path": str(evidence / "build-request.json"),
+                   "sounddevice_patch": str(sounddevice_patch)}
         write_json(Path(request["request_path"]), request)
         env = native_environment(payload, state)
         run_logged([str(python), "-I", "-B", str(Path(__file__).resolve()),
@@ -1307,7 +1463,8 @@ def prepare(options):
         gate = json_object((evidence / "canonical-build.json").read_bytes())
         require(gate["status"] == "passed" and gate["catalog_union"]["total_rows"] == 102, "canonical build did not pass")
         require(input_before == {"candidate": inventory(candidate), "audio": inventory(audio), "patch_sha256": sha256(patch),
-                    "supplemental_patch_sha256": sha256(marker_patch)},
+                    "supplemental_patch_sha256": sha256(marker_patch),
+                    "sounddevice_patch_sha256": sha256(sounddevice_patch)},
                 "reconstruction inputs changed during preparation")
         require(installed_before == (inventory(INSTALLED) if INSTALLED.is_dir() else None),
                 "installed payload changed during preparation")
@@ -1337,6 +1494,7 @@ def prepare(options):
                                     "audio_patch_source_reference": {"baseline": "f49c77b666cef7fd5235cdd786556908527b532e",
                                                               "replay": "aa90e9a6eca74835dacc2dc55f376bddfd499c25"}},
                       catalog=gate["catalog"], extras=EXTRAS, canonical_build=gate,
+                      sounddevice_derivative=gate["sounddevice_derivative"],
                       original_inventory_sha256=inventory_sha(before),
                       prepared_inventory_sha256=inventory_sha(after),
                       payload_changes=changes, contained_links=link_report["contained_links"],

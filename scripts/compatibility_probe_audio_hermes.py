@@ -107,6 +107,8 @@ def runtime_worker(request):
         "/system/bin/audioserver", "/system/bin/servicemanager",
         "/system/lib64/libOpenSLES.so", "/system/lib/libOpenSLES.so",
     )}
+    sounddevice_source = payload / "venv/lib/python3.14/site-packages/sounddevice.py"
+    prep.pinned(sounddevice_source, *prep.SOUNDDEVICE_SOURCE_AFTER)
     error, devices, device_error = None, [], None
     try:
         import sounddevice as sd
@@ -164,6 +166,11 @@ def runtime_worker(request):
     input_count = sum(int(device.get("max_input_channels", 0)) > 0 for device in devices)
     result = {
         "schema_version": 1, "dependency_readiness": "passed", "native_numerics": "passed",
+        "sounddevice_android_discovery": {
+            "source_sha256": prep.SOUNDDEVICE_SOURCE_AFTER[1],
+            "derived_wheel_sha256": prep.SOUNDDEVICE_WHEEL_AFTER[1],
+            "native_initialization_errors_preserved": True,
+        },
         "numpy_checks": ["arithmetic", "FFT roundtrip", "internal LAPACK solve", "matrix multiplication"],
         "cffi_checks": ["native allocation", "native buffer", "owned extension import"],
         "audio_io_anchors": True, "voice_module": str(voice_mode.__file__),
