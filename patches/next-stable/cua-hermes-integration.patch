@@ -162,6 +162,85 @@ index 00000000..4df4c4b8
 +    monkeypatch.setenv("HERMES_HOME", str(home))
 +    rows = _PLUGIN_ROW_BUILDERS[TOOL_CATEGORIES["computer_use"]["name"]]()
 +    assert any(row["computer_use_backend"] == "owned-fixture" for row in rows)
+diff --git a/tests/tools/test_computer_use_scroll_schema.py b/tests/tools/test_computer_use_scroll_schema.py
+new file mode 100644
+index 00000000..ae395ff1
+--- /dev/null
++++ b/tests/tools/test_computer_use_scroll_schema.py
+@@ -0,0 +1,73 @@
++"""Scroll coordinates follow the live driver schema and legacy capability contract."""
++
++from __future__ import annotations
++
++import asyncio
++from types import SimpleNamespace
++from unittest.mock import patch
++
++import pytest
++
++
++def _scroll_backend(input_schema, *, capabilities=()):
++    from tools.computer_use.cua_backend import CuaDriverBackend
++    from tools.computer_use.cua_backend_session import _CuaDriverSession
++
++    tool = SimpleNamespace(name="scroll", inputSchema=input_schema, model_extra={})
++    if capabilities:
++        tool.capabilities = list(capabilities)
++
++    class _McpSession:
++        async def list_tools(self):
++            return SimpleNamespace(tools=[tool], model_extra={})
++
++    session = _CuaDriverSession.__new__(_CuaDriverSession)
++    asyncio.run(session._populate_capabilities(_McpSession()))
++    backend = CuaDriverBackend.__new__(CuaDriverBackend)
++    backend._session = session
++    backend._session_id = "hermes-session"
++    backend._snapshot_tokens = {}
++    backend._active_pid = 42
++    backend._active_window_id = 7
++    return backend
++
++
++@pytest.mark.parametrize(
++    ("input_schema", "expected_coordinates"),
++    [
++        ({"properties": {"x": {"type": "number"}, "y": {"type": "number"}}}, {"x": 80, "y": 60}),
++        ({}, {}),
++        ({"properties": {"x": {"type": "number"}}}, {}),
++        ({"properties": {"y": {"type": "number"}}}, {}),
++    ],
++    ids=["both-axes", "no-schema-properties", "x-only", "y-only"],
++)
++def test_scroll_coordinates_follow_the_live_input_schema(input_schema, expected_coordinates):
++    backend = _scroll_backend(input_schema)
++    assert backend._session.supports_capability("input.scroll.coordinates", tool="scroll") is False
++
++    with patch.object(backend._session, "call_tool", return_value={"isError": False, "data": {}}) as send:
++        result = backend.scroll(direction="down", amount=2, x=80, y=60)
++
++    assert result.ok is True
++    send.assert_called_once_with("scroll", {
++        "pid": 42,
++        "window_id": 7,
++        "session": "hermes-session",
++        "direction": "down",
++        "amount": 2,
++        **expected_coordinates,
++    })
++
++
++def test_scroll_coordinates_keep_the_legacy_capability_contract():
++    backend = _scroll_backend({}, capabilities=("input.scroll.coordinates",))
++
++    with patch.object(backend._session, "call_tool", return_value={"isError": False, "data": {}}) as send:
++        result = backend.scroll(direction="down", amount=2, x=80, y=60)
++
++    assert result.ok is True
++    send.assert_called_once_with("scroll", {
++        "pid": 42, "window_id": 7, "session": "hermes-session",
++        "direction": "down", "amount": 2, "x": 80, "y": 60,
++    })
 diff --git a/tests/tools/test_computer_use_termux_override.py b/tests/tools/test_computer_use_termux_override.py
 new file mode 100644
 index 00000000..b04e6ba4
@@ -306,83 +385,22 @@ index 00000000..b04e6ba4
 +    assert result.returncode == 0, result.stderr
 +    assert json.loads(result.stdout) == {**published, "CUA_DRIVER_RS_TELEMETRY_ENABLED": "0"}
 +    assert os.environ.get("DISPLAY") == ambient_display
-diff --git a/tests/tools/test_cua_scroll_schema.py b/tests/tools/test_cua_scroll_schema.py
-new file mode 100644
-index 00000000..fa50860f
---- /dev/null
-+++ b/tests/tools/test_cua_scroll_schema.py
-@@ -0,0 +1,66 @@
-+"""Scroll targeting follows the live driver schema without guessing its version.
-+
-+The native Termux integration exposed a driver whose scroll schema accepts x/y
-+but has no input.scroll.coordinates token; dropping x/y moved input to center.
-+"""
-+from types import SimpleNamespace
-+from unittest.mock import AsyncMock, Mock
-+import asyncio
-+
-+import pytest
-+
-+from tools.computer_use.cua_backend import CuaDriverBackend
-+
-+
-+def backend_with_scroll_schema(capabilities, properties):
-+    backend = CuaDriverBackend()
-+    backend._active_pid = 111
-+    backend._active_window_id = 222
-+    tool = SimpleNamespace(
-+        name="scroll", capabilities=capabilities,
-+        inputSchema={"type": "object", "properties": properties, "additionalProperties": False},
-+    )
-+    client = SimpleNamespace(list_tools=AsyncMock(return_value=SimpleNamespace(tools=[tool])))
-+    asyncio.run(backend._session._populate_capabilities(client))
-+    backend._session.call_tool = Mock(return_value={
-+        "data": "ok", "images": [], "structuredContent": None, "isError": False,
-+    })
-+    return backend
-+
-+
-+@pytest.mark.parametrize("capabilities,properties,include_coordinates", [
-+    ([], {"x": {"type": "number"}, "y": {"type": "number"}}, True),
-+    (["input.scroll.coordinates"], {}, True),
-+    ([], {"x": {"type": "number"}}, False),
-+    ([], {"y": {"type": "number"}}, False),
-+    ([], {}, False),
-+])
-+def test_scroll_preserves_only_advertised_coordinate_support(capabilities, properties, include_coordinates):
-+    backend = backend_with_scroll_schema(capabilities, properties)
-+
-+    result = backend.scroll(direction="down", amount=2, x=80, y=60)
-+
-+    assert result.ok
-+    expected = {"pid": 111, "window_id": 222, "direction": "down", "amount": 2,
-+                "session": backend._session_id}
-+    if include_coordinates:
-+        expected.update(x=80, y=60)
-+    backend._session.call_tool.assert_called_once_with("scroll", expected)
-+
-+
-+@pytest.mark.parametrize("window_id,element", [(222, 7), (None, None)])
-+def test_scroll_retains_element_precedence_and_exact_window_requirement(window_id, element):
-+    backend = backend_with_scroll_schema([], {"x": {"type": "number"}, "y": {"type": "number"}})
-+    backend._active_window_id = window_id
-+
-+    result = backend.scroll(direction="down", amount=2, element=element, x=80, y=60)
-+
-+    if window_id is None:
-+        assert not result.ok
-+        backend._session.call_tool.assert_not_called()
-+    else:
-+        assert result.ok
-+        backend._session.call_tool.assert_called_once_with("scroll", {
-+            "pid": 111, "window_id": 222, "direction": "down", "amount": 2,
-+            "element_index": 7, "session": backend._session_id,
-+        })
 diff --git a/tools/computer_use/cua_backend.py b/tools/computer_use/cua_backend.py
-index ec903cbf..5c8bf845 100644
+index ec903cbf..39f904da 100644
 --- a/tools/computer_use/cua_backend.py
 +++ b/tools/computer_use/cua_backend.py
-@@ -285,6 +285,9 @@ class CuaDriverBackend(_CaptureMixin, _InputMixin, ComputerUseBackend):
+@@ -143,7 +143,9 @@ def cua_driver_child_env(base_env: Optional[dict[str, str]] = None) -> dict[str,
+     # A running Bot Desktop for this profile owns the agent's screen: DISPLAY/XAUTHORITY/DBUS point there so
+     # cua-driver never acts on a seat the human is sitting at (#90374 class) and headless hosts get a display.
+     from tools.bot_desktop.runtime import desktop_env as _bot_desktop_env
+-    env = _bot_desktop_env(env)
++    from tools.bot_desktop.termux import system_env as _termux_system_env
++    # The external Termux driver needs APT libraries before a desktop is published too.
++    env = _termux_system_env(_bot_desktop_env(env))
+     if _cua_telemetry_disabled():
+         env[_CUA_TELEMETRY_ENV_VAR] = "0"
+     if sys.platform == "linux" and env.get("WAYLAND_DISPLAY") and bool(_computer_use_cfg().get("native_wayland", False)):
+@@ -285,6 +287,9 @@ class CuaDriverBackend(_CaptureMixin, _InputMixin, ComputerUseBackend):
          if sandbox_mcp_invocation() is not None:
              contract = {"ready": True}
          else:
@@ -392,7 +410,7 @@ index ec903cbf..5c8bf845 100644
              if not os.environ.get(_CUA_DRIVER_CMD_ENV, "").strip():
                  from pm import ensure
                  ensure("cua-driver")
-@@ -347,7 +350,8 @@ class CuaDriverBackend(_CaptureMixin, _InputMixin, ComputerUseBackend):
+@@ -347,7 +352,8 @@ class CuaDriverBackend(_CaptureMixin, _InputMixin, ComputerUseBackend):
              logger.debug("cua-driver %s: %s", what, e)
  
      def is_available(self) -> bool:
@@ -418,12 +436,14 @@ index 017a6702..0ec981db 100644
              "Or run `hermes tools` and enable the Computer Use toolset to install it automatically.")
  
 diff --git a/tools/computer_use/cua_backend_input.py b/tools/computer_use/cua_backend_input.py
-index 2b09856a..04ba7c2e 100644
+index 2b09856a..dab764bb 100644
 --- a/tools/computer_use/cua_backend_input.py
 +++ b/tools/computer_use/cua_backend_input.py
-@@ -137,7 +137,9 @@ class _InputMixin:
+@@ -136,8 +136,11 @@ class _InputMixin:
+         # to the coordinate form or the bare window. Some driver schemas reject x/y on scroll: only send
          # coordinates when the driver advertises support; otherwise it scrolls the targeted window
          # (window_id is still sent for routing).
++        # Modern drivers can advertise both axes in inputSchema without legacy capability tokens.
          xy = lambda: ({"x": x, "y": y}
 -                      if self._session.supports_capability("input.scroll.coordinates", tool="scroll") else {})
 +                      if (self._session.supports_capability("input.scroll.coordinates", tool="scroll")

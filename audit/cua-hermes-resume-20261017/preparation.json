@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "status": "host_regressions_passed_native_integration_pending",
+  "prepared_at": "2026-10-17T17:35:06.455287+00:00",
+  "preparation_base_commit": "1eaee07fddc0dadab59ea4a5758f27513488b168",
+  "upstream_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+  "baseline_reference_tree": "f49c77b666cef7fd5235cdd786556908527b532e",
+  "patched_reference_tree": "7244db4e6256b7dc47267077709d45547de89aac",
+  "reference_tree_scope": "Full upstream source plus the four released patches and frozen main compatibility patch; this is not the trimmed installed app tree.",
+  "current_inputs": {
+    "patches/next-stable/cua-hermes-integration.patch": "6424636d7d5b590724365eb8b952fa164ac6dfc26a9d7c1a9a70ac8baf7b591b",
+    "scripts/compatibility_probe_cua_hermes.py": "310ca4e826fad5badad3750ea25fafe941a01c65311c3c5488afa4c2dc494b08",
+    "patches/next-stable/compatibility.patch": "77ac41bc11a6facd928f4cef577642b9eeb042ce3da7d820478aa49e1d98fa1e"
+  },
+  "unchanged_locks": {
+    "uv.lock": "72abb87a634769baaf30830cd317892053c6e15f8e9519b085524fa0ed542829",
+    "pm/lock.json": "49b79259220160f147255078a19af541a5f328d3871c8041cc1eb909d19eb549"
+  },
+  "integration_changed_paths": [
+    "hermes_cli/tools_config.py",
+    "hermes_cli/tools_config_cua.py",
+    "hermes_cli/tools_config_providers.py",
+    "plugins/computer_use/cua/__init__.py",
+    "tests/hermes_cli/test_cua_termux_setup.py",
+    "tests/tools/test_computer_use_termux_override.py",
+    "tools/computer_use/cua_backend.py",
+    "tools/computer_use/cua_backend_driver.py",
+    "tools/computer_use/cua_backend_platform.py",
+    "tools/computer_use/permissions.py"
+  ],
+  "added_fix": "Every Termux native CUA child uses APT libraries before and after Bot Desktop publication; the managed Python parent retains its bundled loader path.",
+  "native_regression_added": "Before starting any desktop, execute the actual pinned driver manifest through Hermes sanitized child env, and require the parent bundled loader path unchanged.",
+  "canonical_host_run": {
+    "receipt": "host-tests.json",
+    "receipt_sha256": "517fe86816857ea9a75d3ccc62de7d3e57f77fcec6e433e110b7fead135870fd",
+    "log": "host-tests.log",
+    "log_sha256": "d8a2e4423323bd434952770f40b24ec5796eac3fcb32219f6ecf38660b1c1b43",
+    "files": 8,
+    "passed": 73,
+    "failed": 0,
+    "skipped": 3,
+    "runner_elapsed_seconds": 42.3,
+    "skips": "macOS-only cases on actual Windows host",
+    "raw_log": {
+      "file": "host-tests.raw.log.gz",
+      "compression": "gzip",
+      "archive_sha256": "7a3a9677134a7e04d4d49a9014839feb9a50aa5e1b07b99e5127353324a56928",
+      "decoded_bytes": 2678,
+      "decoded_sha256": "bec7ff517e1df2a48ea869cdcaaf3934950cc8fc36721668acb4c07b10f7d14a"
+    }
+  },
+  "previous_evidence": "../cua-hermes-preparation-20261017.json",
+  "previous_evidence_policy": "Historical patch and run identities remain unchanged; this record describes the newer integration patch.",
+  "standalone_native_evidence": "../cua-native-20261017/run-39052290704.json",
+  "included_in_main_candidate": false,
+  "main_candidate_restrictions_restored": 6,
+  "default_pm_driver_admission_changed": false,
+  "foreground_only": true,
+  "physical_android_device_tested": false,
+  "release_created": false
+}

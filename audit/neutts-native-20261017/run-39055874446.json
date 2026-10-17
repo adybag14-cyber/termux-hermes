@@ -1,0 +1,317 @@
+{
+  "schema_version": 1,
+  "status": "all_six_native_scientific_behavior_cases_passed_pip_wheel_tags_unresolved_engine_excluded",
+  "scope": "APT native scientific ABI/behavior with exact Python dependencies",
+  "run_id": 39055874446,
+  "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39055874446",
+  "head_sha": "d439e8100bc89dbfe681fc03aa22017f175b8b2d",
+  "workflow_conclusion": "success",
+  "artifact": {
+    "id": 12109572127,
+    "name": "termux-neutts-dependency-experiment",
+    "size_in_bytes": 11117493,
+    "digest": "sha256:3cb864d0e3c72862d82c553c0a21b2426db62f02b06e99b77324d3f3f8fd7379",
+    "expired": false
+  },
+  "whole_archive_sha256_verified": true,
+  "all_crc_verified": true,
+  "verification": "run-39055874446/verification.json",
+  "native_receipt": "run-39055874446/NEUTTS-CORE-RESULT.json",
+  "python_receipt": "run-39055874446/NEUTTS-PYTHON-RESULT.json",
+  "exit_receipt": "run-39055874446/NEUTTS-EXIT.json",
+  "tested_inputs": {
+    "scripts/compatibility_probe_neutts.sh": "6b3e1ef9a711766de0a51d632e070825a41b9eef105d7e7390245871136511df",
+    "scripts/compatibility_probe_neutts.py": "137200bd63a1916079a8344349eeb3783281a08121489f9045d15f997dc64ce0",
+    ".github/workflows/neutts-termux-probe.yml": "e7b477dff174ba0d5ea98f2db924a936225e617646795e567f3b7671ef3083af"
+  },
+  "python": {
+    "version": "3.14.6 (main, Jul  5 2026, 10:35:55) [Clang 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 5e96669f0",
+    "platform": "android",
+    "prefix": "/data/data/com.termux/files/usr",
+    "executable": {
+      "path": "/data/data/com.termux/files/usr/bin/python3.14",
+      "bytes": 4448,
+      "sha256": "4f8d78ede7fc26e96e99342dd83ce42d32c9b4d0806bc9a99ff7151396269b25",
+      "elf_class": 64,
+      "endianness": "little",
+      "machine": 183
+    }
+  },
+  "uid": 1000,
+  "apt_archive_count": 122,
+  "apt_archive_hashes_checked_before_install": true,
+  "rolling_base_upgrade_recorded_separately": true,
+  "source_lock_sha256": "16300cf807347b7fcfa3c19963f5fe950913fdb3e41e3c649ea724bc7dc997da",
+  "dependency_closure_passed": true,
+  "scientific_behavior_passed": true,
+  "pip_check_passed": false,
+  "pip_wheel_tag_compatibility": "unresolved",
+  "tags_rewritten": false,
+  "diagnostic_continuation": "Only the exact seven unsupported-platform messages with unchanged pinned APT WHEEL metadata are admitted to native diagnostics; missing dependencies, conflicts, or any other pip errors fail.",
+  "cases": [
+    {
+      "component": "torch",
+      "exit_code": 0,
+      "status": "passed",
+      "timed_out": false,
+      "receipt": "neutts-torch.json",
+      "receipt_sha256": "eedfd0335c7e5f6036799fae55e74dc9a1ba864743a3af255eee8609816ee9ae",
+      "stdout_bytes": 0,
+      "stdout_saved_bytes": 0,
+      "stdout_truncated": false,
+      "stderr_bytes": 0,
+      "stderr_saved_bytes": 0,
+      "stderr_truncated": false,
+      "behavior": {
+        "modules": [
+          {
+            "distribution": "torch",
+            "version": "2.14.1",
+            "module_file": "/data/data/com.termux/files/usr/lib/python3.14/site-packages/torch/__init__.py",
+            "module_sha256": "bd4a10ff16357ed78f45aaf4b46ce5b771fdc0e8549402206e324d0eb792c672"
+          }
+        ],
+        "conv1d": [
+          4.0,
+          8.0,
+          12.0,
+          16.0,
+          20.0,
+          24.0
+        ],
+        "matmul": [
+          [
+            4.0,
+            4.0
+          ],
+          [
+            10.0,
+            8.0
+          ]
+        ],
+        "device": "cpu"
+      },
+      "elapsed_seconds": 1.419
+    },
+    {
+      "component": "torchaudio",
+      "exit_code": 0,
+      "status": "passed",
+      "timed_out": false,
+      "receipt": "neutts-torchaudio.json",
+      "receipt_sha256": "a2bc481a7cedf3f44a9fdce310c8c6030720ee9cb6f195bfd5c76dc866306f36",
+      "stdout_bytes": 0,
+      "stdout_saved_bytes": 0,
+      "stdout_truncated": false,
+      "stderr_bytes": 0,
+      "stderr_saved_bytes": 0,
+      "stderr_truncated": false,
+      "behavior": {
+        "modules": [
+          {
+            "distribution": "torch",
+            "version": "2.14.1",
+            "module_file": "/data/data/com.termux/files/usr/lib/python3.14/site-packages/torch/__init__.py",
+            "module_sha256": "bd4a10ff16357ed78f45aaf4b46ce5b771fdc0e8549402206e324d0eb792c672"
+          },
+          {
+            "distribution": "torchaudio",
+            "version": "2.11.0",
+            "module_file": "/data/data/com.termux/files/usr/lib/python3.14/site-packages/torchaudio/__init__.py",
+            "module_sha256": "f0e07710f18256217b2e0056cbf6d4c99505e872542296d323ca2e446c27ea55"
+          }
+        ],
+        "input_rate": 24000,
+        "output_rate": 16000,
+        "output_samples": 1600,
+        "mean_absolute_error": 0.0002512822684366256
+      },
+      "elapsed_seconds": 1.471
+    },
+    {
+      "component": "torchcodec",
+      "exit_code": 0,
+      "status": "passed",
+      "timed_out": false,
+      "receipt": "neutts-torchcodec.json",
+      "receipt_sha256": "328efec80bbb3c8f2dbe1bc95247c15bcb78a4e19509099479e75ef623f0a42e",
+      "stdout_bytes": 0,
+      "stdout_saved_bytes": 0,
+      "stdout_truncated": false,
+      "stderr_bytes": 0,
+      "stderr_saved_bytes": 0,
+      "stderr_truncated": false,
+      "behavior": {
+        "modules": [
+          {
+            "distribution": "torch",
+            "version": "2.14.1",
+            "module_file": "/data/data/com.termux/files/usr/lib/python3.14/site-packages/torch/__init__.py",
+            "module_sha256": "bd4a10ff16357ed78f45aaf4b46ce5b771fdc0e8549402206e324d0eb792c672"
+          },
+          {
+            "distribution": "torchcodec",
+            "version": "0.17.0",
+            "module_file": "/data/data/com.termux/files/usr/lib/python3.14/site-packages/torchcodec/__init__.py",
+            "module_sha256": "eda0d547332da020ff8f4b501a8455c12bfa4c3ef1874033317b2731479fec33"
+          }
+        ],
+        "fixture_sha256": "9cb03fa8ed3e66867c6e52c7680a7a8cd5852f0b8ed67a811b693b1bf54e6871",
+        "samples": 1600,
+        "sample_rate": 16000,
+        "maximum_absolute_error": 0.0
+      },
+      "elapsed_seconds": 4.84
+    },
+    {
+      "component": "scipy",
+      "exit_code": 0,
+      "status": "passed",
+      "timed_out": false,
+      "receipt": "neutts-scipy.json",
+      "receipt_sha256": "f2d4eea240ecfe280427ce1a259b8637aa4ce81bb079c4d47cb624dd18f6a892",
+      "stdout_bytes": 0,
+      "stdout_saved_bytes": 0,
+      "stdout_truncated": false,
+      "stderr_bytes": 0,
+      "stderr_saved_bytes": 0,
+      "stderr_truncated": false,
+      "behavior": {
+        "modules": [
+          {
+            "distribution": "numpy",
+            "version": "2.5.4",
+            "module_file": "/data/data/com.termux/files/usr/lib/python3.14/site-packages/numpy/__init__.py",
+            "module_sha256": "09295a80660f17925ae23765ce8cbd7ff7ceae968d5f2f89349f1cb74c0b9e11"
+          },
+          {
+            "distribution": "scipy",
+            "version": "1.18.1",
+            "module_file": "/data/data/com.termux/files/usr/lib/python3.14/site-packages/scipy/__init__.py",
+            "module_sha256": "39ccae300a4739cc53719bd3b39ce3f8f66e736c6eb672006e338a4c5cc3dc76"
+          }
+        ],
+        "solution": [
+          2.000000000000001,
+          2.9999999999999996
+        ],
+        "fft": [
+          [
+            10.0,
+            -0.0
+          ],
+          [
+            -2.0,
+            2.0
+          ],
+          [
+            -2.0,
+            -0.0
+          ],
+          [
+            -2.0,
+            -2.0
+          ]
+        ]
+      },
+      "elapsed_seconds": 0.305
+    },
+    {
+      "component": "llvmlite",
+      "exit_code": 0,
+      "status": "passed",
+      "timed_out": false,
+      "receipt": "neutts-llvmlite.json",
+      "receipt_sha256": "86718bd39485a90c7dc3563cee9f7de7a542b67c1acf2adcfa189b76d447cbba",
+      "stdout_bytes": 0,
+      "stdout_saved_bytes": 0,
+      "stdout_truncated": false,
+      "stderr_bytes": 0,
+      "stderr_saved_bytes": 0,
+      "stderr_truncated": false,
+      "behavior": {
+        "modules": [
+          {
+            "distribution": "llvmlite",
+            "version": "0.49.0",
+            "module_file": "/data/data/com.termux/files/usr/lib/python3.14/site-packages/llvmlite/__init__.py",
+            "module_sha256": "fd4c05b036b6c225f1d562f1d17515d9692b3d9a50c235d3478b0f48d4369c33"
+          }
+        ],
+        "llvm_version": [
+          22,
+          1,
+          8
+        ],
+        "target_triple": "aarch64-unknown-linux-android24",
+        "native_jit_result": 23.0
+      },
+      "elapsed_seconds": 0.16
+    },
+    {
+      "component": "soxr",
+      "exit_code": 0,
+      "status": "passed",
+      "timed_out": false,
+      "receipt": "neutts-soxr.json",
+      "receipt_sha256": "122f0cffb236fcd7ef49c434d0fa83eb342bcd3044721a05fae4d3c02e9ea490",
+      "stdout_bytes": 0,
+      "stdout_saved_bytes": 0,
+      "stdout_truncated": false,
+      "stderr_bytes": 0,
+      "stderr_saved_bytes": 0,
+      "stderr_truncated": false,
+      "behavior": {
+        "modules": [
+          {
+            "distribution": "numpy",
+            "version": "2.5.4",
+            "module_file": "/data/data/com.termux/files/usr/lib/python3.14/site-packages/numpy/__init__.py",
+            "module_sha256": "09295a80660f17925ae23765ce8cbd7ff7ceae968d5f2f89349f1cb74c0b9e11"
+          },
+          {
+            "distribution": "soxr",
+            "version": "1.1.0",
+            "module_file": "/data/data/com.termux/files/usr/lib/python3.14/site-packages/soxr/__init__.py",
+            "module_sha256": "2e21a93cadd4bdc56654ec6b213e6e6fa7707be0f9bd7ee789f1112f289ca377"
+          }
+        ],
+        "output_samples": 1600,
+        "mean_absolute_error": 2.1722018300276968e-07
+      },
+      "elapsed_seconds": 0.12
+    }
+  ],
+  "engine_installed": false,
+  "synthesis_tested": false,
+  "model_downloaded": false,
+  "physical_audio_tested": false,
+  "candidate_modified": false,
+  "pm_admission_changed": false,
+  "release_output": false,
+  "remaining_limits": [
+    "NeuTTS 1.4.1 declares Python >=3.10,<3.14 while managed Hermes uses 3.14.6.",
+    "These APT libraries are a separately measured scientific core, not the complete frozen NeuTTS/NeuCodec/librosa/phonemizer/inference closure.",
+    "Seven original APT wheel tags remain incompatible with pip supported tags.",
+    "No model loading, speech synthesis, streaming, cancellation, or physical audio certification is claimed."
+  ],
+  "previous_runs": [
+    {
+      "run_id": 39053355817,
+      "result": "Torch/audio/codec stopped before native behavior due missing typing_extensions; three other native cases passed."
+    },
+    {
+      "run_id": 39055038031,
+      "result": "Exact supplemental dependencies and escaping passed; pip rejected the seven legacy Android WHEEL tags before native cases.",
+      "verification": "run-39055038031/verification.json"
+    }
+  ],
+  "raw_native_log": {
+    "artifact_member": "neutts-native-probe.log",
+    "stored_as": "run-39055874446/neutts-native-probe.log.gz",
+    "compression": "gzip",
+    "raw_bytes_preserved": true,
+    "uncompressed_sha256": "e5b1853a3e2e7d4c6196b2d6900352900892ad4995c443dc9df186c2f3eaa2fb",
+    "compressed_sha256": "8abe3727e644b26f1d6372f08e6343c91f546a58c23bba4bc571bc4fa3a88796"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "purpose": "unpublished isolated native CUA virtual-X11 experiment",
+  "run_id": "39054744052",
+  "head_sha": "58b3176ba0dfa224964313405826a48421c924a0",
+  "workflow_sha": "58b3176ba0dfa224964313405826a48421c924a0",
+  "builder_image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
+  "native_architecture": "aarch64",
+  "inputs": {
+    "scripts/compatibility_probe_cua.sh": "7826a73a7c57fe878ddd550a066f66072a7968ae8703777b2f1d3a56bce3c0cc",
+    "scripts/prepare_cua_termux_source.py": "093c12378c2f04e07da58dce83ac8e77c3d9edf86e5f2ad7bb2d14bd855c1d57",
+    "patches/next-stable/cua-driver.patch": "8b7c3453bed12feabd319436eae1abc791b4127a4fe485adcc96eb90ce780b6a",
+    ".github/workflows/cua-termux-probe.yml": "833a2701bc3d79ff9d3f6c6ab3668c81e1ce4c9e8af7bc430eefe84774595eed",
+    "scripts/compatibility_probe_cua_hermes.py": "310ca4e826fad5badad3750ea25fafe941a01c65311c3c5488afa4c2dc494b08",
+    "scripts/fetch_compatibility_candidate.py": "dc075415b46e14f3f09fb6a889fdf38279564b2f2e6e6008b21232545d1d6d8a",
+    "patches/next-stable/cua-hermes-integration.patch": "6424636d7d5b590724365eb8b952fa164ac6dfc26a9d7c1a9a70ac8baf7b591b"
+  },
+  "hermes_pm_cua_admission_changed": false,
+  "release_output": false,
+  "hermes_integration_requested": true,
+  "hermes_candidate": {
+    "receipt_sha256": "2bf694eec468c10a4d3820092813d8b2734c2b212954888009e3867a8a88dbf3",
+    "run_id": 39048514731,
+    "head_sha": "e271e922a2e71fd18591c45e9b98b8c7f9fffe02",
+    "artifact": {
+      "id": 12107225801,
+      "name": "hermes-termux-next-stable-candidate",
+      "bytes": 222119336,
+      "sha256": "c49f41590424520b99136800b7ba9fa41f3ab3926d418131cdf686da812d849b"
+    },
+    "package": {
+      "file": "hermes-agent_0.22.2-1_aarch64.deb",
+      "bytes": 222089768,
+      "sha256": "1e4e58fe17a1800f23ababcb2724e92b8904829eae3284569db52dbc672ca76a",
+      "zip_member": "hermes-source/termux-build/deb/hermes-agent_0.22.2-1_aarch64.deb"
+    }
+  }
+}

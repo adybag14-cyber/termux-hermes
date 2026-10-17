@@ -1,0 +1,30 @@
+computer_use action in non-interactive non-gateway context (pattern: cua:type:foreground): Allow computer_use to perform `type`? — no interactive user/gateway present; BLOCKED (fail-closed). Set HERMES_INTERACTIVE or HERMES_GATEWAY_SESSION to answer the prompt.
+[2m2026-10-17T17:46:58.537783Z[0m [33m WARN[0m [2mplatform_linux::overlay[0m[2m:[0m overlay: X11 channel rejected command (no sender or queue full) [3mkey[0m[2m=[0m__cua_runtime_0f670a38fe124ae9a87f45f8b240418a:hermes-23217fe497e7 [3msender_missing[0m[2m=[0mtrue
+
+✨ cua-driver v0.36.0 is available (you have v0.21.0).
+   Update with: cua-driver update
+   Release notes: https://github.com/trycua/cua/releases/tag/cua-driver-rs-v0.36.0
+
+[2m2026-10-17T17:47:01.499050Z[0m [33m WARN[0m [2mplatform_linux::overlay[0m[2m:[0m overlay: X11 channel rejected command (no sender or queue full) [3mkey[0m[2m=[0m__cua_runtime_0f670a38fe124ae9a87f45f8b240418a:hermes-23217fe497e7 [3msender_missing[0m[2m=[0mtrue
+[2m2026-10-17T17:47:01.499671Z[0m [33m WARN[0m [2mplatform_linux::overlay[0m[2m:[0m overlay: X11 channel rejected command (no sender or queue full) [3mkey[0m[2m=[0m__cua_runtime_0f670a38fe124ae9a87f45f8b240418a:hermes-23217fe497e7 [3msender_missing[0m[2m=[0mtrue
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_cua_hermes.py", line 641, in main
+    run_probe(args, receipt)
+    ~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_cua_hermes.py", line 508, in run_probe
+    approved_action("scroll", {"action": "scroll", "coordinate": [80, 60], "direction": "down", "amount": 2,
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                              "delivery_mode": "foreground"},
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                    "scroll down x2", lambda rows: require_button_events(rows, button=5, count=2, x=80, y=60))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_cua_hermes.py", line 499, in approved_action
+    wait_until(observed, "exact fixture input delivery")
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_cua_hermes.py", line 211, in wait_until
+    require(time.monotonic() < deadline, f"timed out waiting for {label}")
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_cua_hermes.py", line 62, in require
+    raise ProbeFailure(message)
+ProbeFailure: timed out waiting for exact fixture input delivery
+{"status": "failed", "result": "/out/hermes-integration/hermes-cua-result.json"}
