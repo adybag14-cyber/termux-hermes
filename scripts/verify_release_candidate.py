@@ -170,10 +170,26 @@ def verify_candidate(candidate: Path, run: dict, repository: str, run_id: str,
     }
 
 
-def verify_release_assets(candidate: Path, release: dict, tag: str) -> None:
+def validate_draft(release: dict, tag: str, target_commit: str) -> int:
     validate_tag(tag)
-    if release.get("tag_name") != tag or release.get("draft") is not True:
-        raise ValueError("uploaded release must still be the intended draft")
+    if not re.fullmatch(r"[a-f0-9]{40}", target_commit) or target_commit == "0" * 40:
+        raise ValueError("draft target must be a full publishing commit SHA")
+    release_id = release.get("id")
+    if type(release_id) is not int or release_id <= 0:
+        raise ValueError("draft must have a positive numeric release ID")
+    if (release.get("tag_name") != tag or release.get("draft") is not True
+            or release.get("prerelease") is not False
+            or release.get("published_at") is not None
+            or release.get("target_commitish") != target_commit):
+        raise ValueError("release must be the unpublished draft for this tag and publishing commit")
+    return release_id
+
+
+def verify_release_assets(candidate: Path, release: dict, tag: str,
+                          release_id: int, target_commit: str) -> None:
+    actual_id = validate_draft(release, tag, target_commit)
+    if type(release_id) is not int or actual_id != release_id:
+        raise ValueError("GitHub response does not match the selected numeric release ID")
     metadata = read_json(candidate / "BUILD-METADATA.json")
     package_filename = metadata.get("package", {}).get("file", "")
     if not re.fullmatch(r"hermes-agent_[0-9][A-Za-z0-9.+~-]*_aarch64\.deb", package_filename):
@@ -192,21 +208,49 @@ def verify_release_assets(candidate: Path, release: dict, tag: str) -> None:
             raise ValueError(f"GitHub asset digest/size/state mismatch: {asset['name']}")
 
 
-def ensure_new_release(repository: str, tag: str) -> None:
+def releases_for_tag(repository: str, tag: str) -> list[dict]:
+    """The authenticated list includes unpublished drafts absent from /tags/."""
     if not REPOSITORY.fullmatch(repository):
         raise ValueError("invalid repository name")
     validate_tag(tag)
-    for endpoint in (f"repos/{repository}/releases/tags/{tag}",
-                     f"repos/{repository}/git/ref/tags/{tag}"):
-        response = subprocess.run(
-            ["gh", "api", "--include", endpoint], capture_output=True, text=True,
-            encoding="utf-8", check=False,
-        )
-        status = re.search(r"^HTTP/\S+ (\d{3})\b", response.stdout, flags=re.MULTILINE)
-        if response.returncode == 0:
-            raise ValueError(f"immutable release or tag already exists: {tag}")
-        if status is None or status[1] != "404":
-            raise ValueError("could not establish release/tag absence: " + response.stderr.strip())
+    response = subprocess.run(
+        ["gh", "api", "--paginate", "--slurp", f"repos/{repository}/releases?per_page=100"],
+        capture_output=True, text=True, encoding="utf-8", check=False,
+    )
+    if response.returncode != 0:
+        raise ValueError("could not establish release absence: " + response.stderr.strip())
+    try:
+        pages = json.loads(response.stdout)
+    except ValueError as error:
+        raise ValueError("invalid GitHub release list JSON") from error
+    if (not isinstance(pages, list) or not pages
+            or any(not isinstance(page, list) for page in pages)
+            or any(not isinstance(release, dict)
+                   or not isinstance(release.get("tag_name"), str)
+                   for page in pages for release in page)):
+        raise ValueError("invalid paginated GitHub release list")
+    return [release for page in pages for release in page if release["tag_name"] == tag]
+
+
+def draft_release_id(repository: str, tag: str, target_commit: str) -> int:
+    matches = releases_for_tag(repository, tag)
+    if len(matches) != 1:
+        raise ValueError("expected exactly one matching draft release")
+    return validate_draft(matches[0], tag, target_commit)
+
+
+def ensure_new_release(repository: str, tag: str) -> None:
+    if releases_for_tag(repository, tag):
+        raise ValueError(f"immutable release or draft already exists: {tag}")
+    response = subprocess.run(
+        ["gh", "api", "--include", f"repos/{repository}/git/ref/tags/{tag}"],
+        capture_output=True, text=True, encoding="utf-8", check=False,
+    )
+    status = re.search(r"^HTTP/\S+ (\d{3})\b", response.stdout, flags=re.MULTILINE)
+    if response.returncode == 0:
+        raise ValueError(f"immutable Git tag already exists: {tag}")
+    if status is None or status[1] != "404":
+        raise ValueError("could not establish tag absence: " + response.stderr.strip())
 
 
 def main() -> int:
@@ -227,6 +271,12 @@ def main() -> int:
     assets_parser.add_argument("--candidate", type=Path, required=True)
     assets_parser.add_argument("--release-json", type=Path, required=True)
     assets_parser.add_argument("--release-tag", required=True)
+    assets_parser.add_argument("--release-id", type=int, required=True)
+    assets_parser.add_argument("--target-commit", required=True)
+    draft_parser = commands.add_parser("draft-id")
+    draft_parser.add_argument("--repository", required=True)
+    draft_parser.add_argument("--release-tag", required=True)
+    draft_parser.add_argument("--target-commit", required=True)
     new_parser = commands.add_parser("new-release")
     new_parser.add_argument("--repository", required=True)
     new_parser.add_argument("--release-tag", required=True)
@@ -250,8 +300,11 @@ def main() -> int:
                         stream.write(f"{key}={value}\n")
             print(json.dumps(result, indent=2, sort_keys=True))
         elif args.command == "assets":
-            verify_release_assets(args.candidate, read_json(args.release_json), args.release_tag)
+            verify_release_assets(args.candidate, read_json(args.release_json), args.release_tag,
+                                  args.release_id, args.target_commit)
             print("GitHub draft assets match every verified candidate digest and size")
+        elif args.command == "draft-id":
+            print(draft_release_id(args.repository, args.release_tag, args.target_commit))
         else:
             ensure_new_release(args.repository, args.release_tag)
             print(f"Release and Git tag are available: {args.release_tag}")

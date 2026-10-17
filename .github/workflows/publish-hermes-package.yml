@@ -124,10 +124,14 @@ jobs:
           gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
             --title "Hermes $SOURCE_TAG for Termux aarch64" \
             --notes-file "$RUNNER_TEMP/release-notes.md" --draft
+          DRAFT_ID="$(python3 scripts/verify_release_candidate.py draft-id \
+            --repository "$GITHUB_REPOSITORY" --release-tag "$RELEASE_TAG" \
+            --target-commit "$GITHUB_SHA")"
           gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" candidate/*
-          gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" > "$RUNNER_TEMP/draft-release.json"
+          gh api "repos/$GITHUB_REPOSITORY/releases/$DRAFT_ID" > "$RUNNER_TEMP/draft-release.json"
           python3 scripts/verify_release_candidate.py assets --candidate candidate \
-            --release-json "$RUNNER_TEMP/draft-release.json" --release-tag "$RELEASE_TAG"
+            --release-json "$RUNNER_TEMP/draft-release.json" --release-tag "$RELEASE_TAG" \
+            --release-id "$DRAFT_ID" --target-commit "$GITHUB_SHA"
           gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest=false
           printf 'Published [Hermes %s](https://github.com/%s/releases/tag/%s) from [native build %s](https://github.com/%s/actions/runs/%s).\n\nPackage SHA-256: %s\n' \
             "$SOURCE_TAG" "$GITHUB_REPOSITORY" "$RELEASE_TAG" "$BUILD_RUN_ID" \
