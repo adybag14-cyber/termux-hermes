@@ -1,0 +1,895 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-10-17T21:12:31.023571+00:00",
+  "scope": "Read-only exact registry sources pinned by unchanged hf-xet1.6 lock; no builds, no source or lock edits",
+  "packages": [
+    {
+      "name": "native-tls",
+      "version": "0.2.18",
+      "archive": {
+        "url": "https://static.crates.io/crates/native-tls/native-tls-0.2.18.crate",
+        "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-rust-route-readonly-20261017\\crates\\native-tls-0.2.18.crate",
+        "bytes": 29967,
+        "sha256": "465500e14ea162429d264d44189adc38b199b62b1c21eea9f69e4b73cb03bbf2"
+      },
+      "source_matches": [
+        {
+          "path": "native-tls-0.2.18/src/imp/openssl.rs",
+          "bytes": 17028,
+          "sha256": "d832fb9ebe0cbf470a57b300ae368e285cdfa2934c10c9057ceee7d3fefd8a07",
+          "matches": [
+            {
+              "line": 8,
+              "context": "use openssl::pkey::{PKey, Private};\nuse openssl::ssl::{\n    self, MidHandshakeSslStream, SslAcceptor, SslConnector, SslContextBuilder, SslMethod,\n    SslVerifyMode,\n};\nuse openssl::x509::store::X509StoreBuilder;\nuse openssl::x509::{X509VerifyResult, X509};\nuse openssl_probe::ProbeResult;\nuse std::sync::LazyLock;\nuse std::{error, fmt, io};"
+            },
+            {
+              "line": 97,
+              "context": "    Ok(())\n}\n\n#[cfg(target_os = \"android\")]\nfn load_android_root_certs(connector: &mut SslContextBuilder) -> Result<(), Error> {\n    use std::fs;\n\n    if let Ok(dir) = fs::read_dir(\"/system/etc/security/cacerts\") {\n        let certs = dir\n            .filter_map(|r| r.ok())"
+            },
+            {
+              "line": 281,
+              "context": "pub struct TlsConnector {\n    connector: SslConnector,\n    use_sni: bool,\n    accept_invalid_hostnames: bool,\n    accept_invalid_certs: bool,\n}\n\nimpl TlsConnector {\n    pub fn new(builder: &TlsConnectorBuilder) -> Result<TlsConnector, Error> {\n        let mut connector = SslConnector::builder(SslMethod::tls())?;"
+            },
+            {
+              "line": 282,
+              "context": "    connector: SslConnector,\n    use_sni: bool,\n    accept_invalid_hostnames: bool,\n    accept_invalid_certs: bool,\n}\n\nimpl TlsConnector {\n    pub fn new(builder: &TlsConnectorBuilder) -> Result<TlsConnector, Error> {\n        let mut connector = SslConnector::builder(SslMethod::tls())?;\n"
+            },
+            {
+              "line": 290,
+              "context": "        let mut connector = SslConnector::builder(SslMethod::tls())?;\n\n        // We need to load these separately so an error on one doesn't prevent the other from loading.\n        if let Some(cert_file) = &PROBE_RESULT.cert_file {\n            if let Err(e) = connector.load_verify_locations(Some(cert_file), None) {\n                debug!(\"load_verify_locations cert file error: {:?}\", e);\n            }\n        }\n        for cert_dir in &PROBE_RESULT.cert_dir {\n            if let Err(e) = connector.load_verify_locations(None, Some(cert_dir)) {"
+            },
+            {
+              "line": 291,
+              "context": "\n        // We need to load these separately so an error on one doesn't prevent the other from loading.\n        if let Some(cert_file) = &PROBE_RESULT.cert_file {\n            if let Err(e) = connector.load_verify_locations(Some(cert_file), None) {\n                debug!(\"load_verify_locations cert file error: {:?}\", e);\n            }\n        }\n        for cert_dir in &PROBE_RESULT.cert_dir {\n            if let Err(e) = connector.load_verify_locations(None, Some(cert_dir)) {\n                debug!(\"load_verify_locations cert dir error: {:?}\", e);"
+            },
+            {
+              "line": 295,
+              "context": "                debug!(\"load_verify_locations cert file error: {:?}\", e);\n            }\n        }\n        for cert_dir in &PROBE_RESULT.cert_dir {\n            if let Err(e) = connector.load_verify_locations(None, Some(cert_dir)) {\n                debug!(\"load_verify_locations cert dir error: {:?}\", e);\n            }\n        }\n\n        if let Some(ref identity) = builder.identity {"
+            },
+            {
+              "line": 296,
+              "context": "            }\n        }\n        for cert_dir in &PROBE_RESULT.cert_dir {\n            if let Err(e) = connector.load_verify_locations(None, Some(cert_dir)) {\n                debug!(\"load_verify_locations cert dir error: {:?}\", e);\n            }\n        }\n\n        if let Some(ref identity) = builder.identity {\n            connector.set_certificate(&identity.0.cert)?;"
+            },
+            {
+              "line": 328,
+              "context": "            connector.set_alpn_protos(&alpn_wire_format(&builder.alpn)?)?;\n        }\n\n        #[cfg(target_os = \"android\")]\n        load_android_root_certs(&mut connector)?;\n\n        Ok(TlsConnector {\n            connector: connector.build(),\n            use_sni: builder.use_sni,\n            accept_invalid_hostnames: builder.accept_invalid_hostnames,"
+            },
+            {
+              "line": 334,
+              "context": "        Ok(TlsConnector {\n            connector: connector.build(),\n            use_sni: builder.use_sni,\n            accept_invalid_hostnames: builder.accept_invalid_hostnames,\n            accept_invalid_certs: builder.accept_invalid_certs,\n        })\n    }\n\n    pub fn connect<S>(&self, domain: &str, stream: S) -> Result<TlsStream<S>, HandshakeError<S>>\n    where"
+            },
+            {
+              "line": 335,
+              "context": "            connector: connector.build(),\n            use_sni: builder.use_sni,\n            accept_invalid_hostnames: builder.accept_invalid_hostnames,\n            accept_invalid_certs: builder.accept_invalid_certs,\n        })\n    }\n\n    pub fn connect<S>(&self, domain: &str, stream: S) -> Result<TlsStream<S>, HandshakeError<S>>\n    where\n        S: io::Read + io::Write,"
+            },
+            {
+              "line": 347,
+              "context": "            .connector\n            .configure()?\n            .use_server_name_indication(self.use_sni)\n            .verify_hostname(!self.accept_invalid_hostnames);\n        if self.accept_invalid_certs {\n            ssl.set_verify(SslVerifyMode::NONE);\n        }\n\n        let s = ssl.connect(domain, stream)?;\n        Ok(TlsStream(s))"
+            },
+            {
+              "line": 348,
+              "context": "            .configure()?\n            .use_server_name_indication(self.use_sni)\n            .verify_hostname(!self.accept_invalid_hostnames);\n        if self.accept_invalid_certs {\n            ssl.set_verify(SslVerifyMode::NONE);\n        }\n\n        let s = ssl.connect(domain, stream)?;\n        Ok(TlsStream(s))\n    }"
+            },
+            {
+              "line": 349,
+              "context": "            .use_server_name_indication(self.use_sni)\n            .verify_hostname(!self.accept_invalid_hostnames);\n        if self.accept_invalid_certs {\n            ssl.set_verify(SslVerifyMode::NONE);\n        }\n\n        let s = ssl.connect(domain, stream)?;\n        Ok(TlsStream(s))\n    }\n}"
+            },
+            {
+              "line": 380,
+              "context": "        fmt.debug_struct(\"TlsConnector\")\n            // n.b. SslConnector is a newtype on SslContext which implements a noop Debug so it's omitted\n            .field(\"use_sni\", &self.use_sni)\n            .field(\"accept_invalid_hostnames\", &self.accept_invalid_hostnames)\n            .field(\"accept_invalid_certs\", &self.accept_invalid_certs)\n            .finish()\n    }\n}\n\n#[derive(Clone)]"
+            },
+            {
+              "line": 381,
+              "context": "            // n.b. SslConnector is a newtype on SslContext which implements a noop Debug so it's omitted\n            .field(\"use_sni\", &self.use_sni)\n            .field(\"accept_invalid_hostnames\", &self.accept_invalid_hostnames)\n            .field(\"accept_invalid_certs\", &self.accept_invalid_certs)\n            .finish()\n    }\n}\n\n#[derive(Clone)]\npub struct TlsAcceptor(SslAcceptor);"
+            }
+          ]
+        },
+        {
+          "path": "native-tls-0.2.18/src/imp/schannel.rs",
+          "bytes": 18318,
+          "sha256": "b59661db1000fa5016e134906cc017d83c6878ac1d3a260886aecc1c9d0042ae",
+          "matches": [
+            {
+              "line": 251,
+              "context": "    min_protocol: Option<crate::Protocol>,\n    max_protocol: Option<crate::Protocol>,\n    use_sni: bool,\n    accept_invalid_hostnames: bool,\n    accept_invalid_certs: bool,\n    disable_built_in_roots: bool,\n    #[cfg(feature = \"alpn\")]\n    alpn: Vec<Box<str>>,\n}\n"
+            },
+            {
+              "line": 252,
+              "context": "    max_protocol: Option<crate::Protocol>,\n    use_sni: bool,\n    accept_invalid_hostnames: bool,\n    accept_invalid_certs: bool,\n    disable_built_in_roots: bool,\n    #[cfg(feature = \"alpn\")]\n    alpn: Vec<Box<str>>,\n}\n\nimpl TlsConnector {"
+            },
+            {
+              "line": 272,
+              "context": "            min_protocol: builder.min_protocol,\n            max_protocol: builder.max_protocol,\n            use_sni: builder.use_sni,\n            accept_invalid_hostnames: builder.accept_invalid_hostnames,\n            accept_invalid_certs: builder.accept_invalid_certs,\n            disable_built_in_roots: builder.disable_built_in_roots,\n            #[cfg(feature = \"alpn\")]\n            alpn: builder.alpn.clone(),\n        })\n    }"
+            },
+            {
+              "line": 273,
+              "context": "            max_protocol: builder.max_protocol,\n            use_sni: builder.use_sni,\n            accept_invalid_hostnames: builder.accept_invalid_hostnames,\n            accept_invalid_certs: builder.accept_invalid_certs,\n            disable_built_in_roots: builder.disable_built_in_roots,\n            #[cfg(feature = \"alpn\")]\n            alpn: builder.alpn.clone(),\n        })\n    }\n"
+            },
+            {
+              "line": 295,
+              "context": "            .cert_store(self.roots.clone())\n            .domain(domain)\n            .use_sni(self.use_sni)\n            .accept_invalid_hostnames(self.accept_invalid_hostnames);\n        if self.accept_invalid_certs {\n            builder.verify_callback(|_| Ok(()));\n        } else if self.disable_built_in_roots {\n            let roots_copy = self.roots.clone();\n            builder.verify_callback(move |res| {\n                // Propagate previous error encountered during normal cert validation."
+            },
+            {
+              "line": 296,
+              "context": "            .domain(domain)\n            .use_sni(self.use_sni)\n            .accept_invalid_hostnames(self.accept_invalid_hostnames);\n        if self.accept_invalid_certs {\n            builder.verify_callback(|_| Ok(()));\n        } else if self.disable_built_in_roots {\n            let roots_copy = self.roots.clone();\n            builder.verify_callback(move |res| {\n                // Propagate previous error encountered during normal cert validation.\n                res.result()?;"
+            }
+          ]
+        },
+        {
+          "path": "native-tls-0.2.18/src/imp/security_framework.rs",
+          "bytes": 21488,
+          "sha256": "3d0e6d13f18e2d3742aad44a2a2fcf719eefeaf815e16b6ec542e5301c8d94da",
+          "matches": [
+            {
+              "line": 338,
+              "context": "    max_protocol: Option<Protocol>,\n    roots: Vec<SecCertificate>,\n    use_sni: bool,\n    danger_accept_invalid_hostnames: bool,\n    danger_accept_invalid_certs: bool,\n    disable_built_in_roots: bool,\n    #[cfg(feature = \"alpn\")]\n    alpn: Vec<Box<str>>,\n}\n"
+            },
+            {
+              "line": 339,
+              "context": "    roots: Vec<SecCertificate>,\n    use_sni: bool,\n    danger_accept_invalid_hostnames: bool,\n    danger_accept_invalid_certs: bool,\n    disable_built_in_roots: bool,\n    #[cfg(feature = \"alpn\")]\n    alpn: Vec<Box<str>>,\n}\n\nimpl TlsConnector {"
+            },
+            {
+              "line": 358,
+              "context": "                .map(|c| (c.0).0.clone())\n                .collect(),\n            use_sni: builder.use_sni,\n            danger_accept_invalid_hostnames: builder.accept_invalid_hostnames,\n            danger_accept_invalid_certs: builder.accept_invalid_certs,\n            disable_built_in_roots: builder.disable_built_in_roots,\n            #[cfg(feature = \"alpn\")]\n            alpn: builder.alpn.clone(),\n        })\n    }"
+            },
+            {
+              "line": 359,
+              "context": "                .collect(),\n            use_sni: builder.use_sni,\n            danger_accept_invalid_hostnames: builder.accept_invalid_hostnames,\n            danger_accept_invalid_certs: builder.accept_invalid_certs,\n            disable_built_in_roots: builder.disable_built_in_roots,\n            #[cfg(feature = \"alpn\")]\n            alpn: builder.alpn.clone(),\n        })\n    }\n"
+            },
+            {
+              "line": 389,
+              "context": "        }\n        builder.anchor_certificates(&self.roots);\n        builder.use_sni(self.use_sni);\n        builder.danger_accept_invalid_hostnames(self.danger_accept_invalid_hostnames);\n        builder.danger_accept_invalid_certs(self.danger_accept_invalid_certs);\n        builder.trust_anchor_certificates_only(self.disable_built_in_roots);\n\n        #[cfg(feature = \"alpn\")]\n        {\n            if !self.alpn.is_empty() {"
+            },
+            {
+              "line": 390,
+              "context": "        builder.anchor_certificates(&self.roots);\n        builder.use_sni(self.use_sni);\n        builder.danger_accept_invalid_hostnames(self.danger_accept_invalid_hostnames);\n        builder.danger_accept_invalid_certs(self.danger_accept_invalid_certs);\n        builder.trust_anchor_certificates_only(self.disable_built_in_roots);\n\n        #[cfg(feature = \"alpn\")]\n        {\n            if !self.alpn.is_empty() {\n                builder.alpn_protocols(&self.alpn.iter().map(|s| &**s).collect::<Vec<_>>());"
+            }
+          ]
+        },
+        {
+          "path": "native-tls-0.2.18/src/lib.rs",
+          "bytes": 24481,
+          "sha256": "a703abee1799058d5140b2dfbe441e84544680ca97f6ef09d722764c7d746ae6",
+          "matches": [
+            {
+              "line": 350,
+              "context": "    min_protocol: Option<Protocol>,\n    max_protocol: Option<Protocol>,\n    root_certificates: Vec<Certificate>,\n    accept_invalid_certs: bool,\n    accept_invalid_hostnames: bool,\n    use_sni: bool,\n    disable_built_in_roots: bool,\n    #[cfg(feature = \"alpn\")]\n    alpn: Vec<Box<str>>,\n}"
+            },
+            {
+              "line": 351,
+              "context": "    max_protocol: Option<Protocol>,\n    root_certificates: Vec<Certificate>,\n    accept_invalid_certs: bool,\n    accept_invalid_hostnames: bool,\n    use_sni: bool,\n    disable_built_in_roots: bool,\n    #[cfg(feature = \"alpn\")]\n    alpn: Vec<Box<str>>,\n}\n"
+            },
+            {
+              "line": 423,
+              "context": "    /// You should think very carefully before using this method. If invalid certificates are trusted, *any*\n    /// certificate for *any* site will be trusted for use. This includes expired certificates. This introduces\n    /// significant vulnerabilities, and should only be used as a last resort.\n    pub fn danger_accept_invalid_certs(&mut self, accept_invalid_certs: bool) -> &mut Self {\n        self.accept_invalid_certs = accept_invalid_certs;\n        self\n    }\n\n    /// Controls the use of Server Name Indication (SNI).\n    ///"
+            },
+            {
+              "line": 424,
+              "context": "    /// certificate for *any* site will be trusted for use. This includes expired certificates. This introduces\n    /// significant vulnerabilities, and should only be used as a last resort.\n    pub fn danger_accept_invalid_certs(&mut self, accept_invalid_certs: bool) -> &mut Self {\n        self.accept_invalid_certs = accept_invalid_certs;\n        self\n    }\n\n    /// Controls the use of Server Name Indication (SNI).\n    ///\n    /// Defaults to `true`."
+            },
+            {
+              "line": 445,
+              "context": "    /// You should think very carefully before using this method. If invalid hostnames are trusted, *any* valid\n    /// certificate for *any* site will be trusted for use. This introduces significant vulnerabilities, and should\n    /// only be used as a last resort.\n    pub fn danger_accept_invalid_hostnames(&mut self, accept_invalid_hostnames: bool) -> &mut Self {\n        self.accept_invalid_hostnames = accept_invalid_hostnames;\n        self\n    }\n\n    /// Creates a new `TlsConnector`.\n    pub fn build(&self) -> Result<TlsConnector> {"
+            },
+            {
+              "line": 446,
+              "context": "    /// certificate for *any* site will be trusted for use. This introduces significant vulnerabilities, and should\n    /// only be used as a last resort.\n    pub fn danger_accept_invalid_hostnames(&mut self, accept_invalid_hostnames: bool) -> &mut Self {\n        self.accept_invalid_hostnames = accept_invalid_hostnames;\n        self\n    }\n\n    /// Creates a new `TlsConnector`.\n    pub fn build(&self) -> Result<TlsConnector> {\n        let connector = imp::TlsConnector::new(self)?;"
+            },
+            {
+              "line": 494,
+              "context": "            max_protocol: None,\n            root_certificates: vec![],\n            use_sni: true,\n            accept_invalid_certs: false,\n            accept_invalid_hostnames: false,\n            disable_built_in_roots: false,\n            #[cfg(feature = \"alpn\")]\n            alpn: vec![],\n        }\n    }"
+            },
+            {
+              "line": 495,
+              "context": "            root_certificates: vec![],\n            use_sni: true,\n            accept_invalid_certs: false,\n            accept_invalid_hostnames: false,\n            disable_built_in_roots: false,\n            #[cfg(feature = \"alpn\")]\n            alpn: vec![],\n        }\n    }\n"
+            }
+          ]
+        },
+        {
+          "path": "native-tls-0.2.18/src/test.rs",
+          "bytes": 20361,
+          "sha256": "ae2f7f0c7d9912bf5e7b59a4c74e69f56d9c9c9f08ff537c4a2fad7339aa0638",
+          "matches": [
+            {
+              "line": 81,
+              "context": "#[test]\nfn connect_bad_hostname_ignored() {\n    let builder = p!(TlsConnector::builder()\n        .danger_accept_invalid_hostnames(true)\n        .build());\n    let s = p!(TcpStream::connect(\"google.com:443\"));\n    builder.connect(\"goggle.com\", s).unwrap();\n}\n\n#[test]"
+            },
+            {
+              "line": 365,
+              "context": "\n    let socket = p!(TcpStream::connect((\"localhost\", port)));\n    let builder = p!(TlsConnector::builder()\n        .danger_accept_invalid_certs(true)\n        .build());\n    let mut socket = p!(builder.connect(\"localhost\", socket));\n\n    p!(socket.write_all(b\"hello\"));\n    let mut buf = vec![];\n    p!(socket.read_to_end(&mut buf));"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "openssl",
+      "version": "0.10.81",
+      "archive": {
+        "url": "https://static.crates.io/crates/openssl/openssl-0.10.81.crate",
+        "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-rust-route-readonly-20261017\\crates\\openssl-0.10.81.crate",
+        "bytes": 311187,
+        "sha256": "77823a27f0babb03091cb9ed9ef80af3b39dbc82f97e8fa530374b7dafd87a45"
+      },
+      "source_matches": [
+        {
+          "path": "openssl-0.10.81/src/lib.rs",
+          "bytes": 7788,
+          "sha256": "3f74b428ccee8a71f2aa569307b80f5ea0bd6b6ba750d1485f6a9a989bab7714",
+          "matches": [
+            {
+              "line": 62,
+              "context": "//! A set of environment variables can be used to point `openssl-sys` towards an OpenSSL installation. They will\n//! override the automatic detection logic.\n//!\n//! * `OPENSSL_DIR` - If specified, the directory of an OpenSSL installation. The directory should contain `lib` and\n//!   `include` subdirectories containing the libraries and headers respectively.\n//! * `OPENSSL_LIB_DIR` and `OPENSSL_INCLUDE_DIR` - If specified, the directories containing the OpenSSL libraries and\n//!   headers respectively. This can be used if the OpenSSL installation is split in a nonstandard directory layout.\n//! * `OPENSSL_STATIC` - If set, the crate will statically link to OpenSSL rather than dynamically link.\n//! * `OPENSSL_LIBS` - If set, a `:`-separated list of library names to link to (e.g. `ssl:crypto`). This can be used\n//!   if nonstandard library names were used for whatever reason."
+            },
+            {
+              "line": 64,
+              "context": "//!\n//! * `OPENSSL_DIR` - If specified, the directory of an OpenSSL installation. The directory should contain `lib` and\n//!   `include` subdirectories containing the libraries and headers respectively.\n//! * `OPENSSL_LIB_DIR` and `OPENSSL_INCLUDE_DIR` - If specified, the directories containing the OpenSSL libraries and\n//!   headers respectively. This can be used if the OpenSSL installation is split in a nonstandard directory layout.\n//! * `OPENSSL_STATIC` - If set, the crate will statically link to OpenSSL rather than dynamically link.\n//! * `OPENSSL_LIBS` - If set, a `:`-separated list of library names to link to (e.g. `ssl:crypto`). This can be used\n//!   if nonstandard library names were used for whatever reason.\n//! * `OPENSSL_NO_VENDOR` - If set, always find OpenSSL in the system, even if the `vendored` feature is enabled.\n//!"
+            },
+            {
+              "line": 66,
+              "context": "//!   `include` subdirectories containing the libraries and headers respectively.\n//! * `OPENSSL_LIB_DIR` and `OPENSSL_INCLUDE_DIR` - If specified, the directories containing the OpenSSL libraries and\n//!   headers respectively. This can be used if the OpenSSL installation is split in a nonstandard directory layout.\n//! * `OPENSSL_STATIC` - If set, the crate will statically link to OpenSSL rather than dynamically link.\n//! * `OPENSSL_LIBS` - If set, a `:`-separated list of library names to link to (e.g. `ssl:crypto`). This can be used\n//!   if nonstandard library names were used for whatever reason.\n//! * `OPENSSL_NO_VENDOR` - If set, always find OpenSSL in the system, even if the `vendored` feature is enabled.\n//!\n//! If the `vendored` Cargo feature is enabled, the following environment variable can also be used to further configure\n//! the OpenSSL build."
+            },
+            {
+              "line": 69,
+              "context": "//! * `OPENSSL_STATIC` - If set, the crate will statically link to OpenSSL rather than dynamically link.\n//! * `OPENSSL_LIBS` - If set, a `:`-separated list of library names to link to (e.g. `ssl:crypto`). This can be used\n//!   if nonstandard library names were used for whatever reason.\n//! * `OPENSSL_NO_VENDOR` - If set, always find OpenSSL in the system, even if the `vendored` feature is enabled.\n//!\n//! If the `vendored` Cargo feature is enabled, the following environment variable can also be used to further configure\n//! the OpenSSL build.\n//!\n//! * `OPENSSL_CONFIG_DIR` - If set, the copy of OpenSSL built by the `openssl-src` crate will be configured to look for\n//!   configuration files and root certificates in this directory."
+            },
+            {
+              "line": 78,
+              "context": "//!   configuration files and root certificates in this directory.\n//!\n//! Additionally, these variables can be prefixed with the upper-cased target architecture (e.g.\n//!     `X86_64_UNKNOWN_LINUX_GNU_OPENSSL_DIR`), which can be useful when cross compiling.\n//!\n//! # Feature Detection\n//!\n//! APIs have been added to and removed from the various supported OpenSSL versions, and this library exposes the\n//! functionality available in the version being linked against. This means that methods, constants, and even modules\n//! will be present when building against one version of OpenSSL but not when building against another! APIs will"
+            }
+          ]
+        },
+        {
+          "path": "openssl-0.10.81/src/ssl/connector.rs",
+          "bytes": 13788,
+          "sha256": "36522d364ef1897ce664b6f156d8ebf74032285664bed429b7304b63b2df8b4f",
+          "matches": [
+            {
+              "line": 11,
+              "context": "use crate::ssl::SslVersion;\nuse crate::ssl::{\n    HandshakeError, Ssl, SslContext, SslContextBuilder, SslContextRef, SslMethod, SslMode,\n    SslOptions, SslRef, SslStream, SslVerifyMode,\n};\nuse crate::version;\nuse std::net::IpAddr;\n\nconst FFDHE_2048: &str = \"\n-----BEGIN DH PARAMETERS-----"
+            },
+            {
+              "line": 73,
+              "context": "    /// The default configuration is subject to change, and is currently derived from Python.\n    pub fn builder(method: SslMethod) -> Result<SslConnectorBuilder, ErrorStack> {\n        let mut ctx = ctx(method)?;\n        ctx.set_default_verify_paths()?;\n        ctx.set_cipher_list(\n            \"DEFAULT:!aNULL:!eNULL:!MD5:!3DES:!DES:!RC4:!IDEA:!SEED:!aDSS:!SRP:!PSK\",\n        )?;\n        setup_verify(&mut ctx);\n\n        Ok(SslConnectorBuilder(ctx))"
+            },
+            {
+              "line": 97,
+              "context": "        Ssl::new(&self.0).map(|ssl| ConnectConfiguration {\n            ssl,\n            sni: true,\n            verify_hostname: true,\n        })\n    }\n\n    /// Consumes the `SslConnector`, returning the inner raw `SslContext`.\n    pub fn into_context(self) -> SslContext {\n        self.0"
+            },
+            {
+              "line": 140,
+              "context": "pub struct ConnectConfiguration {\n    ssl: Ssl,\n    sni: bool,\n    verify_hostname: bool,\n}\n\nimpl ConnectConfiguration {\n    /// A builder-style version of `set_use_server_name_indication`.\n    pub fn use_server_name_indication(mut self, use_sni: bool) -> ConnectConfiguration {\n        self.set_use_server_name_indication(use_sni);"
+            },
+            {
+              "line": 157,
+              "context": "        self.sni = use_sni;\n    }\n\n    /// A builder-style version of `set_verify_hostname`.\n    pub fn verify_hostname(mut self, verify_hostname: bool) -> ConnectConfiguration {\n        self.set_verify_hostname(verify_hostname);\n        self\n    }\n\n    /// Configures the use of hostname verification when connecting."
+            },
+            {
+              "line": 158,
+              "context": "    }\n\n    /// A builder-style version of `set_verify_hostname`.\n    pub fn verify_hostname(mut self, verify_hostname: bool) -> ConnectConfiguration {\n        self.set_verify_hostname(verify_hostname);\n        self\n    }\n\n    /// Configures the use of hostname verification when connecting.\n    ///"
+            },
+            {
+              "line": 159,
+              "context": "\n    /// A builder-style version of `set_verify_hostname`.\n    pub fn verify_hostname(mut self, verify_hostname: bool) -> ConnectConfiguration {\n        self.set_verify_hostname(verify_hostname);\n        self\n    }\n\n    /// Configures the use of hostname verification when connecting.\n    ///\n    /// Defaults to `true`."
+            },
+            {
+              "line": 172,
+              "context": "    /// You should think very carefully before you use this method. If hostname verification is not\n    /// used, *any* valid certificate for *any* site will be trusted for use from any other. This\n    /// introduces a significant vulnerability to man-in-the-middle attacks.\n    pub fn set_verify_hostname(&mut self, verify_hostname: bool) {\n        self.verify_hostname = verify_hostname;\n    }\n\n    /// Returns an `Ssl` configured to connect to the provided domain.\n    ///\n    /// The domain is used for SNI (if it is not an IP address) and hostname verification if enabled."
+            },
+            {
+              "line": 173,
+              "context": "    /// used, *any* valid certificate for *any* site will be trusted for use from any other. This\n    /// introduces a significant vulnerability to man-in-the-middle attacks.\n    pub fn set_verify_hostname(&mut self, verify_hostname: bool) {\n        self.verify_hostname = verify_hostname;\n    }\n\n    /// Returns an `Ssl` configured to connect to the provided domain.\n    ///\n    /// The domain is used for SNI (if it is not an IP address) and hostname verification if enabled.\n    pub fn into_ssl(mut self, domain: &str) -> Result<Ssl, ErrorStack> {"
+            },
+            {
+              "line": 184,
+              "context": "            self.ssl.set_hostname(domain)?;\n        }\n\n        if self.verify_hostname {\n            setup_verify_hostname(&mut self.ssl, domain)?;\n        }\n\n        Ok(self.ssl)\n    }\n"
+            },
+            {
+              "line": 185,
+              "context": "        }\n\n        if self.verify_hostname {\n            setup_verify_hostname(&mut self.ssl, domain)?;\n        }\n\n        Ok(self.ssl)\n    }\n\n    /// Initiates a client-side TLS session on a stream."
+            },
+            {
+              "line": 377,
+              "context": "}\n\nfn setup_verify(ctx: &mut SslContextBuilder) {\n    ctx.set_verify(SslVerifyMode::PEER);\n}\n\nfn setup_verify_hostname(ssl: &mut SslRef, domain: &str) -> Result<(), ErrorStack> {\n    use crate::x509::verify::X509CheckFlags;\n\n    let param = ssl.param_mut();"
+            },
+            {
+              "line": 380,
+              "context": "    ctx.set_verify(SslVerifyMode::PEER);\n}\n\nfn setup_verify_hostname(ssl: &mut SslRef, domain: &str) -> Result<(), ErrorStack> {\n    use crate::x509::verify::X509CheckFlags;\n\n    let param = ssl.param_mut();\n    param.set_hostflags(X509CheckFlags::NO_PARTIAL_WILDCARDS);\n    match domain.parse() {\n        Ok(ip) => param.set_ip(ip),"
+            }
+          ]
+        },
+        {
+          "path": "openssl-0.10.81/src/ssl/mod.rs",
+          "bytes": 154322,
+          "sha256": "c1dfb4620e2bc35c0233fffc08750d8fe9c58711dfefa9cd593dab9ae105aee6",
+          "matches": [
+            {
+              "line": 398,
+              "context": "    /// Options controlling the behavior of certificate verification.\n    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]\n    #[repr(transparent)]\n    pub struct SslVerifyMode: i32 {\n        /// Verifies that the peer's certificate is trusted.\n        ///\n        /// On the server side, this will cause OpenSSL to request a certificate from the client.\n        const PEER = ffi::SSL_VERIFY_PEER;\n\n        /// Disables verification of the peer's certificate."
+            },
+            {
+              "line": 774,
+              "context": "    }\n\n    /// Configures the certificate verification method for new connections.\n    #[corresponds(SSL_CTX_set_verify)]\n    pub fn set_verify(&mut self, mode: SslVerifyMode) {\n        unsafe {\n            ffi::SSL_CTX_set_verify(self.as_ptr(), mode.bits() as c_int, None);\n        }\n    }\n"
+            },
+            {
+              "line": 775,
+              "context": "\n    /// Configures the certificate verification method for new connections.\n    #[corresponds(SSL_CTX_set_verify)]\n    pub fn set_verify(&mut self, mode: SslVerifyMode) {\n        unsafe {\n            ffi::SSL_CTX_set_verify(self.as_ptr(), mode.bits() as c_int, None);\n        }\n    }\n\n    /// Configures the certificate verification method for new connections and"
+            },
+            {
+              "line": 777,
+              "context": "    #[corresponds(SSL_CTX_set_verify)]\n    pub fn set_verify(&mut self, mode: SslVerifyMode) {\n        unsafe {\n            ffi::SSL_CTX_set_verify(self.as_ptr(), mode.bits() as c_int, None);\n        }\n    }\n\n    /// Configures the certificate verification method for new connections and\n    /// registers a verification callback.\n    ///"
+            },
+            {
+              "line": 787,
+              "context": "    /// The callback is passed a boolean indicating if OpenSSL's internal verification succeeded as\n    /// well as a reference to the `X509StoreContext` which can be used to examine the certificate\n    /// chain. It should return a boolean indicating if verification succeeded.\n    #[corresponds(SSL_CTX_set_verify)]\n    pub fn set_verify_callback<F>(&mut self, mode: SslVerifyMode, verify: F)\n    where\n        F: Fn(bool, &mut X509StoreContextRef) -> bool + 'static + Sync + Send,\n    {\n        unsafe {\n            self.set_ex_data(SslContext::cached_ex_index::<F>(), verify);"
+            },
+            {
+              "line": 788,
+              "context": "    /// well as a reference to the `X509StoreContext` which can be used to examine the certificate\n    /// chain. It should return a boolean indicating if verification succeeded.\n    #[corresponds(SSL_CTX_set_verify)]\n    pub fn set_verify_callback<F>(&mut self, mode: SslVerifyMode, verify: F)\n    where\n        F: Fn(bool, &mut X509StoreContextRef) -> bool + 'static + Sync + Send,\n    {\n        unsafe {\n            self.set_ex_data(SslContext::cached_ex_index::<F>(), verify);\n            ffi::SSL_CTX_set_verify(self.as_ptr(), mode.bits() as c_int, Some(raw_verify::<F>));"
+            },
+            {
+              "line": 794,
+              "context": "    {\n        unsafe {\n            self.set_ex_data(SslContext::cached_ex_index::<F>(), verify);\n            ffi::SSL_CTX_set_verify(self.as_ptr(), mode.bits() as c_int, Some(raw_verify::<F>));\n        }\n    }\n\n    /// Configures the server name indication (SNI) callback for new connections.\n    ///\n    /// SNI is used to allow a single server to handle requests for multiple domains, each of which"
+            },
+            {
+              "line": 832,
+              "context": "    /// Sets the certificate verification depth.\n    ///\n    /// If the peer's certificate chain is longer than this value, verification will fail.\n    #[corresponds(SSL_CTX_set_verify_depth)]\n    pub fn set_verify_depth(&mut self, depth: u32) {\n        unsafe {\n            ffi::SSL_CTX_set_verify_depth(self.as_ptr(), depth as c_int);\n        }\n    }\n"
+            },
+            {
+              "line": 833,
+              "context": "    ///\n    /// If the peer's certificate chain is longer than this value, verification will fail.\n    #[corresponds(SSL_CTX_set_verify_depth)]\n    pub fn set_verify_depth(&mut self, depth: u32) {\n        unsafe {\n            ffi::SSL_CTX_set_verify_depth(self.as_ptr(), depth as c_int);\n        }\n    }\n\n    /// Sets a custom certificate store for verifying peer certificates."
+            },
+            {
+              "line": 835,
+              "context": "    #[corresponds(SSL_CTX_set_verify_depth)]\n    pub fn set_verify_depth(&mut self, depth: u32) {\n        unsafe {\n            ffi::SSL_CTX_set_verify_depth(self.as_ptr(), depth as c_int);\n        }\n    }\n\n    /// Sets a custom certificate store for verifying peer certificates.\n    ///\n    /// Requires OpenSSL 1.1.0 or newer."
+            },
+            {
+              "line": 844,
+              "context": "    /// Requires OpenSSL 1.1.0 or newer.\n    #[corresponds(SSL_CTX_set0_verify_cert_store)]\n    #[cfg(ossl110)]\n    pub fn set_verify_cert_store(&mut self, cert_store: X509Store) -> Result<(), ErrorStack> {\n        unsafe {\n            let ptr = cert_store.as_ptr();\n            cvt(ffi::SSL_CTX_set0_verify_cert_store(self.as_ptr(), ptr) as c_int)?;\n            mem::forget(cert_store);\n\n            Ok(())"
+            },
+            {
+              "line": 920,
+              "context": "\n    /// Use the default locations of trusted certificates for verification.\n    ///\n    /// These locations are read from the `SSL_CERT_FILE` and `SSL_CERT_DIR` environment variables\n    /// if present, or defaults specified at OpenSSL build time otherwise.\n    #[corresponds(SSL_CTX_set_default_verify_paths)]\n    pub fn set_default_verify_paths(&mut self) -> Result<(), ErrorStack> {\n        unsafe { cvt(ffi::SSL_CTX_set_default_verify_paths(self.as_ptr())).map(|_| ()) }\n    }\n"
+            },
+            {
+              "line": 922,
+              "context": "    ///\n    /// These locations are read from the `SSL_CERT_FILE` and `SSL_CERT_DIR` environment variables\n    /// if present, or defaults specified at OpenSSL build time otherwise.\n    #[corresponds(SSL_CTX_set_default_verify_paths)]\n    pub fn set_default_verify_paths(&mut self) -> Result<(), ErrorStack> {\n        unsafe { cvt(ffi::SSL_CTX_set_default_verify_paths(self.as_ptr())).map(|_| ()) }\n    }\n\n    /// Loads trusted root certificates from a file.\n    ///"
+            },
+            {
+              "line": 923,
+              "context": "    /// These locations are read from the `SSL_CERT_FILE` and `SSL_CERT_DIR` environment variables\n    /// if present, or defaults specified at OpenSSL build time otherwise.\n    #[corresponds(SSL_CTX_set_default_verify_paths)]\n    pub fn set_default_verify_paths(&mut self) -> Result<(), ErrorStack> {\n        unsafe { cvt(ffi::SSL_CTX_set_default_verify_paths(self.as_ptr())).map(|_| ()) }\n    }\n\n    /// Loads trusted root certificates from a file.\n    ///\n    /// The file should contain a sequence of PEM-formatted CA certificates."
+            },
+            {
+              "line": 924,
+              "context": "    /// if present, or defaults specified at OpenSSL build time otherwise.\n    #[corresponds(SSL_CTX_set_default_verify_paths)]\n    pub fn set_default_verify_paths(&mut self) -> Result<(), ErrorStack> {\n        unsafe { cvt(ffi::SSL_CTX_set_default_verify_paths(self.as_ptr())).map(|_| ()) }\n    }\n\n    /// Loads trusted root certificates from a file.\n    ///\n    /// The file should contain a sequence of PEM-formatted CA certificates.\n    #[corresponds(SSL_CTX_load_verify_locations)]"
+            },
+            {
+              "line": 1951,
+              "context": "        unsafe { ffi::SSL_CTX_sess_get_cache_size(self.as_ptr()) as i64 }\n    }\n\n    /// Returns the verify mode that was set on this context from [`SslContextBuilder::set_verify`].\n    ///\n    /// [`SslContextBuilder::set_verify`]: struct.SslContextBuilder.html#method.set_verify\n    #[corresponds(SSL_CTX_get_verify_mode)]\n    pub fn verify_mode(&self) -> SslVerifyMode {\n        let mode = unsafe { ffi::SSL_CTX_get_verify_mode(self.as_ptr()) };\n        SslVerifyMode::from_bits_retain(mode)"
+            },
+            {
+              "line": 1953,
+              "context": "\n    /// Returns the verify mode that was set on this context from [`SslContextBuilder::set_verify`].\n    ///\n    /// [`SslContextBuilder::set_verify`]: struct.SslContextBuilder.html#method.set_verify\n    #[corresponds(SSL_CTX_get_verify_mode)]\n    pub fn verify_mode(&self) -> SslVerifyMode {\n        let mode = unsafe { ffi::SSL_CTX_get_verify_mode(self.as_ptr()) };\n        SslVerifyMode::from_bits_retain(mode)\n    }\n"
+            },
+            {
+              "line": 1955,
+              "context": "    ///\n    /// [`SslContextBuilder::set_verify`]: struct.SslContextBuilder.html#method.set_verify\n    #[corresponds(SSL_CTX_get_verify_mode)]\n    pub fn verify_mode(&self) -> SslVerifyMode {\n        let mode = unsafe { ffi::SSL_CTX_get_verify_mode(self.as_ptr()) };\n        SslVerifyMode::from_bits_retain(mode)\n    }\n\n    /// Gets the number of TLS 1.3 session tickets that will be sent to a client after a full\n    /// handshake."
+            },
+            {
+              "line": 1957,
+              "context": "    #[corresponds(SSL_CTX_get_verify_mode)]\n    pub fn verify_mode(&self) -> SslVerifyMode {\n        let mode = unsafe { ffi::SSL_CTX_get_verify_mode(self.as_ptr()) };\n        SslVerifyMode::from_bits_retain(mode)\n    }\n\n    /// Gets the number of TLS 1.3 session tickets that will be sent to a client after a full\n    /// handshake.\n    ///\n    /// Requires OpenSSL 1.1.1 or newer."
+            },
+            {
+              "line": 2398,
+              "context": "        unsafe { ffi::SSL_set_accept_state(self.as_ptr()) }\n    }\n\n    /// Like [`SslContextBuilder::set_verify`].\n    ///\n    /// [`SslContextBuilder::set_verify`]: struct.SslContextBuilder.html#method.set_verify\n    #[corresponds(SSL_set_verify)]\n    pub fn set_verify(&mut self, mode: SslVerifyMode) {\n        unsafe { ffi::SSL_set_verify(self.as_ptr(), mode.bits() as c_int, None) }\n    }"
+            },
+            {
+              "line": 2400,
+              "context": "\n    /// Like [`SslContextBuilder::set_verify`].\n    ///\n    /// [`SslContextBuilder::set_verify`]: struct.SslContextBuilder.html#method.set_verify\n    #[corresponds(SSL_set_verify)]\n    pub fn set_verify(&mut self, mode: SslVerifyMode) {\n        unsafe { ffi::SSL_set_verify(self.as_ptr(), mode.bits() as c_int, None) }\n    }\n\n    /// Returns the verify mode that was set using `set_verify`."
+            },
+            {
+              "line": 2401,
+              "context": "    /// Like [`SslContextBuilder::set_verify`].\n    ///\n    /// [`SslContextBuilder::set_verify`]: struct.SslContextBuilder.html#method.set_verify\n    #[corresponds(SSL_set_verify)]\n    pub fn set_verify(&mut self, mode: SslVerifyMode) {\n        unsafe { ffi::SSL_set_verify(self.as_ptr(), mode.bits() as c_int, None) }\n    }\n\n    /// Returns the verify mode that was set using `set_verify`.\n    #[corresponds(SSL_set_verify_mode)]"
+            },
+            {
+              "line": 2402,
+              "context": "    ///\n    /// [`SslContextBuilder::set_verify`]: struct.SslContextBuilder.html#method.set_verify\n    #[corresponds(SSL_set_verify)]\n    pub fn set_verify(&mut self, mode: SslVerifyMode) {\n        unsafe { ffi::SSL_set_verify(self.as_ptr(), mode.bits() as c_int, None) }\n    }\n\n    /// Returns the verify mode that was set using `set_verify`.\n    #[corresponds(SSL_set_verify_mode)]\n    pub fn verify_mode(&self) -> SslVerifyMode {"
+            },
+            {
+              "line": 2403,
+              "context": "    /// [`SslContextBuilder::set_verify`]: struct.SslContextBuilder.html#method.set_verify\n    #[corresponds(SSL_set_verify)]\n    pub fn set_verify(&mut self, mode: SslVerifyMode) {\n        unsafe { ffi::SSL_set_verify(self.as_ptr(), mode.bits() as c_int, None) }\n    }\n\n    /// Returns the verify mode that was set using `set_verify`.\n    #[corresponds(SSL_set_verify_mode)]\n    pub fn verify_mode(&self) -> SslVerifyMode {\n        let mode = unsafe { ffi::SSL_get_verify_mode(self.as_ptr()) };"
+            },
+            {
+              "line": 2406,
+              "context": "        unsafe { ffi::SSL_set_verify(self.as_ptr(), mode.bits() as c_int, None) }\n    }\n\n    /// Returns the verify mode that was set using `set_verify`.\n    #[corresponds(SSL_set_verify_mode)]\n    pub fn verify_mode(&self) -> SslVerifyMode {\n        let mode = unsafe { ffi::SSL_get_verify_mode(self.as_ptr()) };\n        SslVerifyMode::from_bits_retain(mode)\n    }\n"
+            },
+            {
+              "line": 2407,
+              "context": "    }\n\n    /// Returns the verify mode that was set using `set_verify`.\n    #[corresponds(SSL_set_verify_mode)]\n    pub fn verify_mode(&self) -> SslVerifyMode {\n        let mode = unsafe { ffi::SSL_get_verify_mode(self.as_ptr()) };\n        SslVerifyMode::from_bits_retain(mode)\n    }\n\n    /// Like [`SslContextBuilder::set_verify_callback`]."
+            },
+            {
+              "line": 2408,
+              "context": "\n    /// Returns the verify mode that was set using `set_verify`.\n    #[corresponds(SSL_set_verify_mode)]\n    pub fn verify_mode(&self) -> SslVerifyMode {\n        let mode = unsafe { ffi::SSL_get_verify_mode(self.as_ptr()) };\n        SslVerifyMode::from_bits_retain(mode)\n    }\n\n    /// Like [`SslContextBuilder::set_verify_callback`].\n    ///"
+            },
+            {
+              "line": 2410,
+              "context": "    #[corresponds(SSL_set_verify_mode)]\n    pub fn verify_mode(&self) -> SslVerifyMode {\n        let mode = unsafe { ffi::SSL_get_verify_mode(self.as_ptr()) };\n        SslVerifyMode::from_bits_retain(mode)\n    }\n\n    /// Like [`SslContextBuilder::set_verify_callback`].\n    ///\n    /// [`SslContextBuilder::set_verify_callback`]: struct.SslContextBuilder.html#method.set_verify_callback\n    #[corresponds(SSL_set_verify)]"
+            },
+            {
+              "line": 2413,
+              "context": "        SslVerifyMode::from_bits_retain(mode)\n    }\n\n    /// Like [`SslContextBuilder::set_verify_callback`].\n    ///\n    /// [`SslContextBuilder::set_verify_callback`]: struct.SslContextBuilder.html#method.set_verify_callback\n    #[corresponds(SSL_set_verify)]\n    pub fn set_verify_callback<F>(&mut self, mode: SslVerifyMode, verify: F)\n    where\n        F: Fn(bool, &mut X509StoreContextRef) -> bool + 'static + Sync + Send,"
+            },
+            {
+              "line": 2415,
+              "context": "\n    /// Like [`SslContextBuilder::set_verify_callback`].\n    ///\n    /// [`SslContextBuilder::set_verify_callback`]: struct.SslContextBuilder.html#method.set_verify_callback\n    #[corresponds(SSL_set_verify)]\n    pub fn set_verify_callback<F>(&mut self, mode: SslVerifyMode, verify: F)\n    where\n        F: Fn(bool, &mut X509StoreContextRef) -> bool + 'static + Sync + Send,\n    {\n        unsafe {"
+            },
+            {
+              "line": 2416,
+              "context": "    /// Like [`SslContextBuilder::set_verify_callback`].\n    ///\n    /// [`SslContextBuilder::set_verify_callback`]: struct.SslContextBuilder.html#method.set_verify_callback\n    #[corresponds(SSL_set_verify)]\n    pub fn set_verify_callback<F>(&mut self, mode: SslVerifyMode, verify: F)\n    where\n        F: Fn(bool, &mut X509StoreContextRef) -> bool + 'static + Sync + Send,\n    {\n        unsafe {\n            // this needs to be in an Arc since the callback can register a new callback!"
+            },
+            {
+              "line": 2417,
+              "context": "    ///\n    /// [`SslContextBuilder::set_verify_callback`]: struct.SslContextBuilder.html#method.set_verify_callback\n    #[corresponds(SSL_set_verify)]\n    pub fn set_verify_callback<F>(&mut self, mode: SslVerifyMode, verify: F)\n    where\n        F: Fn(bool, &mut X509StoreContextRef) -> bool + 'static + Sync + Send,\n    {\n        unsafe {\n            // this needs to be in an Arc since the callback can register a new callback!\n            self.set_ex_data(Ssl::cached_ex_index(), Arc::new(verify));"
+            },
+            {
+              "line": 2424,
+              "context": "        unsafe {\n            // this needs to be in an Arc since the callback can register a new callback!\n            self.set_ex_data(Ssl::cached_ex_index(), Arc::new(verify));\n            ffi::SSL_set_verify(\n                self.as_ptr(),\n                mode.bits() as c_int,\n                Some(ssl_raw_verify::<F>),\n            );\n        }\n    }"
+            },
+            {
+              "line": 3290,
+              "context": "        path: P,\n    ) -> Result<(), ErrorStack> {\n        let p = path.as_ref().as_os_str().to_str().unwrap();\n        let cert_file = CString::new(p).unwrap();\n        unsafe {\n            cvt(ffi::SSL_use_certificate_chain_file(\n                self.as_ptr(),\n                cert_file.as_ptr(),\n            ))?;\n        };"
+            },
+            {
+              "line": 3294,
+              "context": "        unsafe {\n            cvt(ffi::SSL_use_certificate_chain_file(\n                self.as_ptr(),\n                cert_file.as_ptr(),\n            ))?;\n        };\n        Ok(())\n    }\n\n    /// Sets ca certificate that client trusted"
+            },
+            {
+              "line": 3389,
+              "context": "    /// Set the certificate store used for certificate verification\n    #[corresponds(SSL_set_cert_store)]\n    #[cfg(ossl110)]\n    pub fn set_verify_cert_store(&mut self, cert_store: X509Store) -> Result<(), ErrorStack> {\n        unsafe {\n            cvt(ffi::SSL_set0_verify_cert_store(self.as_ptr(), cert_store.as_ptr()) as c_int)?;\n            mem::forget(cert_store);\n            Ok(())\n        }\n    }"
+            }
+          ]
+        },
+        {
+          "path": "openssl-0.10.81/src/ssl/test/mod.rs",
+          "bytes": 56895,
+          "sha256": "ad87f4cda4b690c4a4b3e081d5f807aef6f0c06c07986c1f8d3e993a18cc4c1d",
+          "matches": [
+            {
+              "line": 33,
+              "context": "use crate::ssl::{\n    Error, HandshakeError, MidHandshakeSslStream, ShutdownResult, ShutdownState, Ssl, SslAcceptor,\n    SslAcceptorBuilder, SslConnector, SslContext, SslContextBuilder, SslFiletype, SslMethod,\n    SslOptions, SslSessionCacheMode, SslStream, SslVerifyMode, StatusType,\n};\n#[cfg(ossl110)]\nuse crate::x509::store::X509StoreBuilder;\n#[cfg(ossl110)]\nuse crate::x509::verify::X509CheckFlags;\nuse crate::x509::{X509Name, X509StoreContext, X509VerifyResult, X509};"
+            },
+            {
+              "line": 54,
+              "context": "    let server = server.build();\n\n    let mut client = server.client();\n    client.ctx().set_verify(SslVerifyMode::PEER);\n\n    client.connect_err();\n}\n\n#[test]\nfn verify_trusted() {"
+            },
+            {
+              "line": 79,
+              "context": "    store.add_cert(x509).unwrap();\n\n    let mut client = server.client();\n    client.ctx().set_verify(SslVerifyMode::PEER);\n    client.ctx().set_verify_cert_store(store.build()).unwrap();\n\n    client.connect();\n}\n\n#[test]"
+            },
+            {
+              "line": 80,
+              "context": "\n    let mut client = server.client();\n    client.ctx().set_verify(SslVerifyMode::PEER);\n    client.ctx().set_verify_cert_store(store.build()).unwrap();\n\n    client.connect();\n}\n\n#[test]\nfn verify_untrusted_callback_override_ok() {"
+            },
+            {
+              "line": 94,
+              "context": "    let mut client = server.client();\n    client\n        .ctx()\n        .set_verify_callback(SslVerifyMode::PEER, |_, x509| {\n            CALLED_BACK.store(true, Ordering::SeqCst);\n            assert!(x509.current_cert().is_some());\n            true\n        });\n\n    client.connect();"
+            },
+            {
+              "line": 113,
+              "context": "    let mut client = server.client();\n    client\n        .ctx()\n        .set_verify_callback(SslVerifyMode::PEER, |_, _| false);\n\n    client.connect_err();\n}\n\n#[test]\nfn verify_trusted_callback_override_ok() {"
+            },
+            {
+              "line": 128,
+              "context": "    client.ctx().set_ca_file(\"test/root-ca.pem\").unwrap();\n    client\n        .ctx()\n        .set_verify_callback(SslVerifyMode::PEER, |_, x509| {\n            CALLED_BACK.store(true, Ordering::SeqCst);\n            assert!(x509.current_cert().is_some());\n            true\n        });\n\n    client.connect();"
+            },
+            {
+              "line": 148,
+              "context": "    client.ctx().set_ca_file(\"test/root-ca.pem\").unwrap();\n    client\n        .ctx()\n        .set_verify_callback(SslVerifyMode::PEER, |_, _| false);\n\n    client.connect_err();\n}\n\n#[test]\nfn verify_callback_load_certs() {"
+            },
+            {
+              "line": 162,
+              "context": "    let mut client = server.client();\n    client\n        .ctx()\n        .set_verify_callback(SslVerifyMode::PEER, |_, x509| {\n            CALLED_BACK.store(true, Ordering::SeqCst);\n            assert!(x509.current_cert().is_some());\n            true\n        });\n\n    client.connect();"
+            },
+            {
+              "line": 182,
+              "context": "    client.ctx().set_ca_file(\"test/root-ca.pem\").unwrap();\n    client\n        .ctx()\n        .set_verify_callback(SslVerifyMode::PEER, |_, x509| {\n            CALLED_BACK.store(true, Ordering::SeqCst);\n            assert_eq!(x509.error(), X509VerifyResult::OK);\n            true\n        });\n\n    client.connect();"
+            },
+            {
+              "line": 201,
+              "context": "    let mut client = server.client();\n    client\n        .ctx()\n        .set_verify_callback(SslVerifyMode::PEER, |_, x509| {\n            assert_ne!(x509.error(), X509VerifyResult::OK);\n            false\n        });\n\n    client.connect_err();\n}"
+            },
+            {
+              "line": 219,
+              "context": "    let expected = \"59172d9313e84459bcff27f967e79e6e9217e584\";\n    client\n        .ctx()\n        .set_verify_callback(SslVerifyMode::PEER, move |_, x509| {\n            CALLED_BACK.store(true, Ordering::SeqCst);\n            let cert = x509.current_cert().unwrap();\n            let digest = cert.digest(MessageDigest::sha1()).unwrap();\n            assert_eq!(hex::encode(digest), expected);\n            true\n        });"
+            },
+            {
+              "line": 241,
+              "context": "    let expected = \"59172d9313e84459bcff27f967e79e6e9217e584\";\n    client\n        .ssl()\n        .set_verify_callback(SslVerifyMode::PEER, move |_, x509| {\n            CALLED_BACK.store(true, Ordering::SeqCst);\n            let cert = x509.current_cert().unwrap();\n            let digest = cert.digest(MessageDigest::sha1()).unwrap();\n            assert_eq!(hex::encode(digest), expected);\n            true\n        });"
+            },
+            {
+              "line": 676,
+              "context": "#[cfg_attr(all(target_os = \"macos\", feature = \"vendored\"), ignore)]\nfn default_verify_paths() {\n    let mut ctx = SslContext::builder(SslMethod::tls()).unwrap();\n    ctx.set_default_verify_paths().unwrap();\n    ctx.set_verify(SslVerifyMode::PEER);\n    #[cfg(ossl400)]\n    ctx.set_options(super::SslOptions::IGNORE_UNEXPECTED_EOF);\n    let ctx = ctx.build();\n    let s = match TcpStream::connect(\"google.com:443\") {\n        Ok(s) => s,"
+            },
+            {
+              "line": 677,
+              "context": "fn default_verify_paths() {\n    let mut ctx = SslContext::builder(SslMethod::tls()).unwrap();\n    ctx.set_default_verify_paths().unwrap();\n    ctx.set_verify(SslVerifyMode::PEER);\n    #[cfg(ossl400)]\n    ctx.set_options(super::SslOptions::IGNORE_UNEXPECTED_EOF);\n    let ctx = ctx.build();\n    let s = match TcpStream::connect(\"google.com:443\") {\n        Ok(s) => s,\n        Err(_) => return,"
+            },
+            {
+              "line": 701,
+              "context": "#[test]\nfn verify_mode_round_trip() {\n    let mut ctx = SslContext::builder(SslMethod::tls()).unwrap();\n    let mut mode = SslVerifyMode::PEER;\n    mode |= SslVerifyMode::FAIL_IF_NO_PEER_CERT;\n    #[cfg(not(any(boringssl, awslc)))]\n    {\n        mode |= SslVerifyMode::CLIENT_ONCE;\n    }\n    #[cfg(ossl111)]"
+            },
+            {
+              "line": 702,
+              "context": "fn verify_mode_round_trip() {\n    let mut ctx = SslContext::builder(SslMethod::tls()).unwrap();\n    let mut mode = SslVerifyMode::PEER;\n    mode |= SslVerifyMode::FAIL_IF_NO_PEER_CERT;\n    #[cfg(not(any(boringssl, awslc)))]\n    {\n        mode |= SslVerifyMode::CLIENT_ONCE;\n    }\n    #[cfg(ossl111)]\n    {"
+            },
+            {
+              "line": 705,
+              "context": "    mode |= SslVerifyMode::FAIL_IF_NO_PEER_CERT;\n    #[cfg(not(any(boringssl, awslc)))]\n    {\n        mode |= SslVerifyMode::CLIENT_ONCE;\n    }\n    #[cfg(ossl111)]\n    {\n        mode |= SslVerifyMode::POST_HANDSHAKE;\n    }\n    ctx.set_verify(mode);"
+            },
+            {
+              "line": 709,
+              "context": "    }\n    #[cfg(ossl111)]\n    {\n        mode |= SslVerifyMode::POST_HANDSHAKE;\n    }\n    ctx.set_verify(mode);\n\n    let ctx = ctx.build();\n    assert_eq!(ctx.verify_mode(), mode);\n    let ssl = Ssl::new(&ctx).unwrap();"
+            },
+            {
+              "line": 711,
+              "context": "    {\n        mode |= SslVerifyMode::POST_HANDSHAKE;\n    }\n    ctx.set_verify(mode);\n\n    let ctx = ctx.build();\n    assert_eq!(ctx.verify_mode(), mode);\n    let ssl = Ssl::new(&ctx).unwrap();\n    assert_eq!(ssl.verify_mode(), mode);\n}"
+            },
+            {
+              "line": 733,
+              "context": "\n    let mut client = server.client();\n    client.ctx().set_ca_file(\"test/root-ca.pem\").unwrap();\n    client.ctx().set_verify(SslVerifyMode::PEER);\n\n    let mut client = client.build().builder();\n    client\n        .ssl()\n        .param_mut()\n        .set_hostflags(X509CheckFlags::NO_PARTIAL_WILDCARDS);"
+            },
+            {
+              "line": 753,
+              "context": "\n    let mut client = server.client();\n    client.ctx().set_ca_file(\"test/root-ca.pem\").unwrap();\n    client.ctx().set_verify(SslVerifyMode::PEER);\n\n    let mut client = client.build().builder();\n    client\n        .ssl()\n        .param_mut()\n        .set_hostflags(X509CheckFlags::NO_PARTIAL_WILDCARDS);"
+            },
+            {
+              "line": 801,
+              "context": "        .build()\n        .configure()\n        .unwrap()\n        .verify_hostname(false)\n        .connect(\"bogus.com\", s)\n        .unwrap();\n    s.read_exact(&mut [0]).unwrap();\n}\n\n#[test]"
+            },
+            {
+              "line": 819,
+              "context": "    assert!(connector\n        .configure()\n        .unwrap()\n        .verify_hostname(false)\n        .connect(\"fizzbuzz.com\", s)\n        .is_err());\n}\n\n#[test]\nfn connector_can_disable_verify() {"
+            },
+            {
+              "line": 829,
+              "context": "    let server = Server::builder().build();\n\n    let mut connector = SslConnector::builder(SslMethod::tls()).unwrap();\n    connector.set_verify(SslVerifyMode::NONE);\n    let connector = connector.build();\n\n    let s = server.connect_tcp();\n    let mut s = connector\n        .configure()\n        .unwrap()"
+            },
+            {
+              "line": 882,
+              "context": "\n    let mut connector = SslConnector::builder(SslMethod::tls()).unwrap();\n    // The server's cert isn't issued for 127.0.0.1 but we don't care for this test.\n    connector.set_verify(SslVerifyMode::NONE);\n\n    let s = server.connect_tcp();\n    let mut s = connector\n        .build()\n        .configure()\n        .unwrap()"
+            },
+            {
+              "line": 985,
+              "context": "    let mut client = server.client();\n    let cert = X509::from_pem(ROOT_CERT).unwrap();\n    client.ctx().cert_store_mut().add_cert(cert).unwrap();\n    client.ctx().set_verify(SslVerifyMode::PEER);\n\n    client.connect();\n}\n\n#[test]\n#[cfg_attr(any(boringssl, awslc, ossl400), ignore)]"
+            },
+            {
+              "line": 1652,
+              "context": "    let mut client = server.client();\n    client\n        .ctx()\n        .set_verify_callback(SslVerifyMode::PEER, |_, _| {\n            CALLED_BACK.store(true, Ordering::SeqCst);\n            true\n        });\n\n    let mut client = client.build().builder();\n"
+            },
+            {
+              "line": 1769,
+              "context": "    let mut builder = X509StoreBuilder::new().unwrap();\n    builder.add_cert(x509).unwrap();\n    let store = builder.build();\n    ssl.set_verify_cert_store(store).unwrap();\n}\n\n#[test]\n#[cfg(ossl110)]\nfn test_ssl_set_cert_chain_file() {\n    let ctx = SslContext::builder(SslMethod::tls()).unwrap().build();"
+            }
+          ]
+        },
+        {
+          "path": "openssl-0.10.81/src/version.rs",
+          "bytes": 3954,
+          "sha256": "9f03a745f245a738a3432338081dcdc25a409645127ce006ba02d3abd7949d33",
+          "matches": [
+            {
+              "line": 20,
+              "context": "use std::ffi::CStr;\n\nuse ffi::{\n    OpenSSL_version, OpenSSL_version_num, OPENSSL_BUILT_ON, OPENSSL_CFLAGS, OPENSSL_DIR,\n    OPENSSL_PLATFORM, OPENSSL_VERSION,\n};\n\n/// OPENSSL_VERSION_NUMBER is a numeric release version identifier:\n///\n/// `MNNFFPPS: major minor fix patch status`"
+            },
+            {
+              "line": 85,
+              "context": "#[corresponds(OpenSSL_version)]\npub fn dir() -> &'static str {\n    unsafe {\n        CStr::from_ptr(OpenSSL_version(OPENSSL_DIR))\n            .to_str()\n            .unwrap()\n    }\n}\n\n/// This test ensures that we do not segfault when calling the functions of this module"
+            }
+          ]
+        },
+        {
+          "path": "openssl-0.10.81/src/x509/store.rs",
+          "bytes": 9906,
+          "sha256": "2df285c7f2af4d4ebd04fde605361f666782cd4507686bdb47720a60b99889ba",
+          "matches": [
+            {
+              "line": 105,
+              "context": "\n    /// Load certificates from their default locations.\n    ///\n    /// These locations are read from the `SSL_CERT_FILE` and `SSL_CERT_DIR`\n    /// environment variables if present, or defaults specified at OpenSSL\n    /// build time otherwise.\n    #[corresponds(X509_STORE_set_default_paths)]\n    pub fn set_default_paths(&mut self) -> Result<(), ErrorStack> {\n        unsafe { cvt(ffi::X509_STORE_set_default_paths(self.as_ptr())).map(|_| ()) }\n    }"
+            },
+            {
+              "line": 205,
+              "context": "#[cfg(not(any(boringssl, awslc)))]\nimpl X509LookupRef<File> {\n    /// Specifies a file from which certificates will be loaded\n    #[corresponds(X509_load_cert_file)]\n    // FIXME should return 'Result<i32, ErrorStack' like load_crl_file\n    pub fn load_cert_file<P: AsRef<Path>>(\n        &mut self,\n        file: P,\n        file_type: SslFiletype,\n    ) -> Result<(), ErrorStack> {"
+            },
+            {
+              "line": 207,
+              "context": "    /// Specifies a file from which certificates will be loaded\n    #[corresponds(X509_load_cert_file)]\n    // FIXME should return 'Result<i32, ErrorStack' like load_crl_file\n    pub fn load_cert_file<P: AsRef<Path>>(\n        &mut self,\n        file: P,\n        file_type: SslFiletype,\n    ) -> Result<(), ErrorStack> {\n        let file = CString::new(file.as_ref().as_os_str().to_str().unwrap()).unwrap();\n        unsafe {"
+            },
+            {
+              "line": 214,
+              "context": "    ) -> Result<(), ErrorStack> {\n        let file = CString::new(file.as_ref().as_os_str().to_str().unwrap()).unwrap();\n        unsafe {\n            cvt(ffi::X509_load_cert_file(\n                self.as_ptr(),\n                file.as_ptr(),\n                file_type.as_raw(),\n            ))\n            .map(|_| ())\n        }"
+            }
+          ]
+        },
+        {
+          "path": "openssl-0.10.81/src/x509/tests.rs",
+          "bytes": 44427,
+          "sha256": "ffadac8753882ef5451131fdc37a24ebe59f8267fd07f70308d771600996aef1",
+          "matches": [
+            {
+              "line": 975,
+              "context": "\n#[test]\n#[cfg(not(any(boringssl, awslc)))]\nfn test_load_cert_file() {\n    let cert = include_bytes!(\"../../test/cert.pem\");\n    let cert = X509::from_pem(cert).unwrap();\n    let chain = Stack::new().unwrap();\n\n    let mut store_bldr = X509StoreBuilder::new().unwrap();\n    let lookup = store_bldr.add_lookup(X509Lookup::file()).unwrap();"
+            },
+            {
+              "line": 983,
+              "context": "    let mut store_bldr = X509StoreBuilder::new().unwrap();\n    let lookup = store_bldr.add_lookup(X509Lookup::file()).unwrap();\n    lookup\n        .load_cert_file(\"test/root-ca.pem\", SslFiletype::PEM)\n        .unwrap();\n    let store = store_bldr.build();\n\n    let mut context = X509StoreContext::new().unwrap();\n    assert!(context\n        .init(&store, &cert, &chain, |c| c.verify_cert())"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "openssl-probe",
+      "version": "0.2.1",
+      "archive": {
+        "url": "https://static.crates.io/crates/openssl-probe/openssl-probe-0.2.1.crate",
+        "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-rust-route-readonly-20261017\\crates\\openssl-probe-0.2.1.crate",
+        "bytes": 9155,
+        "sha256": "7c87def4c32ab89d880effc9e097653c8da5d6ef28e6b539d313baaacfbafcbe"
+      },
+      "source_matches": [
+        {
+          "path": "openssl-probe-0.2.1/examples/probe.rs",
+          "bytes": 141,
+          "sha256": "78fd7274bd050c3d53b0c855be121d2388d4b8ac2fa0e52160a55ddc65e2c2f0",
+          "matches": [
+            {
+              "line": 4,
+              "context": "fn main() {\n    let r = openssl_probe::probe();\n\n    println!(\"cert_dir: {:?}\", r.cert_dir);\n    println!(\"cert_file: {:?}\", r.cert_file);\n}"
+            },
+            {
+              "line": 5,
+              "context": "    let r = openssl_probe::probe();\n\n    println!(\"cert_dir: {:?}\", r.cert_dir);\n    println!(\"cert_file: {:?}\", r.cert_file);\n}"
+            }
+          ]
+        },
+        {
+          "path": "openssl-probe-0.2.1/src/lib.rs",
+          "bytes": 8149,
+          "sha256": "84ec9c4dfb24f51bb7e6bd17ac574dc4861034dadbfb3d298eac3a17a54ed396",
+          "matches": [
+            {
+              "line": 5,
+              "context": "use std::ffi::{OsStr, OsString};\nuse std::path::{Path, PathBuf};\n\n/// Probe for SSL certificates on the system, then configure the SSL certificate `SSL_CERT_FILE`\n/// and `SSL_CERT_DIR` environment variables in this process for OpenSSL to use.\n///\n/// Preconfigured values in the environment variables will not be overwritten if the paths they\n/// point to exist and are accessible.\n///\n/// Returns `true` if any certificate file or directory was found while probing."
+            },
+            {
+              "line": 6,
+              "context": "use std::path::{Path, PathBuf};\n\n/// Probe for SSL certificates on the system, then configure the SSL certificate `SSL_CERT_FILE`\n/// and `SSL_CERT_DIR` environment variables in this process for OpenSSL to use.\n///\n/// Preconfigured values in the environment variables will not be overwritten if the paths they\n/// point to exist and are accessible.\n///\n/// Returns `true` if any certificate file or directory was found while probing.\n/// Combine this with `has_ssl_cert_env_vars()` to check whether previously configured environment"
+            },
+            {
+              "line": 27,
+              "context": "/// [doc]: https://doc.rust-lang.org/stable/std/env/fn.set_var.html#safety\npub unsafe fn try_init_openssl_env_vars() -> bool {\n    let ProbeResult {\n        cert_file,\n        cert_dir,\n    } = probe();\n    // we won't be overwriting existing env variables because if they're valid probe() will have\n    // returned them unchanged\n    if let Some(path) = &cert_file {\n        unsafe {"
+            },
+            {
+              "line": 28,
+              "context": "pub unsafe fn try_init_openssl_env_vars() -> bool {\n    let ProbeResult {\n        cert_file,\n        cert_dir,\n    } = probe();\n    // we won't be overwriting existing env variables because if they're valid probe() will have\n    // returned them unchanged\n    if let Some(path) = &cert_file {\n        unsafe {\n            put(ENV_CERT_FILE, path.as_os_str());"
+            },
+            {
+              "line": 32,
+              "context": "    } = probe();\n    // we won't be overwriting existing env variables because if they're valid probe() will have\n    // returned them unchanged\n    if let Some(path) = &cert_file {\n        unsafe {\n            put(ENV_CERT_FILE, path.as_os_str());\n        }\n    }\n\n    if !cert_dir.is_empty() {"
+            },
+            {
+              "line": 38,
+              "context": "        }\n    }\n\n    if !cert_dir.is_empty() {\n        let mut joined = OsString::new();\n        for (i, path) in cert_dir.iter().enumerate() {\n            if i != 0 {\n                joined.push(\":\");\n            }\n            joined.push(path.as_os_str());"
+            },
+            {
+              "line": 40,
+              "context": "\n    if !cert_dir.is_empty() {\n        let mut joined = OsString::new();\n        for (i, path) in cert_dir.iter().enumerate() {\n            if i != 0 {\n                joined.push(\":\");\n            }\n            joined.push(path.as_os_str());\n        }\n"
+            },
+            {
+              "line": 63,
+              "context": "        }\n    }\n\n    cert_file.is_some() || !cert_dir.is_empty()\n}\n\n/// Probe the current system for the \"cert file\" and \"cert dir\" variables that\n/// OpenSSL typically requires.\n///\n/// The probe result is returned as a [`ProbeResult`] structure here."
+            },
+            {
+              "line": 72,
+              "context": "/// The probe result is returned as a [`ProbeResult`] structure here.\npub fn probe() -> ProbeResult {\n    let mut result = ProbeResult::from_env();\n    if result.cert_file.is_none() {\n        result.cert_file =\n            CERTIFICATE_FILE_NAMES\n                .iter()\n                .find_map(|p| match Path::new(p).exists() {\n                    true => Some(PathBuf::from(p)),\n                    false => None,"
+            },
+            {
+              "line": 73,
+              "context": "pub fn probe() -> ProbeResult {\n    let mut result = ProbeResult::from_env();\n    if result.cert_file.is_none() {\n        result.cert_file =\n            CERTIFICATE_FILE_NAMES\n                .iter()\n                .find_map(|p| match Path::new(p).exists() {\n                    true => Some(PathBuf::from(p)),\n                    false => None,\n                });"
+            },
+            {
+              "line": 82,
+              "context": "                });\n    }\n\n    for certs_dir in candidate_cert_dirs() {\n        let cert_dir = PathBuf::from(certs_dir);\n        if cert_dir.exists() {\n            result.cert_dir.push(cert_dir);\n        }\n    }\n"
+            },
+            {
+              "line": 83,
+              "context": "    }\n\n    for certs_dir in candidate_cert_dirs() {\n        let cert_dir = PathBuf::from(certs_dir);\n        if cert_dir.exists() {\n            result.cert_dir.push(cert_dir);\n        }\n    }\n\n    result"
+            },
+            {
+              "line": 84,
+              "context": "\n    for certs_dir in candidate_cert_dirs() {\n        let cert_dir = PathBuf::from(certs_dir);\n        if cert_dir.exists() {\n            result.cert_dir.push(cert_dir);\n        }\n    }\n\n    result\n}"
+            },
+            {
+              "line": 85,
+              "context": "    for certs_dir in candidate_cert_dirs() {\n        let cert_dir = PathBuf::from(certs_dir);\n        if cert_dir.exists() {\n            result.cert_dir.push(cert_dir);\n        }\n    }\n\n    result\n}\n"
+            },
+            {
+              "line": 96,
+              "context": "/// found.\n///\n/// This will only search known system locations.\npub fn candidate_cert_dirs() -> impl Iterator<Item = &'static Path> {\n    CERTIFICATE_DIRS\n        .iter()\n        .map(Path::new)\n        .filter(|p| p.exists())\n}\n"
+            },
+            {
+              "line": 103,
+              "context": "        .filter(|p| p.exists())\n}\n\n/// Check whether the OpenSSL `SSL_CERT_FILE` and/or `SSL_CERT_DIR` environment variable is\n/// configured in this process with an existing file or directory.\n///\n/// That being the case would indicate that certificates will be found successfully by OpenSSL.\n///\n/// Returns `true` if either variable is set to an existing file or directory.\npub fn has_ssl_cert_env_vars() -> bool {"
+            },
+            {
+              "line": 111,
+              "context": "/// Returns `true` if either variable is set to an existing file or directory.\npub fn has_ssl_cert_env_vars() -> bool {\n    let probe = ProbeResult::from_env();\n    probe.cert_file.is_some() || !probe.cert_dir.is_empty()\n}\n\npub struct ProbeResult {\n    pub cert_file: Option<PathBuf>,\n    pub cert_dir: Vec<PathBuf>,\n}"
+            },
+            {
+              "line": 115,
+              "context": "}\n\npub struct ProbeResult {\n    pub cert_file: Option<PathBuf>,\n    pub cert_dir: Vec<PathBuf>,\n}\n\nimpl ProbeResult {\n    fn from_env() -> ProbeResult {\n        let var = |name| env::var_os(name).map(PathBuf::from).filter(|p| p.exists());"
+            },
+            {
+              "line": 116,
+              "context": "\npub struct ProbeResult {\n    pub cert_file: Option<PathBuf>,\n    pub cert_dir: Vec<PathBuf>,\n}\n\nimpl ProbeResult {\n    fn from_env() -> ProbeResult {\n        let var = |name| env::var_os(name).map(PathBuf::from).filter(|p| p.exists());\n        ProbeResult {"
+            },
+            {
+              "line": 123,
+              "context": "    fn from_env() -> ProbeResult {\n        let var = |name| env::var_os(name).map(PathBuf::from).filter(|p| p.exists());\n        ProbeResult {\n            cert_file: var(ENV_CERT_FILE),\n            cert_dir: match var(ENV_CERT_DIR) {\n                Some(p) => vec![p],\n                None => vec![],\n            },\n        }\n    }"
+            },
+            {
+              "line": 124,
+              "context": "        let var = |name| env::var_os(name).map(PathBuf::from).filter(|p| p.exists());\n        ProbeResult {\n            cert_file: var(ENV_CERT_FILE),\n            cert_dir: match var(ENV_CERT_DIR) {\n                Some(p) => vec![p],\n                None => vec![],\n            },\n        }\n    }\n}"
+            },
+            {
+              "line": 202,
+              "context": "    \"/etc/certs/ca-certificates.crt\", // OpenIndiana, https://github.com/rustls/openssl-probe/pull/22\n];\n\n#[cfg(target_os = \"android\")] // Termux on Android, https://github.com/rustls/openssl-probe/pull/2\nconst CERTIFICATE_FILE_NAMES: &[&str] = &[\"/data/data/com.termux/files/usr/etc/tls/cert.pem\"];\n\n#[cfg(target_os = \"haiku\")] // https://github.com/rustls/openssl-probe/pull/4\nconst CERTIFICATE_FILE_NAMES: &[&str] = &[\"/boot/system/data/ssl/CARootCertificates.pem\"];\n\n#[cfg(not(any("
+            },
+            {
+              "line": 216,
+              "context": "    target_os = \"openbsd\",\n    target_os = \"solaris\",\n    target_os = \"illumos\",\n    target_os = \"android\",\n    target_os = \"haiku\",\n)))]\nconst CERTIFICATE_FILE_NAMES: &[&str] = &[\"/etc/ssl/certs/ca-certificates.crt\"];\n\n/// The OpenSSL environment variable to configure what certificate file to use.\npub const ENV_CERT_FILE: &str = \"SSL_CERT_FILE\";"
+            },
+            {
+              "line": 222,
+              "context": "const CERTIFICATE_FILE_NAMES: &[&str] = &[\"/etc/ssl/certs/ca-certificates.crt\"];\n\n/// The OpenSSL environment variable to configure what certificate file to use.\npub const ENV_CERT_FILE: &str = \"SSL_CERT_FILE\";\n\n/// The OpenSSL environment variable to configure what certificates directory to use.\npub const ENV_CERT_DIR: &str = \"SSL_CERT_DIR\";"
+            },
+            {
+              "line": 225,
+              "context": "pub const ENV_CERT_FILE: &str = \"SSL_CERT_FILE\";\n\n/// The OpenSSL environment variable to configure what certificates directory to use.\npub const ENV_CERT_DIR: &str = \"SSL_CERT_DIR\";"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "openssl-sys",
+      "version": "0.9.117",
+      "archive": {
+        "url": "https://static.crates.io/crates/openssl-sys/openssl-sys-0.9.117.crate",
+        "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-rust-route-readonly-20261017\\crates\\openssl-sys-0.9.117.crate",
+        "bytes": 76045,
+        "sha256": "b47e7e6bb2c38cd930d25a23b40fa52e068c10e85f3e03a7f5ba5aaca5713695"
+      },
+      "source_matches": [
+        {
+          "path": "openssl-sys-0.9.117/build/find_normal.rs",
+          "bytes": 8885,
+          "sha256": "015b5d233c175a67111743c25839a1917242b575f9bbf2fa36582d060c9d1696",
+          "matches": [
+            {
+              "line": 8,
+              "context": "use super::env;\n\npub fn get_openssl(target: &str) -> (Vec<PathBuf>, PathBuf) {\n    let lib_dir = env(\"OPENSSL_LIB_DIR\").map(PathBuf::from);\n    let include_dir = env(\"OPENSSL_INCLUDE_DIR\").map(PathBuf::from);\n\n    match (lib_dir, include_dir) {\n        (Some(lib_dir), Some(include_dir)) => (vec![lib_dir], include_dir),\n        (lib_dir, include_dir) => {\n            let openssl_dir = env(\"OPENSSL_DIR\").unwrap_or_else(|| find_openssl_dir(target));"
+            },
+            {
+              "line": 9,
+              "context": "\npub fn get_openssl(target: &str) -> (Vec<PathBuf>, PathBuf) {\n    let lib_dir = env(\"OPENSSL_LIB_DIR\").map(PathBuf::from);\n    let include_dir = env(\"OPENSSL_INCLUDE_DIR\").map(PathBuf::from);\n\n    match (lib_dir, include_dir) {\n        (Some(lib_dir), Some(include_dir)) => (vec![lib_dir], include_dir),\n        (lib_dir, include_dir) => {\n            let openssl_dir = env(\"OPENSSL_DIR\").unwrap_or_else(|| find_openssl_dir(target));\n            let openssl_dir = Path::new(&openssl_dir);"
+            },
+            {
+              "line": 14,
+              "context": "    match (lib_dir, include_dir) {\n        (Some(lib_dir), Some(include_dir)) => (vec![lib_dir], include_dir),\n        (lib_dir, include_dir) => {\n            let openssl_dir = env(\"OPENSSL_DIR\").unwrap_or_else(|| find_openssl_dir(target));\n            let openssl_dir = Path::new(&openssl_dir);\n            let lib_dir = lib_dir.map(|d| vec![d]).unwrap_or_else(|| {\n                let mut lib_dirs = vec![];\n                // OpenSSL 3.0 now puts it's libraries in lib64/ by default,\n                // check for both it and lib/.\n                if openssl_dir.join(\"lib64\").exists() {"
+            },
+            {
+              "line": 111,
+              "context": "    let msg_header =\n        \"Could not find directory of OpenSSL installation, and this `-sys` crate cannot\nproceed without this knowledge. If OpenSSL is installed and this crate had\ntrouble finding it,  you can set the `OPENSSL_DIR` environment variable for the\ncompilation process.\";\n\n    println!(\n        \"cargo:warning={} See stderr section below for further information.\",\n        msg_header.replace('\\n', \" \")\n    );"
+            }
+          ]
+        },
+        {
+          "path": "openssl-sys-0.9.117/build/main.rs",
+          "bytes": 20953,
+          "sha256": "3a7f63b3c446451801ac03c34e03051b8d3ebcceea28b8fb2688922255629d27",
+          "matches": [
+            {
+              "line": 52,
+              "context": "    #[cfg(feature = \"vendored\")]\n    {\n        // vendor if the feature is present, unless\n        // OPENSSL_NO_VENDOR exists and isn't `0`\n        if env(\"OPENSSL_NO_VENDOR\").map_or(true, |s| s == \"0\") {\n            return find_vendored::get_openssl(target);\n        }\n    }\n    find_normal::get_openssl(target)\n}"
+            },
+            {
+              "line": 53,
+              "context": "    {\n        // vendor if the feature is present, unless\n        // OPENSSL_NO_VENDOR exists and isn't `0`\n        if env(\"OPENSSL_NO_VENDOR\").map_or(true, |s| s == \"0\") {\n            return find_vendored::get_openssl(target);\n        }\n    }\n    find_normal::get_openssl(target)\n}\n"
+            },
+            {
+              "line": 327,
+              "context": "\nFailed to find OpenSSL development headers.\n\nYou can try fixing this setting the `OPENSSL_DIR` environment variable\npointing to your OpenSSL installation or installing OpenSSL headers package\nspecific to your distribution:\n\n    # On Ubuntu\n    sudo apt-get install pkg-config libssl-dev\n    # On Arch Linux"
+            },
+            {
+              "line": 506,
+              "context": "/// statically or dynamically.\nfn determine_mode(libdirs: &[PathBuf], libs: &[&str]) -> &'static str {\n    // First see if a mode was explicitly requested\n    let kind = env(\"OPENSSL_STATIC\");\n    match kind.as_ref().and_then(|s| s.to_str()) {\n        Some(\"0\") => return \"dylib\",\n        Some(_) => return \"static\",\n        None => {}\n    }\n"
+            }
+          ]
+        },
+        {
+          "path": "openssl-sys-0.9.117/src/crypto.rs",
+          "bytes": 3193,
+          "sha256": "a8f95d2245e645fc48f4ef992a04d5e1fce5f52e42e806e8d0d8eeb1638cbdd5",
+          "matches": [
+            {
+              "line": 122,
+              "context": "pub const OPENSSL_CFLAGS: c_int = 1;\npub const OPENSSL_BUILT_ON: c_int = 2;\npub const OPENSSL_PLATFORM: c_int = 3;\npub const OPENSSL_DIR: c_int = 4;\n\n#[cfg(not(osslconf = \"OPENSSL_NO_DEPRECATED_3_0\"))]\npub const CRYPTO_LOCK: c_int = 1;"
+            }
+          ]
+        },
+        {
+          "path": "openssl-sys-0.9.117/src/handwritten/ssl.rs",
+          "bytes": 27263,
+          "sha256": "9062ea8b924942590b246b7503efddebe384fb7d16c5040cffe5dc186b0527d6",
+          "matches": [
+            {
+              "line": 333,
+              "context": "    pub fn SSL_set_ciphersuites(ssl: *mut SSL, str: *const c_char) -> c_int;\n    pub fn SSL_set_cipher_list(ssl: *mut SSL, s: *const c_char) -> c_int;\n    pub fn SSL_set_ssl_method(s: *mut SSL, method: *const SSL_METHOD) -> c_int;\n    pub fn SSL_set_verify(\n        ssl: *mut SSL,\n        mode: c_int,\n        // FIXME should be unsafe\n        verify_callback: Option<extern \"C\" fn(c_int, *mut X509_STORE_CTX) -> c_int>,\n    );\n    pub fn SSL_CTX_use_PrivateKey(ctx: *mut SSL_CTX, key: *mut EVP_PKEY) -> c_int;"
+            },
+            {
+              "line": 349,
+              "context": "    ) -> c_int;\n    pub fn SSL_CTX_use_certificate_file(\n        ctx: *mut SSL_CTX,\n        cert_file: *const c_char,\n        file_type: c_int,\n    ) -> c_int;\n    pub fn SSL_CTX_use_certificate_chain_file(\n        ctx: *mut SSL_CTX,\n        cert_chain_file: *const c_char,\n    ) -> c_int;"
+            },
+            {
+              "line": 404,
+              "context": "\n    pub fn SSL_get_peer_cert_chain(ssl: *const SSL) -> *mut stack_st_X509;\n\n    pub fn SSL_CTX_set_verify(\n        ctx: *mut SSL_CTX,\n        mode: c_int,\n        verify_callback: Option<extern \"C\" fn(c_int, *mut X509_STORE_CTX) -> c_int>,\n    );\n    pub fn SSL_CTX_set_verify_depth(ctx: *mut SSL_CTX, depth: c_int);\n"
+            },
+            {
+              "line": 409,
+              "context": "        mode: c_int,\n        verify_callback: Option<extern \"C\" fn(c_int, *mut X509_STORE_CTX) -> c_int>,\n    );\n    pub fn SSL_CTX_set_verify_depth(ctx: *mut SSL_CTX, depth: c_int);\n\n    #[cfg(any(ossl111, libressl))]\n    pub fn SSL_CTX_set_post_handshake_auth(ctx: *mut SSL_CTX, val: c_int);\n\n    pub fn SSL_CTX_check_private_key(ctx: *const SSL_CTX) -> c_int;\n"
+            },
+            {
+              "line": 550,
+              "context": "\n    pub fn SSL_CTX_add_client_CA(ctx: *mut SSL_CTX, cacert: *mut X509) -> c_int;\n\n    pub fn SSL_CTX_set_default_verify_paths(ctx: *mut SSL_CTX) -> c_int;\n    pub fn SSL_CTX_load_verify_locations(\n        ctx: *mut SSL_CTX,\n        CAfile: *const c_char,\n        CApath: *const c_char,\n    ) -> c_int;\n}"
+            }
+          ]
+        },
+        {
+          "path": "openssl-sys-0.9.117/src/handwritten/x509.rs",
+          "bytes": 22456,
+          "sha256": "b048857e5f5cf99b3b3ac9f14dc30bafb72dbf35933809a202a94f11704912e4",
+          "matches": [
+            {
+              "line": 564,
+              "context": "}\n\nextern \"C\" {\n    pub fn X509_get_default_cert_file_env() -> *const c_char;\n    pub fn X509_get_default_cert_file() -> *const c_char;\n    pub fn X509_get_default_cert_dir_env() -> *const c_char;\n    pub fn X509_get_default_cert_dir() -> *const c_char;\n}\n\nextern \"C\" {"
+            },
+            {
+              "line": 565,
+              "context": "\nextern \"C\" {\n    pub fn X509_get_default_cert_file_env() -> *const c_char;\n    pub fn X509_get_default_cert_file() -> *const c_char;\n    pub fn X509_get_default_cert_dir_env() -> *const c_char;\n    pub fn X509_get_default_cert_dir() -> *const c_char;\n}\n\nextern \"C\" {\n    pub fn X509_cmp(a: *const X509, b: *const X509) -> c_int;"
+            },
+            {
+              "line": 566,
+              "context": "extern \"C\" {\n    pub fn X509_get_default_cert_file_env() -> *const c_char;\n    pub fn X509_get_default_cert_file() -> *const c_char;\n    pub fn X509_get_default_cert_dir_env() -> *const c_char;\n    pub fn X509_get_default_cert_dir() -> *const c_char;\n}\n\nextern \"C\" {\n    pub fn X509_cmp(a: *const X509, b: *const X509) -> c_int;\n    pub fn X509_issuer_and_serial_cmp(a: *const X509, b: *const X509) -> c_int;"
+            },
+            {
+              "line": 567,
+              "context": "    pub fn X509_get_default_cert_file_env() -> *const c_char;\n    pub fn X509_get_default_cert_file() -> *const c_char;\n    pub fn X509_get_default_cert_dir_env() -> *const c_char;\n    pub fn X509_get_default_cert_dir() -> *const c_char;\n}\n\nextern \"C\" {\n    pub fn X509_cmp(a: *const X509, b: *const X509) -> c_int;\n    pub fn X509_issuer_and_serial_cmp(a: *const X509, b: *const X509) -> c_int;\n    pub fn X509_issuer_name_cmp(a: *const X509, b: *const X509) -> c_int;"
+            }
+          ]
+        },
+        {
+          "path": "openssl-sys-0.9.117/src/handwritten/x509_vfy.rs",
+          "bytes": 4386,
+          "sha256": "43a421eb418d287e6b360f108cdd71cee09851424bd93af603e0b408add216b8",
+          "matches": [
+            {
+              "line": 28,
+              "context": "        argl: c_long,\n        ret: *mut *mut c_char,\n    ) -> c_int;\n    pub fn X509_load_cert_file(ctx: *mut X509_LOOKUP, file: *const c_char, _type: c_int) -> c_int;\n    pub fn X509_load_crl_file(ctx: *mut X509_LOOKUP, file: *const c_char, _type: c_int) -> c_int;\n}\n\nextern \"C\" {\n    pub fn X509_STORE_new() -> *mut X509_STORE;\n    pub fn X509_STORE_free(store: *mut X509_STORE);"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,220 @@
+{
+  "schema": 1,
+  "observed_utc": "2026-10-17T20:56:01.859253+00:00",
+  "scope": "Exact pure Python build wheels only; native code not executed; no shared locks edited",
+  "packages": [
+    {
+      "name": "setuptools-rust",
+      "version": "1.13.0",
+      "requires_python": ">=3.9",
+      "requires_dist": [
+        "setuptools>=62.4",
+        "semantic_version<3,>=2.8.2"
+      ],
+      "filename": "setuptools_rust-1.13.0-py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/0b/80/909e46e684e47b116ed145bf2a1a8f5f7c9d90e8c3f8f7fce6a529c0068d/setuptools_rust-1.13.0-py3-none-any.whl",
+      "bytes": 30536,
+      "sha256": "666439c4d90e968bb625bcf87ec0aa02b4f49e599d2f5dc255c633a04e8eca99",
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-rust-route-readonly-20261017\\python-build-wheels\\setuptools_rust-1.13.0-py3-none-any.whl",
+      "zip_crc": "pass",
+      "record_hashes": "pass",
+      "record_rows": 17,
+      "wheel_text": "Wheel-Version: 1.0\nGenerator: setuptools (82.0.1)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n",
+      "source_matches": [
+        {
+          "path": "setuptools_rust/build.py",
+          "bytes": 37362,
+          "sha256": "9d4e048fc2bc81743bd24bf11777f875713a8dfc0fd2c81f8f7ea5c489aee30b",
+          "matches": [
+            {
+              "line": 98,
+              "text": "        self.target = os.getenv(\"CARGO_BUILD_TARGET\", _Platform.CARGO_DEFAULT)"
+            },
+            {
+              "line": 199,
+              "text": "            existing_rustflags = env.get(\"RUSTFLAGS\")"
+            },
+            {
+              "line": 203,
+              "text": "            env[\"RUSTFLAGS\"] = new_rustflags"
+            },
+            {
+              "line": 205,
+              "text": "            # print RUSTFLAGS being added before the command"
+            },
+            {
+              "line": 207,
+              "text": "                print(f\"[RUSTFLAGS={new_rustflags}]\", end=\" \", file=sys.stderr)"
+            },
+            {
+              "line": 514,
+              "text": "        host_platform = sysconfig.get_platform()"
+            },
+            {
+              "line": 585,
+              "text": "        if ext.cargo_manifest_args is not None:"
+            },
+            {
+              "line": 586,
+              "text": "            args.extend(ext.cargo_manifest_args)"
+            },
+            {
+              "line": 593,
+              "text": "        \"\"\"Get extra arguments for `rustc` and the `RUSTFLAGS` environment variable"
+            },
+            {
+              "line": 607,
+              "text": "        rust_flags: List[str] = []  # Extras for the `RUSTFLAGS` environment variable."
+            },
+            {
+              "line": 741,
+              "text": "            \"PYO3_PYTHON\": env_vars.get(\"PYO3_PYTHON\", executable),"
+            }
+          ]
+        },
+        {
+          "path": "setuptools_rust/clean.py",
+          "bytes": 856,
+          "sha256": "051184a665f24b5ace35b993a80f2d3ee2da0339fbbab92f8381f2c8070c6176",
+          "matches": [
+            {
+              "line": 21,
+              "text": "        if ext.cargo_manifest_args:"
+            },
+            {
+              "line": 22,
+              "text": "            args.extend(ext.cargo_manifest_args)"
+            }
+          ]
+        },
+        {
+          "path": "setuptools_rust/extension.py",
+          "bytes": 15071,
+          "sha256": "b2b7f92a02ad82cc7be5b8a71b5b2ac66f528df5eb6c53719d7b4c1ae078f007",
+          "matches": [
+            {
+              "line": 88,
+              "text": "        cargo_manifest_args: A list of extra arguments to be passed to Cargo."
+            },
+            {
+              "line": 92,
+              "text": "            For example, ``cargo_manifest_args=[\"--locked\"]`` will require"
+            },
+            {
+              "line": 97,
+              "text": "            `RUSTFLAGS` environment variable."
+            },
+            {
+              "line": 108,
+              "text": "            (deprecated, set environment variable RUSTFLAGS=-Ctarget-cpu=native)."
+            },
+            {
+              "line": 134,
+              "text": "        cargo_manifest_args: Optional[Sequence[str]] = (),"
+            },
+            {
+              "line": 159,
+              "text": "        self.cargo_manifest_args = tuple(cargo_manifest_args or ())"
+            },
+            {
+              "line": 180,
+              "text": "                \"`native` is deprecated, set RUSTFLAGS=-Ctarget-cpu=native instead.\","
+            },
+            {
+              "line": 277,
+              "text": "        if self.cargo_manifest_args:"
+            },
+            {
+              "line": 278,
+              "text": "            metadata_command.extend(self.cargo_manifest_args)"
+            },
+            {
+              "line": 312,
+              "text": "        cargo_manifest_args: A list of extra arguments to be passed to Cargo."
+            },
+            {
+              "line": 316,
+              "text": "            For example, ``cargo_manifest_args=[\"--locked\"]`` will require"
+            },
+            {
+              "line": 336,
+              "text": "        cargo_manifest_args: Optional[Sequence[str]] = (),"
+            },
+            {
+              "line": 349,
+              "text": "            cargo_manifest_args=cargo_manifest_args,"
+            }
+          ]
+        },
+        {
+          "path": "setuptools_rust/setuptools_ext.py",
+          "bytes": 14668,
+          "sha256": "e7f00da426bcce84e1eddf5352300e3f25094c37c0d57fad56b71f820fb5d761",
+          "matches": [
+            {
+              "line": 93,
+              "text": "                # --frozen, --locked, or --offline."
+            },
+            {
+              "line": 96,
+              "text": "                cargo_manifest_args: Set[str] = set()"
+            },
+            {
+              "line": 112,
+              "text": "                    if ext.cargo_manifest_args:"
+            },
+            {
+              "line": 113,
+              "text": "                        cargo_manifest_args.update(ext.cargo_manifest_args)"
+            },
+            {
+              "line": 122,
+              "text": "                    if cargo_manifest_args:"
+            },
+            {
+              "line": 123,
+              "text": "                        command.extend(sorted(cargo_manifest_args))"
+            },
+            {
+              "line": 174,
+              "text": "            self.target = os.getenv(\"CARGO_BUILD_TARGET\", _Platform.CARGO_DEFAULT)"
+            },
+            {
+              "line": 280,
+              "text": "                self.target = os.getenv(\"CARGO_BUILD_TARGET\")"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "semantic-version",
+      "version": "2.10.0",
+      "requires_python": ">=2.7",
+      "requires_dist": [
+        "Django (>=1.11) ; extra == 'dev'",
+        "nose2 ; extra == 'dev'",
+        "tox ; extra == 'dev'",
+        "check-manifest ; extra == 'dev'",
+        "coverage ; extra == 'dev'",
+        "flake8 ; extra == 'dev'",
+        "wheel ; extra == 'dev'",
+        "zest.releaser[recommended] ; extra == 'dev'",
+        "readme-renderer (<25.0) ; (python_version == \"3.4\") and extra == 'dev'",
+        "colorama (<=0.4.1) ; (python_version == \"3.4\") and extra == 'dev'",
+        "Sphinx ; extra == 'doc'",
+        "sphinx-rtd-theme ; extra == 'doc'"
+      ],
+      "filename": "semantic_version-2.10.0-py2.py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/6a/23/8146aad7d88f4fcb3a6218f41a60f6c2d4e3a72de72da1825dc7c8f7877c/semantic_version-2.10.0-py2.py3-none-any.whl",
+      "bytes": 15552,
+      "sha256": "de78a3b8e0feda74cabc54aab2da702113e33ac9d9eb9d2389bcf1f58b7d9177",
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-rust-route-readonly-20261017\\python-build-wheels\\semantic_version-2.10.0-py2.py3-none-any.whl",
+      "zip_crc": "pass",
+      "record_hashes": "pass",
+      "record_rows": 8,
+      "wheel_text": "Wheel-Version: 1.0\nGenerator: bdist_wheel (0.36.2)\nRoot-Is-Purelib: true\nTag: py2-none-any\nTag: py3-none-any\n\n",
+      "source_matches": []
+    }
+  ]
+}

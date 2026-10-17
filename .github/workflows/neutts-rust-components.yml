@@ -1,0 +1,59 @@
+name: Prepare NeuTTS Rust components
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: Locked wheel builds or separate missing Tiktoken lock capture
+        type: choice
+        default: all
+        options: [all, locked-build, tiktoken-lock]
+  push:
+    branches: [prepare/termux-compatibility-next-stable]
+    paths:
+      - '.github/workflows/neutts-rust-components.yml'
+      - 'scripts/compatibility_probe_neutts_rust.sh'
+      - 'scripts/compatibility_probe_neutts_rust.py'
+      - 'scripts/prepare_neutts_rust_sources.py'
+      - 'scripts/neutts_rust_sources_lock.json'
+      - 'scripts/neutts_rust_operations.py'
+      - 'tests/test_neutts_rust_preparation.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neutts-rust-components-${{ github.sha }}-${{ inputs.stage || 'all' }}
+  cancel-in-progress: false
+
+jobs:
+  native-rust:
+    name: Native Rust preparation (${{ matrix.stage }})
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 125
+    strategy:
+      fail-fast: false
+      matrix:
+        stage: ${{ fromJSON(inputs.stage == 'locked-build' && '["locked-build"]' || inputs.stage == 'tiktoken-lock' && '["tiktoken-lock"]' || '["locked-build","tiktoken-lock"]') }}
+    steps:
+      - name: Checkout the exact reviewed preparation
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify inputs, the scientific foundation, and this separate Rust stage
+        env:
+          NEUTTS_PROBE_HEAD_SHA: ${{ github.sha }}
+          RUST_PREPARATION_STAGE: ${{ matrix.stage }}
+        run: bash scripts/compatibility_probe_neutts_rust.sh --stage "$RUST_PREPARATION_STAGE" --out "probe-results/rust-$RUST_PREPARATION_STAGE"
+
+      - name: Preserve original inputs, Cargo graphs, wheels, and separate behavior evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-neutts-rust-${{ matrix.stage }}
+          path: probe-results/rust-${{ matrix.stage }}/
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 14
