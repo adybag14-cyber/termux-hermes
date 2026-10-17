@@ -73,7 +73,14 @@ It disables ALSA, JACK, OSS and PulseAudio backends. The native audio probe
 therefore records two separate results: exact NumPy wheel/numerical behavior,
 and actual PortAudio loading/device enumeration. A container missing Android's
 audio framework must remain environment-limited, with no fabricated audio device
-or library. Physical microphone permission, capture, VAD thresholds, maximum
+or library. The diagnostic run now verifies that specific boundary: native
+NumPy passes with both library environments, the mapped OpenSL ES object is the
+Termux libandroid-stub wrapper, and the real Android framework/Binder/audio
+services are absent. PortAudio initialization remains failed and no microphone
+capability is admitted from this container result. See the [captured audio
+evidence](../audit/native-probes-9fcd31c-20261017/audio-summary.json) and the
+[reviewed wrapper source](https://github.com/termux/termux-packages/blob/11ae750781a261b8df328697b12d66d75b72e5da/packages/libandroid-stub/libOpenSLES-wrapper.c).
+Physical microphone permission, capture, VAD thresholds, maximum
 duration, playback/audio focus and cancellation remain device gates.
 
 ## Stable-release prerequisites

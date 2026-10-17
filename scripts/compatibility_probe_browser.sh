@@ -252,6 +252,8 @@ assert browser_use_cli._find_cli() == [sys.executable, "-m", "browser_harness.ru
 }, indent=2) + "\n")
 
 screenshot = out / "browser-default-loopback.png"
+# The pinned harness marks controlled tabs with a cosmetic horse-title prefix.
+# Keep that product behavior and verify fixture identity through URL and DOM.
 code = (
     "# Checking the native default browser\n"
     "import base64, json\n"
@@ -259,10 +261,12 @@ code = (
     f"new_tab({json.dumps(f'http://127.0.0.1:{port}/')})\n"
     "wait_for_load()\n"
     "title = js('document.title')\n"
+    f"assert js('location.href') == {json.dumps(f'http://127.0.0.1:{port}/')}\n"
+    "assert js(\"document.querySelector('h1').textContent\") == 'Hermes loopback probe'\n"
     "before = js(\"document.getElementById('result').textContent\")\n"
     "js(\"document.getElementById('change').click()\")\n"
     "after = js(\"document.getElementById('result').textContent\")\n"
-    "assert title == 'Hermes Android browser probe', title\n"
+    "assert title.removeprefix('🐴 ') == 'Hermes Android browser probe', title\n"
     "assert before == 'Before click', before\n"
     "assert after == 'Clicked successfully', after\n"
     "shot = cdp('Page.captureScreenshot', format='png')\n"

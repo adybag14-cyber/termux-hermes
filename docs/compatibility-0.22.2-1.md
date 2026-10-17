@@ -106,11 +106,11 @@ The reviewed exact source digests are also embedded in the preparation helpers.
 
 | Capability | Published behavior | Preparation status |
 | --- | --- | --- |
-| Local managed browser | PM has no Bionic artifact for either AgentBrowser or Chromium. Remote browser/CDP paths are distinct and can remain usable. | The locked static ARM64 AgentBrowser and official Termux Chromium passed real navigation, interaction and screenshot checks under UID 1000. Product PM/discovery integration passed 139 regression tests; its extended native proof is pending. Chromium remains an explicitly APT-owned dependency. |
+| Local managed browser | PM has no Bionic artifact for either AgentBrowser or Chromium. Remote browser/CDP paths are distinct and can remain usable. | The locked static ARM64 AgentBrowser and official Termux Chromium passed real navigation, interaction and screenshot checks under UID 1000. Product PM/discovery integration passed 139 regression tests, and its complete built-in browser roundtrip passed natively. The default browser_exec handler launched and executed navigation/JavaScript; its final probe correction accounts for the product title marker while retaining exact URL, DOM and screenshot checks. Chromium remains an explicitly APT-owned dependency. |
 | Default native computer use | Default CUA driver rejects Android. Having the MCP dependency does not supply this native backend. | The locked driver is a glibc Linux/X11/Wayland executable, not an Android UI backend. Fixed the separate routing bug that rejected Android before evaluating a configured remote Linux provider. Remote availability regressions pass; native phone UI control still needs an Android backend. |
 | Bot Desktop | Virtual display host is Linux-only. | Added a local Termux Xvnc/Xfce adapter, prefix-aware runtime paths and screenshot capture through scrot. Desktop/remote-provider regressions pass, including real resolver result types. Native ARM UID 1000 validation passed: Xfce, an 800x600 RFB framebuffer, private Xauthority/socket permissions, no TCP display listener, real product screenshot capture and cleanup. |
 | Managed gateway service | Service install/start/uninstall paths reject Termux/APT provenance. Manual foreground/background gateway paths remain available. | Added a per-home Termux runit adapter with owned service directories, separate start-now/login policy, graceful stop and crash supervision. Twenty-four gateway tests pass. Native ARM install/start/status/restart/stop/crash-respawn/uninstall checks also passed, including same-basename home isolation and preservation of the shared supervisor. |
-| Recorder silence auto-stop | The Termux:API recorder does not provide the sounddevice VAD/silence path. Manual stop remains available. | Added explicit auto, sounddevice and termux-api capture selection with accurate diagnostics. The PCM path retains the existing VAD implementation. Exact NumPy 2.4.3 built and passed native numerical checks with both build and original payload libraries. PortAudio loaded but Android audio-engine initialization failed in the container; microphone/VAD remains unverified. Termux:API itself has no PCM stream for this VAD path. |
+| Recorder silence auto-stop | The Termux:API recorder does not provide the sounddevice VAD/silence path. Manual stop remains available. | Added explicit auto, sounddevice and termux-api capture selection with accurate diagnostics. The PCM path retains the existing VAD implementation. Exact NumPy 2.4.3 built and passed native numerical checks with both build and original payload libraries. PortAudio loaded, but measured runtime evidence shows only the Termux OpenSL ES wrapper: the actual Android audio framework, Binder devices and audio services are absent. Engine initialization failed in that environment; microphone/VAD remains unverified. Termux:API itself has no PCM stream for this VAD path. |
 
 Source guards: upstream [pm/packages.py](https://github.com/NousResearch/hermes-agent/blob/d923a5eb487a17c0a68801bba9ef0f56c81040a8/pm/packages.py),
 [CUA backend](https://github.com/NousResearch/hermes-agent/blob/d923a5eb487a17c0a68801bba9ef0f56c81040a8/tools/computer_use/cua_backend.py),
@@ -230,9 +230,11 @@ the complete next-stable package, optional-install lifecycle, external account
 credentials, or physical device permissions. Those are separate validation gates.
 
 The additional [gateway evidence](../audit/native-probes-4b3d121-20261017/gateway-summary.json) and
-[audio evidence](../audit/native-probes-4b3d121-20261017/audio-summary.json) bind their results to
-commit 4b3d121 and its exact candidate patch. The audio result separates passing
-NumPy behavior from the unresolved PortAudio engine initialization failure.
+[audio evidence](../audit/native-probes-9fcd31c-20261017/audio-summary.json) bind their results to
+their exact tested commits and candidate patch. Audio retains its failed PortAudio
+admission while proving native NumPy and measuring the missing Android framework.
+Its actual mapped OpenSL ES object belongs to libandroid-stub; the corresponding
+real system library and audio/Binder services are absent.
 
 The captured [native probe evidence](../audit/native-probes-20261017/summary.json)
 binds the tested patch digest to GitHub run and artifact identities. Matrix checks
@@ -244,6 +246,13 @@ these protocol/library checks; live account pairing remains a separate step.
 also builds a disposable candidate package as an Actions artifact. It keeps the
 existing version for upgrade testing and has no release or APT publication steps.
 Its package is deliberately separate from the release-promotion artifact.
+
+Native workflows select checks from the exact previous PR head when reliable
+ancestry is available. Changes to source patches, pins, build helpers or lifecycle
+checks require the corresponding native validation; unknown or replaced history
+runs the full set. Documentation-only updates avoid rebuilding identical inputs.
+Planner and worker checkouts use the same PR head. Standard CI still runs on each
+push and pull request.
 
 The changes live in [patches/next-stable/compatibility.patch](../patches/next-stable/compatibility.patch),
 applied after the four released v0.22.2 packaging patches. The normal release

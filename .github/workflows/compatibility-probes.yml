@@ -10,9 +10,12 @@ on:
         options: [all, uvloop, matrix, nemo, browser, desktop, audio, gateway]
   pull_request:
     paths:
+      - 'manifest/**'
+      - 'patches/upstream-*.patch'
       - '.github/workflows/compatibility-probes.yml'
       - 'patches/next-stable/**'
       - 'scripts/probe_native_compatibility.*'
+      - 'scripts/plan_next_stable_validation.py'
       - 'scripts/compatibility_probe_browser.sh'
       - 'scripts/compatibility_probe_desktop.sh'
       - 'scripts/compatibility_probe_gateway.sh'
@@ -26,19 +29,39 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      required: ${{ steps.select.outputs.required }}
+      groups: ${{ steps.select.outputs.groups }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Select checks whose inputs changed
+        id: select
+        env:
+          REQUESTED_GROUP: ${{ inputs.group || 'all' }}
+        run: python3 scripts/plan_next_stable_validation.py --kind components
+
   probe:
+    needs: plan
+    if: needs.plan.outputs.required == 'true'
     name: Native ${{ matrix.group }} probe
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 150
     strategy:
       fail-fast: false
       matrix:
-        group: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.group != 'all' && format('["{0}"]', inputs.group) || '["uvloop","matrix","nemo","browser","desktop","audio","gateway"]') }}
+        group: ${{ fromJSON(needs.plan.outputs.groups) }}
     steps:
       - name: Checkout proposed packaging changes
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Read the immutable source baseline
         run: |

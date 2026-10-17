@@ -4,20 +4,41 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - "manifest/**"
+      - "patches/upstream-*.patch"
       - ".github/workflows/next-stable-candidate.yml"
       - "patches/next-stable/**"
       - "scripts/check_next_stable_candidate.sh"
       - "scripts/check_next_stable_lifecycle.py"
+      - "scripts/plan_next_stable_validation.py"
 
 permissions:
   contents: read
 
-concurrency:
-  group: termux-next-stable-candidate-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      required: ${{ steps.select.outputs.required }}
+      groups: ${{ steps.select.outputs.groups }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Select checks whose inputs changed
+        id: select
+        env:
+          REQUESTED_GROUP: ${{ inputs.group || 'all' }}
+        run: python3 scripts/plan_next_stable_validation.py --kind candidate
+
   build:
+    needs: plan
+    if: needs.plan.outputs.required == 'true'
+    concurrency:
+      group: termux-next-stable-candidate-${{ github.ref }}
+      cancel-in-progress: false
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 180
     env:
@@ -27,6 +48,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Read the reviewed release pins
         run: |
@@ -166,7 +188,7 @@ jobs:
       - name: Record the candidate identity without changing release pins
         run: |
           python3 - <<'PY'
-          import hashlib, json, os
+          import hashlib, json, os, subprocess
           from pathlib import Path
           out = Path("next-stable-evidence")
           out.mkdir(exist_ok=True)
@@ -176,7 +198,8 @@ jobs:
               "purpose": "next-stable compatibility candidate; do not publish",
               "published": False, "version_bumped": False,
               "package": package.name, "package_sha256": hashlib.sha256(package.read_bytes()).hexdigest(),
-              "packaging_commit": os.environ["GITHUB_SHA"],
+              "packaging_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+              "workflow_ref_commit": os.environ["GITHUB_SHA"],
               "upstream_commit": os.environ["HERMES_COMMIT"], "upstream_tag": os.environ["HERMES_TAG"],
               "patches": {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in patches},
           }
