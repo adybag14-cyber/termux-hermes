@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "purpose": "unpublished APT native scientific behavior with strict dependency provenance",
+  "run_id": "39065274205",
+  "head_sha": "cea5b45c7f3b0474c51706153c2cee848f29d181",
+  "workflow_ref_commit": "cea5b45c7f3b0474c51706153c2cee848f29d181",
+  "native_image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
+  "inputs": {
+    "scripts/compatibility_probe_neutts.sh": "acc7d36700405efa463d218db5994b01c53dfdb11df049374cb46a0046ec2df4",
+    "scripts/compatibility_probe_neutts.py": "56af47cbb1b73f7a968a02a31fb6b724f28cd14a42516e4448f453a18fc748f0",
+    "scripts/prepare_neutts_core_python.py": "b78a252eb1c3d1872b64f7ffe5e16bf16c161057b6579732a7af966317e0b19e",
+    "scripts/neutts_core_python_lock.json": "ba927bae7ec87c331e23136ba883da86876ca24044485288d9866649130fab38",
+    "scripts/validate_neutts_apt_python.py": "7c051b0143675594aadd52f9a0b66ec71e6950e9953feef3f773acceafcb0a29",
+    "scripts/neutts_apt_python_metadata.json": "2031c8a6915915ffffb980b268ad5107d42a186682cb2ca7009d803fe2abe200",
+    ".github/workflows/neutts-termux-probe.yml": "9c8294e5f4a748b1a746ab02f63a99ca6f0f6e20fa30272b58c6f70a2f452bd1",
+    "scripts/prepare_neutts_native_sources.py": "96e6787b9aa35a2b7f820955750c8d75dbcc90728946b23594dbb12e48d48ced",
+    "scripts/neutts_native_sources_lock.json": "822aeabc9dca027f2f940dfb63a96fa5d015f81f293e138b67d126bd6914cc25",
+    "scripts/compatibility_probe_neutts_native.sh": "95871673b96f179037f5e76a30e5b1bbebb89339d5abd54fc82c4e8e47dad534",
+    "scripts/compatibility_probe_neutts_native.py": "160d073c2db074f1870698e72ba57da3eb4b4a7af0729fdc6f7996f726357a7e",
+    "patches/next-stable/llama-cpp-python-android-loader.patch": "254d0d86b5b3d0ff0a92f0767d997f9d11d16449570713f1fc6ab64f0e718a9b",
+    ".github/workflows/neutts-engine-components.yml": "f6aa82530f32a5121c5d7c34f71b60845815850cf9fc72b42f4aa2dcb8525a86"
+  },
+  "recipe_repository": "termux/termux-packages",
+  "reviewed_recipe_commit": "ae877f2c6a2b2318abeb43699d6ec5f619c216a6",
+  "reviewed_index_url": "https://packages.termux.dev/apt/termux-main/dists/stable/main/binary-aarch64/Packages.gz",
+  "reviewed_index_sha256": "0f9ea9b4cd6c0f7c3ffe90bea8afb7e25a61adc319fc90eca3d0979da6dcb923",
+  "declared_engine_commit": "b7a3427d0d25e20e8b9e92cbaae688f732916baf",
+  "engine_source_url": "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/pyproject.toml",
+  "engine_source_sha256": "3d74df60f0db27733b308c93b88ae95f9deaa8f396f48183b0cf4f14eb3deb94",
+  "engine_version": "1.4.1",
+  "engine_requires_python": ">=3.10, <3.14",
+  "engine_dependencies": [
+    "librosa==0.11.0",
+    "neucodec>=0.0.4",
+    "numpy>=2.2.6",
+    "phonemizer>=3.0.0",
+    "resemble-perth==1.0.1",
+    "soundfile==0.13.1",
+    "torch>=2.8.0",
+    "torchaudio>=2.8.0",
+    "transformers==5.1.0"
+  ],
+  "engine_optional_dependencies": {
+    "llama": [
+      "llama-cpp-python",
+      "gguf"
+    ],
+    "onnx": [
+      "onnxruntime"
+    ],
+    "all": [
+      "llama-cpp-python",
+      "gguf",
+      "onnxruntime"
+    ]
+  },
+  "managed_python_supported_by_declared_engine": false,
+  "apt_core_is_engine_dependency_lock": false,
+  "python_wheelhouse": "exact frozen archives; native MarkupSafe 3.0.4",
+  "apt_postinst_dependency_resolution": "offline from the verified wheelhouse",
+  "pip_wheel_tag_compatibility": "unresolved",
+  "rolling_base_upgrade": true,
+  "engine_installed": false,
+  "synthesis_tested": false,
+  "physical_device_tested": false,
+  "native_source_components_requested": true,
+  "hermes_candidate_installed": false,
+  "pm_admission_changed": false,
+  "release_output": false
+}

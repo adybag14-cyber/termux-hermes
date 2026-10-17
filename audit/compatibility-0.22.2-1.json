@@ -349,22 +349,21 @@
       "standalone_cua_success_counted_as_main_candidate_repair": false
     },
     "packaging_ci": {
-      "run_id": 39063780757,
-      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39063780757",
-      "event": "push",
-      "head_sha": "1136617b0c5983f1bdc5991126758c7892f4c94c",
+      "head_sha": "cea5b45c7f3b0474c51706153c2cee848f29d181",
       "conclusion": "success",
-      "passed": 391,
+      "passed": 394,
       "failed": 0,
       "skipped": 0,
-      "elapsed_seconds": 1.69,
-      "raw_summary_line": "391 passed in 1.69s",
       "counts_not_aggregated_with_other_runs": true,
-      "evidence": "packaging-ci-1136617-20261017/summary.json",
-      "compile_python": "passed",
-      "shell_syntax": "passed",
-      "json_validation": "passed",
-      "later_oracle_source_change_requires_own_ci": true
+      "run_id": 39065274383,
+      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39065274383",
+      "event": "push",
+      "elapsed_seconds": 1.83,
+      "evidence": "packaging-ci-cea5b45-20261017/summary.json",
+      "pr_run_id": 39065277607,
+      "pr_checkout_sha": "20bbecb36c7f554978984916410bdf98abb9d552",
+      "pr_tree_equals_source_head_tree": true,
+      "candidate_and_component_runs_were_planning_only": true
     },
     "neutts_apt_core_probe": {
       "status": "strict_provenance_and_native_scientific_behavior_passed_pip_tags_unresolved",
@@ -670,7 +669,7 @@
       "native_loader_or_engine_certified": false
     },
     "neutts_native_cpu_preparation": {
-      "status": "native_builds_and_numba_passed_llama_oracle_fix_awaiting_native_revalidation",
+      "status": "native_source_builds_and_model_free_cpu_behavior_passed_pip_tags_unresolved",
       "scope": "Opt-in model-free Numba and matching llama CPU build and behavior experiment",
       "numba_version": "0.67.0",
       "llama_cpp_python_version": "0.3.36",
@@ -689,21 +688,49 @@
       "engine_installed": false,
       "synthesis_tested": false,
       "main_candidate_modified": false,
-      "latest_native_run_id": 39063780748,
-      "latest_native_head_sha": "1136617b0c5983f1bdc5991126758c7892f4c94c",
-      "latest_native_workflow_conclusion": "failure",
-      "latest_failure_evidence_verification": "complete_archive_sha256_crc_and_member_hashes",
-      "latest_native_evidence": "neutts-native-components-20261017/run-39063780748/summary.json",
+      "latest_native_run_id": 39065274205,
+      "latest_native_head_sha": "cea5b45c7f3b0474c51706153c2cee848f29d181",
+      "latest_native_workflow_conclusion": "success",
+      "latest_native_evidence": "neutts-native-components-20261017/run-39065274205/summary.json",
       "native_platform_fix_proved": true,
       "both_native_source_builds_passed": true,
       "installed_native_inputs_passed": true,
       "native_numba_behavior_passed": true,
-      "native_llama_behavior_passed": false,
-      "latest_failure": "Pinned llama_model_params has load_mode/lazy_mode instead of obsolete use_mmap",
+      "native_llama_behavior_passed": true,
       "llama_oracle_correction": "Require and record exact AUTO load/lazy defaults while preserving separate mmap capability and existing native guards",
       "platform_reconciliation_evidence": "neutts-native-components-reconciliation-20261017.json",
       "current_helper_sha256": "160d073c2db074f1870698e72ba57da3eb4b4a7af0729fdc6f7996f726357a7e",
-      "original_platform_failure": "Unnecessary _PYTHON_HOST_PLATFORM override raised KeyError during pip platform enumeration before compilation"
+      "original_platform_failure": "Unnecessary _PYTHON_HOST_PLATFORM override raised KeyError during pip platform enumeration before compilation",
+      "previous_failed_native_run": {
+        "run_id": 39063780748,
+        "head_sha": "1136617b0c5983f1bdc5991126758c7892f4c94c",
+        "workflow_conclusion": "failure",
+        "evidence": "neutts-native-components-20261017/run-39063780748/summary.json",
+        "failure": "Pinned llama_model_params has load_mode/lazy_mode instead of obsolete use_mmap",
+        "verification": "complete_archive_sha256_crc_and_member_hashes"
+      },
+      "latest_native_evidence_verification": "complete_archive_sha256_crc_and_all_4669_member_hashes",
+      "native_component_behavior_passed": true,
+      "native_cases_passed": 3,
+      "foundation_cases_passed": 7,
+      "case_counts_not_aggregated_with_other_runs": true,
+      "all_13_current_input_hashes_match_tested_source": true,
+      "artifact_id": 12112669544,
+      "artifact_bytes": 151554662,
+      "artifact_sha256": "7ad7a42e42c9977e13b832b7c274109fbd7938f62baa82bcb1c27a2f474871fb",
+      "llama_default_model": {
+        "load_mode": -1,
+        "lazy_mode": 1
+      },
+      "native_numba_jit_actual": 102.0,
+      "native_numba_workqueue_threads": 2,
+      "raw_pip_exit_code": 1,
+      "pip_check_passed": false,
+      "pip_wheel_tag_compatibility": "unresolved",
+      "overall_compatibility_passed": false,
+      "model_loaded": false,
+      "inference_tested": false,
+      "physical_device_tested": false
     },
     "audio_readiness_preparation": {
       "patch": "../patches/next-stable/audio-readiness.patch",
@@ -891,7 +918,8 @@
       "skipped": 4,
       "failed": 0,
       "evidence": "neutts-llama-oracle-reconciliation-20261017.json",
-      "linux_ci_for_current_source": "pending"
+      "linux_ci_for_current_source": "passed",
+      "linux_ci_evidence": "packaging-ci-cea5b45-20261017/summary.json"
     },
     "reviewed_preparation_base": {
       "branch": "prepare/termux-compatibility-reviewed-base-20261017",
@@ -941,6 +969,24 @@
       "termux_api_companion_present": false,
       "adb_run_as_available": false,
       "physical_audio_validation": "not_performed"
+    },
+    "previous_platform_fix_packaging_ci": {
+      "run_id": 39063780757,
+      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39063780757",
+      "event": "push",
+      "head_sha": "1136617b0c5983f1bdc5991126758c7892f4c94c",
+      "conclusion": "success",
+      "passed": 391,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_seconds": 1.69,
+      "raw_summary_line": "391 passed in 1.69s",
+      "counts_not_aggregated_with_other_runs": true,
+      "evidence": "packaging-ci-1136617-20261017/summary.json",
+      "compile_python": "passed",
+      "shell_syntax": "passed",
+      "json_validation": "passed",
+      "later_oracle_source_change_requires_own_ci": true
     }
   }
 }

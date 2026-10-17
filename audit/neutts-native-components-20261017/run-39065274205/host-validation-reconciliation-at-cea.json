@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-17T20:00:27.528192+00:00",
+  "source_checkpoint_before_fix": "1136617b0c5983f1bdc5991126758c7892f4c94c",
+  "status": "host_validation_passed_native_revalidation_pending",
+  "scope": "Align the model-free llama default-parameter oracle with the exact pinned Python/C ABI",
+  "inputs": {
+    "scripts/compatibility_probe_neutts_native.py": {
+      "sha256": "160d073c2db074f1870698e72ba57da3eb4b4a7af0729fdc6f7996f726357a7e",
+      "bytes": 43205
+    },
+    "tests/test_neutts_native_components.py": {
+      "sha256": "f36518d3c1872952d40737e55d14b366348f1d4c2846f88be914c2daba8a44df",
+      "bytes": 13980
+    },
+    "scripts/neutts_native_sources_lock.json": {
+      "sha256": "822aeabc9dca027f2f940dfb63a96fa5d015f81f293e138b67d126bd6914cc25",
+      "bytes": 35211,
+      "unchanged_from_prior_tested_source": true
+    },
+    "scripts/prepare_neutts_native_sources.py": {
+      "sha256": "96e6787b9aa35a2b7f820955750c8d75dbcc90728946b23594dbb12e48d48ced",
+      "bytes": 22681,
+      "unchanged_from_prior_tested_source": true
+    },
+    "scripts/compatibility_probe_neutts.sh": {
+      "sha256": "acc7d36700405efa463d218db5994b01c53dfdb11df049374cb46a0046ec2df4",
+      "bytes": 31620,
+      "unchanged_from_prior_tested_source": true
+    },
+    ".github/workflows/neutts-engine-components.yml": {
+      "sha256": "f6aa82530f32a5121c5d7c34f71b60845815850cf9fc72b42f4aa2dcb8525a86",
+      "bytes": 1775,
+      "unchanged_from_prior_tested_source": true
+    }
+  },
+  "host_validation": {
+    "command": [
+      "C:\\Python314\\python.exe",
+      "-m",
+      "pytest",
+      "-q"
+    ],
+    "exit_code": 0,
+    "summary": "390 passed, 4 skipped in 8.78s",
+    "raw_log": "neutts-llama-oracle-reconciliation-20261017/host-packaging-tests.log.gz",
+    "raw_log_bytes": 518,
+    "raw_log_sha256": "03028152220050d1f1fb5c6df83b93d37b51853444bf1f9ed2d0919dc8003d4c",
+    "gzip_sha256": "1796d2f9f79b7479db09a60f7380bdb5bad791f4228e1592ca35bbb4d6d86d21",
+    "counts_not_aggregated_with_other_runs": true,
+    "additional_checks": [
+      {
+        "command": [
+          "C:\\Python314\\python.exe",
+          "-m",
+          "compileall",
+          "-q",
+          "scripts",
+          "tests"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    ]
+  },
+  "native_validation": {
+    "status": "pending"
+  },
+  "source_version_archive_abi_compiler_pins_changed": false,
+  "model_downloaded": false,
+  "engine_installed": false,
+  "candidate_admission_changed": false,
+  "release_created": false,
+  "original_native_evidence": "neutts-native-components-20261017/run-39063780748/summary.json",
+  "original_native_run_id": 39063780748,
+  "original_native_head_sha": "1136617b0c5983f1bdc5991126758c7892f4c94c",
+  "source_backed_review": "neutts-native-components-20261017/run-39063780748/oracle-correction-review.json",
+  "correction": {
+    "obsolete_field": "llama_model_params.use_mmap",
+    "actual_fields": {
+      "load_mode": {
+        "enum": "LLAMA_LOAD_MODE_AUTO",
+        "value": -1
+      },
+      "lazy_mode": {
+        "enum": "LLAMA_LAZY_MODE_AUTO",
+        "value": 1
+      }
+    },
+    "separate_mmap_capability_preserved": true,
+    "existing_cpu_context_abi_library_and_cleanup_guards_preserved": true,
+    "only_production_function_changed": "llama_case",
+    "red_regression_reproduced_original_attribute_error": true,
+    "focused_suite_passed": 57,
+    "focused_and_full_counts_overlap": true
+  }
+}

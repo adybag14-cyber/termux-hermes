@@ -10,9 +10,24 @@ The [native audio record](../audit/native-probes-9fcd31c-20261017/audio-summary.
 
 The successful e271 full candidate still selects seven extras and does not include `audio-io`. Changing `voice.capture_backend` alone does not supply NumPy or sounddevice. This guide does not authorize or perform an installation, add an extra to the released package, or change the main compatibility patch.
 
+## Device access observed on 2026-10-17
+
+The [sanitized device-access record](../audit/device-audio-access-20261017.json), captured at 20:01 UTC, records Android **API level 36** and the **arm64-v8a** ABI on the attached physical device. These runtime identifiers are now known; no persistent device identifier was retained.
+
+| Observation | Consequence for the follow-up |
+|---|---|
+| Package inventory lists `com.termux` and `com.termux.x11`; the package follow-up identifies Termux `0.118.0` (code 118, minimum SDK 21, target SDK 28). | Termux is present. The generic Android package installer record does not prove its distribution channel; the installed Hermes payload also still needs to be identified in the intended session. |
+| The Termux package dump contains no `android.permission.RECORD_AUDIO` entry. | This does not establish the complete shared-UID permission or app-ops state. Check actual microphone permission in the intended app context before a take. |
+| The same inventory does not list `com.termux.api`. | The Termux:API companion is unavailable in the observed package inventory. This affects the Termux:API path, not the separately staged sounddevice/PortAudio path. |
+| `run-as com.termux id` fails with `package not debuggable`. | This ADB command cannot launch the probe as the installed Termux app. A foreground Termux session remains the documented execution context; app-context execution has not yet been established. |
+
+This inventory does not prove microphone permission, PortAudio initialization, capture, or VAD. It establishes no isolated audio environment and does not change any audio gate. The local PCM/VAD test below does not require the Termux:API backend; that backend is a separate check and cannot prove silence autostop.
+
 ## Exact software prerequisites before a phone test
 
 A packager must first supply a separately reviewed, freshly assembled PM environment for native Android ARM64/Python 3.14, plus a copy of the prepared Hermes source with this patch applied. Keep the installed package and its environment unchanged. Reuse the exact candidate's reviewed base runtime and wheel catalog, then add the locked audio closure in the isolated environment; do not copy the CI venv to the phone or substitute system Python packages. This full device-test environment and its installer/receipt have not yet been prepared or certified.
+
+The launcher below resolves `AUDIO_PAYLOAD` to the existing `$PREFIX/lib/hermes-agent` directory. Its receipt must bind that payload to the selected candidate's source, package digest and runtime-library hashes, as well as the new environment's complete wheel manifest and patched source. If the existing payload does not match, prepare a separately reviewed launcher pointing to an isolated copy of the selected payload before using these blocks. An unrelated installed payload is not a substitute for this prerequisite.
 
 The existing component proof is [run 39043935925](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39043935925), artifact `12104898993`; the [build receipt](../audit/native-probes-9fcd31c-20261017/audio-build-probe.json) records these exact files. The runtime closure has four packages; the fifth retained wheel is build support.
 
@@ -30,7 +45,7 @@ The historical component environment was `/out/environment/bin/python`, created 
 
 ## Device facts: no recording
 
-Use a native foreground Termux session. The following commands only report the selected runtime facts and current recorder status; `-i` does not start recording. If Termux:API is absent, report that result and stop that command path.
+For the later device session, use a native foreground Termux session. The following commands only report the selected runtime facts and current recorder status; `-i` does not start recording. The API level and ABI can be compared with the dated inventory above. Run the last two Termux:API-specific commands only when that backend is being checked and its matching companion app and CLI helper are available; otherwise retain the observed absence and continue only with the separately prepared sounddevice path.
 
 ```bash
 # Run in the foreground Termux app, not in proot, Docker, or an SSH shell.
@@ -159,6 +174,13 @@ The separate [preparation record](../audit/audio-readiness-preparation-20261017.
 
 The unchanged baseline produced three failures and one passing control. On the fixed source, the new file passed four cases, the existing selector suite passed fourteen cases (three Linux-only WSL cases were skipped on Windows), and two selected existing missing-library cases passed. These are separate runs; the red and green runs overlap and are not added together. One expanded attempt hit a 65-second outer timeout before a summary was retained, and no test result is claimed for that attempt. No native microphone or device installation was performed.
 
-## Information still needed from the device owner
+## Remaining preparation for the device test
 
-Please identify the ARM64 Android device/model and Android release/API level, the native Termux version/channel, whether the matching Termux:API add-on is present, and whether you can later initiate a brief local microphone test with Android's microphone permission. The packager must first deliver the isolated audio environment described above; missing software staging is not a request for the user to supply private data.
+The available device already meets the observed ARM64/API identity part of the plan. The concrete follow-up is:
+
+1. **Prepare the exact isolated software.** Deliver the full audio environment, patched source, selected candidate payload, launcher and digest receipt described above. This staging remains unfinished; the dependency-only CI environment is insufficient for the Hermes recorder check.
+2. **Establish execution inside foreground Termux.** Use an owner-operated Termux session and the delivered launcher. Record the app version/channel, human-readable device model and Android release, installed Hermes payload identity, and existing microphone-permission state. The failed `run-as` route does not provide this entry point. Determine compatible Termux:API companion/helper versions only if that separate backend will be tested.
+3. **Run the non-recording readiness gate.** Verify the receipt and exact interpreter, then require successful native initialization, a real input device and mapped audio-library provenance. Retain the numeric and provenance reports; an unavailable or output-only inventory remains a failed gate.
+4. **Let the device owner initiate the bounded local PCM/VAD check.** After the readiness gate passes, use the local-only block above for speech followed by silence, distinguish silence stopping from the duration cap, and repeat to check reopen/cleanup. Retain the numeric result and shutdown observation; delete the temporary WAV as the block specifies.
+
+Playback/audio focus, physical clipboard behavior and the normal Hermes UI remain separate checks. None is established by a successful local PCM/VAD result. The packager must finish software staging before requesting any brief microphone take from the device owner.

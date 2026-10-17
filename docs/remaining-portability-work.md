@@ -124,13 +124,19 @@ The [new standalone-wrapper run](../audit/neutts-native-20261017/run-39063780780
 passed all seven scientific/installed-wheel cases and strict provenance at
 `1136617b0c5983f1bdc5991126758c7892f4c94c`, while preserving pip exit 1. The [platform-corrected CPU run](../audit/neutts-native-components-20261017/run-39063780748/summary.json)
 built and installed Numba and the matching llama backend. Installed-input and
-Numba JIT/guvectorize/workqueue behavior checks passed. The full result remains
+Numba JIT/guvectorize/workqueue behavior checks passed. That historical result remains
 failed because the llama oracle referenced an obsolete use_mmap parameter.
 The pinned Python/C structures instead define load_mode/lazy_mode AUTO defaults;
 the [corrected oracle](../audit/neutts-llama-oracle-reconciliation-20261017.json)
 now checks those actual values while retaining all existing CPU, ABI, library
-and cleanup guards. Host regressions pass; a fresh full native result is pending.
-No model loading, inference, full engine closure or synthesis is inferred.
+and cleanup guards. The [fresh native run](../audit/neutts-native-components-20261017/run-39065274205/summary.json)
+passes at `cea5b45c7f3b0474c51706153c2cee848f29d181`: seven foundation cases
+and three native cases, with both source builds, installed-input verification,
+Numba behavior and llama initialization/cleanup passing. The observed model
+defaults are `load_mode=-1` and `lazy_mode=1`; all 13 tested inputs match the
+current implementation. All 4,669 artifact members were verified. Raw pip still
+exits 1 and WHEEL tag compatibility remains unresolved, so overall compatibility
+is false. No model loading, inference, full engine closure or synthesis is inferred.
 
 This disposable Termux system-Python experiment records the rolling base upgrade
 separately from the pinned dependency archives. Its

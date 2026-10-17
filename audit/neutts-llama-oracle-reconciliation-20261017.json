@@ -2,7 +2,7 @@
   "schema_version": 1,
   "observed_at": "2026-10-17T20:00:27.528192+00:00",
   "source_checkpoint_before_fix": "1136617b0c5983f1bdc5991126758c7892f4c94c",
-  "status": "host_validation_passed_native_revalidation_pending",
+  "status": "host_linux_ci_and_native_model_free_oracle_validation_passed",
   "scope": "Align the model-free llama default-parameter oracle with the exact pinned Python/C ABI",
   "inputs": {
     "scripts/compatibility_probe_neutts_native.py": {
@@ -75,7 +75,36 @@
     ]
   },
   "native_validation": {
-    "status": "pending"
+    "status": "passed",
+    "run_id": 39065274205,
+    "head_sha": "cea5b45c7f3b0474c51706153c2cee848f29d181",
+    "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39065274205",
+    "evidence": "neutts-native-components-20261017/run-39065274205/summary.json",
+    "source_provenance": "neutts-native-components-20261017/run-39065274205/source-provenance.json",
+    "completed_at": "2026-10-17T20:13:34Z",
+    "summary_sha256": "b37bef1954ecbab5bbd4a423068afd7ecd11dd14e1bcb8b9293fbc89308e62a8",
+    "all_13_current_inputs_match_tested_source": true,
+    "artifact_id": 12112669544,
+    "artifact_sha256": "7ad7a42e42c9977e13b832b7c274109fbd7938f62baa82bcb1c27a2f474871fb",
+    "artifact_bytes": 151554662,
+    "verified_archive_members": 4669,
+    "native_cases_passed": 3,
+    "foundation_cases_passed": 7,
+    "counts_not_aggregated_with_other_runs": true,
+    "both_native_source_builds_passed": true,
+    "llama_backend_initialized_and_freed": true,
+    "llama_default_model": {
+      "load_mode": -1,
+      "lazy_mode": 1
+    },
+    "pip_check_exit_code": 1,
+    "pip_check_passed": false,
+    "pip_wheel_tag_compatibility": "unresolved",
+    "overall_compatibility_passed": false,
+    "model_loaded": false,
+    "inference_tested": false,
+    "synthesis_tested": false,
+    "physical_device_tested": false
   },
   "source_version_archive_abi_compiler_pins_changed": false,
   "model_downloaded": false,
@@ -104,5 +133,16 @@
     "red_regression_reproduced_original_attribute_error": true,
     "focused_suite_passed": 57,
     "focused_and_full_counts_overlap": true
+  },
+  "packaging_ci": {
+    "head_sha": "cea5b45c7f3b0474c51706153c2cee848f29d181",
+    "push_run_id": 39065274383,
+    "pr_run_id": 39065277607,
+    "passed_in_each_run": 394,
+    "failed": 0,
+    "skipped": 0,
+    "evidence": "packaging-ci-cea5b45-20261017/summary.json",
+    "pr_checkout_sha": "20bbecb36c7f554978984916410bdf98abb9d552",
+    "pr_tree_equals_source_head_tree": true
   }
 }

@@ -303,7 +303,7 @@ before compilation because of an unnecessary host-platform override. The
 [platform-corrected native run](../audit/neutts-native-components-20261017/run-39063780748/summary.json)
 then built and installed both Android-tagged wheels, verified native installed
 inputs, and passed Numba JIT, exact guvectorize and two-thread workqueue behavior.
-All 4,669 artifact members were verified. The full result remains **failed**:
+All 4,669 artifact members were verified. That historical run remains **failed**:
 the llama oracle read an obsolete model parameter after initialization.
 
 The [oracle correction](../audit/neutts-llama-oracle-reconciliation-20261017.json)
@@ -312,7 +312,17 @@ preserves mmap capability, CPU, context, ABI, library and cleanup checks. It
 changes no source/archive/version/build pins. The new regression first reproduced
 the original AttributeError; the focused suite now passes 57 tests, and the full
 Windows host suite passes 390 with four skips. These overlapping counts are not
-summed. Fresh native validation of the corrected llama oracle is pending.
+summed. The [corrected native run](../audit/neutts-native-components-20261017/run-39065274205/summary.json)
+now passes at source `cea5b45c7f3b0474c51706153c2cee848f29d181`: all seven
+foundation cases and all three native cases pass, including both source builds,
+installed-input verification, Numba behavior and llama initialization/cleanup.
+The actual pinned model defaults are `load_mode=-1` and `lazy_mode=1`.
+Numba produces the expected JIT result 102.0, exact guvectorize output and two
+workqueue threads. All 13 source input hashes match the current implementation;
+the complete 151,554,662-byte artifact and all 4,669 member hashes/CRCs were verified.
+Raw pip still exits 1 and APT WHEEL tag compatibility remains unresolved, so
+overall compatibility is still false. No model was loaded, and inference,
+synthesis, the complete NeuTTS engine and physical devices remain untested.
 
 The final source validation comprises
 [73 loader tests with three host skips](../audit/cua-hermes-resume-20261017/host-tests.json),
@@ -332,13 +342,20 @@ audio services are absent; microphone capture was not tested. All seven
 artifact archives were downloaded in full and verified by SHA-256, ZIP CRC and
 member hashes. The failed job's complete original log is retained too.
 
+The [current oracle implementation CI](../audit/packaging-ci-cea5b45-20261017/summary.json)
+passed **394 tests** with no failures or skips in each of its separate push and
+PR runs. The push checked out source `cea5b45c7f3b0474c51706153c2cee848f29d181`; the PR
+used its generated merge commit, whose tree is verified identical to that source.
+Python compilation, shell syntax and JSON validation passed. The concurrent
+candidate and component workflows performed planning only and skipped their
+native jobs; they are not new native validation of the unchanged main candidate.
+
 The [platform-fix implementation CI](../audit/packaging-ci-1136617-20261017/summary.json)
 passed **391 tests** with no failures or skips at
 `1136617b0c5983f1bdc5991126758c7892f4c94c`. Python compilation, shell syntax
 and JSON validation passed. The corresponding Windows host run passed
 387 tests with four host-specific skips; these overlapping counts are not summed.
-The subsequent oracle correction has the separate host result above and awaits
-its own Linux CI.
+The subsequent oracle correction has its own host and Linux results above.
 
 The [earlier implementation-commit CI](../audit/resume-ci-635ec13-20261017.json)
 passed **291 tests** with no failures or skips in each of the separate push and

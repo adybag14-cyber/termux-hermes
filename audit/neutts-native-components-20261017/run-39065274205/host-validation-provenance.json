@@ -1,0 +1,48 @@
+{
+  "counts_not_aggregated_with_native_or_prior_host_runs": true,
+  "host_validation": {
+    "additional_checks": [
+      {
+        "command": [
+          "C:\\Python314\\python.exe",
+          "-m",
+          "compileall",
+          "-q",
+          "scripts",
+          "tests"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ],
+    "command": [
+      "C:\\Python314\\python.exe",
+      "-m",
+      "pytest",
+      "-q"
+    ],
+    "counts_not_aggregated_with_other_runs": true,
+    "exit_code": 0,
+    "gzip_sha256": "1796d2f9f79b7479db09a60f7380bdb5bad791f4228e1592ca35bbb4d6d86d21",
+    "raw_log": "neutts-llama-oracle-reconciliation-20261017/host-packaging-tests.log.gz",
+    "raw_log_bytes": 518,
+    "raw_log_sha256": "03028152220050d1f1fb5c6df83b93d37b51853444bf1f9ed2d0919dc8003d4c",
+    "summary": "390 passed, 4 skipped in 8.78s"
+  },
+  "native_validation_pending_field_in_original_reconciliation_is_historical": true,
+  "retained_raw_log": "host-packaging-tests.log.gz",
+  "source_commit": "cea5b45c7f3b0474c51706153c2cee848f29d181",
+  "source_path": "audit/neutts-llama-oracle-reconciliation-20261017.json",
+  "source_sha256": "1a3d525b26e4f530a06535a5c8939f72c1d560e255d44dc6340c05589f33941e"
+}
