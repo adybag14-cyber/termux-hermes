@@ -180,6 +180,24 @@ index 029ef80..2e6afcc 100644
  fn authenticate_history_cli_connection(stream: &tokio::net::UnixStream) -> anyhow::Result<()> {
      let peer_pid = stream
          .peer_cred()
+diff --git a/libs/cua-driver/rust/crates/cua-driver/src/telemetry.rs b/libs/cua-driver/rust/crates/cua-driver/src/telemetry.rs
+index 2453fec..0fb93d8 100644
+--- a/libs/cua-driver/rust/crates/cua-driver/src/telemetry.rs
++++ b/libs/cua-driver/rust/crates/cua-driver/src/telemetry.rs
+@@ -2563,6 +2563,13 @@ fn os_version() -> String {
+     let command = std::process::Command::new("cmd")
+         .args(["/c", "ver"])
+         .output();
++    // Android Build.VERSION.RELEASE reads this public system property:
++    // aosp-mirror/platform_frameworks_base@1cdfff555f4a21f71ccc978290e2e212e2f8b168
++    // core/java/android/os/Build.java. Missing getprop keeps the existing fallback.
++    #[cfg(target_os = "android")]
++    let command = std::process::Command::new("/system/bin/getprop")
++        .arg("ro.build.version.release")
++        .output();
+     #[cfg(target_os = "linux")]
+     {
+         return std::fs::read_to_string("/etc/os-release")
 diff --git a/libs/cua-driver/rust/crates/platform-linux/Cargo.toml b/libs/cua-driver/rust/crates/platform-linux/Cargo.toml
 index 5a54b73..ac5afda 100644
 --- a/libs/cua-driver/rust/crates/platform-linux/Cargo.toml
