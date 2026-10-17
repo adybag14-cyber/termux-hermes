@@ -107,8 +107,8 @@ explicitly configured remote Linux desktop. The Termux Bot Desktop adapter
 provides a separate local virtual X11 display. These are useful capabilities,
 but neither supplies Android Accessibility/MediaProjection control of arbitrary
 phone apps. A phone UI backend requires that Android integration and its explicit
-device permissions. A potential native X11 driver build should be evaluated
-against the virtual desktop on its own terms.
+device permissions. The native X11 driver has now been evaluated
+against the virtual desktop, as recorded below.
 
 ### Isolated native X11 source-port experiment
 
@@ -243,6 +243,15 @@ evidence](../audit/native-probes-9fcd31c-20261017/audio-summary.json) and the
 [reviewed wrapper source](https://github.com/termux/termux-packages/blob/11ae750781a261b8df328697b12d66d75b72e5da/packages/libandroid-stub/libOpenSLES-wrapper.c).
 Physical microphone permission, capture, VAD thresholds, maximum
 duration, playback/audio focus and cancellation remain device gates.
+
+A separate [audio-readiness repair](audio-readiness-device-validation.md) has
+passing host contract tests for PortAudio initialization failures and output-only
+device inventories; its [preparation record](../audit/audio-readiness-preparation-20261017.json)
+retains the source and test evidence. It remains outside the main candidate.
+The proven candidate does not select `audio-io`: a complete isolated Hermes
+audio environment and its installation receipt must be prepared before physical
+capture/VAD validation. These diagnostics do not supply the missing Android audio
+framework or certify microphone access.
 
 ## Stable-release prerequisites
 
