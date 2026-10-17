@@ -281,7 +281,7 @@
       "native_behavior_checks_passed": 11,
       "foreground_virtual_x11_probe_passed": true,
       "accessibility_tree_certified": false,
-      "hermes_native_integration_executed": false
+      "hermes_native_integration_executed": true
     },
     "termux_host_assembly_regressions": {
       "passed": 3,
@@ -300,12 +300,22 @@
     },
     "cua_hermes_integration": {
       "patch": "../patches/next-stable/cua-hermes-integration.patch",
-      "status": "reviewed_explicit_driver_adapter_and_native_helper_prepared_not_yet_native_tested",
+      "status": "explicit_driver_and_foreground_native_integration_passed_packaged_default_gate_pending",
       "included_in_main_candidate": false,
       "preparation_evidence": "cua-hermes-preparation-20261017.json",
       "canonical_host_test_evidence": "cua-hermes-host-tests-20261017.json",
       "canonical_source_runs_not_aggregated": true,
-      "native_source_strategy": "copy the exact proven candidate's trimmed app tree outside the installed payload and apply only the experimental CUA patch; full-source reference Git tree equality is not asserted"
+      "native_source_strategy": "copy the exact proven candidate's trimmed app tree outside the installed payload and apply only the experimental CUA patch; full-source reference Git tree equality is not asserted",
+      "native_run_id": 39056267366,
+      "native_run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39056267366",
+      "tested_head_sha": "fbf7c029b8df66618f520a47e6c07ff722129a43",
+      "tested_patch_sha256": "486bd24394e17e34143304f4a9f1bd7c9668db8433975f83101eddcb7986571f",
+      "native_evidence": "cua-native-20261017/run-39056267366.json",
+      "native_evidence_sha256": "0e8e0a2180db2b722f82caa3f772541917bdff99ebfaabfa3d315657226d09ad",
+      "native_behavior_checks_passed": 5,
+      "separate_once_approvals": 3,
+      "original_payload_file_and_symlink_count_unchanged": 29809,
+      "packaged_default_admission_certified": false
     },
     "main_candidate_repaired_restrictions": {
       "count": 6,
@@ -320,119 +330,297 @@
       "standalone_cua_success_counted_as_main_candidate_repair": false
     },
     "packaging_ci": {
-      "run_id": 39052294622,
-      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39052294622",
-      "job_id": 117453149639,
-      "job_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39052294622/job/117453149639",
-      "event": "pull_request",
-      "head_sha": "3e63be4a65dcb0d6d2c0c2fec86f94546fbba8ed",
-      "checked_out_ref": "refs/remotes/pull/6/merge",
-      "checked_out_sha": "e6fd5fcfb260ab72ef77e87f109c51aa69444a34",
-      "conclusion": "success",
-      "command": [
-        "python",
-        "-m",
-        "pytest",
-        "-q"
-      ],
-      "passed": 209,
-      "failed": 0,
-      "skipped": 0,
-      "elapsed_seconds": 1.53,
-      "raw_summary_line": "209 passed in 1.53s",
-      "counts_not_aggregated_with_host_runs": true,
-      "detail_evidence": "cua-hermes-preparation-20261017.json"
+      "run_id": 39058572994,
+      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39058572994",
+      "job_id": 117471524118,
+      "branch_head": "19ab7a1ce9f496dd8dd291d19e3818bb5f878048",
+      "tested_merge_checkout": "5d40caf985598eb6b6842a0fe46d70b489fe3fe7",
+      "status": "success",
+      "passed": 322,
+      "elapsed_seconds": 2.7,
+      "raw_job_log_sha256": "cc67c01087a9d299fbffcc958036eb470e8caff6099daf046c3227603828641a",
+      "raw_job_log_bytes": 22522
     },
     "neutts_apt_core_probe": {
-      "status": "completed_partial_dependency_proof_missing_python_closure",
-      "script": "../scripts/compatibility_probe_neutts.sh",
-      "workflow": "../.github/workflows/neutts-termux-probe.yml",
-      "scope": "separate APT-only scientific dependency ABI/behavior experiment under Termux system Python",
-      "run_id": 39053355817,
-      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39053355817",
-      "head_sha": "036f11515eda3a6e4129e14c7dd75ec27d5ae47d",
-      "workflow_conclusion": "failure",
-      "tested_inputs": {
-        "scripts/compatibility_probe_neutts.sh": "66c36889ff4af3d627d17f51387e497583c6d5bc4bd2c61dfea7ff77d3a9ffdb",
-        ".github/workflows/neutts-termux-probe.yml": "879ba127636bb181d51466cb7213eccec086c0fca091de54d563a00e38728acd"
-      },
+      "status": "native_foundation_passed",
+      "run_id": 39058569758,
+      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39058569758",
+      "head_sha": "19ab7a1ce9f496dd8dd291d19e3818bb5f878048",
+      "workflow_conclusion": "success",
+      "evidence": "neutts-native-20261017/run-39058569758.json",
+      "evidence_sha256": "ae3af59b4b37a031dce47f8627c67dc61a0ab28994c8c666da9c32bd339faa8c",
       "artifact": {
-        "id": 12108591522,
-        "name": "termux-neutts-dependency-experiment",
-        "bytes": 288815,
-        "sha256": "1d770fc5107e4bf666a6ea8dff4622e7eb907eecfe8ee1cced27ae5ffa6d8682",
+        "id": 12110107775,
+        "bytes": 11169316,
+        "sha256": "994dd71b304d4d8147000859b7260c198fa35cce48b247b9ce0a282a3284c760",
         "all_crc_verified": true
       },
-      "raw_exit_result": {
-        "schema_version": 1,
-        "stage": "native-scientific-behavior",
-        "exit_code": 1
+      "scope": {
+        "engine_installed": false,
+        "model_downloaded": false,
+        "synthesis_tested": false,
+        "physical_audio_tested": false,
+        "candidate_modified": false,
+        "pm_admission_changed": false,
+        "release_created": false
       },
-      "apt_archive_count": 122,
-      "apt_archive_hashes_checked_before_install": true,
-      "rolling_base_upgrade_recorded_separately_from_pinned_dependency_archives": true,
+      "apt_archives": 122,
+      "python_wheels": 9,
       "cases": [
         {
+          "component": "python_dependencies",
+          "exit_code": 0,
+          "status": "passed",
+          "timed_out": false,
+          "receipt": "neutts-python_dependencies.json",
+          "receipt_sha256": "469749bfb7161075c32f437c26d6eaac99e9797b40aad0308e09f11c2638a66f",
+          "stdout_bytes": 0,
+          "stdout_saved_bytes": 0,
+          "stdout_truncated": false,
+          "stderr_bytes": 0,
+          "stderr_saved_bytes": 0,
+          "stderr_truncated": false
+        },
+        {
           "component": "torch",
-          "status": "failed",
-          "error": {
-            "type": "ModuleNotFoundError",
-            "message": "No module named 'typing_extensions'"
-          },
-          "receipt_sha256": "7a22e4f6974001f47375b33c2d09c75f1c7e91271e9f11bcbc31005191dfacaf"
+          "exit_code": 0,
+          "status": "passed",
+          "timed_out": false,
+          "receipt": "neutts-torch.json",
+          "receipt_sha256": "22eabd8fd93dfdd820ba2f7f7b36b3525deed2a2ac7a12d1337b5fef7a3d441b",
+          "stdout_bytes": 0,
+          "stdout_saved_bytes": 0,
+          "stdout_truncated": false,
+          "stderr_bytes": 0,
+          "stderr_saved_bytes": 0,
+          "stderr_truncated": false
         },
         {
           "component": "torchaudio",
-          "status": "failed",
-          "error": {
-            "type": "ModuleNotFoundError",
-            "message": "No module named 'typing_extensions'"
-          },
-          "receipt_sha256": "26acae33c84861521a115cd8f5bc0495732fe62ff01214e0a4bd5cc02f972800"
+          "exit_code": 0,
+          "status": "passed",
+          "timed_out": false,
+          "receipt": "neutts-torchaudio.json",
+          "receipt_sha256": "0f03237292ae7374d8120575a25e3a4b5a03b8544cb234756e0d5eac89ab1465",
+          "stdout_bytes": 0,
+          "stdout_saved_bytes": 0,
+          "stdout_truncated": false,
+          "stderr_bytes": 0,
+          "stderr_saved_bytes": 0,
+          "stderr_truncated": false
         },
         {
           "component": "torchcodec",
-          "status": "failed",
-          "error": {
-            "type": "ModuleNotFoundError",
-            "message": "No module named 'typing_extensions'"
-          },
-          "receipt_sha256": "a4045082b82cdb336c8dae6e7281f9262df9d212b4b4aa692584f18c683454c7"
+          "exit_code": 0,
+          "status": "passed",
+          "timed_out": false,
+          "receipt": "neutts-torchcodec.json",
+          "receipt_sha256": "9060f7f8b897ef7d812cab74adfae513ad167d56af9cb50aa20e26c473fb8e1a",
+          "stdout_bytes": 0,
+          "stdout_saved_bytes": 0,
+          "stdout_truncated": false,
+          "stderr_bytes": 0,
+          "stderr_saved_bytes": 0,
+          "stderr_truncated": false
         },
         {
           "component": "scipy",
+          "exit_code": 0,
           "status": "passed",
-          "error": null,
-          "receipt_sha256": "68060a1618b4c2d6baa765dfd532a676b5e4a57647e3773f10a1858fcc2efe4f"
+          "timed_out": false,
+          "receipt": "neutts-scipy.json",
+          "receipt_sha256": "da7a049de51980f75c9295767fc16dd4349055024d77ca4b11448401a7488a0b",
+          "stdout_bytes": 0,
+          "stdout_saved_bytes": 0,
+          "stdout_truncated": false,
+          "stderr_bytes": 0,
+          "stderr_saved_bytes": 0,
+          "stderr_truncated": false
         },
         {
           "component": "llvmlite",
+          "exit_code": 0,
           "status": "passed",
-          "error": null,
-          "receipt_sha256": "e07f5c1d09ddec61d02a051893d9d7f0934848d66a105648189a25d1e1e5bbe6"
+          "timed_out": false,
+          "receipt": "neutts-llvmlite.json",
+          "receipt_sha256": "26606b1effe73ef69edfd2c4acf23c8dd6c4203ba00ff87f725efd1e4624fff6",
+          "stdout_bytes": 0,
+          "stdout_saved_bytes": 0,
+          "stdout_truncated": false,
+          "stderr_bytes": 0,
+          "stderr_saved_bytes": 0,
+          "stderr_truncated": false
         },
         {
           "component": "soxr",
+          "exit_code": 0,
           "status": "passed",
-          "error": null,
-          "receipt_sha256": "451d8041a13d7ec9dc1eca06d7d531a0317ca5e256d520caed0f95f92222e33b"
+          "timed_out": false,
+          "receipt": "neutts-soxr.json",
+          "receipt_sha256": "451d8041a13d7ec9dc1eca06d7d531a0317ca5e256d520caed0f95f92222e33b",
+          "stdout_bytes": 0,
+          "stdout_saved_bytes": 0,
+          "stdout_truncated": false,
+          "stderr_bytes": 0,
+          "stderr_saved_bytes": 0,
+          "stderr_truncated": false
         }
       ],
-      "completed_native_behavior_cases": [
-        "scipy",
-        "llvmlite",
-        "soxr"
+      "requirements_and_provenance": {
+        "status": "requirements-and-provenance-passed",
+        "exit_code": 0,
+        "receipt": "NEUTTS-APT-PYTHON-VALIDATION.json",
+        "sha256": "51c43c3c98916bce3285de415ae78dc17ddb6d412307e02bfe955a3b51fc3f00",
+        "metadata_ledger_sha256": "2031c8a6915915ffffb980b268ad5107d42a186682cb2ca7009d803fe2abe200",
+        "raw_pip_check_preserved": true
+      },
+      "raw_pip_check": {
+        "exit_code": 1,
+        "log": "NEUTTS-PYTHON-CHECK.log",
+        "log_sha256": "2c025ce5a45cfa2b6f032ea3bc706e8173fa7c6a1c78ff860e40d669199a48bf"
+      },
+      "next_gate": "native Numba and matching patched llama-cpp-python, then complete NeuTTS codec/eSpeak/model synthesis",
+      "rolling_base_upgrade_recorded_separately_from_pinned_dependency_archives": true
+    },
+    "neutts_apt_probe_history": [
+      {
+        "status": "completed_partial_dependency_proof_missing_python_closure",
+        "script": "../scripts/compatibility_probe_neutts.sh",
+        "workflow": "../.github/workflows/neutts-termux-probe.yml",
+        "scope": "separate APT-only scientific dependency ABI/behavior experiment under Termux system Python",
+        "run_id": 39053355817,
+        "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39053355817",
+        "head_sha": "036f11515eda3a6e4129e14c7dd75ec27d5ae47d",
+        "workflow_conclusion": "failure",
+        "tested_inputs": {
+          "scripts/compatibility_probe_neutts.sh": "66c36889ff4af3d627d17f51387e497583c6d5bc4bd2c61dfea7ff77d3a9ffdb",
+          ".github/workflows/neutts-termux-probe.yml": "879ba127636bb181d51466cb7213eccec086c0fca091de54d563a00e38728acd"
+        },
+        "artifact": {
+          "id": 12108591522,
+          "name": "termux-neutts-dependency-experiment",
+          "bytes": 288815,
+          "sha256": "1d770fc5107e4bf666a6ea8dff4622e7eb907eecfe8ee1cced27ae5ffa6d8682",
+          "all_crc_verified": true
+        },
+        "raw_exit_result": {
+          "schema_version": 1,
+          "stage": "native-scientific-behavior",
+          "exit_code": 1
+        },
+        "apt_archive_count": 122,
+        "apt_archive_hashes_checked_before_install": true,
+        "rolling_base_upgrade_recorded_separately_from_pinned_dependency_archives": true,
+        "cases": [
+          {
+            "component": "torch",
+            "status": "failed",
+            "error": {
+              "type": "ModuleNotFoundError",
+              "message": "No module named 'typing_extensions'"
+            },
+            "receipt_sha256": "7a22e4f6974001f47375b33c2d09c75f1c7e91271e9f11bcbc31005191dfacaf"
+          },
+          {
+            "component": "torchaudio",
+            "status": "failed",
+            "error": {
+              "type": "ModuleNotFoundError",
+              "message": "No module named 'typing_extensions'"
+            },
+            "receipt_sha256": "26acae33c84861521a115cd8f5bc0495732fe62ff01214e0a4bd5cc02f972800"
+          },
+          {
+            "component": "torchcodec",
+            "status": "failed",
+            "error": {
+              "type": "ModuleNotFoundError",
+              "message": "No module named 'typing_extensions'"
+            },
+            "receipt_sha256": "a4045082b82cdb336c8dae6e7281f9262df9d212b4b4aa692584f18c683454c7"
+          },
+          {
+            "component": "scipy",
+            "status": "passed",
+            "error": null,
+            "receipt_sha256": "68060a1618b4c2d6baa765dfd532a676b5e4a57647e3773f10a1858fcc2efe4f"
+          },
+          {
+            "component": "llvmlite",
+            "status": "passed",
+            "error": null,
+            "receipt_sha256": "e07f5c1d09ddec61d02a051893d9d7f0934848d66a105648189a25d1e1e5bbe6"
+          },
+          {
+            "component": "soxr",
+            "status": "passed",
+            "error": null,
+            "receipt_sha256": "451d8041a13d7ec9dc1eca06d7d531a0317ca5e256d520caed0f95f92222e33b"
+          }
+        ],
+        "completed_native_behavior_cases": [
+          "scipy",
+          "llvmlite",
+          "soxr"
+        ],
+        "cases_blocked_before_native_behavior": [
+          "torch",
+          "torchaudio",
+          "torchcodec"
+        ],
+        "next_step": "provide the reviewed exact Python dependency closure, then rerun the isolated scientific probe",
+        "native_run_completed": true,
+        "engine_installed": false,
+        "synthesis_tested": false,
+        "hermes_pm_admission_changed": false
+      },
+      {
+        "run_id": 39055594718,
+        "evidence": "neutts-native-20261017/run-39055594718.json",
+        "status": "nine_python_wheels_installed_pip_tag_failure_before_native_cases"
+      },
+      {
+        "run_id": 39056756533,
+        "evidence": "neutts-native-20261017/run-39056756533.json",
+        "status": "six_native_scientific_cases_passed_tag_and_installed_data_oracle_gates_failed"
+      }
+    ],
+    "audio_readiness_preparation": {
+      "patch": "../patches/next-stable/audio-readiness.patch",
+      "patch_sha256": "82b92d5095ceabc05f0200569da1cc16b861c77b166095982b05d57940573db7",
+      "evidence": "audio-readiness-preparation-20261017.json",
+      "evidence_sha256": "e96c40ab39516a1a59b87e6a2d55bf5ed533576cb2e012183fb1befa79bd1bd0",
+      "guide": "../docs/audio-readiness-device-validation.md",
+      "status": "import_time_PortAudio_failure_and_output_only_inventory_fixed_host_tested",
+      "physical_microphone_or_vad_certified": false,
+      "included_in_main_candidate": false
+    },
+    "neutts_default_gguf_source_review": {
+      "documentation": "../docs/neutts-default-gguf-feasibility.md",
+      "evidence": "neutts-default-gguf-source-20261017.json",
+      "loader_patch": "../patches/next-stable/llama-cpp-python-android-loader.patch",
+      "loader_patch_sha256": "254d0d86b5b3d0ff0a92f0767d997f9d11d16449570713f1fc6ab64f0e718a9b",
+      "host_loader_tests_passed": 15,
+      "native_loader_or_engine_certified": false
+    },
+    "neutts_native_cpu_preparation": {
+      "status": "host_prepared_native_validation_pending",
+      "source_lock": "scripts/neutts_native_sources_lock.json",
+      "source_lock_sha256": "a06e595179fad6f437ca95210d685beb339baa0867cd527dba5f5083d94b36ce",
+      "workflow": ".github/workflows/neutts-engine-components.yml",
+      "foundation_required": "All seven cases and strict archive/Python/APT provenance pass before compiler installation.",
+      "additional_python_wheels": 4,
+      "build_apt_closure_packages": 44,
+      "additional_apt_packages": 19,
+      "native_cases": [
+        "installed_inputs",
+        "numba_cpu_jit_and_parallel_workqueue",
+        "matching_vendored_llama_cpu_backend"
       ],
-      "cases_blocked_before_native_behavior": [
-        "torch",
-        "torchaudio",
-        "torchcodec"
-      ],
-      "next_step": "provide the reviewed exact Python dependency closure, then rerun the isolated scientific probe",
-      "native_run_completed": true,
-      "engine_installed": false,
+      "models_downloaded": false,
       "synthesis_tested": false,
-      "hermes_pm_admission_changed": false
+      "pm_admission_changed": false,
+      "published_candidate_modified": false
     }
   }
 }

@@ -1,0 +1,49 @@
+name: Prepare NeuTTS native CPU components
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [prepare/termux-compatibility-next-stable]
+    paths:
+      - '.github/workflows/neutts-engine-components.yml'
+      - 'scripts/prepare_neutts_native_sources.py'
+      - 'scripts/neutts_native_sources_lock.json'
+      - 'scripts/compatibility_probe_neutts_native.sh'
+      - 'scripts/compatibility_probe_neutts_native.py'
+      - 'tests/test_neutts_native_sources.py'
+      - 'tests/test_neutts_native_components.py'
+      - 'patches/next-stable/llama-cpp-python-android-loader.patch'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neutts-native-components-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  native-components:
+    name: Scientific foundation then isolated CPU source builds
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 55
+    steps:
+      - name: Checkout the exact proposed source preparation
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify the foundation and build matching native components
+        env:
+          NEUTTS_PROBE_HEAD_SHA: ${{ github.sha }}
+        run: bash scripts/compatibility_probe_neutts.sh --native-components --out probe-results/neutts-native
+
+      - name: Preserve dependency, compiler, wheel and behavior evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-neutts-native-cpu-components
+          path: probe-results/neutts-native/
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 14

@@ -4,7 +4,9 @@ set -Eeuo pipefail
 
 mode=host
 if [[ "${1:-}" == --in-container ]]; then mode=container; shift; fi
-[[ $# == 2 && "$1" == --out ]] || { echo "usage: $0 [--in-container] --out NEW_DIR" >&2; exit 2; }
+native_components=0
+if [[ "${1:-}" == --native-components ]]; then native_components=1; shift; fi
+[[ $# == 2 && "$1" == --out ]] || { echo "usage: $0 [--in-container] [--native-components] --out NEW_DIR" >&2; exit 2; }
 out="$2"
 
 if [[ "$mode" == host ]]; then
@@ -14,7 +16,7 @@ if [[ "$mode" == host ]]; then
   mkdir -p "$out"
   out="$(realpath "$out")"
   image='termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303'
-  python3 - "$packaging" "$out" "$image" <<'PY'
+  python3 - "$packaging" "$out" "$image" "$native_components" <<'PY'
 import hashlib, json, os, pathlib, subprocess, sys, tomllib, urllib.request
 root, out = map(pathlib.Path, sys.argv[1:3])
 head = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
@@ -26,6 +28,12 @@ names = ("scripts/compatibility_probe_neutts.sh", "scripts/compatibility_probe_n
          "scripts/prepare_neutts_core_python.py", "scripts/neutts_core_python_lock.json",
          "scripts/validate_neutts_apt_python.py", "scripts/neutts_apt_python_metadata.json",
          ".github/workflows/neutts-termux-probe.yml")
+native_components = sys.argv[4] == "1"
+if native_components:
+    names += ("scripts/prepare_neutts_native_sources.py", "scripts/neutts_native_sources_lock.json",
+              "scripts/compatibility_probe_neutts_native.sh", "scripts/compatibility_probe_neutts_native.py",
+              "patches/next-stable/llama-cpp-python-android-loader.patch",
+              ".github/workflows/neutts-engine-components.yml")
 engine_url = "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/pyproject.toml"
 engine_hash = "3d74df60f0db27733b308c93b88ae95f9deaa8f396f48183b0cf4f14eb3deb94"
 with urllib.request.urlopen(engine_url, timeout=30) as response:
@@ -54,24 +62,37 @@ data = {
     "apt_core_is_engine_dependency_lock": False,
     "rolling_base_upgrade": True,
     "engine_installed": False, "synthesis_tested": False, "physical_device_tested": False,
+    "native_source_components_requested": native_components,
     "hermes_candidate_installed": False, "pm_admission_changed": False, "release_output": False,
 }
 (out / "NEUTTS-PROBE-INPUTS.json").write_text(json.dumps(data, indent=2) + "\n")
 PY
   python3 "$packaging/scripts/prepare_neutts_core_python.py" \
     --lock "$packaging/scripts/neutts_core_python_lock.json" --out "$out/python-wheelhouse"
+  native_args=()
+  native_mounts=()
+  container_timeout=24m
+  container_memory=8g
+  if [[ "$native_components" == 1 ]]; then
+    python3 "$packaging/scripts/prepare_neutts_native_sources.py" --out "$out/native-inputs"
+    native_args=(--native-components)
+    native_mounts=(-v "$out/native-inputs:/out/native-inputs:ro")
+    container_timeout=48m
+    container_memory=6g
+  fi
   chmod 0777 "$out"
   docker pull "$image"
   [[ "$(docker image inspect "$image" --format '{{.Architecture}}')" == arm64 ]]
   container="hermes-neutts-${GITHUB_RUN_ID:-local}-$$"
   finish_host() { docker rm -f "$container" >/dev/null 2>&1 || true; }
   trap finish_host EXIT
-  timeout --signal=TERM --kill-after=20s 24m docker run --rm --name "$container" \
-    --platform linux/arm64 --user 1000:1000 --cpus 2 --memory 8g --pids-limit 512 \
+  timeout --signal=TERM --kill-after=20s "$container_timeout" docker run --rm --name "$container" \
+    --platform linux/arm64 --user 1000:1000 --cpus 2 --memory "$container_memory" --pids-limit 512 \
     --tmpfs /bin:mode=1777 \
     -v "$packaging:/probes:ro" -v "$out:/out" \
     -v "$out/python-wheelhouse:/out/python-wheelhouse:ro" \
-    "$image" bash /probes/scripts/compatibility_probe_neutts.sh --in-container --out /out \
+    "${native_mounts[@]}" \
+    "$image" bash /probes/scripts/compatibility_probe_neutts.sh --in-container "${native_args[@]}" --out /out \
     2>&1 | tee "$out/neutts-native-probe.log"
   exit 0
 fi
@@ -315,5 +336,23 @@ cp "$(dirname "$0")/compatibility_probe_neutts.py" "$work/native_core.py"
 
 stage=native-scientific-behavior
 "$PREFIX/bin/python" -I -B "$work/native_core.py" "$out"
-stage=complete
 echo "NATIVE_APT_CORE_PASSED: dependency feasibility only; NeuTTS synthesis remains untested"
+if [[ "$native_components" == 1 ]]; then
+  # The full scientific foundation must pass before adding any compiler. Download
+  # the exact build closure into the retained cache; the separate native helper
+  # verifies all 44 archives and installs only the 19 reviewed additions offline.
+  stage=native-component-apt-download
+  native_specs=()
+  while IFS=$'\t' read -r name version arch sha bytes archive_path; do
+    native_specs+=("$name=$version")
+  done < "$out/native-inputs/build-apt-closure.tsv"
+  [[ "${#native_specs[@]}" == 44 ]]
+  apt-get "${apt_options[@]}" -o Dir::Cache::archives="$work/archives" \
+    -y --no-install-recommends --no-remove --download-only --reinstall install "${native_specs[@]}"
+  stage=native-source-components
+  bash /probes/scripts/compatibility_probe_neutts_native.sh \
+    --inputs "$out/native-inputs" --apt-archives "$work/archives" \
+    --foundation-receipt "$out/NEUTTS-CORE-RESULT.json" --out "$out/native-components"
+  echo "NATIVE_CPU_COMPONENTS_PASSED: Numba JIT and matching llama backend; synthesis remains untested"
+fi
+stage=complete
