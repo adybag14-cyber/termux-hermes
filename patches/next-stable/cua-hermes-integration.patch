@@ -306,6 +306,78 @@ index 00000000..b04e6ba4
 +    assert result.returncode == 0, result.stderr
 +    assert json.loads(result.stdout) == {**published, "CUA_DRIVER_RS_TELEMETRY_ENABLED": "0"}
 +    assert os.environ.get("DISPLAY") == ambient_display
+diff --git a/tests/tools/test_cua_scroll_schema.py b/tests/tools/test_cua_scroll_schema.py
+new file mode 100644
+index 00000000..fa50860f
+--- /dev/null
++++ b/tests/tools/test_cua_scroll_schema.py
+@@ -0,0 +1,66 @@
++"""Scroll targeting follows the live driver schema without guessing its version.
++
++The native Termux integration exposed a driver whose scroll schema accepts x/y
++but has no input.scroll.coordinates token; dropping x/y moved input to center.
++"""
++from types import SimpleNamespace
++from unittest.mock import AsyncMock, Mock
++import asyncio
++
++import pytest
++
++from tools.computer_use.cua_backend import CuaDriverBackend
++
++
++def backend_with_scroll_schema(capabilities, properties):
++    backend = CuaDriverBackend()
++    backend._active_pid = 111
++    backend._active_window_id = 222
++    tool = SimpleNamespace(
++        name="scroll", capabilities=capabilities,
++        inputSchema={"type": "object", "properties": properties, "additionalProperties": False},
++    )
++    client = SimpleNamespace(list_tools=AsyncMock(return_value=SimpleNamespace(tools=[tool])))
++    asyncio.run(backend._session._populate_capabilities(client))
++    backend._session.call_tool = Mock(return_value={
++        "data": "ok", "images": [], "structuredContent": None, "isError": False,
++    })
++    return backend
++
++
++@pytest.mark.parametrize("capabilities,properties,include_coordinates", [
++    ([], {"x": {"type": "number"}, "y": {"type": "number"}}, True),
++    (["input.scroll.coordinates"], {}, True),
++    ([], {"x": {"type": "number"}}, False),
++    ([], {"y": {"type": "number"}}, False),
++    ([], {}, False),
++])
++def test_scroll_preserves_only_advertised_coordinate_support(capabilities, properties, include_coordinates):
++    backend = backend_with_scroll_schema(capabilities, properties)
++
++    result = backend.scroll(direction="down", amount=2, x=80, y=60)
++
++    assert result.ok
++    expected = {"pid": 111, "window_id": 222, "direction": "down", "amount": 2,
++                "session": backend._session_id}
++    if include_coordinates:
++        expected.update(x=80, y=60)
++    backend._session.call_tool.assert_called_once_with("scroll", expected)
++
++
++@pytest.mark.parametrize("window_id,element", [(222, 7), (None, None)])
++def test_scroll_retains_element_precedence_and_exact_window_requirement(window_id, element):
++    backend = backend_with_scroll_schema([], {"x": {"type": "number"}, "y": {"type": "number"}})
++    backend._active_window_id = window_id
++
++    result = backend.scroll(direction="down", amount=2, element=element, x=80, y=60)
++
++    if window_id is None:
++        assert not result.ok
++        backend._session.call_tool.assert_not_called()
++    else:
++        assert result.ok
++        backend._session.call_tool.assert_called_once_with("scroll", {
++            "pid": 111, "window_id": 222, "direction": "down", "amount": 2,
++            "element_index": 7, "session": backend._session_id,
++        })
 diff --git a/tools/computer_use/cua_backend.py b/tools/computer_use/cua_backend.py
 index ec903cbf..5c8bf845 100644
 --- a/tools/computer_use/cua_backend.py
@@ -345,6 +417,21 @@ index 017a6702..0ec981db 100644
      return ("cua-driver is not installed. Install the pinned driver with:\n  hermes computer-use install\n"
              "Or run `hermes tools` and enable the Computer Use toolset to install it automatically.")
  
+diff --git a/tools/computer_use/cua_backend_input.py b/tools/computer_use/cua_backend_input.py
+index 2b09856a..04ba7c2e 100644
+--- a/tools/computer_use/cua_backend_input.py
++++ b/tools/computer_use/cua_backend_input.py
+@@ -137,7 +137,9 @@ class _InputMixin:
+         # coordinates when the driver advertises support; otherwise it scrolls the targeted window
+         # (window_id is still sent for routing).
+         xy = lambda: ({"x": x, "y": y}
+-                      if self._session.supports_capability("input.scroll.coordinates", tool="scroll") else {})
++                      if (self._session.supports_capability("input.scroll.coordinates", tool="scroll")
++                          or (self._session.supports_input_property("scroll", "x")
++                              and self._session.supports_input_property("scroll", "y"))) else {})
+         refusal = self._pointer_args("scroll", args, (
+             ("element scroll", {"element_index": element}
+              if element is not None and self._active_window_id is not None else None),
 diff --git a/tools/computer_use/cua_backend_platform.py b/tools/computer_use/cua_backend_platform.py
 new file mode 100644
 index 00000000..ea1f34cd
