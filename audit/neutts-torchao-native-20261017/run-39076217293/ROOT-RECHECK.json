@@ -1,0 +1,84 @@
+{
+  "actual_archived_wheels_reverified": 11,
+  "artifact_members": 63,
+  "captured_utc": "2026-10-17T22:57:42.065671+00:00",
+  "exact_run_source_files": 13,
+  "foundation_cases_passed": 7,
+  "host_native_execution": false,
+  "native_result_hash_links_rechecked": true,
+  "native_wheel_integrity": {
+    "complete_installed_record_verified": true,
+    "extra_distribution_count": 0,
+    "installed_file_count": 351,
+    "installer_generated_files": [
+      "torchao-0.12.0.dist-info/INSTALLER",
+      "torchao-0.12.0.dist-info/RECORD",
+      "torchao-0.12.0.dist-info/REQUESTED",
+      "torchao-0.12.0.dist-info/direct_url.json"
+    ],
+    "name": "torchao",
+    "original_files_manifest_sha256": "e0022ab6b7207529b4fe30244bcc38fe686425970f4b8f3a67c45ad696534dd6",
+    "original_files_verified": 347,
+    "version": "0.12.0",
+    "wheel_sha256": "82bbdfef93ba0423ed84fc8afdafeb4f9f13ed3fa74ab467b3d5aeef0027b442"
+  },
+  "patched_wheel_reconstructed_from_original": true,
+  "release_output": false,
+  "schema_version": 1,
+  "scope_note": "Native process verified installed environment files and operations. Host independently replays archived wheel/source integrity and receipt bindings; temporary native venv is not present on host.",
+  "text_artifact_members": 52,
+  "torch_libraries_matched_foundation": 7,
+  "torchao_cases": [
+    {
+      "active_base_requirements": [],
+      "case": "real_package_import",
+      "status": "passed",
+      "torch": {
+        "distribution": "torch",
+        "module_file": "/data/data/com.termux/files/usr/lib/python3.14/site-packages/torch/__init__.py",
+        "module_sha256": "bd4a10ff16357ed78f45aaf4b46ce5b771fdc0e8549402206e324d0eb792c672",
+        "version": "2.14.1"
+      },
+      "torchao_file": "/data/data/com.termux/files/usr/tmp/torchao-component-ij7fx6z9/runtime/lib/python3.14/site-packages/torchao/__init__.py",
+      "torchao_sha256": "2b5dbcb251f02f9b29134037c54c1e6b124f628c0b9e91ca375d79c209089cb0"
+    },
+    {
+      "block_size": 64,
+      "case": "nf4_default_quantization",
+      "independent_packed_byte_oracle": true,
+      "packed_bytes": 8192,
+      "packed_sha256": "c8a3cf4e14777c7a30bd5049b4af22864fc42c1469bc6a64a31cd5e8772948a9",
+      "scaler_block_size": 256,
+      "shape": [
+        128,
+        128
+      ],
+      "status": "passed",
+      "weight_values": 16384
+    },
+    {
+      "case": "independent_dequantization",
+      "maximum_absolute_error": 0.0,
+      "normalized_l2_error_bound": 0.16,
+      "normalized_l2_error_to_original": 0.0881182849407196,
+      "status": "passed"
+    },
+    {
+      "case": "linear_forward",
+      "maximum_absolute_error": 0.0,
+      "output_shape": [
+        3,
+        128
+      ],
+      "public_operation": "torchao.dtypes.nf4tensor.linear_nf4",
+      "status": "passed"
+    },
+    {
+      "case": "input_gradient",
+      "maximum_absolute_error": 0.0,
+      "status": "passed",
+      "weight_training_proved": false
+    }
+  ],
+  "whole_artifact_crc_sha256_checked": true
+}
