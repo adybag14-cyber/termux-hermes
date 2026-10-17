@@ -192,6 +192,18 @@ confirms all 81 published distributions remain at identical versions. The
 candidate's 19 additional distribution records include the application's own
 metadata record; they are not 19 additional user-facing features.
 
+The independent [full rebuild at `635ec13`](../audit/candidate-lifecycle-635ec13-20261017/summary.json)
+also passed every package and lifecycle gate in
+[run 39057745675](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745675).
+Both build caches missed. The finished package and diagnostics archives were
+downloaded in full and verified by SHA-256, ZIP CRC and every member hash.
+The new receipts independently confirm all 81 released versions retained,
+100 initial candidate distributions, and 102 after the two optional additions.
+All 100 wheel hashes agree between the build index and lifecycle receipt;
+21 wheels were built with Android tags and none were retagged from Linux.
+The new package has its own recorded digest. The earlier package remains the
+pinned input for the completed CUA experiment.
+
 [Two initial assembly failures](../audit/candidate-assembly-20261017/summary.json)
 identified a host script running outside PM's locked environment. The corrected
 entry point now uses the existing PM runtime and preserves child failure status;
@@ -264,14 +276,21 @@ records all six NeuTTS-adjacent dependency cases passing at
 while the original APT wheel tags still fail pip compatibility. The engine,
 model loading and synthesis were not exercised.
 
-The active scientific probe has since adopted the incoming strict APT provenance
-validator and its separate frozen nine-wheel closure, including native
-MarkupSafe 3.0.4. It verifies original archives, installed metadata and pip source
-ownership, the actual requirements graph, and the exact seven original pip tag
-failures. The older native result used different supplemental dependency inputs
-and remains historical evidence. Fresh native validation of this stricter
-implementation is pending; its [reconciliation record](../audit/neutts-provenance-reconciliation-20261017.json)
-tracks the changed inputs and retained limits.
+The [stricter scientific revalidation](../audit/neutts-native-20261017/run-39062191148.json)
+passed at exact head `ba708a8ac82666c9d1a05b1495335d8d1bb76179`. All six
+scientific cases, installed-wheel verification and strict APT/Python provenance
+passed together. It verified 474 selected APT-owned files, including 456 pip
+source files, and 2,829 installed files from nine frozen wheels, including native
+MarkupSafe 3.0.4. The actual requirements graph contained 17 distributions and
+11 active edges. The original pip exit 1 and seven tag failures remain recorded;
+neither pip compatibility nor the complete NeuTTS engine is certified.
+
+The subsequent [native CPU preparation](../audit/neutts-native-components-reconciliation-20261017.json)
+adds opt-in Numba and matching llama source builds. Its first native attempt
+failed before compilation because of an unnecessary host-platform override.
+The correction uses the actual native Python platform and retains all frozen
+source/version/ABI checks. Native revalidation of the updated wrapper and CPU
+build path is pending.
 
 The final source validation comprises
 [73 loader tests with three host skips](../audit/cua-hermes-resume-20261017/host-tests.json),

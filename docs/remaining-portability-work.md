@@ -89,12 +89,40 @@ seven original pip platform-tag failures, with interpreter and ABI checks.
 It does not rewrite metadata or supported tags. A SymPy installed-file check now
 accounts for its wheel data-directory installation path.
 
-Fresh native validation of this combined implementation is pending. The
+This stricter implementation passed native validation in
+[run 39062191148](../audit/neutts-native-20261017/run-39062191148.json) at
+`ba708a8ac82666c9d1a05b1495335d8d1bb76179`. All seven cases passed,
+including native MarkupSafe and Jinja2 escaping. The checker verified 474 selected
+APT-owned files (456 pip source files), 2,829 installed wheel files, 17 installed
+distributions and 11 active requirement edges. Pip still exits 1 with its exact
+seven tag failures; overall compatibility remains false. The
 [reconciliation record](../audit/neutts-provenance-reconciliation-20261017.json)
-preserves the older six-case proof under its original inputs and records the new
-validation separately. The [GGUF feasibility study](neutts-default-gguf-feasibility.md)
+keeps both the older source-fallback result and this stricter result under their
+own tested inputs. The [GGUF feasibility study](neutts-default-gguf-feasibility.md)
 and isolated llama-cpp-python Android loader patch remain source preparation,
 outside the main package candidate and without a native inference claim.
+
+### Opt-in native CPU source builds
+
+A separate [native component workflow](../.github/workflows/neutts-engine-components.yml)
+prepares Numba 0.67.0 and llama-cpp-python 0.3.36 with its exact vendored llama
+source. It builds and tests CPU behavior without downloading models. The
+[initial native attempt](../audit/neutts-native-components-20261017/run-39062163081/summary.json)
+passed the complete scientific foundation and verified the compiler APT closure,
+then stopped before Numba compilation. An injected
+`_PYTHON_HOST_PLATFORM=android-24-arm64_v8a` made pip's native platform
+enumeration raise `KeyError: '24-arm64_v8a'`.
+
+The helper now uses native Python's actual platform, removes that injected
+override from build children, and rejects inherited overrides before querying
+native metadata. The [regression and reconciliation record](../audit/neutts-native-components-reconciliation-20261017.json)
+preserves the failing evidence and the host-validated correction. Every frozen
+source, archive, version, ABI and compiler-option pin remains the same; only the
+lock's descriptive platform policy and its checksum changed.
+
+Native validation of this corrected build path and the newly extended wrapper
+is pending. Numba or llama compilation, CPU behavior, full engine dependency
+closure and synthesis are not inferred from the host checks.
 
 This disposable Termux system-Python experiment records the rolling base upgrade
 separately from the pinned dependency archives. Its
@@ -288,7 +316,10 @@ framework or certify microphone access.
 
 The compatibility preparation is saved independently from the released recipe.
 The current same-version candidate passed the complete native package and
-optional-install lifecycle gate; its [saved evidence](../audit/candidate-lifecycle-e271e92-20261017/summary.json)
-records the exact tested inputs. A future stable release must keep that gate
+optional-install lifecycle gate again in the independent full rebuild at
+`635ec13`; its [saved evidence](../audit/candidate-lifecycle-635ec13-20261017/summary.json)
+records the exact tested inputs, complete artifact verification and preserved
+distribution versions. The older candidate remains the pinned input of the
+completed CUA experiment. A future stable release must keep that gate
 passing for its final source and complete the Android device checks. This branch does not
 publish a release or promote the candidate into the signed APT feed.

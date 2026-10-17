@@ -1,0 +1,56 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+___ test_native_build_commands_cannot_inherit_or_inject_a_platform_override ___
+
+tmp_path = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-853/test_native_build_commands_can0')
+lock = {'additional_python_wheels': [{'artifact': {'bytes': 293450, 'filename': 'scikit_build_core-1.1.1-py3-none-any.whl', '...ndor/wheel; no additional wheel distribution install', 'requirements': ['packaging>=24.0'], 'version': '0.46.3'}}, ...}
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000024C41259F30>
+
+    def test_native_build_commands_cannot_inherit_or_inject_a_platform_override(tmp_path, lock, monkeypatch):
+        # Reproduce the observed build environment, without pretending this host is Android.
+        monkeypatch.setenv("_PYTHON_HOST_PLATFORM", "android-24-arm64_v8a")
+        inputs, out, work = (tmp_path / name for name in ("inputs", "out", "work"))
+        (inputs / "sources").mkdir(parents=True)
+        out.mkdir()
+        work.mkdir()
+        commands = []
+    
+        class ReachedCompilerBoundary(Exception):
+            pass
+    
+        def capture(command, destination, label, timeout, env=None, cwd=None):
+            commands.append((label, env))
+            if label == "native-build-numba":
+                assert env is not None
+                assert "_PYTHON_HOST_PLATFORM" not in env
+                raise ReachedCompilerBoundary
+            return {"exit_code": 0}
+    
+        monkeypatch.setattr(probe, "bounded_command", capture)
+        with pytest.raises(ReachedCompilerBoundary):
+>           probe.build_packages(lock, inputs, out, work)
+
+tests\test_neutts_native_components.py:244: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\compatibility_probe_neutts_native.py:467: in build_packages
+    build = bounded_command(command, out, "native-build-" + package, seconds, env=env)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+command = ['C:\\Users\\adyba\\AppData\\Local\\Temp\\pytest-of-adyba\\pytest-853\\test_native_build_commands_can0\\work\\venv\\bin\\python', '-I', '-B', '-m', 'pip', 'wheel', ...]
+destination = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-853/test_native_build_commands_can0/out')
+label = 'native-build-numba', timeout = 900
+env = {'ALLUSERSPROFILE': 'C:\\ProgramData', 'APPDATA': 'C:\\Users\\adyba\\AppData\\Roaming', 'CC': '\\data\\data\\com.termux\\files\\usr\\bin\\clang', 'CFLAGS': '-O2 -fPIC --target=aarch64-linux-android24 -march=armv8-a', ...}
+cwd = None
+
+    def capture(command, destination, label, timeout, env=None, cwd=None):
+        commands.append((label, env))
+        if label == "native-build-numba":
+            assert env is not None
+>           assert "_PYTHON_HOST_PLATFORM" not in env
+E           AssertionError: assert '_PYTHON_HOST_PLATFORM' not in {'ALLUSERSPROFILE': 'C:\\ProgramData', 'APPDATA': 'C:\\Users\\adyba\\AppData\\Roaming', 'CC': '\\data\\data\\com.termux\\files\\usr\\bin\\clang', 'CFLAGS': '-O2 -fPIC --target=aarch64-linux-android24 -march=armv8-a', ...}
+
+tests\test_neutts_native_components.py:238: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_neutts_native_components.py::test_native_build_commands_cannot_inherit_or_inject_a_platform_override
+1 failed in 0.19s

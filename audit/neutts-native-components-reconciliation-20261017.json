@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "status": "host_validation_passed_native_revalidation_pending",
+  "source_checkpoint_before_merge": "ba708a8ac82666c9d1a05b1495335d8d1bb76179",
+  "incoming_preparation_commit": "3d9086cfc190ba981e48e0276234064903315539",
+  "scope": "Preserve separate opt-in native CPU preparation with no engine admission or release",
+  "inputs": {
+    "scripts/compatibility_probe_neutts.sh": "acc7d36700405efa463d218db5994b01c53dfdb11df049374cb46a0046ec2df4",
+    "scripts/compatibility_probe_neutts.py": "56af47cbb1b73f7a968a02a31fb6b724f28cd14a42516e4448f453a18fc748f0",
+    ".github/workflows/neutts-engine-components.yml": "f6aa82530f32a5121c5d7c34f71b60845815850cf9fc72b42f4aa2dcb8525a86",
+    "scripts/compatibility_probe_neutts_native.py": "8d34f192f6597a4980566e622ca8acac6d27f0cf6efcffcb37562048aeda0eb7",
+    "scripts/compatibility_probe_neutts_native.sh": "95871673b96f179037f5e76a30e5b1bbebb89339d5abd54fc82c4e8e47dad534",
+    "scripts/neutts_native_sources_lock.json": "822aeabc9dca027f2f940dfb63a96fa5d015f81f293e138b67d126bd6914cc25",
+    "scripts/prepare_neutts_native_sources.py": "96e6787b9aa35a2b7f820955750c8d75dbcc90728946b23594dbb12e48d48ced",
+    "tests/test_neutts_native_components.py": "ddfe58b5c95bfb06e174f953bceab71aac56b0ead5baac9a9aaca651abc46e6c",
+    "tests/test_neutts_native_sources.py": "d1bf3828b8618dcbd20be279af9bf50613053a13a4da6f72a21bae93217225f4"
+  },
+  "resolution": {
+    "strict_scientific_python_probe_unchanged_from_ba708a8": true,
+    "default_native_components_disabled": true,
+    "incoming_guarded_native_hooks_preserved": true,
+    "our_explicit_pip_failure_and_scientific_scope_preserved": true,
+    "new_native_helper_accepts_existing_foundation_receipt": true,
+    "current_primary_cua_component_and_candidate_evidence_preserved": true,
+    "incoming_history_saved_separately": true,
+    "resume_branch_native_components_trigger_added": true
+  },
+  "prior_merged_strict_scientific_run": {
+    "run_id": 39062191148,
+    "head_sha": "ba708a8ac82666c9d1a05b1495335d8d1bb76179",
+    "workflow_conclusion": "success",
+    "wrapper_inputs_differ_from_new_wrapper": true
+  },
+  "incoming_native_component_run": {
+    "run_id": 39062163081,
+    "head_sha": "3d9086cfc190ba981e48e0276234064903315539",
+    "status": "completed",
+    "workflow_conclusion": "failure",
+    "failure_stage": "native-build-numba",
+    "recorded_exit_code": 2,
+    "actual_failure_diagnostics_under_review": false,
+    "no_inference_or_engine_admission": true,
+    "evidence": "neutts-native-components-20261017/run-39062163081/summary.json",
+    "diagnosed_failure": "Injected _PYTHON_HOST_PLATFORM=android-24-arm64_v8a triggers KeyError: '24-arm64_v8a' before Numba compilation"
+  },
+  "host_validation": {
+    "command": [
+      "C:\\Python314\\python.exe",
+      "-m",
+      "pytest",
+      "-q"
+    ],
+    "exit_code": 0,
+    "summary": "387 passed, 4 skipped in 3.97s",
+    "raw_log": "neutts-native-components-reconciliation-20261017/host-packaging-tests.log.gz",
+    "raw_log_bytes": 518,
+    "raw_log_sha256": "b4ca122b4589d71f138b6786dd51fc29fd541ea02b6ca86d3adc09028cb5d89c",
+    "gzip_sha256": "8474bb869c148d15f405f193224a03cd2d3b3334924b42689432bd18aede3e6e",
+    "counts_not_aggregated_with_other_runs": true,
+    "additional_checks": [
+      {
+        "command": [
+          "C:\\Python314\\python.exe",
+          "-m",
+          "compileall",
+          "-q",
+          "scripts",
+          "tests"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "C:\\Program Files\\Git\\bin\\bash.exe",
+          "-n",
+          "scripts/compatibility_probe_neutts.sh"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "C:\\Program Files\\Git\\bin\\bash.exe",
+          "-n",
+          "scripts/compatibility_probe_neutts_native.sh"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "C:\\Users\\adyba\\go\\bin\\actionlint.EXE",
+          "-shellcheck=",
+          "-pyflakes=",
+          ".github/workflows/neutts-engine-components.yml"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    ]
+  },
+  "native_validation": {
+    "status": "pending"
+  },
+  "model_downloaded": false,
+  "engine_installed": false,
+  "candidate_admission_changed": false,
+  "release_created": false,
+  "original_worktree_modified": false,
+  "native_build_platform_fix": {
+    "injected_host_platform_override_removed": true,
+    "inherited_override_rejected_before_native_platform_query": true,
+    "build_child_environment_cleans_override": true,
+    "actual_sysconfig_platform_checked": "android-24-arm64_v8a",
+    "source_archive_version_abi_and_build_option_pins_changed": false,
+    "only_changed_lock_field": "build.wheel_tag_policy",
+    "new_lock_sha256": "822aeabc9dca027f2f940dfb63a96fa5d015f81f293e138b67d126bd6914cc25",
+    "native_revalidation_required": true
+  },
+  "reviewed_base": {
+    "branch": "prepare/termux-compatibility-reviewed-base-20261017",
+    "commit": "3d9086cfc190ba981e48e0276234064903315539",
+    "reason": "Keep this verified preparation handoff based on its reviewed checkpoint while the original draft receives separate new experiments",
+    "original_draft_url": "https://github.com/adybag14-cyber/termux-hermes/pull/6",
+    "later_concurrent_checkpoint_not_merged": "49a9c383f4582bba4f7fdf69658e56168ec5c847",
+    "later_scope": "Separate CUA sealed candidate and lifecycle preparation; not part of this handoff or current native claims"
+  }
+}
