@@ -56,6 +56,9 @@ before that graph is installed.
 The package build, release tag and subsequent packaging main are distinct commits;
 [release identity evidence](../audit/release-boundary-20261017.json) records each
 against the unchanged published asset.
+The [latest preparation identity check](../audit/resume-release-boundary-20261017.json)
+confirms the unchanged public main, package asset, installer and publication files,
+and records the draft against its frozen reviewed base.
 
 The package's `pyproject.toml` and `uv.lock` match this upstream release.
 The released adapters change packaging/build behavior. The census compares
@@ -285,12 +288,31 @@ MarkupSafe 3.0.4. The actual requirements graph contained 17 distributions and
 11 active edges. The original pip exit 1 and seven tag failures remain recorded;
 neither pip compatibility nor the complete NeuTTS engine is certified.
 
-The subsequent [native CPU preparation](../audit/neutts-native-components-reconciliation-20261017.json)
-adds opt-in Numba and matching llama source builds. Its first native attempt
-failed before compilation because of an unnecessary host-platform override.
-The correction uses the actual native Python platform and retains all frozen
-source/version/ABI checks. Native revalidation of the updated wrapper and CPU
-build path is pending.
+The [merged-wrapper native revalidation](../audit/neutts-native-20261017/run-39063780780.json)
+now passes at exact source `1136617b0c5983f1bdc5991126758c7892f4c94c`.
+All seven cases and the same strict provenance checks passed again: nine frozen
+wheels, 2,829 installed wheel files, 474 selected APT-owned files and 11 active
+requirement edges across 17 distributions. The complete artifact and its 49
+members were verified; all 40 original non-wheel files are retained. Raw pip
+still exits 1 and overall compatibility remains false. These results validate
+the current standalone scientific wrapper, independently of the CPU build path.
+
+The separate [native CPU preparation](../audit/neutts-native-components-reconciliation-20261017.json)
+adds opt-in Numba and matching llama source builds. Its first attempt failed
+before compilation because of an unnecessary host-platform override. The
+[platform-corrected native run](../audit/neutts-native-components-20261017/run-39063780748/summary.json)
+then built and installed both Android-tagged wheels, verified native installed
+inputs, and passed Numba JIT, exact guvectorize and two-thread workqueue behavior.
+All 4,669 artifact members were verified. The full result remains **failed**:
+the llama oracle read an obsolete model parameter after initialization.
+
+The [oracle correction](../audit/neutts-llama-oracle-reconciliation-20261017.json)
+checks the exact pinned Python/C load_mode and lazy_mode AUTO defaults and
+preserves mmap capability, CPU, context, ABI, library and cleanup checks. It
+changes no source/archive/version/build pins. The new regression first reproduced
+the original AttributeError; the focused suite now passes 57 tests, and the full
+Windows host suite passes 390 with four skips. These overlapping counts are not
+summed. Fresh native validation of the corrected llama oracle is pending.
 
 The final source validation comprises
 [73 loader tests with three host skips](../audit/cua-hermes-resume-20261017/host-tests.json),
@@ -310,15 +332,23 @@ audio services are absent; microphone capture was not tested. All seven
 artifact archives were downloaded in full and verified by SHA-256, ZIP CRC and
 member hashes. The failed job's complete original log is retained too.
 
-The [implementation-commit CI](../audit/resume-ci-635ec13-20261017.json)
+The [platform-fix implementation CI](../audit/packaging-ci-1136617-20261017/summary.json)
+passed **391 tests** with no failures or skips at
+`1136617b0c5983f1bdc5991126758c7892f4c94c`. Python compilation, shell syntax
+and JSON validation passed. The corresponding Windows host run passed
+387 tests with four host-specific skips; these overlapping counts are not summed.
+The subsequent oracle correction has the separate host result above and awaits
+its own Linux CI.
+
+The [earlier implementation-commit CI](../audit/resume-ci-635ec13-20261017.json)
 passed **291 tests** with no failures or skips in each of the separate push and
 pull-request runs at `635ec13c9d0f264f508d1bdbaa7670d4eaa00787`. Compile, shell
 syntax and JSON validation passed too. The [earlier combined CI](../audit/resume-ci-3414585-20261017.json)
 and its separate Windows host run remain recorded at `3414585`; that host run
 passed 287 tests with four host-specific skips. The [earlier merge receipt](../audit/resume-integration-20261017.json)
 records preserved concurrent preparation work and confirms unchanged native-test
-inputs at that earlier checkpoint. The stricter NeuTTS reconciliation above
-changes the separate scientific experiment and requires its own native run. The earlier
+inputs at that earlier checkpoint. The later scientific implementation and
+merged wrapper have their own completed native results above. The earlier
 [standalone](../audit/cua-native-20261017/run-39052290704.json) and
 [host preparation](../audit/cua-hermes-host-tests-20261017.json) evidence remains
 available with its original source bindings.

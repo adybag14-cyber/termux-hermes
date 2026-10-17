@@ -166,7 +166,8 @@
     "version_bump": false,
     "main_merge": false,
     "installer_pin_change": false,
-    "scope": "preparation branch and candidate-only validation for the next stable version"
+    "scope": "preparation branch and candidate-only validation for the next stable version",
+    "latest_identity_check": "resume-release-boundary-20261017.json"
   },
   "preparation": {
     "selected_extras": [
@@ -348,49 +349,60 @@
       "standalone_cua_success_counted_as_main_candidate_repair": false
     },
     "packaging_ci": {
-      "schema_version": 1,
-      "run_id": 39057745679,
-      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745679",
-      "event": "pull_request",
-      "head_sha": "635ec13c9d0f264f508d1bdbaa7670d4eaa00787",
+      "run_id": 39063780757,
+      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39063780757",
+      "event": "push",
+      "head_sha": "1136617b0c5983f1bdc5991126758c7892f4c94c",
       "conclusion": "success",
-      "command": [
-        "python",
-        "-m",
-        "pytest",
-        "-q"
-      ],
-      "passed": 291,
-      "skipped": 0,
+      "passed": 391,
       "failed": 0,
-      "elapsed_seconds": 2.18,
-      "raw_summary_line": "291 passed in 2.18s",
+      "skipped": 0,
+      "elapsed_seconds": 1.69,
+      "raw_summary_line": "391 passed in 1.69s",
       "counts_not_aggregated_with_other_runs": true,
-      "raw_log": "resume-ci-635ec13-20261017/39057745679.log.gz",
-      "raw_log_sha256": "b15a501b3a418f3c7a9de3d2f9eb2a58213b7d96e29d68980e17b12bcfc767e4",
-      "compressed_log_sha256": "31e410cf1c2134877aa4dd797a7e1585aa4fcab5dad011de9f2d8c0598b45d33",
-      "detail_evidence": "resume-ci-635ec13-20261017/39057745679.json",
-      "push_and_pr_run_evidence": "resume-ci-635ec13-20261017.json"
+      "evidence": "packaging-ci-1136617-20261017/summary.json",
+      "compile_python": "passed",
+      "shell_syntax": "passed",
+      "json_validation": "passed",
+      "later_oracle_source_change_requires_own_ci": true
     },
     "neutts_apt_core_probe": {
-      "status": "strict_provenance_implementation_awaiting_native_validation",
+      "status": "strict_provenance_and_native_scientific_behavior_passed_pip_tags_unresolved",
       "script": "../scripts/compatibility_probe_neutts.sh",
       "workflow": "../.github/workflows/neutts-termux-probe.yml",
       "scope": "Separate APT native scientific ABI/behavior with strict provenance and frozen nine-wheel dependencies",
       "incoming_preparation_commit": "19ab7a1ce9f496dd8dd291d19e3818bb5f878048",
-      "prior_native_result_inputs_differ": true,
       "previous_native_evidence": "neutts-native-20261017/run-39055874446.json",
-      "evidence": "neutts-provenance-reconciliation-20261017.json",
+      "evidence": "neutts-native-20261017/run-39063780780.json",
       "pip_wheel_tag_compatibility": "unresolved",
       "wheel_tags_rewritten": false,
-      "native_run_completed": false,
+      "native_run_completed": true,
       "engine_installed": false,
       "synthesis_tested": false,
       "hermes_pm_admission_changed": false,
       "latest_wrapper_reconciliation": "neutts-native-components-reconciliation-20261017.json",
       "previous_passed_revalidation_run_id": 39062191148,
       "previous_passed_revalidation_head": "ba708a8ac82666c9d1a05b1495335d8d1bb76179",
-      "current_wrapper_requires_own_native_validation": true
+      "current_wrapper_requires_own_native_validation": false,
+      "run_id": 39063780780,
+      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39063780780",
+      "head_sha": "1136617b0c5983f1bdc5991126758c7892f4c94c",
+      "workflow_conclusion": "success",
+      "native_cases_passed": 7,
+      "scientific_cases_passed": 6,
+      "installed_wheel_case_passed": true,
+      "verified_apt_archives": 122,
+      "verified_python_wheels": 9,
+      "installed_wheel_files_verified": 2829,
+      "selected_apt_owned_files_verified": 474,
+      "installed_distributions": 17,
+      "active_requirement_edges": 11,
+      "raw_pip_exit_code": 1,
+      "pip_check_passed": false,
+      "overall_compatibility_passed": false,
+      "current_tested_inputs_unchanged": true,
+      "artifact_sha256": "a0e39b35f540ab297558685dce372a6ecd880226c5f1f51dfab39aa97c26f600",
+      "older_historical_result_inputs_differ": true
     },
     "resume_integration_evidence": "resume-integration-20261017.json",
     "audio_readiness_diagnostics": {
@@ -658,17 +670,16 @@
       "native_loader_or_engine_certified": false
     },
     "neutts_native_cpu_preparation": {
-      "status": "platform_override_fix_prepared_native_revalidation_pending",
+      "status": "native_builds_and_numba_passed_llama_oracle_fix_awaiting_native_revalidation",
       "scope": "Opt-in model-free Numba and matching llama CPU build and behavior experiment",
       "numba_version": "0.67.0",
       "llama_cpp_python_version": "0.3.36",
       "source_lock": "../scripts/neutts_native_sources_lock.json",
       "source_lock_sha256": "822aeabc9dca027f2f940dfb63a96fa5d015f81f293e138b67d126bd6914cc25",
       "workflow": "../.github/workflows/neutts-engine-components.yml",
-      "reconciliation_evidence": "neutts-native-components-reconciliation-20261017.json",
+      "reconciliation_evidence": "neutts-llama-oracle-reconciliation-20261017.json",
       "original_source_preparation_evidence": "neutts-native-source-preparation-20261017.json",
       "original_failed_native_evidence": "neutts-native-components-20261017/run-39062163081/summary.json",
-      "failure": "Unnecessary _PYTHON_HOST_PLATFORM override raised KeyError during pip platform enumeration before compilation",
       "native_platform_override_removed": true,
       "all_source_archive_version_abi_build_option_pins_preserved": true,
       "changed_lock_field": "build.wheel_tag_policy description only",
@@ -677,7 +688,22 @@
       "model_downloaded": false,
       "engine_installed": false,
       "synthesis_tested": false,
-      "main_candidate_modified": false
+      "main_candidate_modified": false,
+      "latest_native_run_id": 39063780748,
+      "latest_native_head_sha": "1136617b0c5983f1bdc5991126758c7892f4c94c",
+      "latest_native_workflow_conclusion": "failure",
+      "latest_failure_evidence_verification": "complete_archive_sha256_crc_and_member_hashes",
+      "latest_native_evidence": "neutts-native-components-20261017/run-39063780748/summary.json",
+      "native_platform_fix_proved": true,
+      "both_native_source_builds_passed": true,
+      "installed_native_inputs_passed": true,
+      "native_numba_behavior_passed": true,
+      "native_llama_behavior_passed": false,
+      "latest_failure": "Pinned llama_model_params has load_mode/lazy_mode instead of obsolete use_mmap",
+      "llama_oracle_correction": "Require and record exact AUTO load/lazy defaults while preserving separate mmap capability and existing native guards",
+      "platform_reconciliation_evidence": "neutts-native-components-reconciliation-20261017.json",
+      "current_helper_sha256": "160d073c2db074f1870698e72ba57da3eb4b4a7af0729fdc6f7996f726357a7e",
+      "original_platform_failure": "Unnecessary _PYTHON_HOST_PLATFORM override raised KeyError during pip platform enumeration before compilation"
     },
     "audio_readiness_preparation": {
       "patch": "../patches/next-stable/audio-readiness.patch",
@@ -861,16 +887,60 @@
       }
     },
     "latest_packaging_host_validation": {
-      "passed": 387,
+      "passed": 390,
       "skipped": 4,
       "failed": 0,
-      "evidence": "neutts-native-components-reconciliation-20261017.json",
+      "evidence": "neutts-llama-oracle-reconciliation-20261017.json",
       "linux_ci_for_current_source": "pending"
     },
     "reviewed_preparation_base": {
       "branch": "prepare/termux-compatibility-reviewed-base-20261017",
       "commit": "3d9086cfc190ba981e48e0276234064903315539",
-      "later_original_draft_work_remains_separate": "49a9c383f4582bba4f7fdf69658e56168ec5c847"
+      "later_original_draft_work_remains_separate": "49a9c383f4582bba4f7fdf69658e56168ec5c847",
+      "draft_url": "https://github.com/adybag14-cyber/termux-hermes/pull/7"
+    },
+    "previous_implementation_packaging_ci": {
+      "schema_version": 1,
+      "run_id": 39057745679,
+      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39057745679",
+      "event": "pull_request",
+      "head_sha": "635ec13c9d0f264f508d1bdbaa7670d4eaa00787",
+      "conclusion": "success",
+      "command": [
+        "python",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "passed": 291,
+      "skipped": 0,
+      "failed": 0,
+      "elapsed_seconds": 2.18,
+      "raw_summary_line": "291 passed in 2.18s",
+      "counts_not_aggregated_with_other_runs": true,
+      "raw_log": "resume-ci-635ec13-20261017/39057745679.log.gz",
+      "raw_log_sha256": "b15a501b3a418f3c7a9de3d2f9eb2a58213b7d96e29d68980e17b12bcfc767e4",
+      "compressed_log_sha256": "31e410cf1c2134877aa4dd797a7e1585aa4fcab5dad011de9f2d8c0598b45d33",
+      "detail_evidence": "resume-ci-635ec13-20261017/39057745679.json",
+      "push_and_pr_run_evidence": "resume-ci-635ec13-20261017.json"
+    },
+    "previous_platform_fix_host_validation": {
+      "passed": 387,
+      "skipped": 4,
+      "failed": 0,
+      "evidence": "neutts-native-components-reconciliation-20261017.json",
+      "linux_ci_for_current_source": "passed",
+      "linux_ci_evidence": "packaging-ci-1136617-20261017/summary.json"
+    },
+    "audio_device_access": {
+      "evidence": "device-audio-access-20261017.json",
+      "device_present": true,
+      "android_api": 36,
+      "abi": "arm64-v8a",
+      "termux_present": true,
+      "termux_api_companion_present": false,
+      "adb_run_as_available": false,
+      "physical_audio_validation": "not_performed"
     }
   }
 }

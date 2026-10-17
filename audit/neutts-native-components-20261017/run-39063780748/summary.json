@@ -1,0 +1,183 @@
+{
+  "artifact": {
+    "all_member_crc_and_sha256_verified": true,
+    "bytes": 151556029,
+    "full_archive_retained_outside_git": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-components-resume\\39063780748\\artifact.zip",
+    "id": 12112438525,
+    "member_count": 4669,
+    "name": "termux-neutts-native-cpu-components",
+    "sha256": "d20a5d2f424cfbfd9bda3eafaecbd2f3ce4bc354e68e1a29b03266233ff55d1a",
+    "verification": "verification.json"
+  },
+  "built_wheels": [
+    {
+      "build_exit_code": 0,
+      "bytes": 2805585,
+      "filename": "numba-0.67.0-cp314-cp314-android_24_arm64_v8a.whl",
+      "metadata_sha256": "025ba2df60d252a02c4e25a02a3dd8616d0bf5f3159dd7da4e1c9322f7efd580",
+      "name": "numba",
+      "native_member_count": 12,
+      "sha256": "60f9017aa3ba6813f8b0747b3ade0e313f9d84d1234c9b2306c2be1d48011de5",
+      "tag": "cp314-cp314-android_24_arm64_v8a",
+      "verified_member_count": 814,
+      "version": "0.67.0"
+    },
+    {
+      "build_exit_code": 0,
+      "bytes": 20002763,
+      "filename": "llama_cpp_python-0.3.36-py3-none-android_24_arm64_v8a.whl",
+      "metadata_sha256": "b81a20e824ea2aeb630038b6f41a1285b05b928236bf811c7f2575cc109fc17f",
+      "name": "llama-cpp-python",
+      "native_member_count": 33,
+      "sha256": "73095f24626a33a9116ae76863d7bff9f0c1b7a7d7c7e10aca8875baf0831fb7",
+      "tag": "py3-none-android_24_arm64_v8a",
+      "verified_member_count": 91,
+      "version": "0.3.36"
+    }
+  ],
+  "compiler_apt": {
+    "additional_count": 19,
+    "status": "passed",
+    "verified_archive_count": 44
+  },
+  "curation": {
+    "inventory": "raw-small-members-inventory.json",
+    "large_source_wheel_and_apt_binaries_omitted_from_git": true,
+    "raw_archive": "raw-small-members.zip",
+    "selected_original_member_count": 78
+  },
+  "foundation": {
+    "apt_validation_sha256": "615bcaadf4f69d513ffd842076d4fa1333d18ff9ccb9902d3b581e1f0f3b318f",
+    "case_count": 7,
+    "path": "/out/NEUTTS-CORE-RESULT.json",
+    "raw_pip_exit_code": 1,
+    "sha256": "f14f8848f00f956abbbd8448445a7051ebfd362449d1e1165f47180c41965dce",
+    "status": "passed"
+  },
+  "foundation_behavior_passed": true,
+  "head_sha": "1136617b0c5983f1bdc5991126758c7892f4c94c",
+  "job_id": 117487039771,
+  "llama_failure": {
+    "message": "'llama_model_params' object has no attribute 'use_mmap'",
+    "type": "AttributeError"
+  },
+  "native_cases": [
+    {
+      "component": "installed_inputs",
+      "exit_code": 0,
+      "receipt_sha256": "d05f815ccaff8dcd0cb0321a54df6e7bc641c0dee3176ac06e2c22c7a06223f5",
+      "status": "passed",
+      "stderr": {
+        "bytes": 0,
+        "saved_bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 0,
+        "saved_bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "timed_out": false
+    },
+    {
+      "component": "numba",
+      "exit_code": 0,
+      "receipt_sha256": "ed16f07ae1154be66b73e4301658d125b3171534e38cbb1416fc5b820a0a1656",
+      "status": "passed",
+      "stderr": {
+        "bytes": 0,
+        "saved_bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 0,
+        "saved_bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "timed_out": false
+    },
+    {
+      "component": "llama",
+      "error": {
+        "message": "'llama_model_params' object has no attribute 'use_mmap'",
+        "type": "AttributeError"
+      },
+      "exit_code": 1,
+      "receipt_sha256": "a4e946a45b1e6efd5746e3ab801810dafa0421cbb6420e8c46d27f64384fe82a",
+      "status": "failed",
+      "stderr": {
+        "bytes": 457,
+        "saved_bytes": 457,
+        "sha256": "a0de9fa14eeafbf76f88f90a3be0793a891a51154be0699f249a265f1d8d5350"
+      },
+      "stdout": {
+        "bytes": 0,
+        "saved_bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "timed_out": false
+    }
+  ],
+  "numba_behavior": {
+    "generated_assembly_sha256": "368097afe5b61bffe089cad5650f41f562a98d5354085b6ed10d37aa1a8531cb",
+    "guvectorize_exact": true,
+    "guvectorize_shape": [
+      4,
+      6
+    ],
+    "jit_actual": 102.0,
+    "jit_expected": 102.0,
+    "llvm_default_triple": "aarch64-unknown-linux-android24",
+    "llvm_version": [
+      22,
+      1,
+      8
+    ],
+    "nopython_signature_count": 1,
+    "threading_layer": "workqueue",
+    "threads": 2
+  },
+  "oracle_correction": "oracle-correction-review.json",
+  "original_native_result_preserved_as_failure": true,
+  "overall_compatibility_passed": false,
+  "pip_check_passed": false,
+  "pip_wheel_tag_compatibility": "unresolved",
+  "purpose": "Preserve failed native CPU preparation with successful source builds, installed-input checks and Numba JIT evidence; no engine certificate.",
+  "repository": "adybag14-cyber/termux-hermes",
+  "run_id": 39063780748,
+  "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39063780748",
+  "runtime": {
+    "api_level": 24,
+    "base_prefix": "/data/data/com.termux/files/usr",
+    "executable": {
+      "bytes": 4448,
+      "class": 64,
+      "endianness": "little",
+      "machine": 183,
+      "path": "/data/data/com.termux/files/usr/bin/python3.14",
+      "sha256": "4f8d78ede7fc26e96e99342dd83ce42d32c9b4d0806bc9a99ff7151396269b25"
+    },
+    "host_platform_override": null,
+    "machine": "aarch64",
+    "prefix": "/data/data/com.termux/files/usr",
+    "python": "3.14.6 (main, Jul  5 2026, 10:35:55) [Clang 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 5e96669f0",
+    "sys_platform": "android",
+    "sysconfig_platform": "android-24-arm64_v8a",
+    "uid": 1000
+  },
+  "schema_version": 1,
+  "scope_limits": {
+    "engine_installed": false,
+    "inference_tested": false,
+    "model_loaded": false,
+    "models_downloaded": false,
+    "physical_device_tested": false,
+    "pm_admission_changed": false,
+    "published_candidate_modified": false,
+    "release_output": false,
+    "synthesis_tested": false
+  },
+  "source_provenance": "source-provenance.json",
+  "stage": "native-behavior/llama-oracle",
+  "status": "failed"
+}

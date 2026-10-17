@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "host_validation_passed_native_revalidation_pending",
+  "status": "platform_override_fix_proved_native_cpu_oracle_failure_recorded",
   "source_checkpoint_before_merge": "ba708a8ac82666c9d1a05b1495335d8d1bb76179",
   "incoming_preparation_commit": "3d9086cfc190ba981e48e0276234064903315539",
   "scope": "Preserve separate opt-in native CPU preparation with no engine admission or release",
@@ -115,7 +115,32 @@
     ]
   },
   "native_validation": {
-    "status": "pending"
+    "scientific_foundation": {
+      "status": "passed",
+      "run_id": 39063780780,
+      "head_sha": "1136617b0c5983f1bdc5991126758c7892f4c94c",
+      "evidence": "neutts-native-20261017/run-39063780780.json",
+      "native_cases_passed": 7,
+      "pip_check_passed": false,
+      "overall_compatibility_passed": false
+    },
+    "native_cpu_components": {
+      "run_id": 39063780748,
+      "head_sha": "1136617b0c5983f1bdc5991126758c7892f4c94c",
+      "status": "completed",
+      "workflow_conclusion": "failure",
+      "failure_evidence_verification": "complete_archive_sha256_crc_and_member_hashes",
+      "evidence": "neutts-native-components-20261017/run-39063780748/summary.json",
+      "both_source_builds_passed": true,
+      "installed_native_inputs_passed": true,
+      "numba_behavior_passed": true,
+      "llama_behavior_passed": false,
+      "failure_stage": "native-behavior/llama-oracle",
+      "failure": {
+        "message": "'llama_model_params' object has no attribute 'use_mmap'",
+        "type": "AttributeError"
+      }
+    }
   },
   "model_downloaded": false,
   "engine_installed": false,
@@ -130,7 +155,8 @@
     "source_archive_version_abi_and_build_option_pins_changed": false,
     "only_changed_lock_field": "build.wheel_tag_policy",
     "new_lock_sha256": "822aeabc9dca027f2f940dfb63a96fa5d015f81f293e138b67d126bd6914cc25",
-    "native_revalidation_required": true
+    "native_revalidation_required": false,
+    "native_proof_evidence": "neutts-native-components-20261017/run-39063780748/summary.json"
   },
   "reviewed_base": {
     "branch": "prepare/termux-compatibility-reviewed-base-20261017",
@@ -139,5 +165,16 @@
     "original_draft_url": "https://github.com/adybag14-cyber/termux-hermes/pull/6",
     "later_concurrent_checkpoint_not_merged": "49a9c383f4582bba4f7fdf69658e56168ec5c847",
     "later_scope": "Separate CUA sealed candidate and lifecycle preparation; not part of this handoff or current native claims"
-  }
+  },
+  "packaging_ci": {
+    "run_id": 39063780757,
+    "head_sha": "1136617b0c5983f1bdc5991126758c7892f4c94c",
+    "conclusion": "success",
+    "passed": 391,
+    "failed": 0,
+    "skipped": 0,
+    "evidence": "packaging-ci-1136617-20261017/summary.json"
+  },
+  "input_scope": "The exact1136617 source that proved the platform correction; later oracle source changes are recorded separately.",
+  "oracle_followup": "neutts-llama-oracle-reconciliation-20261017.json"
 }

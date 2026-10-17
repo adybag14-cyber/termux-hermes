@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_neutts_native.py", line 690, in run_case
+    result["behavior"] = llama_case()
+                         ~~~~~~~~~~^^
+  File "/probes/scripts/compatibility_probe_neutts_native.py", line 665, in llama_case
+    "default_model_use_mmap": bool(model.use_mmap),
+                                   ^^^^^^^^^^^^^^
+AttributeError: 'llama_model_params' object has no attribute 'use_mmap'
