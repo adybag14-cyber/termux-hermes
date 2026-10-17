@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "scope": "Merge committed concurrent preparation into the isolated resume branch only",
+  "resume_checkpoint": "0ea44fcac049869b36f21fb1202223477addb19e",
+  "original_preparation_commit": "fbf7c029b8df66618f520a47e6c07ff722129a43",
+  "original_worktree_modified": false,
+  "main_modified": false,
+  "release_created": false,
+  "conflict_resolution": {
+    "retain_native_validated_resume_inputs": {
+      ".github/workflows/neutts-termux-probe.yml": "e7b477dff174ba0d5ea98f2db924a936225e617646795e567f3b7671ef3083af",
+      "patches/next-stable/cua-hermes-integration.patch": "4de54e137b2f7c8a8736e6afd91405690e401d85baa7df9224300fcde31a4437",
+      "scripts/compatibility_probe_neutts.py": "137200bd63a1916079a8344349eeb3783281a08121489f9045d15f997dc64ce0",
+      "scripts/compatibility_probe_neutts.sh": "6b3e1ef9a711766de0a51d632e070825a41b9eef105d7e7390245871136511df",
+      "tests/test_neutts_probe.py": "2337873590044ec1d182f3db9f69d07d1fa69163563595ba059b1b623ffb173f"
+    },
+    "reason": "CUA scroll condition is semantically the same on both branches; resume additionally retains the proven pre-desktop loader fix. NeuTTS uses the exact dependency completion and bounded pip-tag diagnostic path that passed all six native scientific cases.",
+    "retain_original_independent_preparation_files": [
+      "audit/cua-native-20261017/run-39054088793.json",
+      "audit/neutts-core-python-metadata-20261017.json",
+      "audit/neutts-core-python-preparation-20261017.json",
+      "scripts/neutts_core_python_lock.json",
+      "scripts/prepare_neutts_core_python.py",
+      "tests/test_neutts_core_python.py"
+    ]
+  },
+  "native_validation_preserved": {
+    "cua_run_id": 39056472835,
+    "cua_tested_head": "37bf89d09a2a68a41585389d59b19e5e583c1f23",
+    "neutts_run_id": 39055874446,
+    "neutts_tested_head": "d439e8100bc89dbfe681fc03aa22017f175b8b2d",
+    "all_native_input_bytes_unchanged": true
+  },
+  "post_merge_host_packaging_tests": {
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "-q"
+    ],
+    "passed": 287,
+    "skipped": 4,
+    "failed": 0,
+    "elapsed_seconds": 4.07,
+    "raw_summary": "287 passed, 4 skipped in 4.07s"
+  },
+  "whitespace_check": "git diff --cached --check passed",
+  "other_session_uncommitted_work": "Preserved in its original checkout; not copied or overwritten."
+}
