@@ -1,0 +1,101 @@
+Metadata-Version: 2.5
+Name: torch-einops-utils
+Version: 0.1.36
+Summary: Personal utility functions
+Project-URL: Homepage, https://pypi.org/project/torch-einops-utils/
+Project-URL: Repository, https://github.com/lucidrains/torch-einops-utils
+Author-email: Phil Wang <lucidrains@gmail.com>
+License: MIT License
+        
+        Copyright (c) 2026 Phil Wang
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+License-File: LICENSE
+Keywords: einops,torch
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: >=3.9
+Requires-Dist: einops>=0.8.1
+Requires-Dist: torch>=2.5
+Provides-Extra: examples
+Provides-Extra: test
+Requires-Dist: numpy; extra == 'test'
+Requires-Dist: pytest; extra == 'test'
+Description-Content-Type: text/markdown
+
+## torch-einops-utils
+
+Some utility functions to help myself (and perhaps others) go faster with ML/AI work
+
+## maybe_return
+
+return just the primary output by default, extras only on request
+
+```python
+from torch_einops_utils import maybe_return
+
+@maybe_return('memories')
+def forward(self, ids, return_memories = False):
+    memories = build_memories(ids) if return_memories else None
+
+    return backbone(ids), memories
+
+model(ids)                             # logits
+model(ids, return_memories = True)     # Output(logits, memories)
+logits, memories = model(ids, return_memories = True)  # unpacks
+```
+
+any number of extras, individually or all at once
+
+```python
+@maybe_return('memories', 'hiddens')
+def forward(self, ids, return_memories = False, return_hiddens = False):
+    ...
+    return logits, memories, hiddens
+
+model(ids, return_hiddens = True)  # Output(logits, hiddens)
+model(ids, return_all = True)      # Output(logits, memories, hiddens)
+```
+
+`primary` may be a tuple of names, or a callable receiving the bound call arguments, for when the shape of the primary depends on the mode
+
+```python
+def primary_fields(kwargs):
+    if not kwargs.get('return_loss', False):
+        return ('logits', 'memory') if kwargs.get('return_memory', False) else 'logits'
+
+    return ('loss', 'loss_mask') if not kwargs.get('reduce_loss', False) else 'loss'
+
+@maybe_return('pooled_repr', primary = primary_fields)
+def forward(self, ids, return_loss = False, return_memory = False, reduce_loss = False, return_pooled_repr = False):
+    ...
+    if return_loss:
+        return loss, loss_mask, pooled_repr
+
+    return logits, memory, pooled_repr
+
+model(ids)                            # logits
+logits, memory = model(ids, return_memory = True)
+loss, loss_mask = model(ids, return_loss = True)
+loss = model(ids, return_loss = True, reduce_loss = True)
+loss, pooled = model(ids, return_loss = True, reduce_loss = True, return_pooled_repr = True)
+```
