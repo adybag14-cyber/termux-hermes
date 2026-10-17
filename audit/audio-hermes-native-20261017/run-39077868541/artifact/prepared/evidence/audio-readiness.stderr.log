@@ -1,0 +1,20 @@
+Audio readiness probe failed: audio import failed for a reason other than PortAudio initialization
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_audio_hermes.py", line 112, in runtime_worker
+    import sounddevice as sd
+  File "/out/prepared/payload/venv/lib/python3.14/site-packages/sounddevice.py", line 72, in <module>
+    raise OSError('PortAudio library not found')
+OSError: PortAudio library not found
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_audio_hermes.py", line 247, in main
+    runtime_worker(request)
+    ~~~~~~~~~~~~~~^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_audio_hermes.py", line 115, in runtime_worker
+    require(type(exc).__name__ == "PortAudioError", "audio import failed for a reason other than PortAudio initialization")
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/prepare_audio_hermes_environment.py", line 262, in require
+    raise PreparationError(message)
+_audio_preparation_contract.PreparationError: audio import failed for a reason other than PortAudio initialization
