@@ -112,7 +112,7 @@
         "PM Chromium"
       ],
       "baseline": "No managed Android artifacts; local managed browser cannot be provisioned.",
-      "status": "native_probe_pending"
+      "status": "raw_native_browser_passed_product_pm_integration_tested_native_rerun_pending"
     },
     {
       "id": "native-cua",
@@ -127,7 +127,7 @@
     {
       "id": "gateway-service",
       "baseline": "Managed service installation/start/uninstall refuses Termux/APT provenance; manual gateway remains usable.",
-      "status": "runit_adapter_review"
+      "status": "runit_adapter_tests_passed_native_lifecycle_pending"
     },
     {
       "id": "recorder-silence-vad",
@@ -175,9 +175,9 @@
       "uvloop"
     ],
     "dependency_probes": {
-      "uvloop": "native_behavior_passed_artifact_permissions_fixed_repeat_pending",
-      "matrix": "cmake_and_clang_source_fixes_prepared_native_repeat_pending",
-      "nemo-relay": "native_build_and_behavior_passed_artifact_permissions_fixed_repeat_pending",
+      "uvloop": "native_behavior_and_original_payload_linkage_passed",
+      "matrix": "native_encrypted_protocol_and_original_payload_linkage_passed",
+      "nemo-relay": "native_build_behavior_original_payload_linkage_and_artifact_capture_passed",
       "neutts": "blocked_by_python_and_native_ml_runtime_closure"
     },
     "initial_native_run": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39037495656",
@@ -191,9 +191,41 @@
       "failed": 0
     },
     "desktop_and_remote_cua_regressions": {
-      "passed": 20,
+      "passed": 15,
+      "failed": 0,
+      "scope": "8 current Termux desktop tests plus 7 remote CUA availability tests"
+    },
+    "candidate_package": "pending; Actions artifact only, never a release",
+    "pm_bundled_wheel_regressions": {
+      "passed": 21,
+      "failed": 0,
+      "scope": "18 bundled-wheel/bootstrap tests, 2 bytecode fallback, 1 ambient-config isolation"
+    },
+    "native_evidence": "native-probes-20261017/summary.json",
+    "published_package_census": "released-package-census.json",
+    "remaining_portability_notes": "../docs/remaining-portability-work.md",
+    "browser_regressions": {
+      "passed": 139,
+      "failed": 0,
+      "skipped_host_specific": 7
+    },
+    "gateway_runit_regressions": {
+      "passed": 24,
+      "failed": 0,
+      "scope": "14 new runit cases plus 10 existing provenance/manual/profile dispatch regressions"
+    },
+    "numpy_source_regressions": {
+      "passed": 9,
       "failed": 0
     },
-    "candidate_package": "pending; Actions artifact only, never a release"
+    "termux_diagnostic_regressions": {
+      "passed": 2,
+      "failed": 0
+    },
+    "packaging_regressions": {
+      "passed": 131,
+      "failed": 0,
+      "skipped_host_specific": 4
+    }
   }
 }

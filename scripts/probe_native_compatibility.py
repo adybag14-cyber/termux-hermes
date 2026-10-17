@@ -16,6 +16,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import shutil
 import subprocess
 import sys
 import sysconfig
@@ -26,6 +27,7 @@ ANCHORS = {
     "matrix": {"aiohttp", "aiohttp-socks", "aiosqlite", "asyncpg", "mautrix",
                "python-olm", "pycryptodome"},
     "nemo": {"nemo-relay"},
+    "audio": {"numpy", "sounddevice"},
 }
 
 
@@ -44,7 +46,8 @@ def locked_closure(lock: dict, group: str, environment: dict[str, str]) -> dict[
     if group == "nemo":
         starts = [d for d in root.get("dependencies", []) if d["name"] == "nemo-relay"]
     else:
-        starts = root.get("optional-dependencies", {}).get(group, [])
+        extra = "audio-io" if group == "audio" else group
+        starts = root.get("optional-dependencies", {}).get(extra, [])
     selected, seen = {}, set()
 
     def admits(marker: str | None) -> bool:
@@ -211,23 +214,130 @@ def exercise_nemo() -> list[str]:
 
 
 
+
+def exercise_numpy() -> list[str]:
+    import numpy as np
+
+    samples = np.arange(32, dtype=np.float32) / np.float32(32)
+    np.testing.assert_allclose(np.fft.irfft(np.fft.rfft(samples), n=len(samples)), samples, atol=1e-6)
+    matrix = np.array([[3.0, 1.0], [1.0, 2.0]])
+    np.testing.assert_allclose(np.linalg.solve(matrix, [9.0, 8.0]), [2.0, 3.0])
+    np.testing.assert_allclose(matrix @ np.array([2.0, 3.0]), [9.0, 8.0])
+    return ["NumPy native array arithmetic", "FFT roundtrip", "internal LAPACK linear solve",
+            "matrix multiplication without external BLAS"]
+
+
+def audio_failure_status(error: Exception) -> str:
+    """A missing Android system library is not a successful PortAudio import."""
+    message = str(error).lower()
+    missing_library = any(s in message for s in ("not found", "no such file", "cannot open shared object"))
+    return "environment-limited" if "libopensles.so" in message and missing_library else "failed"
+
+
+def inspect_audio_devices() -> dict:
+    # Import performs the actual CFFI dlopen and PortAudio initialization.
+    # Never substitute an empty inventory for a failed import.
+    import sounddevice as sd
+
+    version, version_text = sd.get_portaudio_version()
+    if not isinstance(version, int) or version <= 0 or not version_text:
+        raise RuntimeError("PortAudio did not return a valid native version")
+    devices = [dict(device) for device in sd.query_devices()]
+    hostapis = [dict(api) for api in sd.query_hostapis()]
+    inputs = [device for device in devices if device["max_input_channels"] > 0]
+    unavailable_reason = None
+    if not inputs:
+        try:
+            sd.query_devices(kind="input")
+        except sd.PortAudioError as exc:
+            unavailable_reason = str(exc)
+        else:
+            raise RuntimeError("PortAudio inventory and default input query disagree")
+    maps = Path("/proc/self/maps")
+    loaded = sorted({line.split()[-1] for line in maps.read_text().splitlines()
+                     if "libportaudio.so" in line and line.split()[-1].startswith("/")}) if maps.is_file() else []
+    if not loaded:
+        raise RuntimeError("Actual loaded PortAudio library could not be identified")
+    return {
+        "portaudio_status": "loaded", "portaudio_version": version,
+        "portaudio_version_text": version_text,
+        "loaded_libraries": [{"path": path, "sha256": source_sha(Path(path))} for path in loaded],
+        "hostapis": hostapis, "devices": devices,
+        "input_device_status": "available" if inputs else "unavailable",
+        "unavailable_reason": unavailable_reason, "hardware_capture_tested": False,
+    }
+
+
 def exercise(group: str, out: Path) -> None:
     assert_native()
-    checks = {"uvloop": exercise_uvloop, "matrix": exercise_matrix, "nemo": exercise_nemo}[group]()
     result = {
-        "status": "passed", "group": group, "checks": checks,
+        "status": "passed", "group": group,
         "python": sys.version, "platform": sys.platform, "machine": platform.machine(),
         "installed": sorted(
             ({"name": d.metadata["Name"], "version": d.version}
              for d in importlib.metadata.distributions()), key=lambda d: d["name"].lower(),
         ),
     }
+    if group == "audio":
+        result["checks"] = exercise_numpy()
+        # Keep NumPy proof even if this container lacks Android's audio framework.
+        numpy_out = out.with_name("NUMPY-" + out.name)
+        numpy_out.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+        try:
+            result["audio"] = inspect_audio_devices()
+        except Exception as exc:
+            result["status"] = audio_failure_status(exc)
+            result["audio"] = {"portaudio_status": "unavailable", "error": str(exc),
+                               "hardware_capture_tested": False}
+            out.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+            raise
+        result["checks"].extend(["actual PortAudio dlopen", "native audio-device inventory"])
+    else:
+        result["checks"] = {"uvloop": exercise_uvloop, "matrix": exercise_matrix, "nemo": exercise_nemo}[group]()
     out.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
 
 
-def inspect_native_linkage(environment: Path, payload: Path) -> dict:
+def stage_audio_runtime(out: Path) -> Path:
+    """Retain the exact official APT library separately from compiler inputs."""
+    prefix = Path(os.environ["PREFIX"])
+    libraries = sorted((prefix / "lib").glob("libportaudio.so*"))
+    if not libraries:
+        raise RuntimeError("The installed official portaudio package has no runtime library")
+    added = out / "added-runtime-libs"
+    added.mkdir(exist_ok=False)
+    version = subprocess.check_output(["dpkg-query", "-W", "-f=${Version}", "portaudio"], text=True).strip()
+    records = []
+    for path in libraries:
+        if not path.is_file() or path.read_bytes()[:4] != b"\x7fELF":
+            raise RuntimeError(f"PortAudio runtime input is not an ELF library: {path}")
+        target = added / path.name
+        shutil.copyfile(path, target)
+        records.append({"name": path.name, "source_path": str(path), "sha256": source_sha(target),
+                        "size": target.stat().st_size, "package": "portaudio", "package_version": version,
+                        "needed": subprocess.check_output(["patchelf", "--print-needed", str(target)],
+                                                          text=True).splitlines()})
+    (out / "AUDIO-RUNTIME-INPUTS.json").write_text(json.dumps({
+        "source": "official Termux APT repository", "libraries": records,
+        "android_audio_abi": "libOpenSLES.so", "hardware_capture_tested": False,
+    }, indent=2) + "\n", encoding="utf-8")
+    return added
+
+
+def run_runtime_probe(python: Path, group: str, out: Path, environment: dict | None = None) -> int:
+    try:
+        return subprocess.run(
+            [str(python), str(Path(__file__).resolve()), "exercise", "--group", group, "--out", str(out)],
+            env=environment, check=False, timeout=90,
+        ).returncode
+    except subprocess.TimeoutExpired:
+        out.write_text(json.dumps({"status": "failed", "group": group,
+                                  "error": "native runtime probe timed out after 90 seconds"}) + "\n")
+        return 124
+
+
+def inspect_native_linkage(environment: Path, payload: Path, added_runtime: Path | None = None) -> dict:
     """Account for each extension dependency before claiming payload compatibility."""
-    platform_libraries = {"libc.so", "libm.so", "libdl.so", "liblog.so", "libandroid.so", "libz.so"}
+    platform_libraries = {"libc.so", "libm.so", "libdl.so", "liblog.so", "libandroid.so", "libz.so", "libOpenSLES.so"}
     payload_libraries = defaultdict(list)
     for root in (payload / "tools", payload / "runtime-libs"):
         for path in root.rglob("*.so*"):
@@ -235,6 +345,8 @@ def inspect_native_linkage(environment: Path, payload: Path) -> dict:
                 payload_libraries[path.name].append(str(path.relative_to(payload)))
     native = [p for p in environment.rglob("*.so*") if p.is_file() and p.read_bytes()[:4] == b"\x7fELF"]
     local_libraries = {p.name for p in native}
+    added = {p.name: p for p in added_runtime.glob("*.so*")} if added_runtime is not None else {}
+    native.extend(added.values())
     entries, undeclared = [], set()
     for path in sorted(native):
         needed = subprocess.check_output(["patchelf", "--print-needed", str(path)], text=True).splitlines()
@@ -243,6 +355,8 @@ def inspect_native_linkage(environment: Path, payload: Path) -> dict:
         for name in needed:
             if name in payload_libraries:
                 dependencies[name] = {"kind": "original-payload", "paths": payload_libraries[name]}
+            elif name in added:
+                dependencies[name] = {"kind": "declared-added-runtime", "sha256": source_sha(added[name])}
             elif name in local_libraries:
                 dependencies[name] = {"kind": "candidate-wheel"}
             elif name in platform_libraries:
@@ -250,9 +364,12 @@ def inspect_native_linkage(environment: Path, payload: Path) -> dict:
             else:
                 undeclared.add(name)
                 dependencies[name] = {"kind": "undeclared-runtime-dependency"}
-        entries.append({"extension": str(path.relative_to(environment)), "needed": dependencies, "rpath": rpath})
+        relative = str(path.relative_to(environment)) if path.is_relative_to(environment) else "added-runtime-libs/" + path.name
+        entries.append({"extension": relative, "needed": dependencies, "rpath": rpath})
     return {"extensions": entries, "undeclared_runtime_libraries": sorted(undeclared),
-            "declared_added_runtime_libraries": []}
+            "declared_added_runtime_libraries": [
+                {"name": name, "sha256": source_sha(path)} for name, path in sorted(added.items())
+            ]}
 
 
 def build(source: Path, out: Path, group: str) -> None:
@@ -276,6 +393,9 @@ def build(source: Path, out: Path, group: str) -> None:
     requirements.write_text("".join(f"{n}=={p['version']}\n" for n, p in graph.items()), encoding="utf-8")
     resolved = out / "resolved.txt"
     resolved.write_text("".join(f"{n}\t=={p['version']}\t\t\n" for n, p in graph.items()), encoding="utf-8")
+    added_runtime = stage_audio_runtime(out) if group == "audio" else None
+    if added_runtime is not None:
+        os.environ["LD_LIBRARY_PATH"] = str(added_runtime) + ":" + os.environ["LD_LIBRARY_PATH"]
     compatible = set(sys_tags())
     build_set = []
     for name, package in graph.items():
@@ -304,8 +424,6 @@ def build(source: Path, out: Path, group: str) -> None:
     )
     subprocess.run([str(python), str(source / "scripts/termux/build_wheels.py"),
                     "--import-modules", *build_set], check=True)
-    subprocess.run([str(python), str(Path(__file__).resolve()), "exercise", "--group", group,
-                    "--out", str(out / "RUNTIME-PROBE.json")], check=True)
     evidence = {
         "schema_version": 1, "group": group, "status": "passed", "lock_sha256": lock_sha,
         "pyproject_sha256": source_sha(source / "pyproject.toml"),
@@ -313,21 +431,36 @@ def build(source: Path, out: Path, group: str) -> None:
         "wheels": [{"name": p.name, "sha256": source_sha(p), "size": p.stat().st_size}
                    for p in sorted(wheelhouse.glob("*.whl"))],
     }
-    linkage = inspect_native_linkage(out / "environment", Path(os.environ["HERMES_PROBE_PAYLOAD"]))
+    linkage = inspect_native_linkage(out / "environment", Path(os.environ["HERMES_PROBE_PAYLOAD"]), added_runtime)
     (out / "NATIVE-LINKAGE.json").write_text(json.dumps(linkage, indent=2) + "\n", encoding="utf-8")
-    original = subprocess.run(
-        [str(python), str(Path(__file__).resolve()), "exercise", "--group", group,
-         "--out", str(out / "ORIGINAL-RUNTIME-PROBE.json")],
-        env={**os.environ, "LD_LIBRARY_PATH": os.environ["HERMES_PROBE_ORIGINAL_LD_LIBRARY_PATH"]},
-        check=False,
+    built_returncode = run_runtime_probe(python, group, out / "RUNTIME-PROBE.json")
+    original_ld = os.environ["HERMES_PROBE_ORIGINAL_LD_LIBRARY_PATH"]
+    if added_runtime is not None:
+        original_ld = str(added_runtime) + ":" + original_ld
+    original_returncode = run_runtime_probe(
+        python, group, out / "ORIGINAL-RUNTIME-PROBE.json",
+        {**os.environ, "LD_LIBRARY_PATH": original_ld},
     )
-    evidence["original_payload_runtime_passed"] = original.returncode == 0
+    evidence["build_runtime_passed"] = built_returncode == 0
+    evidence["original_payload_runtime_passed"] = original_returncode == 0
     evidence["undeclared_runtime_libraries"] = linkage["undeclared_runtime_libraries"]
+    evidence["declared_added_runtime_libraries"] = linkage["declared_added_runtime_libraries"]
     evidence["qualification"] = "candidate-built; complete package and device validation remain required"
-    evidence["status"] = "passed" if original.returncode == 0 and not linkage["undeclared_runtime_libraries"] else "failed"
+    evidence["status"] = "passed" if built_returncode == original_returncode == 0 and not linkage["undeclared_runtime_libraries"] else "failed"
+    if group == "audio":
+        evidence["hardware_capture_tested"] = False
+        evidence["numpy_original_runtime_passed"] = (out / "NUMPY-ORIGINAL-RUNTIME-PROBE.json").is_file()
+        runtime_statuses = [
+            json.loads(path.read_text()).get("status") for path in
+            (out / "RUNTIME-PROBE.json", out / "ORIGINAL-RUNTIME-PROBE.json") if path.is_file()
+        ]
+        if (evidence["numpy_original_runtime_passed"] and runtime_statuses
+                and all(status == "environment-limited" for status in runtime_statuses)
+                and not linkage["undeclared_runtime_libraries"]):
+            evidence["status"] = "environment-limited"
     (out / "BUILD-PROBE.json").write_text(json.dumps(evidence, indent=2) + "\n", encoding="utf-8")
     if evidence["status"] != "passed":
-        raise RuntimeError("Native build requires runtime inputs absent from the original payload; inspect BUILD-PROBE.json and NATIVE-LINKAGE.json")
+        raise RuntimeError("Native runtime proof is incomplete; inspect BUILD-PROBE.json and NATIVE-LINKAGE.json")
 
 
 def main() -> int:

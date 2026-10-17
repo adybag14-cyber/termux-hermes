@@ -119,3 +119,79 @@ assert result["data"]["result"] == "Clicked successfully", result
 assert (out / "browser-loopback.png").read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
 (out / "browser-probe-passed.txt").write_text("Native Termux ARM64 static CLI and APT Chromium: navigation, snapshot, click, evaluation, screenshot, close passed. No physical Android display was tested.\n")
 PY
+
+# Exercise the proposed product route against the installed payload's real PM
+# runtime. These source overlays exist only in this disposable probe container.
+cp -R "$SOURCE/pm/." "$HERMES_PROBE_PAYLOAD/app/pm/"
+for relative in hermes_cli/browser_runtime.py tools/browser_tool_install.py tools/browser_tool_session.py; do
+  cp "$SOURCE/$relative" "$HERMES_PROBE_PAYLOAD/app/$relative"
+done
+export HERMES_HOME="$work/pm-home" HERMES_RUNTIME_DIR="$HERMES_PROBE_PAYLOAD/tools"
+export PYTHONPATH="$HERMES_PROBE_PAYLOAD/app" PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1
+export AGENT_BROWSER_PROFILE="$work/pm-profile"
+mkdir -p "$HERMES_HOME" "$AGENT_BROWSER_PROFILE"
+"$HERMES_PROBE_PAYLOAD/venv/bin/python" -B - "$work" "$OUT" "$port" <<'PY'
+from pathlib import Path
+import hashlib
+import json
+import os
+import subprocess
+import sys
+
+import pm
+from hermes_cli.browser_runtime import chromium_executable
+from tools import browser_tool_install as install
+from tools import browser_tool_session as session
+
+work, out = map(Path, sys.argv[1:3])
+port = int(sys.argv[3])
+assert sys.platform == "android" and os.geteuid() == 1000
+assert pm.current_target() == "linux-arm64-bionic"
+pm.ensure("agent-browser", explicit=True)
+driver = install._find_agent_browser(validate=False)
+installed = pm.installed_package("agent-browser")
+assert installed is not None and installed.binary == Path(driver)
+assert pm.installed_package("chromium") is None, "APT Chromium must not be recorded as a PM-owned artifact"
+chromium = chromium_executable()
+assert chromium == os.environ["PREFIX"] + "/bin/chromium-browser", chromium
+assert install.check_browser_requirements(), "the product readiness gate must advertise the proven local browser"
+socket_dir = work / "pm-sockets"
+socket_dir.mkdir(mode=0o700)
+env = session._agent_browser_command_env(str(socket_dir))
+session._apply_chromium_sandbox_args(env)
+assert env["AGENT_BROWSER_EXECUTABLE_PATH"] == chromium
+assert "LD_LIBRARY_PATH" not in env
+assert "LD_LIBRARY_PATH" in os.environ, "the Python parent must keep its own library environment"
+assert env["AGENT_BROWSER_ARGS"] == "--no-sandbox,--disable-dev-shm-usage"
+
+def command(name, *args):
+    result = subprocess.run(
+        [driver, "--session", "hermes-pm", "--json", *args], env=env,
+        capture_output=True, text=True, check=True, timeout=90,
+    )
+    (out / ("pm-browser-" + name + ".json")).write_text(result.stdout)
+    parsed = json.loads(result.stdout)
+    assert parsed.get("success") is True, parsed
+    return parsed
+
+try:
+    command("open", "open", f"http://127.0.0.1:{port}/")
+    command("snapshot", "snapshot", "-i")
+    command("click", "click", "#change")
+    result = command("eval", "eval", "document.getElementById('result').textContent")
+    assert result["data"]["result"] == "Clicked successfully", result
+    command("screenshot", "screenshot", str(out / "pm-browser-loopback.png"))
+    assert (out / "pm-browser-loopback.png").read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
+finally:
+    command("close", "close")
+(out / "browser-pm-evidence.json").write_text(json.dumps({
+    "target": pm.current_target(), "uid": os.geteuid(), "version": installed.version,
+    "driver": driver, "driver_sha256": hashlib.sha256(Path(driver).read_bytes()).hexdigest(),
+    "chromium": chromium, "chromium_owner": "Termux APT",
+    "product_readiness": True, "pm_install_and_child_environment": True,
+    "physical_android_display_tested": False,
+}, indent=2) + "\n")
+(out / "browser-pm-probe-passed.txt").write_text(
+    "PM-managed static driver, actual Hermes discovery/readiness/environment, and APT Chromium completed the native loopback workflow.\n"
+)
+PY

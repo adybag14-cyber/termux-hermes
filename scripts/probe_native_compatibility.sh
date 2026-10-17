@@ -28,7 +28,7 @@ if [[ "${1:-}" == --in-container ]]; then
   export PYTHONDONTWRITEBYTECODE=1
   [[ -e /bin/sh ]] || ln -s "$PREFIX/bin/sh" /bin/sh
   "$HERMES_PROBE_PYTHON" -c 'import sys,platform; assert sys.platform=="android"; assert platform.machine() in ("aarch64","arm64"); assert sys.version_info[:2]==(3,14); print(sys.version)'
-  if [[ "$group" == browser || "$group" == desktop ]]; then
+  if [[ "$group" == browser || "$group" == desktop || "$group" == gateway ]]; then
     bash "/probes/scripts/compatibility_probe_${group}.sh" --source /source --out /out
     exit 0
   fi
@@ -37,6 +37,7 @@ if [[ "${1:-}" == --in-container ]]; then
                   libandroid-posix-semaphore libandroid-support libffi openssl)
   if [[ "$group" == matrix ]]; then build_packages+=(cmake ninja); fi
   if [[ "$group" == nemo ]]; then build_packages+=(rust protobuf cmake ninja); fi
+  if [[ "$group" == audio ]]; then build_packages+=(cmake ninja portaudio); fi
   env -u LD_LIBRARY_PATH apt-get -o Acquire::Retries=5 install -y "${build_packages[@]}"
   dpkg-query -W -f='${Package}\t${Version}\n' > /out/TERMUX-PACKAGES.tsv
 
@@ -77,7 +78,7 @@ fi
 
 [[ $# == 3 ]] || { echo "usage: $0 GROUP PATCHED_SOURCE OUT" >&2; exit 2; }
 group="$1"
-case "$group" in uvloop|matrix|nemo|browser|desktop) ;; *) echo "Unknown probe group: $group" >&2; exit 2;; esac
+case "$group" in uvloop|matrix|nemo|browser|desktop|audio|gateway) ;; *) echo "Unknown probe group: $group" >&2; exit 2;; esac
 case "$(uname -m)" in aarch64|arm64) ;; *) echo "Native ARM runner required" >&2; exit 1;; esac
 source="$(realpath "$2")"
 mkdir -p "$3"
@@ -86,6 +87,7 @@ packaging="$(cd "$(dirname "$0")/.." && pwd)"
 test -f "$source/uv.lock"
 test -f "$source/scripts/termux/compat_sources.py"
 test -f "$source/scripts/termux/nemo_source.py"
+if [[ "$group" == audio ]]; then test -f "$source/scripts/termux/numpy_source.py"; fi
 TERMUX_IMAGE="$(python3 - "$packaging/manifest/release.json" <<'PY'
 import json, re, sys
 image = json.load(open(sys.argv[1]))["termux_image"]
@@ -123,7 +125,7 @@ chmod a+r "$deb"
 docker pull "$TERMUX_IMAGE"
 test "$(docker image inspect --format '{{.Architecture}}' "$TERMUX_IMAGE")" = arm64
 container_user=root
-if [[ "$group" == browser || "$group" == desktop ]]; then container_user=1000:1000; fi
+if [[ "$group" == browser || "$group" == desktop || "$group" == gateway ]]; then container_user=1000:1000; fi
 docker run --rm --platform linux/arm64 --user "$container_user" --tmpfs /bin:mode=1777 \
   -v "$source:/source:ro" -v "$packaging:/probes:ro" \
   -v "$deb:/baseline/package.deb:ro" -v "$out:/out" \

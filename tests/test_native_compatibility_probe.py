@@ -86,3 +86,56 @@ def test_resolution_markers_select_actual_android_variant():
     other["resolution-markers"] = ["sys_platform != 'android'"]
     lock["package"].append(other)
     assert locked_closure(lock, "uvloop", ANDROID)["uvloop"]["version"] == "1.0"
+
+
+def test_audio_probe_uses_audio_io_extra_and_preserves_cffi_transitive_dependency():
+    lock = lock_fixture()
+    lock["package"][0]["optional-dependencies"]["audio-io"] = [
+        {"name": "numpy"}, {"name": "sounddevice"},
+    ]
+    lock["package"].extend([
+        package("numpy"), package("sounddevice", dependencies=[{"name": "cffi"}]), package("pycparser"),
+    ])
+    next(p for p in lock["package"] if p["name"] == "cffi")["dependencies"] = [{"name": "pycparser"}]
+    assert set(locked_closure(lock, "audio", ANDROID)) == {"numpy", "sounddevice", "cffi", "pycparser"}
+
+
+@pytest.mark.parametrize("message, expected", [
+    ('dlopen failed: library "libOpenSLES.so" not found', "environment-limited"),
+    ("libOpenSLES.so: cannot open shared object file: No such file or directory", "environment-limited"),
+    ("PortAudio library not found", "failed"),
+    ('cannot locate symbol "new_function" referenced by "libOpenSLES.so"', "failed"),
+    ("Error initializing PortAudio: Internal PortAudio error", "failed"),
+])
+def test_only_missing_android_audio_library_is_environment_limited(message, expected):
+    from scripts.probe_native_compatibility import audio_failure_status
+    assert audio_failure_status(OSError(message)) == expected
+
+
+def test_direct_portaudio_runtime_library_dependencies_are_accounted_for(tmp_path, monkeypatch):
+    from scripts.probe_native_compatibility import inspect_native_linkage
+
+    environment = tmp_path / "environment"
+    environment.mkdir()
+    (environment / "numpy-core.so").write_bytes(b"\x7fELFfixture")
+    payload = tmp_path / "payload"
+    (payload / "runtime-libs").mkdir(parents=True)
+    (payload / "runtime-libs" / "libc++_shared.so").write_bytes(b"fixture")
+    added = tmp_path / "added-runtime-libs"
+    added.mkdir()
+    (added / "libportaudio.so").write_bytes(b"\x7fELFfixture")
+
+    def patchelf(args, **kwargs):
+        if args[1] == "--print-rpath":
+            return ""
+        if args[-1].endswith("libportaudio.so"):
+            return "libOpenSLES.so\nlibc++_shared.so\n"
+        return "libc.so\nlibunexpected-compiler-runtime.so\n"
+
+    monkeypatch.setattr("scripts.probe_native_compatibility.subprocess.check_output", patchelf)
+    result = inspect_native_linkage(environment, payload, added)
+    assert result["undeclared_runtime_libraries"] == ["libunexpected-compiler-runtime.so"]
+    portaudio = next(row for row in result["extensions"] if row["extension"] == "added-runtime-libs/libportaudio.so")
+    assert portaudio["needed"]["libOpenSLES.so"]["kind"] == "android-system-abi"
+    assert portaudio["needed"]["libc++_shared.so"]["kind"] == "original-payload"
+    assert [row["name"] for row in result["declared_added_runtime_libraries"]] == ["libportaudio.so"]

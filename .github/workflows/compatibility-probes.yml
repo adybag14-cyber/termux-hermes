@@ -2,6 +2,12 @@ name: Probe next-stable Termux compatibility
 
 on:
   workflow_dispatch:
+    inputs:
+      group:
+        description: Native probe group
+        type: choice
+        default: all
+        options: [all, uvloop, matrix, nemo, browser, desktop, audio, gateway]
   pull_request:
     paths:
       - '.github/workflows/compatibility-probes.yml'
@@ -9,6 +15,7 @@ on:
       - 'scripts/probe_native_compatibility.*'
       - 'scripts/compatibility_probe_browser.sh'
       - 'scripts/compatibility_probe_desktop.sh'
+      - 'scripts/compatibility_probe_gateway.sh'
       - 'tests/test_native_compatibility_probe.py'
 
 permissions:
@@ -26,7 +33,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        group: [uvloop, matrix, nemo, browser, desktop]
+        group: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.group != 'all' && format('["{0}"]', inputs.group) || '["uvloop","matrix","nemo","browser","desktop","audio","gateway"]') }}
     steps:
       - name: Checkout proposed packaging changes
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -103,5 +110,6 @@ jobs:
             probe-results/${{ matrix.group }}/*.jpg
             probe-results/${{ matrix.group }}/wheelhouse/*.whl
             probe-results/${{ matrix.group }}/build-runtime-libs/*
+            probe-results/${{ matrix.group }}/added-runtime-libs/*
           if-no-files-found: warn
           compression-level: 0

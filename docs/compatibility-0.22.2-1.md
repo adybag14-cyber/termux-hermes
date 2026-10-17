@@ -48,6 +48,25 @@ optional dependencies and platform gates with the installed package metadata,
 `RESOLVED.txt`, feature facts, and runtime source guards. The machine-readable
 result is [compatibility-0.22.2-1.json](../audit/compatibility-0.22.2-1.json).
 
+### Reproduce the package census
+
+[released-package-census.json](../audit/released-package-census.json) contains the
+complete observed inventory, all 55 optional group declarations and their target
+markers, the admitted/excluded resolved rows, source digests and PM facts. Generate
+it from the published package and its RESOLVED.txt:
+
+```sh
+python scripts/audit_release_compatibility.py \
+  --package /path/to/hermes-agent_0.22.2-1_aarch64.deb \
+  --resolved /path/to/RESOLVED.txt \
+  --output /tmp/hermes-release-census.json
+```
+
+The inspector verifies the exact package SHA-256 before streaming its archive.
+It installs nothing and executes no package code. The recorded source digests
+also match the exact upstream commit. Capability classification remains a
+source-reviewed judgment, distinct from distribution inventory.
+
 ### Counting rules
 
 - Count a named capability once, even when multiple packages block it.
@@ -65,9 +84,9 @@ result is [compatibility-0.22.2-1.json](../audit/compatibility-0.22.2-1.json).
 
 | Capability | Released restriction and actual cause | Proposed next-stable remedy | Current evidence |
 | --- | --- | --- | --- |
-| uvloop event-loop acceleration | Android marker excludes uvloop 0.22.1. Its setup backend runs shell/configure commands assuming a conventional Unix shell path; the old preconfigure workaround is overwritten by setup.py's later copy/configure sequence. Standard asyncio remains available. | Verify the exact locked source archive, patch the commands actually executed to use Termux's `CONFIG_SHELL`, and admit Android aarch64. Supply the resulting wheel through the reusable bundle cache. | Native ARM TCP/task/shutdown probe passed in run 39037495656. The artifact-upload permission defect is fixed; repeat evidence capture is pending. |
-| Matrix messaging with encryption | Five requirements and the PM extra gate admit Linux only. The encrypted backend's python-olm 3.2.16 builds an older vendored libolm with CMake compatibility assumptions and an incorrectly const-qualified pointer rejected by current Clang. | Preserve bundled static libolm, apply Termux's CMake policy and const-pointer corrections, and admit Android aarch64 for the complete encrypted dependency group. Bundle reusable native wheels. | Source-hook and closure tests pass; native Olm/Megolm, AES, asyncpg, HTTP and SQLite probes pending. |
-| Nemo Relay | Core platform marker excludes Android. The 0.10.0 Rust source unconditionally requests a vendored protoc binary whose platform table lacks Android, ignoring the available system `PROTOC`. The old builder also silently skipped Nemo if it reached the build list. | Verify the locked sdist, honor the system protoc executable, remove the silent omission paths, and require Nemo in completeness checks. | Android Rust build and native behavior probe passed in run 39037495656. The artifact-upload permission defect is fixed; repeat evidence capture is pending. |
+| uvloop event-loop acceleration | Android marker excludes uvloop 0.22.1. Its setup backend runs shell/configure commands assuming a conventional Unix shell path; the old preconfigure workaround is overwritten by setup.py's later copy/configure sequence. Standard asyncio remains available. | Verify the exact locked source archive, patch the commands actually executed to use Termux's `CONFIG_SHELL`, and admit Android aarch64. Supply the resulting wheel through the reusable bundle cache. | Corrected native ARM TCP/task/shutdown job passed in run 39039959324, including original-payload runtime and successful artifact capture. |
+| Matrix messaging with encryption | Five requirements and the PM extra gate admit Linux only. The encrypted backend's python-olm 3.2.16 builds an older vendored libolm with CMake compatibility assumptions and an incorrectly const-qualified pointer rejected by current Clang. | Preserve bundled static libolm, apply Termux's CMake policy and const-pointer corrections, and admit Android aarch64 for the complete encrypted dependency group. Bundle reusable native wheels. | Native ARM Olm/Megolm, AES, asyncpg codec, HTTP and SQLite probes passed with original payload libraries; no undeclared runtime libraries. |
+| Nemo Relay | Core platform marker excludes Android. The 0.10.0 Rust source unconditionally requests a vendored protoc binary whose platform table lacks Android, ignoring the available system `PROTOC`. The old builder also silently skipped Nemo if it reached the build list. | Verify the locked sdist, honor the system protoc executable, remove the silent omission paths, and require Nemo in completeness checks. | Android Rust build, native plugin validation and scope/trace behavior passed in run 39039959324, including original-payload execution and successful artifact capture. |
 | NeuTTS local speech engine | Locked NeuTTS 1.4.1 requires Python >=3.10 and <3.14. Its published release has platform wheels but **no source distribution**; the closure also needs native Torch/Torchaudio, codec and inference libraries. This package uses Python 3.14.6 on Bionic. | Retain the honest exclusion. Public upstream source exists, but enabling this locked engine requires a supported Python/runtime arrangement plus the complete native Torch, codec and inference closure. No speculative marker-only enablement is made. | Exact PyPI release metadata inspected; merely removing the Python marker cannot produce a compatible engine. |
 
 The uvloop, Olm and Nemo adapters reject unexpected source bytes or changed build
@@ -87,11 +106,11 @@ The reviewed exact source digests are also embedded in the preparation helpers.
 
 | Capability | Published behavior | Preparation status |
 | --- | --- | --- |
-| Local managed browser | PM has no Bionic artifact for either AgentBrowser or Chromium. Remote browser/CDP paths are distinct and can remain usable. | Probe the locked static musl ARM64 AgentBrowser executable with official Termux Chromium, including real navigation, interaction, and screenshot. Do not declare Chromium managed until its binary/library closure is accounted for. |
+| Local managed browser | PM has no Bionic artifact for either AgentBrowser or Chromium. Remote browser/CDP paths are distinct and can remain usable. | The locked static ARM64 AgentBrowser and official Termux Chromium passed real navigation, interaction and screenshot checks under UID 1000. Product PM/discovery integration passed 139 regression tests; its extended native proof is pending. Chromium remains an explicitly APT-owned dependency. |
 | Default native computer use | Default CUA driver rejects Android. Having the MCP dependency does not supply this native backend. | The locked driver is a glibc Linux/X11/Wayland executable, not an Android UI backend. Fixed the separate routing bug that rejected Android before evaluating a configured remote Linux provider. Remote availability regressions pass; native phone UI control still needs an Android backend. |
-| Bot Desktop | Virtual display host is Linux-only. | Added a local Termux Xvnc/Xfce adapter, prefix-aware runtime paths and screenshot capture through scrot. Twenty focused desktop/remote-provider and existing regression tests pass; native user-owned desktop probe pending. |
-| Managed gateway service | Service install/start/uninstall paths reject Termux/APT provenance. Manual foreground/background gateway paths remain available. | Investigate a Termux runit adapter with native service lifecycle semantics. |
-| Recorder silence auto-stop | The Termux:API recorder does not provide the sounddevice VAD/silence path. Manual stop remains available. | Added explicit auto, sounddevice and termux-api capture selection with accurate diagnostics. The PCM path retains the existing VAD implementation. Native NumPy/audio provisioning and physical microphone proof remain pending; Termux:API itself has no PCM stream for this VAD path. |
+| Bot Desktop | Virtual display host is Linux-only. | Added a local Termux Xvnc/Xfce adapter, prefix-aware runtime paths and screenshot capture through scrot. Desktop/remote-provider regressions pass, including real resolver result types. The native probe found and corrected an unavailable optional X11 package name; native rerun pending. |
+| Managed gateway service | Service install/start/uninstall paths reject Termux/APT provenance. Manual foreground/background gateway paths remain available. | Added a per-home Termux runit adapter with owned service directories, separate start-now/login policy, graceful stop and crash supervision. Twenty-four gateway tests pass, including all fourteen new runit cases and existing dispatch/provenance regressions; real native service lifecycle proof is pending. |
+| Recorder silence auto-stop | The Termux:API recorder does not provide the sounddevice VAD/silence path. Manual stop remains available. | Added explicit auto, sounddevice and termux-api capture selection with accurate diagnostics. The PCM path retains the existing VAD implementation. An exact NumPy native source build and separate PortAudio/OpenSL ES probe are prepared; native and physical microphone proof remain pending; Termux:API itself has no PCM stream for this VAD path. |
 
 Source guards: upstream [pm/packages.py](https://github.com/NousResearch/hermes-agent/blob/d923a5eb487a17c0a68801bba9ef0f56c81040a8/pm/packages.py),
 [CUA backend](https://github.com/NousResearch/hermes-agent/blob/d923a5eb487a17c0a68801bba9ef0f56c81040a8/tools/computer_use/cua_backend.py),
@@ -186,10 +205,18 @@ native tools at startup. APT owns application updates, so `hermes update`
 correctly delegates to `pkg upgrade hermes-agent`. Docker-dependent local
 execution still needs a host that supports Docker.
 
+## Remaining native runtime work
+
+[Remaining portability work](remaining-portability-work.md) records the verified
+NeuTTS Python/native-ML mismatch, the distinction between remote/virtual desktop
+support and a native Android phone UI driver, and the real OpenSL ES requirement
+for microphone capture. These are explicit certification limits, not claims
+that Android ports are impossible.
+
 ## Validation and release boundary
 
 [Probe next-stable Termux compatibility](../.github/workflows/compatibility-probes.yml)
-runs five native ARM lanes against the immutable released package and the proposed
+runs seven native ARM lanes against the immutable released package and the proposed
 source patch. It has read-only repository permissions and uploads candidate
 diagnostics/wheels only. It does not construct or publish a new release.
 
@@ -201,6 +228,12 @@ not accidentally conceal a missing package runtime dependency.
 Passing a component probe is recorded as **candidate-built**. It does not certify
 the complete next-stable package, optional-install lifecycle, external account
 credentials, or physical device permissions. Those are separate validation gates.
+
+The captured [native probe evidence](../audit/native-probes-20261017/summary.json)
+binds the tested patch digest to GitHub run and artifact identities. Matrix checks
+include encrypted bidirectional Olm messaging, Megolm, AES, native asyncpg codec,
+loopback HTTP and SQLite. No external Matrix account or credential is needed for
+these protocol/library checks; live account pairing remains a separate step.
 
 [Validate next-stable Termux candidate](../.github/workflows/next-stable-candidate.yml)
 also builds a disposable candidate package as an Actions artifact. It keeps the

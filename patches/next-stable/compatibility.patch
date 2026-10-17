@@ -1,3 +1,52 @@
+diff --git a/hermes_cli/browser_runtime.py b/hermes_cli/browser_runtime.py
+index f18cfaa6..59a86832 100644
+--- a/hermes_cli/browser_runtime.py
++++ b/hermes_cli/browser_runtime.py
+@@ -1,16 +1,40 @@
+ """Read-only full-Chromium selection shared by browser launchers."""
+-
+ from __future__ import annotations
+ 
++from collections.abc import Mapping
+ import os
+ 
+ import pm
++from hermes_platform.host.runtime import is_termux
++from hermes_platform.resolver import LookupContext, locate_command
+ 
+ 
+-def chromium_executable(*, allow_override: bool = True) -> str | None:
+-    """Prefer an explicit override unless the caller needs PM's own Chromium."""
++def chromium_executable(*, allow_override: bool = True, termux: bool | None = None) -> str | None:
++    """Prefer an explicit override, then PM or the official Termux prefix."""
+     override = os.environ.get("AGENT_BROWSER_EXECUTABLE_PATH") if allow_override else None
+     if override:
+         return override
+     installed = pm.installed_package("chromium")
+-    return str(installed.binary) if installed and installed.binary is not None else None
++    if installed and installed.binary is not None:
++        return str(installed.binary)
++    if is_termux() if termux is None else termux:
++        root = os.environ.get("PREFIX") or "/data/data/com.termux/files/usr"
++        for name in ("chromium-browser", "chromium"):
++            resolution = locate_command(name, LookupContext(path=""), known_dirs=(os.path.join(root, "bin"),))
++            if resolution.found:
++                return resolution.command[0]
++    return None
++
++
++def chromium_child_env(base: Mapping[str, str], *, termux: bool | None = None) -> dict[str, str]:
++    """APT Chromium resolves its current system libraries outside the Python bundle."""
++    env = dict(base)
++    if is_termux() if termux is None else termux:
++        env.pop("LD_LIBRARY_PATH", None)
++    return env
++
++
++def chromium_install_hint(*, termux: bool | None = None) -> str:
++    if is_termux() if termux is None else termux:
++        return "pkg install x11-repo && pkg install chromium"
++    return "hermes pm install chromium (system libraries: npx playwright install-deps chromium)"
 diff --git a/hermes_cli/clipboard.py b/hermes_cli/clipboard.py
 index df6d4cff..0815c4d4 100644
 --- a/hermes_cli/clipboard.py
@@ -61,6 +110,626 @@ index 76b6fbd2..66b4e791 100644
          "submit_mode": "direct",  # TUI: direct submits immediately; draft = editable transcript
          "max_recording_seconds": 120,
          "auto_tts": False,
+diff --git a/hermes_cli/doctor_tools.py b/hermes_cli/doctor_tools.py
+index 1a812c51..2d221d7f 100644
+--- a/hermes_cli/doctor_tools.py
++++ b/hermes_cli/doctor_tools.py
+@@ -83,16 +83,19 @@ def _run_ok(cmd: list[str], timeout: int, **kw) -> bool:
+ 
+ 
+ def _termux_browser_setup_steps(node_installed: bool) -> list[str]:
+-    steps = [] if node_installed else ["pkg install nodejs"]
+-    steps += ["npm install -g agent-browser", "agent-browser install"]
++    steps = ["pkg install x11-repo", "pkg install chromium", "hermes pm install agent-browser"]
+     return [f"{i}) {step}" for i, step in enumerate(steps, 1)]
+ 
+ 
+ _TERMUX_INSTALL_ALL_FALLBACK_NOTES = (
+     "Termux uses the Hermes APT package: pkg install hermes-agent.",
+-    "Matrix E2EE extra is excluded on Termux (python-olm currently fails to build).",
+-    "Local faster-whisper extra is excluded on Termux (ctranslate2/av build path unavailable).",
+-    "STT fallback: use Groq Whisper (set GROQ_API_KEY) or OpenAI Whisper (set VOICE_TOOLS_OPENAI_KEY).",
++    "Bundled Termux extras: acp, cron, matrix, mcp, telegram, termux, uvloop; Nemo relay is included in core.",
++    "NeuTTS is unavailable with this bundle's Python 3.14 runtime.",
++    "Local CUA has no Android driver; remote CUA uses the configured desktop host.",
++    "Termux:API recording has a duration limit but no silence/VAD stop; microphone and speaker access "
++    "require Android permissions and on-device verification.",
++    "Local faster-whisper is optional and unbundled; its Android native dependencies still require a validated build.",
++    "Cloud STT options: Groq Whisper (set GROQ_API_KEY) or OpenAI Whisper (set VOICE_TOOLS_OPENAI_KEY).",
+ )
+ 
+ 
+@@ -324,7 +327,7 @@ def _check_agent_browser(should_fix: bool) -> bool:
+         resolved = _find_agent_browser(validate=False)
+     except Exception:
+         resolved = None
+-    if not resolved and should_fix and not _is_termux():
++    if not resolved and should_fix:
+         try:
+             import pm
+             from tools.browser_tool_install import _find_agent_browser
+@@ -336,8 +339,8 @@ def _check_agent_browser(should_fix: bool) -> bool:
+         check_ok("agent-browser", f"({resolved})")
+         return True
+     if _is_termux():
+-        _termux_browser_hints("agent-browser is not installed (expected in the tested Termux path)",
+-                              "Install it manually later with: npm install -g agent-browser && agent-browser install", node_installed=True)
++        _termux_browser_hints("The PM-managed agent-browser driver is not installed.",
++                              "Chromium and its native libraries are supplied by official Termux APT.", node_installed=True)
+     else:
+         check_warn("agent-browser not installed", "(run: hermes pm install agent-browser)")
+     return False
+@@ -367,9 +370,11 @@ def _check_chromium() -> None:
+         return
+     if _is_camofox_mode() or bool(_get_cdp_override_raw()) or _get_cloud_provider() is not None or _using_lightpanda_engine():
+         return
+-    if not check_bool(_chromium_installed(), ("Playwright Chromium", "(browser engine)"),
+-                      ("Playwright Chromium not installed", "(browser_* tools will be hidden from the agent)")):
+-        check_info("Install with: hermes pm install chromium")
++    label = "Termux Chromium" if _is_termux() else "Playwright Chromium"
++    if not check_bool(_chromium_installed(), (label, "(browser engine)"),
++                      (label + " not installed", "(browser_* tools will be hidden from the agent)")):
++        from hermes_cli.browser_runtime import chromium_install_hint
++        check_info("Install with: " + chromium_install_hint())
+ 
+ 
+ def _check_lightpanda() -> None:
+@@ -405,7 +410,7 @@ def _check_node_and_browser(should_fix: bool, f: Finding) -> None:
+                               "Install Node.js on Termux with: pkg install nodejs", node_installed=False)
+     else:
+         check_warn("Node.js not found", "(optional; PM agent-browser is a native executable)")
+-    if _check_agent_browser(should_fix) and not _is_termux():
++    if _check_agent_browser(should_fix):
+         _check_chromium()
+     _check_lightpanda()
+ 
+@@ -495,7 +500,7 @@ def _check_npm_audit(should_fix: bool, f: Finding) -> None:
+             if ((PROJECT_ROOT if audit_extra else npm_dir) / "node_modules").exists():
+                 _audit_one(npm_bin, npm_dir, label, audit_extra, f.manual_issues)
+     if _is_termux():
+-        check_info("Termux compatibility fallbacks:")
++        check_info("Termux compatibility notes:")
+         for note in _TERMUX_INSTALL_ALL_FALLBACK_NOTES:
+             check_info(note)
+ 
+diff --git a/hermes_cli/gateway.py b/hermes_cli/gateway.py
+index 99be5247..20428917 100644
+--- a/hermes_cli/gateway.py
++++ b/hermes_cli/gateway.py
+@@ -19,7 +19,7 @@ import textwrap
+ import time
+ from dataclasses import dataclass
+ from pathlib import Path
+-from hermes_cli import gateway_service_owner, setup_platforms
++from hermes_cli import gateway_service_owner, setup_platforms, gateway_runit
+ 
+ # UV's bundled Python ships a minimal PATH; ensure launchctl/systemctl are discoverable.
+ if os.name == "posix":
+@@ -132,6 +132,8 @@ def _get_service_pids(all_profiles: bool = False) -> set:
+     the ``hermes-gateway*`` fleet glob.
+     """
+     pids: set = set()
++    if is_termux():
++        return gateway_runit.service_pids(all_profiles=all_profiles)
+ 
+     # --- systemd (Linux): user and system scopes ---
+     if supports_systemd_services():
+@@ -1555,6 +1557,11 @@ def get_gateway_runtime_snapshot(system: bool = False) -> GatewayRuntimeSnapshot
+     """Return a unified view of gateway liveness for the current profile."""
+     gateway_pids = tuple(find_gateway_pids())
+     if is_termux():
++        if gateway_runit.is_installed():
++            state = gateway_runit.current().state()
++            return GatewayRuntimeSnapshot(manager="Termux runit", service_installed=True,
++                                          service_running=state.running, gateway_pids=gateway_pids,
++                                          service_scope="Termux app user")
+         return GatewayRuntimeSnapshot(manager="Termux / manual process", gateway_pids=gateway_pids)
+ 
+     from hermes_constants import is_container
+@@ -4825,6 +4832,8 @@ def _is_service_installed() -> bool:
+ 
+ def _is_service_running() -> bool:
+     """Check if the gateway service is currently running."""
++    if is_termux() and gateway_runit.is_installed():
++        return gateway_runit.current().state().running
+     if supports_systemd_services():
+         return _systemd_unit_is_active(False) or _systemd_unit_is_active(True)
+     if is_macos() and get_launchd_plist_path().exists():
+@@ -4845,6 +4854,8 @@ def _print_indented(text: str, emit=print) -> None:
+ def _service_backend(*, windows: bool = True) -> str | None:
+     """Host service manager: ``"systemd"`` / ``"launchd"`` / ``"windows"`` / None, in the canonical
+     predicate order every subcommand routes on. ``windows=False`` never probes ``is_windows()``."""
++    if is_termux():
++        return "runit" if gateway_runit.available() else None
+     if supports_systemd_services():
+         return "systemd"
+     if is_macos():
+@@ -4857,6 +4868,8 @@ def _service_backend(*, windows: bool = True) -> str | None:
+ def _service_call(backend: str, verb: str, system: bool | None = False) -> None:
+     """Run ``verb`` (start/stop/restart/uninstall) on ``backend``. Names resolve at call time so tests
+     can monkeypatch them; only systemd takes a scope, and ``system=None`` omits it (wizard restart)."""
++    if backend == "runit":
++        return gateway_runit.dispatch(verb, system=bool(system))
+     if backend == "windows":
+         return getattr(_gw_windows(), verb)()
+     if backend == "launchd":
+@@ -5034,6 +5047,8 @@ def _block_until_terminated() -> None:
+ def _installed_service_kind_for(windows) -> str | None:
+     """``"systemd"`` / ``"launchd"`` when the unit/plist exists, else ``"windows"`` iff ``windows()``
+     (a thunk so it runs last, like every caller's original ladder), else None."""
++    if is_termux():
++        return "runit" if gateway_runit.is_installed() else None
+     if _systemd_unit_installed():
+         return "systemd"
+     if is_macos() and get_launchd_plist_path().exists():
+@@ -5110,7 +5125,9 @@ _WSL_FOREGROUND_HINT = (
+ # ``None`` exit code means plain return.
+ _NO_BACKEND_MESSAGES = {
+     ("install", "termux"): (1,
+-        "Gateway service installation is not supported on Termux.", "Run manually: hermes gateway"),
++        "Gateway service management on Termux needs termux-services.",
++        "Install: pkg install termux-services; restart your shell, then retry hermes gateway install.",
++        "Run manually: hermes gateway run"),
+     ("install", "wsl"): (1,
+         "WSL detected but systemd is not running.",
+         "Either enable systemd (add systemd=true to /etc/wsl.conf and restart WSL)",
+@@ -5129,7 +5146,7 @@ _NO_BACKEND_MESSAGES = {
+     ("install", "unsupported"): (1,
+         "Service installation not supported on this platform.", "Run manually: hermes gateway run"),
+     ("uninstall", "termux"): (1,
+-        "Gateway service uninstall is not supported on Termux because there is no managed service to remove.",
++        "Termux runit tools are unavailable; install termux-services and restart your shell.",
+         "Stop manual runs with: hermes gateway stop"),
+     ("uninstall", "s6"): (None,
+         "Per-profile gateways are auto-unregistered when you delete the profile.", "",
+@@ -5144,8 +5161,8 @@ _NO_BACKEND_MESSAGES = {
+         "(no systemd, launchd or Scheduled Tasks), so there is nothing to uninstall.",
+         "Stop a manually started gateway with: hermes gateway stop"),
+     ("start", "termux"): (1,
+-        "Gateway service start is not supported on Termux because there is no system service manager.",
+-        "Run manually: hermes gateway"),
++        "Gateway service start on Termux needs termux-services; install it and restart your shell.",
++        "Run manually: hermes gateway run"),
+     ("start", "wsl"): (1,
+         "WSL detected but systemd is not available.",
+         "Run the gateway in foreground mode instead:", *_WSL_FOREGROUND_HINT, "",
+@@ -5173,8 +5190,8 @@ def _no_backend_exit(subcommand: str, reason: str) -> None:
+ def _is_apt_termux_install() -> bool:
+     """True when this install is a sealed ``apt-termux`` tree.
+ 
+-    A Termux APT package is a sealed tree owned by the package manager with
+-    no service manager behind it. Keyed on the steward stamp
++    A Termux APT package is a sealed tree owned by the package manager.
++    Only its native Termux runit service lane is allowed. Keyed on the steward stamp
+     (``sealed_steward``), never a platform probe, so the refusal follows the
+     INSTALL PROVENANCE (our apt distribution's own stamp) rather than the
+     ambient environment; the platform-shaped ``is_termux()`` lanes stay
+@@ -5187,10 +5204,10 @@ def _is_apt_termux_install() -> bool:
+ 
+ 
+ def _service_mgmt_blocked() -> bool:
+-    """Service lanes are unavailable: a Termux device (platform probe) or a
+-    sealed apt-termux install (provenance probe). One predicate so a fourth
+-    service gate cannot forget the disjunction."""
+-    return is_termux() or _is_apt_termux_install()
++    """Termux uses native runit; sealed APT trees cannot use a foreign host manager."""
++    if is_termux():
++        return not gateway_runit.available()
++    return _is_apt_termux_install()
+ 
+ 
+ def _handle_no_backend(subcommand: str, *, wsl: bool, s6: bool) -> None:
+@@ -5249,7 +5266,9 @@ def _cmd_install(args):
+     if _service_mgmt_blocked():
+         _no_backend_exit("install", "termux")
+     backend = _service_backend()
+-    if backend == "systemd":
++    if backend == "runit":
++        gateway_runit.install_from_cli(args)
++    elif backend == "systemd":
+         if refuses_container_user_scope_install(system):
+             sys.exit(1)
+         _install_systemd_from_cli(args, force=force, system=system, run_as_user=run_as_user)
+@@ -5625,6 +5644,7 @@ _STATUS_RUNNING_HINTS = {
+ }
+ _STATUS_STOPPED_HINTS = {
+     "termux": (
++        "  pkg install termux-services  # Then restart the shell and run hermes gateway install",
+         "  nohup hermes gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # Best-effort background start",
+     ),
+     "wsl": (
+@@ -5677,6 +5697,8 @@ def _cmd_status(args):
+             systemd_status(deep, system=system, full=full)
+         elif kind == "launchd":
+             launchd_status(deep)
++        elif kind == "runit":
++            gateway_runit.status(system=system)
+         else:
+             _gw_windows().status(deep=deep)
+         _print_gateway_process_mismatch(snapshot)
+diff --git a/hermes_cli/gateway_command_errors.py b/hermes_cli/gateway_command_errors.py
+index 67349b11..9e8c4f38 100644
+--- a/hermes_cli/gateway_command_errors.py
++++ b/hermes_cli/gateway_command_errors.py
+@@ -42,6 +42,9 @@ def _verb_for(exc: subprocess.CalledProcessError) -> str:
+ def explain_service_failure(exc: BaseException) -> list[str] | None:
+     """Lines to print for a systemd service failure escaping the gateway command, or None
+     when *exc* is not one this module knows how to explain (callers re-raise)."""
++    from hermes_cli.gateway_runit import RunitServiceError
++    if isinstance(exc, RunitServiceError):
++        return [str(exc), 'Inspect hermes gateway status and the profile logs/gateway-runit.log.']
+     if isinstance(exc, SystemctlUnavailableError):
+         return list(_NO_SYSTEMCTL_LINES)
+     if isinstance(exc, subprocess.CalledProcessError):
+diff --git a/hermes_cli/gateway_runit.py b/hermes_cli/gateway_runit.py
+new file mode 100644
+index 00000000..3237a8a6
+--- /dev/null
++++ b/hermes_cli/gateway_runit.py
+@@ -0,0 +1,308 @@
++"""Per-home Termux runit services, sharing the native termux-services daemon.
++
++Only marker-owned service directories are changed. The daemon is started when
++needed and is never stopped: it may supervise unrelated Termux services.
++"""
++from __future__ import annotations
++
++from dataclasses import dataclass
++import hashlib
++import json
++import os
++from pathlib import Path
++import re
++import shlex
++import subprocess
++import tempfile
++import time
++
++from hermes_platform.resolver.termux_services import TermuxServices, resolve_termux_services
++
++MARKER = "hermes-service.json"
++
++
++class RunitServiceError(RuntimeError):
++    """A Termux service operation failed with actionable user-facing detail."""
++
++
++def _gw():
++    from hermes_cli import gateway
++    return gateway
++
++
++def service_name(home: Path) -> str:
++    identity = str(Path(home).resolve()).encode("utf-8")
++    return "hermes-gateway-" + hashlib.sha256(identity).hexdigest()[:16]
++
++
++@dataclass(frozen=True)
++class ServiceState:
++    installed: bool
++    supervised: bool = False
++    pid: int | None = None
++    detail: str = ""
++
++    @property
++    def running(self) -> bool:
++        return self.pid is not None
++
++
++class RunitService:
++    def __init__(self, tools: TermuxServices, home: Path, root: Path, *, timeout: int = 30):
++        self.tools, self.home, self.root = tools, Path(home).resolve(), Path(root).resolve()
++        self.path = tools.services / service_name(self.home)
++        self.timeout = max(7, int(timeout))
++
++    @property
++    def identity(self) -> dict:
++        return {"schema": 1, "home": str(self.home), "root": str(self.root)}
++
++    def _owned(self) -> bool:
++        if not self.path.exists() and not self.path.is_symlink():
++            return False
++        try:
++            marker = self.path / MARKER
++            if self.path.is_symlink() or not self.path.is_dir() or marker.is_symlink():
++                raise ValueError("service directory or marker is a symlink")
++            if json.loads(marker.read_text(encoding="utf-8")) != self.identity:
++                raise ValueError("service identity does not match this installation and home")
++            for name in ("run", "finish", "down"):
++                path = self.path / name
++                if path.is_symlink():
++                    raise ValueError(f"{name} is a symlink")
++            if not (self.path / "run").is_file():
++                raise ValueError("service run script is missing")
++        except (OSError, ValueError) as exc:
++            raise RunitServiceError(f"Refusing foreign or damaged service {self.path}: {exc}") from exc
++        return True
++
++    def _run(self, args: list[str], *, timeout: int = 7):
++        try:
++            return subprocess.run(args, env=self.tools.environment(), capture_output=True,
++                                  text=True, encoding="utf-8", errors="replace",
++                                  timeout=timeout, check=False)
++        except (OSError, subprocess.TimeoutExpired) as exc:
++            raise RunitServiceError(f"Termux runit command failed: {exc}") from exc
++
++    def state(self) -> ServiceState:
++        if not self._owned():
++            return ServiceState(False)
++        result = self._run([str(self.tools.sv), "status", str(self.path)])
++        detail = (result.stdout + result.stderr).strip()
++        match = re.search(r"^run: .*: \(pid ([1-9][0-9]*)\)", result.stdout, re.MULTILINE)
++        return ServiceState(True, result.returncode == 0,
++                            int(match.group(1)) if match and result.returncode == 0 else None,
++                            detail)
++
++    def _ensure_supervised(self) -> None:
++        if self.state().supervised:
++            return
++        # service-daemon may return 1 when an existing daemon owns its PID file;
++        # the authoritative gate is whether sv can talk to THIS service.
++        self._run([str(self.tools.daemon), "start"], timeout=10)
++        deadline = time.monotonic() + 12
++        while not self.state().supervised:
++            if time.monotonic() >= deadline:
++                raise RunitServiceError(
++                    "Termux runit did not supervise this service. Restart your Termux shell, "
++                    "then retry hermes gateway start; inspect the service-daemon if it persists.")
++            time.sleep(0.1)
++
++    def _control(self, verb: str) -> None:
++        self._owned()
++        result = self._run([str(self.tools.sv), "-w", str(self.timeout), verb, str(self.path)],
++                           timeout=self.timeout + 5)
++        if result.returncode:
++            detail = (result.stdout + result.stderr).strip()
++            raise RunitServiceError(f"Termux runit could not {verb} {self.path.name}: {detail}")
++
++    def install(self, command: list[str], *, start_now: bool = True,
++                start_on_login: bool = True, force: bool = False) -> None:
++        exists = self._owned()
++        if exists and not force:
++            return
++        if not command or any(not isinstance(arg, str) or "\0" in arg for arg in command):
++            raise RunitServiceError("Gateway service command is empty or invalid")
++        if not self.home.is_dir():
++            raise RunitServiceError(f"Gateway home does not exist: {self.home}")
++        log = self.home / "logs" / "gateway-runit.log"
++        log.parent.mkdir(parents=True, exist_ok=True)
++        run = (
++            f"#!{self.tools.shell}\nset -eu\numask 077\n"
++            f"export HERMES_HOME={shlex.quote(str(self.home))}\n"
++            "export HERMES_SUPERVISED_CHILD=1\n"
++            f"cd {shlex.quote(str(self.home))}\n"
++            f"exec >>{shlex.quote(str(log))} 2>&1\n"
++            f"exec {shlex.join(command)}\n"
++        )
++        # Configuration exit 78 is terminal, as on the existing systemd backend.
++        finish = (
++            f"#!{self.tools.shell}\n"
++            f'if [ "$1" = 78 ]; then exec {shlex.quote(str(self.tools.sv))} '
++            f"down {shlex.quote(str(self.path))}; fi\n"
++        )
++        self.tools.services.mkdir(parents=True, exist_ok=True)
++        if exists:
++            (self.path / 'down').touch()
++            self.stop()
++            for name, content in (("run", run), ("finish", finish)):
++                with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", newline="\n",
++                                                 prefix="."+name+".", dir=self.path, delete=False) as staged:
++                    staged.write(content)
++                    staging = Path(staged.name)
++                staging.chmod(0o700)
++                os.replace(staging, self.path / name)
++        else:
++            with tempfile.TemporaryDirectory(prefix=".hermes-gateway-", dir=self.tools.services) as temp:
++                staging = Path(temp) / "service"
++                staging.mkdir(mode=0o700)
++                for name, content in (("run", run), ("finish", finish)):
++                    target = staging / name
++                    target.write_text(content, encoding="utf-8", newline="\n")
++                    target.chmod(0o700)
++                (staging / MARKER).write_text(json.dumps(self.identity) + "\n", encoding="utf-8")
++                (staging / "down").touch()
++                os.rename(staging, self.path)
++        # Publish disabled, wait until runsv has observed that state, and then
++        # apply the next-login policy. Removing down now does not change runsv's
++        # current want-down state, so --no-start-now does not race an auto-start.
++        (self.path / "down").touch()
++        self._ensure_supervised()
++        self._control("stop")
++        if start_on_login:
++            (self.path / "down").unlink()
++        if start_now:
++            self.start()
++
++    def start(self) -> None:
++        if not self._owned():
++            raise RunitServiceError("Gateway runit service is not installed; run hermes gateway install")
++        self._ensure_supervised()
++        self._control("start")
++
++    def stop(self) -> None:
++        if not self._owned():
++            raise RunitServiceError("Gateway runit service is not installed")
++        if self.state().supervised:
++            self._control("stop")
++
++    def restart(self) -> None:
++        if not self._owned():
++            raise RunitServiceError("Gateway runit service is not installed")
++        self._ensure_supervised()
++        self._control("restart")
++
++    def uninstall(self) -> None:
++        if not self._owned():
++            return
++        (self.path / "down").touch()
++        self.stop()
++        # A dot-directory is invisible to runsvdir. Unpublish before asking
++        # this one runsv to exit so the shared daemon cannot respawn it.
++        old = self.path
++        with tempfile.TemporaryDirectory(prefix=".hermes-gateway-remove-", dir=old.parent) as temp:
++            removed = Path(temp) / "service"
++            os.rename(old, removed)
++            self.path = removed
++            try:
++                if self.state().supervised:
++                    self._control("shutdown")
++            except BaseException:
++                os.rename(removed, old)
++                raise
++            finally:
++                self.path = old
++
++
++def available() -> bool:
++    return _gw().is_termux() and resolve_termux_services() is not None
++
++
++def current() -> RunitService:
++    tools = resolve_termux_services()
++    if not _gw().is_termux() or tools is None:
++        raise RunitServiceError(
++            "Termux runit is unavailable. Install it with pkg install termux-services, "
++            "restart your shell, then retry. Manual use remains hermes gateway run.")
++    gw = _gw()
++    budget = gw.resolve_systemd_timeout_stop_sec(gw._get_restart_drain_timeout(),
++                                                 gw._get_cron_drain_timeout())
++    return RunitService(tools, gw.get_hermes_home(), gw.PROJECT_ROOT, timeout=budget)
++
++
++def is_installed() -> bool:
++    return available() and current()._owned()
++
++
++def require_user_scope(system=False, run_as_user=None) -> None:
++    if system or run_as_user:
++        raise RunitServiceError("Termux runit runs as the Termux app user; --system/--run-as-user are unavailable")
++
++
++def command_for_service() -> list[str]:
++    from pm.environments import payload_command_dir, cli_command_name
++    from hermes_cli._launchers import installation_command
++    gw = _gw()
++    args = ["gateway", "run", "--external-supervisor"]
++    # Sealed APT launchers own Bionic library scope and PM generation selection.
++    # Never mint a source launcher inside the package or pin a venv generation.
++    directory = payload_command_dir(gw.PROJECT_ROOT)
++    if directory is not None:
++        command = directory / cli_command_name(gw.PROJECT_ROOT)
++        if not command.is_file():
++            raise RunitServiceError(f"Bundled Hermes launcher is missing: {command}")
++        return [str(command), *args]
++    if gw._is_apt_termux_install():
++        raise RunitServiceError("Sealed Termux package has no valid launcher; reinstall it with APT")
++    gw._prepare_service_launcher()
++    return installation_command(gw.PROJECT_ROOT, args, python=gw.get_python_path(),
++                                home=gw.get_hermes_home())
++
++
++def install_from_cli(args) -> None:
++    require_user_scope(getattr(args, "system", False), getattr(args, "run_as_user", None))
++    service = current()
++    service.install(command_for_service(), force=getattr(args, "force", False),
++                    start_now=getattr(args, "start_now", None) is not False,
++                    start_on_login=getattr(args, "start_on_login", None) is not False)
++    print(f"Gateway runit service installed: {service.path}")
++    print("Termux must remain running; Android force-stop stops its services.")
++
++
++def dispatch(verb: str, *, system=False) -> None:
++    require_user_scope(system)
++    service = current()
++    getattr(service, verb)()
++    print(f"Gateway runit service {verb}: {service.path.name}")
++
++
++def status(*, system=False) -> None:
++    require_user_scope(system)
++    service = current()
++    state = service.state()
++    print(f"Termux runit: {state.detail or 'service is not installed'}")
++    print(f"  Service: {service.path}")
++    print(f"  Log: {service.home / 'logs' / 'gateway-runit.log'}")
++    print("  Android force-stop stops Termux services.")
++
++
++def service_pids(*, all_profiles=False) -> set[int]:
++    if not available():
++        return set()
++    own = current()
++    if not all_profiles:
++        state = own.state()
++        return {state.pid} if state.pid is not None else set()
++    pids = set()
++    for path in own.tools.services.glob("hermes-gateway-*"):
++        try:
++            marker = json.loads((path / MARKER).read_text(encoding="utf-8"))
++            service = RunitService(own.tools, Path(marker["home"]), Path(marker["root"]))
++            if service.path != path:
++                continue
++            state = service.state()
++            if state.pid is not None:
++                pids.add(state.pid)
++        except (OSError, ValueError, KeyError, TypeError, RunitServiceError):
++            continue
++    return pids
+diff --git a/hermes_platform/resolver/termux_services.py b/hermes_platform/resolver/termux_services.py
+new file mode 100644
+index 00000000..f07a2b8d
+--- /dev/null
++++ b/hermes_platform/resolver/termux_services.py
+@@ -0,0 +1,49 @@
++"""Resolve Termux's native service tools without starting the shared supervisor."""
++from __future__ import annotations
++
++from dataclasses import dataclass
++import os
++from pathlib import Path
++
++
++@dataclass(frozen=True)
++class TermuxServices:
++    prefix: Path
++
++    @property
++    def sv(self) -> Path:
++        return self.prefix / "bin" / "sv"
++
++    @property
++    def daemon(self) -> Path:
++        return self.prefix / "bin" / "service-daemon"
++
++    @property
++    def shell(self) -> Path:
++        return self.prefix / "bin" / "sh"
++
++    @property
++    def services(self) -> Path:
++        return self.prefix / "var" / "service"
++
++    def environment(self) -> dict[str, str]:
++        # A bundled Python's old scoped libraries must never load into current
++        # APT runit/coreutils. Do not make the shared daemon inherit a CLI's
++        # selected profile, generation, Python overrides, or credentials.
++        env = {key: os.environ[key] for key in
++               ("HOME", "LANG", "TZ", "ANDROID_ROOT", "ANDROID_DATA")
++               if key in os.environ}
++        env.update(PREFIX=str(self.prefix), PATH=str(self.prefix / "bin"),
++                   SVDIR=str(self.services), LOGDIR=str(self.prefix / "var" / "log"),
++                   TMPDIR=str(self.prefix / "tmp"))
++        return env
++
++
++def resolve_termux_services(prefix: Path | None = None) -> TermuxServices | None:
++    """Resolve the official PREFIX layout; explicit paths are data for probes."""
++    raw = str(prefix) if prefix is not None else os.environ.get("PREFIX", "")
++    if not raw or not Path(raw).is_absolute():
++        return None
++    tools = TermuxServices(Path(raw).resolve())
++    return tools if all(path.is_file() and os.access(path, os.X_OK)
++                        for path in (tools.sv, tools.daemon, tools.shell)) else None
 diff --git a/plugins/computer_use/cua/__init__.py b/plugins/computer_use/cua/__init__.py
 index 230fc073..9c5573a2 100644
 --- a/plugins/computer_use/cua/__init__.py
@@ -106,6 +775,70 @@ index 230fc073..9c5573a2 100644
  
  
  def register(ctx):
+diff --git a/pm/agent_browser.py b/pm/agent_browser.py
+new file mode 100644
+index 00000000..41abc31a
+--- /dev/null
++++ b/pm/agent_browser.py
+@@ -0,0 +1,27 @@
++"""Architecture and linkage evidence for the pinned Termux browser driver."""
++from __future__ import annotations
++
++from pathlib import Path
++import struct
++
++
++def static_arm64_reason(binary: Path | None) -> str:
++    """The Android route requires the archive's static ARM64 executable."""
++    if binary is None:
++        return "Termux agent-browser has no selected binary"
++    try:
++        raw = binary.read_bytes()
++        if len(raw) < 64 or raw[:6] != b"\x7fELF\x02\x01":
++            return "Termux agent-browser requires a little-endian ELF64 binary"
++        if struct.unpack_from("<H", raw, 18)[0] != 183:
++            return "Termux agent-browser requires an ARM64 binary"
++        offset = struct.unpack_from("<Q", raw, 32)[0]
++        size, count = struct.unpack_from("<HH", raw, 54)
++        if not count or size < 56 or offset < 64 or offset + size * count > len(raw):
++            return "Termux agent-browser has invalid ELF program headers"
++        headers = [struct.unpack_from("<I", raw, offset + i * size)[0] for i in range(count)]
++        if 2 in headers or 3 in headers:
++            return "Termux agent-browser must be static, with no ELF interpreter or dynamic dependencies"
++    except (OSError, struct.error) as exc:
++        return f"Cannot inspect Termux agent-browser linkage: {exc}"
++    return ""
+diff --git a/pm/build_operations.py b/pm/build_operations.py
+index 6a4b5cc9..716a519f 100644
+--- a/pm/build_operations.py
++++ b/pm/build_operations.py
+@@ -106,7 +106,7 @@ def prepare_tools(names: Sequence[str], *, out: Path, target: str,
+ 
+     if isinstance(names, str):
+         raise TypeError("names must be a sequence, not a string")
+-    packages = walk(list(names))
++    packages = walk(list(names), target=target)
+     if any(isinstance(package, StatePackage) for package in packages):
+         raise ValueError("prepare_tools accepts tools, not application state")
+     out = Path(out).resolve()
+@@ -158,7 +158,7 @@ def verified_tools(names: Sequence[str], *, source_store: Path, target: str,
+ 
+     if isinstance(names, str):
+         raise TypeError("names must be a sequence, not a string")
+-    packages = walk(list(names))
++    packages = walk(list(names), target=target)
+     if any(isinstance(package, StatePackage) for package in packages):
+         raise ValueError("verified_tools accepts tool packages, not application state")
+     source_store = Path(source_store).resolve()
+@@ -217,7 +217,7 @@ def stage_tools(names: Sequence[str], *, source_store: Path, out: Path, target:
+         raise ValueError("tool stores must be disjoint")
+     if not (source_store / "facts.json").is_file():
+         raise InstallError("tools", f"source facts missing: {source_store}")
+-    packages = walk(list(names))
++    packages = walk(list(names), target=target)
+     if any(isinstance(package, StatePackage) for package in packages):
+         raise ValueError("stage_tools accepts tool packages, not application state")
+     source, destination = Store(source_store), Store(out)
 diff --git a/pm/bundled_wheels.py b/pm/bundled_wheels.py
 new file mode 100644
 index 00000000..c0e4cb6c
@@ -615,11 +1348,94 @@ index 0a12a25e..54cbf15c 100644
  
      def export_requirements(self, source: Path, out: Path, *, extras: Sequence[str] = (),
                              timeout: int = 1800) -> None:
+diff --git a/pm/install.py b/pm/install.py
+index c32b5ccd..f7db502f 100644
+--- a/pm/install.py
++++ b/pm/install.py
+@@ -547,7 +547,7 @@ def ensure(
+ 
+     lockfile = _lockfile()
+     target = current_target()
+-    chain = walk([name])
++    chain = walk([name], target=target)
+     checked = _operation.checked if _operation is not None else set()
+     if _operation is not None:
+         _operation.lock()
+@@ -583,7 +583,7 @@ def env_for(*names: str, base_env: Optional[dict] = None) -> dict[str, str]:
+     diffs: list[dict] = []
+     for name in names:
+         try:
+-            chain = walk([name])
++            chain = walk([name], target=target)
+         except KeyError:
+             continue
+         for package in chain:
+@@ -902,7 +902,7 @@ def check(*, include_venv: bool = True) -> list[str]:
+     return [f"{name}: {reason}" for name, reason in drift(include_venv=include_venv).items()]
+ 
+ 
+-def _dependents_first(names: list[str]) -> list[str]:
++def _dependents_first(names: list[str], *, target: str | None = None) -> list[str]:
+     """*names* with each package moved ahead of the packages it depends on.
+ 
+     A package that extends its dependency must win on PATH: node's own dir also holds node's
+@@ -912,7 +912,7 @@ def _dependents_first(names: list[str]) -> list[str]:
+     order = list(names)
+     for name in names:
+         try:
+-            deps = {package.name for package in walk([name])} - {name}
++            deps = {package.name for package in walk([name], target=target)} - {name}
+         except KeyError:
+             continue
+         positions = [order.index(dep) for dep in deps if dep in order]
+@@ -941,10 +941,10 @@ def _store_path_dirs() -> list[str]:
+         return locations[package.name]
+ 
+     dirs: list[str] = []
+-    for name in _dependents_first(lockfile.names()):
++    for name in _dependents_first(lockfile.names(), target=target):
+         try:
+             package = get_package(name)
+-            chain = walk([name])
++            chain = walk([name], target=target)
+         except KeyError:
+             continue
+         if package.internal:
+diff --git a/pm/package.py b/pm/package.py
+index e0a3073d..1dc952db 100644
+--- a/pm/package.py
++++ b/pm/package.py
+@@ -90,6 +90,10 @@ class Package:
+     # The arch guard accepts the x64 PE on these targets.
+     emulated_arch_targets: frozenset[str] = frozenset()
+ 
++    def dependencies(self, target: str) -> tuple[str, ...]:
++        """The managed dependency closure for this target; external tools stay external."""
++        return self.deps
++
+     def missing_reason(self, target: str) -> Optional[str]:
+         return self.gaps.get(target)
+ 
 diff --git a/pm/packages.py b/pm/packages.py
-index 9ec2b07c..cabb7e16 100644
+index 9ec2b07c..f0f4a7d1 100644
 --- a/pm/packages.py
 +++ b/pm/packages.py
-@@ -410,7 +410,8 @@ class Venv(StatePackage):
+@@ -120,11 +120,12 @@ class BinaryPackage(Package):
+     def _probe_env(self) -> dict:
+         """Deps' env composed in: npm's shim is `#!/usr/bin/env node` and
+         must find the node it extends on PATH."""
+-        if not self.deps:
++        dependencies = self.dependencies(current_target())
++        if not dependencies:
+             return dict(os.environ)
+         from pm.install import env_for
+ 
+-        return env_for(*self.deps)
++        return env_for(*dependencies)
+ 
+ 
+ @register
+@@ -410,7 +411,8 @@ class Venv(StatePackage):
  
          return selected_venv(self.project_root())
  
@@ -629,7 +1445,7 @@ index 9ec2b07c..cabb7e16 100644
          import hashlib
          import json
          from pm.lock import Lockfile
-@@ -430,6 +431,19 @@ class Venv(StatePackage):
+@@ -430,6 +432,19 @@ class Venv(StatePackage):
          from pm.workspace import enabled_member_dirs, members_stamp
  
          h.update(members_stamp(enabled_member_dirs() if plugin_dirs is None else plugin_dirs).encode())
@@ -649,6 +1465,79 @@ index 9ec2b07c..cabb7e16 100644
          return h.hexdigest()
  
      def apply(self, extras: list[str], *, plugin_dirs=None, repair: bool = False, explicit: bool = False,
+@@ -972,10 +987,9 @@ class AgentBrowser(BinaryPackage):
+     # Default-install it; `install.sh --skip-browser` declines it.
+     default = True
+     deps = ("chromium",)
+-    # Termux owns its browser stack (`npm install -g agent-browser`; see
+-    # tools/browser_tool_install.py), and PM has no bionic Chromium to drive.
++    # Termux uses the pinned static ARM64 driver with its official APT Chromium.
++    # The Chromium binary and its rolling library closure remain APT-owned.
+     gaps = {
+-        "linux-arm64-bionic": "Termux installs agent-browser through npm",
+         **{target: "agent-browser has no musl Chromium runtime" for target in MUSL_TARGETS},
+     }
+     flatten = True
+@@ -986,6 +1000,9 @@ class AgentBrowser(BinaryPackage):
+     # to x64 on arm64). chromium is likewise the x64 build on win32-arm64.
+     emulated_arch_targets = frozenset({"win32-arm64"})
+ 
++    def dependencies(self, target: str) -> tuple[str, ...]:
++        return () if target == "linux-arm64-bionic" else self.deps
++
+     def latest_versions(self, target: str, locked=None) -> list[str]:
+         latest = npm_dist_tags("agent-browser").get("latest")
+         return [latest] if latest else []
+@@ -997,6 +1014,8 @@ class AgentBrowser(BinaryPackage):
+         # falls back to x64 on arm64), so the staged name is win32-x64.
+         if target == "win32-arm64":
+             target = "win32-x64"
++        elif target == "linux-arm64-bionic":
++            target = "linux-musl-arm64"
+         return f"bin/agent-browser-{target}{ext}"
+ 
+     def binary(self, entry: Path, target: str) -> Optional[Path]:
+@@ -1004,6 +1023,13 @@ class AgentBrowser(BinaryPackage):
+         # resolve it under the win32-x64 name.
+         return super().binary(entry, "win32-x64" if target == "win32-arm64" else target)
+ 
++    def verify(self, entry: Path, target: str) -> str:
++        reason = super().verify(entry, target)
++        if reason or target != "linux-arm64-bionic":
++            return reason
++        from pm.agent_browser import static_arm64_reason
++        return static_arm64_reason(self.binary(entry, target))
++
+     def stage(self, store: Store, staged: Path, version: str, target: str) -> None:
+         flatten_single_dir(staged)
+         bin_dir = staged / "bin"
+diff --git a/pm/registry.py b/pm/registry.py
+index 3bf0876c..9c8fb3b0 100644
+--- a/pm/registry.py
++++ b/pm/registry.py
+@@ -156,8 +156,11 @@ def load_package_definitions(definitions: list[dict[str, Any]]) -> None:
+     _packages.update(restored)
+ 
+ 
+-def walk(names: list[str]) -> list[Package]:
+-    """Deps-first topological order over the requested packages."""
++def walk(names: list[str], *, target: str | None = None) -> list[Package]:
++    """Deps-first topological order for the selected target (the host by default)."""
++    if target is None:
++        from pm.store import current_target
++        target = current_target()
+     seen: dict[str, Package] = {}
+ 
+     def visit(name: str, chain: tuple[str, ...]) -> None:
+@@ -167,7 +170,7 @@ def walk(names: list[str]) -> list[Package]:
+         if name in seen:
+             return
+         package = get_package(name)
+-        for dep in package.deps:
++        for dep in package.dependencies(target):
+             visit(dep, chain + (name,))
+         seen[name] = package
+ 
 diff --git a/pm/runtime_stage.py b/pm/runtime_stage.py
 index 1e256bd1..e0c774eb 100644
 --- a/pm/runtime_stage.py
@@ -742,11 +1631,15 @@ index 5145f275..3e3eefe2 100644
  google-chat = "platform_machine != 'ARM64' or sys_platform != 'win32'"
  # Match the engine dependency markers so PM refuses an unsupported install.
 diff --git a/scripts/termux/build_deb.sh b/scripts/termux/build_deb.sh
-index 30d73c49..39129858 100644
+index 30d73c49..6d6bdea3 100644
 --- a/scripts/termux/build_deb.sh
 +++ b/scripts/termux/build_deb.sh
-@@ -130,10 +130,9 @@ OUT_ABS="$(mkdir -p "$OUT" && cd "$OUT" && pwd)"
+@@ -128,12 +128,13 @@ OUT_ABS="$(mkdir -p "$OUT" && cd "$OUT" && pwd)"
+ # staged trees so the shipped venv's absolute shebangs point at the REAL
+ # $PREFIX path they will occupy on-device ($PREFIX is contractual).
  log "Creating application and PM environments with the bundled CPython (inside the container)"
++# The receipt belongs to this native assembly, never to a previous attempt.
++rm -f "$PAYLOAD_ABS/.work/venv-selection.json"
  if [ -d "$PAYLOAD_ABS/venv" ]; then rm -rf "$PAYLOAD_ABS/venv"; fi
  if [ -d "$PAYLOAD_ABS/pm-runtime" ]; then rm -rf "$PAYLOAD_ABS/pm-runtime"; fi
 -# The venv's dep list: the resolved graph with markers intact (the installer
@@ -759,7 +1652,17 @@ index 30d73c49..39129858 100644
  python3 - "$HERE" "$PAYLOAD_ABS/.work/resolved.txt" "$PAYLOAD_ABS/.work/resolved-reqs.txt" <<'PYREQS' \
      || fail "deb-venv reqs generation failed"
  import sys
-@@ -224,8 +223,10 @@ mkdir -p "$STAGE/DEBIAN" "$DEST/tools"
+@@ -185,6 +186,9 @@ restore_assembly_owner
+ trap - EXIT
+ # They were built at the final on-device paths, not at host scratch paths.
+ mv "$ASSEMBLY/venv" "$ASSEMBLY/pm-runtime" "$PAYLOAD_ABS/"
++# The native uid writes only its private assembly root. After ownership is
++# restored, the host moves the verified receipt beside its resolved inputs.
++mv "$ASSEMBLY/venv-selection.json" "$PAYLOAD_ABS/.work/venv-selection.json"
+ rm -rf "$ASSEMBLY"
+ 
+ # The install-method stamp (code-scoped, next to hermes_cli/): the deb IS
+@@ -224,8 +228,10 @@ mkdir -p "$STAGE/DEBIAN" "$DEST/tools"
  for tool in python node uv npm ffmpeg ripgrep; do
      cp -a "$PAYLOAD_ABS/$tool" "$DEST/tools/"
  done
@@ -773,7 +1676,7 @@ index 30d73c49..39129858 100644
  python3 "$HERE/launchers.py" --payload "$DEST" --control "$STAGE/DEBIAN"
  
 diff --git a/scripts/termux/build_environment.py b/scripts/termux/build_environment.py
-index dd27c278..70bb3df3 100644
+index dd27c278..c0a51a85 100644
 --- a/scripts/termux/build_environment.py
 +++ b/scripts/termux/build_environment.py
 @@ -24,13 +24,19 @@ def prepare_tools(source: Path, root: Path) -> None:
@@ -785,7 +1688,7 @@ index dd27c278..70bb3df3 100644
      from pm import build_requirements_environment
  
 +    if record_selection:
-+        (root / ".work/venv-selection.json").unlink(missing_ok=True)
++        (root / "venv-selection.json").unlink(missing_ok=True)
      build_requirements_environment(
          requirements.read_text(encoding="utf-8-sig").splitlines(), out=root / "venv",
          python=python, wheelhouse=root / "wheelhouse", offline=True, sealed=True, explicit=True,
@@ -833,7 +1736,7 @@ index dd27c278..70bb3df3 100644
  
  
 diff --git a/scripts/termux/build_wheels.py b/scripts/termux/build_wheels.py
-index 2449b9fe..ea890ea6 100644
+index 2449b9fe..d79faae6 100644
 --- a/scripts/termux/build_wheels.py
 +++ b/scripts/termux/build_wheels.py
 @@ -30,8 +30,12 @@ from urllib.parse import urlsplit
@@ -882,13 +1785,13 @@ index 2449b9fe..ea890ea6 100644
  
  
  def safe_extract(archive: Path, dest: Path) -> Path:
-@@ -147,68 +145,27 @@ def build_wheels(build_set: list[str], specs: dict[str, str], wheelhouse: Path,
+@@ -147,68 +145,36 @@ def build_wheels(build_set: list[str], specs: dict[str, str], wheelhouse: Path,
          ):
              print(f"==> {name} {ver} already in the wheelhouse (cache restore); skipping")
              continue
 -        if name == "uvloop":
 -            print(f"==> building {name} (download + extract + pre-build fixups)")
-+        if name in {"uvloop", "python-olm", "nemo-relay"}:
++        if name in {"uvloop", "python-olm", "nemo-relay", "numpy"}:
 +            print(f"==> building {name} (verified source + reviewed build fixup)")
              with tempfile.TemporaryDirectory(prefix=f"hermes-build-{name}-") as tmp:
 -                tmp = Path(tmp)
@@ -941,7 +1844,16 @@ index 2449b9fe..ea890ea6 100644
 -                            print("autogen stderr:", proc.stderr[-1200:])
 -                            print("autoreconf stderr:", proc2.stderr[-1200:])
 -                            raise subprocess.CalledProcessError(proc2.returncode, proc2.args)
-+                if name == "nemo-relay":
++                config_args = []
++                if name == "numpy":
++                    if __package__:
++                        from .numpy_source import NUMPY_CONFIG_SETTINGS, prepare_numpy_source
++                    else:
++                        from numpy_source import NUMPY_CONFIG_SETTINGS, prepare_numpy_source
++                    source, extra_env = prepare_numpy_source(req, Path(tmp), extract=safe_extract)
++                    for setting in NUMPY_CONFIG_SETTINGS:
++                        config_args += ["--config-settings", setting]
++                elif name == "nemo-relay":
 +                    source, extra_env = prepare_nemo_source(
 +                        req, Path(tmp), extract=safe_extract,
 +                    )
@@ -954,7 +1866,7 @@ index 2449b9fe..ea890ea6 100644
 -                     "-w", str(wheelhouse), str(src)],
 -                    check=False, cwd=tmp, capture_output=True, text=True, encoding="utf-8",
 +                    [python, "-m", "pip", "wheel", "--no-deps",
-+                     "-w", str(wheelhouse), str(source)],
++                     "-w", str(wheelhouse), *config_args, str(source)],
 +                    check=False, cwd=source, env={**os.environ, **extra_env},
 +                    capture_output=True, text=True, encoding="utf-8",
                  )
@@ -967,7 +1879,7 @@ index 2449b9fe..ea890ea6 100644
                      raise subprocess.CalledProcessError(proc.returncode, proc.args)
          else:
              # Build isolation LEFT ON: --no-build-isolation requires every
-@@ -245,10 +202,6 @@ TARGET_ENV = {
+@@ -245,10 +211,6 @@ TARGET_ENV = {
      "sys_platform": "android",
  }
  
@@ -978,7 +1890,7 @@ index 2449b9fe..ea890ea6 100644
  
  def _marker_admits(marker: str) -> bool:
      if not marker:
-@@ -271,22 +224,15 @@ def _parse_full(resolved: Path) -> list[tuple[str, str, str, str]]:
+@@ -271,22 +233,15 @@ def _parse_full(resolved: Path) -> list[tuple[str, str, str, str]]:
  
  
  def fetch_pure_wheels(build_set: list[str], specs: dict[str, str], wheelhouse: Path, resolved: Path) -> None:
@@ -1007,7 +1919,7 @@ index 2449b9fe..ea890ea6 100644
              continue
          if not _marker_admits(marker):
              continue
-@@ -350,6 +296,8 @@ def import_native_modules(build_set: list[str]) -> None:
+@@ -350,6 +305,8 @@ def import_native_modules(build_set: list[str]) -> None:
          # DeferredError that only fires on first use. Import the C
          # extension directly so the dlopen itself is what's proven.
          "pillow-heif": "_pillow_heif",
@@ -1232,6 +2144,58 @@ index 00000000..7a480957
 +    source = extract(archive, work / "source")
 +    patch_worker_proto(source)
 +    return source, {"PROTOC": str(compiler)}
+diff --git a/scripts/termux/numpy_source.py b/scripts/termux/numpy_source.py
+new file mode 100644
+index 00000000..d8de3e61
+--- /dev/null
++++ b/scripts/termux/numpy_source.py
+@@ -0,0 +1,46 @@
++"""Build the exact locked NumPy source with its internal BLAS/LAPACK fallback.
++
++No NumPy runtime code is patched. The Android wheel must not acquire an
++unbundled OpenBLAS dependency merely to supply arrays for microphone capture.
++Native wheel and numerical validation are separate gates from microphone use.
++"""
++from __future__ import annotations
++
++import hashlib
++from pathlib import Path
++from typing import Callable
++from urllib.parse import urlsplit
++import urllib.request
++
++SDIST_SHA256 = "483a201202b73495f00dbc83796c6ae63137a9bdade074f7648b3e32613412dd"
++SDIST_SIZE = 20727743
++NUMPY_CONFIG_SETTINGS = (
++    "setup-args=-Dblas=none",
++    "setup-args=-Dlapack=none",
++    "setup-args=-Dallow-noblas=true",
++)
++
++
++def prepare_numpy_source(
++    requirement: str, work: Path, *, extract: Callable[[Path, Path], Path],
++) -> tuple[Path, dict[str, str]]:
++    """Admit the reviewed archive before any build backend can execute it."""
++    name, separator, artifact = requirement.partition(" @ ")
++    parsed = urlsplit(artifact)
++    if (
++        name != "numpy" or not separator or parsed.scheme != "https"
++        or parsed.netloc != "files.pythonhosted.org" or parsed.query
++        or not parsed.path.endswith("/numpy-2.4.3.tar.gz")
++        or parsed.fragment != "sha256=" + SDIST_SHA256
++    ):
++        raise ValueError("NumPy source must match the reviewed locked 2.4.3 sdist")
++    url = parsed._replace(fragment="").geturl()
++    with urllib.request.urlopen(url, timeout=60) as response:
++        data = response.read(SDIST_SIZE + 1)
++    if len(data) != SDIST_SIZE or hashlib.sha256(data).hexdigest() != SDIST_SHA256:
++        raise ValueError("NumPy source hash or size differs from the reviewed lock")
++    work.mkdir(parents=True, exist_ok=True)
++    archive = work / "numpy-2.4.3.tar.gz"
++    with archive.open("xb") as stream:
++        stream.write(data)
++    return extract(archive, work / "source"), {}
 diff --git a/scripts/termux/payload_facts.py b/scripts/termux/payload_facts.py
 index d50605b6..0ca1d0d2 100644
 --- a/scripts/termux/payload_facts.py
@@ -1300,7 +2264,7 @@ index d50605b6..0ca1d0d2 100644
 +                args.venv_selection, args.requirements)
 diff --git a/scripts/termux/selection_receipt.py b/scripts/termux/selection_receipt.py
 new file mode 100644
-index 00000000..cf760649
+index 00000000..bd98c2b1
 --- /dev/null
 +++ b/scripts/termux/selection_receipt.py
 @@ -0,0 +1,69 @@
@@ -1345,7 +2309,7 @@ index 00000000..cf760649
 +        "pm_lock_sha256": _digest(root / "app/pm/lock.json"),
 +        "requirements_sha256": _digest(requirements),
 +    }
-+    destination = root / ".work/venv-selection.json"
++    destination = root / "venv-selection.json"
 +    destination.parent.mkdir(parents=True, exist_ok=True)
 +    destination.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
 +    return destination
@@ -1374,31 +2338,54 @@ index 00000000..cf760649
 +            raise ValueError(f"native Termux selection no longer matches {source.name}")
 +    return data
 diff --git a/scripts/termux/termux_build.sh b/scripts/termux/termux_build.sh
-index ffdae6ab..c3040d66 100755
+index ffdae6ab..4a349d48 100755
 --- a/scripts/termux/termux_build.sh
 +++ b/scripts/termux/termux_build.sh
-@@ -229,9 +229,19 @@ PY
+@@ -229,9 +229,42 @@ PY
  [ -f "$WORK/tree/pyproject.toml" ] || fail "archived tag tree has no pyproject.toml -- bad tag?"
  # Package the reviewed build adapters as well: installed validation executes
  # app/scripts/termux/build_wheels.py, and must use the same import and hash policy.
 -for adapted in termux_build.sh build_wheels.py locked_sources.py wheelhouse_cache.py build_deb.sh payload_facts.py; do
-+for adapted in termux_build.sh build_wheels.py locked_sources.py compat_sources.py nemo_source.py wheelhouse_cache.py build_environment.py build_deb.sh payload_facts.py feature_profile.py selection_receipt.py; do
++for adapted in termux_build.sh build_wheels.py locked_sources.py compat_sources.py nemo_source.py numpy_source.py wheelhouse_cache.py build_environment.py build_deb.sh payload_facts.py feature_profile.py selection_receipt.py; do
      cp "$REPO_ABS/scripts/termux/$adapted" "$WORK/tree/scripts/termux/$adapted"
  done
 +for adapted in \
-+    pyproject.toml uv.lock \
-+    pm/environment.py pm/bundled_wheels.py pm/runtime_stage.py pm/packages.py \
-+    hermes_cli/clipboard.py hermes_cli/config_defaults.py \
-+    tools/voice_mode.py tools/voice_mode_termux.py tools/voice_mode_capture.py \
++    pyproject.toml \
++    uv.lock \
++    pm/environment.py \
++    pm/bundled_wheels.py \
++    pm/runtime_stage.py \
++    pm/packages.py \
++    pm/package.py \
++    pm/registry.py \
++    pm/build_operations.py \
++    pm/install.py \
++    pm/agent_browser.py \
++    hermes_cli/clipboard.py \
++    hermes_cli/config_defaults.py \
++    hermes_cli/browser_runtime.py \
++    hermes_cli/doctor_tools.py \
++    hermes_cli/gateway.py \
++    hermes_cli/gateway_command_errors.py \
++    hermes_cli/gateway_runit.py \
++    hermes_platform/resolver/termux_services.py \
++    tools/voice_mode.py \
++    tools/voice_mode_termux.py \
++    tools/voice_mode_capture.py \
 +    plugins/computer_use/cua/__init__.py \
-+    tools/bot_desktop/runtime.py tools/bot_desktop/install.py tools/bot_desktop/launcher.sh \
-+    tools/bot_desktop/thumbnail.py tools/bot_desktop/termux.py; do
++    tools/bot_desktop/runtime.py \
++    tools/bot_desktop/install.py \
++    tools/bot_desktop/launcher.sh \
++    tools/bot_desktop/thumbnail.py \
++    tools/bot_desktop/termux.py \
++    tools/browser_tool_install.py \
++    tools/browser_tool_session.py; do
 +    cp "$REPO_ABS/$adapted" "$WORK/tree/$adapted"
 +done
  REPO_ROOT="$(cd "$HERE/../.." && pwd)"
  DIGEST="$(cd "$REPO_ROOT" && python3 -c 'from pm.lock import termux_docker_digest; print(termux_docker_digest())')"
  [ -n "$DIGEST" ] || fail "termux-docker digest missing from pm/lock.json"
-@@ -253,8 +263,13 @@ mkdir -p "$WHEELHOUSE"
+@@ -253,8 +286,13 @@ mkdir -p "$WHEELHOUSE"
  rm -f "$OUT_ABS/index.json" "$OUT_ABS/SHA256SUMS" "$WORK/resolved.txt" "$WORK/build_set.txt"
  # [d] Resolve the real graph from the tag's own lock.
  log "Resolving dependency graph from the tag's uv.lock"
@@ -1413,7 +2400,7 @@ index ffdae6ab..c3040d66 100755
      || fail "PM requirements export failed (frozen lock at $REF)"
  # Host parsing needs packaging too. Use the release lock, not runner packages.
  PACKAGING_SPEC="$(python3 - "$WORK/tree/uv.lock" <<'PY'
-@@ -349,18 +364,8 @@ def probe(item):
+@@ -349,18 +387,8 @@ def probe(item):
  with ThreadPoolExecutor(max_workers=10) as ex:
      results = list(ex.map(probe, entries))
  
@@ -1432,7 +2419,7 @@ index ffdae6ab..c3040d66 100755
  for name, covered, err in results:
      if covered is None:
          excluded += 1
-@@ -368,14 +373,9 @@ for name, covered, err in results:
+@@ -368,14 +396,9 @@ for name, covered, err in results:
      if err is not None:
          print(f"  probe miss {name}: {err} -> building from sdist", file=sys.stderr)
      if not covered:
@@ -1448,14 +2435,15 @@ index ffdae6ab..c3040d66 100755
  PYEOF
  [ -s "$BUILD_SET" ] || fail "build set is empty -- nothing to build (probe bug?)"
 diff --git a/scripts/termux/wheelhouse_cache.py b/scripts/termux/wheelhouse_cache.py
-index dc196775..4ad062a9 100644
+index dc196775..dbfed294 100644
 --- a/scripts/termux/wheelhouse_cache.py
 +++ b/scripts/termux/wheelhouse_cache.py
-@@ -14,9 +14,12 @@ def build_identity(repo: Path, builder: str, platform_tag: str, python_abi: str)
+@@ -14,9 +14,13 @@ def build_identity(repo: Path, builder: str, platform_tag: str, python_abi: str)
          "scripts/termux/build_config.sh",
          "scripts/termux/termux_build.sh", "scripts/termux/build_wheels.py",
          "scripts/termux/locked_sources.py",
 +        "scripts/termux/compat_sources.py", "scripts/termux/nemo_source.py",
++        "scripts/termux/numpy_source.py",
 +        "scripts/termux/feature_profile.py", "scripts/termux/selection_receipt.py",
          "scripts/termux/retag_wheel.py", "scripts/termux/python_linkage.py",
          "scripts/termux/wheelhouse_cache.py", "scripts/termux/build_environment.py",
@@ -1465,6 +2453,45 @@ index dc196775..4ad062a9 100644
          "pm/pyproject.toml", "pm/uv.lock",
          "scripts/termux/termux-builder.Dockerfile",
      )
+diff --git a/tests/hermes_cli/test_browser_runtime.py b/tests/hermes_cli/test_browser_runtime.py
+index 834a5dfc..52d4357a 100644
+--- a/tests/hermes_cli/test_browser_runtime.py
++++ b/tests/hermes_cli/test_browser_runtime.py
+@@ -64,3 +64,34 @@ def test_chromium_override_wins_without_installing(tmp_path, monkeypatch):
+     assert chromium_executable() is None
+     assert not store.exists()
+     assert "AGENT_BROWSER_EXECUTABLE_PATH" not in os.environ
++
++
++def test_termux_discovers_only_the_official_prefix_without_installing(tmp_path, monkeypatch):
++    from hermes_cli.browser_runtime import chromium_executable
++
++    monkeypatch.delenv("AGENT_BROWSER_EXECUTABLE_PATH", raising=False)
++    monkeypatch.setattr(pm, "installed_package", lambda name: None)
++    monkeypatch.setattr(pm, "ensure", lambda *a, **k: pytest.fail("passive discovery installed a package"))
++    prefix = tmp_path / "prefix"
++    (prefix / "bin").mkdir(parents=True)
++    chromium = prefix / "bin/chromium-browser"
++    chromium.write_bytes(b"the existing Termux executable")
++    chromium.chmod(0o755)
++    monkeypatch.setenv("PREFIX", str(prefix))
++    monkeypatch.setenv("PATH", "")
++    assert chromium_executable(termux=True) == str(chromium)
++    assert chromium_executable(termux=False) is None
++    chromium.unlink()
++    assert chromium_executable(termux=True) is None
++
++
++def test_termux_chromium_has_an_isolated_child_library_environment():
++    from hermes_cli.browser_runtime import chromium_child_env
++
++    base = {"LD_LIBRARY_PATH": "/bundle/lib", "PATH": "/termux/bin", "DISPLAY": ":22",
++            "XAUTHORITY": "/profile/auth"}
++    env = chromium_child_env(base, termux=True)
++    assert "LD_LIBRARY_PATH" not in env
++    assert env["PATH"] == base["PATH"] and env["XAUTHORITY"] == base["XAUTHORITY"]
++    assert base["LD_LIBRARY_PATH"] == "/bundle/lib"
++    assert chromium_child_env(base, termux=False) == base
 diff --git a/tests/hermes_cli/test_clipboard_termux.py b/tests/hermes_cli/test_clipboard_termux.py
 new file mode 100644
 index 00000000..8a44f2ec
@@ -1500,6 +2527,331 @@ index 00000000..8a44f2ec
 +    monkeypatch.setattr(clipboard.subprocess, "run", run)
 +    assert clipboard.write_clipboard_text("text")
 +    assert calls[:2] == ["termux-clipboard-set", "xclip"]
+diff --git a/tests/hermes_cli/test_doctor_termux_notes.py b/tests/hermes_cli/test_doctor_termux_notes.py
+new file mode 100644
+index 00000000..96f6b606
+--- /dev/null
++++ b/tests/hermes_cli/test_doctor_termux_notes.py
+@@ -0,0 +1,34 @@
++"""The Termux doctor must describe the next-stable bundle, not old exclusions."""
++
++from hermes_cli import doctor_tools
++
++
++def _notes(monkeypatch, *, termux):
++    messages = []
++    monkeypatch.setattr(doctor_tools, "_is_termux", lambda: termux)
++    monkeypatch.setattr(doctor_tools, "_pm_tool_path", lambda _name: None)
++    monkeypatch.setattr(doctor_tools, "_safe_which", lambda _name: None)
++    monkeypatch.setattr(doctor_tools, "check_info", messages.append)
++    doctor_tools._check_npm_audit(False)
++    return messages
++
++
++def test_termux_notes_report_admitted_extras_and_remaining_limits(monkeypatch):
++    messages = _notes(monkeypatch, termux=True)
++    output = "\n".join(messages)
++
++    assert messages[0] == "Termux compatibility notes:"
++    assert "acp, cron, matrix, mcp, telegram, termux, uvloop" in output
++    assert "Nemo relay is included in core" in output
++    assert "Matrix E2EE extra is excluded" not in output
++    assert "NeuTTS is unavailable" in output
++    assert "Python 3.14" in output
++    assert "Local CUA has no Android driver" in output
++    assert "no silence/VAD stop" in output
++    assert "Android permissions and on-device verification" in output
++    assert "faster-whisper is optional and unbundled" in output
++    assert "Cloud STT options" in output
++
++
++def test_termux_bundle_notes_are_absent_on_other_platforms(monkeypatch):
++    assert _notes(monkeypatch, termux=False) == []
+diff --git a/tests/hermes_cli/test_gateway_runit.py b/tests/hermes_cli/test_gateway_runit.py
+new file mode 100644
+index 00000000..7b7a1fec
+--- /dev/null
++++ b/tests/hermes_cli/test_gateway_runit.py
+@@ -0,0 +1,207 @@
++"""Owned runit lifecycle and sealed-launcher contracts; native execution has an ARM probe."""
++from __future__ import annotations
++
++import json
++from pathlib import Path
++import subprocess
++
++import pytest
++
++from hermes_cli import gateway, gateway_runit as runit
++from hermes_platform.resolver.termux_services import TermuxServices, resolve_termux_services
++
++
++class Supervisor:
++    """The sv protocol as a deterministic process fixture, independent of host OS."""
++
++    def __init__(self, tools):
++        self.tools, self.records, self.calls = tools, {}, []
++        self.next_pid = 100
++
++    def _key(self, path):
++        return json.loads((path / runit.MARKER).read_text())["home"]
++
++    def __call__(self, args, **kwargs):
++        self.calls.append(list(args))
++        assert "LD_LIBRARY_PATH" not in kwargs["env"]
++        if Path(args[0]) == self.tools.daemon:
++            for path in self.tools.services.glob("hermes-gateway-*"):
++                key = self._key(path)
++                self.records.setdefault(key, None if (path / "down").exists() else self._pid())
++            return subprocess.CompletedProcess(args, 0, "", "")
++        verb = args[-2]
++        path = Path(args[-1])
++        key = self._key(path)
++        if key not in self.records:
++            return subprocess.CompletedProcess(args, 1, "", "supervisor unavailable")
++        if verb == "status":
++            pid = self.records[key]
++            text = f"run: {path}: (pid {pid}) 2s" if pid else f"down: {path}: 2s"
++            return subprocess.CompletedProcess(args, 0, text, "")
++        if verb in ("start", "restart"):
++            self.records[key] = self._pid()
++        elif verb == "stop":
++            self.records[key] = None
++        elif verb == "shutdown":
++            del self.records[key]
++        else:
++            raise AssertionError(verb)
++        return subprocess.CompletedProcess(args, 0, "", "")
++
++    def _pid(self):
++        self.next_pid += 1
++        return self.next_pid
++
++
++@pytest.fixture
++def service(tmp_path, monkeypatch):
++    tools = TermuxServices(tmp_path / "prefix")
++    home, root = tmp_path / "home with 'quotes'", tmp_path / "app"
++    home.mkdir()
++    root.mkdir()
++    service = runit.RunitService(tools, home, root)
++    supervisor = Supervisor(tools)
++    monkeypatch.setattr(runit.subprocess, "run", supervisor)
++    return service, supervisor
++
++
++@pytest.mark.parametrize("start_now", [True, False])
++@pytest.mark.parametrize("start_on_login", [True, False])
++def test_install_separates_current_run_from_next_login(service, start_now, start_on_login):
++    svc, supervisor = service
++    svc.install(["/stable/launcher", "gateway", "run"],
++                start_now=start_now, start_on_login=start_on_login)
++    assert svc.state().running is start_now
++    assert (svc.path / "down").exists() is (not start_on_login)
++    assert json.loads((svc.path / runit.MARKER).read_text()) == svc.identity
++    # A plain start/stop does not rewrite the user's next-login policy.
++    svc.stop()
++    assert not svc.state().running
++    svc.start()
++    assert svc.state().running
++    assert (svc.path / "down").exists() is (not start_on_login)
++    assert all(args[1:] == ["start"] for args in supervisor.calls
++               if Path(args[0]) == svc.tools.daemon)
++
++
++def test_stop_restart_uninstall_only_control_the_owning_home(service):
++    first, supervisor = service
++    second_home = first.home.parent / "another root" / first.home.name
++    second_home.mkdir(parents=True)
++    second = runit.RunitService(first.tools, second_home, first.root)
++    first.install(["/stable/first"])
++    second.install(["/stable/second"])
++    assert first.path.name != second.path.name
++    first_pid, second_pid = first.state().pid, second.state().pid
++    first.restart()
++    assert first.state().pid != first_pid
++    assert second.state().pid == second_pid
++    first.stop()
++    assert not first.state().running and second.state().pid == second_pid
++    first.uninstall()
++    assert not first.path.exists() and second.state().pid == second_pid
++    assert all(args[1:] == ["start"] for args in supervisor.calls
++               if Path(args[0]) == first.tools.daemon)
++
++
++def test_force_cannot_overwrite_a_foreign_installation(service):
++    svc, supervisor = service
++    svc.install(["/stable/launcher"])
++    foreign = {**svc.identity, "root": str(svc.root.parent / "foreign")}
++    (svc.path / runit.MARKER).write_text(json.dumps(foreign))
++    calls = list(supervisor.calls)
++    with pytest.raises(runit.RunitServiceError, match="Refusing foreign"):
++        svc.install(["/unrelated"], force=True)
++    with pytest.raises(runit.RunitServiceError, match="Refusing foreign"):
++        svc.uninstall()
++    assert supervisor.calls == calls
++    assert json.loads((svc.path / runit.MARKER).read_text()) == foreign
++
++
++def test_unowned_directory_is_preserved(service):
++    svc, supervisor = service
++    svc.path.mkdir(parents=True)
++    sentinel = svc.path / "user-data.txt"
++    sentinel.write_text("belongs to someone else")
++    with pytest.raises(runit.RunitServiceError, match="Refusing foreign"):
++        svc.install(["/stable/launcher"], force=True)
++    assert sentinel.read_text() == "belongs to someone else"
++    assert not supervisor.calls
++
++
++def test_failed_control_never_claims_success(service, monkeypatch):
++    svc, supervisor = service
++    svc.install(["/stable/launcher"])
++    original = supervisor.__call__
++
++    def refuse_stop(args, **kwargs):
++        if args[-2] == "stop":
++            return subprocess.CompletedProcess(args, 1, "timeout: service still running", "")
++        return original(args, **kwargs)
++
++    monkeypatch.setattr(runit.subprocess, "run", refuse_stop)
++    with pytest.raises(runit.RunitServiceError, match="still running"):
++        svc.stop()
++    assert svc.state().running
++
++
++def test_missing_service_does_not_start_shared_daemon(service):
++    svc, supervisor = service
++    with pytest.raises(runit.RunitServiceError, match="not installed"):
++        svc.start()
++    assert not supervisor.calls
++
++
++def test_user_scope_refuses_system_identity():
++    for kwargs in ({"system": True}, {"run_as_user": "root"}):
++        with pytest.raises(runit.RunitServiceError, match="Termux app user"):
++            runit.require_user_scope(**kwargs)
++    runit.require_user_scope()
++
++
++def test_sealed_service_uses_manifest_launcher_without_mutating_source(tmp_path, monkeypatch):
++    root = tmp_path / "app"
++    root.mkdir()
++    command = tmp_path / "bin" / "hermes"
++    command.parent.mkdir()
++    command.write_text("sealed launcher fixture")
++    (tmp_path / "manifest.json").write_text(json.dumps({
++        "repo": "app", "venv": "venv", "store": "tools",
++        "runtime": {"commands": {"hermes": "bin/hermes"}},
++    }))
++    monkeypatch.setattr(gateway, "PROJECT_ROOT", root)
++
++    def must_not_mint(**kwargs):
++        raise AssertionError("a sealed payload must retain its own launcher")
++
++    monkeypatch.setattr(gateway, "_prepare_service_launcher", must_not_mint)
++    assert runit.command_for_service() == [
++        str(command), "gateway", "run", "--external-supervisor",
++    ]
++
++
++def test_sealed_install_without_manifest_launcher_fails_closed(tmp_path, monkeypatch):
++    monkeypatch.setattr(gateway, "PROJECT_ROOT", tmp_path)
++    monkeypatch.setattr(gateway, "_is_apt_termux_install", lambda: True)
++    with pytest.raises(runit.RunitServiceError, match="reinstall"):
++        runit.command_for_service()
++
++
++def test_native_tool_environment_does_not_capture_cli_runtime(tmp_path, monkeypatch):
++    for key in ("LD_LIBRARY_PATH", "HERMES_RUNTIME_DIR", "HERMES_HOME",
++                "PYTHONPATH", "PYTHONHOME", "OPENAI_API_KEY"):
++        monkeypatch.setenv(key, "must not inherit")
++    tools = TermuxServices(tmp_path / "prefix")
++    env = tools.environment()
++    assert env["PREFIX"] == str(tools.prefix)
++    assert env["SVDIR"] == str(tools.services)
++    assert not any(value == "must not inherit" for value in env.values())
++    assert resolve_termux_services(tmp_path / "missing") is None
++
++
++def test_runit_failure_uses_its_own_actionable_guidance():
++    from hermes_cli.gateway_command_errors import explain_service_failure
++    lines = explain_service_failure(runit.RunitServiceError("owned service could not stop"))
++    assert lines[0] == "owned service could not stop"
++    assert "gateway-runit.log" in lines[1]
++    assert all("systemd" not in line for line in lines)
+diff --git a/tests/pm/test_agent_browser_termux.py b/tests/pm/test_agent_browser_termux.py
+new file mode 100644
+index 00000000..de460494
+--- /dev/null
++++ b/tests/pm/test_agent_browser_termux.py
+@@ -0,0 +1,66 @@
++"""The Termux browser driver keeps PM ownership without a nonexistent Chromium artifact."""
++from pathlib import Path
++import struct
++
++import pytest
++
++from pm.agent_browser import static_arm64_reason
++from pm.lock import Lockfile
++from pm import paths
++from pm.packages import AgentBrowser, Chromium
++from pm.registry import walk
++
++
++@pytest.mark.parametrize("target", ["linux-arm64", "linux-x64", "darwin-arm64", "win32-x64", "win32-arm64"])
++def test_other_targets_keep_their_pinned_chromium_dependency(target):
++    assert [p.name for p in walk(["agent-browser"], target=target)] == ["chromium", "agent-browser"]
++
++
++def test_termux_uses_the_existing_pinned_archive_and_external_chromium():
++    target = "linux-arm64-bionic"
++    assert [p.name for p in walk(["agent-browser"], target=target)] == ["agent-browser"]
++    assert AgentBrowser().missing_reason(target) is None
++    assert Chromium().missing_reason(target)
++    lock = Lockfile(paths.lockfile_path())
++    assert lock.artifacts("agent-browser", target) == lock.artifacts("agent-browser", "linux-arm64")
++    assert lock.artifacts("agent-browser", target)
++
++
++def elf(*, program_type=1, machine=183):
++    result = bytearray(120)
++    result[:6] = b"\x7fELF\x02\x01"
++    struct.pack_into("<H", result, 18, machine)
++    struct.pack_into("<Q", result, 32, 64)
++    struct.pack_into("<HH", result, 54, 56, 1)
++    struct.pack_into("<I", result, 64, program_type)
++    return bytes(result)
++
++
++def test_termux_stage_keeps_only_the_executable_that_passed_native_proof(tmp_path):
++    staged = tmp_path / "stage"
++    binaries = staged / "package/bin"
++    binaries.mkdir(parents=True)
++    selected = binaries / "agent-browser-linux-musl-arm64"
++    selected.write_bytes(elf())
++    (binaries / "agent-browser-linux-arm64").write_bytes(b"glibc")
++    package = AgentBrowser()
++    package.stage(None, staged, "0.26.0", "linux-arm64-bionic")
++    binary = package.binary(staged, "linux-arm64-bionic")
++    assert binary == staged / "bin/agent-browser-linux-musl-arm64"
++    assert binary.read_bytes() == elf()
++    assert not (binary.parent / "agent-browser-linux-arm64").exists()
++    assert package.verify(staged, "linux-arm64-bionic") == ""
++
++
++@pytest.mark.parametrize("program_type", [2, 3])
++def test_dynamic_or_interpreted_driver_is_refused(tmp_path, program_type):
++    binary = tmp_path / "driver"
++    binary.write_bytes(elf(program_type=program_type))
++    assert "must be static" in static_arm64_reason(binary)
++
++
++@pytest.mark.parametrize("payload", [b"not ELF", elf(machine=62), elf()[:100]])
++def test_invalid_or_wrong_architecture_driver_is_refused(tmp_path, payload):
++    binary = tmp_path / "driver"
++    binary.write_bytes(payload)
++    assert static_arm64_reason(binary)
 diff --git a/tests/pm/test_bundled_wheel_stamp.py b/tests/pm/test_bundled_wheel_stamp.py
 new file mode 100644
 index 00000000..a3edddb9
@@ -1839,6 +3191,38 @@ index 00000000..a5a8ca59
 +"""
 +    assert _run([sys.executable, "-I", "-S", "-c", script],
 +                cwd=source, env=dict(os.environ)) == "bootstrap complete"
+diff --git a/tests/pm/test_chromium.py b/tests/pm/test_chromium.py
+index 9a397fcf..5aad9c53 100644
+--- a/tests/pm/test_chromium.py
++++ b/tests/pm/test_chromium.py
+@@ -10,7 +10,7 @@ from scripts.bundles.native import _bundle_package_names
+ 
+ 
+ def test_browser_closure_and_bundle_ship_full_chromium_only():
+-    closure = {package.name for package in walk(["agent-browser"])}
++    closure = {package.name for package in walk(["agent-browser"], target="linux-x64")}
+     bundled = set(_bundle_package_names())
+     assert "chromium" in closure & bundled
+     assert "chromium-headless-shell" not in closure | bundled
+diff --git a/tests/pm/test_install_default_closure.py b/tests/pm/test_install_default_closure.py
+index 9a3955bb..639eb7d2 100644
+--- a/tests/pm/test_install_default_closure.py
++++ b/tests/pm/test_install_default_closure.py
+@@ -126,12 +126,12 @@ def test_a_failed_default_download_does_not_fail_the_install(install_spy, capsys
+     assert "hermes pm install agent-browser" in capsys.readouterr().out
+ 
+ 
+-def test_termux_has_no_pm_browser_default():
++def test_termux_defaults_include_the_pinned_static_browser_driver():
+     from pm.defaults import default_packages
+ 
+     names = pm.cli._lockfile().names()
+     assert "agent-browser" in default_packages(names, target="linux-x64", declined_names=frozenset())
+-    assert default_packages(names, target="linux-arm64-bionic", declined_names=frozenset()) == []
++    assert "agent-browser" in default_packages(names, target="linux-arm64-bionic", declined_names=frozenset())
+ 
+ 
+ def test_without_refuses_a_required_package(install_spy, capsys):
 diff --git a/tests/scripts/test_pm_build_consumers.py b/tests/scripts/test_pm_build_consumers.py
 index 745c55fd..6c15e701 100644
 --- a/tests/scripts/test_pm_build_consumers.py
@@ -2155,9 +3539,107 @@ index 00000000..7d4f2d74
 +    )
 +    assert without_compiler.returncode != 0
 +    assert "validated PROTOC" in without_compiler.stderr
+diff --git a/tests/scripts/test_termux_numpy_source.py b/tests/scripts/test_termux_numpy_source.py
+new file mode 100644
+index 00000000..284a678a
+--- /dev/null
++++ b/tests/scripts/test_termux_numpy_source.py
+@@ -0,0 +1,92 @@
++"""NumPy source admission keeps the reviewed lock authoritative before build hooks."""
++from __future__ import annotations
++
++import hashlib
++import io
++from pathlib import Path
++import tomllib
++
++import pytest
++
++from scripts.termux import numpy_source
++
++URL = "https://files.pythonhosted.org/packages/reviewed/numpy-2.4.3.tar.gz"
++
++
++def test_numpy_source_pin_matches_the_repository_lock():
++    root = Path(__file__).resolve().parents[2]
++    lock = tomllib.loads((root / "uv.lock").read_text(encoding="utf-8"))
++    package = next(row for row in lock["package"] if row["name"] == "numpy")
++    assert package["version"] == "2.4.3"
++    assert package["sdist"]["hash"] == "sha256:" + numpy_source.SDIST_SHA256
++    assert package["sdist"]["size"] == numpy_source.SDIST_SIZE
++
++
++@pytest.fixture
++def reviewed_payload(monkeypatch):
++    # Supply deterministic downloaded bytes; the real digest and size checks
++    # still run before the safe extractor or a build backend can see them.
++    data = b"reviewed source fixture"
++    monkeypatch.setattr(numpy_source, "SDIST_SHA256", hashlib.sha256(data).hexdigest())
++    monkeypatch.setattr(numpy_source, "SDIST_SIZE", len(data))
++    return data
++
++
++def test_verified_archive_reaches_the_safe_extractor_unchanged(tmp_path, monkeypatch, reviewed_payload):
++    requests = []
++    def download(url, **kwargs):
++        requests.append((url, kwargs))
++        return io.BytesIO(reviewed_payload)
++    monkeypatch.setattr(numpy_source.urllib.request, "urlopen", download)
++    extracted = []
++    def extract(archive, directory):
++        assert archive.read_bytes() == reviewed_payload
++        extracted.append((archive, directory))
++        directory.mkdir()
++        return directory
++    source, env = numpy_source.prepare_numpy_source(
++        "numpy @ " + URL + "#sha256=" + numpy_source.SDIST_SHA256,
++        tmp_path / "build", extract=extract,
++    )
++    assert source == tmp_path / "build/source" and env == {}
++    assert requests == [(URL, {"timeout": 60})]
++    assert len(extracted) == 1
++
++
++def test_tampered_download_never_reaches_the_extractor(tmp_path, monkeypatch, reviewed_payload):
++    monkeypatch.setattr(numpy_source.urllib.request, "urlopen", lambda *a, **k: io.BytesIO(b"x" * len(reviewed_payload)))
++    with pytest.raises(ValueError, match="hash or size"):
++        numpy_source.prepare_numpy_source(
++            "numpy @ " + URL + "#sha256=" + numpy_source.SDIST_SHA256,
++            tmp_path / "build", extract=lambda *a: pytest.fail("unverified source reached extraction"),
++        )
++    assert not (tmp_path / "build").exists()
++
++
++@pytest.mark.parametrize("url", [
++    "http://files.pythonhosted.org/packages/reviewed/numpy-2.4.3.tar.gz",
++    "https://example.com/numpy-2.4.3.tar.gz",
++    "https://files.pythonhosted.org@evil.example/numpy-2.4.3.tar.gz",
++    "https://files.pythonhosted.org/packages/reviewed/numpy-2.4.4.tar.gz",
++    URL + "?replacement=1",
++])
++def test_unreviewed_location_is_rejected_before_network(tmp_path, monkeypatch, url):
++    monkeypatch.setattr(numpy_source.urllib.request, "urlopen", lambda *a, **k: pytest.fail("unreviewed network request"))
++    with pytest.raises(ValueError, match="reviewed locked"):
++        numpy_source.prepare_numpy_source(
++            "numpy @ " + url + "#sha256=" + numpy_source.SDIST_SHA256,
++            tmp_path, extract=lambda *a: pytest.fail("unreviewed extraction"),
++        )
++
++
++def test_response_read_is_bounded_before_digest_verification(tmp_path, monkeypatch, reviewed_payload):
++    class Oversized(io.BytesIO):
++        def read(self, size=-1):
++            assert size == numpy_source.SDIST_SIZE + 1
++            return super().read(size)
++    monkeypatch.setattr(numpy_source.urllib.request, "urlopen", lambda *a, **k: Oversized(reviewed_payload + b"extra"))
++    with pytest.raises(ValueError, match="hash or size"):
++        numpy_source.prepare_numpy_source(
++            "numpy @ " + URL + "#sha256=" + numpy_source.SDIST_SHA256,
++            tmp_path, extract=lambda *a: pytest.fail("oversized archive reached extraction"),
++        )
 diff --git a/tests/scripts/test_termux_selection_receipt.py b/tests/scripts/test_termux_selection_receipt.py
 new file mode 100644
-index 00000000..8befb5e4
+index 00000000..c36fe84e
 --- /dev/null
 +++ b/tests/scripts/test_termux_selection_receipt.py
 @@ -0,0 +1,53 @@
@@ -2201,8 +3683,8 @@ index 00000000..8befb5e4
 +def test_failed_native_install_removes_previous_selection_receipt(tmp_path, monkeypatch):
 +    from scripts.termux.build_environment import application
 +
-+    receipt = tmp_path / ".work/venv-selection.json"
-+    receipt.parent.mkdir()
++    receipt = tmp_path / "venv-selection.json"
++    receipt.parent.mkdir(exist_ok=True)
 +    receipt.write_text('{"stamp": "stale"}', encoding="utf-8")
 +    requirements = tmp_path / "requirements.txt"
 +    requirements.write_text("missing-native==1.0\n", encoding="utf-8")
@@ -2214,12 +3696,40 @@ index 00000000..8befb5e4
 +    with pytest.raises(RuntimeError, match="offline native wheel missing"):
 +        application(tmp_path, requirements, Path("unused-python"), record_selection=True)
 +    assert not receipt.exists()
+diff --git a/tests/tools/test_bot_desktop_browser.py b/tests/tools/test_bot_desktop_browser.py
+index da0d5866..bbea85fe 100644
+--- a/tests/tools/test_bot_desktop_browser.py
++++ b/tests/tools/test_bot_desktop_browser.py
+@@ -45,6 +45,7 @@ def test_pinned_profile_honours_tilde_and_resolves_relative_paths_against_hermes
+     monkeypatch.setattr(runtime, "get_hermes_home", lambda: home)
+     monkeypatch.setattr(Path, "home", lambda: tmp_path / "user")
+     monkeypatch.setenv("HOME", str(tmp_path / "user"))
++    monkeypatch.setenv("USERPROFILE", str(tmp_path / "user"))
+ 
+     monkeypatch.setenv("AGENT_BROWSER_PROFILE", "~/pin")
+     assert browser.profile_dir() == tmp_path / "user" / "pin"
+@@ -145,6 +146,7 @@ def _install_browsers(tmp_path, monkeypatch, *, playwright: bool, system: bool):
+     return str(pw_exe), str(sys_exe)
+ 
+ 
++@pytest.mark.platforms("posix")
+ def test_unprivileged_user_under_apparmor_userns_restriction_gets_the_system_browser(tmp_path, monkeypatch):
+     """Playwright's bundled Chromium has no setuid chrome_sandbox; with
+     kernel.apparmor_restrict_unprivileged_userns=1 it dies 'FATAL: No usable sandbox!' for a non-root user,
+@@ -172,6 +174,7 @@ def test_unprivileged_user_under_apparmor_userns_restriction_gets_the_system_bro
+     assert ("--no-sandbox" in browser.dock_argv(exe, "/p/dir")) == ("--no-sandbox" in agent_flags)
+ 
+ 
++@pytest.mark.platforms("posix")
+ def test_root_dock_browser_starts_with_the_same_sandbox_args_as_the_agents_browser(monkeypatch):
+     """Chromium refuses to start as root without --no-sandbox; agent-browser gets that flag from one
+     policy, and the dock icon (same binary, same profile) must get the very same flags or the human's
 diff --git a/tests/tools/test_bot_desktop_termux.py b/tests/tools/test_bot_desktop_termux.py
 new file mode 100644
-index 00000000..ba878d03
+index 00000000..17851b73
 --- /dev/null
 +++ b/tests/tools/test_bot_desktop_termux.py
-@@ -0,0 +1,96 @@
+@@ -0,0 +1,109 @@
 +"""Termux desktop behavior: user-owned installs, X11 paths, and isolated native capture."""
 +
 +from __future__ import annotations
@@ -2230,7 +3740,13 @@ index 00000000..ba878d03
 +
 +import pytest
 +
++from hermes_platform.resolver import Candidate, Resolution
 +from tools.bot_desktop import runtime, termux
++from tools.bot_desktop.runtime import missing_binaries
++
++
++def found_command(path):
++    return Resolution("explicit_path", (Candidate(path, "explicit", True),))
 +
 +
 +def test_android_host_support_requires_the_termux_x11_environment():
@@ -2253,10 +3769,10 @@ index 00000000..ba878d03
 +
 +def test_termux_manager_requires_its_actual_apt_command(monkeypatch):
 +    seen = []
-+    monkeypatch.setattr(termux, "locate_command", lambda command: seen.append(command) or "/prefix/bin/apt-get")
++    monkeypatch.setattr(termux, "locate_command", lambda command: seen.append(command) or found_command("/prefix/bin/apt-get"))
 +    assert runtime.package_manager(termux=True) == "termux"
 +    assert seen == ["apt-get"]
-+    monkeypatch.setattr(termux, "locate_command", lambda command: None)
++    monkeypatch.setattr(termux, "locate_command", lambda command: Resolution("missing"))
 +    assert runtime.package_manager(termux=True) is None
 +
 +
@@ -2293,7 +3809,7 @@ index 00000000..ba878d03
 +    from tools.environments import local
 +    parent_auth = os.environ.get("XAUTHORITY")
 +    seen = []
-+    monkeypatch.setattr(termux, "locate_command", lambda name: "/prefix/bin/scrot")
++    monkeypatch.setattr(termux, "locate_command", lambda name: found_command("/prefix/bin/scrot"))
 +    monkeypatch.setattr(local, "served_profile_child_env",
 +                        lambda **kw: {"LD_LIBRARY_PATH": "/bundle", "DISPLAY": ":wrong"})
 +    def run(argv, **kw):
@@ -2313,9 +3829,88 @@ index 00000000..ba878d03
 +
 +
 +def test_missing_scrot_reports_the_supported_install_path(monkeypatch):
-+    monkeypatch.setattr(termux, "locate_command", lambda name: None)
++    monkeypatch.setattr(termux, "locate_command", lambda name: Resolution("missing"))
 +    with pytest.raises(RuntimeError, match="hermes screen install"):
 +        termux.grab_x11_image({"DISPLAY": ":28"})
++
++
++def test_missing_binaries_uses_resolution_presence_not_object_truthiness(monkeypatch):
++    monkeypatch.setattr(termux, "locate_command", lambda name: (
++        Resolution("missing") if name in {"Xvnc", "scrot"} else found_command("/prefix/bin/" + name)
++    ))
++    assert missing_binaries(termux=True) == ["Xvnc", "scrot"]
+diff --git a/tests/tools/test_browser_pm.py b/tests/tools/test_browser_pm.py
+index 4b279f25..fbbca77a 100644
+--- a/tests/tools/test_browser_pm.py
++++ b/tests/tools/test_browser_pm.py
+@@ -131,24 +131,50 @@ def test_execution_acquires_missing_browser_through_pm(browser_store, monkeypatc
+     assert install._chromium_installed()
+ 
+ 
+-def test_termux_ownership_policy_never_provisions(browser_store, monkeypatch):
+-    # Exercise the real environment policy, not an emulated Android binary.
++def test_termux_driver_uses_pm_while_chromium_remains_externally_owned(browser_store, monkeypatch):
++    # Exercise the environment policy without emulating Android binaries.
+     from hermes_cli import doctor_tools
++    import pm.client
+ 
++    _, _, publish = browser_store
+     monkeypatch.setenv("TERMUX_VERSION", "test")
+     monkeypatch.setenv("PATH", "")
+     monkeypatch.setenv("HERMES_DISABLE_LAZY_INSTALLS", "0")
+     monkeypatch.setattr(install, "_running_in_docker", lambda: False)
+     monkeypatch.setattr(bt, "_chromium_autoinstall_attempted", False)
++    requests = []
+ 
+-    def forbidden(*args, **kwargs):
+-        pytest.fail("Termux browser installation is externally owned")
++    def request(operation, payload, **kwargs):
++        assert payload["name"] == "agent-browser", "Chromium must remain APT-owned on Termux"
++        requests.append((operation, payload))
++        publish("agent-browser")
+ 
+-    monkeypatch.setattr(pm, "ensure", forbidden)
+-    with pytest.raises(FileNotFoundError, match="npm install -g agent-browser"):
+-        install._find_agent_browser()
++    monkeypatch.setattr(pm.client, "_request", request)
++    with pytest.raises(FileNotFoundError, match="hermes pm install agent-browser"):
++        install._find_agent_browser(validate=False)
++    assert requests == []
++    assert install._find_agent_browser() == str(pm.installed_package("agent-browser").binary)
++    assert requests == [("ensure", {"name": "agent-browser", "explicit": False})]
+     assert install._maybe_autoinstall_chromium() is False
+-    assert doctor_tools._check_agent_browser(True) is False
++    assert doctor_tools._check_agent_browser(True) is True
++
++
++def test_termux_session_env_selects_native_libraries_and_preserves_explicit_flags(browser_store, monkeypatch):
++    from hermes_cli import browser_runtime
++    _, _, publish = browser_store
++    publish("agent-browser")
++    monkeypatch.setenv("TERMUX_VERSION", "test")
++    monkeypatch.setenv("LD_LIBRARY_PATH", "/bundle/runtime-libs")
++    monkeypatch.setattr(browser_runtime, "chromium_executable", lambda: "/prefix/bin/chromium-browser")
++    env = session._agent_browser_command_env("/private/session")
++    assert env["AGENT_BROWSER_EXECUTABLE_PATH"] == "/prefix/bin/chromium-browser"
++    assert "LD_LIBRARY_PATH" not in env
++    assert os.environ["LD_LIBRARY_PATH"] == "/bundle/runtime-libs"
++    session._apply_chromium_sandbox_args(env)
++    assert env["AGENT_BROWSER_ARGS"] == "--no-sandbox,--disable-dev-shm-usage"
++    env["AGENT_BROWSER_ARGS"] = "--user-supplied-flag"
++    session._apply_chromium_sandbox_args(env)
++    assert env["AGENT_BROWSER_ARGS"] == "--user-supplied-flag"
+ 
+ 
+ def test_cdp_override_does_not_require_pm_browser(browser_store, monkeypatch):
+@@ -208,7 +234,7 @@ def test_restricted_path_discovers_external_browser_without_execution(browser_st
+ 
+     monkeypatch.setattr("subprocess.Popen", forbidden)
+     monkeypatch.setattr(pm, "ensure", forbidden)
+-    assert install._find_agent_browser(validate=False) == str(binary)
++    assert Path(install._find_agent_browser(validate=False)) == binary
+     assert not store.exists()
+ 
+ 
 diff --git a/tests/tools/test_computer_use_remote_availability.py b/tests/tools/test_computer_use_remote_availability.py
 new file mode 100644
 index 00000000..4f13e81e
@@ -2724,7 +4319,7 @@ index 93953fa3..128066b0 100755
  WM_THEME_NAME=$(pick_theme Default-hdpi Default)   # xfwm4 window themes ship with xfwm4 itself
  ICON_THEME_NAME=$(pick_icons Papirus-Dark breeze-dark Adwaita hicolor)
 diff --git a/tools/bot_desktop/runtime.py b/tools/bot_desktop/runtime.py
-index 8107e5cc..935d1f2c 100644
+index 8107e5cc..caa984d0 100644
 --- a/tools/bot_desktop/runtime.py
 +++ b/tools/bot_desktop/runtime.py
 @@ -27,7 +27,7 @@ from pathlib import Path
@@ -2763,16 +4358,17 @@ index 8107e5cc..935d1f2c 100644
 +            or (_termux.is_termux() if termux is None else termux))
  
  
- def missing_binaries() -> list[str]:
-+    if _termux.is_termux():
-+        return [b for b in (*REQUIRED_BINARIES, "scrot") if _termux.locate_command(b) is None]
+-def missing_binaries() -> list[str]:
++def missing_binaries(*, termux: bool | None = None) -> list[str]:
++    if _termux.is_termux() if termux is None else termux:
++        return [b for b in (*REQUIRED_BINARIES, "scrot") if not _termux.locate_command(b).found]
      return [b for b in REQUIRED_BINARIES if shutil.which(b) is None]
  
  
 -def package_manager() -> Optional[str]:
 +def package_manager(*, termux: bool | None = None) -> Optional[str]:
 +    if _termux.is_termux() if termux is None else termux:
-+        return "termux" if _termux.locate_command("apt-get") else None
++        return "termux" if _termux.locate_command("apt-get").found else None
      for pm in ("apt-get", "dnf", "pacman"):
          if shutil.which(pm):
              return "apt" if pm == "apt-get" else pm
@@ -2868,7 +4464,7 @@ index 8107e5cc..935d1f2c 100644
              child_env.pop(key, None)
 diff --git a/tools/bot_desktop/termux.py b/tools/bot_desktop/termux.py
 new file mode 100644
-index 00000000..814da24e
+index 00000000..fa966073
 --- /dev/null
 +++ b/tools/bot_desktop/termux.py
 @@ -0,0 +1,88 @@
@@ -2898,7 +4494,7 @@ index 00000000..814da24e
 +PACKAGES = [
 +    "tigervnc", "xfwm4", "xfce4-panel", "xfdesktop", "xfce4-settings", "xfce4-terminal",
 +    "dbus", "xorg-xauth", "xorg-xdpyinfo", "xorg-setxkbmap", "xorg-xprop",
-+    "xorg-xsetroot", "xorg-xset", "ttf-dejavu", "scrot",
++    "xorg-xsetroot", "ttf-dejavu", "scrot",
 +]
 +
 +
@@ -2944,8 +4540,8 @@ index 00000000..814da24e
 +
 +def grab_x11_image(published: Mapping[str, str]):
 +    """Capture only this profile's X display, without requiring Pillow's optional XCB extension."""
-+    command = locate_command("scrot")
-+    if not command:
++    resolution = locate_command("scrot")
++    if not resolution.found:
 +        raise RuntimeError("Bot Desktop thumbnails on Termux require the scrot package; run hermes screen install.")
 +    from PIL import Image
 +    from tools.environments.local import served_profile_child_env
@@ -2955,7 +4551,7 @@ index 00000000..814da24e
 +    with tempfile.TemporaryDirectory(prefix="hermes-x11-") as scratch:
 +        target = Path(scratch) / "screen.png"
 +        subprocess.run(
-+            [command, "--silent", "--overwrite", str(target)], env=env, stdin=subprocess.DEVNULL,
++            [*resolution.command, "--silent", "--overwrite", str(target)], env=env, stdin=subprocess.DEVNULL,
 +            stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10, check=True,
 +        )
 +        with Image.open(target) as image:
@@ -3034,6 +4630,117 @@ index 2ae3ffa2..4d9e2b79 100644
      image.thumbnail(max_size)
      buf = io.BytesIO()
      image.convert("RGB").save(buf, "JPEG", quality=quality, optimize=True)
+diff --git a/tools/browser_tool_install.py b/tools/browser_tool_install.py
+index b740b811..a4f0e7a6 100644
+--- a/tools/browser_tool_install.py
++++ b/tools/browser_tool_install.py
+@@ -7,6 +7,7 @@ import os
+ import shutil
+ 
+ from hermes_constants import agent_browser_runnable, is_termux as _is_termux_environment
++from hermes_platform.resolver import LookupContext, locate_command
+ from tools.browser_tool_origin import origin_module as _origin
+ from tools import browser_tool_cdp as _cdp
+ from tools import browser_tool_cloud as _cloud
+@@ -47,7 +48,7 @@ def _merge_browser_path(existing_path: str = "") -> str:
+ 
+ def _browser_install_hint() -> str:
+     if _is_termux_environment():
+-        return "npm install -g agent-browser && agent-browser install"
++        return "pkg install x11-repo && pkg install chromium && hermes pm install agent-browser"
+     return "hermes pm install agent-browser (system libraries: npx playwright install-deps chromium)"
+ 
+ 
+@@ -60,27 +61,25 @@ def _agent_browser_candidate_present(path: str | None) -> bool:
+ def _find_agent_browser(*, validate: bool = True) -> str:
+     """Select PM's exact binary, then an external PATH/Homebrew installation.
+ 
+-    Termux owns its browser installation. Elsewhere PM may acquire a missing
+-    CLI at execution time, subject to its lazy-install policy. Readiness checks
++    PM may acquire the pinned CLI at execution time, subject to its lazy-install
++    policy. Termux Chromium remains APT-owned. Readiness checks
+     (``validate=False``) never execute or install anything. Selection is not
+     cached: a new PM fact or profile must be visible immediately.
+     """
+     import pm
+ 
+-    termux = _is_termux_environment()
+-    if not termux:
+-        installed = pm.installed_package("agent-browser")
+-        if installed and installed.binary is not None:
+-            return str(installed.binary)
++    installed = pm.installed_package("agent-browser")
++    if installed and installed.binary is not None:
++        return str(installed.binary)
+     usable = agent_browser_runnable if validate else _agent_browser_candidate_present
+     for search_path in (None, _merge_browser_path("")):
+         if search_path == "":
+             continue
+-        candidate = shutil.which("agent-browser", path=search_path)
+-        if candidate and usable(candidate):
+-            return candidate
++        resolution = locate_command("agent-browser", LookupContext(path=search_path))
++        if resolution.found and usable(resolution.command[0]):
++            return resolution.command[0]
+     hint = f"agent-browser CLI not found. Install it with: {_browser_install_hint()}"
+-    if validate and not termux:
++    if validate:
+         try:
+             pm.ensure("agent-browser")
+         except (pm.InstallError, OSError) as exc:
+diff --git a/tools/browser_tool_session.py b/tools/browser_tool_session.py
+index 8472668c..18cc82f1 100644
+--- a/tools/browser_tool_session.py
++++ b/tools/browser_tool_session.py
+@@ -49,6 +49,8 @@ def apparmor_restricts_unprivileged_userns() -> bool:
+ 
+ def _needs_chromium_sandbox_bypass() -> bool:
+     """True when Chromium needs --no-sandbox to start reliably (root, Docker, AppArmor userns)."""
++    if _install._is_termux_environment():
++        return True
+     if hasattr(os, "geteuid") and os.geteuid() == 0:
+         return True
+     if _install._running_in_docker():
+@@ -182,7 +184,7 @@ def _agent_browser_command_env(socket_dir: str) -> dict[str, str]:
+     env = _bt._build_browser_env()
+     env["PATH"] = _install._merge_browser_path(env.get("PATH", ""))
+     env = env_for("agent-browser", base_env=env)
+-    from hermes_cli.browser_runtime import chromium_executable
++    from hermes_cli.browser_runtime import chromium_child_env, chromium_executable
+ 
+     executable = chromium_executable()
+     if executable:
+@@ -190,7 +192,7 @@ def _agent_browser_command_env(socket_dir: str) -> dict[str, str]:
+     env["AGENT_BROWSER_SOCKET_DIR"] = socket_dir
+     if "AGENT_BROWSER_IDLE_TIMEOUT_MS" not in env:
+         env["AGENT_BROWSER_IDLE_TIMEOUT_MS"] = str(_daemon_idle_timeout_seconds() * 1000)
+-    return env
++    return chromium_child_env(env)
+ 
+ 
+ _SHARED_HEADED_DAEMON_IDLE_SECONDS = 24 * 3600
+@@ -698,7 +700,7 @@ def _sandbox_wrap(cmd_parts: list[str], browser_env: dict[str, str], task_socket
+ 
+ 
+ def _browser_command_preflight() -> dict[str, Any]:
+-    """Fail fast before spawning (missing CLI, Termux gap, interrupt, no Chromium in local
++    """Fail fast before spawning (missing CLI, interrupt, no Chromium in local
+     mode — else every call hangs for command_timeout). Error result, or ``{"browser_cmd": path}``."""
+     from tools.bot_desktop import placement, runtime as _bd_runtime
+     try:
+@@ -723,7 +725,11 @@ def _browser_command_preflight() -> dict[str, Any]:
+         and _cloud._get_browser_engine() != "lightpanda"
+         and not _install._maybe_autoinstall_chromium()
+     ):
+-        hint = _CHROMIUM_MISSING_DOCKER_HINT if _install._running_in_docker() else _CHROMIUM_MISSING_HINT
++        if _install._is_termux_environment():
++            from hermes_cli.browser_runtime import chromium_install_hint
++            hint = "Chromium browser is missing. Install it with: " + chromium_install_hint()
++        else:
++            hint = _CHROMIUM_MISSING_DOCKER_HINT if _install._running_in_docker() else _CHROMIUM_MISSING_HINT
+         _bt.logger.warning("browser command blocked: %s", hint)
+         return {"success": False, "error": hint}
+ 
 diff --git a/tools/voice_mode.py b/tools/voice_mode.py
 index d1d6323a..d7bccc11 100644
 --- a/tools/voice_mode.py
