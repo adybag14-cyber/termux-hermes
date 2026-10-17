@@ -39,24 +39,46 @@ contains PyTorch 2.14.0, while the NeuTTS
 dependency group is excluded for the managed interpreter. No Android wheel for
 the locked PyTorch or ONNX Runtime entries is present in that lock.
 
-The first separate [APT-only dependency experiment](../scripts/compatibility_probe_neutts.sh),
-[run 39053355817](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39053355817)
-at head `036f11515eda3a6e4129e14c7dd75ec27d5ae47d`, installed all 122 pinned
-APT packages. SciPy's numerical checks, llvmlite's native MCJIT function and soxr
-resampling passed. Torch, Torchaudio and Torchcodec each stopped at
-`ModuleNotFoundError: No module named 'typing_extensions'` before their native
-behavior cases; the overall probe correctly failed. A [pinned Python
-dependency completion](../audit/neutts-native-20261017/python-dependency-preparation.json)
-now supplies the exact supplemental artifacts already frozen in the upstream
-lock. It checks the complete installed metadata graph before exercising native
-behavior; its new native run is pending.
+The separate [scientific dependency experiment](../scripts/compatibility_probe_neutts.sh)
+now **passes all six native behavior cases** in
+[run 39055874446](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39055874446)
+at exact head `d439e8100bc89dbfe681fc03aa22017f175b8b2d`. The
+[verified result](../audit/neutts-native-20261017/run-39055874446.json)
+binds all 122 pinned APT archives, the exact supplemental Python artifacts from
+the upstream lock, the real Termux system interpreter, mapped AArch64 libraries,
+and each independent child-process receipt.
+
+| Component | Native behavior observed |
+| --- | --- |
+| Torch 2.14.1 | Exact CPU convolution and matrix multiplication results. |
+| Torchaudio 2.11.0 | 24 kHz to 16 kHz resampling; 1,600 output samples with mean absolute error 0.0002513. |
+| TorchCodec 0.17.0 | Decoded the 16 kHz PCM fixture into 1,600 samples with zero maximum error. |
+| NumPy 2.5.4 / SciPy 1.18.1 | Linear-system solution and FFT matched their numerical oracles. |
+| llvmlite 0.49.0 | Real Android AArch64 MCJIT execution returned the expected 23.0. |
+| Soxr 1.1.0 | Resampling produced 1,600 samples with mean absolute error 2.1722e-7. |
+
+The first run, [39053355817](../audit/neutts-native-20261017/run-39053355817.json),
+stopped Torch, Torchaudio and TorchCodec at missing `typing_extensions`, while
+the other three cases passed. The supplemental dependency repair then completed
+the installed metadata graph and actual MarkupSafe/Jinja2 escaping checks.
+[Run 39055038031](../audit/neutts-native-20261017/run-39055038031/verification.json)
+still failed before native cases because pip rejected the seven original APT
+scientific distributions' `android_aarch64` WHEEL tags.
+
+That pip compatibility issue is **still unresolved**. The final probe records
+`dependency_closure_passed=true` and `scientific_behavior_passed=true`, alongside
+`pip_check_passed=false`. Diagnostic continuation requires exactly the seven
+observed unsupported-platform messages, expected versions, and original WHEEL
+file hashes from the pinned APT archives. Missing dependencies, version conflicts
+or any other pip error stop the probe. No wheel tags are rewritten and no
+interpreter platform is spoofed.
 
 This disposable Termux system-Python experiment records the rolling base upgrade
 separately from the pinned dependency archives. Its
 [native workflow](../.github/workflows/neutts-termux-probe.yml) does not install
 NeuTTS, change Hermes PM, validate synthesis or alter the current engine
-exclusion. The [audit record](../audit/compatibility-0.22.2-1.json) binds these
-partial results to the exact tested inputs and verified artifact.
+exclusion. Its successful scientific measurements do not establish the complete
+NeuTTS dependency closure or compatibility with the bundled Hermes interpreter.
 
 The engine still needs one certified runtime arrangement:
 
