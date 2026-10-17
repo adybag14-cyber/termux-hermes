@@ -291,7 +291,11 @@ stage=pinned-python-install
   --find-links "$NEUTTS_PYTHON_WHEELHOUSE" \
   -r "$NEUTTS_PYTHON_WHEELHOUSE/requirements.txt" \
   > "$out/NEUTTS-PYTHON-INSTALL.log" 2>&1
-"$PREFIX/bin/python" -I -m pip check > "$out/NEUTTS-PYTHON-CHECK.log" 2>&1
+# Keep the dependency failure authoritative, but still collect independent native
+# behavior and the exact APT-owned wheel tags which pip rejected.
+neutts_pip_check_status=0
+"$PREFIX/bin/python" -I -m pip check > "$out/NEUTTS-PYTHON-CHECK.log" 2>&1 || neutts_pip_check_status=$?
+export NEUTTS_PIP_CHECK_EXIT_CODE="$neutts_pip_check_status"
 
 cp "$(dirname "$0")/compatibility_probe_neutts.py" "$work/native_core.py"
 

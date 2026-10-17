@@ -305,6 +305,63 @@ def execute_case(name, out):
     return row
 
 
+def apt_python_metadata(out):
+    """Record packaging tags without modifying any APT-owned file."""
+    import platform
+    import sysconfig
+    import pip
+    from pip._vendor import packaging
+    from pip._vendor.packaging import tags as packaging_tags
+    from pip._vendor.packaging.tags import parse_tag, sys_tags
+    from pip._internal.operations import check as pip_check_operations
+    from pip._internal.commands import check as pip_check_command
+    from pip._internal.utils import compatibility_tags
+
+    supported = set(compatibility_tags.get_supported())
+    generic_tags = set(sys_tags())
+    result = {"schema_version": 1, "supported_tag_count": len(supported),
+              "supported_tags": sorted(map(str, supported)),
+              "generic_sys_tags": sorted(map(str, generic_tags)),
+              "sysconfig_platform": sysconfig.get_platform(),
+              "platform_system": platform.system(),
+              "platform_android_ver": dict(platform.android_ver()._asdict()),
+              "pip_version": pip.__version__, "packaging_version": packaging.__version__,
+              "tag_implementation": [
+                  {"module": module.__name__, "path": module.__file__,
+                   "sha256": sha(module.__file__)}
+                  for module in (packaging_tags, compatibility_tags,
+                                 pip_check_operations, pip_check_command)],
+              "distributions": []}
+    for name in EXPECTED:
+        dist = importlib.metadata.distribution(name)
+        require(dist.version.split("+", 1)[0] == EXPECTED[name],
+                "APT distribution version differs while collecting metadata: " + name)
+        metadata_members = [item for item in (dist.files or [])
+                            if str(item).endswith(".dist-info/WHEEL")]
+        require(len(metadata_members) == 1, "APT wheel metadata member is missing or ambiguous: " + name)
+        path = Path(dist.locate_file(metadata_members[0]))
+        wheel = path.read_text(encoding="utf-8")
+        tags = [line.removeprefix("Tag: ").strip() for line in wheel.splitlines()
+                if line.startswith("Tag: ")]
+        require(tags, "APT wheel metadata has no tags: " + name)
+        parsed = set()
+        for tag in tags:
+            parsed.update(parse_tag(tag))
+        result["distributions"].append({
+            "distribution": name, "version": dist.version,
+            "wheel_metadata_path": str(path), "wheel_metadata_sha256": sha(path),
+            "wheel_metadata": wheel, "declared_tags": tags,
+            "supported_tag_overlap": sorted(map(str, parsed & supported)),
+            "base_requires_dist": list(dist.requires or []),
+        })
+    path = out / "NEUTTS-APT-PYTHON-METADATA.json"
+    path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    return {"receipt": path.name, "sha256": sha(path),
+            "unsupported_distribution_names": [
+                row["distribution"] for row in result["distributions"]
+                if not row["supported_tag_overlap"]]}
+
+
 def main(out):
     require(sys.platform == "android" and os.uname().machine == "aarch64" and os.getuid() == 1000,
             "native Bionic UID1000 interpreter required")
@@ -320,8 +377,20 @@ def main(out):
         require(packages.get(name) == {"version": version, "architecture": architecture}, "installed APT pin differs: " + name)
         pins.append({"package": name, "version": version, "architecture": architecture,
                      "sha256": digest, "bytes": int(size), "repository_path": filename})
+    pip_check_code = int(os.environ["NEUTTS_PIP_CHECK_EXIT_CODE"])
+    require(0 <= pip_check_code <= 255, "invalid pip dependency-check status")
+    pip_check_log = out / "NEUTTS-PYTHON-CHECK.log"
+    require(pip_check_log.is_file(), "missing dependency-check output")
+    try:
+        packaging_metadata = apt_python_metadata(out)
+    except Exception as exc:
+        packaging_metadata = {"error": {"type": type(exc).__name__, "message": str(exc)}}
+        traceback.print_exc()
     receipt = {
         "schema_version": 1, "status": "running", "scope": "APT native scientific ABI/behavior with verified Python dependencies",
+        "pip_check": {"exit_code": pip_check_code, "log": pip_check_log.name,
+                      "log_sha256": sha(pip_check_log)},
+        "apt_python_metadata": packaging_metadata,
         "python": {"version": sys.version, "platform": sys.platform, "prefix": sys.prefix,
                    "executable": elf("/proc/self/exe")}, "uid": os.getuid(),
         "apt_archives": pins, "apt_archive_hashes_checked_before_install": True,
@@ -335,9 +404,11 @@ def main(out):
     for name in CASES:
         receipt["cases"].append(execute_case(name, out))
         result_path.write_text(json.dumps(receipt, indent=2) + "\n")
-    receipt["status"] = "passed" if all(row["exit_code"] == 0 and row["status"] == "passed" for row in receipt["cases"]) else "failed"
+    receipt["status"] = "passed" if (pip_check_code == 0 and "error" not in packaging_metadata and all(
+        row["exit_code"] == 0 and row["status"] == "passed" for row in receipt["cases"])) else "failed"
     result_path.write_text(json.dumps(receipt, indent=2) + "\n")
-    print(json.dumps({"status": receipt["status"], "cases": receipt["cases"]}), flush=True)
+    print(json.dumps({"status": receipt["status"], "pip_check": receipt["pip_check"],
+                      "apt_python_metadata": packaging_metadata, "cases": receipt["cases"]}), flush=True)
     return 0 if receipt["status"] == "passed" else 1
 
 
