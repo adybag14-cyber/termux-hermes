@@ -117,6 +117,17 @@ NATIVE_METADATA_SHA256 = {
     "torchcodec": "260e2c0dc46d782d896f4995b81db75772a9d3d41fdfd891d2a3504b0ba5faf4",
 }
 
+# Exact WHEEL bytes retained by the seven reviewed APT archives.
+APT_WHEEL_SHA256 = {
+    "llvmlite": "05d94d41cb53e5b01ecf10839cd3590e7f740654a0237676c6e73a955e7d9501",
+    "numpy": "a20faf9d5aaa10c4de3ffaef30aaf997af4aa80cce1e8d234f1e60f8f6da53d0",
+    "scipy": "a20faf9d5aaa10c4de3ffaef30aaf997af4aa80cce1e8d234f1e60f8f6da53d0",
+    "soxr": "e07b9b81cf17f8809c2b11d3901b3d6dc621fbcf8104f87d0bc5b8fd282dd540",
+    "torch": "ffdbc8fb24da49c70951e582e00ac5885ef338aa509f182f31d9ea4f75abbffa",
+    "torchaudio": "05d94d41cb53e5b01ecf10839cd3590e7f740654a0237676c6e73a955e7d9501",
+    "torchcodec": "ffdbc8fb24da49c70951e582e00ac5885ef338aa509f182f31d9ea4f75abbffa"
+}
+
 
 def require(ok, reason):
     if not ok:
@@ -272,6 +283,48 @@ def verify_python_closure():
             "jinja2_result": rendered}
 
 
+def installed_apt_wheel_evidence():
+    from packaging.tags import parse_tag, sys_tags
+    supported = set(sys_tags())
+    evidence = {}
+    for name, digest in APT_WHEEL_SHA256.items():
+        distribution = importlib.metadata.distribution(name)
+        require(distribution.version == EXPECTED[name], "APT distribution version changed: " + name)
+        text = distribution.read_text("WHEEL")
+        require(text is not None, "APT distribution has no WHEEL metadata: " + name)
+        actual_digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+        require(actual_digest == digest, "APT WHEEL metadata changed: " + name)
+        metadata = BytesParser().parsebytes(text.encode("utf-8"))
+        tags = metadata.get_all("Tag", [])
+        require(tags, "APT distribution has no recorded wheel tags: " + name)
+        parsed = {tag for value in tags for tag in parse_tag(value)}
+        evidence[name] = {"version": distribution.version, "wheel_metadata": text,
+                          "wheel_metadata_sha256": actual_digest, "tags": tags,
+                          "matches_current_supported_tags": bool(parsed & supported)}
+    return evidence
+
+
+def classify_pip_check(code, stdout, stderr):
+    """Allow measured diagnostics only for the exact original APT tag mismatch."""
+    if code == 0:
+        require(not stderr and stdout.strip() == "No broken requirements found.",
+                "unexpected successful pip-check output")
+        return {"status": "passed", "pip_check_passed": True, "wheel_tag_compatibility": "passed"}
+    expected = {f"{name} {EXPECTED[name]} is not supported on this platform" for name in APT_WHEEL_SHA256}
+    lines = stdout.splitlines()
+    require(code == 1 and not stderr and len(lines) == len(expected) and set(lines) == expected,
+            "pip check has errors beyond the reviewed APT wheel-tag diagnostic")
+    evidence = installed_apt_wheel_evidence()
+    require(set(evidence) == set(APT_WHEEL_SHA256), "APT wheel evidence set differs")
+    for name, row in evidence.items():
+        require(row["version"] == EXPECTED[name] and row["wheel_metadata_sha256"] == APT_WHEEL_SHA256[name]
+                and row["matches_current_supported_tags"] is False,
+                "unverified APT wheel-tag diagnostic: " + name)
+    return {"status": "failed", "pip_check_passed": False, "wheel_tag_compatibility": "unresolved",
+            "diagnostic_continuation": "only measured native scientific behavior",
+            "apt_wheel_evidence": evidence}
+
+
 def install_python_inputs(inputs, out):
     """Complete the disposable APT interpreter graph without changing native pins."""
     require(sys.platform == "android" and os.uname().machine == "aarch64" and os.getuid() == 1000,
@@ -296,7 +349,7 @@ def install_python_inputs(inputs, out):
     def save():
         receipt_path.write_text(json.dumps(receipt, indent=2) + "\n")
 
-    def run_logged(label, args):
+    def run_logged(label, args, *, enforce_success=True):
         save()
         try:
             result = subprocess.run(args, capture_output=True, timeout=180)
@@ -308,7 +361,9 @@ def install_python_inputs(inputs, out):
         receipt["commands"].append({"label": label, "exit_code": code, "argv": args,
                                     "stdout_bytes": len(stdout), "stderr_bytes": len(stderr)})
         save()
-        require(code == 0, "pinned Python dependency command failed: " + label)
+        if enforce_success:
+            require(code == 0, "pinned Python dependency command failed: " + label)
+        return code, stdout, stderr
 
     try:
         requirements = work / "registry-wheels.txt"
@@ -339,8 +394,13 @@ def install_python_inputs(inputs, out):
             "--find-links", str(wheel_out), "-r", str(built_requirements),
         ])
         receipt["closure"] = verify_python_closure()
-        run_logged("neutts-python-check", pip + ["check"])
-        receipt["status"] = "passed"
+        receipt["dependency_closure_passed"] = True
+        code, stdout, stderr = run_logged("neutts-python-check", pip + ["check"], enforce_success=False)
+        receipt["pip_check_passed"] = False
+        receipt["pip_check"] = classify_pip_check(code, stdout.decode("utf-8"), stderr.decode("utf-8"))
+        receipt["pip_check_passed"] = receipt["pip_check"]["pip_check_passed"]
+        receipt["pip_wheel_tag_compatibility"] = receipt["pip_check"]["wheel_tag_compatibility"]
+        receipt["status"] = "passed" if receipt["pip_check_passed"] else "ready-for-native-diagnostics"
         save()
         return 0
     except Exception as exc:
@@ -578,11 +638,16 @@ def main(out):
                      "sha256": digest, "bytes": int(size), "repository_path": filename})
     python_result_path = out / "NEUTTS-PYTHON-RESULT.json"
     python_result = json.loads(python_result_path.read_text())
-    require(python_result.get("status") == "passed", "supplemental Python dependency gate did not pass")
+    require(python_result.get("status") in ("passed", "ready-for-native-diagnostics")
+            and python_result.get("dependency_closure_passed") is True,
+            "supplemental Python dependency gate did not pass")
     receipt = {
         "schema_version": 1, "status": "running", "scope": "APT native scientific ABI/behavior with exact Python dependencies",
         "python_dependencies_receipt": python_result_path.name,
         "python_dependencies_receipt_sha256": sha(python_result_path),
+        "dependency_closure_passed": True,
+        "pip_check_passed": python_result["pip_check_passed"],
+        "pip_wheel_tag_compatibility": python_result["pip_wheel_tag_compatibility"],
         "python": {"version": sys.version, "platform": sys.platform, "prefix": sys.prefix,
                    "executable": elf("/proc/self/exe")}, "uid": os.getuid(),
         "apt_archives": pins, "apt_archive_hashes_checked_before_install": True,
@@ -596,9 +661,14 @@ def main(out):
     for name in CASES:
         receipt["cases"].append(execute_case(name, out))
         result_path.write_text(json.dumps(receipt, indent=2) + "\n")
-    receipt["status"] = "passed" if all(row["exit_code"] == 0 and row["status"] == "passed" for row in receipt["cases"]) else "failed"
+    receipt["scientific_behavior_passed"] = all(row["exit_code"] == 0 and row["status"] == "passed"
+                                               for row in receipt["cases"])
+    receipt["status"] = "passed" if receipt["scientific_behavior_passed"] else "failed"
     result_path.write_text(json.dumps(receipt, indent=2) + "\n")
-    print(json.dumps({"status": receipt["status"], "cases": receipt["cases"]}), flush=True)
+    print(json.dumps({"status": receipt["status"], "scientific_behavior_passed": receipt["scientific_behavior_passed"],
+                      "pip_check_passed": receipt["pip_check_passed"],
+                      "pip_wheel_tag_compatibility": receipt["pip_wheel_tag_compatibility"],
+                      "cases": receipt["cases"]}), flush=True)
     return 0 if receipt["status"] == "passed" else 1
 
 

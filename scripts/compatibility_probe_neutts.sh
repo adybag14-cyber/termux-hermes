@@ -291,4 +291,4 @@ stage=pinned-python-dependencies
 stage=native-scientific-behavior
 "$PREFIX/bin/python" -I -B "$work/native_core.py" "$out"
 stage=complete
-echo "NATIVE_APT_CORE_PASSED: native APT and pinned Python dependencies; NeuTTS synthesis remains untested"
+echo "NATIVE_APT_CORE_PASSED: measured scientific behavior; pip/WHEEL compatibility is recorded separately; NeuTTS synthesis remains untested"

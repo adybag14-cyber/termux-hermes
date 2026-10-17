@@ -229,3 +229,79 @@ def test_native_dependency_installer_refuses_host_python_before_reading_inputs(t
     monkeypatch.setattr(probe.sys, "platform", "win32")
     with pytest.raises(RuntimeError, match="native Bionic"):
         probe.install_python_inputs(tmp_path / "missing", tmp_path)
+
+
+def apt_platform_output():
+    return "\n".join(f"{name} {probe.EXPECTED[name]} is not supported on this platform"
+                     for name in probe.APT_WHEEL_SHA256) + "\n"
+
+
+def apt_wheel_fixture():
+    return {name: {"version": probe.EXPECTED[name], "wheel_metadata_sha256": digest,
+                   "matches_current_supported_tags": False}
+            for name, digest in probe.APT_WHEEL_SHA256.items()}
+
+
+def test_exact_apt_tag_diagnostic_retains_failed_pip_compatibility(monkeypatch):
+    evidence = apt_wheel_fixture()
+    monkeypatch.setattr(probe, "installed_apt_wheel_evidence", lambda: evidence)
+    result = probe.classify_pip_check(1, apt_platform_output(), "")
+    assert result["status"] == "failed"
+    assert result["pip_check_passed"] is False
+    assert result["wheel_tag_compatibility"] == "unresolved"
+    assert result["apt_wheel_evidence"] == evidence
+    assert result["diagnostic_continuation"] == "only measured native scientific behavior"
+
+
+@pytest.mark.parametrize("line", [
+    "torch 2.14.1 requires filelock, which is not installed.",
+    "torch 2.14.1 has requirement sympy>=1.13.3, but you have sympy 1.12.0.",
+    "unknown 1.0 is not supported on this platform",
+])
+def test_missing_conflicting_or_unknown_pip_error_cannot_continue(line):
+    with pytest.raises(RuntimeError, match="beyond the reviewed"):
+        probe.classify_pip_check(1, apt_platform_output() + line + "\n", "")
+
+
+@pytest.mark.parametrize("code,stderr", [(2, ""), (1, "unexpected stderr")])
+def test_other_pip_status_or_stderr_cannot_continue(code, stderr):
+    with pytest.raises(RuntimeError, match="beyond the reviewed"):
+        probe.classify_pip_check(code, apt_platform_output(), stderr)
+
+
+def test_partial_apt_unsupported_set_cannot_continue():
+    with pytest.raises(RuntimeError, match="beyond the reviewed"):
+        probe.classify_pip_check(1, "\n".join(apt_platform_output().splitlines()[:-1]), "")
+
+
+@pytest.mark.parametrize("change", ["hash", "version", "compatible"])
+def test_apt_diagnostic_requires_exact_original_wheel_evidence(monkeypatch, change):
+    evidence = apt_wheel_fixture()
+    row = evidence["torch"]
+    if change == "hash":
+        row["wheel_metadata_sha256"] = "0" * 64
+    elif change == "version":
+        row["version"] = "0.0"
+    else:
+        row["matches_current_supported_tags"] = True
+    monkeypatch.setattr(probe, "installed_apt_wheel_evidence", lambda: evidence)
+    with pytest.raises(RuntimeError, match="unverified APT"):
+        probe.classify_pip_check(1, apt_platform_output(), "")
+
+
+def test_genuine_successful_pip_check_is_reported_as_passed():
+    result = probe.classify_pip_check(0, "No broken requirements found.\n", "")
+    assert result == {"status": "passed", "pip_check_passed": True, "wheel_tag_compatibility": "passed"}
+
+
+def test_installed_apt_wheel_evidence_rejects_changed_bytes(monkeypatch):
+    class Distribution:
+        version = probe.EXPECTED[next(iter(probe.APT_WHEEL_SHA256))]
+
+        def read_text(self, name):
+            assert name == "WHEEL"
+            return "Wheel-Version: 1.0\nTag: invented\n"
+
+    monkeypatch.setattr(probe.importlib.metadata, "distribution", lambda name: Distribution())
+    with pytest.raises(RuntimeError, match="APT WHEEL metadata changed"):
+        probe.installed_apt_wheel_evidence()
