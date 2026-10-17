@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "run_id": 39044958038,
+  "job_id": 117431762915,
+  "actual_packaging_checkout_sha": "e20e8c447681b832ae3d1956e105da6aaf338146",
+  "reported_probe_inputs_packaging_commit": "d80e2bd1cd999d2e25c6315160e3e77601d1e797",
+  "workflow_ref_parent_shas": [
+    "91e096aec63aafd55700675e07148285522dcc70",
+    "e20e8c447681b832ae3d1956e105da6aaf338146"
+  ],
+  "metadata_note": "The raw artifact field PROBE-INPUTS.packaging_commit was populated from GITHUB_SHA and denotes the workflow merge commit. The workflow explicitly checked out the PR head; the job checkout log confirms actual packaging HEAD e20e8c447681b832ae3d1956e105da6aaf338146. The raw artifact record is retained unchanged.",
+  "job_log": {
+    "url": "https://api.github.com/repos/adybag14-cyber/termux-hermes/actions/jobs/117431762915/logs",
+    "sha256": "0a1ee554c4a9bd8de6d0264e3a1ffbf797be1532cb6f2c179e88ea672cad8808",
+    "bytes": 176353
+  },
+  "checkout_records": [
+    {
+      "repository": "adybag14-cyber/termux-hermes",
+      "commit": "e20e8c447681b832ae3d1956e105da6aaf338146",
+      "job_log_lines": [
+        {
+          "number": 130,
+          "text": "2026-10-17T15:25:27.5514219Z [command]/usr/bin/git log -1 --format=%H"
+        },
+        {
+          "number": 131,
+          "text": "2026-10-17T15:25:27.5534930Z e20e8c447681b832ae3d1956e105da6aaf338146"
+        }
+      ]
+    },
+    {
+      "repository": "NousResearch/hermes-agent",
+      "commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+      "job_log_lines": [
+        {
+          "number": 274,
+          "text": "2026-10-17T15:25:32.2932420Z [command]/usr/bin/git log -1 --format=%H"
+        },
+        {
+          "number": 275,
+          "text": "2026-10-17T15:25:32.2956214Z d923a5eb487a17c0a68801bba9ef0f56c81040a8"
+        }
+      ]
+    }
+  ],
+  "workflow": {
+    "path": ".github/workflows/compatibility-probes.yml",
+    "sha256": "3e6ae5d3b8930c1ce1cc0d7670f193cc6cbc0ab1266df6d786443a885174792d",
+    "checkout_ref_expression": "${{ github.event.pull_request.head.sha || github.sha }}"
+  }
+}

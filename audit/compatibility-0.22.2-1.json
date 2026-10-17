@@ -112,12 +112,12 @@
         "PM Chromium"
       ],
       "baseline": "No managed Android artifacts; local managed browser cannot be provisioned.",
-      "status": "native_pm_built_in_roundtrip_passed_default_handler_executed_final_fixture_correction_pending"
+      "status": "native_raw_pm_built_in_and_actual_default_browser_exec_roundtrips_passed"
     },
     {
       "id": "native-cua",
       "baseline": "Default local CUA driver does not support Android; MCP dependency alone is not a native backend.",
-      "status": "remote_routing_fixed_native_android_backend_unavailable"
+      "status": "remote_routing_fixed_isolated_bionic_x11_source_port_prepared_native_probe_pending"
     },
     {
       "id": "bot-desktop",
@@ -223,17 +223,29 @@
       "failed": 0
     },
     "packaging_regressions": {
-      "passed": 154,
+      "passed": 155,
       "failed": 0,
       "skipped_host_specific": 4
     },
     "native_gateway_evidence": "native-probes-4b3d121-20261017/gateway-summary.json",
     "native_audio_evidence": "native-probes-9fcd31c-20261017/audio-summary.json",
     "native_desktop_evidence": "native-probes-4b3d121-20261017/browser-desktop-summary.json",
-    "native_browser_evidence": "native-probes-9fcd31c-20261017/browser-summary.json",
+    "native_browser_evidence": "native-probes-e20e8c4-20261017/browser-summary.json",
     "native_planner_regressions": {
       "passed": 19,
       "failed": 0
+    },
+    "cua_source_port": {
+      "source_commit": "70db98d1bcd92890d778f4978e0eb107a4b66c1b",
+      "original_cargo_lock_sha256": "27b025bc4fd81074cf18ae614597bec5b7c9d8ea99b2a7aaf45072aec72c64ce",
+      "adapted_registry_crates": [
+        "clipboard-rs==0.3.5",
+        "x11rb-protocol==0.13.2"
+      ],
+      "unchanged_other_cargo_package_records": 602,
+      "status": "source_preparation_passed_native_build_and_operations_pending",
+      "included_in_hermes_candidate": false,
+      "physical_android_phone_ui": false
     }
   }
 }

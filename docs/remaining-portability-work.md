@@ -58,6 +58,33 @@ phone apps. A phone UI backend requires that Android integration and its explici
 device permissions. A potential native X11 driver build should be evaluated
 against the virtual desktop on its own terms.
 
+### Isolated native X11 source-port experiment
+
+The preparation includes a candidate-only source port for CUA's existing virtual
+X11 desktop backend. Its source is pinned to commit
+`70db98d1bcd92890d778f4978e0eb107a4b66c1b` (CUA 0.21.0), with original
+Cargo.lock SHA-256
+`27b025bc4fd81074cf18ae614597bec5b7c9d8ea99b2a7aaf45072aec72c64ce`.
+The [source preparer](../scripts/prepare_cua_termux_source.py) verifies the clean
+Git checkout and both exact registry archives before applying
+[the reviewed patch](../patches/next-stable/cua-driver.patch).
+
+The driver/SDK platform configuration admits Android to the existing X11 code.
+Two local crate adapters enable clipboard-rs's Unix X11 implementation and align
+x11rb-protocol's socket location with Termux's PREFIX/tmp. Both retain their
+locked versions; the preparer verifies that all 602 other Cargo package records
+remain unchanged. Source preparation has passed. Native compilation and actual
+input/capture behavior are the next gate.
+
+The experiment checks a private, owned Xvnc desktop using real MCP operations
+and independent fixture observations. Its scope includes screenshot capture,
+keyboard and mouse events, scrolling, clipboard transfer, window geometry, and
+cleanup. It remains separate from Hermes PM admission and the complete package
+candidate. Encrypted history still requires a supported secure credential store;
+its existing failure behavior is preserved. TigerVNC does not provide the
+parallel uinput devices expected by CUA's multiple-pointer implementation.
+Android phone application control still requires an Android-specific backend.
+
 ## Microphone silence detection
 
 Termux:API records a finalized audio file; it does not expose the live PCM stream

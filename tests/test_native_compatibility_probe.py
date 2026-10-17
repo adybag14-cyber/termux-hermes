@@ -219,3 +219,37 @@ def test_audio_initialization_failure_keeps_real_object_hash_and_origin_evidence
     }]
     assert probe.os.environ["LD_LIBRARY_PATH"] == "parent-python-libraries"
     assert evidence["hardware_capture_tested"] is False
+
+
+def test_component_metadata_records_checkout_instead_of_workflow_merge_commit(tmp_path, monkeypatch):
+    import json
+    from pathlib import Path
+    import subprocess
+    import sys
+
+    script = (Path(__file__).resolve().parents[1] / "scripts/probe_native_compatibility.sh").read_text(encoding="utf-8")
+    invocation = '''python3 - "$out" "$group" "$TERMUX_IMAGE" "$deb_sha" "$packaging" <<'PY'
+'''
+    program = script.split(invocation, 1)[1].split("\nPY\n", 1)[0]
+    checkout = tmp_path / "checkout"
+    checkout.mkdir()
+    subprocess.run(["git", "init", "-q", str(checkout)], check=True)
+    subprocess.run([
+        "git", "-C", str(checkout), "-c", "user.name=Provenance fixture",
+        "-c", "user.email=fixture@example.invalid", "-c", "commit.gpgsign=false",
+        "commit", "--allow-empty", "-qm", "fixture",
+    ], check=True)
+    head = subprocess.check_output(["git", "-C", str(checkout), "rev-parse", "HEAD"], text=True).strip()
+    workflow_merge = "f" * 40
+    assert head != workflow_merge
+    monkeypatch.setenv("GITHUB_SHA", workflow_merge)
+    out = tmp_path / "evidence"
+    out.mkdir()
+    # Execute the actual shell-owned metadata block away from the checkout.
+    subprocess.run([
+        sys.executable, "-c", program, str(out), "audio",
+        "termux/termux-docker@sha256:" + "a" * 64, "b" * 64, str(checkout),
+    ], cwd=tmp_path, check=True)
+    record = json.loads((out / "PROBE-INPUTS.json").read_text(encoding="utf-8"))
+    assert record["packaging_commit"] == head
+    assert record["workflow_ref_commit"] == workflow_merge

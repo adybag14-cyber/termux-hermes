@@ -110,13 +110,15 @@ test "$(dpkg-deb -f "$deb" Version)" = 0.22.2-1
 test "$(dpkg-deb -f "$deb" Architecture)" = aarch64
 cp "$source/uv.lock" "$out/PROBE-UV.lock"
 cp "$source/pyproject.toml" "$out/PROBE-PYPROJECT.toml"
-python3 - "$out" "$group" "$TERMUX_IMAGE" "$deb_sha" <<'PY'
-import json, os, sys
+python3 - "$out" "$group" "$TERMUX_IMAGE" "$deb_sha" "$packaging" <<'PY'
+import json, os, subprocess, sys
 from pathlib import Path
-out, group, image, sha = sys.argv[1:]
+out, group, image, sha, packaging = sys.argv[1:]
 Path(out, "PROBE-INPUTS.json").write_text(json.dumps({
     "group": group, "builder_image": image, "baseline_package_sha256": sha,
-    "baseline_package_version": "0.22.2-1", "packaging_commit": os.environ.get("GITHUB_SHA"),
+    "baseline_package_version": "0.22.2-1",
+    "packaging_commit": subprocess.check_output(["git", "-C", packaging, "rev-parse", "HEAD"], text=True).strip(),
+    "workflow_ref_commit": os.environ.get("GITHUB_SHA"),
     "purpose": "next-stable compatibility probe; no release output",
 }, indent=2) + "\n")
 PY
