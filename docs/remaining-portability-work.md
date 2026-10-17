@@ -45,8 +45,41 @@ at head `036f11515eda3a6e4129e14c7dd75ec27d5ae47d`, installed all 122 pinned
 APT packages. SciPy's numerical checks, llvmlite's native MCJIT function and soxr
 resampling passed. Torch, Torchaudio and Torchcodec each stopped at
 `ModuleNotFoundError: No module named 'typing_extensions'` before their native
-behavior cases; the overall probe correctly failed. A pinned Python
-dependency-closure fix is pending.
+behavior cases; the overall probe correctly failed. The preparation then added
+a verified nine-wheel Python dependency closure. The [later native run
+39056756533](../audit/neutts-native-20261017/run-39056756533.json) passes all six
+scientific checks: Torch matrix/Conv1d arithmetic, Torchaudio resampling,
+Torchcodec decoding an owned PCM WAV with zero sample error, SciPy numerical/FFT
+operations, llvmlite JIT and soxr resampling.
+
+Two validation issues remain recorded in that run. Pip reports seven original
+APT WHEEL tags using `android_aarch64`, while the actual interpreter expects
+the `arm64_v8a` ABI spelling. The installed-file oracle also needed to handle
+Sympy's real `.data/data/share/man/man1/isympy.1` file. The latter mapping is
+corrected without omitting the file. The [strict APT validator](../scripts/validate_neutts_apt_python.py)
+binds the original archives, installed metadata and pip sources, enforces Python
+and APT requirements, and recognizes only the exact reviewed native tag
+convention. It preserves pip's nonzero result without retagging packages. The
+combined validator/file/native gate **passed** in [run 39058569758](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39058569758)
+at packaging head `19ab7a1ce9f496dd8dd291d19e3818bb5f878048`. Its
+[retained receipt and raw evidence](../audit/neutts-native-20261017/run-39058569758.json)
+verify all seven gates, all 2,829 files from the nine wheels, the native
+MarkupSafe extension, 474 APT-owned provenance files, and both Python and APT
+dependency checks. Pip's original seven tag errors remain verbatim in the
+evidence; no wheel metadata or interpreter tag table was changed.
+
+The [exact default-engine source review](neutts-default-gguf-feasibility.md)
+identifies the next concrete builds: Numba 0.67.0 against the proven APT
+NumPy/llvmlite and llama-cpp-python 0.3.36 with its matching vendored llama.cpp.
+The latter's Android shared-library loader exclusion is fixed in a separate
+patch with 15 focused host tests. A [separate native-component workflow](../.github/workflows/neutts-engine-components.yml)
+now prepares exact Numba and matching vendored llama sources, four additional
+hash-verified Python wheels and a 44-package compiler closure. It first reruns
+the full scientific foundation, then installs only the 19 additional compiler
+packages from verified retained archives and builds isolated native wheels.
+Numba CPU JIT/workqueue behavior and actual llama backend initialization are
+the required next gates. Neither the native engine nor model inference is
+claimed from the host preparation tests.
 
 This disposable Termux system-Python experiment records the rolling base upgrade
 separately from the pinned dependency archives. Its
@@ -138,22 +171,40 @@ real registered tool and product Bot Desktop, with exact fixture image/input
 observations, three one-action foreground approvals, refusal without an approver,
 viewer takeover/hand-back, and owned cleanup. Its [candidate fetcher](../scripts/fetch_compatibility_candidate.py)
 verifies the already-proven package and source identities before the test. These
-files are prepared and reviewed; native Hermes integration is still pending and
-the experimental patch is not included in the full main candidate. The
+files now have [successful real native Hermes evidence](../audit/cua-native-20261017/run-39056267366.json)
+at head `fbf7c029b8df66618f520a47e6c07ff722129a43`. Five integration checks
+passed through real MCP, including three once approvals, exact input oracles,
+viewer takeover and cleanup. The preceding run exposed a scroll-schema error:
+Hermes dropped requested coordinates and scrolled at the window center.
+Corrected paired-x/y schema handling delivered both events at (80,60).
+The experimental patch is still not part of the full main candidate. The
 [preparation receipt](../audit/cua-hermes-preparation-20261017.json) distinguishes
 the full-source reference/replay Git trees from the forthcoming runtime input:
-the native probe will copy the exact proven candidate's trimmed `app/` tree
-outside the installed payload and apply only the experimental CUA patch. The
+the successful native probe copied the exact proven candidate's trimmed `app/`
+tree outside the installed payload and applied only the experimental CUA patch. The
 full-source trees `f49c77b666cef7fd5235cdd786556908527b532e` and
 `d4e6233dc147ca2595d37e9a76a03878ee137498` prove the reference patch replay;
 they do not assert that the candidate's trimmed app tree is identical to either.
 
 The [canonical host-validation record](../audit/cua-hermes-host-tests-20261017.json)
 preserves the initial 58-pass/three-skip run and the final 14-pass readiness run,
-with seven overlapping cases and unchanged production code. Those results are
-not summed and do not establish native Hermes-to-MCP behavior. The standalone
-driver result therefore does not increase the six main-candidate repairs or
-change the nine-restriction baseline count.
+with seven overlapping cases and unchanged production code. Those host results are not summed. The later native integration establishes
+Hermes-to-MCP behavior for explicit driver/foreground selection. A new candidate
+preparation adds a sealed, source-bound PM tool descriptor and normal driver
+discovery, plus a Termux-local foreground default resolved before approval.
+Explicit background requests are refused; background grants must not authorize
+foreground input. The next gate must execute the app and PM inside the
+augmented package and exercise omitted delivery mode. Until that package gate
+passes, the six main-candidate repairs and nine-restriction baseline remain
+unchanged.
+
+The [packaged CUA preparation](cua-candidate-preparation.md) now adds canonical
+bundled-driver selection and resolves omitted input delivery mode to foreground
+before approval on the local Termux X11 backend. Explicit background input is
+refused. Its separate unpublished package adds `Depends: libx11, libxi`,
+preserves the original Python/runtime dependency identities, and must pass
+installed default selection plus a fresh-container same-version upgrade and
+optional-install lifecycle. Those new native gates remain pending.
 
 ## Microphone silence detection
 
@@ -179,6 +230,15 @@ evidence](../audit/native-probes-9fcd31c-20261017/audio-summary.json) and the
 [reviewed wrapper source](https://github.com/termux/termux-packages/blob/11ae750781a261b8df328697b12d66d75b72e5da/packages/libandroid-stub/libOpenSLES-wrapper.c).
 Physical microphone permission, capture, VAD thresholds, maximum
 duration, playback/audio focus and cancellation remain device gates.
+
+The separate [audio-readiness patch](../patches/next-stable/audio-readiness.patch)
+catches the actual import-time PortAudio exception path, preserves its diagnostic
+cause and prevents an output-only inventory from being reported as microphone
+readiness. Its [source/test receipt](../audit/audio-readiness-preparation-20261017.json)
+and [device guide](audio-readiness-device-validation.md) distinguish tested source
+behavior from missing physical-device proof. A fresh isolated PM audio environment
+still has to be staged before the device test; copying a CI environment is not
+an installation procedure.
 
 ## Stable-release prerequisites
 

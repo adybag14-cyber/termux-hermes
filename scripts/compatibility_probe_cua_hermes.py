@@ -2,13 +2,16 @@
 """Exercise real Hermes computer_use against one owned native Termux X11 fixture.
 
 Invoke with the SHA-verified candidate's <payload>/venv/bin/python, preserving its
-bundle loader environment. --source is a separate Hermes checkout with the
-experimental cua-hermes-integration.patch applied. The caller provisions the
-product Bot Desktop package set and passes the standalone probe's Xlib fixture.
---candidate-receipt names the verified fetch receipt, beside its two unchanged
-raw JSON files. The exact candidate/run/artifact is pinned below, and its native
-catalog, locks, and feature selection are checked against the running payload.
-This helper installs nothing and must run before that fixture is removed.
+bundle loader environment. By default --source is a separate patched Hermes
+checkout and the driver is explicitly selected. --packaged-default instead
+requires --source to be the executing payload/app and --prepared-receipt to
+identify the reviewed augmented same-version package. That route exercises PM
+selection and foreground/no-overlay defaults without authority overrides.
+The caller provisions product Bot Desktop packages and the owned Xlib fixture.
+--candidate-receipt names the original verified fetch receipt, beside its two
+unchanged raw JSON files. Both routes retain its exact dependency selection.
+The prepared receipt must be beside its new .deb and full payload inventory.
+This helper installs nothing and must run before the fixture is removed.
 
 Scope: provider/registry admission, the normal MCP backend, private Bot Desktop
 pixels and input, one-action fixture approvals, and viewer lease refusal.
@@ -19,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import copy
 import hashlib
 import importlib.metadata
 import io
@@ -48,6 +52,16 @@ SOURCE_FILES = (
     "pm/lock.json", "uv.lock", "pyproject.toml",
 )
 PAYLOAD_FILES = ("manifest.json", "bundled-wheels.json", "enabled-features.json", "app/uv.lock", "app/pm/lock.json")
+PACKAGED_SOURCE_FILES = ("pm/bundled_tools.py", "pm/install.py", "pm/packages.py", "tools/computer_use/schema.py")
+PACKAGED_TOOL_ENTRY = "tools/cua-driver-0.21.0-linux-arm64-bionic"
+PACKAGED_PAYLOAD_FILES = ("bundled-tools.json", PACKAGED_TOOL_ENTRY + "/cua-driver",
+                          PACKAGED_TOOL_ENTRY + "/source-receipt.json")
+AUTHORITY_OVERRIDES = ("HERMES_CUA_DRIVER_CMD", "HERMES_RUNTIME_DIR", "HERMES_INSTALL_ROOT")
+PREPARED_PATCH = {
+    "file": "cua-hermes-integration.patch", "bytes": 67709,
+    "sha256": "8bbfddbbacfd508db35de6158e4c1a2c06423b84cd5f4ed621d4955fcd529edd",
+}
+SOURCE_RECEIPT_SHA256 = "47c43e002a868f0387e02142a9c623e5790c2656076959688abc3e93a6ec6167"
 LEFT_RGB, RIGHT_RGB = (0x22, 0x44, 0x66), (0x55, 0xCC, 0x88)
 SHA256 = re.compile(r"[a-f0-9]{64}")
 FOREGROUND_NOTICE = " [FOREGROUND — briefly raises the window / changes focus]"
@@ -120,6 +134,154 @@ def read_candidate_receipt(path: Path) -> dict[str, Any]:
         require({k: v for k, v in entry.items() if k not in {"file", "sha256", "zip_member"}} == raw,
                 f"candidate {key} fields differ from the verified raw file")
     return data
+
+
+def payload_inventory(root: Path) -> dict[str, dict[str, Any]]:
+    """Measure every descendant, including directory modes, without following links."""
+    require(root.is_dir() and not root.is_symlink(), "payload root is not a real directory")
+    files = {}
+    def failed_walk(error):
+        raise error
+    for parent, directories, names in os.walk(root, followlinks=False, onerror=failed_walk):
+        for name in sorted(directories + names):
+            path = Path(parent) / name
+            st = path.lstat()
+            row: dict[str, Any] = {"mode": stat.S_IMODE(st.st_mode)}
+            if stat.S_ISLNK(st.st_mode):
+                row.update(kind="symlink", target=os.readlink(path))
+            elif stat.S_ISDIR(st.st_mode):
+                row["kind"] = "directory"
+            elif stat.S_ISREG(st.st_mode):
+                row.update(kind="file", bytes=st.st_size, sha256=digest(path))
+            else:
+                raise ProbeFailure(f"unexpected special file inside the sealed payload: {path}")
+            files[path.relative_to(root).as_posix()] = row
+    return files
+
+
+def read_prepared_receipt(path: Path, *, payload: Path, source: Path, driver: Path,
+                          driver_sha256: str, candidate_path: Path,
+                          candidate: dict[str, Any]) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
+    """Bind the installed augmented package to the reviewed inputs and full inventory."""
+    require(source == payload / "app", "packaged --source must be the executing payload/app")
+    require(driver == payload / PACKAGED_TOOL_ENTRY / "cua-driver",
+            "packaged driver must be the canonical resident executable")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    require(isinstance(data, dict) and type(data.get("schema_version")) is int and data["schema_version"] == 1
+            and data.get("status") == "prepared-candidate"
+            and data.get("published") is False and data.get("version_bumped") is False,
+            "prepared receipt is not an unpublished same-version candidate")
+    packaging_commit = data.get("packaging_commit")
+    require(isinstance(packaging_commit, str) and re.fullmatch(r"[a-f0-9]{40}", packaging_commit),
+            "prepared packaging commit is not a full Git identity")
+    workflow_head = os.environ.get("CUA_PROBE_HEAD_SHA")
+    if workflow_head is not None:
+        require(packaging_commit == workflow_head, "prepared packaging commit differs from the actual workflow head")
+    expected_input = {key: CANDIDATE[key] for key in ("run_id", "head_sha", "artifact_id", "package_sha256")}
+    expected_input["candidate_receipt_sha256"] = digest(candidate_path)
+    require(data.get("input_candidate") == expected_input, "prepared input candidate identity differs")
+    require(data.get("patch") == PREPARED_PATCH, "prepared experimental patch identity differs")
+    package = data.get("package", {})
+    require(isinstance(package, dict)
+            and package.get("file") == "hermes-agent_0.22.2-1_aarch64-cua-candidate.deb"
+            and package.get("name") == "hermes-agent" and package.get("version") == "0.22.2-1"
+            and package.get("architecture") == "aarch64"
+            and package.get("depends") == "libx11, libxi" and package.get("pre_depends") == ""
+            and type(package.get("bytes")) is int and package["bytes"] > 0
+            and isinstance(package.get("sha256"), str) and SHA256.fullmatch(package["sha256"]),
+            "prepared package metadata differs")
+    package_path = path.parent / package["file"]
+    require(package_path.is_file() and not package_path.is_symlink()
+            and package_path.stat().st_size == package["bytes"] and digest(package_path) == package["sha256"],
+            "prepared package bytes differ")
+    original_selection = {key: value for key, value in candidate["native_selection"].items()
+                          if key not in {"file", "sha256", "zip_member"}}
+    require(data.get("native_selection") == original_selection,
+            "prepared dependency selection differs from the proven candidate")
+    payload_row = data.get("payload", {})
+    require(isinstance(payload_row, dict)
+            and payload_row.get("root") == str(payload),
+            "prepared receipt does not identify the executing payload root")
+    manifest_path = payload / "manifest.json"
+    require(payload_row.get("manifest_sha256") == digest(manifest_path), "prepared manifest bytes differ")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    staged = data.get("bundled_tools", {})
+    require(isinstance(staged, dict) and set(staged) == {"descriptor", "tool"},
+            "prepared bundled-tool descriptor is missing")
+    descriptor, tool_row = staged["descriptor"], staged["tool"]
+    require(isinstance(descriptor, dict) and set(descriptor) == {"path", "sha256"}
+            and descriptor.get("path") == "bundled-tools.json"
+            and descriptor.get("sha256") == digest(payload / "bundled-tools.json")
+            and manifest.get("bundled_tools") == descriptor, "prepared bundled-tool catalog differs")
+    catalog = json.loads((payload / "bundled-tools.json").read_text(encoding="utf-8"))
+    require(catalog == {"schema_version": 1, "tools": [tool_row]},
+            "prepared bundled-tool catalog does not contain its exact declared entry")
+    expected_tool = {"name": "cua-driver", "version": "0.21.0", "target": "linux-arm64-bionic",
+                     "entry": PACKAGED_TOOL_ENTRY, "binary": "cua-driver", "source_receipt": "source-receipt.json",
+                     "binary_sha256": driver_sha256, "source_receipt_sha256": SOURCE_RECEIPT_SHA256}
+    require(isinstance(tool_row, dict) and all(tool_row.get(key) == value for key, value in expected_tool.items())
+            and digest(driver) == driver_sha256
+            and digest(driver.parent / "source-receipt.json") == SOURCE_RECEIPT_SHA256,
+            "prepared driver bytes or reviewed source identity differ")
+    inventory_row = payload_row.get("inventory", {})
+    require(isinstance(inventory_row, dict) and inventory_row.get("file") == "CUA-PREPARED-PAYLOAD.json"
+            and type(inventory_row.get("bytes")) is int and 0 < inventory_row["bytes"] <= 64 * 1024 * 1024,
+            "prepared payload inventory descriptor differs")
+    inventory_path = path.parent / inventory_row["file"]
+    require(inventory_path.stat().st_size == inventory_row["bytes"]
+            and digest(inventory_path) == inventory_row.get("sha256"), "prepared payload inventory bytes differ")
+    inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+    require(isinstance(inventory, dict) and type(inventory.get("schema_version")) is int
+            and inventory["schema_version"] == 1 and isinstance(inventory.get("files"), dict),
+            "prepared payload inventory schema differs")
+    require(payload_inventory(payload) == inventory["files"], "installed payload differs from the prepared package inventory")
+    return data, inventory["files"]
+
+
+def verify_installed_control_output(output: str, package: dict[str, Any]) -> dict[str, str]:
+    fields = ("Package", "Version", "Architecture", "Depends", "Pre-Depends")
+    values = output.splitlines()
+    require(len(values) == len(fields), "installed dpkg metadata did not return five exact fields")
+    actual = dict(zip(fields, values))
+    expected = dict(zip(fields, (package["name"], package["version"], package["architecture"],
+                                 package["depends"], package["pre_depends"])))
+    require(actual == expected, "installed package control identity differs from the prepared candidate")
+    return actual
+
+
+def installed_control(package: dict[str, Any]) -> dict[str, str]:
+    fields = ("Package", "Version", "Architecture", "Depends", "Pre-Depends")
+    format_string = "".join("$" + "{" + name + "}\\n" for name in fields)
+    result = subprocess.run(
+        ["dpkg-query", "--show", "--showformat=" + format_string, "hermes-agent"],
+        stdin=subprocess.DEVNULL, capture_output=True, text=True, encoding="utf-8", timeout=10,
+    )
+    require(result.returncode == 0, "installed dpkg identity query failed: " + result.stderr)
+    return verify_installed_control_output(result.stdout, package)
+
+
+def verify_packaged_driver(pm_module, payload: Path, driver: Path, expected_sha256: str) -> dict[str, Any]:
+    """Require the real PM resident selection, with no ambient authority overrides."""
+    require(all(key not in os.environ for key in AUTHORITY_OVERRIDES), "packaged PM selection has an authority override")
+    require(Path(pm_module.__file__).resolve().is_relative_to(payload / "app" / "pm"),
+            "PM did not load from the executing packaged app")
+    selected = pm_module.installed_package("cua-driver")
+    require(selected is not None and selected.version == "0.21.0"
+            and selected.path.resolve() == payload / PACKAGED_TOOL_ENTRY
+            and selected.binary is not None and selected.binary.resolve() == driver,
+            "PM did not select the exact sealed resident driver")
+    require(digest(selected.binary) == expected_sha256, "PM selected driver bytes differ")
+    return {"path": str(selected.path), "binary": str(selected.binary), "version": selected.version,
+            "sha256": expected_sha256, "authority_overrides_present": []}
+
+
+def dispatch_unchanged(registry, arguments: dict[str, Any], *, session_id: str) -> Any:
+    """A successful probe cannot conceal normalization that mutated its caller."""
+    original = copy.deepcopy(arguments)
+    try:
+        return registry.dispatch("computer_use", arguments, session_id=session_id)
+    finally:
+        require(arguments == original, "registered handler mutated the original request arguments")
 
 
 def verify_native_selection(selection: dict[str, Any], payload_hashes: dict[str, str],
@@ -263,7 +425,7 @@ class FixtureApproval:
         return "once"
 
 
-def configure_environment(work: Path, payload: Path) -> Path:
+def configure_environment(work: Path, payload: Path, *, packaged_default: bool = False) -> Path:
     # All state belongs to this new disposable profile, including the driver's
     # ordinary history/preferences. No history or consent preference is disabled.
     for key, name in (("HOME", "home"), ("HERMES_HOME", "profile"), ("TMPDIR", "tmp"),
@@ -278,13 +440,19 @@ def configure_environment(work: Path, payload: Path) -> Path:
                 "HERMES_SINGLE_QUERY_SESSION", "CUA_DRIVER_PERMISSION_MODE",
                 "CUA_DRIVER_CAPABILITY_MANIFEST", "CUA_DRIVER_SOCKET"):
         os.environ.pop(key, None)
-    os.environ.update(HERMES_RUNTIME_DIR=str(payload / "tools"), TERMINAL_ENV="local",
-                      PYTHONNOUSERSITE="1", PYTHONDONTWRITEBYTECODE="1")
+    if packaged_default:
+        for key in AUTHORITY_OVERRIDES:
+            os.environ.pop(key, None)
+    else:
+        os.environ["HERMES_RUNTIME_DIR"] = str(payload / "tools")
+    os.environ.update(TERMINAL_ENV="local", PYTHONNOUSERSITE="1", PYTHONDONTWRITEBYTECODE="1")
     sys.dont_write_bytecode = True
     home = work / "profile"
     (home / "config.yaml").write_text(
         "terminal:\n  backend: local\nbot_desktop:\n  placement: gateway\n  geometry: '800x600'\n"
-        "computer_use:\n  backend: cua\n  permission_mode: standard\n  no_overlay: true\n  cua_telemetry: false\n"
+        "computer_use:\n  backend: cua\n  permission_mode: standard\n"
+        + ("" if packaged_default else "  no_overlay: true\n")
+        + "  cua_telemetry: false\n"
         "approvals:\n  mode: manual\nsecurity:\n  allow_lazy_installs: false\n"
         "model:\n  provider: openai\n  default: gpt-4o\nagent:\n  image_input_mode: native\n",
         encoding="utf-8",
@@ -300,8 +468,16 @@ def run_probe(args: argparse.Namespace, receipt: dict[str, Any]) -> None:
     require(Path(sys.prefix).resolve().name == "venv" and (payload / "tools").is_dir(),
             "interpreter must be the verified candidate's payload/venv/bin/python")
     require((payload / "app/.install_method").read_text().strip() == "apt", "candidate must retain sealed APT provenance")
-    require(not source.is_relative_to(payload), "--source must be separate from the immutable candidate payload")
-    before_source, before_payload = file_identity(source, SOURCE_FILES), file_identity(payload, PAYLOAD_FILES)
+    packaged_default = args.packaged_default
+    if packaged_default:
+        require(str(payload) == "/data/data/com.termux/files/usr/lib/hermes-agent",
+                "packaged route requires the fixed native Termux payload prefix")
+        require(source == payload / "app", "packaged --source must equal the executing payload/app")
+    else:
+        require(not source.is_relative_to(payload), "--source must be separate from the immutable candidate payload")
+    source_files = SOURCE_FILES + (PACKAGED_SOURCE_FILES if packaged_default else ())
+    payload_files = PAYLOAD_FILES + (PACKAGED_PAYLOAD_FILES if packaged_default else ())
+    before_source, before_payload = file_identity(source, source_files), file_identity(payload, payload_files)
     manifest = json.loads((payload / "manifest.json").read_text())
     candidate_receipt_path = Path(args.candidate_receipt).resolve()
     candidate_receipt = read_candidate_receipt(candidate_receipt_path)
@@ -309,6 +485,16 @@ def run_probe(args: argparse.Namespace, receipt: dict[str, Any]) -> None:
                             json.loads((payload / "enabled-features.json").read_text()))
     receipt["candidate_receipt"] = {"path": str(candidate_receipt_path), "sha256": digest(candidate_receipt_path),
                                     "verified": candidate_receipt}
+    prepared_inventory = None
+    if packaged_default:
+        prepared_path = Path(args.prepared_receipt).resolve()
+        prepared, prepared_inventory = read_prepared_receipt(
+            prepared_path, payload=payload, source=source, driver=driver,
+            driver_sha256=args.driver_sha256, candidate_path=candidate_receipt_path, candidate=candidate_receipt,
+        )
+        receipt["prepared_candidate"] = {"path": str(prepared_path), "sha256": digest(prepared_path), "verified": prepared,
+                                         "workflow_head_checked": os.environ.get("CUA_PROBE_HEAD_SHA")}
+        receipt["installed_control"] = installed_control(prepared["package"])
     receipt["driver"] = pin_executable(driver, args.driver_sha256)
     receipt["fixture_executable"] = pin_executable(fixture)
     receipt["interpreter"] = {"executable": sys.executable, "prefix": sys.prefix, "base_prefix": sys.base_prefix,
@@ -331,7 +517,7 @@ def run_probe(args: argparse.Namespace, receipt: dict[str, Any]) -> None:
     logger.addHandler(transport_log)
     completed = False
     try:
-        configure_environment(work, payload)
+        configure_environment(work, payload, packaged_default=packaged_default)
         os.chdir(source)
         sys.path.insert(0, str(source))
         import mcp
@@ -359,13 +545,19 @@ def run_probe(args: argparse.Namespace, receipt: dict[str, Any]) -> None:
         interactive_token = context.set_hermes_interactive_context(False)
         require(not approval.is_approval_bypass_active_for_session(session_id), "approval bypass is active")
         require(not lease.human_holds(), "new profile unexpectedly has a human lease")
-        require(not get_active_provider().is_available(), "default PM path unexpectedly advertises a Termux CUA artifact")
-        os.environ["HERMES_CUA_DRIVER_CMD"] = str(driver)
-        require(get_active_provider().is_available(), "explicit Termux provider is unavailable")
+        if packaged_default:
+            import pm
+            receipt["pm_selection"] = verify_packaged_driver(pm, payload, driver, args.driver_sha256)
+            require(get_active_provider().is_available(), "packaged default Termux provider is unavailable")
+        else:
+            require(not get_active_provider().is_available(), "default PM path unexpectedly advertises a Termux CUA artifact")
+            os.environ["HERMES_CUA_DRIVER_CMD"] = str(driver)
+            require(get_active_provider().is_available(), "explicit Termux provider is unavailable")
         require(registry.is_toolset_available("computer_use"), "computer_use is not exposable through the real registry")
         require(any(row["function"]["name"] == "computer_use" for row in registry.get_definitions({"computer_use"})),
                 "provider availability did not expose the registered tool definition")
-        receipt["availability"] = {"default_without_override": False, "explicit_provider": True, "registered_toolset": True}
+        receipt["availability"] = {"default_without_override": packaged_default,
+                                   "explicit_provider": not packaged_default, "registered_toolset": True}
         require(runtime.is_supported_host() and not runtime.missing_binaries(),
                 f"caller must provision product Bot Desktop packages: {runtime.missing_binaries()}")
         desktop = runtime.start(wait_seconds=45)
@@ -413,9 +605,10 @@ def run_probe(args: argparse.Namespace, receipt: dict[str, Any]) -> None:
 
         def dispatch(label: str, arguments: dict[str, Any]) -> Any:
             require(fixture_child.poll() is None, "fixture exited before registered-handler call")
-            result = registry.dispatch("computer_use", arguments, session_id=session_id)
+            original = copy.deepcopy(arguments)
+            result = dispatch_unchanged(registry, arguments, session_id=session_id)
             body = json_object(result)
-            record = {"label": label, "arguments": arguments,
+            record = {"label": label, "arguments": original, "arguments_unchanged": True,
                       "result": {key: value for key, value in body.items() if key != "content"}}
             receipt["calls"].append(record)
             return result
@@ -424,11 +617,46 @@ def run_probe(args: argparse.Namespace, receipt: dict[str, Any]) -> None:
             time.sleep(0.25)  # bounded negative observation; never replay an input
             require(input_events(events()) == before, "a refused operation changed the owned fixture")
 
+        delivery = {} if packaged_default else {"delivery_mode": "foreground"}
         before = input_events(events())
-        denied = json_object(dispatch("no-approver", {"action": "type", "text": "must-not-land", "delivery_mode": "foreground"}))
+        denied = json_object(dispatch("no-approver", {"action": "type", "text": "must-not-land", **delivery}))
         require("requires approval" in str(denied.get("error", "")), f"missing approver was not refused: {denied}")
         unchanged_inputs(before)
         receipt["checks"].append("no-approver-input-refused")
+
+        if packaged_default:
+            denied = json_object(dispatch("explicit-background-refused", {
+                "action": "click", "coordinate": [80, 60], "delivery_mode": "background",
+            }))
+            require(denied.get("ok") is False and denied.get("code") == "background_unavailable",
+                    f"explicit background was not truthfully refused: {denied}")
+            unchanged_inputs(before)
+            receipt["checks"].append("explicit-background-refused-without-input")
+
+            # Test an existing background grant before any MCP backend is started:
+            # clearing this disposable approval session also releases its backend.
+            background_key, foreground_key = "cua:click:background", "cua:click:foreground"
+            require(not approval.is_approved(session_id, background_key)
+                    and not approval.is_approved(session_id, foreground_key), "fresh scope already has a grant")
+            approval.approve_session(session_id, background_key)
+            try:
+                require(approval.is_approved(session_id, background_key)
+                        and not approval.is_approved(session_id, foreground_key)
+                        and not approval.is_approval_bypass_active_for_session(session_id),
+                        "background-only grant unexpectedly authorized foreground or a bypass")
+                denied = json_object(dispatch("background-grant-cannot-approve-default", {
+                    "action": "click", "coordinate": [80, 60],
+                }))
+                require("requires approval" in str(denied.get("error", "")),
+                        f"background-only grant authorized omitted foreground input: {denied}")
+                unchanged_inputs(before)
+            finally:
+                approval.clear_session(session_id)
+            require(not approval.is_approved(session_id, background_key)
+                    and not approval.is_approved(session_id, foreground_key), "test scope grant survived cleanup")
+            receipt["background_scope"] = {"created": background_key, "foreground_authorized": False,
+                                           "input_events_added": 0, "revoked": True}
+            receipt["checks"].append("background-only-grant-cannot-approve-default-foreground")
 
         windows = json_object(dispatch("list-windows", {"action": "list_windows"})).get("windows", [])
         require(sum(row.get("pid") == target["pid"] and row.get("window_id") == target["window_id"] for row in windows) == 1,
@@ -489,19 +717,18 @@ def run_probe(args: argparse.Namespace, receipt: dict[str, Any]) -> None:
             require(backend._active_pid == target["pid"] and backend._active_window_id == target["window_id"],
                     "input sticky target escaped the owned fixture")
 
-        approved_action("click", {"action": "click", "coordinate": [80, 60], "delivery_mode": "foreground"},
+        approved_action("click", {"action": "click", "coordinate": [80, 60], **delivery},
                         "click at (80, 60)", lambda rows: require_button_events(rows, button=1, count=1, x=80, y=60))
-        approved_action("scroll", {"action": "scroll", "coordinate": [80, 60], "direction": "down", "amount": 2,
-                                  "delivery_mode": "foreground"},
+        approved_action("scroll", {"action": "scroll", "coordinate": [80, 60], "direction": "down", "amount": 2, **delivery},
                         "scroll down x2", lambda rows: require_button_events(rows, button=5, count=2, x=80, y=60))
         typed = "hermes-native-input"
-        approved_action("type", {"action": "type", "text": typed, "delivery_mode": "foreground"},
+        approved_action("type", {"action": "type", "text": typed, **delivery},
                         f"type {typed!r}", lambda rows: require_text_events(rows, typed))
         require(len(receipt["approvals"]) == 3, "approved actions did not each receive exactly one once decision")
         receipt["checks"].append("three-once-approvals-with-independent-input-oracles")
 
         before = input_events(events())
-        denied = json_object(dispatch("once-not-reusable", {"action": "type", "text": "still-must-not-land", "delivery_mode": "foreground"}))
+        denied = json_object(dispatch("once-not-reusable", {"action": "type", "text": "still-must-not-land", **delivery}))
         require("requires approval" in str(denied.get("error", "")), "a once approval became reusable")
         unchanged_inputs(before)
 
@@ -509,7 +736,7 @@ def run_probe(args: argparse.Namespace, receipt: dict[str, Any]) -> None:
         require(acquired.holder == lease.HUMAN and acquired.viewer_id == viewer_id, "real viewer lease was not acquired")
         receipt["lease"] = {"acquired_epoch": acquired.epoch, "viewer_id": viewer_id}
         for label, arguments in (
-            ("lease-blocks-input", {"action": "click", "coordinate": [80, 60], "delivery_mode": "foreground"}),
+            ("lease-blocks-input", {"action": "click", "coordinate": [80, 60], **delivery}),
             ("lease-blocks-capture", {"action": "capture", "mode": "vision", **target}),
         ):
             denied = json_object(dispatch(label, arguments))
@@ -527,8 +754,11 @@ def run_probe(args: argparse.Namespace, receipt: dict[str, Any]) -> None:
                 "native MCP child was replaced during the probe")
         require(not transport_log.fallbacks, f"the MCP proof fell back to CLI: {transport_log.fallbacks}")
         require(digest(driver) == receipt["driver"]["sha256"], "driver changed during execution")
-        require(file_identity(source, SOURCE_FILES) == before_source, "Hermes source changed during execution")
-        require(file_identity(payload, PAYLOAD_FILES) == before_payload, "sealed candidate inputs changed during execution")
+        require(file_identity(source, source_files) == before_source, "Hermes source changed during execution")
+        require(file_identity(payload, payload_files) == before_payload, "sealed candidate inputs changed during execution")
+        if packaged_default:
+            require(verify_packaged_driver(pm, payload, driver, args.driver_sha256) == receipt["pm_selection"],
+                    "PM resident selection changed during execution")
         completed = True
     except Exception as exc:
         receipt["operation_error"] = {"type": type(exc).__name__, "message": str(exc)}
@@ -605,6 +835,11 @@ def run_probe(args: argparse.Namespace, receipt: dict[str, Any]) -> None:
         receipt["cleanup"]["private_workspace_removed"] = not work.exists()
         require(not errors, "cleanup failed: " + "; ".join(errors))
     require(completed, "probe did not complete all native operations")
+    if packaged_default:
+        require(payload_inventory(payload) == prepared_inventory,
+                "prepared payload inventory changed during operations or cleanup")
+        receipt["prepared_payload_preserved"] = {"inventory_entries": len(prepared_inventory),
+                                                 "files_links_and_directory_modes": True}
     receipt["checks"].append("product-session-desktop-and-owned-child-cleanup")
 
 
@@ -612,13 +847,19 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("source", "driver", "driver-sha256", "fixture", "out", "candidate-receipt"):
         parser.add_argument("--" + name, required=True)
+    parser.add_argument("--packaged-default", action="store_true",
+                        help="exercise the sealed PM driver and omitted input/overlay defaults")
+    parser.add_argument("--prepared-receipt", help="receipt beside the augmented .deb and full payload inventory")
     args = parser.parse_args(argv)
+    if args.packaged_default != bool(args.prepared_receipt):
+        parser.error("--packaged-default and --prepared-receipt must be supplied together")
     out = Path(args.out).resolve()
     out.mkdir(parents=True, exist_ok=True)
     result_path = out / "hermes-cua-result.json"
     require(not result_path.exists(), "use a new evidence directory; do not overwrite a previous probe result")
     receipt: dict[str, Any] = {
         "schema_version": 1, "status": "running", "scope": "private native Termux X11 through real Hermes computer_use",
+        "driver_selection_mode": "packaged-default" if args.packaged_default else "explicit-override",
         "android_phone_ui_tested": False, "at_spi_content_tested": False, "history_preview_tested": False,
         "physical_device_tested": False, "model_calls_requested": False, "checks": [], "calls": [], "approvals": [], "cleanup": {},
     }

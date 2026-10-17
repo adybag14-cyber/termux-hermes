@@ -12,6 +12,15 @@ on:
       - 'patches/next-stable/cua-hermes-integration.patch'
       - 'scripts/compatibility_probe_cua_hermes.py'
       - 'scripts/fetch_compatibility_candidate.py'
+      - 'scripts/prepare_cua_assembly_source.py'
+      - 'scripts/prepare_cua_hermes_candidate.py'
+      - 'scripts/run_cua_packaged_probe.py'
+      - 'scripts/check_cua_candidate_lifecycle.sh'
+      - 'scripts/check_next_stable_candidate.sh'
+      - 'scripts/check_next_stable_lifecycle.py'
+      - 'manifest/release.json'
+      - 'tests/test_cua_hermes_probe.py'
+      - 'tests/test_prepare_cua_hermes_candidate.py'
 
 permissions:
   contents: read
@@ -76,6 +85,11 @@ jobs:
             --source cua-source --out probe-results/cua \
             --candidate-dir "$RUNNER_TEMP/verified-compatibility-candidate"
 
+      - name: Validate CUA upgrade and optional installs without build tools
+        run: |
+          bash scripts/check_cua_candidate_lifecycle.sh \
+            probe-results/cua/hermes-prepared probe-results/cua/hermes-lifecycle
+
       - name: Retain Cargo fingerprints after a compile failure or success
         if: always() && steps.cargo-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -101,6 +115,9 @@ jobs:
             probe-results/cua/bin/cua-driver
             probe-results/cua/hermes-candidate/
             probe-results/cua/hermes-integration/
+            probe-results/cua/hermes-prepared/
+            probe-results/cua/assembly-source/
+            probe-results/cua/hermes-lifecycle/
           if-no-files-found: warn
           compression-level: 0
           retention-days: 14
