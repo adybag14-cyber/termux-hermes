@@ -232,13 +232,6 @@ def releases_for_tag(repository: str, tag: str) -> list[dict]:
     return [release for page in pages for release in page if release["tag_name"] == tag]
 
 
-def draft_release_id(repository: str, tag: str, target_commit: str) -> int:
-    matches = releases_for_tag(repository, tag)
-    if len(matches) != 1:
-        raise ValueError("expected exactly one matching draft release")
-    return validate_draft(matches[0], tag, target_commit)
-
-
 def ensure_new_release(repository: str, tag: str) -> None:
     if releases_for_tag(repository, tag):
         raise ValueError(f"immutable release or draft already exists: {tag}")
@@ -274,7 +267,7 @@ def main() -> int:
     assets_parser.add_argument("--release-id", type=int, required=True)
     assets_parser.add_argument("--target-commit", required=True)
     draft_parser = commands.add_parser("draft-id")
-    draft_parser.add_argument("--repository", required=True)
+    draft_parser.add_argument("--release-json", type=Path, required=True)
     draft_parser.add_argument("--release-tag", required=True)
     draft_parser.add_argument("--target-commit", required=True)
     new_parser = commands.add_parser("new-release")
@@ -304,7 +297,7 @@ def main() -> int:
                                   args.release_id, args.target_commit)
             print("GitHub draft assets match every verified candidate digest and size")
         elif args.command == "draft-id":
-            print(draft_release_id(args.repository, args.release_tag, args.target_commit))
+            print(validate_draft(read_json(args.release_json), args.release_tag, args.target_commit))
         else:
             ensure_new_release(args.repository, args.release_tag)
             print(f"Release and Git tag are available: {args.release_tag}")

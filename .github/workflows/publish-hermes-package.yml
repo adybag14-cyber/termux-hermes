@@ -121,18 +121,31 @@ jobs:
           Package checksums, locked dependency evidence and build provenance are attached.
           APT remains responsible for updates; use pkg upgrade hermes-agent.
           EOF
-          gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
-            --title "Hermes $SOURCE_TAG for Termux aarch64" \
-            --notes-file "$RUNNER_TEMP/release-notes.md" --draft
+          jq --null-input --arg tag "$RELEASE_TAG" --arg target "$GITHUB_SHA" \
+            --arg title "Hermes $SOURCE_TAG for Termux aarch64" \
+            --rawfile body "$RUNNER_TEMP/release-notes.md" \
+            '{tag_name: $tag, target_commitish: $target, name: $title, body: $body,
+              draft: true, prerelease: false}' > "$RUNNER_TEMP/release-request.json"
+          gh api --method POST "repos/$GITHUB_REPOSITORY/releases" \
+            --input "$RUNNER_TEMP/release-request.json" > "$RUNNER_TEMP/created-draft.json"
           DRAFT_ID="$(python3 scripts/verify_release_candidate.py draft-id \
-            --repository "$GITHUB_REPOSITORY" --release-tag "$RELEASE_TAG" \
+            --release-json "$RUNNER_TEMP/created-draft.json" --release-tag "$RELEASE_TAG" \
             --target-commit "$GITHUB_SHA")"
-          gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" candidate/*
+          for asset in candidate/*; do
+            asset_name="$(basename "$asset")"
+            asset_name_uri="$(jq --null-input --raw-output --arg name "$asset_name" '$name | @uri')"
+            gh api --method POST \
+              "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$DRAFT_ID/assets?name=$asset_name_uri" \
+              --header "Content-Type: application/octet-stream" --input "$asset" \
+              > "$RUNNER_TEMP/upload-$asset_name.json"
+          done
           gh api "repos/$GITHUB_REPOSITORY/releases/$DRAFT_ID" > "$RUNNER_TEMP/draft-release.json"
           python3 scripts/verify_release_candidate.py assets --candidate candidate \
             --release-json "$RUNNER_TEMP/draft-release.json" --release-tag "$RELEASE_TAG" \
             --release-id "$DRAFT_ID" --target-commit "$GITHUB_SHA"
-          gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest=false
+          gh api --method PATCH "repos/$GITHUB_REPOSITORY/releases/$DRAFT_ID" \
+            --field draft=false --field prerelease=false --raw-field make_latest=false \
+            > "$RUNNER_TEMP/published-release.json"
           printf 'Published [Hermes %s](https://github.com/%s/releases/tag/%s) from [native build %s](https://github.com/%s/actions/runs/%s).\n\nPackage SHA-256: %s\n' \
             "$SOURCE_TAG" "$GITHUB_REPOSITORY" "$RELEASE_TAG" "$BUILD_RUN_ID" \
             "$GITHUB_REPOSITORY" "$BUILD_RUN_ID" "$PACKAGE_SHA256" >> "$GITHUB_STEP_SUMMARY"
@@ -147,5 +160,7 @@ jobs:
             ${{ runner.temp }}/verified-candidate.json
             ${{ runner.temp }}/promotion-upgrade.log
             ${{ runner.temp }}/promotion-recovery.log
+            ${{ runner.temp }}/created-draft.json
             ${{ runner.temp }}/draft-release.json
+            ${{ runner.temp }}/published-release.json
           if-no-files-found: ignore

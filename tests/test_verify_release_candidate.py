@@ -236,34 +236,51 @@ def test_new_release_rejects_hidden_draft_on_later_page_before_checking_tag(
     assert len(calls) == 1
 
 
-def test_draft_lookup_returns_numeric_id_from_later_page(
-    monkeypatch: pytest.MonkeyPatch,
+def test_draft_id_comes_from_creation_response_without_network_readback(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture,
 ) -> None:
-    mock_release_pages(monkeypatch, [[], [draft_release()]])
-    assert promote.draft_release_id(REPO, TAG, HEAD) == DRAFT_ID
+    created = tmp_path / "created-draft.json"
+    created.write_text(json.dumps(draft_release()), encoding="utf-8")
+    monkeypatch.setattr(promote.sys, "argv", [
+        "verify_release_candidate", "draft-id", "--release-json", str(created),
+        "--release-tag", TAG, "--target-commit", HEAD,
+    ])
 
+    def unexpected_readback(*args: object, **kwargs: object) -> None:
+        pytest.fail("draft creation response must not need a list or tag endpoint lookup")
 
-@pytest.mark.parametrize("matches", [[], [draft_release(), draft_release(id=DRAFT_ID + 1)]])
-def test_draft_lookup_requires_one_unambiguous_match(
-    monkeypatch: pytest.MonkeyPatch, matches: list[dict],
-) -> None:
-    mock_release_pages(monkeypatch, [matches[:1], matches[1:]])
-    with pytest.raises(ValueError, match="exactly one"):
-        promote.draft_release_id(REPO, TAG, HEAD)
+    monkeypatch.setattr(promote.subprocess, "run", unexpected_readback)
+    assert promote.main() == 0
+    assert capsys.readouterr().out == f"{DRAFT_ID}\n"
 
 
 @pytest.mark.parametrize("changed", [
     {"id": None}, {"id": True}, {"id": 0}, {"id": -1}, {"id": str(DRAFT_ID)},
+    {"tag_name": "untagged-a852d1b6ec5675f3389b"},
     {"target_commitish": "a" * 40}, {"target_commitish": "main"},
     {"draft": False}, {"prerelease": True}, {"prerelease": None},
     {"published_at": "2026-10-17T00:00:00Z"},
 ])
-def test_draft_lookup_rejects_invalid_id_or_other_publishing_target(
-    monkeypatch: pytest.MonkeyPatch, changed: dict,
-) -> None:
-    mock_release_pages(monkeypatch, [[draft_release(**changed)]])
+def test_creation_response_requires_expected_draft_identity(changed: dict) -> None:
     with pytest.raises(ValueError, match="numeric release ID|unpublished draft"):
-        promote.draft_release_id(REPO, TAG, HEAD)
+        promote.validate_draft(draft_release(**changed), TAG, HEAD)
+
+
+@pytest.mark.parametrize("payload", ["[]", '{"id": true}', "invalid JSON"])
+def test_draft_id_cli_rejects_invalid_creation_response(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture,
+    payload: str,
+) -> None:
+    created = tmp_path / "created-draft.json"
+    created.write_text(payload, encoding="utf-8")
+    monkeypatch.setattr(promote.sys, "argv", [
+        "verify_release_candidate", "draft-id", "--release-json", str(created),
+        "--release-tag", TAG, "--target-commit", HEAD,
+    ])
+    with pytest.raises(SystemExit) as error:
+        promote.main()
+    assert error.value.code == 1
+    assert not capsys.readouterr().out
 
 
 @pytest.mark.parametrize("payload", [
