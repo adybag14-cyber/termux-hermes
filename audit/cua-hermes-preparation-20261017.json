@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "status": "prepared_and_reviewed_native_integration_pending",
+  "recorded_at": "2026-10-17",
+  "purpose": "next-stable compatibility preparation; no release",
+  "files": {
+    "patches/next-stable/cua-hermes-integration.patch": {
+      "bytes": 22045,
+      "sha256": "7d78150b29f186ab64e05818826d85312fa9c986a19d63facfbccb08aecdfbb7"
+    },
+    "scripts/compatibility_probe_cua_hermes.py": {
+      "bytes": 37732,
+      "sha256": "873a6dc99b445a88d711b28507df2d00cc1767c949ced75b32c45fb26f0232de"
+    },
+    "scripts/fetch_compatibility_candidate.py": {
+      "bytes": 19415,
+      "sha256": "dc075415b46e14f3f09fb6a889fdf38279564b2f2e6e6008b21232545d1d6d8a"
+    },
+    "tests/test_cua_hermes_probe.py": {
+      "bytes": 6948,
+      "sha256": "8d42e4f5c78a1bddb44ecad018fd263d287446bd844db206ba9851fc5f8fbd87"
+    },
+    "tests/test_fetch_compatibility_candidate.py": {
+      "bytes": 14547,
+      "sha256": "ff4bb8670b4163ca2b29909258c5bc83306474206d18da170f91f824fdbb1685"
+    },
+    ".github/workflows/ci.yml": {
+      "bytes": 1110,
+      "sha256": "9a823342dc43403b6e1d48eb4f897e61b444d0e4522305c8d9e7eb2d70afc0fa"
+    }
+  },
+  "source_baseline": {
+    "upstream_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+    "required_patch_order": "four released v0.22.2 patches; main compatibility patch; separate CUA integration patch",
+    "main_compatibility_patch_sha256": "77ac41bc11a6facd928f4cef577642b9eeb042ce3da7d820478aa49e1d98fa1e",
+    "before_integration_tree": "f49c77b666cef7fd5235cdd786556908527b532e",
+    "after_integration_tree": "d4e6233dc147ca2595d37e9a76a03878ee137498"
+  },
+  "host_validation": {
+    "packaging_suite": {
+      "command": [
+        "python",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "passed": 205,
+      "skipped_host_specific": 4,
+      "failed": 0,
+      "elapsed_seconds": 3.77
+    },
+    "helper_oracle_tests": 13,
+    "fetch_verification_tests": 37,
+    "counts_overlap_full_packaging_suite": true,
+    "reviewers": [
+      "root",
+      "package_contract",
+      "bootstrap_fix_review"
+    ]
+  },
+  "native_integration_executed": false,
+  "model_api_calls_requested": false,
+  "included_in_main_candidate": false,
+  "scope": "explicit external driver; owned X11 desktop; standard three one-action foreground approvals and real viewer-lease refusal; no phone UI, background input, AT-SPI or history claim",
+  "release_output": false
+}

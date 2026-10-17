@@ -12,6 +12,15 @@ The PyPI release supplies platform wheels but no source distribution.
 The public source is available and still declares version 1.4.1, so a source port
 can be considered without pretending an sdist exists.
 
+Hermes declares the exact NeuTTS version, but its current resolver environment
+is Python >=3.14. The resulting uv.lock contains no resolved NeuTTS, NeuCodec,
+Torchaudio, librosa, or llama-cpp-python package records. The Torch and ONNX
+Runtime records mentioned below come from other selected or optional graphs;
+they are not a complete locked NeuTTS closure. A separate engine environment
+would need its own exact dependency resolution and native validation. The
+[upstream resolver configuration](https://github.com/NousResearch/hermes-agent/blob/d923a5eb487a17c0a68801bba9ef0f56c81040a8/pyproject.toml)
+and the audited lock establish this distinction.
+
 Primary sources:
 
 - [Exact PyPI release metadata](https://pypi.org/pypi/neutts/1.4.1/json).
@@ -82,8 +91,12 @@ uses the existing kernel syscall where Bionic does not export the libc wrapper;
 native descriptor, shared-mapping, keymap and error-path checks passed. The first
 linked run stopped before Xfwm4 startup because the private test bus rejected
 method replies and signals. A narrow correction restores the standard D-Bus
-session receive policy and adds a real request/reply gate. Actual X11 input and
-capture behavior remain pending.
+session receive policy and adds a real request/reply gate. That correction
+passed: the native driver now starts, registers 60 MCP tools and captures the
+exact 320x240 client window with independently checked colors. The default
+background click returned an unverifiable effect and produced no fixture event.
+The next probe explicitly requests the documented foreground XTest route; no
+background-input certification is claimed.
 [Native progress records](../audit/cua-native-20261017/) preserve the exact tested
 inputs, real failure messages and completed PTY proof.
 
@@ -95,6 +108,17 @@ candidate. Encrypted history still requires a supported secure credential store;
 its existing failure behavior is preserved. TigerVNC does not provide the
 parallel uinput devices expected by CUA's multiple-pointer implementation.
 Android phone application control still requires an Android-specific backend.
+
+A [separate Hermes integration patch](../patches/next-stable/cua-hermes-integration.patch)
+allows an explicitly selected native Termux X11 executable. It leaves the full
+runtime manifest check, action approval gate and viewer lease in place. The
+[native integration helper](../scripts/compatibility_probe_cua_hermes.py) uses the
+real registered tool and product Bot Desktop, with exact fixture image/input
+observations, three one-action foreground approvals, refusal without an approver,
+viewer takeover/hand-back, and owned cleanup. Its [candidate fetcher](../scripts/fetch_compatibility_candidate.py)
+verifies the already-proven package and source identities before the test. These
+files are prepared and reviewed; native Hermes integration is still pending and
+the experimental patch is not included in the full main candidate.
 
 ## Microphone silence detection
 

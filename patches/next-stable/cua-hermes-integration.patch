@@ -1,0 +1,456 @@
+diff --git a/hermes_cli/tools_config.py b/hermes_cli/tools_config.py
+index 50f4a255..ccea9fd0 100644
+--- a/hermes_cli/tools_config.py
++++ b/hermes_cli/tools_config.py
+@@ -344,14 +344,15 @@ TOOL_CATEGORIES = {
+         ],
+     },
+     "computer_use": {
+-        "name": "Computer Use (macOS/Windows/Linux)", "icon": "🖱️",
+-        # Runtime backends ship for macOS, Windows, Linux (X11; Wayland via XWayland). Gaps surface via `computer-use doctor`.
+-        "platform_gate": ["darwin", "win32", "linux"],
++        "name": "Computer Use (desktop/X11)", "icon": "🖱️",
++        # Provider availability owns local/remote placement and the explicit Termux exception.
++        "setup_note": ("Termux X11 requires an externally built native driver selected by HERMES_CUA_DRIVER_CMD; "
++                       "it does not control Android phone apps."),
+         # cua-driver reads HOME/TMPDIR from the process env; HERMES_CUA_DRIVER_CMD selects a specific
+         # binary (e.g. a local build). There is no version-pin env var.
+         "providers": [
+             _row("cua-driver (background)", "★ recommended · free · local",
+-                 "Background computer-use via cua-driver — does NOT steal your cursor or focus. Works with any model.",
++                 "Desktop control via cua-driver. Foreground input requires separate approval. Works with any model.",
+                  computer_use_backend="cua", post_setup="cua_driver"),
+         ],
+     },
+diff --git a/hermes_cli/tools_config_cua.py b/hermes_cli/tools_config_cua.py
+index 10b00b28..05338f8a 100644
+--- a/hermes_cli/tools_config_cua.py
++++ b/hermes_cli/tools_config_cua.py
+@@ -88,6 +88,9 @@ def _cua_driver_contract_status(binary: Optional[str] = None) -> dict:
+ 
+ 
+ def _cua_driver_install_ready() -> bool:
++    from tools.computer_use.cua_backend_platform import local_cua_host_supported
++    if not local_cua_host_supported():
++        return False
+     state = _cua_driver_contract_status()
+     if not state.get("ready"):
+         return False
+@@ -110,7 +113,10 @@ def install_cua_driver(upgrade: bool = False, show_installer_progress: bool = Tr
+     Unattended callers should use PM ensure directly, without interactive host setup.
+     """
+     from pm import ensure
++    from tools.computer_use.cua_backend_platform import local_cua_host_supported, local_cua_unsupported_reason
+ 
++    if not local_cua_host_supported():
++        return _fail("    " + local_cua_unsupported_reason())
+     override = os.environ.get("HERMES_CUA_DRIVER_CMD", "").strip()
+     binary = _resolved_cua_driver_cmd()
+     fresh_install = binary is None
+@@ -159,8 +165,9 @@ def install_cua_driver(upgrade: bool = False, show_installer_progress: bool = Tr
+             return _fail("    cua-driver macOS app registration failed.")
+     if show_installer_progress:
+         _print_success(f"    cua-driver ready: {contract.get('version') or 'unknown version'}.")
++        from hermes_platform.host.runtime import is_termux
+         _print_cua_platform_notes(sys.platform == "win32", sys.platform == "linux",
+-                                  fresh_install=fresh_install)
++                                  fresh_install=fresh_install, is_termux_x11=is_termux())
+     return True
+ 
+ 
+@@ -256,8 +263,13 @@ def _repair_cua_driver_autostart_windows(driver_cmd: str, *, verbose: bool) -> b
+     return False
+ 
+ 
+-def _print_cua_platform_notes(is_windows: bool, is_linux: bool, *, fresh_install: bool) -> None:
+-    if is_windows:
++def _print_cua_platform_notes(is_windows: bool, is_linux: bool, *, fresh_install: bool,
++                              is_termux_x11: bool = False) -> None:
++    if is_termux_x11:
++        from tools.computer_use.cua_backend_platform import TERMUX_X11_HINT
++        _print_info("    " + TERMUX_X11_HINT)
++        _print_info("    Start the owned X11 desktop and use computer_use.no_overlay: true for this experiment.")
++    elif is_windows:
+         _print_info("    cua-driver may spawn a UIAccess worker (cua-driver-uia.exe);")
+         _print_info("    Windows/SmartScreen may prompt the first time it runs.")
+     elif is_linux:
+diff --git a/hermes_cli/tools_config_providers.py b/hermes_cli/tools_config_providers.py
+index 6bd4a182..86ec6850 100644
+--- a/hermes_cli/tools_config_providers.py
++++ b/hermes_cli/tools_config_providers.py
+@@ -127,7 +127,7 @@ _PLUGIN_ROW_BUILDERS = {
+     "Web Search & Extract": _plugin_web_search_providers,
+     "Browser Automation": _plugin_browser_providers,
+     "Text-to-Speech": _plugin_tts_providers,
+-    "Computer Use (macOS/Windows/Linux)": lambda: _computer_use_provider_rows()}
++    "Computer Use (desktop/X11)": lambda: _computer_use_provider_rows()}
+ 
+ 
+ def _computer_use_provider_rows() -> list[dict]:
+diff --git a/plugins/computer_use/cua/__init__.py b/plugins/computer_use/cua/__init__.py
+index 9c5573a2..23f1004d 100644
+--- a/plugins/computer_use/cua/__init__.py
++++ b/plugins/computer_use/cua/__init__.py
+@@ -8,12 +8,16 @@ from collections.abc import Callable
+ from tools.computer_use.backend import ComputerUseBackend, ComputerUseProvider
+ 
+ 
+-def _available_for_placement(platform: str, where: str, binary_available: Callable[[], bool]) -> bool:
++def _available_for_placement(platform: str, where: str, binary_available: Callable[[], bool], *,
++                             termux: bool = False, explicit_driver: bool = False) -> bool:
+     """A remote desktop's driver belongs to that backend, independently of the client's OS."""
+     from tools.bot_desktop import placement
+     if where == placement.TERMINAL:
+         return True  # The sandbox's actual binary and contract are checked on first use.
+-    return platform in ("darwin", "win32", "linux") and binary_available()
++    from tools.computer_use.cua_backend_platform import local_cua_supported
++    return (where == placement.GATEWAY
++            and local_cua_supported(platform, termux=termux, explicit_driver=explicit_driver)
++            and binary_available())
+ 
+ 
+ class CuaDriverProvider(ComputerUseProvider):
+@@ -28,7 +32,15 @@ class CuaDriverProvider(ComputerUseProvider):
+         """Probe a local desktop driver, or admit the explicitly placed remote Linux desktop."""
+         from tools.bot_desktop import placement
+         from tools.computer_use.cua_backend_driver import cua_driver_binary_available
+-        return _available_for_placement(sys.platform, placement.resolve().where, cua_driver_binary_available)
++        from hermes_platform.host.runtime import is_termux
++        from tools.computer_use.cua_backend_platform import configured_external_driver
++        where = placement.resolve().where
++        # A remote driver must not resolve any local override, even for passive availability.
++        termux = is_termux() if where == placement.GATEWAY else False
++        return _available_for_placement(
++            sys.platform, where, cua_driver_binary_available, termux=termux,
++            explicit_driver=bool(configured_external_driver()) if termux else False,
++        )
+ 
+ 
+ def register(ctx):
+diff --git a/tests/hermes_cli/test_cua_termux_setup.py b/tests/hermes_cli/test_cua_termux_setup.py
+new file mode 100644
+index 00000000..4df4c4b8
+--- /dev/null
++++ b/tests/hermes_cli/test_cua_termux_setup.py
+@@ -0,0 +1,29 @@
++"""Termux CUA setup guidance describes only the external X11 experiment."""
++
++from hermes_cli.tools_config_cua import _print_cua_platform_notes
++
++
++def test_termux_guidance_does_not_request_macos_permissions(capsys):
++    _print_cua_platform_notes(False, False, fresh_install=True, is_termux_x11=True)
++    output = capsys.readouterr().out
++    assert "Termux X11" in output
++    assert "HERMES_CUA_DRIVER_CMD" in output
++    assert "Android phone" in output
++    assert "System Settings" not in output
++    assert "CuaDriver.app" not in output
++
++
++def test_computer_use_category_keeps_external_provider_discovery(tmp_path, monkeypatch):
++    from hermes_cli.tools_config import TOOL_CATEGORIES
++    from hermes_cli.tools_config_providers import _PLUGIN_ROW_BUILDERS
++
++    home = tmp_path / "profile"
++    provider = home / "plugins" / "owned-fixture"
++    provider.mkdir(parents=True)
++    (provider / "__init__.py").write_text("# register_computer_use_provider\n", encoding="utf-8")
++    (provider / "plugin.yaml").write_text(
++        "name: owned-fixture\ndescription: An unselected fixture provider\n", encoding="utf-8",
++    )
++    monkeypatch.setenv("HERMES_HOME", str(home))
++    rows = _PLUGIN_ROW_BUILDERS[TOOL_CATEGORIES["computer_use"]["name"]]()
++    assert any(row["computer_use_backend"] == "owned-fixture" for row in rows)
+diff --git a/tests/tools/test_computer_use_termux_override.py b/tests/tools/test_computer_use_termux_override.py
+new file mode 100644
+index 00000000..b04e6ba4
+--- /dev/null
++++ b/tests/tools/test_computer_use_termux_override.py
+@@ -0,0 +1,138 @@
++"""External Termux X11 admission never implies a bundled driver or phone UI support."""
++
++import json
++import sys
++
++import pytest
++
++from plugins.computer_use.cua import _available_for_placement
++from tools.bot_desktop import placement
++
++
++@pytest.mark.parametrize("platform", ["android", "linux"])
++def test_termux_requires_the_explicit_external_driver(platform):
++    def absent():
++        return False
++
++    assert _available_for_placement(
++        platform, placement.GATEWAY, lambda: True,
++        termux=True, explicit_driver=True,
++    )
++    assert not _available_for_placement(
++        platform, placement.GATEWAY, lambda: True,
++        termux=True, explicit_driver=False,
++    )
++    assert not _available_for_placement(
++        platform, placement.GATEWAY, absent,
++        termux=True, explicit_driver=True,
++    )
++
++
++@pytest.mark.parametrize("where", [placement.GATEWAY, placement.REFUSED])
++def test_external_binary_does_not_admit_an_android_phone_host(where):
++    assert not _available_for_placement(
++        "android", where, lambda: True, termux=False, explicit_driver=True,
++    )
++
++
++def test_remote_placement_never_resolves_the_local_external_driver():
++    def forbidden():
++        pytest.fail("a remotely placed driver must remain inside its selected terminal backend")
++
++    assert _available_for_placement(
++        "android", placement.TERMINAL, forbidden,
++        termux=True, explicit_driver=False,
++    )
++    assert not _available_for_placement(
++        "android", placement.REFUSED, forbidden,
++        termux=True, explicit_driver=True,
++    )
++
++
++def test_external_lookup_uses_only_the_exact_override(tmp_path, monkeypatch):
++    import pm
++    from tools.computer_use.cua_backend_platform import configured_external_driver
++
++    def forbidden(*args, **kwargs):
++        pytest.fail("external selection must not fall through to PM")
++
++    monkeypatch.setattr(pm, "installed_package", forbidden)
++    monkeypatch.setattr(pm, "ensure", forbidden)
++    monkeypatch.delenv("HERMES_CUA_DRIVER_CMD", raising=False)
++    assert configured_external_driver() is None
++    monkeypatch.setenv("HERMES_CUA_DRIVER_CMD", sys.executable)
++    assert configured_external_driver() == sys.executable
++    assert configured_external_driver(str(tmp_path / "missing-driver")) is None
++    assert configured_external_driver(sys.executable + " mcp --direct") is None
++    assert configured_external_driver("") is None
++
++
++def test_registered_handler_rejects_unusable_external_manifest(monkeypatch):
++    """A real host executable passes passive lookup but cannot bypass runtime validation."""
++    import pm
++    import tools.computer_use_tool
++    from tools.computer_use.tool import release_computer_use_session
++    from tools.registry import registry
++
++    def forbidden(*args, **kwargs):
++        pytest.fail("an explicit driver must not trigger PM acquisition or SDK setup")
++
++    monkeypatch.setenv("HERMES_CUA_DRIVER_CMD", sys.executable)
++    monkeypatch.setattr(pm, "ensure", forbidden)
++    monkeypatch.setattr(pm, "ensure_import", forbidden)
++    session_id = "external-driver-invalid-manifest"
++    try:
++        assert registry.is_toolset_available("computer_use")
++        result = json.loads(registry.dispatch(
++            "computer_use", {"action": "list_windows"}, session_id=session_id,
++        ))
++        assert "error" in result
++        assert "not ready" in result["error"]
++        assert "HERMES_CUA_DRIVER_CMD" in result["error"]
++    finally:
++        release_computer_use_session(session_id)
++
++
++@pytest.mark.parametrize("ambient_display", [None, ":999"])
++def test_readiness_process_uses_the_published_desktop(tmp_path, monkeypatch, ambient_display):
++    """Real child env from product files; the fixture does not claim to run an X server."""
++    import os
++
++    import psutil
++
++    from tools.bot_desktop import runtime
++    from tools.computer_use import permissions
++
++    home = tmp_path / "owned-profile"
++    monkeypatch.setenv("HERMES_HOME", str(home))
++    state = runtime.state_dir()
++    state.mkdir(parents=True)
++    owner = psutil.Process()
++    (state / "launcher.pid").write_text(
++        f"{owner.pid} {owner.create_time()}\n", encoding="utf-8",
++    )
++    published = {
++        "DISPLAY": ":73",
++        "XAUTHORITY": str(state / "Xauthority"),
++        "DBUS_SESSION_BUS_ADDRESS": "unix:path=owned-desktop-bus",
++    }
++    (state / "env").write_text(
++        "".join(f"{key}={value}\n" for key, value in published.items()), encoding="utf-8",
++    )
++    if ambient_display is None:
++        monkeypatch.delenv("DISPLAY", raising=False)
++    else:
++        monkeypatch.setenv("DISPLAY", ambient_display)
++    monkeypatch.setenv("XAUTHORITY", "stale-parent-authority")
++    monkeypatch.setenv("DBUS_SESSION_BUS_ADDRESS", "unix:path=stale-parent-bus")
++    monkeypatch.setenv("ANTHROPIC_API_KEY", "fixture-secret-must-not-be-forwarded")
++    keys = [*published, "CUA_DRIVER_RS_TELEMETRY_ENABLED"]
++    program = (
++        "import json,os;"
++        f"print(json.dumps({{k:os.environ.get(k) for k in {keys!r}}}));"
++        "assert 'ANTHROPIC_API_KEY' not in os.environ"
++    )
++    result = permissions._run(sys.executable, "-c", program, timeout=10)
++    assert result.returncode == 0, result.stderr
++    assert json.loads(result.stdout) == {**published, "CUA_DRIVER_RS_TELEMETRY_ENABLED": "0"}
++    assert os.environ.get("DISPLAY") == ambient_display
+diff --git a/tools/computer_use/cua_backend.py b/tools/computer_use/cua_backend.py
+index ec903cbf..5c8bf845 100644
+--- a/tools/computer_use/cua_backend.py
++++ b/tools/computer_use/cua_backend.py
+@@ -285,6 +285,9 @@ class CuaDriverBackend(_CaptureMixin, _InputMixin, ComputerUseBackend):
+         if sandbox_mcp_invocation() is not None:
+             contract = {"ready": True}
+         else:
++            from tools.computer_use.cua_backend_platform import local_cua_host_supported, local_cua_unsupported_reason
++            if not local_cua_host_supported():
++                raise RuntimeError(local_cua_unsupported_reason())
+             if not os.environ.get(_CUA_DRIVER_CMD_ENV, "").strip():
+                 from pm import ensure
+                 ensure("cua-driver")
+@@ -347,7 +350,8 @@ class CuaDriverBackend(_CaptureMixin, _InputMixin, ComputerUseBackend):
+             logger.debug("cua-driver %s: %s", what, e)
+ 
+     def is_available(self) -> bool:
+-        return sys.platform in ("darwin", "win32", "linux") and cua_driver_binary_available()  # other Unix-likes untested E2E
++        from tools.computer_use.cua_backend_platform import local_cua_host_supported
++        return local_cua_host_supported() and cua_driver_binary_available()
+ 
+     def _clear_active_target(self) -> None:
+         """Forget a capture/focus target so a failed lookup cannot misroute input."""
+diff --git a/tools/computer_use/cua_backend_driver.py b/tools/computer_use/cua_backend_driver.py
+index 017a6702..0ec981db 100644
+--- a/tools/computer_use/cua_backend_driver.py
++++ b/tools/computer_use/cua_backend_driver.py
+@@ -89,6 +89,10 @@ def cua_driver_binary_available() -> bool:
+     return resolve_cua_driver_cmd() is not None
+ 
+ def cua_driver_install_hint() -> str:
++    from hermes_platform.host.runtime import is_termux
++    from tools.computer_use.cua_backend_platform import TERMUX_X11_HINT
++    if is_termux() or sys.platform == "android":
++        return TERMUX_X11_HINT
+     return ("cua-driver is not installed. Install the pinned driver with:\n  hermes computer-use install\n"
+             "Or run `hermes tools` and enable the Computer Use toolset to install it automatically.")
+ 
+diff --git a/tools/computer_use/cua_backend_platform.py b/tools/computer_use/cua_backend_platform.py
+new file mode 100644
+index 00000000..ea1f34cd
+--- /dev/null
++++ b/tools/computer_use/cua_backend_platform.py
+@@ -0,0 +1,49 @@
++"""Local CUA admission for an externally owned Termux X11 driver.
++
++PM does not publish a Bionic driver. An explicit executable only enables the
++existing X11 transport; startup still validates its full runtime manifest.
++"""
++
++from __future__ import annotations
++
++import os
++import sys
++from typing import Optional
++
++from hermes_platform.host.runtime import is_termux
++
++TERMUX_X11_HINT = (
++    "Termux X11 requires an externally built native cua-driver selected by "
++    "HERMES_CUA_DRIVER_CMD. No Android driver is published by Hermes PM. "
++    "This experiment controls X11 desktop windows; Android phone UI is unavailable."
++)
++
++
++def local_cua_supported(platform: str, *, termux: bool, explicit_driver: bool) -> bool:
++    """Platform facts are data; Termux always requires an explicit external executable."""
++    if termux:
++        return platform in ("android", "linux") and explicit_driver
++    return platform in ("darwin", "win32", "linux")
++
++
++def configured_external_driver(override: Optional[str] = None) -> Optional[str]:
++    """Resolve an explicit executable without consulting or acquiring a PM package."""
++    from tools.computer_use.cua_backend_driver import _CUA_DRIVER_CMD_ENV, resolve_cua_driver_cmd
++
++    configured = (override if override is not None else os.environ.get(_CUA_DRIVER_CMD_ENV, "")).strip()
++    return resolve_cua_driver_cmd(configured) if configured else None
++
++
++def local_cua_host_supported(*, override: Optional[str] = None) -> bool:
++    """Cheap host admission; manifest and display checks remain at startup/readiness."""
++    termux = is_termux()
++    return local_cua_supported(
++        sys.platform, termux=termux,
++        explicit_driver=bool(configured_external_driver(override)) if termux else False,
++    )
++
++
++def local_cua_unsupported_reason() -> str:
++    if is_termux() or sys.platform == "android":
++        return TERMUX_X11_HINT
++    return f"Local cua-driver is not supported on this host platform ({sys.platform})."
+diff --git a/tools/computer_use/permissions.py b/tools/computer_use/permissions.py
+index 2cdc00dd..5440c61b 100644
+--- a/tools/computer_use/permissions.py
++++ b/tools/computer_use/permissions.py
+@@ -16,7 +16,6 @@ from typing import Any, Dict, Optional
+ 
+ from hermes_cli._subprocess_compat import windows_hide_flags
+ 
+-_RUNTIME_PLATFORMS = frozenset({"darwin", "win32", "linux"})  # mirrors the toolset platform_gate
+ _BOOLS = ("accessibility", "screen_recording", "screen_recording_capturable")
+ CUA_DRIVER_BUNDLE_ID = "com.trycua.driver"  # the only identity TCC rows and the private daemon are keyed to
+ _TCC_SERVICES = {"accessibility": "Accessibility", "screen_recording": "ScreenCapture"}  # status field -> tccutil service
+@@ -88,9 +87,13 @@ def computer_use_status(driver_cmd: Optional[str] = None) -> dict[str, Any]:
+     probe failed). ``can_grant`` is macOS-only."""
+     from plugins.computer_use import DEFAULT_BACKEND, configured_backend_name, get_active_provider
+     from tools.computer_use.cua_backend_driver import resolve_cua_driver_cmd  # same resolver as the tool itself
++    from hermes_platform.host.runtime import is_termux
++    from tools.computer_use.cua_backend_platform import (
++        TERMUX_X11_HINT, local_cua_host_supported, local_cua_unsupported_reason,
++    )
+     plat, name = sys.platform, configured_backend_name()
+     binary = resolve_cua_driver_cmd(driver_cmd) if name == DEFAULT_BACKEND else None
+-    out: dict[str, Any] = {"platform": plat, "platform_supported": plat in _RUNTIME_PLATFORMS,
++    out: dict[str, Any] = {"platform": plat, "platform_supported": local_cua_host_supported(override=driver_cmd),
+                            "installed": bool(binary), "version": None, "ready": None, "can_grant": plat == "darwin",
+                            "checks": [], "source": None, "error": None, **{k: None for k in _BOOLS}}
+     if name != DEFAULT_BACKEND:  # another driver is selected: cua-driver probes and TCC grants do not apply
+@@ -103,13 +106,26 @@ def computer_use_status(driver_cmd: Optional[str] = None) -> dict[str, Any]:
+         out.update(installed=True, version=f"{provider.display_name} (computer_use.backend: {provider.name})",
+                    ready=provider.is_available())
+         return out
++    if not out["platform_supported"]:
++        out.update(ready=False, error=local_cua_unsupported_reason())
++        return out
+     if not binary:
+         return out
++    termux_x11 = is_termux()
++    if termux_x11:
++        from tools.computer_use.cua_backend_driver import cua_driver_runtime_contract_status
++        contract = cua_driver_runtime_contract_status(binary)
++        out["source"] = {"kind": "external", "binary": binary, "scope": "termux-x11"}
++        if not contract["ready"]:
++            out.update(ready=False, version=contract["version"], error=contract["reason"])
++            return out
+     with suppress(Exception):
+         out["version"] = (_run(binary, "--version", timeout=5).stdout or "").strip() or None
+     doctor = _doctor(binary)
+     if doctor is not None:
+         out["checks"] = doctor["checks"]
++    if termux_x11:
++        out["checks"].append({"label": "External Termux X11 driver", "status": "warn", "message": TERMUX_X11_HINT})
+     if plat == "darwin":
+         _mac_permissions(binary, out)
+         if out["error"] is None:

@@ -371,6 +371,7 @@ receipt = {
     "binary_sha256": hashlib.sha256(elf).hexdigest(),
     "authorization_mode": "standard", "phone_ui_certified": False,
     "history_admitted": False, "parallel_uinput_claimed": False,
+    "background_input_certified": False,
     "accessibility_tree_certified": False, "hermes_pm_cua_admission_changed": False,
     "checks": ["native-aarch64-bionic-elf"], "status": "started",
 }
@@ -582,7 +583,9 @@ try:
     receipt["screenshot"] = {"width": width, "height": height,
                              "sha256": hashlib.sha256(screenshot.read_bytes()).hexdigest()}
     receipt["checks"].append("screenshot-png-independent-two-color-oracle")
-    rpc.call("click", **target, x=80, y=60, button="left")
+    # The owned visible fixture uses the documented foreground XTest route.
+    # Background non-delivery: audit/cua-native-20261017/run-39051490364.json.
+    rpc.call("click", **target, x=80, y=60, button="left", delivery_mode="foreground")
     until(lambda: any(e.get("event") == "button" and e["button"] == 1 and
                       e["x"] == 80 and e["y"] == 60 for e in events()),
           "real fixture button event at requested client coordinates")

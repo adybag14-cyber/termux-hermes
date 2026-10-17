@@ -120,7 +120,7 @@
     {
       "id": "native-cua",
       "baseline": "Default local CUA driver does not support Android; MCP dependency alone is not a native backend.",
-      "status": "remote_routing_fixed_native_driver_link_pty_and_memfd_passed_virtual_desktop_fixture_under_repair"
+      "status": "native_mcp_registry_and_window_capture_passed_foreground_input_probe_pending_background_non_delivery_recorded"
     },
     {
       "id": "bot-desktop",
@@ -247,7 +247,7 @@
       "failed": 0
     },
     "packaging_regressions": {
-      "passed": 155,
+      "passed": 205,
       "failed": 0,
       "skipped_host_specific": 4
     },
@@ -267,16 +267,32 @@
         "x11rb-protocol==0.13.2"
       ],
       "unchanged_other_cargo_package_records": 602,
-      "status": "native_bionic_driver_link_pty_and_memfd_passed_private_session_bus_fixture_under_repair",
+      "status": "native_bionic_link_abi_mcp_registry_and_window_capture_passed_input_probe_pending",
       "included_in_hermes_candidate": false,
       "physical_android_phone_ui": false,
-      "native_progress_evidence": "cua-native-20261017/"
+      "native_progress_evidence": "cua-native-20261017/",
+      "background_input_certified": false
     },
     "termux_host_assembly_regressions": {
       "passed": 3,
       "failed": 0,
       "scope": "fixed-prefix assembly, bare-host PM runtime handoff, corrupt native catalog exit propagation"
     },
-    "reviewed_termux_recipe_pins": "termux-recipe-pins-20261017.json"
+    "reviewed_termux_recipe_pins": "termux-recipe-pins-20261017.json",
+    "neutts_resolution": {
+      "declared_version": "1.4.1",
+      "upstream_requires_python": ">=3.10,<3.14",
+      "hermes_resolver_environment": "python_version >= '3.14'",
+      "resolved_neutts_package_record_present": false,
+      "resolved_complete_neutts_closure_present": false,
+      "separate_engine_environment_requires_own_frozen_resolution": true,
+      "termux_apt_python_observed": "3.14.6-1"
+    },
+    "cua_hermes_integration": {
+      "patch": "../patches/next-stable/cua-hermes-integration.patch",
+      "status": "reviewed_explicit_driver_adapter_and_native_helper_prepared_not_yet_native_tested",
+      "included_in_main_candidate": false,
+      "preparation_evidence": "cua-hermes-preparation-20261017.json"
+    }
   }
 }
