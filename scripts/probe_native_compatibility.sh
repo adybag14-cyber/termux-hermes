@@ -6,6 +6,9 @@ set -Eeuo pipefail
 if [[ "${1:-}" == --in-container ]]; then
   group="$2"
   umask 022
+  # Root-built evidence must remain readable by the Actions artifact uploader,
+  # including diagnostics from a failed build and copied restrictive input files.
+  trap 'find /out -type d -exec chmod a+rx {} +; find /out -type f -exec chmod a+r {} +' EXIT
   export PREFIX=/data/data/com.termux/files/usr
   export TMPDIR="$PREFIX/tmp"
   export DEBIAN_FRONTEND=noninteractive TERMUX_PKG_NO_MIRROR_SELECT=1

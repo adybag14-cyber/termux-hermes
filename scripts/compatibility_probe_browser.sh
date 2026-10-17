@@ -15,6 +15,8 @@ mkdir -p "$OUT"
 work="$(mktemp -d "$PREFIX/tmp/hb.XXXXXX")"
 server_pid=
 cleanup() {
+  # The native container may write evidence as root; the host uploader must read it.
+  chmod -R a+rX "$OUT" 2>/dev/null || true
   if [[ -x "$work/agent-browser" ]]; then
     env -u LD_LIBRARY_PATH "$work/agent-browser" --session hermes-compat close >/dev/null 2>&1 || true
   fi
@@ -23,6 +25,7 @@ cleanup() {
 }
 trap cleanup EXIT
 export DEBIAN_FRONTEND=noninteractive TERMUX_PKG_NO_MIRROR_SELECT=1
+mkdir -p "$PREFIX/etc/apt/sources.list.d"
 printf '%s\n' 'deb https://packages.termux.dev/apt/termux-x11 x11 main' > "$PREFIX/etc/apt/sources.list.d/hermes-browser-probe.list"
 env -u LD_LIBRARY_PATH apt-get -o Acquire::Retries=5 -o APT::Update::Error-Mode=any update
 env -u LD_LIBRARY_PATH apt-get -o Acquire::Retries=5 install -y chromium
