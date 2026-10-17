@@ -650,6 +650,8 @@ def llama_case():
         model = api.llama_model_default_params()
         context = api.llama_context_default_params()
         require(text and "CPU" in text, "No real CPU backend system information")
+        require(model.load_mode == api.LLAMA_LOAD_MODE_AUTO,
+                "Unexpected real default model load mode")
         require(context.n_ctx > 0 and context.n_batch > 0 and context.n_threads > 0,
                 "Invalid real default context parameters")
         require(api.llama_supports_gpu_offload() is False and api.llama_supports_rpc() is False,
@@ -658,7 +660,7 @@ def llama_case():
             "backend_initialized": True, "system_info": text,
             "default_context": {"n_ctx": context.n_ctx, "n_batch": context.n_batch,
                                 "n_threads": context.n_threads},
-            "default_model_use_mmap": bool(model.use_mmap),
+            "default_model_load_mode": int(model.load_mode),
             "supports_mmap": api.llama_supports_mmap(), "supports_mlock": api.llama_supports_mlock(),
             "supports_gpu_offload": False, "supports_rpc": False,
             "library": elf(library, dynamic=True), "model_loaded": False, "inference_tested": False,

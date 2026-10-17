@@ -268,3 +268,55 @@ def test_native_build_uses_actual_android_platform(tmp_path, lock, monkeypatch, 
     with pytest.raises(BuildReached):
         probe.build_packages(lock, inputs, out, work)
     assert observed == ["native-build-python-inputs", "native-build-numba"]
+
+
+@pytest.mark.parametrize("load_mode,valid", [(-1, True), (99, False)])
+def test_llama_probe_uses_current_load_mode_and_releases_backend(tmp_path, monkeypatch, load_mode, valid):
+    """Current wrapper contract without loading host-incompatible native code."""
+    import ctypes
+    import sys
+    from types import ModuleType
+
+    class ModelParams(ctypes.Structure):
+        _fields_ = [("load_mode", ctypes.c_int)]
+
+    params = ModelParams(load_mode)
+    assert not hasattr(params, "use_mmap")
+    prefix = tmp_path / "venv"
+    package_dir = prefix / "lib" / "python3.14" / "site-packages" / "llama_cpp"
+    library = package_dir / "lib" / "libllama.so"
+    events = []
+    api = SimpleNamespace(
+        _lib=SimpleNamespace(_name=str(library)),
+        LLAMA_LOAD_MODE_AUTO=-1,
+        llama_backend_init=lambda: events.append("init"),
+        llama_backend_free=lambda: events.append("free"),
+        llama_print_system_info=lambda: b"CPU : NEON = 1",
+        llama_model_default_params=lambda: params,
+        llama_context_default_params=lambda: SimpleNamespace(n_ctx=512, n_batch=2048, n_threads=4),
+        llama_supports_gpu_offload=lambda: False,
+        llama_supports_rpc=lambda: False,
+        llama_supports_mmap=lambda: True,
+        llama_supports_mlock=lambda: True,
+    )
+    package = ModuleType("llama_cpp")
+    package.__file__ = str(package_dir / "__init__.py")
+    package.__version__ = "0.3.36"
+    package.llama_cpp = api
+    monkeypatch.setitem(sys.modules, "llama_cpp", package)
+    monkeypatch.setattr(probe.sys, "prefix", str(prefix))
+    monkeypatch.setattr(probe, "elf", lambda path, dynamic: {"path": str(path)})
+    monkeypatch.setattr(probe, "mapped_libraries", lambda: [
+        {"path": str(library)}, {"path": str(library.parent / "libggml-base.so")}
+    ])
+    if valid:
+        result = probe.llama_case()
+        assert result["default_model_load_mode"] == -1
+        assert "default_model_use_mmap" not in result
+        assert result["backend_initialized"] and result["backend_freed"]
+        assert result["model_loaded"] is False and result["inference_tested"] is False
+        assert result["supports_mmap"] is True
+    else:
+        with pytest.raises(probe.ProbeError, match="default model load mode"):
+            probe.llama_case()
+    assert events == ["init", "free"]

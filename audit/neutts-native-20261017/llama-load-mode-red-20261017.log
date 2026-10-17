@@ -1,0 +1,183 @@
+FF                                                                       [100%]
+================================== FAILURES ===================================
+____ test_llama_probe_uses_current_load_mode_and_releases_backend[-1-True] ____
+
+tmp_path = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-861/test_llama_probe_uses_current_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001D88F89D940>
+load_mode = -1, valid = True
+
+    @pytest.mark.parametrize("load_mode,valid", [(-1, True), (99, False)])
+    def test_llama_probe_uses_current_load_mode_and_releases_backend(tmp_path, monkeypatch, load_mode, valid):
+        """Current wrapper contract without loading host-incompatible native code."""
+        import ctypes
+        import sys
+        from types import ModuleType
+    
+        class ModelParams(ctypes.Structure):
+            _fields_ = [("load_mode", ctypes.c_int)]
+    
+        params = ModelParams(load_mode)
+        assert not hasattr(params, "use_mmap")
+        prefix = tmp_path / "venv"
+        package_dir = prefix / "lib" / "python3.14" / "site-packages" / "llama_cpp"
+        library = package_dir / "lib" / "libllama.so"
+        events = []
+        api = SimpleNamespace(
+            _lib=SimpleNamespace(_name=str(library)),
+            LLAMA_LOAD_MODE_AUTO=-1,
+            llama_backend_init=lambda: events.append("init"),
+            llama_backend_free=lambda: events.append("free"),
+            llama_print_system_info=lambda: b"CPU : NEON = 1",
+            llama_model_default_params=lambda: params,
+            llama_context_default_params=lambda: SimpleNamespace(n_ctx=512, n_batch=2048, n_threads=4),
+            llama_supports_gpu_offload=lambda: False,
+            llama_supports_rpc=lambda: False,
+            llama_supports_mmap=lambda: True,
+            llama_supports_mlock=lambda: True,
+        )
+        package = ModuleType("llama_cpp")
+        package.__file__ = str(package_dir / "__init__.py")
+        package.__version__ = "0.3.36"
+        package.llama_cpp = api
+        monkeypatch.setitem(sys.modules, "llama_cpp", package)
+        monkeypatch.setattr(probe.sys, "prefix", str(prefix))
+        monkeypatch.setattr(probe, "elf", lambda path, dynamic: {"path": str(path)})
+        monkeypatch.setattr(probe, "mapped_libraries", lambda: [
+            {"path": str(library)}, {"path": str(library.parent / "libggml-base.so")}
+        ])
+        if valid:
+>           result = probe.llama_case()
+                     ^^^^^^^^^^^^^^^^^^
+
+tests\test_neutts_native_components.py:313: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def llama_case():
+        import llama_cpp
+        from llama_cpp import llama_cpp as api
+    
+        require(llama_cpp.__version__ == "0.3.36", "Built llama Python version differs")
+        require(Path(llama_cpp.__file__).resolve().is_relative_to(Path(sys.prefix).resolve()),
+                "llama import escaped its newly built venv")
+        library = Path(api._lib._name).resolve()
+        library_root = Path(llama_cpp.__file__).resolve().parent / "lib"
+        require(library.is_relative_to(library_root), "An arbitrary system libllama was loaded")
+        api.llama_backend_init()
+        try:
+            text = api.llama_print_system_info().decode("utf-8")
+            model = api.llama_model_default_params()
+            context = api.llama_context_default_params()
+            require(text and "CPU" in text, "No real CPU backend system information")
+            require(context.n_ctx > 0 and context.n_batch > 0 and context.n_threads > 0,
+                    "Invalid real default context parameters")
+            require(api.llama_supports_gpu_offload() is False and api.llama_supports_rpc() is False,
+                    "Unexpected accelerator or remote backend in portable CPU result")
+            result = {
+                "backend_initialized": True, "system_info": text,
+                "default_context": {"n_ctx": context.n_ctx, "n_batch": context.n_batch,
+                                    "n_threads": context.n_threads},
+>               "default_model_use_mmap": bool(model.use_mmap),
+                                               ^^^^^^^^^^^^^^
+                "supports_mmap": api.llama_supports_mmap(), "supports_mlock": api.llama_supports_mlock(),
+                "supports_gpu_offload": False, "supports_rpc": False,
+                "library": elf(library, dynamic=True), "model_loaded": False, "inference_tested": False,
+            }
+E           AttributeError: 'ModelParams' object has no attribute 'use_mmap'
+
+scripts\compatibility_probe_neutts_native.py:661: AttributeError
+___ test_llama_probe_uses_current_load_mode_and_releases_backend[99-False] ____
+
+tmp_path = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-861/test_llama_probe_uses_current_1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001D88F89CB00>
+load_mode = 99, valid = False
+
+    @pytest.mark.parametrize("load_mode,valid", [(-1, True), (99, False)])
+    def test_llama_probe_uses_current_load_mode_and_releases_backend(tmp_path, monkeypatch, load_mode, valid):
+        """Current wrapper contract without loading host-incompatible native code."""
+        import ctypes
+        import sys
+        from types import ModuleType
+    
+        class ModelParams(ctypes.Structure):
+            _fields_ = [("load_mode", ctypes.c_int)]
+    
+        params = ModelParams(load_mode)
+        assert not hasattr(params, "use_mmap")
+        prefix = tmp_path / "venv"
+        package_dir = prefix / "lib" / "python3.14" / "site-packages" / "llama_cpp"
+        library = package_dir / "lib" / "libllama.so"
+        events = []
+        api = SimpleNamespace(
+            _lib=SimpleNamespace(_name=str(library)),
+            LLAMA_LOAD_MODE_AUTO=-1,
+            llama_backend_init=lambda: events.append("init"),
+            llama_backend_free=lambda: events.append("free"),
+            llama_print_system_info=lambda: b"CPU : NEON = 1",
+            llama_model_default_params=lambda: params,
+            llama_context_default_params=lambda: SimpleNamespace(n_ctx=512, n_batch=2048, n_threads=4),
+            llama_supports_gpu_offload=lambda: False,
+            llama_supports_rpc=lambda: False,
+            llama_supports_mmap=lambda: True,
+            llama_supports_mlock=lambda: True,
+        )
+        package = ModuleType("llama_cpp")
+        package.__file__ = str(package_dir / "__init__.py")
+        package.__version__ = "0.3.36"
+        package.llama_cpp = api
+        monkeypatch.setitem(sys.modules, "llama_cpp", package)
+        monkeypatch.setattr(probe.sys, "prefix", str(prefix))
+        monkeypatch.setattr(probe, "elf", lambda path, dynamic: {"path": str(path)})
+        monkeypatch.setattr(probe, "mapped_libraries", lambda: [
+            {"path": str(library)}, {"path": str(library.parent / "libggml-base.so")}
+        ])
+        if valid:
+            result = probe.llama_case()
+            assert result["default_model_load_mode"] == -1
+            assert "default_model_use_mmap" not in result
+            assert result["backend_initialized"] and result["backend_freed"]
+            assert result["model_loaded"] is False and result["inference_tested"] is False
+            assert result["supports_mmap"] is True
+        else:
+            with pytest.raises(probe.ProbeError, match="default model load mode"):
+>               probe.llama_case()
+
+tests\test_neutts_native_components.py:321: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def llama_case():
+        import llama_cpp
+        from llama_cpp import llama_cpp as api
+    
+        require(llama_cpp.__version__ == "0.3.36", "Built llama Python version differs")
+        require(Path(llama_cpp.__file__).resolve().is_relative_to(Path(sys.prefix).resolve()),
+                "llama import escaped its newly built venv")
+        library = Path(api._lib._name).resolve()
+        library_root = Path(llama_cpp.__file__).resolve().parent / "lib"
+        require(library.is_relative_to(library_root), "An arbitrary system libllama was loaded")
+        api.llama_backend_init()
+        try:
+            text = api.llama_print_system_info().decode("utf-8")
+            model = api.llama_model_default_params()
+            context = api.llama_context_default_params()
+            require(text and "CPU" in text, "No real CPU backend system information")
+            require(context.n_ctx > 0 and context.n_batch > 0 and context.n_threads > 0,
+                    "Invalid real default context parameters")
+            require(api.llama_supports_gpu_offload() is False and api.llama_supports_rpc() is False,
+                    "Unexpected accelerator or remote backend in portable CPU result")
+            result = {
+                "backend_initialized": True, "system_info": text,
+                "default_context": {"n_ctx": context.n_ctx, "n_batch": context.n_batch,
+                                    "n_threads": context.n_threads},
+>               "default_model_use_mmap": bool(model.use_mmap),
+                                               ^^^^^^^^^^^^^^
+                "supports_mmap": api.llama_supports_mmap(), "supports_mlock": api.llama_supports_mlock(),
+                "supports_gpu_offload": False, "supports_rpc": False,
+                "library": elf(library, dynamic=True), "model_loaded": False, "inference_tested": False,
+            }
+E           AttributeError: 'ModelParams' object has no attribute 'use_mmap'
+
+scripts\compatibility_probe_neutts_native.py:661: AttributeError
+=========================== short test summary info ===========================
+FAILED tests/test_neutts_native_components.py::test_llama_probe_uses_current_load_mode_and_releases_backend[-1-True]
+FAILED tests/test_neutts_native_components.py::test_llama_probe_uses_current_load_mode_and_releases_backend[99-False]
+2 failed, 31 deselected in 0.17s
