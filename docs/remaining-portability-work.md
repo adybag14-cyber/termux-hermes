@@ -45,8 +45,11 @@ at head `036f11515eda3a6e4129e14c7dd75ec27d5ae47d`, installed all 122 pinned
 APT packages. SciPy's numerical checks, llvmlite's native MCJIT function and soxr
 resampling passed. Torch, Torchaudio and Torchcodec each stopped at
 `ModuleNotFoundError: No module named 'typing_extensions'` before their native
-behavior cases; the overall probe correctly failed. A pinned Python
-dependency-closure fix is pending.
+behavior cases; the overall probe correctly failed. A [pinned Python
+dependency completion](../audit/neutts-native-20261017/python-dependency-preparation.json)
+now supplies the exact supplemental artifacts already frozen in the upstream
+lock. It checks the complete installed metadata graph before exercising native
+behavior; its new native run is pending.
 
 This disposable Termux system-Python experiment records the rolling base upgrade
 separately from the pinned dependency archives. Its

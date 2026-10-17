@@ -3,10 +3,14 @@ name: Probe NeuTTS native Termux dependencies
 on:
   workflow_dispatch:
   push:
-    branches: [prepare/termux-compatibility-next-stable]
+    branches:
+      - prepare/termux-compatibility-next-stable
+      - prepare/termux-compatibility-resume-20261017
     paths:
       - '.github/workflows/neutts-termux-probe.yml'
       - 'scripts/compatibility_probe_neutts.sh'
+      - 'scripts/compatibility_probe_neutts.py'
+      - 'tests/test_neutts_probe.py'
 
 permissions:
   contents: read
@@ -27,7 +31,7 @@ jobs:
           ref: ${{ github.sha }}
           persist-credentials: false
 
-      - name: Verify pinned APT inputs and exercise the native dependency core
+      - name: Verify exact APT and Python inputs and exercise native behavior
         env:
           NEUTTS_PROBE_HEAD_SHA: ${{ github.sha }}
         run: bash scripts/compatibility_probe_neutts.sh --out probe-results/neutts

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Separate APT-only native ABI experiment. Does not install NeuTTS or modify Hermes.
+# Separate native APT/Python dependency experiment. Does not install NeuTTS or modify Hermes.
 set -Eeuo pipefail
 
 mode=host
@@ -15,16 +15,27 @@ if [[ "$mode" == host ]]; then
   out="$(realpath "$out")"
   image='termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303'
   python3 - "$packaging" "$out" "$image" <<'PY'
-import hashlib, json, os, pathlib, subprocess, sys
+import hashlib, json, os, pathlib, subprocess, sys, tomllib, urllib.request
 root, out = map(pathlib.Path, sys.argv[1:3])
 head = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
 if os.environ.get("NEUTTS_PROBE_HEAD_SHA", head) != head:
     raise SystemExit("advertised head differs from the actual checkout")
 if json.loads((root / "manifest/release.json").read_text())["termux_image"] != sys.argv[3]:
     raise SystemExit("review the native image pin before changing this experiment")
-names = ("scripts/compatibility_probe_neutts.sh", ".github/workflows/neutts-termux-probe.yml")
+names = ("scripts/compatibility_probe_neutts.sh", "scripts/compatibility_probe_neutts.py",
+         ".github/workflows/neutts-termux-probe.yml")
+engine_url = "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/pyproject.toml"
+engine_hash = "3d74df60f0db27733b308c93b88ae95f9deaa8f396f48183b0cf4f14eb3deb94"
+with urllib.request.urlopen(engine_url, timeout=30) as response:
+    engine_source = response.read(65537)
+if len(engine_source) > 65536 or hashlib.sha256(engine_source).hexdigest() != engine_hash:
+    raise SystemExit("exact NeuTTS source metadata differs")
+engine = tomllib.loads(engine_source.decode("utf-8"))["project"]
+if engine["version"] != "1.4.1" or engine["requires-python"] != ">=3.10, <3.14":
+    raise SystemExit("review the engine Python boundary before changing this experiment")
+(out / "NEUTTS-ENGINE-pyproject.toml").write_bytes(engine_source)
 data = {
-    "schema_version": 1, "purpose": "unpublished APT-only NeuTTS dependency feasibility",
+    "schema_version": 1, "purpose": "unpublished APT native core with frozen Python dependency completion",
     "run_id": os.environ.get("GITHUB_RUN_ID"), "head_sha": head,
     "workflow_ref_commit": os.environ.get("GITHUB_SHA"), "native_image": sys.argv[3],
     "inputs": {p: hashlib.sha256((root / p).read_bytes()).hexdigest() for p in names},
@@ -33,11 +44,21 @@ data = {
     "reviewed_index_url": "https://packages.termux.dev/apt/termux-main/dists/stable/main/binary-aarch64/Packages.gz",
     "reviewed_index_sha256": "0f9ea9b4cd6c0f7c3ffe90bea8afb7e25a61adc319fc90eca3d0979da6dcb923",
     "declared_engine_commit": "b7a3427d0d25e20e8b9e92cbaae688f732916baf",
+    "engine_source_url": engine_url, "engine_source_sha256": engine_hash,
+    "engine_version": engine["version"], "engine_requires_python": engine["requires-python"],
+    "engine_dependencies": engine["dependencies"],
+    "engine_optional_dependencies": engine["optional-dependencies"],
+    "managed_python_supported_by_declared_engine": False,
+    "apt_core_is_engine_dependency_lock": False,
+    "rolling_base_upgrade": True,
+    "apt_postinst_dependency_resolution": False,
+    "supplemental_python_dependencies_checked_separately": True,
     "engine_installed": False, "synthesis_tested": False, "physical_device_tested": False,
     "hermes_candidate_installed": False, "pm_admission_changed": False, "release_output": False,
 }
 (out / "NEUTTS-PROBE-INPUTS.json").write_text(json.dumps(data, indent=2) + "\n")
 PY
+  python3 "$packaging/scripts/compatibility_probe_neutts.py" --prepare-python "$out/python-inputs"
   chmod 0777 "$out"
   docker pull "$image"
   [[ "$(docker image inspect "$image" --format '{{.Architecture}}')" == arm64 ]]
@@ -59,6 +80,9 @@ export TMPDIR="$PREFIX/tmp"
 export PATH="$PREFIX/bin:/system/bin:/system/xbin"
 export DEBIAN_FRONTEND=noninteractive TERMUX_PKG_NO_MIRROR_SELECT=1
 export PIP_NO_INDEX=1 PIP_DISABLE_PIP_VERSION_CHECK=1 PYTHONDONTWRITEBYTECODE=1
+# Some APT postinst scripts run pip without a complete Python dependency set.
+# Complete that graph explicitly from verified local artifacts after APT setup.
+export PIP_NO_DEPS=1
 export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2
 unset LD_LIBRARY_PATH LD_PRELOAD PYTHONPATH PYTHONHOME HERMES_RUNTIME_DIR HERMES_HOME
 umask 077
@@ -210,6 +234,10 @@ apt_options=(-o Acquire::Retries=5 -o Dpkg::Options::=--force-confnew
              -o APT::Keep-Downloaded-Packages=true)
 stage=signed-apt-update
 apt-get "${apt_options[@]}" -o APT::Update::Error-Mode=any update
+mkdir -p "$out/signed-apt"
+for file in "$PREFIX/var/lib/apt/lists/"*_InRelease; do
+  cp "$file" "$out/signed-apt/"
+done
 # The pinned image is an old rolling snapshot. Update its base before loading new
 # native libraries; all scientific/runtime dependency packages are then pinned.
 stage=rolling-base-upgrade
@@ -253,261 +281,14 @@ dpkg-query -W -f='${Package}\t${Version}\t${Architecture}\n' > "$out/NEUTTS-INST
 while IFS=$'\t' read -r name version arch sha bytes archive_path; do
   [[ "$(dpkg-query -W -f='${Version}' "$name")" == "$version" ]]
 done < "$work/PINNED-APT.tsv"
-mkdir -p "$out/signed-apt"
-for file in "$PREFIX/var/lib/apt/lists/"*_InRelease; do
-  cp "$file" "$out/signed-apt/"
-done
 export LD_LIBRARY_PATH="$PREFIX/lib"
 
-cat > "$work/native_core.py" <<'PY'
-"""Real APT scientific behavior, with one isolated child per ABI boundary."""
-import ctypes
-import hashlib
-import importlib.metadata
-import json
-import math
-import os
-from pathlib import Path
-import struct
-import subprocess
-import sys
-import time
-import traceback
-import wave
+cp "$(dirname "$0")/compatibility_probe_neutts.py" "$work/native_core.py"
 
-CASES = ("torch", "torchaudio", "torchcodec", "scipy", "llvmlite", "soxr")
-EXPECTED = {
-    "torch": "2.14.1", "torchaudio": "2.11.0", "torchcodec": "0.17.0",
-    "scipy": "1.18.1", "llvmlite": "0.49.0", "soxr": "1.1.0", "numpy": "2.5.4",
-}
-
-
-def require(ok, reason):
-    if not ok:
-        raise RuntimeError(reason)
-
-
-def sha(path):
-    with Path(path).open("rb") as stream:
-        return hashlib.file_digest(stream, "sha256").hexdigest()
-
-
-def elf(path):
-    path = Path(path).resolve()
-    with path.open("rb") as stream:
-        header = stream.read(64)
-    require(header[:6] == b"\x7fELF\x02\x01", "expected little-endian ELF64")
-    machine = struct.unpack_from("<H", header, 18)[0]
-    require(machine == 183, "expected actual AArch64 ELF")
-    return {"path": str(path), "bytes": path.stat().st_size, "sha256": sha(path),
-            "elf_class": 64, "endianness": "little", "machine": machine}
-
-
-def libraries():
-    prefix = Path(os.environ["PREFIX"])
-    owners = {}
-    for listing in (prefix / "var/lib/dpkg/info").glob("*.list"):
-        for line in listing.read_text(errors="replace").splitlines():
-            owners.setdefault(line, []).append(listing.name.removesuffix(".list"))
-    paths = set()
-    for line in Path("/proc/self/maps").read_text().splitlines():
-        parts = line.split(None, 5)
-        if len(parts) == 6 and parts[5].startswith("/") and ".so" in parts[5]:
-            paths.add(parts[5])
-    result = []
-    for raw in sorted(paths):
-        path = Path(raw)
-        if path.is_file():
-            identity = elf(path)
-            identity["mapped_path"] = raw
-            identity["dpkg_owners"] = sorted(set(owners.get(raw, []) + owners.get(str(path.resolve()), [])))
-            result.append(identity)
-    return result
-
-
-def module_identity(module):
-    name = module.__name__.split(".")[0]
-    version = importlib.metadata.version(name)
-    require(version.split("+", 1)[0] == EXPECTED[name], f"{name} distribution version differs")
-    return {"distribution": name, "version": version, "module_file": module.__file__,
-            "module_sha256": sha(module.__file__)}
-
-
-def torch_case():
-    import torch
-    torch.set_num_threads(2)
-    x = torch.arange(8, dtype=torch.float32).reshape(1, 1, 8)
-    conv = torch.nn.Conv1d(1, 1, 3, bias=False)
-    with torch.no_grad():
-        conv.weight.copy_(torch.tensor([[[1.0, 2.0, 1.0]]]))
-        result = conv(x).flatten().tolist()
-    require(result == [4.0, 8.0, 12.0, 16.0, 20.0, 24.0], "Conv1d differs from exact stencil oracle")
-    a = torch.tensor([[1.0, 2.0], [3.0, 4.0]])
-    b = torch.tensor([[2.0, 0.0], [1.0, 2.0]])
-    product = (a @ b).tolist()
-    require(product == [[4.0, 4.0], [10.0, 8.0]], "tensor multiplication differs")
-    return {"modules": [module_identity(torch)], "conv1d": result, "matmul": product, "device": str(x.device)}
-
-
-def torchaudio_case():
-    import torch
-    import torchaudio
-    torch.set_num_threads(2)
-    signal = torch.tensor([math.sin(2 * math.pi * 1000 * i / 24000) for i in range(2400)])
-    actual = torchaudio.functional.resample(signal, 24000, 16000)
-    require(tuple(actual.shape) == (1600,) and bool(torch.isfinite(actual).all()), "resampled shape or values differ")
-    expected = torch.tensor([math.sin(2 * math.pi * 1000 * i / 16000) for i in range(1600)])
-    error = float(torch.mean(torch.abs(actual[64:-64] - expected[64:-64])))
-    require(error < 0.005, "resampling differs from independent sinusoid oracle")
-    return {"modules": [module_identity(torch), module_identity(torchaudio)],
-            "input_rate": 24000, "output_rate": 16000, "output_samples": 1600, "mean_absolute_error": error}
-
-
-def torchcodec_case(work):
-    import torch
-    import torchcodec
-    from torchcodec.decoders import AudioDecoder
-    pcm = [round(10000 * math.sin(2 * math.pi * 440 * i / 16000)) for i in range(1600)]
-    fixture = work / "owned-pcm.wav"
-    with wave.open(str(fixture), "wb") as stream:
-        stream.setnchannels(1)
-        stream.setsampwidth(2)
-        stream.setframerate(16000)
-        stream.writeframes(struct.pack("<" + "h" * len(pcm), *pcm))
-    decoded = AudioDecoder(str(fixture)).get_all_samples()
-    require(decoded.sample_rate == 16000 and tuple(decoded.data.shape) == (1, 1600), "PCM decode shape/rate differs")
-    expected = torch.tensor(pcm, dtype=torch.float32).reshape(1, -1) / 32768
-    error = float(torch.max(torch.abs(decoded.data - expected)))
-    require(bool(torch.isfinite(decoded.data).all()) and error < 0.000002, "decoded PCM differs from source samples")
-    return {"modules": [module_identity(torch), module_identity(torchcodec)],
-            "fixture_sha256": sha(fixture), "samples": 1600, "sample_rate": 16000, "maximum_absolute_error": error}
-
-
-def scipy_case():
-    import numpy as np
-    import scipy
-    from scipy import fft, linalg
-    solved = linalg.solve(np.array([[3.0, 1.0], [1.0, 2.0]]), np.array([9.0, 8.0]))
-    require(bool(np.allclose(solved, [2.0, 3.0], rtol=0, atol=1e-12)), "LAPACK solution differs")
-    transformed = fft.fft(np.array([1.0, 2.0, 3.0, 4.0]))
-    require(bool(np.allclose(transformed, [10.0, -2+2j, -2.0, -2-2j], rtol=0, atol=1e-12)), "FFT differs")
-    return {"modules": [module_identity(np), module_identity(scipy)], "solution": solved.tolist(),
-            "fft": [[float(x.real), float(x.imag)] for x in transformed]}
-
-
-def llvmlite_case():
-    import llvmlite
-    from llvmlite import binding as llvm
-    llvm.initialize_native_target()
-    llvm.initialize_native_asmprinter()
-    triple = llvm.get_default_triple()
-    target = llvm.Target.from_default_triple().create_target_machine()
-    module = llvm.parse_assembly("""
-define double @owned_mul_add(double %a, double %b) {
-entry:
-  %product = fmul double %a, %b
-  %result = fadd double %product, 2.0
-  ret double %result
-}
-""")
-    module.triple = triple
-    module.verify()
-    with llvm.create_mcjit_compiler(module, target) as engine:
-        engine.finalize_object()
-        address = engine.get_function_address("owned_mul_add")
-        require(address != 0, "JIT returned a null function")
-        result = ctypes.CFUNCTYPE(ctypes.c_double, ctypes.c_double, ctypes.c_double)(address)(3.0, 7.0)
-        require(result == 23.0, "native JIT function differs from independent arithmetic oracle")
-    return {"modules": [module_identity(llvmlite)], "llvm_version": list(llvm.llvm_version_info),
-            "target_triple": triple, "native_jit_result": result}
-
-
-def soxr_case():
-    import numpy as np
-    import soxr
-    signal = np.array([math.sin(2 * math.pi * 1000 * i / 24000) for i in range(2400)], dtype=np.float32)
-    actual = soxr.resample(signal, 24000, 16000)
-    require(actual.shape == (1600,) and bool(np.isfinite(actual).all()), "soxr shape/values differ")
-    expected = np.array([math.sin(2 * math.pi * 1000 * i / 16000) for i in range(1600)])
-    error = float(np.mean(np.abs(actual[64:-64] - expected[64:-64])))
-    require(error < 0.005, "soxr differs from independent sinusoid oracle")
-    return {"modules": [module_identity(np), module_identity(soxr)], "output_samples": 1600,
-            "mean_absolute_error": error}
-
-
-def run_case(name, out):
-    receipt = {"schema_version": 1, "component": name, "status": "failed"}
-    start = time.monotonic()
-    try:
-        result = torchcodec_case(Path(__file__).parent) if name == "torchcodec" else globals()[name + "_case"]()
-        receipt.update(status="passed", behavior=result)
-    except Exception as exc:
-        receipt["error"] = {"type": type(exc).__name__, "message": str(exc)}
-        traceback.print_exc()
-    finally:
-        try:
-            receipt["mapped_libraries"] = libraries()
-        except Exception as exc:
-            receipt.update(status="failed", library_evidence_error=str(exc))
-        receipt["elapsed_seconds"] = round(time.monotonic() - start, 3)
-        (out / f"neutts-{name}.json").write_text(json.dumps(receipt, indent=2) + "\n")
-    return 0 if receipt["status"] == "passed" else 1
-
-
-def main(out):
-    require(sys.platform == "android" and os.uname().machine == "aarch64" and os.getuid() == 1000,
-            "native Bionic UID1000 interpreter required")
-    require(sys.version_info[:3] == (3, 14, 6), "actual APT Python version differs")
-    require(Path(sys.prefix).resolve() == Path(os.environ["PREFIX"]).resolve(), "probe entered a managed environment")
-    packages = {}
-    for line in (out / "NEUTTS-INSTALLED-PACKAGES.tsv").read_text().splitlines():
-        name, version, architecture = line.split("\t")
-        packages[name] = {"version": version, "architecture": architecture}
-    pins = []
-    for line in (out / "NEUTTS-PINNED-APT.tsv").read_text().splitlines():
-        name, version, architecture, digest, size, filename = line.split("\t")
-        require(packages.get(name) == {"version": version, "architecture": architecture}, "installed APT pin differs: " + name)
-        pins.append({"package": name, "version": version, "architecture": architecture,
-                     "sha256": digest, "bytes": int(size), "repository_path": filename})
-    receipt = {
-        "schema_version": 1, "status": "running", "scope": "APT-only native scientific ABI/behavior",
-        "python": {"version": sys.version, "platform": sys.platform, "prefix": sys.prefix,
-                   "executable": elf("/proc/self/exe")}, "uid": os.getuid(),
-        "apt_archives": pins, "apt_archive_hashes_checked_before_install": True,
-        "signed_apt": {p.name: sha(p) for p in (out / "signed-apt").iterdir()},
-        "engine_installed": False, "synthesis_tested": False, "model_downloaded": False,
-        "physical_audio_tested": False, "candidate_modified": False, "pm_admission_changed": False,
-        "cases": [],
-    }
-    result_path = out / "NEUTTS-CORE-RESULT.json"
-    for name in CASES:
-        try:
-            child = subprocess.run([sys.executable, "-I", "-B", __file__, "--case", name, str(out)],
-                                   capture_output=True, timeout=90)
-            code, stdout, stderr = child.returncode, child.stdout, child.stderr
-        except subprocess.TimeoutExpired as exc:
-            code, stdout, stderr = 124, exc.stdout or b"", exc.stderr or b""
-        (out / f"neutts-{name}.stdout.log").write_bytes(stdout[-100000:])
-        (out / f"neutts-{name}.stderr.log").write_bytes(stderr[-100000:])
-        path = out / f"neutts-{name}.json"
-        result = json.loads(path.read_text()) if path.exists() else {"status": "failed", "error": "child exited without a receipt"}
-        receipt["cases"].append({"component": name, "exit_code": code, "status": result["status"],
-                                 "receipt": path.name if path.exists() else None,
-                                 "receipt_sha256": sha(path) if path.exists() else None})
-        result_path.write_text(json.dumps(receipt, indent=2) + "\n")
-    receipt["status"] = "passed" if all(row["exit_code"] == 0 and row["status"] == "passed" for row in receipt["cases"]) else "failed"
-    result_path.write_text(json.dumps(receipt, indent=2) + "\n")
-    print(json.dumps({"status": receipt["status"], "cases": receipt["cases"]}), flush=True)
-    return 0 if receipt["status"] == "passed" else 1
-
-
-if __name__ == "__main__":
-    if sys.argv[1] == "--case":
-        raise SystemExit(run_case(sys.argv[2], Path(sys.argv[3])))
-    raise SystemExit(main(Path(sys.argv[1])))
-PY
+stage=pinned-python-dependencies
+"$PREFIX/bin/python" -I -B "$work/native_core.py" --install-python "$out/python-inputs" "$out"
 
 stage=native-scientific-behavior
 "$PREFIX/bin/python" -I -B "$work/native_core.py" "$out"
 stage=complete
-echo "NATIVE_APT_CORE_PASSED: dependency feasibility only; NeuTTS synthesis remains untested"
+echo "NATIVE_APT_CORE_PASSED: native APT and pinned Python dependencies; NeuTTS synthesis remains untested"
