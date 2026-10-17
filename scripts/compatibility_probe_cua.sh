@@ -4,12 +4,13 @@ set -Eeuo pipefail
 
 mode=host
 if [[ $# -gt 0 && "$1" == --in-container ]]; then mode=container; shift; fi
-SOURCE= OUT=
+SOURCE= OUT= CANDIDATE_DIR=
 while (($#)); do
   case "$1" in
     --source) SOURCE="$2"; shift 2 ;;
     --out) OUT="$2"; shift 2 ;;
-    *) echo "usage: $0 [--in-container] --source SOURCE --out OUT" >&2; exit 2 ;;
+    --candidate-dir) CANDIDATE_DIR="$2"; shift 2 ;;
+    *) echo "usage: $0 [--in-container] --source SOURCE --out OUT [--candidate-dir VERIFIED_CANDIDATE]" >&2; exit 2 ;;
   esac
 done
 [[ -n "$SOURCE" && -n "$OUT" ]] || exit 2
@@ -24,11 +25,14 @@ if [[ "$mode" == host ]]; then
   python3 "$packaging/scripts/prepare_cua_termux_source.py" \
     --source "$SOURCE" --patch "$packaging/patches/next-stable/cua-driver.patch" \
     --out "$OUT" --verify-prepared
-  python3 - "$packaging" "$OUT" "$image" <<'PY'
-import hashlib, json, os, pathlib, subprocess, sys
+  if [[ -n "$CANDIDATE_DIR" ]]; then CANDIDATE_DIR="$(realpath "$CANDIDATE_DIR")"; fi
+  python3 - "$packaging" "$OUT" "$image" "$CANDIDATE_DIR" <<'PY'
+import hashlib, json, os, pathlib, runpy, shutil, subprocess, sys
 root, out = map(pathlib.Path, sys.argv[1:3])
 paths = ("scripts/compatibility_probe_cua.sh", "scripts/prepare_cua_termux_source.py",
-         "patches/next-stable/cua-driver.patch", ".github/workflows/cua-termux-probe.yml")
+         "patches/next-stable/cua-driver.patch", ".github/workflows/cua-termux-probe.yml",
+         "scripts/compatibility_probe_cua_hermes.py", "scripts/fetch_compatibility_candidate.py",
+         "patches/next-stable/cua-hermes-integration.patch")
 head = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
 advertised = os.environ.get("CUA_PROBE_HEAD_SHA", head)
 if advertised != head:
@@ -40,7 +44,24 @@ receipt = {
     "native_architecture": "aarch64",
     "inputs": {p: hashlib.sha256((root / p).read_bytes()).hexdigest() for p in paths},
     "hermes_pm_cua_admission_changed": False, "release_output": False,
+    "hermes_integration_requested": bool(sys.argv[4]),
 }
+if sys.argv[4]:
+    candidate = pathlib.Path(sys.argv[4])
+    api = runpy.run_path(str(root / "scripts/compatibility_probe_cua_hermes.py"))
+    verified = api["read_candidate_receipt"](candidate / "candidate-receipt.json")
+    package = candidate / verified["package"]["file"]
+    if package.stat().st_size != verified["package"]["bytes"] or api["digest"](package) != verified["package"]["sha256"]:
+        raise SystemExit("mounted candidate package differs from the verified receipt")
+    evidence = out / "hermes-candidate"
+    evidence.mkdir()
+    for name in ("candidate-receipt.json", "CANDIDATE-IDENTITY.json", "venv-selection.json"):
+        shutil.copyfile(candidate / name, evidence / name)
+    receipt["hermes_candidate"] = {
+        "receipt_sha256": api["digest"](candidate / "candidate-receipt.json"),
+        "run_id": verified["run_id"], "head_sha": verified["head_sha"],
+        "artifact": verified["artifact"], "package": verified["package"],
+    }
 (out / "CUA-PROBE-INPUTS.json").write_text(json.dumps(receipt, indent=2) + "\n")
 PY
   chmod 0777 "$OUT" "$packaging/.cua-native-cache"
@@ -53,12 +74,17 @@ PY
   find "$SOURCE/.git" -type d -exec chmod a+rx {} +
   docker pull "$image"
   [[ "$(docker image inspect "$image" --format '{{.Architecture}}')" == arm64 ]]
+  candidate_mount=() candidate_args=()
+  if [[ -n "$CANDIDATE_DIR" ]]; then
+    candidate_mount=(-v "$CANDIDATE_DIR:/candidate:ro")
+    candidate_args=(--candidate-dir /candidate)
+  fi
   docker run --rm --platform linux/arm64 --user 1000:1000 \
     --tmpfs /bin:mode=1777 \
     -v "$SOURCE:/source:ro" -v "$packaging:/probes:ro" -v "$OUT:/out" \
-    -v "$packaging/.cua-native-cache:/cache" \
+    -v "$packaging/.cua-native-cache:/cache" "${candidate_mount[@]}" \
     "$image" bash /probes/scripts/compatibility_probe_cua.sh \
-      --in-container --source /source --out /out \
+      --in-container --source /source --out /out "${candidate_args[@]}" \
     2>&1 | tee "$OUT/cua-native-probe.log"
   exit 0
 fi
@@ -87,9 +113,14 @@ apt-get -o APT::Update::Error-Mode=any -o Acquire::Retries=5 update
 apt-get -y -o Dpkg::Options::=--force-confnew dist-upgrade
 apt-get -y --no-remove install x11-repo
 apt-get -o APT::Update::Error-Mode=any -o Acquire::Retries=5 update
+desktop_packages=()
+if [[ -n "$CANDIDATE_DIR" ]]; then
+  # Complete product Bot Desktop dependencies, before native cache identity is read.
+  desktop_packages=(xfce4-panel xfdesktop xfce4-settings xfce4-terminal xorg-xsetroot scrot)
+fi
 apt-get -y --no-remove install rust clang make pkg-config git python binutils \
   libx11 libxi libxtst tigervnc xfwm4 dbus xorg-xauth xorg-xdpyinfo xorg-xprop \
-  xorg-setxkbmap ttf-dejavu
+  xorg-setxkbmap ttf-dejavu "${desktop_packages[@]}"
 [[ -e /bin/sh ]] || ln -s "$PREFIX/bin/sh" /bin/sh
 dpkg-query -W -f='${Package}\t${Version}\n' > "$OUT/CUA-PACKAGES.tsv"
 rustc -vV > "$OUT/CUA-RUSTC.txt"
@@ -665,4 +696,169 @@ assert receipt["status"] == "passed", receipt
     "Native Bionic CUA virtual-X11 registry, screenshot, click, scroll, text, clipboard, geometry and cleanup passed.\n"
     "This does not certify phone UI, AT-SPI trees, parallel/uinput or encrypted history.\n")
 PY
+if [[ -n "$CANDIDATE_DIR" ]]; then
+  stage=hermes-integration
+  python -B - /probes "$OUT" "$work" "$CANDIDATE_DIR" <<'PY'
+import hashlib, json, os, pathlib, re, runpy, shutil, stat, subprocess, sys
+
+packaging, out, work, candidate = map(pathlib.Path, sys.argv[1:])
+helper = packaging / "scripts/compatibility_probe_cua_hermes.py"
+api = runpy.run_path(str(helper))
+require, digest = api["require"], api["digest"]
+verified = api["read_candidate_receipt"](candidate / "candidate-receipt.json")
+package = candidate / verified["package"]["file"]
+require(package.stat().st_size == verified["package"]["bytes"]
+        and digest(package) == verified["package"]["sha256"],
+        "candidate bytes differ before native installation")
+standalone = json.loads((out / "CUA-BEHAVIOR.json").read_text())
+require(standalone.get("status") == "passed" and not standalone.get("cleanup_errors"),
+        "Hermes integration requires the completed standalone operations")
+driver = out / "bin/cua-driver"
+require(digest(driver) == standalone["binary_sha256"], "standalone driver changed")
+prefix = pathlib.Path(os.environ["PREFIX"])
+payload = prefix / "lib/hermes-agent"
+source = work / "hermes-source"
+patch = packaging / "patches/next-stable/cua-hermes-integration.patch"
+result = {
+    "schema_version": 1, "status": "started", "published": False,
+    "candidate_receipt_sha256": digest(candidate / "candidate-receipt.json"),
+    "candidate": verified,
+    "baseline": "installed app from the exact verified candidate: upstream plus four released patches and the main compatibility patch",
+    "upstream_commit": verified["identity"]["upstream_commit"],
+    "baseline_patches": verified["identity"]["patches"],
+    "additional_patch": {"path": patch.relative_to(packaging).as_posix(), "sha256": digest(patch)},
+    "helper_sha256": digest(helper), "driver_sha256": digest(driver),
+    "installed_payload": str(payload), "experimental_source": str(source),
+    "hermes_pm_cua_admission_changed": False,
+}
+
+def tree_files(root):
+    entries = {}
+    for current, directories, files in os.walk(root, followlinks=False):
+        base = pathlib.Path(current)
+        for name in sorted(directories + files):
+            path = base / name
+            info = path.lstat()
+            relative = path.relative_to(root).as_posix()
+            if stat.S_ISLNK(info.st_mode):
+                entries[relative] = {"kind": "symlink", "target": os.readlink(path)}
+            elif stat.S_ISREG(info.st_mode):
+                entries[relative] = {"kind": "file", "bytes": info.st_size,
+                                     "sha256": digest(path), "mode": stat.S_IMODE(info.st_mode)}
+            else:
+                require(stat.S_ISDIR(info.st_mode), "unexpected installed payload file type: " + relative)
+    return entries
+
+def tree_receipt(entries):
+    raw = json.dumps(entries, sort_keys=True, separators=(",", ":")).encode()
+    return {"file_and_symlink_count": len(entries), "sha256": hashlib.sha256(raw).hexdigest(),
+            "regular_file_bytes": sum(row.get("bytes", 0) for row in entries.values())}
+
+before_payload = patched_source = None
+failure = None
+try:
+    control = {
+        field: subprocess.check_output(["dpkg-deb", "-f", str(package), field],
+                                       text=True, timeout=15).strip()
+        for field in ("Package", "Version", "Architecture", "Depends", "Pre-Depends")
+    }
+    require(control == {"Package": "hermes-agent", "Version": "0.22.2-1",
+                        "Architecture": "aarch64", "Depends": "", "Pre-Depends": ""},
+            "verified candidate Debian identity/dependency contract differs")
+    result["debian_control"] = control
+    with (out / "hermes-candidate-install.log").open("wb") as log:
+        subprocess.run(["dpkg", "--force-not-root", "--force-script-chrootless",
+                        "--install", str(package)], check=True, stdout=log,
+                       stderr=subprocess.STDOUT, timeout=180)
+    version = subprocess.check_output(["dpkg-query", "-W", "-f=${Version}", "hermes-agent"],
+                                      text=True, timeout=10)
+    require(version == "0.22.2-1", "installed candidate version differs")
+    require((payload / "app/.install_method").read_text().strip() == "apt",
+            "candidate lost its APT install provenance")
+    before_payload = tree_files(payload)
+    baseline = tree_files(payload / "app")
+    result["installed_payload_before"] = tree_receipt(before_payload)
+    result["baseline_app"] = tree_receipt(baseline)
+    require(not source.exists(), "experimental source destination must be new")
+    shutil.copytree(payload / "app", source, symlinks=True)
+    require(tree_files(source) == baseline, "candidate application copy differs")
+    patch_paths = re.findall(r"^diff --git a/(\S+) b/\1$", patch.read_text(), re.MULTILINE)
+    require(bool(patch_paths) and len(patch_paths) == len(set(patch_paths)),
+            "experimental patch has ambiguous paths")
+    for name in patch_paths:
+        relative = pathlib.PurePosixPath(name)
+        require(not relative.is_absolute() and ".." not in relative.parts,
+                "experimental patch path escapes its source")
+    subprocess.run(["git", "-C", str(source), "apply", "--check", str(patch)],
+                   check=True, timeout=20)
+    subprocess.run(["git", "-C", str(source), "apply", str(patch)], check=True, timeout=20)
+    patched_source = tree_files(source)
+    changed = sorted(name for name in baseline.keys() | patched_source.keys()
+                     if baseline.get(name) != patched_source.get(name))
+    require(set(changed) == set(patch_paths), "changes differ from the reviewed experimental patch")
+    result["patched_app"] = tree_receipt(patched_source)
+    result["changed_paths"] = {
+        name: {"before": baseline.get(name), "after": patched_source.get(name)} for name in changed}
+    env = dict(os.environ)
+    env.pop("PYTHONPATH", None)
+    env.pop("PYTHONHOME", None)
+    env.pop("LD_PRELOAD", None)
+    env.update(PYTHONDONTWRITEBYTECODE="1", PYTHONNOUSERSITE="1",
+               HERMES_RUNTIME_DIR=str(payload / "tools"),
+               LD_LIBRARY_PATH=":".join([
+                   str(payload / "tools/python") + str(prefix / "lib"),
+                   str(payload / "tools/node") + str(prefix / "lib"),
+                   str(payload / "tools/ffmpeg") + str(prefix / "lib"),
+                   str(payload / "runtime-libs/lib"), str(prefix / "lib"),
+               ]))
+    command = [str(payload / "venv/bin/python"), "-B", str(helper),
+               "--source", str(source), "--driver", str(driver),
+               "--driver-sha256", standalone["binary_sha256"],
+               "--fixture", str(work / "cua-fixture"),
+               "--out", str(out / "hermes-integration"),
+               "--candidate-receipt", str(candidate / "candidate-receipt.json")]
+    result["command"] = command
+    result["loader_library_paths"] = env["LD_LIBRARY_PATH"].split(":")
+    with (out / "hermes-integration.log").open("wb") as log:
+        completed = subprocess.run(command, env=env, stdout=log, stderr=subprocess.STDOUT,
+                                   timeout=300)
+    result["helper_exit_code"] = completed.returncode
+    require(completed.returncode == 0, "native Hermes integration failed; see hermes-integration.log")
+    helper_result = out / "hermes-integration/hermes-cua-result.json"
+    require(json.loads(helper_result.read_text()).get("status") == "passed",
+            "Hermes helper did not produce a passed result")
+    result["helper_result"] = {"path": helper_result.relative_to(out).as_posix(),
+                               "sha256": digest(helper_result)}
+    result["status"] = "passed"
+except BaseException as exc:
+    failure = exc
+    result["status"], result["error"] = "failed", repr(exc)
+finally:
+    preservation_errors = []
+    if before_payload is not None:
+        try:
+            result["installed_payload_after"] = tree_receipt(tree_files(payload))
+            result["installed_payload_unchanged"] = result["installed_payload_before"] == result["installed_payload_after"]
+            if not result["installed_payload_unchanged"]:
+                preservation_errors.append("installed candidate payload changed after setup")
+        except BaseException as exc:
+            preservation_errors.append("payload preservation check: " + repr(exc))
+    if patched_source is not None:
+        try:
+            result["experimental_source_unchanged_after_execution"] = tree_files(source) == patched_source
+            if not result["experimental_source_unchanged_after_execution"]:
+                preservation_errors.append("experimental source changed during execution")
+        except BaseException as exc:
+            preservation_errors.append("source preservation check: " + repr(exc))
+    result["preservation_errors"] = preservation_errors
+    if preservation_errors:
+        result["status"] = "failed"
+    (out / "CUA-HERMES-PREPARATION.json").write_text(json.dumps(result, indent=2) + "\n")
+    print(json.dumps({"status": result["status"], "receipt": "CUA-HERMES-PREPARATION.json",
+                      "helper_exit_code": result.get("helper_exit_code")}), flush=True)
+if failure is not None:
+    raise failure
+require(result["status"] == "passed", "candidate/source preservation check failed")
+PY
+fi
 stage=completed

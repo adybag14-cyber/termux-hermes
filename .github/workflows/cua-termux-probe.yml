@@ -9,9 +9,13 @@ on:
       - 'scripts/prepare_cua_termux_source.py'
       - 'scripts/compatibility_probe_cua.sh'
       - 'patches/next-stable/cua-driver.patch'
+      - 'patches/next-stable/cua-hermes-integration.patch'
+      - 'scripts/compatibility_probe_cua_hermes.py'
+      - 'scripts/fetch_compatibility_candidate.py'
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: cua-termux-probe-${{ github.sha }}
@@ -48,6 +52,13 @@ jobs:
             --patch patches/next-stable/cua-driver.patch \
             --out probe-results/cua
 
+      - name: Fetch and verify the exact passed Hermes candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/fetch_compatibility_candidate.py \
+            --out "$RUNNER_TEMP/verified-compatibility-candidate"
+
       - name: Restore verified-source native build cache
         id: cargo-cache
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -62,7 +73,8 @@ jobs:
           CUA_PROBE_HEAD_SHA: ${{ github.sha }}
         run: |
           bash scripts/compatibility_probe_cua.sh \
-            --source cua-source --out probe-results/cua
+            --source cua-source --out probe-results/cua \
+            --candidate-dir "$RUNNER_TEMP/verified-compatibility-candidate"
 
       - name: Retain Cargo fingerprints after a compile failure or success
         if: always() && steps.cargo-cache.outputs.cache-hit != 'true'
@@ -87,6 +99,8 @@ jobs:
             probe-results/cua/*.patch
             probe-results/cua/*.png
             probe-results/cua/bin/cua-driver
+            probe-results/cua/hermes-candidate/
+            probe-results/cua/hermes-integration/
           if-no-files-found: warn
           compression-level: 0
           retention-days: 14

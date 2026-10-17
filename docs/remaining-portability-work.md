@@ -39,7 +39,23 @@ contains PyTorch 2.14.0, while the NeuTTS
 dependency group is excluded for the managed interpreter. No Android wheel for
 the locked PyTorch or ONNX Runtime entries is present in that lock.
 
-The bounded next step is to choose and certify one runtime arrangement:
+The first separate [APT-only dependency experiment](../scripts/compatibility_probe_neutts.sh),
+[run 39053355817](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39053355817)
+at head `036f11515eda3a6e4129e14c7dd75ec27d5ae47d`, installed all 122 pinned
+APT packages. SciPy's numerical checks, llvmlite's native MCJIT function and soxr
+resampling passed. Torch, Torchaudio and Torchcodec each stopped at
+`ModuleNotFoundError: No module named 'typing_extensions'` before their native
+behavior cases; the overall probe correctly failed. A pinned Python
+dependency-closure fix is pending.
+
+This disposable Termux system-Python experiment records the rolling base upgrade
+separately from the pinned dependency archives. Its
+[native workflow](../.github/workflows/neutts-termux-probe.yml) does not install
+NeuTTS, change Hermes PM, validate synthesis or alter the current engine
+exclusion. The [audit record](../audit/compatibility-0.22.2-1.json) binds these
+partial results to the exact tested inputs and verified artifact.
+
+The engine still needs one certified runtime arrangement:
 
 1. Port the exact NeuTTS source and its native codec/inference closure to the
    managed CPython ABI, then adjust the Python requirement only after actual
@@ -84,21 +100,26 @@ The driver/SDK platform configuration admits Android to the existing X11 code.
 Two local crate adapters enable clipboard-rs's Unix X11 implementation and align
 x11rb-protocol's socket location with Termux's PREFIX/tmp. Both retain their
 locked versions; the preparer verifies that all 602 other Cargo package records
-remain unchanged. Source preparation, the adapted platform backend compilation,
-and an owned-PTY check against Android's installed ioctl header have passed.
-The driver now compiles and links natively. The Android shared-memory adapter
-uses the existing kernel syscall where Bionic does not export the libc wrapper;
-native descriptor, shared-mapping, keymap and error-path checks passed. The first
-linked run stopped before Xfwm4 startup because the private test bus rejected
-method replies and signals. A narrow correction restores the standard D-Bus
-session receive policy and adds a real request/reply gate. That correction
-passed: the native driver now starts, registers 60 MCP tools and captures the
-exact 320x240 client window with independently checked colors. The default
-background click returned an unverifiable effect and produced no fixture event.
-The next probe explicitly requests the documented foreground XTest route; no
-background-input certification is claimed.
-[Native progress records](../audit/cua-native-20261017/) preserve the exact tested
-inputs, real failure messages and completed PTY proof.
+remain unchanged. The standalone native probe now **passes all eleven checks** in
+[run 39052290704](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39052290704)
+at head `3e63be4a65dcb0d6d2c0c2fec86f94546fbba8ed`. Its
+[success record](../audit/cua-native-20261017/run-39052290704.json) preserves
+the source/input receipts, native linking and PTY/shared-memory ABI proof, a
+private D-Bus round trip, all 60 real standalone MCP tool names, and owned cleanup.
+
+The independent Xlib fixture verified a 320x240 screenshot with its two painted
+colors, one foreground click at client coordinates (80,60), exactly two scroll
+events, the exact typed text, and client geometry (40,60,400,200). Clipboard
+write/read returned the exact fixture string. The driver reported input effects
+as unverifiable; success was established by the actual fixture events, not that
+transport response alone.
+
+The [earlier default-background attempt](../audit/cua-native-20261017/run-39051490364.json)
+returned an unverifiable effect and produced no click event. That path remains
+uncertified. The successful foreground run also retained a degraded accessibility
+response because the private bus lacks org.a11y.Bus; its fallback window element
+is not an AT-SPI-tree proof. [Native progress records](../audit/cua-native-20261017/)
+retain the actual failures and subsequent bounded corrections.
 
 The experiment checks a private, owned Xvnc desktop using real MCP operations
 and independent fixture observations. Its scope includes screenshot capture,
@@ -118,7 +139,21 @@ observations, three one-action foreground approvals, refusal without an approver
 viewer takeover/hand-back, and owned cleanup. Its [candidate fetcher](../scripts/fetch_compatibility_candidate.py)
 verifies the already-proven package and source identities before the test. These
 files are prepared and reviewed; native Hermes integration is still pending and
-the experimental patch is not included in the full main candidate.
+the experimental patch is not included in the full main candidate. The
+[preparation receipt](../audit/cua-hermes-preparation-20261017.json) distinguishes
+the full-source reference/replay Git trees from the forthcoming runtime input:
+the native probe will copy the exact proven candidate's trimmed `app/` tree
+outside the installed payload and apply only the experimental CUA patch. The
+full-source trees `f49c77b666cef7fd5235cdd786556908527b532e` and
+`d4e6233dc147ca2595d37e9a76a03878ee137498` prove the reference patch replay;
+they do not assert that the candidate's trimmed app tree is identical to either.
+
+The [canonical host-validation record](../audit/cua-hermes-host-tests-20261017.json)
+preserves the initial 58-pass/three-skip run and the final 14-pass readiness run,
+with seven overlapping cases and unchanged production code. Those results are
+not summed and do not establish native Hermes-to-MCP behavior. The standalone
+driver result therefore does not increase the six main-candidate repairs or
+change the nine-restriction baseline count.
 
 ## Microphone silence detection
 
