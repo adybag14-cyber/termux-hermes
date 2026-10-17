@@ -1,0 +1,24 @@
+diff --git a/build_bundled.sh b/build_bundled.sh
+--- a/build_bundled.sh
++++ b/build_bundled.sh
+@@ -1,6 +1,12 @@
+ #!/bin/sh
+ 
+ VERSION="$1"
++
++# Honor an explicit bounded build budget; use two jobs by default.
++BUILD_JOBS="${CMAKE_BUILD_PARALLEL_LEVEL:-2}"
++case "$BUILD_JOBS" in
++  0*|*[!0-9]*) echo "CMAKE_BUILD_PARALLEL_LEVEL must be a positive integer" >&2; exit 2 ;;
++esac
+ 
+ mkdir -p build
+ 
+@@ -23,5 +29,5 @@
+   -DSPM_DISABLE_EMBEDDED_DATA=ON \
+   -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
+   -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+-  -DCMAKE_CXX_FLAGS="-fPIC -fvisibility=default -ffunction-sections -fdata-sections"
+-cmake --build ${BUILD_DIR} --config Release --target install --parallel $(nproc)
++  -DCMAKE_CXX_FLAGS="${CXXFLAGS:-} -fPIC -fvisibility=default -ffunction-sections -fdata-sections"
++cmake --build ${BUILD_DIR} --config Release --target install --parallel "${BUILD_JOBS}"
