@@ -1,0 +1,176 @@
+--- a/scripts/compatibility_probe_audio_hermes.py
++++ b/scripts/compatibility_probe_audio_hermes.py
+@@ -16,6 +16,7 @@
+ import platform
+ import subprocess
+ import sys
++import traceback
+ 
+ 
+ def preparer():
+@@ -215,20 +216,53 @@
+     return result
+ 
+ 
++
++def exception_details(exc):
++    """Retain the original exception chain; never turn an error into readiness."""
++    chain, seen = [], set()
++    current = exc
++    while current is not None and id(current) not in seen:
++        seen.add(id(current))
++        chain.append({
++            "type": type(current).__name__, "module": type(current).__module__,
++            "message": str(current), "args": repr(current.args),
++        })
++        current = (current.__cause__ if current.__cause__ is not None
++                   else None if current.__suppress_context__ else current.__context__)
++    return {
++        "type": type(exc).__name__, "message": str(exc), "chain": chain,
++        "traceback": "".join(traceback.format_exception(exc)),
++    }
++
++
+ def main(argv=None):
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument("--environment", type=Path)
+     parser.add_argument("--runtime-worker", type=Path, help=argparse.SUPPRESS)
+     args = parser.parse_args(argv)
++    request = None
+     try:
+         if args.runtime_worker:
+-            runtime_worker(json.loads(args.runtime_worker.read_text()))
++            request = json.loads(args.runtime_worker.read_text())
++            runtime_worker(request)
+         else:
+             if args.environment is None:
+                 parser.error("--environment is required")
+             run(args)
+     except Exception as exc:
++        details = exception_details(exc)
++        if args.runtime_worker and isinstance(request, dict) and isinstance(request.get("out"), str):
++            try:
++                preparer().write_json(Path(request["out"]).with_name("audio-readiness-failure.json"), {
++                    "schema_version": 1, "status": "failed", "stage": "runtime-worker",
++                    "error": details, "dependency_readiness": "not-completed",
++                    "physical_vad": "not-tested", "microphone_accessed": False,
++                    "audio_stream_opened": False, "published": False,
++                })
++            except Exception as receipt_error:
++                print("Could not retain audio failure receipt: " + str(receipt_error), file=sys.stderr)
+         print("Audio readiness probe failed: " + str(exc), file=sys.stderr)
++        print(details["traceback"], file=sys.stderr, end="")
+         return 1
+     return 0
+ 
+--- a/tests/test_audio_hermes_preparation.py
++++ b/tests/test_audio_hermes_preparation.py
+@@ -968,3 +968,108 @@
+         fixture.link.write_bytes(fixture.license_raw)
+     with pytest.raises(prep.PreparationError, match="unreviewed staged payload change"):
+         prep.allowed_changes(fixture.original, prep.inventory(fixture.payload))
++
++
++@pytest.mark.parametrize("error_type", [ModuleNotFoundError, OSError, RuntimeError])
++def test_runtime_probe_retains_original_import_exception_and_failure_status(
++    tmp_path, monkeypatch, capsys, error_type,
++):
++    """Real Python exception chaining; no native or audio success is simulated."""
++    evidence = tmp_path / "evidence"
++    evidence.mkdir()
++    success = evidence / "audio-readiness-probe.json"
++    request = evidence / "request.json"
++    request.write_text(json.dumps({"payload": str(tmp_path / "payload"), "out": str(success)}))
++    original = error_type("original import diagnosis retained exactly")
++    predicate_message = "audio import failed for a reason other than PortAudio initialization"
++
++    def failed_worker(_request):
++        try:
++            raise original
++        except Exception:
++            prep.require(False, predicate_message)
++
++    monkeypatch.setattr(probe, "runtime_worker", failed_worker)
++    assert probe.main(["--runtime-worker", str(request)]) == 1
++    assert not success.exists()
++    failure = json.loads((evidence / "audio-readiness-failure.json").read_bytes())
++    assert failure["status"] == "failed"
++    assert failure["stage"] == "runtime-worker"
++    assert failure["dependency_readiness"] == "not-completed"
++    assert failure["physical_vad"] == "not-tested"
++    assert failure["microphone_accessed"] is False
++    assert failure["audio_stream_opened"] is False
++    assert failure["published"] is False
++    assert failure["error"]["type"] == "PreparationError"
++    assert failure["error"]["message"] == predicate_message
++    assert [entry["type"] for entry in failure["error"]["chain"]] == [
++        "PreparationError", error_type.__name__,
++    ]
++    assert failure["error"]["chain"][1] == {
++        "type": error_type.__name__, "module": "builtins",
++        "message": str(original), "args": repr(original.args),
++    }
++    trace = failure["error"]["traceback"]
++    assert error_type.__name__ + ": " + str(original) in trace
++    assert "During handling of the above exception" in trace
++    assert "PreparationError: " + predicate_message in trace
++    captured = capsys.readouterr()
++    assert captured.out == ""
++    assert trace in captured.err
++
++
++@pytest.mark.parametrize("suppress", [False, True])
++def test_probe_exception_receipt_obeys_explicit_cause_and_suppressed_context(suppress):
++    try:
++        try:
++            raise OSError("original diagnostic")
++        except OSError as original:
++            if suppress:
++                raise RuntimeError("outer failure") from None
++            raise RuntimeError("outer failure") from original
++    except RuntimeError as outer:
++        detail = probe.exception_details(outer)
++    assert detail["type"] == "RuntimeError"
++    assert detail["message"] == "outer failure"
++    if suppress:
++        assert [row["type"] for row in detail["chain"]] == ["RuntimeError"]
++        assert "original diagnostic" not in detail["traceback"]
++    else:
++        assert [row["type"] for row in detail["chain"]] == ["RuntimeError", "OSError"]
++        assert "original diagnostic" in detail["traceback"]
++        assert "direct cause" in detail["traceback"]
++
++
++def test_runtime_probe_still_retains_raw_trace_if_failure_receipt_cannot_be_written(
++    tmp_path, monkeypatch, capsys,
++):
++    blocked = tmp_path / "blocked"
++    blocked.write_bytes(b"preserved non-directory")
++    request = tmp_path / "request.json"
++    request.write_text(json.dumps({
++        "payload": str(tmp_path / "payload"),
++        "out": str(blocked / "audio-readiness-probe.json"),
++    }))
++
++    def failed_worker(_request):
++        raise OSError("original runtime failure survives receipt I/O failure")
++
++    monkeypatch.setattr(probe, "runtime_worker", failed_worker)
++    assert probe.main(["--runtime-worker", str(request)]) == 1
++    stderr = capsys.readouterr().err
++    assert "Could not retain audio failure receipt:" in stderr
++    assert "Traceback (most recent call last):" in stderr
++    assert "OSError: original runtime failure survives receipt I/O failure" in stderr
++    assert blocked.read_bytes() == b"preserved non-directory"
++
++
++def test_orchestrator_failure_keeps_full_trace_and_nonzero_exit(tmp_path, monkeypatch, capsys):
++    def failed_run(_options):
++        raise RuntimeError("child failed; original raw logs remain authoritative")
++
++    monkeypatch.setattr(probe, "run", failed_run)
++    assert probe.main(["--environment", str(tmp_path)]) == 1
++    stderr = capsys.readouterr().err
++    assert "Traceback (most recent call last):" in stderr
++    assert "RuntimeError: child failed; original raw logs remain authoritative" in stderr
++    assert not list(tmp_path.iterdir())

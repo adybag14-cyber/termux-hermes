@@ -16,6 +16,7 @@ from pathlib import Path
 import platform
 import subprocess
 import sys
+import traceback
 
 
 def preparer():
@@ -215,20 +216,53 @@ def run(options):
     return result
 
 
+
+def exception_details(exc):
+    """Retain the original exception chain; never turn an error into readiness."""
+    chain, seen = [], set()
+    current = exc
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        chain.append({
+            "type": type(current).__name__, "module": type(current).__module__,
+            "message": str(current), "args": repr(current.args),
+        })
+        current = (current.__cause__ if current.__cause__ is not None
+                   else None if current.__suppress_context__ else current.__context__)
+    return {
+        "type": type(exc).__name__, "message": str(exc), "chain": chain,
+        "traceback": "".join(traceback.format_exception(exc)),
+    }
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--environment", type=Path)
     parser.add_argument("--runtime-worker", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
+    request = None
     try:
         if args.runtime_worker:
-            runtime_worker(json.loads(args.runtime_worker.read_text()))
+            request = json.loads(args.runtime_worker.read_text())
+            runtime_worker(request)
         else:
             if args.environment is None:
                 parser.error("--environment is required")
             run(args)
     except Exception as exc:
+        details = exception_details(exc)
+        if args.runtime_worker and isinstance(request, dict) and isinstance(request.get("out"), str):
+            try:
+                preparer().write_json(Path(request["out"]).with_name("audio-readiness-failure.json"), {
+                    "schema_version": 1, "status": "failed", "stage": "runtime-worker",
+                    "error": details, "dependency_readiness": "not-completed",
+                    "physical_vad": "not-tested", "microphone_accessed": False,
+                    "audio_stream_opened": False, "published": False,
+                })
+            except Exception as receipt_error:
+                print("Could not retain audio failure receipt: " + str(receipt_error), file=sys.stderr)
         print("Audio readiness probe failed: " + str(exc), file=sys.stderr)
+        print(details["traceback"], file=sys.stderr, end="")
         return 1
     return 0
 
