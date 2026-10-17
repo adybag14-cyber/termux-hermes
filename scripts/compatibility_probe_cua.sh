@@ -121,6 +121,50 @@ printf '%s\n' "$cache_key" > "$OUT/CUA-CACHE-KEY.txt"
 export CARGO_BUILD_JOBS=2 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_DEV_INCREMENTAL=false
 export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$PREFIX/bin/clang"
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" ANDROID_API_LEVEL=24 CONFIG_SHELL="$PREFIX/bin/sh"
+stage=tty-abi
+cat > "$work/cua-tty-abi.c" <<'C'
+#include <errno.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+
+/* Same Android request used by platform-linux/src/tty.rs. */
+_Static_assert((unsigned int)TIOCGPTN == 0x80045430U, "Android TIOCGPTN ABI mismatch");
+int main(void) {
+    int master = posix_openpt(O_RDWR | O_NOCTTY | O_CLOEXEC);
+    if (master < 0 || grantpt(master) || unlockpt(master)) {
+        perror("owned PTY setup");
+        return 2;
+    }
+    unsigned int number = 0;
+    char path[128], *end = NULL;
+    if (ioctl(master, (int)0x80045430U, &number) ||
+        ptsname_r(master, path, sizeof(path))) {
+        perror("owned PTY number");
+        return 3;
+    }
+    const char *base = strrchr(path, '/');
+    if (!base) return 4;
+    unsigned long expected = strtoul(base + 1, &end, 10);
+    if (end == base + 1 || *end || expected != number) return 5;
+    if (close(master)) return 6;
+    int ordinary = open("/dev/null", O_RDONLY | O_CLOEXEC);
+    if (ordinary < 0) return 7;
+    errno = 0;
+    int result = ioctl(ordinary, (int)0x80045430U, &number);
+    int saved_errno = errno;
+    if (close(ordinary) || result != -1 || saved_errno != ENOTTY) return 8;
+    puts("{\"request_u32\":2147767344,\"pty_number_agrees_with_ptsname_r\":true,"
+         "\"non_master_rejected\":true}");
+    return 0;
+}
+C
+clang "$work/cua-tty-abi.c" -o "$work/cua-tty-abi"
+"$work/cua-tty-abi" > "$OUT/CUA-TTY-ABI.json"
+
 stage=compile
 cargo build --locked --no-default-features -p cua-driver \
   --manifest-path "$work/source/libs/cua-driver/rust/Cargo.toml" \

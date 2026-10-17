@@ -1190,3 +1190,27 @@ index a7f298f..fe9165c 100644
      {
          let _ = compat;
          let _ = provider;
+diff --git a/libs/cua-driver/rust/crates/platform-linux/src/tty.rs b/libs/cua-driver/rust/crates/platform-linux/src/tty.rs
+index 159a4c5..d168608 100644
+--- a/libs/cua-driver/rust/crates/platform-linux/src/tty.rs
++++ b/libs/cua-driver/rust/crates/platform-linux/src/tty.rs
+@@ -33,9 +33,18 @@ fn pidfd_getfd(pidfd: &OwnedFd, remote_fd: i32) -> Option<OwnedFd> {
+ /// pts index of a pty *master* fd, or `None` if `fd` is not a master.
+ fn pts_number(fd: i32) -> Option<u32> {
+     let mut n: libc::c_uint = 0;
++    // Bionic defines TIOCGPTN as _IOR('T', 0x30, unsigned int), but the locked
++    // Rust libc 0.2.186 does not export it on Android. Its ioctl request is int.
++    // Source: aosp-mirror/platform_bionic@731631f300090436d7f5df80d50b6275c8c60a93
++    // libc/kernel/uapi/asm-generic/ioctls.h and libc/include/bits/ioctl.h.
++    // The native aarch64 probe checks the installed header and an owned PTY.
++    #[cfg(target_os = "android")]
++    let request = 0x8004_5430_u32 as libc::c_int;
++    #[cfg(not(target_os = "android"))]
++    let request = libc::TIOCGPTN;
+     // SAFETY: TIOCGPTN writes a c_uint through the pointer; it fails with
+     // ENOTTY on anything that isn't a pty master, which we treat as "no match".
+-    let ret = unsafe { libc::ioctl(fd, libc::TIOCGPTN, &mut n as *mut libc::c_uint) };
++    let ret = unsafe { libc::ioctl(fd, request, &mut n as *mut libc::c_uint) };
+     (ret == 0).then_some(n as u32)
+ }
+ 
