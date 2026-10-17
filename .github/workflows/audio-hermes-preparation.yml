@@ -2,6 +2,16 @@ name: Prepare full Hermes audio environment
 
 on:
   workflow_dispatch:
+  push:
+    branches: [prepare/termux-compatibility-next-stable]
+    paths:
+      - '.github/workflows/audio-hermes-preparation.yml'
+      - 'scripts/prepare_audio_hermes_environment.py'
+      - 'scripts/compatibility_probe_audio_hermes.py'
+      - 'scripts/run_audio_hermes_preparation.sh'
+      - 'scripts/fetch_compatibility_candidate.py'
+      - 'patches/next-stable/audio-readiness.patch'
+      - 'tests/test_audio_hermes_preparation.py'
 
 permissions:
   contents: read
