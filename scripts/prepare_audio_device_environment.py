@@ -48,6 +48,44 @@ SEALED_ROOTS = ("venv", "pm-runtime")
 ADDITIONS = {"numpy": "2.4.3", "sounddevice": "0.5.5"}
 
 
+
+# The frozen candidate declares its Android psutil wheel by this exact Git source.
+# This maps installed metadata to audited wheel bytes; it never installs a URL.
+PSUTIL_DIRECT_REQUIREMENT = (
+    "psutil @ git+https://github.com/giampaolo/psutil.git@380bd2b59c67b0e1b04bbf3a90b11744f4f96644"
+    " ; sys_platform == 'android' and python_version >= '3.14'"
+)
+PSUTIL_LOCKED_SOURCE = (
+    "https://github.com/giampaolo/psutil.git?rev=380bd2b59c67b0e1b04bbf3a90b11744f4f96644"
+    "#380bd2b59c67b0e1b04bbf3a90b11744f4f96644"
+)
+PSUTIL_DIRECT_BINDING = {
+    "parent": "hermes-agent",
+    "parent_version": "0.0.0",
+    "requirement": PSUTIL_DIRECT_REQUIREMENT,
+    "name": "psutil",
+    "version": "8.0.0",
+    "catalog_wheel": {
+        "file": "wheelhouse/psutil-8.0.0-cp38-abi3-android_24_arm64_v8a.whl",
+        "name": "psutil", "version": "8.0.0", "size": 118929,
+        "sha256": "710186128ed04261dc0918236f5c270e05a97ffad9bd8033ecc1473e738baa5c",
+        "source": {"kind": "git", "locked": PSUTIL_LOCKED_SOURCE},
+        "source_fingerprint": "f424090227b5ff93d90ee0f64f168ba2a81d79187c4d0df8144654d81ac78d72",
+    },
+    "source_inputs": {
+        "app/hermes_agent-0.0.0.dist-info/METADATA": {
+            "size": 13179, "sha256": "61215cb1d4247923477efaf5872e42dfb069b1e47fa0e9b58cc60417bdfca741"},
+        "app/pyproject.toml": {
+            "size": 42858, "sha256": "7ee8c02a9eb624c8fe2c718ba0f69a573d55e5223f3297bb3439afa2dd275547"},
+        "app/uv.lock": {
+            "size": 1203717, "sha256": "72abb87a634769baaf30830cd317892053c6e15f8e9519b085524fa0ed542829"},
+        "bundled-wheels.json": {
+            "size": 68318, "sha256": "3debedb2a10d72c2df30b4a6f9b78785cf1731ac98bc7615b38d54194ba344e3"},
+    },
+    "url_accessed": False,
+    "source_build_executed": False,
+}
+
 def normalized_name(value: str) -> str:
     return re.sub(r"[-_.]+", "-", value).lower()
 
@@ -458,7 +496,67 @@ def verify_inventory(distributions: list, expected: dict[str, str], site: Path, 
     return found
 
 
-def dependency_graph(distributions: dict, expected: dict[str, str], extras: list[str]) -> list[dict]:
+def frozen_psutil_binding(root: Path, manifest: dict) -> dict:
+    """Verify the sole active URL declaration against original candidate inputs."""
+    import copy
+    import email.parser
+    import tomllib
+
+    binding = PSUTIL_DIRECT_BINDING
+    label = binding["parent"] + ": " + binding["requirement"]
+    pins = binding["source_inputs"]
+    entries = {row["path"]: row for row in manifest["entries"]}
+    for name, pin in pins.items():
+        row = entries.get(name)
+        require(row is not None and row.get("kind") == "file"
+                and {key: row.get(key) for key in ("size", "sha256")} == pin,
+                "direct-URL candidate input pin differs: " + label + " [" + name + "]")
+        bundle.verify_file(root / name, pin, "direct-URL candidate input: " + label)
+    lock = manifest["lock"]
+    require(lock["candidate"]["catalog"] == pins["bundled-wheels.json"]
+            and lock["source_locks"]["app/pyproject.toml"] == pins["app/pyproject.toml"]
+            and lock["source_locks"]["app/uv.lock"] == pins["app/uv.lock"],
+            "direct-URL frozen source lock differs: " + label)
+    metadata_path = root / "app/hermes_agent-0.0.0.dist-info/METADATA"
+    parent = email.parser.BytesParser().parsebytes(metadata_path.read_bytes())
+    project = tomllib.loads((root / "app/pyproject.toml").read_text())["project"]
+    require(normalized_name(parent["Name"]) == binding["parent"]
+            and parent["Version"] == binding["parent_version"]
+            and project["name"] == binding["parent"] and project["version"] == binding["parent_version"]
+            and parent.get_all("Requires-Dist", []).count(binding["requirement"]) == 1
+            and project["dependencies"].count(binding["requirement"]) == 1,
+            "direct-URL parent declaration differs: " + label)
+    catalog = bundle.read_json(root / "bundled-wheels.json")
+    selected = [row for row in catalog["wheels"] if row.get("name") == binding["name"]]
+    planned = [row for row in manifest["wheels"] if row.get("name") == binding["name"]]
+    require(selected == [binding["catalog_wheel"]] and planned == selected,
+            "direct-URL wheel/catalog identity differs: " + label)
+    uv = tomllib.loads((root / "app/uv.lock").read_text())
+    source = {"git": PSUTIL_LOCKED_SOURCE}
+    packages = [row for row in uv["package"]
+                if row["name"] == binding["name"] and row["version"] == binding["version"]]
+    require(len(packages) == 1 and packages[0]["source"] == source
+            and packages[0].get("resolution-markers") == [
+                "python_full_version >= '3.14' and sys_platform == 'android'"],
+            "direct-URL Git package lock differs: " + label)
+    parents = [row for row in uv["package"]
+               if row["name"] == binding["parent"] and row["version"] == binding["parent_version"]]
+    expected_edge = {"name": binding["name"], "version": binding["version"],
+                     "source": source, "marker": "sys_platform == 'android'"}
+    require(len(parents) == 1 and parents[0].get("dependencies", []).count(expected_edge) == 1,
+            "direct-URL parent lock edge differs: " + label)
+    origin = {"kind": "git", "locked": packages[0]["source"]["git"]}
+    fingerprint = hashlib.sha256(json.dumps(origin, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    require(origin == selected[0]["source"] and fingerprint == selected[0]["source_fingerprint"],
+            "direct-URL catalog source fingerprint differs: " + label)
+    require(lock["candidate"]["baseline_versions"].get(binding["name"]) == binding["version"],
+            "direct-URL frozen installed version differs: " + label)
+    bundle.verify_file(root / selected[0]["file"], selected[0], "direct-URL frozen wheel: " + label)
+    return copy.deepcopy(binding)
+
+
+def dependency_graph(distributions: dict, expected: dict[str, str], extras: list[str], *,
+                     direct_url_binding: dict | None = None) -> list[dict]:
     from packaging.markers import default_environment
     from packaging.requirements import Requirement
     from packaging.version import Version
@@ -484,12 +582,24 @@ def dependency_graph(distributions: dict, expected: dict[str, str], extras: list
                 if requirement.marker and not requirement.marker.evaluate({**environment, "extra": extra}):
                     continue
                 dependency = normalized_name(requirement.name)
-                require(requirement.url is None, "active direct-URL dependency is outside the frozen wheel closure")
+                bound_source = None
+                if requirement.url is not None:
+                    label = name + ": " + text
+                    require(name == PSUTIL_DIRECT_BINDING["parent"] and text == PSUTIL_DIRECT_REQUIREMENT
+                            and direct_url_binding == PSUTIL_DIRECT_BINDING,
+                            "active direct-URL dependency is outside the frozen wheel closure: " + label)
+                    require(expected.get(name) == direct_url_binding["parent_version"]
+                            and dependency == direct_url_binding["name"]
+                            and expected.get(dependency) == direct_url_binding["version"],
+                            "direct-URL installed identity differs: " + label)
+                    bound_source = direct_url_binding
                 require(dependency in expected, "missing active dependency: " + dependency)
                 require(Version(expected[dependency]) in requirement.specifier,
                         "frozen dependency version conflict: " + text)
                 active[dependency].update(requirement.extras)
                 edges[(name, text)] = {"parent": name, "requirement": text, "selected": expected[dependency]}
+                if bound_source is not None:
+                    edges[(name, text)]["frozen_direct_url_binding"] = bound_source
     return [edges[key] for key in sorted(edges)]
 
 
@@ -629,7 +739,9 @@ def native_validation(root: Path) -> dict:
     require(set(by_name) == (set(expected) - {"hermes-agent"}) | {"setuptools"},
             "wheel catalog has a missing or unexpected dependency")
     wheels = [installed_wheel(root, by_name[name]) for name in sorted(expected) if name != "hermes-agent"]
-    graph = dependency_graph(selected, expected, lock["candidate"]["extras"] + ["audio-io"])
+    psutil_binding = frozen_psutil_binding(root, manifest)
+    graph = dependency_graph(selected, expected, lock["candidate"]["extras"] + ["audio-io"],
+                             direct_url_binding=psutil_binding)
     import pm
     import cffi
     import _cffi_backend

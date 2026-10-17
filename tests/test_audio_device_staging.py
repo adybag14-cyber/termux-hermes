@@ -873,3 +873,181 @@ def test_audio_inventory_classifies_exact_portaudio_format_rejections(code):
     assert result["input_device_status"] == "unsupported"
     assert all(row["status"] == "unsupported" and row["portaudio_code"] == code
                for row in result["supported_input_formats"])
+
+
+@pytest.fixture
+def android_psutil_graph(monkeypatch):
+    import copy
+    from types import SimpleNamespace
+    import packaging.markers
+    actual_environment = packaging.markers.default_environment()
+    monkeypatch.setattr(packaging.markers, "default_environment", lambda: {
+        **actual_environment, "sys_platform": "android", "python_version": "3.14",
+        "python_full_version": "3.14.6", "platform_machine": "aarch64"})
+    monkeypatch.setattr(native.platform, "python_version", lambda: "3.14.6")
+    distributions = {
+        "hermes-agent": SimpleNamespace(metadata={"Requires-Python": ">=3.11"},
+                                       requires=[native.PSUTIL_DIRECT_REQUIREMENT]),
+        "psutil": SimpleNamespace(metadata={"Requires-Python": ">=3.6"}, requires=[]),
+    }
+    return distributions, {"hermes-agent": "0.0.0", "psutil": "8.0.0"}, copy.deepcopy(native.PSUTIL_DIRECT_BINDING)
+
+
+def test_android_psutil_url_edge_requires_verified_binding_context(android_psutil_graph):
+    distributions, versions, _ = android_psutil_graph
+    with pytest.raises(staging.StagingError) as caught:
+        native.dependency_graph(distributions, versions, [])
+    assert "hermes-agent: " + native.PSUTIL_DIRECT_REQUIREMENT in str(caught.value)
+
+
+def test_android_psutil_url_edge_records_exact_frozen_source_and_wheel(android_psutil_graph):
+    distributions, versions, binding = android_psutil_graph
+    graph = native.dependency_graph(distributions, versions, [], direct_url_binding=binding)
+    assert len(graph) == 1
+    edge = graph[0]
+    assert edge["parent"] == "hermes-agent" and edge["requirement"] == native.PSUTIL_DIRECT_REQUIREMENT
+    assert edge["selected"] == "8.0.0"
+    assert edge["frozen_direct_url_binding"] == native.PSUTIL_DIRECT_BINDING
+    assert edge["frozen_direct_url_binding"]["url_accessed"] is False
+    assert edge["frozen_direct_url_binding"]["source_build_executed"] is False
+
+
+@pytest.mark.parametrize("replacement", [
+    "psutil @ git+https://github.com/giampaolo/psutil.git@main ; sys_platform == 'android'",
+    "psutil @ git+https://github.com/another/psutil.git@380bd2b59c67b0e1b04bbf3a90b11744f4f96644 ; sys_platform == 'android'",
+    "psutil @ https://example.invalid/psutil-8.0.0.whl ; sys_platform == 'android'",
+    native.PSUTIL_DIRECT_REQUIREMENT.replace("python_version >= '3.14'", "python_version >= '3.13'"),
+])
+def test_psutil_guard_rejects_changed_url_or_declaration(android_psutil_graph, replacement):
+    distributions, versions, binding = android_psutil_graph
+    distributions["hermes-agent"].requires = [replacement]
+    with pytest.raises(staging.StagingError) as caught:
+        native.dependency_graph(distributions, versions, [], direct_url_binding=binding)
+    assert "hermes-agent: " + replacement in str(caught.value)
+
+
+@pytest.mark.parametrize("name,version", [("psutil", "7.2.2"), ("psutil", "8.0.1"), ("hermes-agent", "0.0.1")])
+def test_psutil_direct_source_does_not_exempt_selected_versions(android_psutil_graph, name, version):
+    distributions, versions, binding = android_psutil_graph
+    versions[name] = version
+    with pytest.raises(staging.StagingError, match="direct-URL installed identity differs"):
+        native.dependency_graph(distributions, versions, [], direct_url_binding=binding)
+
+
+def test_known_psutil_url_from_another_parent_is_still_rejected(android_psutil_graph):
+    distributions, versions, binding = android_psutil_graph
+    distributions["manager-package"] = distributions.pop("hermes-agent")
+    versions["manager-package"] = versions.pop("hermes-agent")
+    with pytest.raises(staging.StagingError, match="manager-package: psutil"):
+        native.dependency_graph(distributions, versions, [], direct_url_binding=binding)
+
+
+@pytest.mark.parametrize("field", ["sha256", "version", "file", "source_fingerprint"])
+def test_psutil_graph_rejects_unverified_wheel_binding(android_psutil_graph, field):
+    distributions, versions, binding = android_psutil_graph
+    binding["catalog_wheel"][field] = "unreviewed"
+    with pytest.raises(staging.StagingError, match="active direct-URL dependency"):
+        native.dependency_graph(distributions, versions, [], direct_url_binding=binding)
+
+
+def test_psutil_binding_does_not_override_actual_platform_markers(android_psutil_graph, monkeypatch):
+    distributions, versions, binding = android_psutil_graph
+    import packaging.markers
+    android = packaging.markers.default_environment()
+    monkeypatch.setattr(packaging.markers, "default_environment", lambda: {**android, "sys_platform": "linux"})
+    assert native.dependency_graph(distributions, versions, [], direct_url_binding=binding) == []
+
+
+@pytest.fixture
+def psutil_binding_documents(tmp_path, monkeypatch):
+    """Exercise relational gates separately from the already tested file digest gate."""
+    import copy
+    import json
+    root = tmp_path / "source-binding"
+    metadata_path = root / "app/hermes_agent-0.0.0.dist-info/METADATA"
+    metadata_path.parent.mkdir(parents=True)
+    metadata_path.write_text("Metadata-Version: 2.4\nName: hermes-agent\nVersion: 0.0.0\nRequires-Dist: "
+                             + native.PSUTIL_DIRECT_REQUIREMENT + "\n")
+    (root / "app/pyproject.toml").write_text(
+        '[project]\nname = "hermes-agent"\nversion = "0.0.0"\ndependencies = ['
+        + json.dumps(native.PSUTIL_DIRECT_REQUIREMENT) + "]\n")
+    source = {"git": native.PSUTIL_LOCKED_SOURCE}
+    git = {"name": "psutil", "version": "8.0.0", "source": source,
+           "resolution-markers": ["python_full_version >= '3.14' and sys_platform == 'android'"]}
+    parent = {"name": "hermes-agent", "version": "0.0.0", "dependencies": [
+        {"name": "psutil", "version": "8.0.0", "source": source, "marker": "sys_platform == 'android'"}]}
+    registry = {"name": "psutil", "version": "7.2.2", "source": {"registry": "https://pypi.org/simple"}}
+    uv = {"package": [registry, git, parent]}
+    (root / "app/uv.lock").write_text("test reader supplies the tiny UV document")
+    actual_loads = __import__("tomllib").loads
+    def loads(text):
+        if text == "test reader supplies the tiny UV document":
+            return uv
+        return actual_loads(text)
+    monkeypatch.setattr(__import__("tomllib"), "loads", loads)
+    catalog = {"schema_version": 1, "wheels": [copy.deepcopy(native.PSUTIL_DIRECT_BINDING["catalog_wheel"])]}
+    (root / "bundled-wheels.json").write_text(json.dumps(catalog))
+    pins = copy.deepcopy(native.PSUTIL_DIRECT_BINDING["source_inputs"])
+    manifest = {"entries": [{"path": name, "kind": "file", **pin} for name, pin in pins.items()],
+                "lock": {"candidate": {"catalog": pins["bundled-wheels.json"], "baseline_versions": {"psutil": "8.0.0"}},
+                         "source_locks": {name: pins[name] for name in ("app/pyproject.toml", "app/uv.lock")}},
+                "wheels": copy.deepcopy(catalog["wheels"])}
+    checked_files = []
+    def verify_file(path, pin, label="file"):
+        checked_files.append((path.relative_to(root).as_posix(), copy.deepcopy(pin)))
+    monkeypatch.setattr(staging, "verify_file", verify_file)
+    return root, manifest, catalog, uv, checked_files
+
+
+def test_frozen_psutil_binding_selects_git_8_not_registry_7(psutil_binding_documents):
+    root, manifest, _, _, checks = psutil_binding_documents
+    binding = native.frozen_psutil_binding(root, manifest)
+    assert binding == native.PSUTIL_DIRECT_BINDING
+    assert [name for name, _ in checks] == [
+        *native.PSUTIL_DIRECT_BINDING["source_inputs"],
+        native.PSUTIL_DIRECT_BINDING["catalog_wheel"]["file"],
+    ]
+    assert checks[-1][1] == native.PSUTIL_DIRECT_BINDING["catalog_wheel"]
+
+
+@pytest.mark.parametrize("damage", [
+    "catalog_sha", "catalog_source", "catalog_version", "catalog_fingerprint", "selection_sha",
+    "git_revision", "git_version", "git_marker", "duplicate_git", "parent_edge",
+    "parent_metadata", "project_declaration", "source_pin",
+])
+def test_frozen_psutil_binding_rejects_broken_identity_chain(psutil_binding_documents, damage):
+    import copy
+    import json
+    root, manifest, catalog, uv, _ = psutil_binding_documents
+    if damage == "catalog_sha":
+        catalog["wheels"][0]["sha256"] = "0" * 64
+    elif damage == "catalog_source":
+        catalog["wheels"][0]["source"]["locked"] = native.PSUTIL_LOCKED_SOURCE.replace("380bd2b", "480bd2b")
+    elif damage == "catalog_version":
+        catalog["wheels"][0]["version"] = "7.2.2"
+    elif damage == "catalog_fingerprint":
+        catalog["wheels"][0]["source_fingerprint"] = "0" * 64
+    elif damage == "selection_sha":
+        manifest["wheels"][0]["sha256"] = "0" * 64
+    elif damage == "git_revision":
+        uv["package"][1]["source"] = {"git": native.PSUTIL_LOCKED_SOURCE.replace("380bd2b", "480bd2b")}
+    elif damage == "git_version":
+        uv["package"][1]["version"] = "7.2.2"
+    elif damage == "git_marker":
+        uv["package"][1]["resolution-markers"] = ["sys_platform == 'linux'"]
+    elif damage == "duplicate_git":
+        uv["package"].append(copy.deepcopy(uv["package"][1]))
+    elif damage == "parent_edge":
+        uv["package"][2]["dependencies"][0]["marker"] = "sys_platform == 'linux'"
+    elif damage == "parent_metadata":
+        path = root / "app/hermes_agent-0.0.0.dist-info/METADATA"
+        path.write_text(path.read_text().replace("git+https://github.com/giampaolo/", "git+https://github.com/other/"))
+    elif damage == "project_declaration":
+        path = root / "app/pyproject.toml"
+        path.write_text(path.read_text().replace("git+https://github.com/giampaolo/", "git+https://github.com/other/"))
+    else:
+        manifest["entries"][0]["sha256"] = "0" * 64
+    (root / "bundled-wheels.json").write_text(json.dumps(catalog))
+    with pytest.raises(staging.StagingError) as caught:
+        native.frozen_psutil_binding(root, manifest)
+    assert "hermes-agent: " + native.PSUTIL_DIRECT_REQUIREMENT in str(caught.value)
