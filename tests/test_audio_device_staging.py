@@ -1181,3 +1181,221 @@ def test_parser_adaptation_preserves_normal_dependency_and_python_constraints(an
     dist.metadata["Requires-Python"] = ">=3.15"
     with pytest.raises(staging.StagingError, match="Requires-Python conflict"):
         native.dependency_graph(distributions, versions, ["audio-io"], direct_url_binding=binding)
+
+
+def test_openssl_environment_ignores_ambient_provider_and_config_overrides(tmp_path):
+    inherited = {"HOME": "/real-user", "OPENSSL_MODULES": "/data/data/com.termux/files/usr/lib/ossl-modules",
+                 "OPENSSL_CONF": "/ambient/openssl.cnf", "OPENSSL_CONF_INCLUDE": "/ambient/config",
+                 "OPENSSL_ENGINES": "/ambient/engines", "CRYPTOGRAPHY_OPENSSL_NO_LEGACY": "1"}
+    for name in ("private-a", "private b with spaces"):
+        root = tmp_path / name
+        env = native.runtime_environment(root, inherited)
+        assert env["OPENSSL_MODULES"] == str(root / "runtime-libs/lib/ossl-modules")
+        assert env["OPENSSL_CONF"] == str(root / "runtime-libs/etc/ssl/openssl.cnf")
+        assert env["OPENSSL_CONF_INCLUDE"] == str(root / "runtime-libs/etc/ssl")
+        assert "OPENSSL_ENGINES" not in env and "CRYPTOGRAPHY_OPENSSL_NO_LEGACY" not in env
+        assert env["HOME"] == "/real-user" and not root.exists()
+    assert inherited["OPENSSL_CONF"] == "/ambient/openssl.cnf"
+
+
+def test_audio_launcher_routes_openssl_before_first_python_with_space_safe_values(tmp_path):
+    import shlex
+    root = tmp_path / "isolated audio with spaces"
+    lines = native.launcher_bytes(root, "a" * 64, "b" * 64).decode().splitlines()
+    execution = next(i for i, line in enumerate(lines) if line.startswith("exec "))
+    values = {}
+    for line in lines[:execution]:
+        if line.startswith("export OPENSSL_"):
+            words = shlex.split(line)
+            assert len(words) == 2
+            key, value = words[1].split("=", 1)
+            values[key] = value
+    assert values == native.openssl_environment(root)
+    assert any("CRYPTOGRAPHY_OPENSSL_NO_LEGACY" in shlex.split(line)[1:]
+               for line in lines[:execution] if line.startswith("unset "))
+    assert lines[execution].endswith(' "$@"')
+
+
+def test_helper_child_overwrites_openssl_controls_before_starting_python(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    root = tmp_path / "isolated child with spaces"
+    monkeypatch.setenv("OPENSSL_MODULES", "/ambient/provider")
+    monkeypatch.setenv("OPENSSL_CONF", "/ambient/config")
+    monkeypatch.setenv("OPENSSL_CONF_INCLUDE", "/ambient/includes")
+    monkeypatch.setenv("CRYPTOGRAPHY_OPENSSL_NO_LEGACY", "1")
+    calls = []
+    def run(command, **kwargs):
+        calls.append((command, kwargs))
+        return SimpleNamespace(returncode=0, stdout='{"status":"passed"}', stderr="")
+    monkeypatch.setattr(native.subprocess, "run", run)
+    assert native.run_child(root, "_application", python=root / "pm-runtime/bin/python") == {"status": "passed"}
+    assert len(calls) == 1 and calls[0][0][0] == str(root / "pm-runtime/bin/python")
+    env = calls[0][1]["env"]
+    assert {key: env[key] for key in native.openssl_environment(root)} == native.openssl_environment(root)
+    assert "CRYPTOGRAPHY_OPENSSL_NO_LEGACY" not in env
+
+
+@pytest.fixture
+def private_openssl_inputs(tmp_path, monkeypatch):
+    root = (tmp_path / "private openssl with spaces").resolve()
+    paths = {
+        "provider": "runtime-libs/lib/ossl-modules/legacy.so",
+        "config": "runtime-libs/etc/ssl/openssl.cnf",
+        "libcrypto": "runtime-libs/lib/libcrypto.so.3",
+        "libssl": "runtime-libs/lib/libssl.so.3",
+    }
+    pins = {}
+    for name, relative in paths.items():
+        content = ("frozen original test " + name + "\n").encode()
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+        pins[name] = {"file": relative, "size": len(content), "sha256": digest(content)}
+        if name in ("libcrypto", "libssl"):
+            path.with_name(path.name.removesuffix(".3")).write_bytes(content)
+    lock = {"openssl": {"provider": pins["provider"], "config": pins["config"],
+                        "libraries": {name: pins[name] for name in ("libcrypto", "libssl")}}}
+    for key, value in native.openssl_environment(root).items():
+        monkeypatch.setenv(key, value)
+    monkeypatch.delenv("CRYPTOGRAPHY_OPENSSL_NO_LEGACY", raising=False)
+    origins = [{"scope": "payload", "path": pins[name]["file"], "sha256": pins[name]["sha256"]}
+               for name in ("libcrypto", "libssl", "provider")]
+    return root, lock, {"origins": origins}
+
+
+def test_openssl_proof_requires_matching_real_provider_but_allows_unused_pm_provider(private_openssl_inputs):
+    root, lock, mapped = private_openssl_inputs
+    proof = native.openssl_provenance(root, lock, mapped, require_legacy=True,
+                                cryptography_legacy_provider_loaded=True)
+    assert proof["legacy_provider_loaded"] is True and proof["legacy_crypto_disabled"] is False
+    assert proof["original_config_bytes_preserved"] is True
+    assert proof["legacy_provider_origins"] == [mapped["origins"][-1]]
+    pm_maps = {"origins": mapped["origins"][:-1]}
+    pm = native.openssl_provenance(root, lock, pm_maps, require_legacy=False)
+    assert pm["legacy_provider_loaded"] is False and pm["legacy_provider_required"] is False
+    with pytest.raises(staging.StagingError, match="legacy provider was not loaded"):
+        native.openssl_provenance(root, lock, pm_maps, require_legacy=True,
+                                    cryptography_legacy_provider_loaded=True)
+
+
+@pytest.mark.parametrize("damage", ["ambient_same_bytes", "platform_provider", "provider_hash",
+                                     "missing_crypto", "wrong_ssl", "ambient_override", "disable_legacy"])
+def test_openssl_proof_rejects_the_observed_leak_and_identity_drift(private_openssl_inputs, monkeypatch, damage):
+    root, lock, mapped = private_openssl_inputs
+    if damage == "ambient_same_bytes":
+        mapped["origins"][-1]["path"] = "/data/data/com.termux/files/usr/lib/ossl-modules/legacy.so"
+    elif damage == "platform_provider":
+        mapped["origins"][-1].update(scope="platform", path="/system/lib64/ossl-modules/legacy.so")
+    elif damage == "provider_hash":
+        mapped["origins"][-1]["sha256"] = "0" * 64
+    elif damage == "missing_crypto":
+        mapped["origins"].pop(0)
+    elif damage == "wrong_ssl":
+        mapped["origins"][1]["sha256"] = "0" * 64
+    elif damage == "ambient_override":
+        monkeypatch.setenv("OPENSSL_CONF", "/data/data/com.termux/files/usr/etc/tls/openssl.cnf")
+    else:
+        monkeypatch.setenv("CRYPTOGRAPHY_OPENSSL_NO_LEGACY", "1")
+    with pytest.raises(staging.StagingError):
+        native.openssl_provenance(root, lock, mapped, require_legacy=True,
+                                cryptography_legacy_provider_loaded=True)
+
+
+@pytest.mark.parametrize("name", ["provider", "config", "libcrypto", "libssl"])
+def test_openssl_proof_rejects_modified_original_input_bytes(private_openssl_inputs, name):
+    root, lock, mapped = private_openssl_inputs
+    openssl = lock["openssl"]
+    pin = openssl[name] if name in ("provider", "config") else openssl["libraries"][name]
+    path = root / pin["file"]
+    path.write_bytes(path.read_bytes() + b"changed")
+    with pytest.raises(staging.StagingError):
+        native.openssl_provenance(root, lock, mapped, require_legacy=True,
+                                cryptography_legacy_provider_loaded=True)
+
+
+def test_ambient_mapped_library_guard_still_rejects_the_exact_openssl_leak(tmp_path, monkeypatch):
+    maps = tmp_path / "maps"
+    maps.write_text("1000-2000 r-xp 00000000 00:00 123 /data/data/com.termux/files/usr/lib/ossl-modules/legacy.so\n")
+    actual_path = Path
+    monkeypatch.setattr(native, "Path", lambda value: maps if value == "/proc/self/maps" else actual_path(value))
+    lock = {"external_runtime_policy": {"allowed_system_roots": ["/system", "/apex"],
+                                        "container_bionic_roots": ["/lib", "/lib64"]}}
+    with pytest.raises(staging.StagingError, match="native library resolved from an undeclared ambient directory"):
+        native.mapped_libraries(tmp_path, lock)
+
+
+@pytest.mark.parametrize("state", [False, None, 1])
+def test_mapped_provider_alone_does_not_prove_successful_legacy_initialization(private_openssl_inputs, state):
+    root, lock, mapped = private_openssl_inputs
+    with pytest.raises(staging.StagingError, match="real cryptography legacy provider did not initialize"):
+        native.openssl_provenance(root, lock, mapped, require_legacy=True,
+                                 cryptography_legacy_provider_loaded=state)
+
+
+def write_tiny_openssl_deb(path, members):
+    import io
+    import tarfile
+    data = io.BytesIO()
+    with tarfile.open(fileobj=data, mode="w") as archive:
+        for name, content in members.items():
+            item = tarfile.TarInfo(name)
+            item.size, item.mode = len(content), 0o644
+            archive.addfile(item, io.BytesIO(content))
+    def ar_member(name, content):
+        header = f"{name:<16}{0:<12}{0:<6}{0:<6}{'100644':<8}{len(content):<10}".encode() + b"\x60\n"
+        assert len(header) == 60
+        return header + content + (b"\n" if len(content) % 2 else b"")
+    path.write_bytes(b"!<arch>\n" + ar_member("debian-binary", b"2.0\n") + ar_member("data.tar", data.getvalue()))
+
+
+@pytest.fixture
+def pinned_openssl_deb(tmp_path):
+    originals = {
+        "provider": ("runtime-libs/lib/ossl-modules/legacy.so",
+                     "./data/data/com.termux/files/usr/lib/ossl-modules/legacy.so"),
+        "config": ("runtime-libs/etc/ssl/openssl.cnf",
+                   "./data/data/com.termux/files/usr/etc/tls/openssl.cnf"),
+        "libcrypto": ("runtime-libs/lib/libcrypto.so.3",
+                      "./data/data/com.termux/files/usr/lib/libcrypto.so.3"),
+        "libssl": ("runtime-libs/lib/libssl.so.3",
+                   "./data/data/com.termux/files/usr/lib/libssl.so.3"),
+    }
+    members, pins = {}, {}
+    for name, (relative, member) in originals.items():
+        content = ("original exact package fixture " + name + "\n").encode()
+        members[member] = content
+        pins[name] = {"file": relative, "member": member, "size": len(content), "sha256": digest(content)}
+    path = tmp_path / "openssl.deb"
+    write_tiny_openssl_deb(path, members)
+    pin = {"archive": {"size": path.stat().st_size, "sha256": staging.file_digest(path)},
+           "package": "openssl", "version": "1:3.6.5", "architecture": "aarch64",
+           "provider": pins["provider"], "config": pins["config"],
+           "libraries": {name: pins[name] for name in ("libcrypto", "libssl")}}
+    return path, pin, members
+
+
+def test_verified_openssl_package_returns_only_provider_and_original_config(pinned_openssl_deb):
+    path, pin, members = pinned_openssl_deb
+    additions = staging.verified_openssl_additions(path, pin)
+    assert additions == {pin[name]["file"]: members[pin[name]["member"]] for name in ("provider", "config")}
+    assert staging.file_digest(path) == pin["archive"]["sha256"]
+    assert not any("libcrypto.so" in name or "libssl.so" in name for name in additions)
+
+
+def test_openssl_package_requires_the_complete_frozen_archive_hash(pinned_openssl_deb):
+    path, pin, _ = pinned_openssl_deb
+    original = path.read_bytes()
+    path.write_bytes(original[:-1] + bytes([original[-1] ^ 1]))
+    with pytest.raises(staging.StagingError):
+        staging.verified_openssl_additions(path, pin)
+
+
+@pytest.mark.parametrize("name", ["provider", "config", "libcrypto", "libssl"])
+def test_openssl_member_identity_is_checked_even_with_matching_archive_hash(pinned_openssl_deb, name):
+    path, pin, members = pinned_openssl_deb
+    row = pin[name] if name in ("provider", "config") else pin["libraries"][name]
+    members[row["member"]] += b"unreviewed change"
+    write_tiny_openssl_deb(path, members)
+    pin["archive"] = {"size": path.stat().st_size, "sha256": staging.file_digest(path)}
+    with pytest.raises(staging.StagingError):
+        staging.verified_openssl_additions(path, pin)

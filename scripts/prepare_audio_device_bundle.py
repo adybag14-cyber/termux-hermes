@@ -279,6 +279,35 @@ def deb_data(path: Path) -> bytes:
     return result
 
 
+def verified_openssl_additions(archive_path: Path, pin: dict) -> dict[str, bytes]:
+    """Bind the missing provider/config to the candidate's exact OpenSSL libraries."""
+    verify_file(archive_path, pin["archive"], "official OpenSSL archive")
+    require(set(pin["libraries"]) == {"libcrypto", "libssl"}, "OpenSSL library binding changed")
+    rows = [pin["provider"], pin["config"], *pin["libraries"].values()]
+    expected = {row["member"]: row for row in rows}
+    require(len(expected) == 4 and len({row["file"] for row in rows}) == 4,
+            "duplicate OpenSSL member or destination")
+    for row in rows:
+        safe_relative_path(row["member"].removeprefix("./"))
+        safe_relative_path(row["file"])
+    seen, additions = set(), {}
+    with tarfile.open(fileobj=io.BytesIO(deb_data(archive_path)), mode="r:*") as archive:
+        for member in archive:
+            if member.name not in expected:
+                continue
+            row = expected[member.name]
+            require(member.name not in seen and member.isfile(), "OpenSSL member missing or ambiguous")
+            require(member.size == row["size"], "OpenSSL member size differs")
+            data = archive.extractfile(member).read()
+            require((len(data), digest_bytes(data)) == (row["size"], row["sha256"]),
+                    "OpenSSL member bytes differ")
+            seen.add(member.name)
+            if row in (pin["provider"], pin["config"]):
+                additions[row["file"]] = data
+    require(seen == set(expected) and len(additions) == 2, "OpenSSL frozen member set incomplete")
+    return additions
+
+
 def apply_pinned_patch(original: bytes, patch: bytes, relative: str) -> bytes:
     """Apply only the exact production-file hunk; test hunks remain review evidence."""
     lines = patch.decode("utf-8").splitlines(keepends=True)
@@ -409,8 +438,11 @@ cp "$bundle/manifest.json" "$destination/staging/bundle-manifest.json"
 chmod 700 "$destination"
 PREFIX=/data/data/com.termux/files/usr
 export PREFIX
-unset PYTHONPATH PYTHONHOME PYTHONUSERBASE VIRTUAL_ENV LD_PRELOAD
+unset PYTHONPATH PYTHONHOME PYTHONUSERBASE VIRTUAL_ENV LD_PRELOAD OPENSSL_ENGINES CRYPTOGRAPHY_OPENSSL_NO_LEGACY
 export PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1
+export OPENSSL_MODULES="$destination/runtime-libs/lib/ossl-modules"
+export OPENSSL_CONF="$destination/runtime-libs/etc/ssl/openssl.cnf"
+export OPENSSL_CONF_INCLUDE="$destination/runtime-libs/etc/ssl"
 export LD_LIBRARY_PATH="$destination/tools/python$PREFIX/lib:$destination/tools/node$PREFIX/lib:$destination/tools/ffmpeg$PREFIX/lib:$destination/runtime-libs/lib"
 exec "$destination/__PYTHON__" -I -B "$destination/staging/prepare_audio_device_environment.py" assemble --root "$destination"
 '''
@@ -419,10 +451,10 @@ exec "$destination/__PYTHON__" -I -B "$destination/staging/prepare_audio_device_
 
 
 def build_bundle(candidate_archive: Path, audio_archive: Path, opensles_deb: Path,
-                 out: Path, *, lock: dict | None = None) -> dict:
+                 out: Path, *, openssl_deb: Path, lock: dict | None = None) -> dict:
     lock = lock or _load_lock()
     out = validate_destination(Path(out).absolute(),
-                               forbidden_roots=tuple(p.resolve() for p in (candidate_archive, audio_archive, opensles_deb)))
+                               forbidden_roots=tuple(p.resolve() for p in (candidate_archive, audio_archive, opensles_deb, openssl_deb)))
     verify_archive(candidate_archive, lock["candidate"])
     verify_archive(audio_archive, lock["audio"])
     verify_file(opensles_deb, lock["opensles"]["archive"], "official OpenSL ES package")
@@ -432,7 +464,7 @@ def build_bundle(candidate_archive: Path, audio_archive: Path, opensles_deb: Pat
     patch_bytes = patch.read_bytes()
     helper = Path(__file__).with_name("prepare_audio_device_environment.py")
     require(helper.is_file(), "destination preparation helper missing")
-    additions = {}
+    additions = verified_openssl_additions(openssl_deb, lock["openssl"])
     with zipfile.ZipFile(audio_archive) as archive:
         for name in lock["wheel_policy"]["additions"]:
             row = next(row for row in lock["audio"]["wheels"] if row["name"] == name)
@@ -515,9 +547,24 @@ def build_bundle(candidate_archive: Path, audio_archive: Path, opensles_deb: Pat
             require(set(baseline_wheels) == {row["file"] for row in candidate_rows}, "candidate wheel catalog/file set mismatch")
             for row in candidate_rows:
                 require(baseline_wheels[row["file"]] == (row["size"], row["sha256"]), "candidate catalog wheel digest mismatch")
+            for pin in lock["openssl"]["libraries"].values():
+                for name in (pin["file"], pin["file"].removesuffix(".3")):
+                    row = entries.get(name, {})
+                    require(row.get("kind") == "file" and
+                            (row.get("size"), row.get("sha256")) == (pin["size"], pin["sha256"]),
+                            "candidate OpenSSL libraries differ from the pinned provider source")
             selected = select_audio_wheels(candidate_rows, lock["audio"]["wheels"], lock["wheel_policy"])
             require(len(candidate_rows) == 100 and len(selected) == 102, "frozen wheel count changed")
             add("staging", mode=0o755)
+            for row in (lock["openssl"]["provider"], lock["openssl"]["config"]):
+                for parent in reversed(PurePosixPath(row["file"]).parents):
+                    name = parent.as_posix()
+                    if name == ".":
+                        continue
+                    if name in entries:
+                        require(entries[name]["kind"] == "directory", "OpenSSL parent is not a directory")
+                    else:
+                        add(name, mode=0o755)
             for name, data in sorted(additions.items()):
                 require(name not in entries, "audio addition collides with candidate payload")
                 add(name, data)
@@ -571,7 +618,7 @@ def build_bundle(candidate_archive: Path, audio_archive: Path, opensles_deb: Pat
 
 
 def fetch_inputs(out: Path, *, lock: dict | None = None) -> dict:
-    """Fetch the three fixed inputs; the existing CUA candidate pin is untouched."""
+    """Fetch the four fixed inputs; the existing CUA candidate pin is untouched."""
     from urllib.request import urlopen
     from types import SimpleNamespace
     from fetch_compatibility_candidate import GitHubClient, _save_archive
@@ -606,10 +653,14 @@ def fetch_inputs(out: Path, *, lock: dict | None = None) -> dict:
                 _save_archive(stream, stage / filename, size_pin)
             verify_archive(stage / filename, pin)
             receipts[label] = {"run": run, "artifact": artifact}
-        with urlopen(lock["opensles"]["url"], timeout=30) as source:
-            data = source.read(lock["opensles"]["archive"]["size"] + 1)
-        (stage / "opensles.deb").write_bytes(data)
-        verify_file(stage / "opensles.deb", lock["opensles"]["archive"], "official OpenSL ES archive")
+        for label in ("opensles", "openssl"):
+            pin = lock[label]
+            with urlopen(pin["url"], timeout=30) as source:
+                data = source.read(pin["archive"]["size"] + 1)
+            archive_path = stage / (label + ".deb")
+            archive_path.write_bytes(data)
+            verify_file(archive_path, pin["archive"], "official " + label + " archive")
+            receipts[label] = {"url": pin["url"], "archive": pin["archive"]}
         (stage / "fetch-receipt.json").write_bytes(canonical_json(receipts))
         require(not out.exists() and not out.is_symlink(), "fetch output appeared")
         stage.rename(out)
@@ -622,14 +673,15 @@ def main(argv: list[str] | None = None) -> int:
     fetch = sub.add_parser("fetch")
     fetch.add_argument("--out", required=True, type=Path)
     build = sub.add_parser("build")
-    for name in ("candidate-archive", "audio-archive", "opensles-deb", "out"):
+    for name in ("candidate-archive", "audio-archive", "opensles-deb", "openssl-deb", "out"):
         build.add_argument("--" + name, required=True, type=Path)
     args = parser.parse_args(argv)
     try:
         if args.command == "fetch":
             result = fetch_inputs(args.out)
         else:
-            result = build_bundle(args.candidate_archive, args.audio_archive, args.opensles_deb, args.out)
+            result = build_bundle(args.candidate_archive, args.audio_archive, args.opensles_deb, args.out,
+                                  openssl_deb=args.openssl_deb)
         print(json.dumps(result, indent=2))
         return 0
     except (StagingError, OSError, ValueError, tarfile.TarError, zipfile.BadZipFile) as exc:

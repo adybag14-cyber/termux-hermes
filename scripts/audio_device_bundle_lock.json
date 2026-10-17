@@ -503,6 +503,54 @@
     "url": "https://packages.termux.dev/apt/termux-main/pool/main/liba/libandroid-stub/libandroid-stub_30-2_aarch64.deb",
     "version": "30-2"
   },
+  "openssl": {
+    "architecture": "aarch64",
+    "archive": {
+      "sha256": "a2fb7856875e63ef6b90442752e05974813372c3ca86d2513a78ea43c67a0f8b",
+      "size": 2482764
+    },
+    "config": {
+      "file": "runtime-libs/etc/ssl/openssl.cnf",
+      "member": "./data/data/com.termux/files/usr/etc/tls/openssl.cnf",
+      "sha256": "a65a2cb9f4ee8ffdc7ef4f0ac600c0bdafb95b7b1ab457188ac610a62f5ad6b3",
+      "size": 12411
+    },
+    "libraries": {
+      "libcrypto": {
+        "file": "runtime-libs/lib/libcrypto.so.3",
+        "member": "./data/data/com.termux/files/usr/lib/libcrypto.so.3",
+        "sha256": "5dddfd86746aabaca2c13eea108c8968811a4f9dcccf5889e34ebff6be920949",
+        "size": 5213680
+      },
+      "libssl": {
+        "file": "runtime-libs/lib/libssl.so.3",
+        "member": "./data/data/com.termux/files/usr/lib/libssl.so.3",
+        "sha256": "595ce9fe0189a24ceae2eaa07721ac428a6df26794f5bfcfe4347013cbd4b9f2",
+        "size": 880976
+      }
+    },
+    "package": "openssl",
+    "provenance": {
+      "configuration_policy": "Copy the original configuration unchanged; no active include, environment lookup, engine or FIPS activation. Preserve default provider behavior; route module and config lookup to the isolated destination.",
+      "native_apt_receipt": {
+        "file": "audit/neutts-native-20261017/run-39062191148/NEUTTS-PINNED-APT.tsv",
+        "sha256": "7ad635d7f1ce1157c7f3b3d7808eaf113c8bb77c4e99a8fe30b6b155faf04c5e"
+      },
+      "repository_path": "pool/main/o/openssl/openssl_1:3.6.5_aarch64.deb",
+      "source_lock": {
+        "file": "scripts/neutts_native_sources_lock.json",
+        "sha256": "822aeabc9dca027f2f940dfb63a96fa5d015f81f293e138b67d126bd6914cc25"
+      }
+    },
+    "provider": {
+      "file": "runtime-libs/lib/ossl-modules/legacy.so",
+      "member": "./data/data/com.termux/files/usr/lib/ossl-modules/legacy.so",
+      "sha256": "d961c814c22295278c8a9f1944e5957c2f0ff19b1f69285f0264e112f4369e22",
+      "size": 124000
+    },
+    "url": "https://packages.termux.dev/apt/termux-main/pool/main/o/openssl/openssl_1%3A3.6.5_aarch64.deb",
+    "version": "1:3.6.5"
+  },
   "preserved_dangling_symlinks": [
     {
       "path": "tools/ffmpeg/data/data/com.termux/files/usr/share/doc/ffmpeg/copyright",

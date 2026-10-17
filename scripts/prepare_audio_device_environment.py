@@ -107,6 +107,15 @@ def normalized_name(value: str) -> str:
     return re.sub(r"[-_.]+", "-", value).lower()
 
 
+def openssl_environment(root: Path) -> dict[str, str]:
+    """Route provider discovery and configuration inside this private payload."""
+    return {
+        "OPENSSL_MODULES": str(root / "runtime-libs/lib/ossl-modules"),
+        "OPENSSL_CONF": str(root / "runtime-libs/etc/ssl/openssl.cnf"),
+        "OPENSSL_CONF_INCLUDE": str(root / "runtime-libs/etc/ssl"),
+    }
+
+
 def runtime_environment(root: Path, inherited_env: dict[str, str]) -> dict[str, str]:
     """Keep the user's HOME; place all experiment state and native libraries here."""
     for key in inherited_env:
@@ -116,11 +125,13 @@ def runtime_environment(root: Path, inherited_env: dict[str, str]) -> dict[str, 
     require(root.is_absolute(), "runtime root must be absolute")
     env = {
         key: value for key, value in inherited_env.items()
-        if not key.startswith(("PYTHON", "LD_", "UV_", "PIP_", "HERMES_"))
-        and key not in {"VIRTUAL_ENV", "CONDA_PREFIX", "CONDA_DEFAULT_ENV", "BASH_ENV", "ENV"}
+        if not key.startswith(("PYTHON", "LD_", "UV_", "PIP_", "HERMES_", "OPENSSL_"))
+        and key not in {"VIRTUAL_ENV", "CONDA_PREFIX", "CONDA_DEFAULT_ENV", "BASH_ENV", "ENV",
+                        "CRYPTOGRAPHY_OPENSSL_NO_LEGACY"}
     }
     state = root / "state"
     env.update({
+        **openssl_environment(root),
         "PREFIX": PREFIX,
         "HERMES_HOME": str(state / "profile"),
         "HERMES_RUNTIME_DIR": str(root / "tools"),
@@ -349,10 +360,14 @@ def launcher_bytes(root: Path, manifest_sha: str, receipt_sha: str) -> bytes:
     command = " ".join(shlex.quote(str(value)) for value in (
         python, "-I", "-B", helper, "launch", "--root", root,
         "--manifest-sha256", manifest_sha, "--receipt-sha256", receipt_sha, "--"))
+    openssl_exports = "".join("export " + key + "=" + shlex.quote(value) + "\n"
+                              for key, value in openssl_environment(root).items())
     text = ("#!" + PREFIX + "/bin/sh\n"
-            "unset LD_PRELOAD LD_AUDIT LD_DEBUG PYTHONHOME PYTHONPATH VIRTUAL_ENV\n"
+            "unset LD_PRELOAD LD_AUDIT LD_DEBUG PYTHONHOME PYTHONPATH VIRTUAL_ENV "
+            "OPENSSL_ENGINES CRYPTOGRAPHY_OPENSSL_NO_LEGACY\n"
             "export LD_LIBRARY_PATH=" + shlex.quote(env_library) + "\n"
-            "exec " + command + ' "$@"\n')
+            + openssl_exports
+            + "exec " + command + ' "$@"\n')
     return text.encode()
 
 
@@ -782,6 +797,55 @@ def mapped_libraries(root: Path, lock: dict) -> dict:
     return {"origins": origins, "ambient_termux_library_directory_used": False}
 
 
+def openssl_provenance(root: Path, lock: dict, mapped: dict, *, require_legacy: bool,
+                       cryptography_legacy_provider_loaded: bool | None = None) -> dict:
+    """Bind real OpenSSL mappings to the matching, frozen private package files."""
+    expected_environment = openssl_environment(root)
+    require(all(os.environ.get(key) == value for key, value in expected_environment.items()),
+            "OpenSSL provider/config environment escaped the private payload")
+    require("CRYPTOGRAPHY_OPENSSL_NO_LEGACY" not in os.environ,
+            "legacy crypto was disabled by an inherited environment override")
+    openssl = lock["openssl"]
+    pins = {"provider": openssl["provider"], "config": openssl["config"], **openssl["libraries"]}
+    allowed = {
+        "provider": ["runtime-libs/lib/ossl-modules/legacy.so"],
+        "config": ["runtime-libs/etc/ssl/openssl.cnf"],
+        "libcrypto": ["runtime-libs/lib/libcrypto.so", "runtime-libs/lib/libcrypto.so.3"],
+        "libssl": ["runtime-libs/lib/libssl.so", "runtime-libs/lib/libssl.so.3"],
+    }
+    require(set(pins) == set(allowed), "frozen OpenSSL input set differs")
+    inputs = {}
+    for name, paths in allowed.items():
+        pin = pins[name]
+        require(pin.get("file") in paths, "frozen OpenSSL input path differs: " + name)
+        for relative in paths:
+            path = root / relative
+            require(path.is_file() and not path.is_symlink() and path.resolve() == path,
+                    "private OpenSSL input is missing or redirects outside its declared path: " + relative)
+            bundle.verify_file(path, pin, "private OpenSSL input: " + name)
+        inputs[name] = {key: pin[key] for key in ("file", "size", "sha256")}
+    origins = mapped["origins"]
+    libraries = {}
+    for name in ("libcrypto", "libssl"):
+        matches = [row for row in origins
+                   if row["scope"] == "payload" and row["path"] in allowed[name]
+                   and row["sha256"] == pins[name]["sha256"]]
+        require(bool(matches), "matching private OpenSSL library was not mapped: " + name)
+        libraries[name] = matches
+    providers = [row for row in origins if Path(row["path"]).name == "legacy.so"]
+    require(all(row["scope"] == "payload" and row["path"] == allowed["provider"][0]
+                and row["sha256"] == pins["provider"]["sha256"] for row in providers),
+            "OpenSSL legacy provider mapping is outside the frozen private input")
+    require(not require_legacy or bool(providers), "frozen legacy provider was not loaded by the real crypto runtime")
+    require(not require_legacy or cryptography_legacy_provider_loaded is True,
+            "real cryptography legacy provider did not initialize")
+    return {"environment": expected_environment, "inputs": inputs, "library_origins": libraries,
+            "legacy_provider_origins": providers, "legacy_provider_loaded": bool(providers),
+            "legacy_provider_required": require_legacy, "legacy_crypto_disabled": False,
+            "cryptography_legacy_provider_loaded": cryptography_legacy_provider_loaded,
+            "original_config_bytes_preserved": True}
+
+
 def native_validation(root: Path) -> dict:
     manifest = load_bundle(root)
     lock = manifest["lock"]
@@ -813,6 +877,7 @@ def native_validation(root: Path) -> dict:
     import cryptography.hazmat.bindings._rust as crypto_native
     import uvloop
     import psutil
+    import ssl
     ffi = cffi.FFI()
     integers = ffi.new("int[]", [3, 5, 8])
     require(sum(integers) == 16, "real CFFI allocation/operation failed")
@@ -836,11 +901,16 @@ def native_validation(root: Path) -> dict:
     from pm.runtime import runtime_command, runtime_environment as manager_environment
     command = runtime_command(root / "staging/prepare_audio_device_environment.py",
                               ["_manager", "--root", str(root)], bootstrap=False)
-    manager_result = subprocess.run(command, env=manager_environment(), cwd=root / "state",
+    manager_result = subprocess.run(command, env=runtime_environment(root, manager_environment()), cwd=root / "state",
                                     capture_output=True, text=True, timeout=120, check=False)
     require(manager_result.returncode == 0, "fresh sealed PM runtime validation failed: " + manager_result.stderr[-1200:])
     manager = json.loads(manager_result.stdout)
     require(manager.get("status") == "passed", "fresh PM result is not successful")
+    libraries = mapped_libraries(root, lock)
+    openssl = openssl_provenance(
+        root, lock, libraries, require_legacy=True,
+        cryptography_legacy_provider_loaded=getattr(crypto_native.openssl, "_legacy_provider_loaded", None))
+    openssl["python_ssl_version"] = ssl.OPENSSL_VERSION
     bundle.verify_manifest_tree(root, manifest, allow_generated=True)
     return {"schema_version": 1, "status": "passed", "root": str(root),
             "bundle_manifest_sha256": bundle.file_digest(root / MANIFEST),
@@ -851,7 +921,7 @@ def native_validation(root: Path) -> dict:
             "application_source_origins": source_origins, "manager": manager,
             "native_operations": {"cffi_sum": 16, "numpy_matrix_product": result, "numpy_linalg_finite": True},
             "audio_available_metadata_only": True, "audio_resolver": resolver,
-            "native_libraries": mapped_libraries(root, lock), "claims": claims()}
+            "native_libraries": libraries, "openssl_runtime": openssl, "claims": claims()}
 
 
 def manager_validation(root: Path) -> dict:
@@ -864,6 +934,7 @@ def manager_validation(root: Path) -> dict:
     import packaging
     import tomli_w
     import truststore
+    import ssl
     import ruamel.yaml
     import pm
     require(Path(pm.__file__).resolve().is_relative_to(root / "app/pm"), "manager PM source is not pinned app source")
@@ -878,8 +949,12 @@ def manager_validation(root: Path) -> dict:
             "private PM dependency closure differs")
     wheels = [installed_wheel(root, by_name[name], environment="pm-runtime") for name in sorted(expected)]
     graph = dependency_graph({normalized_name(dist.metadata["Name"]): dist for dist in distributions}, expected, [])
+    libraries = mapped_libraries(root, manifest["lock"])
+    openssl = openssl_provenance(root, manifest["lock"], libraries, require_legacy=False)
+    openssl["python_ssl_version"] = ssl.OPENSSL_VERSION
     return {"status": "passed", "site": "pm-runtime/" + SITE, "versions": expected,
-            "source": "app/pm", "installed_wheels": wheels, "active_dependency_edges": graph}
+            "source": "app/pm", "installed_wheels": wheels, "active_dependency_edges": graph,
+            "openssl_runtime": openssl, "native_libraries": libraries}
 
 
 def audio_input_inventory(sd) -> dict:
