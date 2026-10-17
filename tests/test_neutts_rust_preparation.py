@@ -566,3 +566,159 @@ def test_actual_installed_inventory_executes_wheel_adapter(tmp_path, monkeypatch
     (site / "example/__init__.py").write_bytes(b"changed installed source\n")
     with pytest.raises(native.ProbeError, match="Installed wheel file changed"):
         native.installed_inventory(manifest, prep)
+
+
+def test_frozen_apt_epoch_names_are_portable_bijective_and_metadata_exact():
+    lock, raw = prep.load_lock(ROOT / "scripts" / prep.LOCK_FILENAME)
+    pins = lock["build_apt"]["packages"]
+    before = deepcopy(pins)
+    names = prep.apt_archive_names(pins)
+    assert len(names) == len(set(names.values())) == 46
+    changed = {p["name"]: names[p["filename"]] for p in pins
+               if names[p["filename"]] != Path(p["filename"]).name}
+    assert changed == {
+        "ca-certificates": "ca-certificates_1%3A2026.09.25_all.deb",
+        "openssl": "openssl_1%3A3.6.5_aarch64.deb",
+    }
+    for p in pins:
+        assert names[p["filename"]].replace("%3A", ":") == Path(p["filename"]).name
+        prep.safe_relative(names[p["filename"]])
+    assert pins == before
+    assert prep.sha(raw) == prep.LOCK_SHA256
+    with pytest.raises(prep.PrepareError):
+        prep.safe_relative("openssl_1:3.6.5_aarch64.deb")
+
+
+def epoch_archive_fixture():
+    filename = "pool/main/f/fixture/fixture_1:1.0_all.deb"
+    raw = b"owned epoch archive copy fixture\n"
+    return raw, {"name": "fixture", "version": "1:1.0", "architecture": "all",
+                 "filename": filename,
+                 "url": "https://packages.termux.dev/apt/termux-main/" + filename,
+                 "bytes": len(raw), "sha256": prep.sha(raw)}
+
+
+@pytest.mark.parametrize("field,value", [
+    ("filename", "pool/main/f/fixture/../fixture_1:1.0_all.deb"),
+    ("filename", "pool/main/f/fixture/fixture_1%3A1.0_all.deb"),
+    ("filename", "pool/main/f/fixture/fixture_1:1.0_all.deb:stream"),
+    ("url", "https://unreviewed.example/fixture_1:1.0_all.deb"),
+    ("version", "1:"),
+])
+def test_apt_cache_mapping_rejects_escape_alias_and_false_identity(field, value):
+    _, pin = epoch_archive_fixture()
+    with pytest.raises(prep.PrepareError):
+        prep.apt_archive_filename({**pin, field: value})
+
+
+def test_apt_cache_mapping_rejects_duplicate_and_case_aliases():
+    _, pin = epoch_archive_fixture()
+    with pytest.raises(prep.PrepareError, match="Duplicate or aliased"):
+        prep.apt_archive_names([pin, pin])
+    pins = []
+    for version in ("1:1a", "1:1A"):
+        filename = "pool/main/f/fixture/fixture_" + version + "_all.deb"
+        pins.append({**pin, "version": version, "filename": filename,
+                     "url": "https://packages.termux.dev/apt/termux-main/" + filename})
+    with pytest.raises(prep.PrepareError, match="Duplicate or aliased"):
+        prep.apt_archive_names(pins)
+
+
+@pytest.mark.parametrize("route", ["verified-cache", "original-url"])
+def test_epoch_download_preserves_bytes_and_original_request_identity(tmp_path, monkeypatch, route):
+    raw, original = epoch_archive_fixture()
+    before = deepcopy(original)
+    local = prep.apt_archive_filename(original)
+    pin = {**original, "filename": local}
+    cache, output = tmp_path / "cache", tmp_path / "output"
+    cache.mkdir()
+    output.mkdir()
+    requests = []
+    if route == "verified-cache":
+        (cache / local).write_bytes(raw)
+        monkeypatch.setattr(prep, "build_opener", lambda *a: pytest.fail("Verified cache must not access network"))
+    else:
+        class Response(io.BytesIO):
+            status = 200
+        def opened(request, timeout):
+            requests.append((request.full_url, timeout))
+            return Response(raw)
+        monkeypatch.setattr(prep, "build_opener", lambda *a: SimpleNamespace(open=opened))
+    result = prep.download(pin, output / local, [cache], time.monotonic() + 5)
+    assert (output / local).read_bytes() == raw and result["sha256"] == original["sha256"]
+    assert result["filename"] == local and original == before
+    assert requests == ([] if route == "verified-cache" else [(original["url"], 30)])
+
+
+@pytest.mark.parametrize("stage", ["locked-build", "tiktoken-lock"])
+def test_both_real_stage_download_plans_preserve_all_original_apt_pins(tmp_path, monkeypatch, stage):
+    """Run actual preparation through all download planning; stop before export."""
+    lock, raw = prep.load_lock(ROOT / "scripts" / prep.LOCK_FILENAME)
+    before = deepcopy(lock)
+    recorded = []
+    verified = prep.verified_bytes
+    class DownloadsPlanned(Exception):
+        pass
+    def acquire(pin, destination, caches, deadline):
+        recorded.append((deepcopy(pin), destination))
+        return {"filename": destination.name, "bytes": pin.get("bytes"),
+                "sha256": pin["sha256"]}
+    def retained(path, pin):
+        if pin["filename"] in ("InRelease", "Packages.gz"):
+            return verified(path, pin)
+        raise DownloadsPlanned()
+    monkeypatch.setattr(prep, "download", acquire)
+    monkeypatch.setattr(prep, "verified_bytes", retained)
+    snapshot = ROOT / "audit/neutts-runtime-index-20261017"
+    apt_names = prep.apt_archive_names(lock["build_apt"]["packages"])
+    expected_apt = {apt_names[p["filename"]]: {**p, "filename": apt_names[p["filename"]]}
+                    for p in lock["build_apt"]["packages"]}
+    expected_sources = {s["artifact"]["filename"] for s in lock["sources"]
+                        if (s["name"] == "tiktoken") == (stage == "tiktoken-lock")}
+    first_plan = None
+    for iteration in (1, 2):
+        recorded.clear()
+        output = tmp_path / ("fresh-" + str(iteration))
+        with pytest.raises(DownloadsPlanned):
+            prep.prepare(ROOT / "scripts" / prep.LOCK_FILENAME, snapshot, output, stage)
+        apt = {path.name: pin for pin, path in recorded if path.parent.name == "apt-archives"}
+        assert apt == expected_apt and len(apt) == 46
+        assert {path.name for pin, path in recorded if path.parent.name == "archives"} == expected_sources
+        assert len([path for pin, path in recorded if path.parent.name == "crates"]) == (804 if stage == "locked-build" else 0)
+        assert len([path for pin, path in recorded if path.parent.name == "wheels"]) == (5 if stage == "locked-build" else 0)
+        plan = sorted((path.relative_to(output).as_posix(), json.dumps(pin, sort_keys=True))
+                      for pin, path in recorded)
+        assert first_plan is None or plan == first_plan
+        first_plan = plan
+        assert not (output / "RUST-PREPARED-INPUTS.json").exists()
+        count = len(recorded)
+        with pytest.raises(prep.PrepareError, match="fresh preparation"):
+            prep.prepare(ROOT / "scripts" / prep.LOCK_FILENAME, snapshot, output, stage)
+        assert len(recorded) == count
+    assert lock == before and prep.sha(raw) == prep.LOCK_SHA256
+
+
+def test_native_writable_apt_copy_restores_index_basename_and_preserves_input(tmp_path, monkeypatch):
+    raw, pin = epoch_archive_fixture()
+    source_dir, work = tmp_path / "inputs", tmp_path / "native-work"
+    source_dir.mkdir()
+    work.mkdir()
+    source = source_dir / prep.apt_archive_filename(pin)
+    source.write_bytes(raw)
+    requested, stored = [], {}
+    copy, digest = shutil.copyfile, native.sha_file
+    def copy_to_native_name(origin, target):
+        requested.append(target.name)
+        # Windows cannot represent an epoch colon in a normal filename. Preserve
+        # the requested native name and adapt only this fixture's physical path.
+        actual = target.with_name(target.name.replace(":", "%3A")) if os.name == "nt" else target
+        stored[str(target)] = actual
+        return copy(origin, actual)
+    monkeypatch.setattr(native.shutil, "copyfile", copy_to_native_name)
+    monkeypatch.setattr(native, "sha_file", lambda path: digest(stored.get(str(path), path)))
+    result = native.stage_install_archives(SimpleNamespace(apt_archives=source_dir), [pin], work)
+    assert requested == ["fixture_1:1.0_all.deb"]
+    assert (result / "partial").is_dir()
+    assert source.read_bytes() == raw
+    assert list(stored.values())[0].read_bytes() == raw
+    assert digest(list(stored.values())[0]) == pin["sha256"]

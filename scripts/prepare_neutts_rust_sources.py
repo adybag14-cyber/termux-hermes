@@ -91,6 +91,42 @@ def safe_relative(value):
     return value
 
 
+def apt_archive_filename(pin):
+    """Map an original APT index identity to a portable owned cache basename.
+
+    Only a Debian version epoch colon is encoded. The original index Filename,
+    Version, URL, size and SHA remain authoritative and are never rewritten.
+    """
+    name, version, architecture = pin["name"], pin["version"], pin["architecture"]
+    require(isinstance(name, str) and re.fullmatch(r"[a-z0-9][a-z0-9+.-]*", name)
+            and isinstance(version, str)
+            and re.fullmatch(r"(?:[0-9]+:)?[0-9][A-Za-z0-9.+~-]*", version)
+            and version.count(":") <= 1
+            and (":" not in version or re.match(r"^[0-9]+:", version))
+            and architecture in ("aarch64", "all"), "Invalid APT archive identity")
+    original = pin["filename"]
+    basename = name + "_" + version + "_" + architecture + ".deb"
+    require(isinstance(original, str) and original.startswith("pool/main/")
+            and "%" not in original and PurePosixPath(original).name == basename
+            and pin["url"] == "https://packages.termux.dev/apt/termux-main/" + original,
+            "APT original filename or URL differs")
+    encoded = original.replace(":", "%3A")
+    safe_relative(encoded)
+    local = basename.replace(":", "%3A")
+    safe_relative(local)
+    require(local.replace("%3A", ":") == basename, "APT local name is not reversible")
+    return local
+
+
+def apt_archive_names(pins):
+    names = {p["filename"]: apt_archive_filename(p) for p in pins}
+    values = list(names.values())
+    require(len(names) == len(pins) and len(set(values)) == len(values)
+            and len({v.casefold() for v in values}) == len(values),
+            "Duplicate or aliased APT cache filenames")
+    return names
+
+
 def write_new(path, raw, mode=0o644):
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("xb") as stream:
@@ -430,10 +466,13 @@ def verify_inputs(directory):
     verified_count = sum(verify_crate(directory / "crates" / p["filename"], p,
                                      directory / "vendor" / (p["name"] + "-" + p["version"]))
                          for p in registry)
+    apt_names = apt_archive_names(lock["build_apt"]["packages"])
+    require(receipt.get("apt_owned_cache_filenames") == apt_names,
+            "APT owned cache filename receipt changed")
     for p in lock["build_apt"]["packages"]:
-        verified_bytes(directory / "apt-archives" / Path(p["filename"]).name, p)
+        verified_bytes(directory / "apt-archives" / apt_names[p["filename"]], p)
     require({p.name for p in (directory / "apt-archives").iterdir()}
-            == {Path(p["filename"]).name for p in lock["build_apt"]["packages"]}, "APT archive set changed")
+            == set(apt_names.values()), "APT archive set changed")
     snapshot_binding(directory / "snapshot", lock["build_apt"]["snapshot"])
     return lock, receipt, {"registry_archives": len(registry), "registry_source_files": verified_count}
 
@@ -441,6 +480,7 @@ def verify_inputs(directory):
 def prepare(lock_path, snapshot_dir, out, stage, caches=()):
     require(stage in ("locked-build", "tiktoken-lock"), "Unknown preparation stage")
     lock, raw = load_lock(lock_path)
+    apt_names = apt_archive_names(lock["build_apt"]["packages"])
     out, snapshot_dir = out.absolute(), snapshot_dir.resolve()
     require(not out.exists() and not out.is_symlink(), "Use a fresh preparation directory")
     for source in (lock_path.resolve(), snapshot_dir, *(p.resolve() for p in caches)):
@@ -460,7 +500,8 @@ def prepare(lock_path, snapshot_dir, out, stage, caches=()):
     jobs += [(p["artifact"], out / "wheels" / p["artifact"]["filename"]) for p in packages]
     jobs += [(p, out / "crates" / p["filename"]) for p in crates]
     for p in lock["build_apt"]["packages"]:
-        jobs.append(({**p, "filename": Path(p["filename"]).name}, out / "apt-archives" / Path(p["filename"]).name))
+        local = apt_names[p["filename"]]
+        jobs.append(({**p, "filename": local}, out / "apt-archives" / local))
     deadline = time.monotonic() + MAX_DOWNLOAD_SECONDS
     def acquire(job):
         pin, destination = job
@@ -480,6 +521,7 @@ def prepare(lock_path, snapshot_dir, out, stage, caches=()):
     receipt = {"schema_version": 1, "status": "verified-inputs", "stage": stage,
                "recorded_at": datetime.now(timezone.utc).isoformat(), "lock_sha256": sha(raw),
                "sources": [s["name"] for s in sources], "downloads": downloads,
+               "apt_owned_cache_filenames": apt_names,
                "registry_archives": len(crates), "registry_source_files": sum(len(p["files"]) for p in registry_rows),
                "registry_full_lock_union_not_target_active_count": True,
                "directory_source": "Unmodified original crates plus generated .cargo-checksum.json; independent archive SHA and full file checks are authoritative.",

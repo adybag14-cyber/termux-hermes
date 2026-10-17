@@ -37,7 +37,7 @@ import zipfile
 
 PREFIX = Path("/data/data/com.termux/files/usr")
 SCRIPT_DIR = Path(__file__).resolve().parent
-PREPARER_SHA256 = "2635c33048122dc0ade3f3afef3e179d45770c846f794551611be645fe491fe0"
+PREPARER_SHA256 = "0f5db491b6a2d2cbe13e908fe24613b62f9db38ac2f0d33968328c499038a9a1"
 OPERATIONS_SHA256 = "a8576c384d3c5aa3854c430df83e6cfb3b1f6a69ba75713079bb6947fee125a7"
 APT_HELPER_SHA256 = "7c051b0143675594aadd52f9a0b66ec71e6950e9953feef3f773acceafcb0a29"
 FOUNDATION_PINS_SHA256 = "7ad635d7f1ce1157c7f3b3d7808eaf113c8bb77c4e99a8fe30b6b155faf04c5e"
@@ -453,18 +453,33 @@ def signed_snapshot(args, lock, work):
                      "packages_uncompressed_sha256": hashlib.sha256(packages_raw).hexdigest(),
                      "matched_archives": len(lock["build_apt"]["packages"])}
 
-def verify_archive_set(args, lock):
+def verify_archive_set(args, lock, prep):
     pins = lock["build_apt"]["packages"]
+    local_names = prep.apt_archive_names(pins)
     rows = []
     for pin in pins:
         path = archive_path(args.apt_archives, pin)
-        require(path.name == Path(pin["filename"]).name, "APT archive basename differs")
+        require(path.name == local_names[pin["filename"]], "APT owned archive basename differs")
         ar_data_members(path, pin, set())
         rows.append({"name": pin["name"], "version": pin["version"],
                      "bytes": pin["bytes"], "sha256": pin["sha256"], "path": str(path)})
     require(len(rows) == 46 and {Path(r["path"]).name for r in rows}
             == {p.name for p in args.apt_archives.iterdir()}, "Incomplete/extra compiler archives")
     return rows
+
+
+def stage_install_archives(args, pins, work):
+    # Inputs use portable owned basenames. Only the native writable APT cache
+    # receives the original index basename, including any Debian epoch colon.
+    archives = work / "install-archives"
+    archives.mkdir()
+    (archives / "partial").mkdir()
+    for pin in pins:
+        source = archive_path(args.apt_archives, pin)
+        target = archives / PurePosixPath(pin["filename"]).name
+        shutil.copyfile(source, target)
+        require(sha_file(target) == pin["sha256"], "APT cache copy changed")
+    return archives
 
 
 def install_toolchain(args, lock, options, work):
@@ -475,15 +490,7 @@ def install_toolchain(args, lock, options, work):
     expected_existing = {p["name"]: {"version": p["version"], "architecture": p["architecture"],
                                     "status": "installed"} for p in existing}
     require(package_snapshot(list(expected_existing)) == expected_existing, "Foundation APT overlap differs")
-    # APT may lock/rename cache entries. Its cache is owned and writable; the source
-    # archives stay independently verified and read-only in the inputs mount.
-    archives = work / "install-archives"
-    archives.mkdir()
-    (archives / "partial").mkdir()
-    for p in pins:
-        source = archive_path(args.apt_archives, p)
-        shutil.copyfile(source, archives / source.name)
-        require(sha_file(archives / source.name) == p["sha256"], "APT cache copy changed")
+    archives = stage_install_archives(args, pins, work)
     command = [str(PREFIX / "bin/apt-get"), *options,
                "-o", "Dir::Cache::archives=" + str(archives),
                "-o", "Dpkg::Options::=--force-confnew", "--no-download", "--no-remove",
@@ -1033,7 +1040,7 @@ def run(args, lock, prep, apt):
         result["input_checks"] = checks
         result["lock_sha256"] = prep.LOCK_SHA256
         result["input_receipt_sha256"] = sha_file(args.inputs / "RUST-PREPARED-INPUTS.json")
-        result["archives"] = verify_archive_set(args, lock)
+        result["archives"] = verify_archive_set(args, lock, prep)
         with tempfile.TemporaryDirectory(prefix="neutts-rust-", dir=PREFIX / "tmp") as temporary:
             work = Path(temporary)
             (work / "tmp").mkdir()

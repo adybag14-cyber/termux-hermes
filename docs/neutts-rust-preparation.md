@@ -62,6 +62,21 @@ The complete Tokenizers subset is the unchanged **25-node, 29-edge** selection f
 
 The separate non-Rust gate owns the PyYAML wheel. Until its exact passed wheel and receipt exist, this preparation does not claim a complete Tokenizers runtime or four-component engine environment. The two-distribution HF Xet/Safetensors environment covers their complete base dependencies. Optional NumPy, Torch, and other framework integrations remain separate gates.
 
+## First native attempt and APT cache correction
+
+The first two-stage workflow, [run 39076217343](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39076217343), failed during host input acquisition. The generic safe-path checker rejected the epoch colon in two original Debian filenames. Docker, the scientific foundation, Cargo, and native component cases had not started.
+
+The preparer now derives a reversible owned cache name for those two archives:
+
+| Original signed-index basename | Owned portable cache basename |
+|---|---|
+| `ca-certificates_1:2026.09.25_all.deb` | `ca-certificates_1%3A2026.09.25_all.deb` |
+| `openssl_1:3.6.5_aarch64.deb` | `openssl_1%3A3.6.5_aarch64.deb` |
+
+The original index Filename, version, URL, size, hash, and archive bytes remain exact. The other 44 archive basenames are unchanged. The mapping rejects duplicate names, case aliases, traversal, and pre-encoded source identities. The generic source/wheel path checker still rejects colons. Only the native writable APT cache receives a copy under the original index basename; the verified input cache remains untouched.
+
+The new host regressions exercise both actual stage download plans twice in fresh outputs, all 46 original frozen identities, verified cache reuse, original request URLs, and the native copy contract. See [the recorded native failure](../audit/neutts-rust-native-20261017/run-39076217343/epoch-basename-failure-analysis.json) and [the correction receipt](../audit/neutts-rust-native-20261017/run-39076217343/epoch-basename-fix-preparation.json). The original 57-test preparation receipt remains a historical checkpoint.
+
 ## Running and reading results
 
 After source review, the preparation-only workflow can run both stages or one selected stage. It uses the pinned native Termux Docker image on an ARM64 runner, UID 1000, two CPUs, six GiB of memory, and bounded timeouts. Its permissions only read repository contents.
@@ -76,11 +91,11 @@ Equivalent ARM64 host entry points:
 
 Both require fresh outputs. The workflow retains all preparation inputs and actual native result files even after a failure. Component checkpoints retain completed wheel results if a later component fails. Subprocess stdout and stderr are preserved on errors and timeouts.
 
-Host evidence currently covers 57 focused integrity checks with no skips, all 744 original source files, 11 cached registry archives containing 2,474 files, and an actual 12-file directory-source export. The real export exposed a cross-platform path-ordering mismatch. The verifier now sorts canonical POSIX path strings while retaining every original file and checksum comparison. The remaining 793 registry archives are checksum-frozen for native preparation acquisition.
+Host evidence currently covers 69 focused integrity checks with no skips, all 744 original source files, 11 cached registry archives containing 2,474 files, and an actual 12-file directory-source export. The real export exposed a cross-platform path-ordering mismatch. The verifier now sorts canonical POSIX path strings while retaining every original file and checksum comparison. The remaining 793 registry archives are checksum-frozen for native preparation acquisition.
 
 Final review also exercised the production APT archive parser against the exact cached Python 3.14.6-1 archive. A missing standard-library import was captured as a real host failure, corrected, and replayed against both original libpython payload hashes. A separate regression executes the installed-wheel inventory and its adapter with actual wheel bytes and Python distribution metadata. See [the archive replay](../audit/neutts-rust-routes-20261017/archive-parser-exact-apt-replay.json).
 
-These host checks claim no Cargo resolution, native source build, native HF TLS success, or four-component runtime admission. See [the source/cache receipt](../audit/neutts-rust-routes-20261017/exact-cached-source-and-crate-gate.json) and the final preparation receipt in the same audit directory for exact file and test hashes.
+These host checks claim no Cargo resolution, native source build, native HF TLS success, or four-component runtime admission. See [the updated source/cache receipt](../audit/neutts-rust-native-20261017/run-39076217343/exact-cached-source-and-crate-gate.json) and the correction receipt for exact file and test hashes.
 
 ## Primary format references
 

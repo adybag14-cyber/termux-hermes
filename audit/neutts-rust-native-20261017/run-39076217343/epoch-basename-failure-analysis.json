@@ -1,0 +1,65 @@
+{
+  "artifact_capture_status_at_recording": "Bounded detached download in progress; whole artifacts not yet claimed verified",
+  "baseline_preparer_sha256": "2635c33048122dc0ade3f3afef3e179d45770c846f794551611be645fe491fe0",
+  "cargo_executed": false,
+  "cause": "Generic local relative-path validation rejects Debian epoch ':' in two unchanged official APT filenames during host input acquisition",
+  "docker_started": false,
+  "foundation_executed": false,
+  "general_path_policy_relaxed": false,
+  "head_sha": "aefb50d1e0e612773eb3cb454f15fe98eef6cc14",
+  "jobs": [
+    {
+      "conclusion": "failure",
+      "id": 117523806254,
+      "stage": "tiktoken-lock"
+    },
+    {
+      "conclusion": "failure",
+      "id": 117523806301,
+      "stage": "locked-build"
+    }
+  ],
+  "native_runtime_executed": false,
+  "observed_utc": "2026-10-17T22:54:34.867849+00:00",
+  "original_records": [
+    {
+      "local_basename_before_correction": "ca-certificates_1:2026.09.25_all.deb",
+      "observed_host_rejection": "Invalid relative path",
+      "original_pin": {
+        "architecture": "all",
+        "bytes": 105404,
+        "depends": "",
+        "filename": "pool/main/c/ca-certificates/ca-certificates_1:2026.09.25_all.deb",
+        "in_foundation": true,
+        "name": "ca-certificates",
+        "pre_depends": "",
+        "sha256": "57fab24bf4561bfdd35afe71bc1929914e51c35458cfd1fca2b15e54bc8df7af",
+        "url": "https://packages.termux.dev/apt/termux-main/pool/main/c/ca-certificates/ca-certificates_1:2026.09.25_all.deb",
+        "version": "1:2026.09.25"
+      }
+    },
+    {
+      "local_basename_before_correction": "openssl_1:3.6.5_aarch64.deb",
+      "observed_host_rejection": "Invalid relative path",
+      "original_pin": {
+        "architecture": "aarch64",
+        "bytes": 2482764,
+        "depends": "ca-certificates, zlib",
+        "filename": "pool/main/o/openssl/openssl_1:3.6.5_aarch64.deb",
+        "in_foundation": true,
+        "name": "openssl",
+        "pre_depends": "",
+        "sha256": "a2fb7856875e63ef6b90442752e05974813372c3ca86d2513a78ea43c67a0f8b",
+        "url": "https://packages.termux.dev/apt/termux-main/pool/main/o/openssl/openssl_1:3.6.5_aarch64.deb",
+        "version": "1:3.6.5"
+      }
+    }
+  ],
+  "planned_correction": "Derive an owned portable basename by encoding only the original version epoch colon as %3A; keep original signed-index Filename, Version, URL, SHA, and source files exact; restore original basename only in native writable APT cache",
+  "run_id": 39076217343,
+  "schema_version": 1,
+  "source_backend_executed": false,
+  "source_or_lock_change_required": false,
+  "status": "failed-before-native-container",
+  "unchanged_lock_sha256": "c72d8bfa5f9ae86205443b2c7c19892be77a2879ec7604ccd77aeda2a94775af"
+}
