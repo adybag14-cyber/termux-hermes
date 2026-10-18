@@ -15,7 +15,9 @@ import re
 import shutil
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -207,6 +209,82 @@ class InstallAndMappingPolicyTests(unittest.TestCase):
             self.assertEqual(record["stderr"]["sha256"], hashlib.sha256(raw).hexdigest())
 
 
+    def case_matrix_fixture(self, temporary, mode):
+        out = Path(temporary)
+        fixture = out / "case-fixture.py"
+        fixture.write_text(
+            "import json,pathlib,sys\n"
+            "name,target,mode=sys.argv[1:]\n"
+            "out=pathlib.Path(target); out.mkdir()\n"
+            "record={'component': name, 'status': 'passed'}\n"
+            "code=0\n"
+            "if mode=='fail' and name=='pyarrow': record['status']='failed'; code=7\n"
+            "if mode=='fail' and name=='lxml': record['component']='wrong-component'\n"
+            "if not (mode=='fail' and name=='msgpack'):\n"
+            " (out/'CASE-RESULT.json').write_text(json.dumps(record))\n"
+            "sys.stderr.write('exact child diagnostic: '+name+'\\n')\n"
+            "raise SystemExit(code)\n", encoding="utf-8")
+        original_command = PROBE.command
+        calls = []
+        def real_child(argv, output, label, timeout, **kwargs):
+            self.assertFalse(kwargs["check"])
+            name = argv[-1]
+            target = argv[argv.index("--out") + 1]
+            calls.append(name)
+            return original_command([sys.executable, "-I", "-B", str(fixture), name, target, mode],
+                                    output, label, min(timeout, 15), **kwargs)
+        args = SimpleNamespace(out=out, inputs=out / "inputs", apt_archives=out / "archives",
+                               foundation_receipt=out / "foundation.json")
+        return args, calls, real_child
+
+    def test_all_five_real_children_run_before_aggregate_failure(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            args, calls, child = self.case_matrix_fixture(temporary, "fail")
+            report = {}
+            with mock.patch.object(PROBE, "command", side_effect=child):
+                with self.assertRaisesRegex(PROBE.ProbeError, "pyarrow, lxml, msgpack"):
+                    PROBE.run_cases(args, self.lock, report)
+            self.assertEqual(calls, list(PROBE.CASES))
+            self.assertEqual([r["status"] for r in report["cases"]],
+                             ["failed", "failed", "failed", "passed", "passed"])
+            self.assertEqual(report["cases"][0]["command"]["exit_code"], 7)
+            self.assertIn("receipt_error", report["cases"][1])
+            self.assertIn("receipt_error", report["cases"][2])
+            for row in report["cases"]:
+                raw = (args.out / row["command"]["stderr"]["file"]).read_bytes()
+                self.assertIn(("exact child diagnostic: " + row["component"]).encode(), raw)
+                self.assertEqual(hashlib.sha256(raw).hexdigest(), row["command"]["stderr"]["sha256"])
+
+    def test_case_matrix_requires_five_matching_successful_receipts(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            args, calls, child = self.case_matrix_fixture(temporary, "pass")
+            report = {}
+            with mock.patch.object(PROBE, "command", side_effect=child):
+                PROBE.run_cases(args, self.lock, report)
+            self.assertEqual(calls, list(PROBE.CASES))
+            self.assertEqual(len(report["cases"]), 5)
+            self.assertTrue(all(row["status"] == row["child_status"] == "passed"
+                                and row["command"]["exit_code"] == 0 for row in report["cases"]))
+
+    def test_behavior_and_mapping_failures_are_retained_separately(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            args = SimpleNamespace(out=Path(temporary), case="pyarrow", foundation_receipt=Path("unused"))
+            apt = SimpleNamespace(native_runtime=lambda contract: None)
+            common = SimpleNamespace(validate_foundation=lambda path, lock: None)
+            with mock.patch.object(PROBE.os, "getuid", return_value=1000, create=True), \
+                    mock.patch.object(PROBE, "pyarrow_case", side_effect=ValueError("behavior fixture")), \
+                    mock.patch.object(PROBE, "verify_mappings", side_effect=PROBE.ProbeError("mapping fixture")):
+                with self.assertRaisesRegex(PROBE.ProbeError, "Actual native case failed"):
+                    PROBE.case_run(args, self.lock, PREP, common, apt)
+            result = json.loads((args.out / "CASE-RESULT.json").read_bytes())
+            self.assertEqual(result["status"], "failed")
+            self.assertEqual(result["error"]["stage"], "behavior")
+            self.assertEqual(result["error"]["message"], "behavior fixture")
+            self.assertEqual(result["mapping_error"]["stage"], "native-mapping-provenance")
+            self.assertEqual(result["mapping_error"]["message"], "mapping fixture")
+            self.assertNotIn("mappings", result)
+
+
 class ActualArchiveFixtureTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -302,6 +380,61 @@ class ActualArchiveFixtureTests(unittest.TestCase):
         changed[18:20] = (62).to_bytes(2, "little")
         with self.assertRaisesRegex(PREP.PreparationError, "AArch64"):
             PREP.elf_identity(changed)
+
+
+    def observations_fixture(self, temporary, corrupt_second=False):
+        out = Path(temporary)
+        elf = self.lock["root_native_files"]["python-msgpack"][0]
+        pin = self.pins["python-msgpack"]
+        raw = PREP.inspect_deb(self.inputs / "archives" / pin["filename"], pin,
+                              wanted={elf["path"]})["selected"][elf["path"]]
+        paths, aliases = [], {}
+        for index in range(2):
+            path = out / ("unreviewed-" + str(index) + ".so")
+            data = raw if not (index == 1 and corrupt_second) else b"not-an-ELF"
+            path.write_bytes(data)
+            name = path.as_posix()
+            paths.append(name)
+            aliases[name] = {PREP.PREFIX_TEXT + "/opt/aosp/lib64/unreviewed-" + str(index) + ".so"}
+        owners = {path: ["aosp-libs"] for path in paths}
+        state = {"aosp-libs": {"version": "fixture-exact", "architecture": "aarch64", "status": "installed"}}
+        apt = SimpleNamespace(collect_owners=lambda wanted: owners)
+        with mock.patch.object(PROBE, "package_snapshot", return_value=state):
+            found, observations = PROBE.mapping_observations(
+                SimpleNamespace(out=out), self.lock, apt, PREP, paths, aliases, [])
+        return paths, found, observations
+
+    def test_all_real_elf_observations_are_saved_without_admission(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            paths, owners, result = self.observations_fixture(temporary)
+            saved = json.loads((Path(temporary) / "MAPPED-LIBRARY-OBSERVATIONS.json").read_bytes())
+            self.assertEqual(saved, result)
+            self.assertTrue(result["complete"])
+            self.assertFalse(result["admitted"])
+            self.assertEqual(len(result["files"]), 2)
+            for row in result["files"]:
+                path = Path(row["resolved_path"])
+                self.assertIn(row["resolved_path"], paths)
+                self.assertEqual(row["bytes"], path.stat().st_size)
+                self.assertEqual(row["sha256"], hashlib.sha256(path.read_bytes()).hexdigest())
+                self.assertEqual(row["elf"]["machine"], 183)
+                self.assertEqual(row["owners"], ["aosp-libs"])
+                self.assertEqual(row["owner_states"]["aosp-libs"]["version"], "fixture-exact")
+                self.assertFalse(row["admitted"])
+                for alias in row["mapped_paths"]:
+                    with self.assertRaisesRegex(PROBE.ProbeError, "Unreviewed native mapping"):
+                        PROBE.classify_mapping(alias, self.lock)
+
+    def test_bad_elf_observation_keeps_both_files_and_cannot_pass(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            paths, owners, result = self.observations_fixture(temporary, corrupt_second=True)
+            self.assertFalse(result["complete"])
+            self.assertFalse(result["admitted"])
+            self.assertEqual(len(result["files"]), 2)
+            bad = next(row for row in result["files"] if row["resolved_path"] == paths[1])
+            self.assertEqual(bad["sha256"], hashlib.sha256(b"not-an-ELF").hexdigest())
+            self.assertIn("AArch64", bad["observation_error"]["message"])
+            self.assertTrue((Path(temporary) / "MAPPED-LIBRARY-OBSERVATIONS.json").is_file())
 
 
 if __name__ == "__main__":

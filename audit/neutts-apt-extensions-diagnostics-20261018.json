@@ -1,0 +1,179 @@
+{
+  "boundaries": {
+    "default_speech_models_downloaded": false,
+    "engine_installed": false,
+    "new_native_success_claim": false,
+    "production_admission_changed": false,
+    "release_created": false,
+    "speech_synthesis_tested": false
+  },
+  "changes": [
+    "Before unchanged mapping classification, retain every observed resolved .so path, actual bytes and SHA256, AArch64 ELF identity, mode/UID/GID, all installed owners and their actual version/architecture/status.",
+    "Deleted/unresolvable paths and failed ownership/byte/ELF observations remain explicit incomplete-observation failures; observations do not admit any path.",
+    "All five independent child cases are attempted with their exact stdout/stderr/exit and receipt. Nonzero, malformed, missing or mismatched receipts fail the aggregate after all cases.",
+    "Retain behavior and mapping errors separately, including when both fail.",
+    "Run the full unchanged original package-file oracle afterward even when the aggregate fails."
+  ],
+  "host_verification": {
+    "evidence": "neutts-apt-extensions-diagnostics-20261018/host-checks/HOST-VERIFICATION.json",
+    "exit_code": 0,
+    "fixture": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\apt-extensions-preparation-20261017\\prepared-inputs-v2",
+    "includes_original_five_archive_cases": true,
+    "new_negative_cases": "Actual host child nonzero/missing/mismatched receipts; preserve simultaneous behavior/mapping errors; actual original AArch64 bytes and corrupt-ELF observations never imply admission.",
+    "skipped": 0,
+    "tests": 38
+  },
+  "image_inspection": {
+    "allowlist_expanded": false,
+    "config": {
+      "architecture": "arm64",
+      "bytes": 2970,
+      "os": "linux",
+      "sha256": "5226204b4f02255155374bdd74ff0aafca66cc66224fa7c780c2db1cc13def25"
+    },
+    "failure": "CDN connections reset with ConnectionResetError/WinError 10054 for bounded range and full GET attempts. No insecure transport or verification exception was attempted.",
+    "failure_log_provenance": "Exact UTF-8 stdout strings returned by the Devbox calls, retained with their original CRLF. Signed redirect URLs and temporary public registry tokens were not printed or saved.",
+    "image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
+    "image_executed": false,
+    "layer_bytes_verified": false,
+    "layer_download_attempts": 3,
+    "layers": [
+      {
+        "digest": "sha256:4be35323a92b7585eccba1e4a563c4cb839e5fe441214ab4f702752ec66bf9c9",
+        "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+        "size": 48731131
+      },
+      {
+        "digest": "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+        "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+        "size": 32
+      }
+    ],
+    "manifest": {
+      "bytes": 735,
+      "sha256": "c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303"
+    },
+    "status": "manifest-and-config-verified-layer-download-unavailable",
+    "unknown_icu_bytes_owner_version_established": false
+  },
+  "original_failure": {
+    "audit": "audit/neutts-apt-extensions-native-20261018/run-39080859288.json",
+    "bytes": 26909,
+    "sha256": "92fa598ac5af9b927ab1c2df9bbb80c0653c30fa01042cb768a57872974e142b"
+  },
+  "raw_bytes": 25287,
+  "raw_file_count": 10,
+  "raw_files": [
+    {
+      "bytes": 1753,
+      "path": "host-checks/HOST-VERIFICATION.json",
+      "sha256": "f112318e225f778072c812db5fe3cf220f49f693ec8d82ce282715efd7ad5fae"
+    },
+    {
+      "bytes": 0,
+      "path": "host-checks/tests.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 7797,
+      "path": "host-checks/tests.stderr.log",
+      "sha256": "3838c4290b4f6029216d2bd79d0af0a587ac5587e3fdc18a21d5198633d8dac1"
+    },
+    {
+      "bytes": 658,
+      "path": "host-checks/STATIC-REGRESSION.json",
+      "sha256": "fe8712f428da172f53d315eb69738c9cd2b9cd9e60585e61cc877c8d7534d0ef"
+    },
+    {
+      "bytes": 735,
+      "path": "image-review/pinned-image-manifest.json",
+      "sha256": "c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303"
+    },
+    {
+      "bytes": 2970,
+      "path": "image-review/pinned-image-config.json",
+      "sha256": "5226204b4f02255155374bdd74ff0aafca66cc66224fa7c780c2db1cc13def25"
+    },
+    {
+      "bytes": 48,
+      "path": "image-review/attempt-1-range.stdout.log",
+      "sha256": "60406c581b627e185e008ffa3b93ad8b29416b326d8365389bec05a6907b759f"
+    },
+    {
+      "bytes": 2192,
+      "path": "image-review/attempt-2-range-diagnostic.stdout.log",
+      "sha256": "4bdebde724d4cd43d505b6c4a158e9d0cd2b9401e1cba141fa83d2407bd7ed83"
+    },
+    {
+      "bytes": 110,
+      "path": "image-review/attempt-3-full-get.stdout.log",
+      "sha256": "21f5e04a682686c5414c168de4d47bc0ec2da445b90ec8f11fb726ecb8928507"
+    },
+    {
+      "bytes": 9024,
+      "path": "image-review/attempted-image-layer-inspector.py",
+      "sha256": "a5bb7d376911cea76c30a4a21b5d986f11428e8b6f3045e0fdab555b705358f9"
+    }
+  ],
+  "schema_version": 1,
+  "sources": {
+    ".github/workflows/neutts-apt-extensions.yml": {
+      "bytes": 1567,
+      "sha256": "940ad872bcf546adb56438df3718175409b27d70594f694a997a7f542d968287"
+    },
+    "scripts/compatibility_probe_neutts_apt_extensions.py": {
+      "bytes": 36701,
+      "sha256": "51453b1005ffdc4a427e98c9b6d78db45e626904ac158420ace1a76de88f5e16"
+    },
+    "scripts/compatibility_probe_neutts_apt_extensions.sh": {
+      "bytes": 7389,
+      "sha256": "52306d79e95b72d3bb5c96674128178dbaead5adee7f89ad68a029a12452d41e"
+    },
+    "scripts/neutts_apt_extensions_lock.json": {
+      "bytes": 517167,
+      "sha256": "b20d35dc54da253578ffd499e0dc7a226c77b4f704b2601e37a22edb81fab8d4"
+    },
+    "scripts/prepare_neutts_apt_extensions.py": {
+      "bytes": 19566,
+      "sha256": "de07068e48e2a383771fa3b05caa4d46efa40430e216ef541d4f271bb82e9a6a"
+    },
+    "tests/test_neutts_apt_extensions.py": {
+      "bytes": 23484,
+      "sha256": "c7a9c1aba16308bfcf45828e606deb280642c10c954d94dff5f80ebd9a28781f"
+    }
+  },
+  "status": "host-verified-native-retry-pending",
+  "unchanged": {
+    "additional_packages": 18,
+    "apt_closure_packages": 78,
+    "apt_provenance_archives": 84,
+    "compiler_requested": false,
+    "five_image_library_pins": true,
+    "foundation_packages": 122,
+    "lock_sha256": "b20d35dc54da253578ffd499e0dc7a226c77b4f704b2601e37a22edb81fab8d4",
+    "original_metadata_and_supported_tags_preserved": true,
+    "probe_functions_ast": {
+      "added_functions": [
+        "mapping_observations",
+        "run_cases"
+      ],
+      "all_five_original_operations_ast_identical": true,
+      "all_other_original_functions_ast_identical": true,
+      "baseline_commit": "2f394673d407589bf7617fcb40c32a9c6804ef61",
+      "baseline_probe_sha256": "1d02c97429517110f4ea63fbb622ac2b0ee0fd374277b567cc3a4b96ed6e5fd5",
+      "changed_functions": [
+        "case_run",
+        "command",
+        "run",
+        "verify_mappings"
+      ],
+      "current_probe_sha256": "51453b1005ffdc4a427e98c9b6d78db45e626904ac158420ace1a76de88f5e16",
+      "native_execution": false,
+      "original_mapping_classifier_ast_identical": true,
+      "schema_version": 1,
+      "status": "passed"
+    },
+    "source_and_archive_versions": true
+  },
+  "why": "First run completed PyArrow operations but rejected an additional unpinned image libicuuc.so mapping. Its complete original artifact and failure remain frozen separately."
+}

@@ -81,7 +81,7 @@ def clean_command_environment():
     return env
 
 
-def command(argv, out, label, timeout, expected=0, env=None):
+def command(argv, out, label, timeout, expected=0, env=None, check=True):
     stdout, stderr = out / (label + ".stdout.log"), out / (label + ".stderr.log")
     record = {"argv": list(map(str, argv)), "exit_code": None, "timed_out": False}
     try:
@@ -114,8 +114,9 @@ def command(argv, out, label, timeout, expected=0, env=None):
     record["status"] = ("passed" if record["exit_code"] == expected and not record["timed_out"]
                         and "launch_error" not in record else "failed")
     save(out / (label + ".command.json"), record)
-    require(record["status"] == "passed",
-            label + " failed: exit=" + str(record["exit_code"]) + "; logs retained under " + str(out))
+    if check:
+        require(record["status"] == "passed",
+                label + " failed: exit=" + str(record["exit_code"]) + "; logs retained under " + str(out))
     return record
 
 
@@ -325,23 +326,63 @@ def classify_mapping(path, lock):
     raise ProbeError("Unreviewed native mapping outside exact APT/image paths: " + str(path))
 
 
+def mapping_observations(args, lock, apt, prep, paths, aliases, resolution_errors):
+    """Preserve actual bytes/ownership before applying the unchanged admission policy."""
+    observations = {"schema_version": 1, "status": "observations-only", "admitted": False,
+                    "image": lock["image_runtime"]["image"], "files": [],
+                    "resolution_errors": resolution_errors, "collection_errors": []}
+    owners, states = {}, {}
+    try:
+        owners = apt.collect_owners(paths)
+    except Exception as exc:
+        observations["collection_errors"].append({"stage": "ownership", "type": type(exc).__name__,
+                                                   "message": str(exc), "traceback": traceback.format_exc()})
+    try:
+        states = package_snapshot(args.out, "mapped-owner-state")
+    except Exception as exc:
+        observations["collection_errors"].append({"stage": "installed-owner-state", "type": type(exc).__name__,
+                                                   "message": str(exc), "traceback": traceback.format_exc()})
+    for name in sorted(paths):
+        row = {"resolved_path": name, "mapped_paths": sorted(aliases[name]),
+               "owners": sorted(owners.get(name, [])),
+               "owner_states": {owner: states.get(owner) for owner in sorted(owners.get(name, []))},
+               "admitted": False}
+        try:
+            raw = prep.read_regular(name, lock["limits"]["max_expanded_member_bytes"])
+            info = Path(name).stat()
+            row.update(bytes=len(raw), sha256=prep.sha(raw), mode=stat.S_IMODE(info.st_mode),
+                       uid=info.st_uid, gid=info.st_gid)
+            row["elf"] = prep.elf_identity(raw)
+        except Exception as exc:
+            row["observation_error"] = {"type": type(exc).__name__, "message": str(exc),
+                                        "traceback": traceback.format_exc()}
+        observations["files"].append(row)
+    observations["complete"] = (not resolution_errors and not observations["collection_errors"]
+                                and bool(paths)
+                                and all("observation_error" not in row for row in observations["files"]))
+    save(args.out / "MAPPED-LIBRARY-OBSERVATIONS.json", observations)
+    return owners, observations
+
+
 def verify_mappings(args, lock, apt, prep):
     raw = Path("/proc/self/maps").read_bytes()
     with (args.out / "proc-self-maps.txt").open("xb") as stream:
         stream.write(raw)
-    paths, aliases = set(), {}
+    paths, aliases, resolution_errors = set(), {}, []
     for line in raw.decode().splitlines():
         parts = line.split(None, 5)
         if len(parts) != 6 or not parts[5].startswith("/") or ".so" not in parts[5]:
             continue
-        require(not parts[5].endswith(" (deleted)"), "Deleted native mapping: " + parts[5])
-        original = Path(parts[5])
-        path = original.resolve(strict=True)
-        classify_mapping(path.as_posix(), lock)
-        paths.add(path.as_posix())
-        aliases.setdefault(path.as_posix(), set()).add(parts[5])
-    require(paths, "No native mappings were observed")
-    owners = apt.collect_owners(paths)
+        try:
+            require(not parts[5].endswith(" (deleted)"), "Deleted native mapping: " + parts[5])
+            path = Path(parts[5]).resolve(strict=True)
+            paths.add(path.as_posix())
+            aliases.setdefault(path.as_posix(), set()).add(parts[5])
+        except Exception as exc:
+            resolution_errors.append({"mapped_path": parts[5], "type": type(exc).__name__,
+                                      "message": str(exc), "traceback": traceback.format_exc()})
+    owners, observations = mapping_observations(args, lock, apt, prep, paths, aliases, resolution_errors)
+    require(observations["complete"], "Native mapping observation incomplete; exact diagnostics retained")
     pins = {p["package"]: p for p in lock["apt"]["provenance_packages"]}
     image = {row["path"]: row for row in lock["image_runtime"]["files"]}
     apt_groups, records = {}, []
@@ -510,16 +551,57 @@ def case_run(args, lock, prep, common, apt):
               "model_downloaded": False, "engine_installed": False}
     try:
         record["behavior"] = globals()[args.case + "_case"](args, lock)
-        record["mappings"] = verify_mappings(args, lock, apt, prep)
-        record["status"] = "passed"
     except Exception as exc:
-        record["error"] = {"type": type(exc).__name__, "message": str(exc), "traceback": traceback.format_exc()}
-        if not (args.out / "proc-self-maps.txt").exists():
-            (args.out / "proc-self-maps.txt").write_bytes(Path("/proc/self/maps").read_bytes())
+        record["error"] = {"stage": "behavior", "type": type(exc).__name__,
+                           "message": str(exc), "traceback": traceback.format_exc()}
         traceback.print_exc()
+    try:
+        record["mappings"] = verify_mappings(args, lock, apt, prep)
+    except Exception as exc:
+        error = {"stage": "native-mapping-provenance", "type": type(exc).__name__,
+                 "message": str(exc), "traceback": traceback.format_exc()}
+        record["mapping_error"] = error
+        record.setdefault("error", error)
+        traceback.print_exc()
+    observation_path = args.out / "MAPPED-LIBRARY-OBSERVATIONS.json"
+    if observation_path.exists():
+        record["mapping_observations"] = {"file": observation_path.name, "sha256": sha(observation_path),
+                                          "admitted": False}
+    if "error" not in record and "behavior" in record and record.get("mappings", {}).get("status") == "passed":
+        record["status"] = "passed"
     save(args.out / "CASE-RESULT.json", record)
     require(record["status"] == "passed", "Actual native case failed: " + args.case)
     return record
+
+
+def run_cases(args, lock, report):
+    """Attempt all five independent cases; each command and receipt must still pass."""
+    report["cases"] = []
+    for name in CASES:
+        target = args.out / name
+        argv = [str(PREFIX / "bin/python"), "-I", "-B", str(Path(__file__).resolve()),
+                "--inputs", str(args.inputs), "--apt-archives", str(args.apt_archives),
+                "--foundation-receipt", str(args.foundation_receipt), "--out", str(target), "--case", name]
+        child = command(argv, args.out, "case-" + name, lock["limits"]["native_case_seconds"], check=False)
+        record = {"component": name, "status": "failed", "command": child}
+        path = target / "CASE-RESULT.json"
+        try:
+            raw = path.read_bytes()
+            record.update(receipt=name + "/CASE-RESULT.json", sha256=hashlib.sha256(raw).hexdigest())
+            result = json.loads(raw)
+            require(result.get("component") == name and result.get("status") in ("passed", "failed"),
+                    "Native child receipt differs: " + name)
+            record["child_status"] = result["status"]
+            if result.get("error") is not None:
+                record["child_error"] = result["error"]
+            if child["status"] == "passed" and result["status"] == "passed":
+                record["status"] = "passed"
+        except Exception as exc:
+            record["receipt_error"] = {"type": type(exc).__name__, "message": str(exc),
+                                       "traceback": traceback.format_exc()}
+        report["cases"].append(record)
+    failed = [row["component"] for row in report["cases"] if row["status"] != "passed"]
+    require(not failed, "Native APT extension cases failed: " + ", ".join(failed))
 
 
 def run(args, lock, prep, common, apt, report):
@@ -550,22 +632,12 @@ def run(args, lock, prep, common, apt, report):
         save(args.out / "APT-EXTENSIONS-REQUIREMENTS.json", validation)
     report["requirements"] = {"status": validation["status"], "sha256": sha(args.out / "APT-EXTENSIONS-REQUIREMENTS.json"),
                               "apt_distributions": 12, "raw_pip_exit_code": 1, "raw_pip_passed": False}
-    report["cases"] = []
-    for name in CASES:
-        target = args.out / name
-        argv = [str(PREFIX / "bin/python"), "-I", "-B", str(Path(__file__).resolve()),
-                "--inputs", str(args.inputs), "--apt-archives", str(args.apt_archives),
-                "--foundation-receipt", str(args.foundation_receipt), "--out", str(target), "--case", name]
-        child = command(argv, args.out, "case-" + name, lock["limits"]["native_case_seconds"])
-        path = target / "CASE-RESULT.json"
-        result = json.loads(path.read_bytes())
-        require(result.get("component") == name and result.get("status") == "passed",
-                "Native child receipt differs: " + name)
-        report["cases"].append({"component": name, "status": "passed", "command": child,
-                                "receipt": name + "/CASE-RESULT.json", "sha256": sha(path)})
-    report["original_files_after"] = verify_root_files(lock, apt, prep)
-    require(report["original_files_before"] == report["original_files_after"],
-            "Operation changed original APT files or metadata")
+    try:
+        run_cases(args, lock, report)
+    finally:
+        report["original_files_after"] = verify_root_files(lock, apt, prep)
+        require(report["original_files_before"] == report["original_files_after"],
+                "Operation changed original APT files or metadata")
     report["status"] = "passed"
 
 

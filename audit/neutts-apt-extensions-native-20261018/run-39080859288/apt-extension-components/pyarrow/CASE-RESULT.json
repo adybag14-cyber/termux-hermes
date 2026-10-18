@@ -1,0 +1,47 @@
+{
+  "behavior": {
+    "filtered_ids": [
+      3,
+      4,
+      5
+    ],
+    "ipc_stream_bytes": 496,
+    "modules": [
+      {
+        "apt_package": "python-pyarrow",
+        "bytes": 19385,
+        "distribution": "pyarrow",
+        "module": "pyarrow",
+        "path": "/data/data/com.termux/files/usr/lib/python3.14/site-packages/pyarrow/__init__.py",
+        "sha256": "c43d79464ff3772907a7a2d50ccc61497d0ba717d80ddf01bac52d8d4b0578ed"
+      },
+      {
+        "apt_package": "python-pyarrow",
+        "bytes": 3799368,
+        "distribution": "pyarrow",
+        "module": "pyarrow.lib",
+        "path": "/data/data/com.termux/files/usr/lib/python3.14/site-packages/pyarrow/lib.cpython-314-aarch64-linux-android.so",
+        "sha256": "e33e586bb2145d32113545a3711e9e16ca5215ddaf30a02d2ccf7805db1b3c3e"
+      }
+    ],
+    "operations": [
+      "NumPy zero-copy",
+      "IPC stream",
+      "IPC file/memory-map",
+      "compute",
+      "dataset filter/projection"
+    ],
+    "rows": 6,
+    "sum": 12
+  },
+  "component": "pyarrow",
+  "engine_installed": false,
+  "error": {
+    "message": "Unreviewed native mapping outside exact APT/image paths: /data/data/com.termux/files/usr/opt/aosp/lib64/libicuuc.so",
+    "traceback": "Traceback (most recent call last):\n  File \"/probes/scripts/compatibility_probe_neutts_apt_extensions.py\", line 513, in case_run\n    record[\"mappings\"] = verify_mappings(args, lock, apt, prep)\n                         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/probes/scripts/compatibility_probe_neutts_apt_extensions.py\", line 340, in verify_mappings\n    classify_mapping(path.as_posix(), lock)\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/probes/scripts/compatibility_probe_neutts_apt_extensions.py\", line 325, in classify_mapping\n    raise ProbeError(\"Unreviewed native mapping outside exact APT/image paths: \" + str(path))\nProbeError: Unreviewed native mapping outside exact APT/image paths: /data/data/com.termux/files/usr/opt/aosp/lib64/libicuuc.so\n",
+    "type": "ProbeError"
+  },
+  "model_downloaded": false,
+  "schema_version": 1,
+  "status": "failed"
+}

@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_neutts_apt_extensions.py", line 513, in case_run
+    record["mappings"] = verify_mappings(args, lock, apt, prep)
+                         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_apt_extensions.py", line 340, in verify_mappings
+    classify_mapping(path.as_posix(), lock)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_apt_extensions.py", line 325, in classify_mapping
+    raise ProbeError("Unreviewed native mapping outside exact APT/image paths: " + str(path))
+ProbeError: Unreviewed native mapping outside exact APT/image paths: /data/data/com.termux/files/usr/opt/aosp/lib64/libicuuc.so
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_neutts_apt_extensions.py", line 592, in main
+    case_run(args, lock, prep, common, apt)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_apt_extensions.py", line 521, in case_run
+    require(record["status"] == "passed", "Actual native case failed: " + args.case)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_apt_extensions.py", line 42, in require
+    raise ProbeError(message)
+ProbeError: Actual native case failed: pyarrow

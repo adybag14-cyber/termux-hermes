@@ -1,0 +1,1050 @@
+{
+  "archives": {
+    "archives": 84,
+    "bytes": 126542852,
+    "receipt_sha256": "e6db33344412bc85987a892c2b3e4fe7e1c7fcc24d25794533961e062a8bb255",
+    "status": "passed"
+  },
+  "cases": [],
+  "compiler_requested": false,
+  "engine_installed": false,
+  "error": {
+    "message": "case-pyarrow failed: exit=1; logs retained under /out/apt-extension-components",
+    "traceback": "Traceback (most recent call last):\n  File \"/probes/scripts/compatibility_probe_neutts_apt_extensions.py\", line 594, in main\n    run(args, lock, prep, common, apt, report)\n    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/probes/scripts/compatibility_probe_neutts_apt_extensions.py\", line 559, in run\n    child = command(argv, args.out, \"case-\" + name, lock[\"limits\"][\"native_case_seconds\"])\n  File \"/probes/scripts/compatibility_probe_neutts_apt_extensions.py\", line 117, in command\n    require(record[\"status\"] == \"passed\",\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n            label + \" failed: exit=\" + str(record[\"exit_code\"]) + \"; logs retained under \" + str(out))\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/probes/scripts/compatibility_probe_neutts_apt_extensions.py\", line 42, in require\n    raise ProbeError(message)\nProbeError: case-pyarrow failed: exit=1; logs retained under /out/apt-extension-components\n",
+    "type": "ProbeError"
+  },
+  "foundation": {
+    "apt_validation_sha256": "6adcb0db6955fbd1dd2c18842a9c47567576e036e0cc4b87e883bda3373e6c3c",
+    "case_count": 7,
+    "path": "/out/NEUTTS-CORE-RESULT.json",
+    "raw_pip_exit_code": 1,
+    "sha256": "0b749587814ca825cc8b785a06aa8c9f9d008cd99b0eaebd9b9ed1d4428ee2cd",
+    "status": "passed"
+  },
+  "image_runtime": {
+    "authority": "Pinned container image and separately validated unchanged seven-case foundation; these are not snapshot archive claims.",
+    "files": [
+      {
+        "bytes": 926896,
+        "dpkg_owners": [
+          "aosp-libs"
+        ],
+        "elf_class": 64,
+        "endianness": "little",
+        "machine": 183,
+        "mapped_path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libc++.so",
+        "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libc++.so",
+        "sha256": "3b3a556e1a175baa03cd5e82a4a9189182ad1b1824319f15c681a13fdfdc42f0"
+      },
+      {
+        "bytes": 1126832,
+        "dpkg_owners": [
+          "aosp-libs"
+        ],
+        "elf_class": 64,
+        "endianness": "little",
+        "machine": 183,
+        "mapped_path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libc.so",
+        "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libc.so",
+        "sha256": "f9eacc7c6402ae1cca97e6e080340e12203bcd43cb44b054522239a7eed64fc4"
+      },
+      {
+        "bytes": 67504,
+        "dpkg_owners": [
+          "aosp-libs"
+        ],
+        "elf_class": 64,
+        "endianness": "little",
+        "machine": 183,
+        "mapped_path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libdl.so",
+        "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libdl.so",
+        "sha256": "cfee715580eac1a5cf3a7713ceebd61e83544a2889bd4799be7c23272356815b"
+      },
+      {
+        "bytes": 136800,
+        "dpkg_owners": [
+          "aosp-libs"
+        ],
+        "elf_class": 64,
+        "endianness": "little",
+        "machine": 183,
+        "mapped_path": "/data/data/com.termux/files/usr/opt/aosp/lib64/liblog.so",
+        "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/liblog.so",
+        "sha256": "af8872cb6e476b8d66bbf6d84eb6fb12e3312ea79a5c947a63a8428256b45a81"
+      },
+      {
+        "bytes": 265480,
+        "dpkg_owners": [
+          "aosp-libs"
+        ],
+        "elf_class": 64,
+        "endianness": "little",
+        "machine": 183,
+        "mapped_path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libm.so",
+        "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libm.so",
+        "sha256": "d99e586652e539e4840c4466d6a8d8a7fe169b662a48935000226eb7f1c41f9b"
+      }
+    ],
+    "image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
+    "snapshot_archive_claim": false,
+    "status": "passed"
+  },
+  "installation": {
+    "compiler_requested": false,
+    "install": {
+      "argv": [
+        "/data/data/com.termux/files/usr/bin/apt-get",
+        "--yes",
+        "-o",
+        "Dir::Etc::sourcelist=/data/data/com.termux/files/usr/tmp/neutts-apt-extensions-gokdhrak/frozen.list",
+        "-o",
+        "Dir::Etc::sourceparts=-",
+        "-o",
+        "Dir::State::lists=/data/data/com.termux/files/usr/tmp/neutts-apt-extensions-gokdhrak/apt-lists",
+        "-o",
+        "Acquire::Languages=none",
+        "-o",
+        "Acquire::AllowInsecureRepositories=false",
+        "-o",
+        "Acquire::AllowDowngradeToInsecureRepositories=false",
+        "-o",
+        "Acquire::AllowWeakRepositories=false",
+        "-o",
+        "APT::Get::AllowUnauthenticated=false",
+        "-o",
+        "APT::Update::Error-Mode=any",
+        "-o",
+        "Dir::Cache::archives=/data/data/com.termux/files/usr/tmp/neutts-apt-extensions.9nTJYx/archives",
+        "-o",
+        "Dpkg::Options::=--force-confnew",
+        "--no-download",
+        "--no-remove",
+        "--no-install-recommends",
+        "--reinstall",
+        "install",
+        "apache-orc=2.3.1-1",
+        "libarrow-cpp=26.0.0-2",
+        "libgcrypt=1.12.4",
+        "libgpg-error=1.61",
+        "libimagequant=4.4.1",
+        "liblz4=1.10.0-1",
+        "libraqm=0.11.0",
+        "libre2=2025-11-05-2",
+        "libsnappy=1.3.1",
+        "libxslt=1.1.45-1",
+        "openjpeg=2.5.4",
+        "python-lxml=6.1.3",
+        "python-msgpack=1.2.3",
+        "python-pillow=12.3.0",
+        "python-psutil=7.2.2-2",
+        "python-pyarrow=26.0.0-2",
+        "thrift=0.25.0",
+        "utf8proc=2.12.0"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "stderr": {
+        "bytes": 0,
+        "file": "apt-install.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 6047,
+        "file": "apt-install.stdout.log",
+        "sha256": "eac7d89d361e32926087785d02b23e5bf32847959a7ddf202d7fe08cc0a78f6d"
+      },
+      "timed_out": false
+    },
+    "new_packages": [
+      "apache-orc",
+      "libarrow-cpp",
+      "libimagequant",
+      "libraqm",
+      "libre2",
+      "libsnappy",
+      "libxslt",
+      "openjpeg",
+      "python-lxml",
+      "python-msgpack",
+      "python-pillow",
+      "python-psutil",
+      "python-pyarrow",
+      "thrift",
+      "utf8proc"
+    ],
+    "other_state_changes": [],
+    "plan": {
+      "argv": [
+        "/data/data/com.termux/files/usr/bin/apt-get",
+        "--simulate",
+        "-o",
+        "Dir::Etc::sourcelist=/data/data/com.termux/files/usr/tmp/neutts-apt-extensions-gokdhrak/frozen.list",
+        "-o",
+        "Dir::Etc::sourceparts=-",
+        "-o",
+        "Dir::State::lists=/data/data/com.termux/files/usr/tmp/neutts-apt-extensions-gokdhrak/apt-lists",
+        "-o",
+        "Acquire::Languages=none",
+        "-o",
+        "Acquire::AllowInsecureRepositories=false",
+        "-o",
+        "Acquire::AllowDowngradeToInsecureRepositories=false",
+        "-o",
+        "Acquire::AllowWeakRepositories=false",
+        "-o",
+        "APT::Get::AllowUnauthenticated=false",
+        "-o",
+        "APT::Update::Error-Mode=any",
+        "-o",
+        "Dir::Cache::archives=/data/data/com.termux/files/usr/tmp/neutts-apt-extensions.9nTJYx/archives",
+        "-o",
+        "Dpkg::Options::=--force-confnew",
+        "--no-download",
+        "--no-remove",
+        "--no-install-recommends",
+        "--reinstall",
+        "install",
+        "apache-orc=2.3.1-1",
+        "libarrow-cpp=26.0.0-2",
+        "libgcrypt=1.12.4",
+        "libgpg-error=1.61",
+        "libimagequant=4.4.1",
+        "liblz4=1.10.0-1",
+        "libraqm=0.11.0",
+        "libre2=2025-11-05-2",
+        "libsnappy=1.3.1",
+        "libxslt=1.1.45-1",
+        "openjpeg=2.5.4",
+        "python-lxml=6.1.3",
+        "python-msgpack=1.2.3",
+        "python-pillow=12.3.0",
+        "python-psutil=7.2.2-2",
+        "python-pyarrow=26.0.0-2",
+        "thrift=0.25.0",
+        "utf8proc=2.12.0"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "stderr": {
+        "bytes": 0,
+        "file": "apt-plan.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 2828,
+        "file": "apt-plan.stdout.log",
+        "sha256": "c7c3517c1886d35dadd6cf7d71532052c3764b3d8e0f20b6994175cda203a37f"
+      },
+      "timed_out": false
+    },
+    "reinstalled_exact_packages": [
+      "libgcrypt",
+      "libgpg-error",
+      "liblz4"
+    ],
+    "removed_packages": [],
+    "selected_archive_bytes": 14043104,
+    "selected_count": 18,
+    "selected_versions": {
+      "apache-orc": "2.3.1-1",
+      "libarrow-cpp": "26.0.0-2",
+      "libgcrypt": "1.12.4",
+      "libgpg-error": "1.61",
+      "libimagequant": "4.4.1",
+      "liblz4": "1.10.0-1",
+      "libraqm": "0.11.0",
+      "libre2": "2025-11-05-2",
+      "libsnappy": "1.3.1",
+      "libxslt": "1.1.45-1",
+      "openjpeg": "2.5.4",
+      "python-lxml": "6.1.3",
+      "python-msgpack": "1.2.3",
+      "python-pillow": "12.3.0",
+      "python-psutil": "7.2.2-2",
+      "python-pyarrow": "26.0.0-2",
+      "thrift": "0.25.0",
+      "utf8proc": "2.12.0"
+    },
+    "status": "passed",
+    "unreviewed_upgrades": []
+  },
+  "installed_apt_controls": {
+    "abseil-cpp": {
+      "Architecture": "aarch64",
+      "Depends": "libc++",
+      "Package": "abseil-cpp",
+      "Pre-Depends": null,
+      "Version": "20260526.0"
+    },
+    "apache-orc": {
+      "Architecture": "aarch64",
+      "Depends": "libc++, liblz4, libprotobuf, libsnappy, zlib, zstd",
+      "Package": "apache-orc",
+      "Pre-Depends": null,
+      "Version": "2.3.1-1"
+    },
+    "brotli": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "brotli",
+      "Pre-Depends": null,
+      "Version": "1.2.0"
+    },
+    "ca-certificates": {
+      "Architecture": "all",
+      "Depends": null,
+      "Package": "ca-certificates",
+      "Pre-Depends": null,
+      "Version": "1:2026.09.25"
+    },
+    "fontconfig": {
+      "Architecture": "aarch64",
+      "Depends": "freetype, libexpat, ttf-dejavu",
+      "Package": "fontconfig",
+      "Pre-Depends": null,
+      "Version": "2.18.3"
+    },
+    "freetype": {
+      "Architecture": "aarch64",
+      "Depends": "brotli, libbz2, libpng, zlib",
+      "Package": "freetype",
+      "Pre-Depends": null,
+      "Version": "2.15.0"
+    },
+    "fribidi": {
+      "Architecture": "aarch64",
+      "Depends": "glib",
+      "Package": "fribidi",
+      "Pre-Depends": null,
+      "Version": "1.0.17"
+    },
+    "gdbm": {
+      "Architecture": "aarch64",
+      "Depends": "readline",
+      "Package": "gdbm",
+      "Pre-Depends": null,
+      "Version": "1.26-1"
+    },
+    "giflib": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "giflib",
+      "Pre-Depends": null,
+      "Version": "6.1.3"
+    },
+    "glib": {
+      "Architecture": "aarch64",
+      "Depends": "libandroid-support, libffi, libiconv, pcre2, resolv-conf, zlib, python",
+      "Package": "glib",
+      "Pre-Depends": null,
+      "Version": "2.90.1"
+    },
+    "harfbuzz": {
+      "Architecture": "aarch64",
+      "Depends": "freetype, glib, libcairo, libgraphite",
+      "Package": "harfbuzz",
+      "Pre-Depends": null,
+      "Version": "14.6.0"
+    },
+    "libandroid-execinfo": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libandroid-execinfo",
+      "Pre-Depends": null,
+      "Version": "0.1-3"
+    },
+    "libandroid-glob": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libandroid-glob",
+      "Pre-Depends": null,
+      "Version": "0.6-3"
+    },
+    "libandroid-posix-semaphore": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libandroid-posix-semaphore",
+      "Pre-Depends": null,
+      "Version": "0.1-4"
+    },
+    "libandroid-shmem": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libandroid-shmem",
+      "Pre-Depends": null,
+      "Version": "0.7"
+    },
+    "libandroid-support": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libandroid-support",
+      "Pre-Depends": null,
+      "Version": "29-1"
+    },
+    "libaom": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libaom",
+      "Pre-Depends": null,
+      "Version": "3.15.2"
+    },
+    "libarrow-cpp": {
+      "Architecture": "aarch64",
+      "Depends": "abseil-cpp, apache-orc, libandroid-execinfo, libc++, liblz4, libprotobuf, libre2, libsnappy, thrift, utf8proc, zlib, zstd",
+      "Package": "libarrow-cpp",
+      "Pre-Depends": null,
+      "Version": "26.0.0-2"
+    },
+    "libavif": {
+      "Architecture": "aarch64",
+      "Depends": "libaom, libc++, libdav1d, libjpeg-turbo, libpng, libwebp, librav1e, svt-av1",
+      "Package": "libavif",
+      "Pre-Depends": null,
+      "Version": "1.4.2"
+    },
+    "libbz2": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libbz2",
+      "Pre-Depends": null,
+      "Version": "1.0.8-8"
+    },
+    "libc++": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libc++",
+      "Pre-Depends": null,
+      "Version": "30"
+    },
+    "libcairo": {
+      "Architecture": "aarch64",
+      "Depends": "fontconfig, freetype, glib, libandroid-shmem, libandroid-execinfo, liblzo, libpixman, libpng, libx11, libxcb, libxext, libxrender, zlib",
+      "Package": "libcairo",
+      "Pre-Depends": null,
+      "Version": "1.18.6"
+    },
+    "libcrypt": {
+      "Architecture": "aarch64",
+      "Depends": "openssl",
+      "Package": "libcrypt",
+      "Pre-Depends": null,
+      "Version": "0.2-6"
+    },
+    "libdav1d": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libdav1d",
+      "Pre-Depends": null,
+      "Version": "1.5.4"
+    },
+    "libexpat": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libexpat",
+      "Pre-Depends": null,
+      "Version": "2.9.0"
+    },
+    "libffi": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libffi",
+      "Pre-Depends": null,
+      "Version": "3.8.0"
+    },
+    "libgcrypt": {
+      "Architecture": "aarch64",
+      "Depends": "libgpg-error",
+      "Package": "libgcrypt",
+      "Pre-Depends": null,
+      "Version": "1.12.4"
+    },
+    "libgpg-error": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libgpg-error",
+      "Pre-Depends": null,
+      "Version": "1.61"
+    },
+    "libgraphite": {
+      "Architecture": "aarch64",
+      "Depends": "libc++",
+      "Package": "libgraphite",
+      "Pre-Depends": null,
+      "Version": "1.3.15"
+    },
+    "libiconv": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libiconv",
+      "Pre-Depends": null,
+      "Version": "1.19"
+    },
+    "libimagequant": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libimagequant",
+      "Pre-Depends": null,
+      "Version": "4.4.1"
+    },
+    "libjpeg-turbo": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libjpeg-turbo",
+      "Pre-Depends": null,
+      "Version": "3.2.0"
+    },
+    "liblz4": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "liblz4",
+      "Pre-Depends": null,
+      "Version": "1.10.0-1"
+    },
+    "liblzma": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "liblzma",
+      "Pre-Depends": null,
+      "Version": "5.8.4"
+    },
+    "liblzo": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "liblzo",
+      "Pre-Depends": null,
+      "Version": "2.10-5"
+    },
+    "libopenblas": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libopenblas",
+      "Pre-Depends": null,
+      "Version": "0.3.34"
+    },
+    "libpixman": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libpixman",
+      "Pre-Depends": null,
+      "Version": "0.46.4-1"
+    },
+    "libpng": {
+      "Architecture": "aarch64",
+      "Depends": "zlib",
+      "Package": "libpng",
+      "Pre-Depends": null,
+      "Version": "1.6.59"
+    },
+    "libprotobuf": {
+      "Architecture": "aarch64",
+      "Depends": "abseil-cpp, libc++, zlib",
+      "Package": "libprotobuf",
+      "Pre-Depends": null,
+      "Version": "2:36.2"
+    },
+    "libraqm": {
+      "Architecture": "aarch64",
+      "Depends": "freetype, harfbuzz, fribidi",
+      "Package": "libraqm",
+      "Pre-Depends": null,
+      "Version": "0.11.0"
+    },
+    "librav1e": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "librav1e",
+      "Pre-Depends": null,
+      "Version": "0.8.1"
+    },
+    "libre2": {
+      "Architecture": "aarch64",
+      "Depends": "abseil-cpp, libc++",
+      "Package": "libre2",
+      "Pre-Depends": null,
+      "Version": "2025-11-05-2"
+    },
+    "libsnappy": {
+      "Architecture": "aarch64",
+      "Depends": "libc++",
+      "Package": "libsnappy",
+      "Pre-Depends": null,
+      "Version": "1.3.1"
+    },
+    "libsqlite": {
+      "Architecture": "aarch64",
+      "Depends": "zlib",
+      "Package": "libsqlite",
+      "Pre-Depends": null,
+      "Version": "3.54.1"
+    },
+    "libtiff": {
+      "Architecture": "aarch64",
+      "Depends": "libc++, libjpeg-turbo, liblzma, zlib, zstd",
+      "Package": "libtiff",
+      "Pre-Depends": null,
+      "Version": "4.7.2"
+    },
+    "libwebp": {
+      "Architecture": "aarch64",
+      "Depends": "giflib, libjpeg-turbo, libpng, libtiff, zlib",
+      "Package": "libwebp",
+      "Pre-Depends": null,
+      "Version": "1.6.0-rc1-0"
+    },
+    "libx11": {
+      "Architecture": "aarch64",
+      "Depends": "libandroid-support, libxcb, xorgproto",
+      "Package": "libx11",
+      "Pre-Depends": null,
+      "Version": "1.8.14"
+    },
+    "libxau": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libxau",
+      "Pre-Depends": null,
+      "Version": "1.0.12-2"
+    },
+    "libxcb": {
+      "Architecture": "aarch64",
+      "Depends": "libxau, libxdmcp",
+      "Package": "libxcb",
+      "Pre-Depends": null,
+      "Version": "1.17.0-1"
+    },
+    "libxdmcp": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "libxdmcp",
+      "Pre-Depends": null,
+      "Version": "1.1.5-2"
+    },
+    "libxext": {
+      "Architecture": "aarch64",
+      "Depends": "libx11",
+      "Package": "libxext",
+      "Pre-Depends": null,
+      "Version": "1.3.7"
+    },
+    "libxml2": {
+      "Architecture": "aarch64",
+      "Depends": "libandroid-glob, libiconv, zlib",
+      "Package": "libxml2",
+      "Pre-Depends": null,
+      "Version": "2.15.4-1"
+    },
+    "libxrender": {
+      "Architecture": "aarch64",
+      "Depends": "libx11",
+      "Package": "libxrender",
+      "Pre-Depends": null,
+      "Version": "0.9.13"
+    },
+    "libxslt": {
+      "Architecture": "aarch64",
+      "Depends": "libgcrypt, libgpg-error, libxml2, libandroid-glob",
+      "Package": "libxslt",
+      "Pre-Depends": null,
+      "Version": "1.1.45-1"
+    },
+    "littlecms": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "littlecms",
+      "Pre-Depends": null,
+      "Version": "2.19.1"
+    },
+    "ncurses": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "ncurses",
+      "Pre-Depends": null,
+      "Version": "6.6.20260307+really6.5.20250830"
+    },
+    "ncurses-ui-libs": {
+      "Architecture": "aarch64",
+      "Depends": "ncurses (= 6.6.20260307+really6.5.20250830)",
+      "Package": "ncurses-ui-libs",
+      "Pre-Depends": null,
+      "Version": "6.6.20260307+really6.5.20250830"
+    },
+    "openjpeg": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "openjpeg",
+      "Pre-Depends": null,
+      "Version": "2.5.4"
+    },
+    "openssl": {
+      "Architecture": "aarch64",
+      "Depends": "ca-certificates, zlib",
+      "Package": "openssl",
+      "Pre-Depends": null,
+      "Version": "1:3.6.5"
+    },
+    "pcre2": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "pcre2",
+      "Pre-Depends": null,
+      "Version": "10.49"
+    },
+    "python": {
+      "Architecture": "aarch64",
+      "Depends": "gdbm, libandroid-posix-semaphore, libandroid-support, libbz2, libcrypt, libexpat, libffi, liblzma, libsqlite, ncurses, ncurses-ui-libs, openssl, readline, zlib, zstd",
+      "Package": "python",
+      "Pre-Depends": null,
+      "Version": "3.14.6-1"
+    },
+    "python-llvmlite": {
+      "Architecture": "aarch64",
+      "Depends": "libc++, libffi, python, python-pip",
+      "Package": "python-llvmlite",
+      "Pre-Depends": null,
+      "Version": "0.49.0-3"
+    },
+    "python-lxml": {
+      "Architecture": "aarch64",
+      "Depends": "libxml2, libxslt, python, python-pip",
+      "Package": "python-lxml",
+      "Pre-Depends": null,
+      "Version": "6.1.3"
+    },
+    "python-msgpack": {
+      "Architecture": "aarch64",
+      "Depends": "libc++, python",
+      "Package": "python-msgpack",
+      "Pre-Depends": null,
+      "Version": "1.2.3"
+    },
+    "python-numpy": {
+      "Architecture": "aarch64",
+      "Depends": "libc++, libopenblas, python",
+      "Package": "python-numpy",
+      "Pre-Depends": null,
+      "Version": "2.5.4"
+    },
+    "python-pillow": {
+      "Architecture": "aarch64",
+      "Depends": "freetype, libavif, libimagequant, libjpeg-turbo, libraqm, libtiff, libwebp, libxcb, littlecms, openjpeg, python, python-pip, zlib",
+      "Package": "python-pillow",
+      "Pre-Depends": null,
+      "Version": "12.3.0"
+    },
+    "python-pip": {
+      "Architecture": "all",
+      "Depends": "python (>= 3.11.1-1)",
+      "Package": "python-pip",
+      "Pre-Depends": null,
+      "Version": "26.2.1"
+    },
+    "python-psutil": {
+      "Architecture": "aarch64",
+      "Depends": "python, python-pip",
+      "Package": "python-psutil",
+      "Pre-Depends": null,
+      "Version": "7.2.2-2"
+    },
+    "python-pyarrow": {
+      "Architecture": "aarch64",
+      "Depends": "python, python-numpy, libarrow-cpp (= 26.0.0-2)",
+      "Package": "python-pyarrow",
+      "Pre-Depends": null,
+      "Version": "26.0.0-2"
+    },
+    "python-scipy": {
+      "Architecture": "aarch64",
+      "Depends": "libandroid-complex-math, libc++, libopenblas, python, python-numpy, python-pip",
+      "Package": "python-scipy",
+      "Pre-Depends": null,
+      "Version": "1.18.1-1"
+    },
+    "python-soxr": {
+      "Architecture": "aarch64",
+      "Depends": "python, python-numpy, python-pip, libc++, libsoxr",
+      "Package": "python-soxr",
+      "Pre-Depends": null,
+      "Version": "1.1.0-2"
+    },
+    "python-torch": {
+      "Architecture": "aarch64",
+      "Depends": "abseil-cpp, libandroid-execinfo, libc++, libopenblas, libprotobuf, python, python-numpy, python-pip",
+      "Package": "python-torch",
+      "Pre-Depends": null,
+      "Version": "2.14.1-2"
+    },
+    "python-torchaudio": {
+      "Architecture": "aarch64",
+      "Depends": "libc++, python, python-pip, python-torch, python-torchcodec",
+      "Package": "python-torchaudio",
+      "Pre-Depends": null,
+      "Version": "2.11.0-4"
+    },
+    "python-torchcodec": {
+      "Architecture": "aarch64",
+      "Depends": "ffmpeg, fmt, google-glog, libc++, libavif, libheif, libjpeg-turbo, libpng, libwebp, python, python-pip, python-torch, zlib",
+      "Package": "python-torchcodec",
+      "Pre-Depends": null,
+      "Version": "0.17.0-1"
+    },
+    "readline": {
+      "Architecture": "aarch64",
+      "Depends": "libandroid-support, ncurses",
+      "Package": "readline",
+      "Pre-Depends": null,
+      "Version": "8.3.6"
+    },
+    "resolv-conf": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "resolv-conf",
+      "Pre-Depends": null,
+      "Version": "1.3"
+    },
+    "svt-av1": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "svt-av1",
+      "Pre-Depends": null,
+      "Version": "4.2.0"
+    },
+    "thrift": {
+      "Architecture": "aarch64",
+      "Depends": "libc++, openssl",
+      "Package": "thrift",
+      "Pre-Depends": null,
+      "Version": "0.25.0"
+    },
+    "ttf-dejavu": {
+      "Architecture": "all",
+      "Depends": null,
+      "Package": "ttf-dejavu",
+      "Pre-Depends": null,
+      "Version": "2.37-8"
+    },
+    "utf8proc": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "utf8proc",
+      "Pre-Depends": null,
+      "Version": "2.12.0"
+    },
+    "xorg-util-macros": {
+      "Architecture": "all",
+      "Depends": null,
+      "Package": "xorg-util-macros",
+      "Pre-Depends": null,
+      "Version": "1.20.2"
+    },
+    "xorgproto": {
+      "Architecture": "all",
+      "Depends": "xorg-util-macros",
+      "Package": "xorgproto",
+      "Pre-Depends": null,
+      "Version": "2026.1"
+    },
+    "zlib": {
+      "Architecture": "aarch64",
+      "Depends": null,
+      "Package": "zlib",
+      "Pre-Depends": null,
+      "Version": "1.3.2"
+    },
+    "zstd": {
+      "Architecture": "aarch64",
+      "Depends": "liblzma, zlib",
+      "Package": "zstd",
+      "Pre-Depends": null,
+      "Version": "1.5.7-1"
+    }
+  },
+  "lock_sha256": "b20d35dc54da253578ffd499e0dc7a226c77b4f704b2601e37a22edb81fab8d4",
+  "metadata_modified": false,
+  "model_downloaded": false,
+  "original_files_before": {
+    "aarch64_elf_files": 34,
+    "installed_manifest_sha256": "f09b3cf2eda59d7f85916d73455e379c041b3201ef8ad72bb79f4344882b34ad",
+    "original_metadata_and_tags_preserved": true,
+    "regular_files": 893,
+    "status": "passed",
+    "symlinks": 1
+  },
+  "prepared_inputs": {
+    "additional_archive_bytes": 14043104,
+    "additional_packages": 18,
+    "closure_edges": 151,
+    "closure_packages": 78,
+    "compiler_installed": false,
+    "engine_installed": false,
+    "foundation_packages": 122,
+    "lock_sha256": "b20d35dc54da253578ffd499e0dc7a226c77b4f704b2601e37a22edb81fab8d4",
+    "metadata_modified": false,
+    "model_downloaded": false,
+    "native_execution": false,
+    "provenance_archives_required_natively": 84,
+    "published": false,
+    "roots": [
+      {
+        "bytes": 1053080,
+        "control": {
+          "Architecture": "aarch64",
+          "Depends": "libxml2, libxslt, python, python-pip",
+          "Package": "python-lxml",
+          "Pre-Depends": null,
+          "Version": "6.1.3"
+        },
+        "native_files": 7,
+        "package": "python-lxml",
+        "regular_files": 101,
+        "sha256": "f89558649586d55c813b30a379f7df44056ee0213fd028e18df095ec8d5c65ef",
+        "symlinks": 0
+      },
+      {
+        "bytes": 61724,
+        "control": {
+          "Architecture": "aarch64",
+          "Depends": "libc++, python",
+          "Package": "python-msgpack",
+          "Pre-Depends": null,
+          "Version": "1.2.3"
+        },
+        "native_files": 1,
+        "package": "python-msgpack",
+        "regular_files": 13,
+        "sha256": "74fab03e5b5beba74b137e931c35fdf03e02225853262b4c100cebd1e0b029b4",
+        "symlinks": 1
+      },
+      {
+        "bytes": 407220,
+        "control": {
+          "Architecture": "aarch64",
+          "Depends": "freetype, libavif, libimagequant, libjpeg-turbo, libraqm, libtiff, libwebp, libxcb, littlecms, openjpeg, python, python-pip, zlib",
+          "Package": "python-pillow",
+          "Pre-Depends": null,
+          "Version": "12.3.0"
+        },
+        "native_files": 8,
+        "package": "python-pillow",
+        "regular_files": 124,
+        "sha256": "3add75907c16921a32d2c6053a69086b25adcdf746269a0d2c62e712443e3073",
+        "symlinks": 0
+      },
+      {
+        "bytes": 82672,
+        "control": {
+          "Architecture": "aarch64",
+          "Depends": "python, python-pip",
+          "Package": "python-psutil",
+          "Pre-Depends": null,
+          "Version": "7.2.2-2"
+        },
+        "native_files": 1,
+        "package": "python-psutil",
+        "regular_files": 20,
+        "sha256": "61147cf1b656b58e61f0293d25ecde85ca1a20b25f8d57338d424b649cddbef0",
+        "symlinks": 0
+      },
+      {
+        "bytes": 3444216,
+        "control": {
+          "Architecture": "aarch64",
+          "Depends": "python, python-numpy, libarrow-cpp (= 26.0.0-2)",
+          "Package": "python-pyarrow",
+          "Pre-Depends": null,
+          "Version": "26.0.0-2"
+        },
+        "native_files": 17,
+        "package": "python-pyarrow",
+        "regular_files": 635,
+        "sha256": "d9cc369295b3e6eabd93a835cdc963bb1c37631136b6d9d665dd3cba9855b531",
+        "symlinks": 0
+      }
+    ],
+    "schema_version": 1,
+    "signed_index_authentication": "required natively; host hash binding only",
+    "status": "verified-inputs"
+  },
+  "production_admission_changed": false,
+  "published": false,
+  "requirements": {
+    "apt_distributions": 12,
+    "raw_pip_exit_code": 1,
+    "raw_pip_passed": false,
+    "sha256": "ac97b3ed066f8ef069cff8867d4cf7b0f24b54dac2e8806137782e6045f5ba43",
+    "status": "requirements-and-provenance-passed"
+  },
+  "runtime": {
+    "api_level": 24,
+    "cache_tag": "cpython-314",
+    "executable": "/data/data/com.termux/files/usr/bin/python",
+    "machine": "aarch64",
+    "prefix": "/data/data/com.termux/files/usr",
+    "sys_platform": "android",
+    "sysconfig_platform": "android-24-arm64_v8a",
+    "system": "Android",
+    "version": "3.14.6"
+  },
+  "schema_version": 1,
+  "scope": "Five APT extension prerequisites only",
+  "signed_index": {
+    "authority": "native APT configured Termux trust store",
+    "insecure_exceptions": false,
+    "matched_foundation_packages": 122,
+    "matched_provenance_archives": 84,
+    "snapshot": {
+      "InRelease": {
+        "bytes": 14016,
+        "sha256": "249dab3ab3da3993b2436d48c819506f9aa586f6985905d81a451e76f2de7901"
+      },
+      "Packages.gz": {
+        "bytes": 727968,
+        "sha256": "dba73c2f0caaa828b65f02ba0e56cac694ee7186999a442ae7858b4258c321b6"
+      }
+    },
+    "status": "passed",
+    "uncompressed": {
+      "bytes": 1867286,
+      "sha256": "95cf6e3b7cf347a81aef44e45199724b7a6cd21c29be7611cc1ac5ebaf2640e1"
+    },
+    "update": {
+      "argv": [
+        "/data/data/com.termux/files/usr/bin/apt-get",
+        "-o",
+        "Dir::Etc::sourcelist=/data/data/com.termux/files/usr/tmp/neutts-apt-extensions-gokdhrak/frozen.list",
+        "-o",
+        "Dir::Etc::sourceparts=-",
+        "-o",
+        "Dir::State::lists=/data/data/com.termux/files/usr/tmp/neutts-apt-extensions-gokdhrak/apt-lists",
+        "-o",
+        "Acquire::Languages=none",
+        "-o",
+        "Acquire::AllowInsecureRepositories=false",
+        "-o",
+        "Acquire::AllowDowngradeToInsecureRepositories=false",
+        "-o",
+        "Acquire::AllowWeakRepositories=false",
+        "-o",
+        "APT::Get::AllowUnauthenticated=false",
+        "-o",
+        "APT::Update::Error-Mode=any",
+        "update"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "stderr": {
+        "bytes": 0,
+        "file": "authenticated-frozen-index.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 845,
+        "file": "authenticated-frozen-index.stdout.log",
+        "sha256": "ab408dc8626969ca3d178dff8d585413a3fb627b32b279014ebbf56020c8cc3b"
+      },
+      "timed_out": false
+    }
+  },
+  "speech_synthesis_tested": false,
+  "status": "failed",
+  "supported_tags_modified": false
+}
