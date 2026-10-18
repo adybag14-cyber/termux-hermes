@@ -1,0 +1,117 @@
+warning: build_py: byte-compiling is disabled, skipping.
+
+/data/data/com.termux/files/usr/tmp/nonrust-native-bdgrutjc/sentencepiece-0.2.2/sentencepiece/src/builder.cc:54:15: warning: unused variable 'kMaxUnicode' [-Wunused-const-variable]
+   54 | constexpr int kMaxUnicode = 0x10FFFF;
+      |               ^~~~~~~~~~~
+/data/data/com.termux/files/usr/tmp/nonrust-native-bdgrutjc/sentencepiece-0.2.2/sentencepiece/src/builder.cc:60:29: warning: unused variable 'kDefaultNormalizerName' [-Wunused-const-variable]
+   60 | constexpr absl::string_view kDefaultNormalizerName = "nfkc";
+      |                             ^~~~~~~~~~~~~~~~~~~~~~
+2 warnings generated.
+/data/data/com.termux/files/usr/tmp/nonrust-native-bdgrutjc/sentencepiece-0.2.2/sentencepiece/src/sentencepiece_trainer.cc:256:16: warning: 'done' overrides a member function but is not marked 'override' [-Winconsistent-missing-override]
+  256 |   virtual bool done() const { return iter_ == end_; }
+      |                ^
+/data/data/com.termux/files/usr/tmp/nonrust-native-bdgrutjc/sentencepiece-0.2.2/sentencepiece/src/sentencepiece_trainer.h:56:30: note: overridden virtual function is here
+   56 |   [[nodiscard]] virtual bool done() const = 0;
+      |                              ^
+1 warning generated.
+clang++: warning: -Wl,-strip-all: 'linker' input unused [-Wunused-command-line-argument]
+In file included from src/sentencepiece/sentencepiece_pybind.cc:4:
+build/root/include/sentencepiece_processor.h:562:33: warning: 'SampleEncodeAndScore' is deprecated: WARNING: SampleEncodeAndScore is deprecated and will be removed. [-Wdeprecated-declarations]
+  562 |     DEFINE_SPP_DIRECT_FUNC_IMPL(SampleEncodeAndScore, _T, input, num_samples,
+      |                                 ^
+build/root/include/sentencepiece_processor.h:400:5: note: 'SampleEncodeAndScore' has been explicitly marked deprecated here
+  400 |   [[deprecated(
+      |     ^
+build/root/include/sentencepiece_processor.h:570:33: warning: 'SampleEncodeAndScore' is deprecated: WARNING: SampleEncodeAndScore is deprecated and will be removed. [-Wdeprecated-declarations]
+  570 |     DEFINE_SPP_DIRECT_FUNC_IMPL(SampleEncodeAndScore, _T, input, num_samples,
+      |                                 ^
+build/root/include/sentencepiece_processor.h:408:5: note: 'SampleEncodeAndScore' has been explicitly marked deprecated here
+  408 |   [[deprecated(
+      |     ^
+build/root/include/sentencepiece_processor.h:590:33: warning: 'Decode' is deprecated: WARNING: Decode with std::vector<> input is deprecated and will be removed. [-Wdeprecated-declarations]
+  590 |     DEFINE_SPP_DIRECT_FUNC_IMPL(Decode, std::string, pieces);
+      |                                 ^
+build/root/include/sentencepiece_processor.h:321:5: note: 'Decode' has been explicitly marked deprecated here
+  321 |   [[deprecated(
+      |     ^
+build/root/include/sentencepiece_processor.h:595:33: warning: 'Decode' is deprecated: WARNING: Decode with std::vector<> input is deprecated and will be removed. [-Wdeprecated-declarations]
+  595 |     DEFINE_SPP_DIRECT_FUNC_IMPL(Decode, std::string, pieces);
+      |                                 ^
+build/root/include/sentencepiece_processor.h:329:5: note: 'Decode' has been explicitly marked deprecated here
+  329 |   [[deprecated(
+      |     ^
+build/root/include/sentencepiece_processor.h:600:33: warning: 'Decode' is deprecated: WARNING: Decode with std::vector<> input is deprecated and will be removed. [-Wdeprecated-declarations]
+  600 |     DEFINE_SPP_DIRECT_FUNC_IMPL(Decode, std::string, ids);
+      |                                 ^
+build/root/include/sentencepiece_processor.h:337:5: note: 'Decode' has been explicitly marked deprecated here
+  337 |   [[deprecated(
+      |     ^
+build/root/include/sentencepiece_processor.h:605:33: warning: 'CalculateEntropy' is deprecated: WARNING: CalculateEntropy is deprecated and will be removed. [-Wdeprecated-declarations]
+  605 |     DEFINE_SPP_DIRECT_FUNC_IMPL(CalculateEntropy, float, text, alpha);
+      |                                 ^
+build/root/include/sentencepiece_processor.h:420:5: note: 'CalculateEntropy' has been explicitly marked deprecated here
+  420 |   [[deprecated("WARNING: CalculateEntropy is deprecated and will be removed.")]]
+      |     ^
+build/root/include/sentencepiece_processor.h:633:38: warning: 'SampleEncodeAndScore' is deprecated: WARNING: SampleEncodeAndScore is deprecated and will be removed. [-Wdeprecated-declarations]
+  633 |     DEFINE_SPP_SERIALIZED_PROTO_IMPL(SampleEncodeAndScore,
+      |                                      ^
+build/root/include/sentencepiece_processor.h:446:5: note: 'SampleEncodeAndScore' has been explicitly marked deprecated here
+  446 |   [[deprecated(
+      |     ^
+build/root/include/sentencepiece_processor.h:647:38: warning: 'Decode' is deprecated: WARNING: Decode with std::vector<> input is deprecated and will be removed. [-Wdeprecated-declarations]
+  647 |     DEFINE_SPP_SERIALIZED_PROTO_IMPL(Decode, ImmutableSentencePieceText,
+      |                                      ^
+build/root/include/sentencepiece_processor.h:463:5: note: 'Decode' has been explicitly marked deprecated here
+  463 |   [[deprecated(
+      |     ^
+build/root/include/sentencepiece_processor.h:653:38: warning: 'Decode' is deprecated: WARNING: Decode with std::vector<> input is deprecated and will be removed. [-Wdeprecated-declarations]
+  653 |     DEFINE_SPP_SERIALIZED_PROTO_IMPL(Decode, ImmutableSentencePieceText,
+      |                                      ^
+build/root/include/sentencepiece_processor.h:471:5: note: 'Decode' has been explicitly marked deprecated here
+  471 |   [[deprecated(
+      |     ^
+build/root/include/sentencepiece_processor.h:659:38: warning: 'Decode' is deprecated: WARNING: Decode with std::vector<> input is deprecated and will be removed. [-Wdeprecated-declarations]
+  659 |     DEFINE_SPP_SERIALIZED_PROTO_IMPL(Decode, ImmutableSentencePieceText, ids);
+      |                                      ^
+build/root/include/sentencepiece_processor.h:479:5: note: 'Decode' has been explicitly marked deprecated here
+  479 |   [[deprecated(
+      |     ^
+build/root/include/sentencepiece_processor.h:723:37: warning: 'Decode' is deprecated: WARNING: Decode with std::vector<> input is deprecated and will be removed. [-Wdeprecated-declarations]
+  723 |     DEFINE_SPP_IMMUTABLE_PROTO_IMPL(Decode, ImmutableSentencePieceText, ids);
+      |                                     ^
+build/root/include/sentencepiece_processor.h:479:5: note: 'Decode' has been explicitly marked deprecated here
+  479 |   [[deprecated(
+      |     ^
+src/sentencepiece/sentencepiece_pybind.cc:1401:35: warning: 'SampleEncodeAndScore' is deprecated: WARNING: SampleEncodeAndScore is deprecated and will be removed. [-Wdeprecated-declarations]
+ 1401 |                auto status = self.SampleEncodeAndScore(
+      |                                   ^
+build/root/include/sentencepiece_processor.h:408:5: note: 'SampleEncodeAndScore' has been explicitly marked deprecated here
+  408 |   [[deprecated(
+      |     ^
+src/sentencepiece/sentencepiece_pybind.cc:1420:35: warning: 'SampleEncodeAndScore' is deprecated: WARNING: SampleEncodeAndScore is deprecated and will be removed. [-Wdeprecated-declarations]
+ 1420 |                auto status = self.SampleEncodeAndScore(
+      |                                   ^
+build/root/include/sentencepiece_processor.h:400:5: note: 'SampleEncodeAndScore' has been explicitly marked deprecated here
+  400 |   [[deprecated(
+      |     ^
+src/sentencepiece/sentencepiece_pybind.cc:1448:25: warning: 'SampleEncodeAndScore' is deprecated: WARNING: SampleEncodeAndScore is deprecated and will be removed. [-Wdeprecated-declarations]
+ 1448 |                    self.SampleEncodeAndScore(in.value, num_samples, alpha, wor,
+      |                         ^
+build/root/include/sentencepiece_processor.h:446:5: note: 'SampleEncodeAndScore' has been explicitly marked deprecated here
+  446 |   [[deprecated(
+      |     ^
+src/sentencepiece/sentencepiece_pybind.cc:1565:35: warning: 'CalculateEntropy' is deprecated: WARNING: CalculateEntropy is deprecated and will be removed. [-Wdeprecated-declarations]
+ 1565 |                auto status = self.CalculateEntropy(in.value, alpha, &entropy);
+      |                                   ^
+build/root/include/sentencepiece_processor.h:420:5: note: 'CalculateEntropy' has been explicitly marked deprecated here
+  420 |   [[deprecated("WARNING: CalculateEntropy is deprecated and will be removed.")]]
+      |     ^
+src/sentencepiece/sentencepiece_pybind.cc:1578:37: warning: 'mutable_normalizer_spec' is deprecated: WARNING: This method is deprecated. It mutates the underlying model and may cause race conditions if the model is shared (using shared_ptr<>) with other users. [-Wdeprecated-declarations]
+ 1578 |                    key, value, self.mutable_normalizer_spec());
+      |                                     ^
+build/root/include/sentencepiece_processor.h:825:19: note: 'mutable_normalizer_spec' has been explicitly marked deprecated here
+  825 |   [[nodiscard]] [[deprecated(
+      |                   ^
+16 warnings generated.
+warning: install_lib: byte-compiling is disabled, skipping.
+

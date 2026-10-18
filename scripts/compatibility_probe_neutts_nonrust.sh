@@ -33,6 +33,7 @@ names = (
     "scripts/compatibility_probe_neutts_nonrust.sh", "scripts/compatibility_probe_neutts_nonrust.py",
     "scripts/prepare_neutts_nonrust_runtime.py", "scripts/neutts_nonrust_runtime_lock.json",
     "scripts/neutts_nonrust_operations.py", "patches/next-stable/sentencepiece-bounded-build.patch",
+    "patches/next-stable/scikit-learn-selected-python.patch",
     "scripts/compatibility_probe_neutts.sh", "scripts/compatibility_probe_neutts.py",
     "scripts/prepare_neutts_core_python.py", "scripts/neutts_core_python_lock.json",
     "scripts/validate_neutts_apt_python.py", "scripts/neutts_apt_python_metadata.json",
@@ -118,15 +119,15 @@ stage=exact-archive-download
 import hashlib, importlib.util, pathlib, sys
 scripts, inputs = map(pathlib.Path, sys.argv[1:3])
 path = scripts / "prepare_neutts_nonrust_runtime.py"
-if hashlib.sha256(path.read_bytes()).hexdigest() != "7712d2aec739ae62b226cb0f1b9d868a12fdb046448d4cb1848505b495258fbe":
+if hashlib.sha256(path.read_bytes()).hexdigest() != "6540cae859c390bdceed18aac315bf27559425262935d3e015ac99393bddc047":
     raise SystemExit("Reviewed non-Rust input verifier changed")
 spec = importlib.util.spec_from_file_location("_nonrust_shell_prepare", path)
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 lock, receipt = module.verify_inputs(inputs)
-if len(lock["build_apt"]["packages"]) != 51:
+if len(module.retained_apt_packages(lock)) != 52:
     raise SystemExit("Retained archive scope differs")
-print("NONRUST_EXACT_INPUTS_VERIFIED: six sources, fifteen wheels, fifty-one APT pins")
+print("NONRUST_EXACT_INPUTS_VERIFIED: six sources, fifteen wheels, fifty-one compiler pins plus one inherited runtime archive")
 PY_VERIFY
 mkdir -p "$work/archives/partial"
 archive_count=0
@@ -142,7 +143,7 @@ while IFS=$'\t' read -r name version arch sha bytes archive_path; do
   printf '%s  %s\n' "$sha" "$destination" | sha256sum --check --status
   archive_count=$((archive_count + 1))
 done < "$out/nonrust-inputs/build-apt-closure.tsv"
-[[ "$archive_count" == 51 ]]
+[[ "$archive_count" == 52 ]]
 stage=independent-native-components
 "$PREFIX/bin/python" -I -B /probes/scripts/compatibility_probe_neutts_nonrust.py \
   --inputs "$out/nonrust-inputs" --apt-archives "$work/archives" \

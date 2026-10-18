@@ -1,0 +1,125 @@
+{
+  "backend_receipt_sha256": "f55dd1f8bbe91ba170e3086c0ab498a28eb72322f6ff5ffe0873d6840d1a727c",
+  "build_process": {
+    "command": [
+      "/data/data/com.termux/files/usr/tmp/nonrust-native-bdgrutjc/build-venv/bin/python",
+      "-I",
+      "-B",
+      "/probes/scripts/compatibility_probe_neutts_nonrust.py",
+      "--phase",
+      "build",
+      "--inputs",
+      "/out/nonrust-inputs",
+      "--out",
+      "/out/nonrust-components/sentencepiece",
+      "--source-name",
+      "sentencepiece",
+      "--source-root",
+      "/data/data/com.termux/files/usr/tmp/nonrust-native-bdgrutjc/sentencepiece-0.2.2",
+      "--wheel-dir",
+      "/out/nonrust-components/sentencepiece/wheels",
+      "--environment-manifest",
+      "/out/nonrust-components/build-environment/build-installed-closure.json"
+    ],
+    "exit_code": 0,
+    "stderr_sha256": "1bd4836e4affab3dfdad9f6840a133bb66d119e2759a56ddac2587fc323e0c32",
+    "stdout_sha256": "5136f3c7a133ed087310082635bb835ccc06cac1024c7b71dcbc16b282c41efe"
+  },
+  "component": "sentencepiece",
+  "model_downloaded": false,
+  "production_admission_changed": false,
+  "release_output": false,
+  "runtime": {
+    "active_edge_count": 0,
+    "actual_runtime_distribution_count": 1,
+    "copied_apt_payloads": [],
+    "process": {
+      "command": [
+        "/data/data/com.termux/files/usr/tmp/nonrust-native-bdgrutjc/runtime-sentencepiece/bin/python",
+        "-I",
+        "-B",
+        "/probes/scripts/compatibility_probe_neutts_nonrust.py",
+        "--phase",
+        "runtime",
+        "--inputs",
+        "/out/nonrust-inputs",
+        "--out",
+        "/out/nonrust-components/sentencepiece",
+        "--apt-archives",
+        "/data/data/com.termux/files/usr/tmp/neutts-nonrust.W5kwiJ/archives",
+        "--source-name",
+        "sentencepiece",
+        "--environment-manifest",
+        "/out/nonrust-components/sentencepiece/runtime-installed-closure.json",
+        "--image-receipt",
+        "/out/NONRUST-PROBE-INPUTS.json"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "ba46a3aeaeade2a6b3eb06ef5061b8003b805440e6d6e10732da666ffcefb0e5",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw_pip": {
+      "authority": "copied file manifests and exact APT provenance are separate required gates",
+      "elapsed_seconds": 0.47,
+      "exit_code": 0,
+      "log": "RAW-PIP-CHECK.log",
+      "original_apt_tag_diagnostics": [],
+      "pip_check_passed": true,
+      "requirements_have_no_missing_or_conflicting_dependencies": true,
+      "sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09",
+      "text": "No broken requirements found.\n"
+    },
+    "receipt": "RUNTIME-OPERATIONS-RESULT.json",
+    "receipt_sha256": "dd4b49fba1da4b30443b0f4ff3e8a16a0a519bc94f6d1c66124c0c9e4909782d",
+    "status": "passed"
+  },
+  "schema_version": 1,
+  "source_archive_sha256": "3d2b5e824b5622038dc7b490897efe05ebbbb9e7350fc142f3ecc8789ef9bdf6",
+  "stage": "complete",
+  "status": "passed",
+  "wheel": {
+    "artifact": {
+      "bytes": 1281830,
+      "filename": "sentencepiece-0.2.2-cp314-cp314-android_24_arm64_v8a.whl",
+      "sha256": "1c97ff35851583d64d6e89eb0dc6758f3db702fa817501e5d1f6ab7986e8670c"
+    },
+    "base_requires_dist": [],
+    "name": "sentencepiece",
+    "native_members": [
+      {
+        "bytes": 1868144,
+        "member": "sentencepiece/_sentencepiece.cpython-314-aarch64-linux-android.so",
+        "sha256": "8cc0b619cc7813276d537edae2c097986b1152b1d537e375546899b2f3057750"
+      }
+    ],
+    "requires_dist": [
+      "numpy; extra == \"numpy\"",
+      "protobuf; extra == \"protobuf\"",
+      "pytest; extra == \"test\"",
+      "numpy; extra == \"test\"",
+      "protobuf; extra == \"test\""
+    ],
+    "requires_python": ">=3.9",
+    "version": "0.2.2",
+    "wheel": {
+      "declared_requires_dist_count": 5,
+      "declared_requires_dist_sha256": "9fe1090c9f71df783a06b441837bb34da04581362fac735703886b5b30f798af",
+      "entry_count": 16,
+      "file_count": 16,
+      "max_member_bytes": 1868144,
+      "members_sha256": "cd53680971b060fdbf5b8501100438d92c766c46205244191103dacbcabe6c4b",
+      "metadata_member": "sentencepiece-0.2.2.dist-info/METADATA",
+      "metadata_sha256": "bb49c79797fff1b8f3048efd4849d86dce4adbe26f7f3f0a5b37239a59d88ee8",
+      "record_member": "sentencepiece-0.2.2.dist-info/RECORD",
+      "record_sha256": "1a3bbeea1b0ea3ff45e2ab575487ddab217860487d6da960cfe3e1dea6b8ae85",
+      "root_is_purelib": false,
+      "tags": [
+        "cp314-cp314-android_24_arm64_v8a"
+      ],
+      "uncompressed_bytes": 3018736,
+      "wheel_member": "sentencepiece-0.2.2.dist-info/WHEEL",
+      "wheel_sha256": "5de0b43b62895bb27799e61cf7cd82ddd493c1ac51e4d63c78e92a98e7a6ce9b"
+    },
+    "wheel_path": "/out/nonrust-components/sentencepiece/wheels/sentencepiece-0.2.2-cp314-cp314-android_24_arm64_v8a.whl"
+  }
+}

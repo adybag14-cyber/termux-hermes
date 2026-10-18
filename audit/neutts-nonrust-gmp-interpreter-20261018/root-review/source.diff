@@ -1,0 +1,471 @@
+diff --git a/.github/workflows/neutts-nonrust-components.yml b/.github/workflows/neutts-nonrust-components.yml
+index e2043f8..29c095b 100644
+--- a/.github/workflows/neutts-nonrust-components.yml
++++ b/.github/workflows/neutts-nonrust-components.yml
+@@ -12,6 +12,7 @@ on:
+       - 'scripts/neutts_nonrust_runtime_lock.json'
+       - 'scripts/neutts_nonrust_operations.py'
+       - 'patches/next-stable/sentencepiece-bounded-build.patch'
++      - 'patches/next-stable/scikit-learn-selected-python.patch'
+       - 'tests/test_neutts_nonrust_preparation.py'
+       - 'tests/fixtures/neutts_nonrust/**'
+ 
+diff --git a/scripts/compatibility_probe_neutts_nonrust.py b/scripts/compatibility_probe_neutts_nonrust.py
+index 0269f16..bbf6c5b 100644
+--- a/scripts/compatibility_probe_neutts_nonrust.py
++++ b/scripts/compatibility_probe_neutts_nonrust.py
+@@ -36,7 +36,7 @@ import zipfile
+ 
+ PREFIX = Path("/data/data/com.termux/files/usr")
+ SCRIPT_DIR = Path(__file__).resolve().parent
+-PREPARER_SHA256 = "7712d2aec739ae62b226cb0f1b9d868a12fdb046448d4cb1848505b495258fbe"
++PREPARER_SHA256 = "6540cae859c390bdceed18aac315bf27559425262935d3e015ac99393bddc047"
+ COMPONENT_HELPER_SHA256 = "6387ecead23b7777e879588d7e76bd4c8d462de5574de1d77092053efc596211"
+ APT_HELPER_SHA256 = "7c051b0143675594aadd52f9a0b66ec71e6950e9953feef3f773acceafcb0a29"
+ OPERATIONS_SHA256 = "ce18cd98cdba38695b26fe36958e7621812a54601522acce1f9734451f55e368"
+@@ -132,6 +132,65 @@ def native_runtime(common):
+     return result
+ 
+ 
++
++def retained_apt_packages(lock):
++    prep = module_at("_nonrust_retained_archive_rules",
++                     SCRIPT_DIR / "prepare_neutts_nonrust_runtime.py", PREPARER_SHA256)
++    return prep.retained_apt_packages(lock)
++
++
++def verify_inherited_runtime_apt(args, lock, common, apt):
++    """Bind an unchanged image library to its signed archive without installing it."""
++    retained_apt_packages(lock)
++    origin = lock["runtime_apt_provenance"]
++    require(origin["native_image"] == lock["platform_runtime"]["native_image"],
++            "Inherited runtime image provenance differs")
++    pins = {pin["name"]: pin for pin in origin["packages"]}
++    expected = {name: {"version": pin["version"], "architecture": pin["architecture"],
++                       "status": "installed"} for name, pin in pins.items()}
++    installed = common.package_snapshot(sorted(pins))
++    require(installed == expected, "Inherited runtime package version differs")
++    baseline = next(row for row in origin["provenance"]["package_inventories"]
++                    if row["path"] == "NEUTTS-BASE-PACKAGES.tsv")
++    baseline_path = args.foundation_receipt.parent / baseline["path"]
++    require(baseline_path.stat().st_size == baseline["bytes"]
++            and sha(baseline_path) == baseline["sha256"],
++            "Same-run base package inventory differs from the pinned image")
++    lines = baseline_path.read_text().splitlines()
++    require(lines.count(baseline["matching_row"]) == 1,
++            "Inherited runtime is absent from the same-run base inventory")
++    files = origin["files"]
++    require(len(files) == 1 and files[0]["package"] == "libgmp",
++            "Unreviewed inherited runtime library set")
++    wanted = {row["path"] for row in files}
++    owners = apt.collect_owners(wanted)
++    records = []
++    for row in files:
++        path = Path(row["path"])
++        require(path.parent == PREFIX / "lib" and path.name == "libgmp.so"
++                and path.resolve() == path.absolute() and stat.S_ISREG(path.lstat().st_mode),
++                "Inherited runtime library is not an exact regular path")
++        pin = pins[row["package"]]
++        members = common.ar_data_members(common.archive_path(args.apt_archives, pin), pin, {row["path"]})
++        require(set(members) == {row["path"]}, "Incomplete inherited runtime archive member")
++        raw = members[row["path"]]
++        require(len(raw) == row["bytes"] and hashlib.sha256(raw).hexdigest() == row["sha256"]
++                and path.stat().st_size == row["bytes"] and path.read_bytes() == raw,
++                "Inherited runtime library differs from its signed archive")
++        require(owners.get(row["path"]) == [row["package"]],
++                "Inherited runtime library owner differs")
++        details = common.elf(path, dynamic=True)
++        require(details["class"] == row["elf_class"] == 64
++                and details["machine"] == row["machine"] == 183
++                and details["endianness"] == row["endianness"] == "little",
++                "Inherited runtime library ABI differs")
++        records.append({"package": row["package"], "package_version": pin["version"],
++                        "archive_sha256": pin["sha256"], **details})
++    return {"status": "verified-already-installed", "packages": installed, "members": records,
++            "base_inventory": str(baseline_path), "base_inventory_sha256": sha(baseline_path),
++            "installed_or_upgraded": False, "additional_retained_archives": 1}
++
++
+ def snapshot_metadata(snapshot, lock):
+     frozen = {p["filename"]: p for p in lock["build_apt"]["snapshot"]}
+     for filename, pin in frozen.items():
+@@ -164,7 +223,7 @@ def snapshot_metadata(snapshot, lock):
+             key = (fields["Package"], fields["Version"], fields["Architecture"], fields["Filename"])
+             require(key not in records, "Duplicate target APT package identity")
+             records[key] = fields
+-    for pin in lock["build_apt"]["packages"]:
++    for pin in retained_apt_packages(lock):
+         row = records.get((pin["name"], pin["version"], pin["architecture"], pin["filename"]))
+         require(row is not None and (row["Version"], row["Architecture"], row["Filename"],
+                 row["SHA256"], int(row["Size"])) == (pin["version"], pin["architecture"],
+@@ -208,11 +267,12 @@ def signed_snapshot(args, lock, common, work):
+                      "inrelease_sha256": frozen["InRelease"]["sha256"],
+                      "packages_gz_sha256": frozen["Packages.gz"]["sha256"],
+                      "packages_uncompressed_sha256": hashlib.sha256(packages_raw).hexdigest(),
+-                     "matched_archives": 51}
++                     "matched_archives": 52, "compiler_package_count": 51,
++                     "inherited_runtime_verification_only": ["libgmp"]}
+ 
+ 
+ def verify_archive_set(args, lock, common):
+-    packages = lock["build_apt"]["packages"]
++    packages = retained_apt_packages(lock)
+     names, rows = set(), []
+     for pin in packages:
+         path = common.archive_path(args.apt_archives, pin)
+@@ -222,8 +282,8 @@ def verify_archive_set(args, lock, common):
+         names.add(path.name)
+         rows.append({"name": pin["name"], "version": pin["version"],
+                      "path": str(path), "bytes": pin["bytes"], "sha256": pin["sha256"]})
+-    require(names == {p.name for p in args.apt_archives.glob("*.deb")} and len(names) == 51,
+-            "Expected exactly 51 retained APT archives")
++    require(names == {p.name for p in args.apt_archives.glob("*.deb")} and len(names) == 52,
++            "Expected exactly 52 retained APT archives")
+     return rows
+ 
+ 
+@@ -838,6 +898,9 @@ def verify_native_mappings(manifest, prep, common, apt, args, lock):
+     all_pins, _ = common.all_apt_pins(lock, prep.base_helper())
+     for pin in lock["build_apt"]["additional_to_141"]:
+         all_pins[pin["name"]] = pin
++    for pin in lock["runtime_apt_provenance"]["packages"]:
++        require(pin["name"] not in all_pins, "Inherited runtime provenance overwrote an existing APT pin")
++        all_pins[pin["name"]] = pin
+     apt_mappings = common.verify_mapped_apt_libraries(args.apt_archives, all_pins, apt)
+     return {"status": "passed", "actually_mapped_extensions": records, "apt": apt_mappings,
+             "image_platform": image_mappings, "diagnostic": "NATIVE-MAPPINGS.json",
+@@ -931,6 +994,7 @@ def run(args, lock, prep, common, apt):
+             work = Path(temporary)
+             options, report["signed_snapshot"] = signed_snapshot(args, lock, common, work)
+             report["toolchain_install"] = install_toolchain(args, lock, common, options)
++            report["inherited_runtime_provenance"] = verify_inherited_runtime_apt(args, lock, common, apt)
+             report["native_build_files"] = verify_build_files(args, lock, common, apt)
+             _, original_native = common.all_apt_pins(lock, prep.base_helper())
+             report["original_compiler_identity"] = common.verify_toolchain(args.apt_archives, original_native)
+diff --git a/scripts/compatibility_probe_neutts_nonrust.sh b/scripts/compatibility_probe_neutts_nonrust.sh
+index c8c1089..089dec0 100644
+--- a/scripts/compatibility_probe_neutts_nonrust.sh
++++ b/scripts/compatibility_probe_neutts_nonrust.sh
+@@ -33,6 +33,7 @@ names = (
+     "scripts/compatibility_probe_neutts_nonrust.sh", "scripts/compatibility_probe_neutts_nonrust.py",
+     "scripts/prepare_neutts_nonrust_runtime.py", "scripts/neutts_nonrust_runtime_lock.json",
+     "scripts/neutts_nonrust_operations.py", "patches/next-stable/sentencepiece-bounded-build.patch",
++    "patches/next-stable/scikit-learn-selected-python.patch",
+     "scripts/compatibility_probe_neutts.sh", "scripts/compatibility_probe_neutts.py",
+     "scripts/prepare_neutts_core_python.py", "scripts/neutts_core_python_lock.json",
+     "scripts/validate_neutts_apt_python.py", "scripts/neutts_apt_python_metadata.json",
+@@ -118,15 +119,15 @@ stage=exact-archive-download
+ import hashlib, importlib.util, pathlib, sys
+ scripts, inputs = map(pathlib.Path, sys.argv[1:3])
+ path = scripts / "prepare_neutts_nonrust_runtime.py"
+-if hashlib.sha256(path.read_bytes()).hexdigest() != "7712d2aec739ae62b226cb0f1b9d868a12fdb046448d4cb1848505b495258fbe":
++if hashlib.sha256(path.read_bytes()).hexdigest() != "6540cae859c390bdceed18aac315bf27559425262935d3e015ac99393bddc047":
+     raise SystemExit("Reviewed non-Rust input verifier changed")
+ spec = importlib.util.spec_from_file_location("_nonrust_shell_prepare", path)
+ module = importlib.util.module_from_spec(spec)
+ spec.loader.exec_module(module)
+ lock, receipt = module.verify_inputs(inputs)
+-if len(lock["build_apt"]["packages"]) != 51:
++if len(module.retained_apt_packages(lock)) != 52:
+     raise SystemExit("Retained archive scope differs")
+-print("NONRUST_EXACT_INPUTS_VERIFIED: six sources, fifteen wheels, fifty-one APT pins")
++print("NONRUST_EXACT_INPUTS_VERIFIED: six sources, fifteen wheels, fifty-one compiler pins plus one inherited runtime archive")
+ PY_VERIFY
+ mkdir -p "$work/archives/partial"
+ archive_count=0
+@@ -142,7 +143,7 @@ while IFS=$'\t' read -r name version arch sha bytes archive_path; do
+   printf '%s  %s\n' "$sha" "$destination" | sha256sum --check --status
+   archive_count=$((archive_count + 1))
+ done < "$out/nonrust-inputs/build-apt-closure.tsv"
+-[[ "$archive_count" == 51 ]]
++[[ "$archive_count" == 52 ]]
+ stage=independent-native-components
+ "$PREFIX/bin/python" -I -B /probes/scripts/compatibility_probe_neutts_nonrust.py \
+   --inputs "$out/nonrust-inputs" --apt-archives "$work/archives" \
+diff --git a/scripts/neutts_nonrust_runtime_lock.json b/scripts/neutts_nonrust_runtime_lock.json
+index 46a35c0..1c87140 100644
+--- a/scripts/neutts_nonrust_runtime_lock.json
++++ b/scripts/neutts_nonrust_runtime_lock.json
+@@ -19512,6 +19512,91 @@
+       "scope": "The exact image-owned AOSP files mapped by every passed foundation case; no new APT package or arbitrary directory admission."
+     }
+   },
++  "runtime_apt_provenance": {
++    "additional_retained_bytes": 328368,
++    "dependencies": [
++      {
++        "already_in_build_apt": true,
++        "from": "libgmp",
++        "requirement": "libc++",
++        "to": "libc++"
++      }
++    ],
++    "files": [
++      {
++        "bytes": 402272,
++        "elf_class": 64,
++        "endianness": "little",
++        "machine": 183,
++        "package": "libgmp",
++        "path": "/data/data/com.termux/files/usr/lib/libgmp.so",
++        "sha256": "d3a7002e8fb504301bc12278260e36eae34c81d15cf8afe72cf4a769832b6f92"
++      }
++    ],
++    "installed_or_upgraded_by_this_gate": false,
++    "mode": "verify-already-installed",
++    "native_image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
++    "package_count": 1,
++    "packages": [
++      {
++        "architecture": "aarch64",
++        "bytes": 328368,
++        "depends": "libc++",
++        "filename": "pool/main/libg/libgmp/libgmp_6.3.0-2_aarch64.deb",
++        "name": "libgmp",
++        "pre_depends": "",
++        "retained_for_provenance_only": true,
++        "sha256": "5a3c1325638946ca212ddcb89bffb2c4459b4c90757d6e69f820e176534037fa",
++        "version": "6.3.0-2"
++      }
++    ],
++    "provenance": {
++      "archive_verification": {
++        "bytes": 1009,
++        "path": "GMP-ARCHIVE-VERIFIED.json",
++        "sha256": "bb7a575f07b5015a3d4ea4d934f10100995b8eb595afd7ec9d9055a2d00eb2db"
++      },
++      "artifact_bytes": 86752851,
++      "artifact_id": "12118719834",
++      "artifact_sha256": "ededd0b79ccff557a7122d9fb744c8523213090cc2584f18426013ea4e2dfdbc",
++      "head_sha": "c53e750753eff6a1d7d533b1958d7ce1abb03fc9",
++      "package_inventories": [
++        {
++          "bytes": 1471,
++          "matching_row": "libgmp\t6.3.0-2",
++          "path": "NEUTTS-BASE-PACKAGES.tsv",
++          "sha256": "78ff2592d1d13be57ae34035e67f41de78677af37644cea50622877b590c6046"
++        },
++        {
++          "bytes": 4804,
++          "matching_row": "libgmp\t6.3.0-2\taarch64",
++          "path": "NEUTTS-INSTALLED-PACKAGES.tsv",
++          "sha256": "40c4104a1cc044bd3f5297deb160e0f952208afe1e383f1b5b8fa3b441956bd3"
++        },
++        {
++          "bytes": 1448,
++          "matching_row": "libgmp\t6.3.0-2",
++          "path": "NEUTTS-UPGRADED-BASE-PACKAGES.tsv",
++          "sha256": "132cb4a2c2714a6c97f61d2393ac17dd5f11edaf16eaaf1dbce3527972d076aa"
++        }
++      ],
++      "run_id": "39081270494",
++      "snapshot": [
++        {
++          "bytes": 14016,
++          "filename": "InRelease",
++          "sha256": "249dab3ab3da3993b2436d48c819506f9aa586f6985905d81a451e76f2de7901"
++        },
++        {
++          "bytes": 727968,
++          "filename": "Packages.gz",
++          "sha256": "dba73c2f0caaa828b65f02ba0e56cac694ee7186999a442ae7858b4258c321b6"
++        }
++      ]
++    },
++    "python_dependencies_changed": false,
++    "retained_archive_count": 52
++  },
+   "schema_version": 1,
+   "scope": "Preparation-only six native Python component experiments; complete fourteen-node runtime subset",
+   "sources": [
+@@ -63550,6 +63635,31 @@
+         }
+       ],
+       "name": "scikit-learn",
++      "patch": {
++        "bytes": 771,
++        "filename": "scikit-learn-selected-python.patch",
++        "files": [
++          {
++            "after_bytes": 1645,
++            "after_sha256": "b8dc713e436ff8917d695e3638ca5d25a48b7863bf017e9191483b076dd89983",
++            "before_bytes": 1623,
++            "before_sha256": "83b8fb8f2861beaa42eaae6b7691a546a081ee42b5e41642e942761e8299931c",
++            "edits": [
++              {
++                "new": "version: run_command(find_program('python'), 'sklearn/_build_utils/version.py', check: true).stdout().strip(),",
++                "old": "version: run_command('sklearn/_build_utils/version.py', check: true).stdout().strip(),"
++              },
++              {
++                "new": "py = import('python').find_installation(pure: false)\ntempita = [py, files('sklearn/_build_utils/tempita.py')]",
++                "old": "tempita = find_program('sklearn/_build_utils/tempita.py')\n\npy = import('python').find_installation(pure: false)"
++              }
++            ],
++            "path": "meson.build"
++          }
++        ],
++        "path": "patches/next-stable/scikit-learn-selected-python.patch",
++        "sha256": "b8cccae95d93d8324409d71d5162bdeacba5773e0e2bcc4123804282d5cd24a2"
++      },
+       "prepared_files": [
+         {
+           "bytes": 965,
+@@ -67248,10 +67358,10 @@
+           "sha256": "16f1c06ff30d5ed8c55307bfac897d610ffc85862df60aa77e82ac9d9fbbda99"
+         },
+         {
+-          "bytes": 1623,
++          "bytes": 1645,
+           "mode": "100644",
+           "path": "meson.build",
+-          "sha256": "83b8fb8f2861beaa42eaae6b7691a546a081ee42b5e41642e942761e8299931c"
++          "sha256": "b8dc713e436ff8917d695e3638ca5d25a48b7863bf017e9191483b076dd89983"
+         },
+         {
+           "bytes": 13834,
+diff --git a/scripts/prepare_neutts_nonrust_runtime.py b/scripts/prepare_neutts_nonrust_runtime.py
+index 46e52c1..77b96ce 100644
+--- a/scripts/prepare_neutts_nonrust_runtime.py
++++ b/scripts/prepare_neutts_nonrust_runtime.py
+@@ -33,7 +33,7 @@ import zipfile
+ SCRIPT_DIR = Path(__file__).resolve().parent
+ LOCK_FILENAME = "neutts_nonrust_runtime_lock.json"
+ RECEIPT_FILENAME = "NONRUST-PREPARED-INPUTS.json"
+-LOCK_SHA256 = "a97d01c1b9c491e0f3e62907df1739a73dab23c4dd80c381b6a445dfa4c0b8a5"
++LOCK_SHA256 = "d463c0f4ad5f3d1582ad66fc4397bda877e21107ac377b13d38db2157182d7f0"
+ BASE_PREPARER_SHA256 = "b6a358f87fb675f00a9e125b821d94ae81d9341cb9b4ab9fe2953ea1697318eb"
+ EXPECTED_SOURCES = frozenset(("audioop-lts", "pandas", "pycryptodomex", "pyyaml",
+                               "scikit-learn", "sentencepiece"))
+@@ -309,6 +309,25 @@ def tsv(packages):
+                               str(p["bytes"]), p["filename"])) + "\n" for p in packages).encode()
+ 
+ 
++
++def retained_apt_packages(lock):
++    """Keep inherited runtime provenance separate from the compiler install set."""
++    build = lock["build_apt"]["packages"]
++    provenance = lock["runtime_apt_provenance"]
++    runtime = provenance["packages"]
++    require(provenance["mode"] == "verify-already-installed"
++            and provenance["installed_or_upgraded_by_this_gate"] is False
++            and provenance["package_count"] == len(runtime) == 1
++            and runtime[0]["name"] == "libgmp"
++            and runtime[0].get("retained_for_provenance_only") is True,
++            "Unreviewed inherited runtime APT provenance scope")
++    require(len(build) == 51 and len({p["name"] for p in build + runtime}) == 52
++            and provenance["retained_archive_count"] == 52
++            and {e["to"] for e in provenance["dependencies"]} <= {p["name"] for p in build},
++            "Retained APT archives overlap or omit a dependency")
++    return sorted(build + runtime, key=lambda pin: pin["name"])
++
++
+ def load_lock(path):
+     raw = read_regular(path, 8_000_000)
+     require(sha(raw) == LOCK_SHA256, "Non-Rust preparation lock changed")
+@@ -322,6 +341,9 @@ def load_lock(path):
+     require(len(lock["build_apt"]["packages"]) == 51
+             and {p["name"] for p in lock["build_apt"]["additional_to_141"]} == {"libyaml", "patchelf"}
+             and lock["build"]["jobs"] == 2, "Unreviewed native dependency/resource scope")
++    retained_apt_packages(lock)
++    require({s["name"] for s in lock["sources"] if "patch" in s}
++            == {"sentencepiece", "scikit-learn"}, "Unreviewed source patch set")
+     return lock, raw
+ 
+ 
+@@ -331,7 +353,7 @@ def verify_inputs(directory):
+     expected_top = {LOCK_FILENAME, RECEIPT_FILENAME, "main-bundled-wheels.json", "sources",
+                     "archives", "wheels", "snapshot", "build-apt-closure.tsv",
+                     "build-requirements.txt", "runtime-prebuilt-requirements.txt",
+-                    "sentencepiece-bounded-build.patch"}
++                    "sentencepiece-bounded-build.patch", "scikit-learn-selected-python.patch"}
+     require({p.name for p in directory.iterdir()} == expected_top, "Prepared input layout changed")
+     base.verify_catalog(directory / "main-bundled-wheels.json", lock)
+     packages = lock["packages"] + lock["build_packages"]
+@@ -346,12 +368,12 @@ def verify_inputs(directory):
+     for source in lock["sources"]:
+         base.verified_bytes(directory / "archives" / source["artifact"]["filename"], source["artifact"])
+         verify_tree(directory / "sources" / source["archive_root"], source["prepared_files"])
+-    patch = next(s["patch"] for s in lock["sources"] if "patch" in s)
+-    require(sha(read_regular(directory / patch["filename"], patch["bytes"])) == patch["sha256"],
+-            "Prepared patch changed")
++    for patch in (s["patch"] for s in lock["sources"] if "patch" in s):
++        require(sha(read_regular(directory / patch["filename"], patch["bytes"])) == patch["sha256"],
++                "Prepared patch changed")
+     for filename, expected in (("build-requirements.txt", base.requirement_text(lock["build_packages"])),
+                                ("runtime-prebuilt-requirements.txt", base.requirement_text(lock["packages"])),
+-                               ("build-apt-closure.tsv", tsv(lock["build_apt"]["packages"]))):
++                               ("build-apt-closure.tsv", tsv(retained_apt_packages(lock)))):
+         require(read_regular(directory / filename, len(expected)) == expected, "Prepared selection file changed")
+     require({p.name for p in (directory / "snapshot").iterdir()}
+             == {p["filename"] for p in lock["build_apt"]["snapshot"]}, "Snapshot file set changed")
+@@ -364,12 +386,19 @@ def verify_inputs(directory):
+     return lock, receipt
+ 
+ 
+-def prepare(lock_path, main_wheelhouse, main_catalog, patch_path, snapshot_dir, output, *, caches=()):
++def prepare(lock_path, main_wheelhouse, main_catalog, patch_path, snapshot_dir, output, *,
++            caches=(), scikit_patch_path=None):
+     base = base_helper()
+     lock, raw_lock = load_lock(lock_path)
+     catalog = base.verify_catalog(main_catalog, lock)
+-    source_patch = next(s["patch"] for s in lock["sources"] if "patch" in s)
+-    patch = base.verified_bytes(patch_path, source_patch)
++    patch_paths = {
++        "sentencepiece": patch_path,
++        "scikit-learn": scikit_patch_path if scikit_patch_path is not None else
++            SCRIPT_DIR.parent / "patches/next-stable/scikit-learn-selected-python.patch",
++    }
++    source_patches = {s["name"]: s["patch"] for s in lock["sources"] if "patch" in s}
++    patches = {name: base.verified_bytes(patch_paths[name], pin)
++               for name, pin in source_patches.items()}
+     output = Path(os.path.abspath(output))
+     require(not os.path.lexists(output) and output.parent.is_dir(), "Use a fresh output under an existing parent")
+     require(not any(parent.is_symlink() for parent in (output.parent, *output.parent.parents)),
+@@ -403,23 +432,26 @@ def prepare(lock_path, main_wheelhouse, main_catalog, patch_path, snapshot_dir,
+             tree = staging / "sources" / source["archive_root"]
+             base.extract_source(raw, source, tree)
+             if "patch" in source:
+-                apply_source_patch(tree, source, patch)
++                apply_source_patch(tree, source, patches[source["name"]])
+             trees[source["name"]] = verify_tree(tree, source["prepared_files"])
+         for pin in lock["build_apt"]["snapshot"]:
+             write_new(staging / "snapshot" / pin["filename"],
+                       base.verified_bytes(snapshot_dir / pin["filename"], pin))
+         write_new(staging / LOCK_FILENAME, raw_lock)
+         write_new(staging / "main-bundled-wheels.json", catalog)
+-        write_new(staging / source_patch["filename"], patch)
++        for name, pin in source_patches.items():
++            write_new(staging / pin["filename"], patches[name])
+         write_new(staging / "build-requirements.txt", base.requirement_text(lock["build_packages"]))
+         write_new(staging / "runtime-prebuilt-requirements.txt", base.requirement_text(lock["packages"]))
+-        write_new(staging / "build-apt-closure.tsv", tsv(lock["build_apt"]["packages"]))
++        write_new(staging / "build-apt-closure.tsv", tsv(retained_apt_packages(lock)))
+         receipt = {
+             "schema_version": 1, "status": "verified-inputs",
+             "verified_at_utc": datetime.now(timezone.utc).isoformat(),
+             "scope": "Six exact source exports, six runtime wheels, nine separate build wheels; native APT payloads remain a distinct archive gate.",
+             "lock_sha256": sha(raw_lock), "node_count": 14, "edge_count": 10,
+             "catalog_sha256": sha(catalog), "wheels": facts, "source_trees": trees,
++            "build_apt_package_count": 51, "retained_apt_archive_count": 52,
++            "inherited_runtime_verification_only": ["libgmp"],
+             "native_build_performed": False, "installed": False, "model_downloaded": False,
+             "production_admission_changed": False, "release_output": False,
+         }
+@@ -442,13 +474,16 @@ def main(argv=None):
+     parser.add_argument("--main-wheelhouse", type=Path, required=True)
+     parser.add_argument("--main-catalog", type=Path, required=True)
+     parser.add_argument("--patch", type=Path, default=SCRIPT_DIR.parent / "patches/next-stable/sentencepiece-bounded-build.patch")
++    parser.add_argument("--scikit-learn-patch", type=Path,
++                        default=SCRIPT_DIR.parent / "patches/next-stable/scikit-learn-selected-python.patch")
+     parser.add_argument("--snapshot-dir", type=Path, default=SCRIPT_DIR.parent / "audit/neutts-runtime-index-20261017")
+     parser.add_argument("--cache", type=Path, action="append", default=[])
+     parser.add_argument("--out", type=Path, required=True)
+     args = parser.parse_args(argv)
+     try:
+         report = prepare(args.lock, args.main_wheelhouse, args.main_catalog, args.patch,
+-                         args.snapshot_dir, args.out, caches=args.cache)
++                         args.snapshot_dir, args.out, caches=args.cache,
++                         scikit_patch_path=args.scikit_learn_patch)
+     except (PrepareError, OSError, ValueError, zipfile.BadZipFile, tarfile.TarError) as exc:
+         parser.exit(1, type(exc).__name__ + ": " + str(exc) + "\n")
+     print(json.dumps({"status": report["status"], "lock_sha256": report["lock_sha256"],

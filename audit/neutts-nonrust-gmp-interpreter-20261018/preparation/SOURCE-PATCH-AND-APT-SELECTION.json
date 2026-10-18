@@ -1,0 +1,118 @@
+{
+  "gmp_provenance": {
+    "additional_retained_bytes": 328368,
+    "dependencies": [
+      {
+        "already_in_build_apt": true,
+        "from": "libgmp",
+        "requirement": "libc++",
+        "to": "libc++"
+      }
+    ],
+    "files": [
+      {
+        "bytes": 402272,
+        "elf_class": 64,
+        "endianness": "little",
+        "machine": 183,
+        "package": "libgmp",
+        "path": "/data/data/com.termux/files/usr/lib/libgmp.so",
+        "sha256": "d3a7002e8fb504301bc12278260e36eae34c81d15cf8afe72cf4a769832b6f92"
+      }
+    ],
+    "installed_or_upgraded_by_this_gate": false,
+    "mode": "verify-already-installed",
+    "native_image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
+    "package_count": 1,
+    "packages": [
+      {
+        "architecture": "aarch64",
+        "bytes": 328368,
+        "depends": "libc++",
+        "filename": "pool/main/libg/libgmp/libgmp_6.3.0-2_aarch64.deb",
+        "name": "libgmp",
+        "pre_depends": "",
+        "retained_for_provenance_only": true,
+        "sha256": "5a3c1325638946ca212ddcb89bffb2c4459b4c90757d6e69f820e176534037fa",
+        "version": "6.3.0-2"
+      }
+    ],
+    "provenance": {
+      "archive_verification": {
+        "bytes": 1009,
+        "path": "GMP-ARCHIVE-VERIFIED.json",
+        "sha256": "bb7a575f07b5015a3d4ea4d934f10100995b8eb595afd7ec9d9055a2d00eb2db"
+      },
+      "artifact_bytes": 86752851,
+      "artifact_id": "12118719834",
+      "artifact_sha256": "ededd0b79ccff557a7122d9fb744c8523213090cc2584f18426013ea4e2dfdbc",
+      "head_sha": "c53e750753eff6a1d7d533b1958d7ce1abb03fc9",
+      "package_inventories": [
+        {
+          "bytes": 1471,
+          "matching_row": "libgmp\t6.3.0-2",
+          "path": "NEUTTS-BASE-PACKAGES.tsv",
+          "sha256": "78ff2592d1d13be57ae34035e67f41de78677af37644cea50622877b590c6046"
+        },
+        {
+          "bytes": 4804,
+          "matching_row": "libgmp\t6.3.0-2\taarch64",
+          "path": "NEUTTS-INSTALLED-PACKAGES.tsv",
+          "sha256": "40c4104a1cc044bd3f5297deb160e0f952208afe1e383f1b5b8fa3b441956bd3"
+        },
+        {
+          "bytes": 1448,
+          "matching_row": "libgmp\t6.3.0-2",
+          "path": "NEUTTS-UPGRADED-BASE-PACKAGES.tsv",
+          "sha256": "132cb4a2c2714a6c97f61d2393ac17dd5f11edaf16eaaf1dbce3527972d076aa"
+        }
+      ],
+      "run_id": "39081270494",
+      "snapshot": [
+        {
+          "bytes": 14016,
+          "filename": "InRelease",
+          "sha256": "249dab3ab3da3993b2436d48c819506f9aa586f6985905d81a451e76f2de7901"
+        },
+        {
+          "bytes": 727968,
+          "filename": "Packages.gz",
+          "sha256": "dba73c2f0caaa828b65f02ba0e56cac694ee7186999a442ae7858b4258c321b6"
+        }
+      ]
+    },
+    "python_dependencies_changed": false,
+    "retained_archive_count": 52
+  },
+  "lock": {
+    "bytes": 4410451,
+    "sha256": "d463c0f4ad5f3d1582ad66fc4397bda877e21107ac377b13d38db2157182d7f0"
+  },
+  "source_patch": {
+    "bytes": 771,
+    "filename": "scikit-learn-selected-python.patch",
+    "files": [
+      {
+        "after_bytes": 1645,
+        "after_sha256": "b8dc713e436ff8917d695e3638ca5d25a48b7863bf017e9191483b076dd89983",
+        "before_bytes": 1623,
+        "before_sha256": "83b8fb8f2861beaa42eaae6b7691a546a081ee42b5e41642e942761e8299931c",
+        "edits": [
+          {
+            "new": "version: run_command(find_program('python'), 'sklearn/_build_utils/version.py', check: true).stdout().strip(),",
+            "old": "version: run_command('sklearn/_build_utils/version.py', check: true).stdout().strip(),"
+          },
+          {
+            "new": "py = import('python').find_installation(pure: false)\ntempita = [py, files('sklearn/_build_utils/tempita.py')]",
+            "old": "tempita = find_program('sklearn/_build_utils/tempita.py')\n\npy = import('python').find_installation(pure: false)"
+          }
+        ],
+        "path": "meson.build"
+      }
+    ],
+    "path": "patches/next-stable/scikit-learn-selected-python.patch",
+    "sha256": "b8cccae95d93d8324409d71d5162bdeacba5773e0e2bcc4123804282d5cd24a2"
+  },
+  "unchanged_build_apt": true,
+  "unchanged_runtime_nodes_edges": true
+}

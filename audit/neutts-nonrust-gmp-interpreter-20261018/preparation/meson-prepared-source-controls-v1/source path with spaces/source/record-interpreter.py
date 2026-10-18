@@ -1,0 +1,1 @@
+import sys,json,Cython;from pathlib import Path;Path('C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-nonrust-failure-review-20261017\\39081270494-fix-v1\\meson-prepared-source-controls-v1\\source path with spaces\\actual-python.json').write_text(json.dumps({'executable':sys.executable,'cython_version':Cython.__version__,'cython_source':Cython.__file__}))

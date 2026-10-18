@@ -33,7 +33,7 @@ import zipfile
 SCRIPT_DIR = Path(__file__).resolve().parent
 LOCK_FILENAME = "neutts_nonrust_runtime_lock.json"
 RECEIPT_FILENAME = "NONRUST-PREPARED-INPUTS.json"
-LOCK_SHA256 = "a97d01c1b9c491e0f3e62907df1739a73dab23c4dd80c381b6a445dfa4c0b8a5"
+LOCK_SHA256 = "d463c0f4ad5f3d1582ad66fc4397bda877e21107ac377b13d38db2157182d7f0"
 BASE_PREPARER_SHA256 = "b6a358f87fb675f00a9e125b821d94ae81d9341cb9b4ab9fe2953ea1697318eb"
 EXPECTED_SOURCES = frozenset(("audioop-lts", "pandas", "pycryptodomex", "pyyaml",
                               "scikit-learn", "sentencepiece"))
@@ -309,6 +309,25 @@ def tsv(packages):
                               str(p["bytes"]), p["filename"])) + "\n" for p in packages).encode()
 
 
+
+def retained_apt_packages(lock):
+    """Keep inherited runtime provenance separate from the compiler install set."""
+    build = lock["build_apt"]["packages"]
+    provenance = lock["runtime_apt_provenance"]
+    runtime = provenance["packages"]
+    require(provenance["mode"] == "verify-already-installed"
+            and provenance["installed_or_upgraded_by_this_gate"] is False
+            and provenance["package_count"] == len(runtime) == 1
+            and runtime[0]["name"] == "libgmp"
+            and runtime[0].get("retained_for_provenance_only") is True,
+            "Unreviewed inherited runtime APT provenance scope")
+    require(len(build) == 51 and len({p["name"] for p in build + runtime}) == 52
+            and provenance["retained_archive_count"] == 52
+            and {e["to"] for e in provenance["dependencies"]} <= {p["name"] for p in build},
+            "Retained APT archives overlap or omit a dependency")
+    return sorted(build + runtime, key=lambda pin: pin["name"])
+
+
 def load_lock(path):
     raw = read_regular(path, 8_000_000)
     require(sha(raw) == LOCK_SHA256, "Non-Rust preparation lock changed")
@@ -322,6 +341,9 @@ def load_lock(path):
     require(len(lock["build_apt"]["packages"]) == 51
             and {p["name"] for p in lock["build_apt"]["additional_to_141"]} == {"libyaml", "patchelf"}
             and lock["build"]["jobs"] == 2, "Unreviewed native dependency/resource scope")
+    retained_apt_packages(lock)
+    require({s["name"] for s in lock["sources"] if "patch" in s}
+            == {"sentencepiece", "scikit-learn"}, "Unreviewed source patch set")
     return lock, raw
 
 
@@ -331,7 +353,7 @@ def verify_inputs(directory):
     expected_top = {LOCK_FILENAME, RECEIPT_FILENAME, "main-bundled-wheels.json", "sources",
                     "archives", "wheels", "snapshot", "build-apt-closure.tsv",
                     "build-requirements.txt", "runtime-prebuilt-requirements.txt",
-                    "sentencepiece-bounded-build.patch"}
+                    "sentencepiece-bounded-build.patch", "scikit-learn-selected-python.patch"}
     require({p.name for p in directory.iterdir()} == expected_top, "Prepared input layout changed")
     base.verify_catalog(directory / "main-bundled-wheels.json", lock)
     packages = lock["packages"] + lock["build_packages"]
@@ -346,12 +368,12 @@ def verify_inputs(directory):
     for source in lock["sources"]:
         base.verified_bytes(directory / "archives" / source["artifact"]["filename"], source["artifact"])
         verify_tree(directory / "sources" / source["archive_root"], source["prepared_files"])
-    patch = next(s["patch"] for s in lock["sources"] if "patch" in s)
-    require(sha(read_regular(directory / patch["filename"], patch["bytes"])) == patch["sha256"],
-            "Prepared patch changed")
+    for patch in (s["patch"] for s in lock["sources"] if "patch" in s):
+        require(sha(read_regular(directory / patch["filename"], patch["bytes"])) == patch["sha256"],
+                "Prepared patch changed")
     for filename, expected in (("build-requirements.txt", base.requirement_text(lock["build_packages"])),
                                ("runtime-prebuilt-requirements.txt", base.requirement_text(lock["packages"])),
-                               ("build-apt-closure.tsv", tsv(lock["build_apt"]["packages"]))):
+                               ("build-apt-closure.tsv", tsv(retained_apt_packages(lock)))):
         require(read_regular(directory / filename, len(expected)) == expected, "Prepared selection file changed")
     require({p.name for p in (directory / "snapshot").iterdir()}
             == {p["filename"] for p in lock["build_apt"]["snapshot"]}, "Snapshot file set changed")
@@ -364,12 +386,19 @@ def verify_inputs(directory):
     return lock, receipt
 
 
-def prepare(lock_path, main_wheelhouse, main_catalog, patch_path, snapshot_dir, output, *, caches=()):
+def prepare(lock_path, main_wheelhouse, main_catalog, patch_path, snapshot_dir, output, *,
+            caches=(), scikit_patch_path=None):
     base = base_helper()
     lock, raw_lock = load_lock(lock_path)
     catalog = base.verify_catalog(main_catalog, lock)
-    source_patch = next(s["patch"] for s in lock["sources"] if "patch" in s)
-    patch = base.verified_bytes(patch_path, source_patch)
+    patch_paths = {
+        "sentencepiece": patch_path,
+        "scikit-learn": scikit_patch_path if scikit_patch_path is not None else
+            SCRIPT_DIR.parent / "patches/next-stable/scikit-learn-selected-python.patch",
+    }
+    source_patches = {s["name"]: s["patch"] for s in lock["sources"] if "patch" in s}
+    patches = {name: base.verified_bytes(patch_paths[name], pin)
+               for name, pin in source_patches.items()}
     output = Path(os.path.abspath(output))
     require(not os.path.lexists(output) and output.parent.is_dir(), "Use a fresh output under an existing parent")
     require(not any(parent.is_symlink() for parent in (output.parent, *output.parent.parents)),
@@ -403,23 +432,26 @@ def prepare(lock_path, main_wheelhouse, main_catalog, patch_path, snapshot_dir, 
             tree = staging / "sources" / source["archive_root"]
             base.extract_source(raw, source, tree)
             if "patch" in source:
-                apply_source_patch(tree, source, patch)
+                apply_source_patch(tree, source, patches[source["name"]])
             trees[source["name"]] = verify_tree(tree, source["prepared_files"])
         for pin in lock["build_apt"]["snapshot"]:
             write_new(staging / "snapshot" / pin["filename"],
                       base.verified_bytes(snapshot_dir / pin["filename"], pin))
         write_new(staging / LOCK_FILENAME, raw_lock)
         write_new(staging / "main-bundled-wheels.json", catalog)
-        write_new(staging / source_patch["filename"], patch)
+        for name, pin in source_patches.items():
+            write_new(staging / pin["filename"], patches[name])
         write_new(staging / "build-requirements.txt", base.requirement_text(lock["build_packages"]))
         write_new(staging / "runtime-prebuilt-requirements.txt", base.requirement_text(lock["packages"]))
-        write_new(staging / "build-apt-closure.tsv", tsv(lock["build_apt"]["packages"]))
+        write_new(staging / "build-apt-closure.tsv", tsv(retained_apt_packages(lock)))
         receipt = {
             "schema_version": 1, "status": "verified-inputs",
             "verified_at_utc": datetime.now(timezone.utc).isoformat(),
             "scope": "Six exact source exports, six runtime wheels, nine separate build wheels; native APT payloads remain a distinct archive gate.",
             "lock_sha256": sha(raw_lock), "node_count": 14, "edge_count": 10,
             "catalog_sha256": sha(catalog), "wheels": facts, "source_trees": trees,
+            "build_apt_package_count": 51, "retained_apt_archive_count": 52,
+            "inherited_runtime_verification_only": ["libgmp"],
             "native_build_performed": False, "installed": False, "model_downloaded": False,
             "production_admission_changed": False, "release_output": False,
         }
@@ -442,13 +474,16 @@ def main(argv=None):
     parser.add_argument("--main-wheelhouse", type=Path, required=True)
     parser.add_argument("--main-catalog", type=Path, required=True)
     parser.add_argument("--patch", type=Path, default=SCRIPT_DIR.parent / "patches/next-stable/sentencepiece-bounded-build.patch")
+    parser.add_argument("--scikit-learn-patch", type=Path,
+                        default=SCRIPT_DIR.parent / "patches/next-stable/scikit-learn-selected-python.patch")
     parser.add_argument("--snapshot-dir", type=Path, default=SCRIPT_DIR.parent / "audit/neutts-runtime-index-20261017")
     parser.add_argument("--cache", type=Path, action="append", default=[])
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
         report = prepare(args.lock, args.main_wheelhouse, args.main_catalog, args.patch,
-                         args.snapshot_dir, args.out, caches=args.cache)
+                         args.snapshot_dir, args.out, caches=args.cache,
+                         scikit_patch_path=args.scikit_learn_patch)
     except (PrepareError, OSError, ValueError, zipfile.BadZipFile, tarfile.TarError) as exc:
         parser.exit(1, type(exc).__name__ + ": " + str(exc) + "\n")
     print(json.dumps({"status": report["status"], "lock_sha256": report["lock_sha256"],

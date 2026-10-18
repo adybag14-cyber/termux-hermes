@@ -36,7 +36,7 @@ import zipfile
 
 PREFIX = Path("/data/data/com.termux/files/usr")
 SCRIPT_DIR = Path(__file__).resolve().parent
-PREPARER_SHA256 = "7712d2aec739ae62b226cb0f1b9d868a12fdb046448d4cb1848505b495258fbe"
+PREPARER_SHA256 = "6540cae859c390bdceed18aac315bf27559425262935d3e015ac99393bddc047"
 COMPONENT_HELPER_SHA256 = "6387ecead23b7777e879588d7e76bd4c8d462de5574de1d77092053efc596211"
 APT_HELPER_SHA256 = "7c051b0143675594aadd52f9a0b66ec71e6950e9953feef3f773acceafcb0a29"
 OPERATIONS_SHA256 = "ce18cd98cdba38695b26fe36958e7621812a54601522acce1f9734451f55e368"
@@ -132,6 +132,65 @@ def native_runtime(common):
     return result
 
 
+
+def retained_apt_packages(lock):
+    prep = module_at("_nonrust_retained_archive_rules",
+                     SCRIPT_DIR / "prepare_neutts_nonrust_runtime.py", PREPARER_SHA256)
+    return prep.retained_apt_packages(lock)
+
+
+def verify_inherited_runtime_apt(args, lock, common, apt):
+    """Bind an unchanged image library to its signed archive without installing it."""
+    retained_apt_packages(lock)
+    origin = lock["runtime_apt_provenance"]
+    require(origin["native_image"] == lock["platform_runtime"]["native_image"],
+            "Inherited runtime image provenance differs")
+    pins = {pin["name"]: pin for pin in origin["packages"]}
+    expected = {name: {"version": pin["version"], "architecture": pin["architecture"],
+                       "status": "installed"} for name, pin in pins.items()}
+    installed = common.package_snapshot(sorted(pins))
+    require(installed == expected, "Inherited runtime package version differs")
+    baseline = next(row for row in origin["provenance"]["package_inventories"]
+                    if row["path"] == "NEUTTS-BASE-PACKAGES.tsv")
+    baseline_path = args.foundation_receipt.parent / baseline["path"]
+    require(baseline_path.stat().st_size == baseline["bytes"]
+            and sha(baseline_path) == baseline["sha256"],
+            "Same-run base package inventory differs from the pinned image")
+    lines = baseline_path.read_text().splitlines()
+    require(lines.count(baseline["matching_row"]) == 1,
+            "Inherited runtime is absent from the same-run base inventory")
+    files = origin["files"]
+    require(len(files) == 1 and files[0]["package"] == "libgmp",
+            "Unreviewed inherited runtime library set")
+    wanted = {row["path"] for row in files}
+    owners = apt.collect_owners(wanted)
+    records = []
+    for row in files:
+        path = Path(row["path"])
+        require(path.parent == PREFIX / "lib" and path.name == "libgmp.so"
+                and path.resolve() == path.absolute() and stat.S_ISREG(path.lstat().st_mode),
+                "Inherited runtime library is not an exact regular path")
+        pin = pins[row["package"]]
+        members = common.ar_data_members(common.archive_path(args.apt_archives, pin), pin, {row["path"]})
+        require(set(members) == {row["path"]}, "Incomplete inherited runtime archive member")
+        raw = members[row["path"]]
+        require(len(raw) == row["bytes"] and hashlib.sha256(raw).hexdigest() == row["sha256"]
+                and path.stat().st_size == row["bytes"] and path.read_bytes() == raw,
+                "Inherited runtime library differs from its signed archive")
+        require(owners.get(row["path"]) == [row["package"]],
+                "Inherited runtime library owner differs")
+        details = common.elf(path, dynamic=True)
+        require(details["class"] == row["elf_class"] == 64
+                and details["machine"] == row["machine"] == 183
+                and details["endianness"] == row["endianness"] == "little",
+                "Inherited runtime library ABI differs")
+        records.append({"package": row["package"], "package_version": pin["version"],
+                        "archive_sha256": pin["sha256"], **details})
+    return {"status": "verified-already-installed", "packages": installed, "members": records,
+            "base_inventory": str(baseline_path), "base_inventory_sha256": sha(baseline_path),
+            "installed_or_upgraded": False, "additional_retained_archives": 1}
+
+
 def snapshot_metadata(snapshot, lock):
     frozen = {p["filename"]: p for p in lock["build_apt"]["snapshot"]}
     for filename, pin in frozen.items():
@@ -164,7 +223,7 @@ def snapshot_metadata(snapshot, lock):
             key = (fields["Package"], fields["Version"], fields["Architecture"], fields["Filename"])
             require(key not in records, "Duplicate target APT package identity")
             records[key] = fields
-    for pin in lock["build_apt"]["packages"]:
+    for pin in retained_apt_packages(lock):
         row = records.get((pin["name"], pin["version"], pin["architecture"], pin["filename"]))
         require(row is not None and (row["Version"], row["Architecture"], row["Filename"],
                 row["SHA256"], int(row["Size"])) == (pin["version"], pin["architecture"],
@@ -208,11 +267,12 @@ def signed_snapshot(args, lock, common, work):
                      "inrelease_sha256": frozen["InRelease"]["sha256"],
                      "packages_gz_sha256": frozen["Packages.gz"]["sha256"],
                      "packages_uncompressed_sha256": hashlib.sha256(packages_raw).hexdigest(),
-                     "matched_archives": 51}
+                     "matched_archives": 52, "compiler_package_count": 51,
+                     "inherited_runtime_verification_only": ["libgmp"]}
 
 
 def verify_archive_set(args, lock, common):
-    packages = lock["build_apt"]["packages"]
+    packages = retained_apt_packages(lock)
     names, rows = set(), []
     for pin in packages:
         path = common.archive_path(args.apt_archives, pin)
@@ -222,8 +282,8 @@ def verify_archive_set(args, lock, common):
         names.add(path.name)
         rows.append({"name": pin["name"], "version": pin["version"],
                      "path": str(path), "bytes": pin["bytes"], "sha256": pin["sha256"]})
-    require(names == {p.name for p in args.apt_archives.glob("*.deb")} and len(names) == 51,
-            "Expected exactly 51 retained APT archives")
+    require(names == {p.name for p in args.apt_archives.glob("*.deb")} and len(names) == 52,
+            "Expected exactly 52 retained APT archives")
     return rows
 
 
@@ -838,6 +898,9 @@ def verify_native_mappings(manifest, prep, common, apt, args, lock):
     all_pins, _ = common.all_apt_pins(lock, prep.base_helper())
     for pin in lock["build_apt"]["additional_to_141"]:
         all_pins[pin["name"]] = pin
+    for pin in lock["runtime_apt_provenance"]["packages"]:
+        require(pin["name"] not in all_pins, "Inherited runtime provenance overwrote an existing APT pin")
+        all_pins[pin["name"]] = pin
     apt_mappings = common.verify_mapped_apt_libraries(args.apt_archives, all_pins, apt)
     return {"status": "passed", "actually_mapped_extensions": records, "apt": apt_mappings,
             "image_platform": image_mappings, "diagnostic": "NATIVE-MAPPINGS.json",
@@ -931,6 +994,7 @@ def run(args, lock, prep, common, apt):
             work = Path(temporary)
             options, report["signed_snapshot"] = signed_snapshot(args, lock, common, work)
             report["toolchain_install"] = install_toolchain(args, lock, common, options)
+            report["inherited_runtime_provenance"] = verify_inherited_runtime_apt(args, lock, common, apt)
             report["native_build_files"] = verify_build_files(args, lock, common, apt)
             _, original_native = common.all_apt_pins(lock, prep.base_helper())
             report["original_compiler_identity"] = common.verify_toolchain(args.apt_archives, original_native)

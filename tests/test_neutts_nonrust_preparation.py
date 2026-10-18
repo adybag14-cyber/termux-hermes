@@ -389,13 +389,15 @@ def patched_text():
     return text
 
 
-def test_only_the_reviewed_sentencepiece_build_script_and_abseil_guard_change():
+def test_only_the_reviewed_sentencepiece_and_scikit_build_members_change():
     for source in LOCK["sources"]:
         before = {row["path"]: row for row in source["files"]}
         after = {row["path"]: row for row in source["prepared_files"]}
         assert set(before) == set(after)
         changed = {name for name in before if before[name] != after[name]}
-        assert changed == ({"build_bundled.sh", "sentencepiece/CMakeLists.txt"} if source["name"] == "sentencepiece" else set())
+        reviewed = {"sentencepiece": {"build_bundled.sh", "sentencepiece/CMakeLists.txt"},
+                    "scikit-learn": {"meson.build"}}
+        assert changed == reviewed.get(source["name"], set())
     assert sum(len(s["files"]) for s in LOCK["sources"]) == 7787
     assert digest(PATCH.read_bytes()) == SENTENCEPIECE["patch"]["sha256"]
 
@@ -987,3 +989,228 @@ def test_rpath_controls_keep_seed_transform_and_execution_failures(tmp_path, mon
     assert report["compiler_rpath"] != before and state["loaded"] == loaded
     if scenario == "seed-readback":
         assert state["backend_calls"] == []
+
+
+def test_inherited_gmp_archive_is_provenance_only_and_preserves_the_compiler_plan():
+    retained = PREP.retained_apt_packages(LOCK)
+    assert len(retained) == 52
+    assert len(LOCK["build_apt"]["packages"]) == 51
+    assert sum(p["additional"] for p in LOCK["build_apt"]["packages"]) == 21
+    assert "libgmp" not in {p["name"] for p in LOCK["build_apt"]["packages"]}
+    pin = next(p for p in retained if p["name"] == "libgmp")
+    assert (pin["version"], pin["architecture"], pin["bytes"], pin["sha256"]) == (
+        "6.3.0-2", "aarch64", 328368,
+        "5a3c1325638946ca212ddcb89bffb2c4459b4c90757d6e69f820e176534037fa")
+    assert LOCK["runtime_apt_provenance"]["installed_or_upgraded_by_this_gate"] is False
+    assert LOCK["runtime_apt_provenance"]["files"] == [{
+        "path": "/data/data/com.termux/files/usr/lib/libgmp.so", "package": "libgmp",
+        "bytes": 402272, "sha256": "d3a7002e8fb504301bc12278260e36eae34c81d15cf8afe72cf4a769832b6f92",
+        "elf_class": 64, "machine": 183, "endianness": "little"}]
+    assert {p["name"] for p in retained} == {p["name"] for p in LOCK["build_apt"]["packages"]} | {"libgmp"}
+
+
+@pytest.mark.parametrize("field,value", [
+    ("mode", "install"), ("installed_or_upgraded_by_this_gate", True),
+    ("package_count", 2), ("retained_archive_count", 51),
+])
+def test_runtime_archive_retention_cannot_become_an_install_or_expand_scope(field, value):
+    changed = copy.deepcopy(LOCK)
+    changed["runtime_apt_provenance"][field] = value
+    with pytest.raises(PREP.PrepareError):
+        PREP.retained_apt_packages(changed)
+
+
+def test_runtime_archive_retention_rejects_an_unreviewed_package():
+    changed = copy.deepcopy(LOCK)
+    changed["runtime_apt_provenance"]["packages"][0]["name"] = "other-library"
+    with pytest.raises(PREP.PrepareError, match="runtime APT provenance scope"):
+        PREP.retained_apt_packages(changed)
+
+
+def test_runtime_archive_retention_requires_its_existing_dependency():
+    changed = copy.deepcopy(LOCK)
+    changed["runtime_apt_provenance"]["dependencies"][0]["to"] = "missing-library"
+    with pytest.raises(PREP.PrepareError, match="omit a dependency"):
+        PREP.retained_apt_packages(changed)
+
+
+def test_runtime_archive_is_checked_against_the_same_real_signed_snapshot():
+    NATIVE.snapshot_metadata(ROOT / "audit/neutts-runtime-index-20261017", LOCK)
+    changed = copy.deepcopy(LOCK)
+    changed["runtime_apt_provenance"]["packages"][0]["sha256"] = "0" * 64
+    with pytest.raises(NATIVE.ProbeError, match="APT source index pin differs"):
+        NATIVE.snapshot_metadata(ROOT / "audit/neutts-runtime-index-20261017", changed)
+
+
+def inherited_gmp_fixture(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    lock = copy.deepcopy(LOCK)
+    prefix = tmp_path / "image/prefix"
+    monkeypatch.setattr(NATIVE, "PREFIX", prefix)
+    path = prefix / "lib/libgmp.so"
+    path.parent.mkdir(parents=True)
+    raw = elf_header() + b"owner-and-byte-contract"
+    path.write_bytes(raw)
+    origin = lock["runtime_apt_provenance"]
+    row = origin["files"][0]
+    row.update(path=str(path), bytes=len(raw), sha256=digest(raw))
+    baseline = next(p for p in origin["provenance"]["package_inventories"]
+                    if p["path"] == "NEUTTS-BASE-PACKAGES.tsv")
+    baseline_raw = (baseline["matching_row"] + "\n").encode()
+    baseline.update(bytes=len(baseline_raw), sha256=digest(baseline_raw))
+    (tmp_path / baseline["path"]).write_bytes(baseline_raw)
+    state = {
+        "snapshot": {"libgmp": {"version": "6.3.0-2", "architecture": "aarch64", "status": "installed"}},
+        "owners": {str(path): ["libgmp"]}, "members": {str(path): raw},
+    }
+    actual_reader = NATIVE.module_at("_test_gmp_elf_header",
+        ROOT / "scripts/compatibility_probe_phonemizer.py", NATIVE.COMPONENT_HELPER_SHA256)
+    # Actual fixed-byte header parsing; no target load, dynamic linkage or APT
+    # installation is performed by this host-only evidence-contract fixture.
+    common = SimpleNamespace(
+        package_snapshot=lambda names: state["snapshot"],
+        archive_path=lambda directory, pin: directory / Path(pin["filename"]).name,
+        ar_data_members=lambda archive, pin, wanted: state["members"],
+        elf=lambda file, dynamic: actual_reader.elf(file, dynamic=False))
+    apt = SimpleNamespace(collect_owners=lambda wanted: state["owners"])
+    args = SimpleNamespace(apt_archives=tmp_path / "archives",
+                           foundation_receipt=tmp_path / "NEUTTS-CORE-RESULT.json")
+    return args, lock, common, apt, state, path
+
+
+def test_inherited_gmp_requires_same_run_package_bytes_owner_and_actual_elf_header(tmp_path, monkeypatch):
+    args, lock, common, apt, state, path = inherited_gmp_fixture(tmp_path, monkeypatch)
+    result = NATIVE.verify_inherited_runtime_apt(args, lock, common, apt)
+    assert result["status"] == "verified-already-installed"
+    assert result["installed_or_upgraded"] is False and result["additional_retained_archives"] == 1
+    assert result["members"][0]["class"] == 64 and result["members"][0]["machine"] == 183
+    assert result["packages"] == state["snapshot"]
+
+
+@pytest.mark.parametrize("change", [
+    "installed-version", "owner", "actual-bytes", "archive-bytes", "missing-member",
+    "foreign-header", "base-inventory", "directory",
+])
+def test_inherited_runtime_provenance_rejects_drift_in_each_independent_authority(tmp_path, monkeypatch, change):
+    args, lock, common, apt, state, path = inherited_gmp_fixture(tmp_path, monkeypatch)
+    if change == "installed-version":
+        state["snapshot"]["libgmp"]["version"] = "6.4.0"
+    elif change == "owner":
+        state["owners"][str(path)] = ["other-library"]
+    elif change == "actual-bytes":
+        path.write_bytes(path.read_bytes() + b"altered")
+    elif change == "archive-bytes":
+        state["members"][str(path)] += b"altered"
+    elif change == "missing-member":
+        state["members"].clear()
+    elif change == "foreign-header":
+        raw = elf_header(machine=62)
+        path.write_bytes(raw)
+        state["members"][str(path)] = raw
+        lock["runtime_apt_provenance"]["files"][0].update(bytes=len(raw), sha256=digest(raw))
+    elif change == "base-inventory":
+        (tmp_path / "NEUTTS-BASE-PACKAGES.tsv").write_bytes(b"other-version\n")
+    elif change == "directory":
+        path.unlink()
+        path.mkdir()
+    with pytest.raises(RuntimeError):
+        NATIVE.verify_inherited_runtime_apt(args, lock, common, apt)
+
+
+def test_mapped_gmp_still_uses_the_unchanged_strict_apt_mapping_verifier(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    prefix = tmp_path / "prefix"
+    path = prefix / "lib/libgmp.so"
+    path.parent.mkdir(parents=True)
+    path.write_bytes(elf_header())
+    out = tmp_path / "out"
+    out.mkdir()
+    monkeypatch.setattr(NATIVE, "PREFIX", prefix)
+    monkeypatch.setattr(NATIVE, "read_native_maps", lambda: maps_line(path))
+    monkeypatch.setattr(NATIVE, "verify_image_platform_members",
+                        lambda paths, lock, common, apt: {"status": "fixture-no-image-members"})
+    calls = []
+    def final_verifier(archives, pins, apt):
+        calls.append((archives, pins, apt))
+        return {"status": "fixture-final-authority"}
+    common = SimpleNamespace(all_apt_pins=lambda lock, helper: ({}, None),
+                             verify_mapped_apt_libraries=final_verifier)
+    args = SimpleNamespace(out=out, apt_archives=tmp_path / "archives")
+    result = NATIVE.verify_native_mappings({"wheels": [], "apt_python": []},
+                                           PREP, common, object(), args, LOCK)
+    assert len(calls) == 1 and calls[0][0] == args.apt_archives
+    assert calls[0][1]["libgmp"] == LOCK["runtime_apt_provenance"]["packages"][0]
+    assert result["apt"]["status"] == "fixture-final-authority"
+    assert (out / "NATIVE-MAPPINGS.raw.txt").read_bytes() == maps_line(path)
+
+
+SCIKIT_SOURCE = next(s for s in LOCK["sources"] if s["name"] == "scikit-learn")
+SCIKIT_FIXTURE = BASELINE.parent / "scikit_learn_interpreter"
+SCIKIT_PATCH = ROOT / "patches/next-stable/scikit-learn-selected-python.patch"
+
+
+def scikit_fixture_source(directory):
+    mapping = {"meson.build": "meson.build", "version.py": "sklearn/_build_utils/version.py",
+               "tempita.py": "sklearn/_build_utils/tempita.py", "__init__.py": "sklearn/__init__.py"}
+    source = copy.deepcopy(SCIKIT_SOURCE)
+    selected = set(mapping.values())
+    source["files"] = [r for r in source["files"] if r["path"] in selected]
+    source["prepared_files"] = [r for r in source["prepared_files"] if r["path"] in selected]
+    for fixture, name in mapping.items():
+        path = directory / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        raw = (SCIKIT_FIXTURE / fixture).read_bytes()
+        pin = next(row for row in source["files"] if row["path"] == name)
+        assert len(raw) == pin["bytes"] and digest(raw) == pin["sha256"]
+        path.write_bytes(raw)
+        path.chmod(0o755 if pin["mode"] == "100755" else 0o644)
+    return source
+
+
+def test_scikit_interpreter_patch_replays_independently_and_preserves_helper_bytes(tmp_path):
+    git = shutil.which("git")
+    assert git, "Git is required for the independent source patch replay"
+    source = scikit_fixture_source(tmp_path)
+    before = {p: (tmp_path / p).read_bytes() for p in ("sklearn/_build_utils/version.py",
+                "sklearn/_build_utils/tempita.py", "sklearn/__init__.py")}
+    subprocess.run([git, "init", "-q", str(tmp_path)], check=True, capture_output=True)
+    subprocess.run([git, "-C", str(tmp_path), "apply", "--check", str(SCIKIT_PATCH)],
+                   check=True, capture_output=True)
+    subprocess.run([git, "-C", str(tmp_path), "apply", str(SCIKIT_PATCH)],
+                   check=True, capture_output=True)
+    # Git's administrative files are outside the selected source fixture.
+    pin = source["patch"]["files"][0]
+    assert digest((tmp_path / "meson.build").read_bytes()) == pin["after_sha256"]
+    assert all((tmp_path / name).read_bytes() == raw for name, raw in before.items())
+
+
+def test_scikit_source_preparer_applies_only_the_reviewed_meson_member(tmp_path):
+    source = scikit_fixture_source(tmp_path)
+    result = PREP.apply_source_patch(tmp_path, source, SCIKIT_PATCH.read_bytes())
+    assert result["files"] == 4
+    pin = source["patch"]["files"][0]
+    assert len((tmp_path / "meson.build").read_bytes()) == pin["after_bytes"]
+
+
+@pytest.mark.parametrize("change", ["source-drift", "patch-drift", "repeat"])
+def test_scikit_patch_rejects_unreviewed_inputs_and_reapplication(tmp_path, change):
+    source = scikit_fixture_source(tmp_path)
+    patch = SCIKIT_PATCH.read_bytes()
+    if change == "source-drift":
+        target = tmp_path / "meson.build"
+        target.write_bytes(target.read_bytes() + b"\n")
+    elif change == "patch-drift":
+        patch += b"\n"
+    else:
+        PREP.apply_source_patch(tmp_path, source, patch)
+    with pytest.raises(PREP.PrepareError):
+        PREP.apply_source_patch(tmp_path, source, patch)
+
+
+def test_original_scikit_version_helper_runs_with_explicit_python_from_spaced_source_path(tmp_path):
+    import sys
+    source_dir = tmp_path / "source path with spaces"
+    source = scikit_fixture_source(source_dir)
+    result = subprocess.run([sys.executable, "-B", str(source_dir / "sklearn/_build_utils/version.py")],
+                            cwd=tmp_path, capture_output=True, timeout=15, check=False)
+    assert result.returncode == 0 and result.stdout.decode().strip() == source["version"]
