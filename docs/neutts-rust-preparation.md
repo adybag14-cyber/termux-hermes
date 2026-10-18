@@ -73,7 +73,7 @@ The preparer now derives a reversible owned cache name for those two archives:
 | `ca-certificates_1:2026.09.25_all.deb` | `ca-certificates_1%3A2026.09.25_all.deb` |
 | `openssl_1:3.6.5_aarch64.deb` | `openssl_1%3A3.6.5_aarch64.deb` |
 
-The original index Filename, version, URL, size, hash, and archive bytes remain exact. The other 44 archive basenames are unchanged. The mapping rejects duplicate names, case aliases, traversal, and pre-encoded source identities. The generic source/wheel path checker still rejects colons. Only the native writable APT cache receives a copy under the original index basename; the verified input cache remains untouched.
+The original index Filename, version, URL, size, hash, and archive bytes remain exact. The other 44 archive basenames are unchanged. The mapping rejects duplicate names, case aliases, traversal, and pre-encoded source identities. The generic source/wheel path checker still rejects colons. At that checkpoint, the native writable cache used the original index basename. The later native APT cache correction below records why an epoch package instead needs APT's quoted basename; the verified input cache remains untouched.
 
 The new host regressions exercise both actual stage download plans twice in fresh outputs, all 46 original frozen identities, verified cache reuse, original request URLs, and the native copy contract. See [the recorded native failure](../audit/neutts-rust-native-20261017/run-39076217343/epoch-basename-failure-analysis.json) and [the correction receipt](../audit/neutts-rust-native-20261017/run-39076217343/epoch-basename-fix-preparation.json). The original 57-test preparation receipt remains a historical checkpoint.
 
@@ -106,6 +106,30 @@ The exact 47-archive union covers all 89 original requested paths: 14 fixed comp
 
 Both complete failed-run artifacts are retained with whole SHA256 and every ZIP-member CRC/SHA256. See [the original failure and archive diagnosis](../audit/neutts-rust-native-20261017/run-39079732704/compiler-input-failure-analysis.json), [the full requested-path inventory](../audit/neutts-rust-native-20261017/run-39079732704/compiler-input-archive-review-attempt3.json), and [the correction checkpoint](../audit/neutts-rust-native-20261017/run-39079732704/compiler-input-fix-preparation.json). The native retry remains a separate gate.
 
+## Native APT cache naming correction
+
+[Run 39082981266](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39082981266), at exact commit `123e70ee7ec9ff97b2cc82a05c13794d98e3e4b5`, passed all seven foundation cases, native authentication of the unchanged signed snapshot, all 47 archive identities, and the exact 20-addition APT plan in both stages. Installation then failed with the same retained diagnostic:
+
+    E: Internal Error, Pathname to install is not absolute 'openssl-tool_1%3a3.6.5_aarch64.deb'
+
+The temporary cache contained the original pool basename with a colon. APT constructs its cache basename from package, version and architecture, and quotes the epoch colon using lowercase hexadecimal. This behavior is observed in the actual native error and matches [the captured upstream APT source](../audit/neutts-rust-native-20261017/run-39082981266/apt-reference-source/reference-source.json). That upstream reference is not a claim about the container's APT version.
+
+Only the owned native cache copy now receives APT's expected basename:
+
+| Identity | Signed pool basename | Preserved portable input basename | Native APT cache basename |
+|---|---|---|---|
+| Existing foundation CA package | `ca-certificates_1:2026.09.25_all.deb` | `ca-certificates_1%3A2026.09.25_all.deb` | `ca-certificates_1%3a2026.09.25_all.deb` |
+| Existing foundation OpenSSL library | `openssl_1:3.6.5_aarch64.deb` | `openssl_1%3A3.6.5_aarch64.deb` | `openssl_1%3a3.6.5_aarch64.deb` |
+| Newly required OpenSSL executable | `openssl-tool_1:3.6.5_aarch64.deb` | `openssl-tool_1%3A3.6.5_aarch64.deb` | `openssl-tool_1%3a3.6.5_aarch64.deb` |
+
+The earlier installation did not exercise an epoch-bearing addition: the CA and OpenSSL library packages were already present in the foundation and are absent from the 20-addition request. The correction preserves that selection. It does not reinstall the foundation to avoid the error, change a version, change signed metadata, or enable downloads.
+
+The native helper validates the identity-to-filename mapping, rejects traversal and prequoted or duplicate aliases, checks every copied archive against its original digest, and records `rust-apt-cache-layout.json` before APT runs. The unchanged installation checks still require the exact plan and exact final package inventory. All source, Cargo, archive and Python dependency pins remain unchanged.
+
+The [production staging replay](../audit/neutts-rust-native-20261017/run-39082981266/actual-native-cache-layout-production-replay.json) copied all 47 exact original archives, totaling 246,673,988 bytes, into a fresh host cache. It rechecked every input and output digest and refused reuse of the existing output. The 126-test focused suite covers both foundation and new epoch identities, invalid names, aliases, unchanged input bytes, and the existing installation, source, ABI and TLS controls. These are host validation results; native APT installation still requires the next retry.
+
+Both complete failed-run artifacts are preserved: 817,730,199 bytes across 47,526 ZIP members, with whole-archive SHA256 and every member CRC/SHA256 checked. The initial small diagnostic extraction was reconciled byte-for-byte with the subsequently verified complete archive. See [the failure analysis](../audit/neutts-rust-native-20261017/run-39082981266/native-cache-failure-analysis.json) and [the correction checkpoint](../audit/neutts-rust-native-20261017/run-39082981266/native-cache-fix-preparation.json). This failed run did not reach compiler ABI controls, Cargo lock resolution, a Rust source build, or HF TLS behavior; no new Tiktoken Cargo.lock was produced.
+
 ## Running and reading results
 
 After source review, the preparation-only workflow can run both stages or one selected stage. It uses the pinned native Termux Docker image on an ARM64 runner, UID 1000, two CPUs, six GiB of memory, and bounded timeouts. Its permissions only read repository contents.
@@ -120,7 +144,7 @@ Equivalent ARM64 host entry points:
 
 Both require fresh outputs. The workflow retains the exact downloaded reconstruction archives and actual native result files even after a failure. GitHub's artifact upload omits hidden paths from the unpacked source/vendor copies. Those partial unpacked copies are not an admitted preparation directory; reconstruct them from the complete original archives with the canonical preparer. Component checkpoints retain completed wheel results if a later component fails. Subprocess stdout and stderr are preserved on errors and timeouts.
 
-Host evidence currently covers 110 focused integrity checks with no skips. The source/cache checkpoint covers all 744 original source files, 11 expanded registry archives containing 2,474 files, and an actual 12-file directory-source export. The real export exposed a cross-platform path-ordering mismatch. The verifier now sorts canonical POSIX path strings while retaining every original file and checksum comparison. Subsequent complete capture of the first native run preserves all 804 original registry archives with their exact frozen checksums. The [separate cache admission receipt](../audit/neutts-rust-native-20261017/run-39076217343/captured-original-input-cache-admission.json) distinguishes that archive-byte admission from the earlier expanded-source checks and records the then-missing 42 APT archives.
+Host evidence currently covers 126 focused integrity checks with no skips. The source/cache checkpoint covers all 744 original source files, 11 expanded registry archives containing 2,474 files, and an actual 12-file directory-source export. The real export exposed a cross-platform path-ordering mismatch. The verifier now sorts canonical POSIX path strings while retaining every original file and checksum comparison. Subsequent complete capture of the first native run preserves all 804 original registry archives with their exact frozen checksums. The [separate cache admission receipt](../audit/neutts-rust-native-20261017/run-39076217343/captured-original-input-cache-admission.json) distinguishes that archive-byte admission from the earlier expanded-source checks and records the then-missing 42 APT archives.
 
 Final review also exercised the production APT archive parser against the exact cached Python 3.14.6-1 archive. A missing standard-library import was captured as a real host failure, corrected, and replayed against both original libpython payload hashes. A separate regression executes the installed-wheel inventory and its adapter with actual wheel bytes and Python distribution metadata. See [the archive replay](../audit/neutts-rust-routes-20261017/archive-parser-exact-apt-replay.json).
 

@@ -1,0 +1,130 @@
+{
+  "actual_native_diagnostic": "E: Internal Error, Pathname to install is not absolute 'openssl-tool_1%3a3.6.5_aarch64.deb'",
+  "complete_capture": {
+    "all_member_crc_and_sha_verified": true,
+    "all_whole_sha_verified": true,
+    "artifacts": 2,
+    "bytes": 817730199,
+    "members": 47526,
+    "preliminary_member_bytes_reconciled": 3,
+    "raw_audit_copies_rechecked": 90,
+    "summary": {
+      "bytes": 1164,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/complete-artifact-capture-summary.json",
+      "sha256": "5de4a703fc1fdbf4179ac6184ac2862bf2feeabd69dfb295b7a08c0ecab2f4ab"
+    }
+  },
+  "diagnosis": "The prior native writable cache copied signed pool basenames containing an epoch colon. APT's native cache lookup expects a lowercase percent-quoted epoch. The sole new epoch addition openssl-tool exercised this cache path; ca-certificates and openssl are prechecked foundation packages and are absent from the unchanged addition request.",
+  "evidence_boundary": "The exact native stderr directly reports the expected cache basename; the old staged basename is established from the exact reviewed helper source. The temporary cache directory itself was not uploaded.",
+  "head_sha": "123e70ee7ec9ff97b2cc82a05c13794d98e3e4b5",
+  "new_tiktoken_lock_produced": false,
+  "not_reached": [
+    "compiler ABI controls",
+    "Cargo lock resolution",
+    "Rust source builds",
+    "HF TLS behavior"
+  ],
+  "observed_at": "2026-10-18T00:56:10.177529+00:00",
+  "reference_scope": "Upstream APT3.0.3 at45bebdfb891535d15e66e860aab1ee7c7b2ecaab corroborates naming. It is not asserted to be the container APT version.",
+  "release_output": false,
+  "run_id": 39082981266,
+  "schema": "native-rust-apt-cache-failure-analysis/v1",
+  "source_or_lock_changed": false,
+  "stages": [
+    {
+      "apt_install_stderr": {
+        "bytes": 92,
+        "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/rust-components/rust-apt-install.stderr.log",
+        "sha256": "6e9b6d66e9fb4e96a98afdb06323f494bda34a133c044237abeada96d193e9bd"
+      },
+      "apt_plan": {
+        "bytes": 3111,
+        "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/rust-components/rust-apt-plan.stdout.log",
+        "sha256": "205a41d01c8014a340a048e761725db805b81fa310dac3b3b0e2620c9dabbca3"
+      },
+      "artifact": {
+        "artifact_id": 12119747428,
+        "bytes": 257951988,
+        "external_copies": 96,
+        "member_count": 145,
+        "raw_audit_copies": 45,
+        "receipt": {
+          "bytes": 40534,
+          "path": "audit/neutts-rust-native-20261017/run-39082981266/verified-artifact-12119747428.json",
+          "sha256": "2e845f590a0886e21a2d60a8428b393e7cf58aa97c6a8b9a4e1eba62fbbee794"
+        },
+        "sha256": "c13dc2444ec54eaab34e51b85a9ce38d4debd826db31d9ba8d5b1b510f7b1ca5"
+      },
+      "exact_apt_plan_count": 20,
+      "foundation_cases_passed": 7,
+      "foundation_epoch_packages_absent_from_install_request": true,
+      "job_id": 117543618809,
+      "matched_signed_archive_identities": 47,
+      "native_failure_stage": "native-compiler-install",
+      "native_signed_index": "passed",
+      "native_status": "failed",
+      "plan_new_installations": 15,
+      "plan_same_version_reinstalls": 5,
+      "registry_input_checks": {
+        "registry_archives": 0,
+        "registry_source_files": 0
+      },
+      "result": {
+        "bytes": 14985,
+        "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/rust-components/RUST-COMPONENTS-RESULT.json",
+        "sha256": "6da5cbca8d1e8388509fe8d1825d1487e8e51230c019492879a82c5ff3faa49d"
+      },
+      "stage": "tiktoken-lock"
+    },
+    {
+      "apt_install_stderr": {
+        "bytes": 92,
+        "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/rust-components/rust-apt-install.stderr.log",
+        "sha256": "6e9b6d66e9fb4e96a98afdb06323f494bda34a133c044237abeada96d193e9bd"
+      },
+      "apt_plan": {
+        "bytes": 3111,
+        "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/rust-components/rust-apt-plan.stdout.log",
+        "sha256": "205a41d01c8014a340a048e761725db805b81fa310dac3b3b0e2620c9dabbca3"
+      },
+      "artifact": {
+        "artifact_id": 12119921806,
+        "bytes": 559778211,
+        "external_copies": 908,
+        "member_count": 47381,
+        "raw_audit_copies": 45,
+        "receipt": {
+          "bytes": 13912224,
+          "path": "audit/neutts-rust-native-20261017/run-39082981266/verified-artifact-12119921806.json",
+          "sha256": "e099aac6626792e02d09bd99d0a45aab6f0d34897d4bd8e33ee6b6ec57770a85"
+        },
+        "sha256": "552da20e4f4cb9448a7a46596d9700adf367c0b92ad54f0f32f7b570d82bb0fa"
+      },
+      "exact_apt_plan_count": 20,
+      "foundation_cases_passed": 7,
+      "foundation_epoch_packages_absent_from_install_request": true,
+      "job_id": 117543619025,
+      "matched_signed_archive_identities": 47,
+      "native_failure_stage": "native-compiler-install",
+      "native_signed_index": "passed",
+      "native_status": "failed",
+      "plan_new_installations": 15,
+      "plan_same_version_reinstalls": 5,
+      "registry_input_checks": {
+        "registry_archives": 804,
+        "registry_source_files": 47554
+      },
+      "result": {
+        "bytes": 15285,
+        "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/rust-components/RUST-COMPONENTS-RESULT.json",
+        "sha256": "6dca1223cafccd2c2e71d03901d28469fdfb0e2c205b96a70348e28435ef192d"
+      },
+      "stage": "locked-build"
+    }
+  ],
+  "upstream_reference": {
+    "bytes": 1161,
+    "path": "audit/neutts-rust-native-20261017/run-39082981266/apt-reference-source/reference-source.json",
+    "sha256": "748c73adb13eba1c6d21bebc194c61af3781d5e957a24a4d410c41c0e3951aeb"
+  }
+}

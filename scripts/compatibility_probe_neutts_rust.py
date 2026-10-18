@@ -511,17 +511,51 @@ def verify_archive_set(args, lock, prep):
     return rows
 
 
+def apt_install_cache_basename(pin):
+    """Derive APT's native cache name from the unchanged signed archive identity."""
+    name, version, architecture = pin["name"], pin["version"], pin["architecture"]
+    require(isinstance(name, str) and re.fullmatch(r"[a-z0-9][a-z0-9+.-]*", name)
+            and isinstance(version, str)
+            and re.fullmatch(r"(?:[0-9]+:)?[0-9][A-Za-z0-9.+~-]*", version)
+            and architecture in ("aarch64", "all"), "Invalid native APT cache identity")
+    filename = pin["filename"]
+    expected = name + "_" + version + "_" + architecture + ".deb"
+    require(isinstance(filename, str) and filename.startswith("pool/main/")
+            and "\\" not in filename and "%" not in filename
+            and PurePosixPath(filename).as_posix() == filename
+            and ".." not in PurePosixPath(filename).parts
+            and PurePosixPath(filename).name == expected,
+            "Native APT cache filename differs from signed identity")
+    # pkgAcqArchive quotes ':' in the version with lowercase hexadecimal.
+    # The supported frozen identity grammar has no other quoted characters.
+    cached = expected.replace(":", "%3a")
+    require(cached.replace("%3a", ":") == expected, "Native APT cache name is not reversible")
+    return cached
+
+
 def stage_install_archives(args, pins, work):
-    # Inputs use portable owned basenames. Only the native writable APT cache
-    # receives the original index basename, including any Debian epoch colon.
+    # Portable input names remain unchanged. The native writable cache uses
+    # APT's quoted archive basename, which differs from the signed pool basename.
+    names = [apt_install_cache_basename(pin) for pin in pins]
+    require(len(set(names)) == len(names) and len({name.casefold() for name in names}) == len(names),
+            "Duplicate or aliased native APT cache filenames")
     archives = work / "install-archives"
     archives.mkdir()
     (archives / "partial").mkdir()
-    for pin in pins:
+    copied = []
+    for pin, name in zip(pins, names, strict=True):
         source = archive_path(args.apt_archives, pin)
-        target = archives / PurePosixPath(pin["filename"]).name
+        target = archives / name
         shutil.copyfile(source, target)
         require(sha_file(target) == pin["sha256"], "APT cache copy changed")
+        copied.append({"name": pin["name"], "version": pin["version"],
+                       "architecture": pin["architecture"], "signed_filename": pin["filename"],
+                       "input_basename": source.name, "apt_cache_basename": name,
+                       "bytes": pin["bytes"], "sha256": pin["sha256"]})
+    save_json(args.out / "rust-apt-cache-layout.json", {
+        "schema": "native-rust-apt-cache-layout/v1", "status": "passed",
+        "scope": "Verified copies in the owned native APT cache; original signed identities and input bytes are unchanged.",
+        "archive_count": len(copied), "archives": copied})
     return archives
 
 

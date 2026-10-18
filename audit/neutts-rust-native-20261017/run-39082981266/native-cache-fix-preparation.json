@@ -1,0 +1,803 @@
+{
+  "boundaries": {
+    "foundation_reinstall_workaround": false,
+    "main_unchanged_by_this_work": true,
+    "native_build_gates_changed": false,
+    "new_tiktoken_lock_or_later_build": false,
+    "release_or_version_change": false,
+    "source_resolution_changed": false,
+    "tls_verification_disabled": false
+  },
+  "code_files": [
+    {
+      "bytes": 77692,
+      "path": "scripts/compatibility_probe_neutts_rust.py",
+      "sha256": "3d8287bf967003267d220e29380f610dbc50b42b165a9299821d76fa260e869e"
+    },
+    {
+      "bytes": 60152,
+      "path": "tests/test_neutts_rust_preparation.py",
+      "sha256": "f1f68e858433d3be5730ffd66f4e4a17e7cda06701a44d26e02b1a3beb0d9a59"
+    },
+    {
+      "bytes": 23975,
+      "path": "docs/neutts-rust-preparation.md",
+      "sha256": "d36755124519a83fe7be0b498ef3909424078ede39fb251f1a47f2da4a77aa56"
+    }
+  ],
+  "complete_failed_run_capture": {
+    "bytes": 1164,
+    "path": "audit/neutts-rust-native-20261017/run-39082981266/complete-artifact-capture-summary.json",
+    "sha256": "5de4a703fc1fdbf4179ac6184ac2862bf2feeabd69dfb295b7a08c0ecab2f4ab"
+  },
+  "correction": "Use APT's lowercase percent-quoted epoch in verified native cache copies; retain the original signed pool basename, portable input name, version, bytes and hash.",
+  "failed_head_sha": "123e70ee7ec9ff97b2cc82a05c13794d98e3e4b5",
+  "failed_run_id": 39082981266,
+  "failure_analysis": {
+    "bytes": 5976,
+    "path": "audit/neutts-rust-native-20261017/run-39082981266/native-cache-failure-analysis.json",
+    "sha256": "b69667145f83a43c93435e92c89b8d7a4a681dfc90d454f210e226ebd2f19627"
+  },
+  "host_gate": {
+    "command": [
+      "C:\\Python314\\python.exe",
+      "-I",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_neutts_rust_preparation.py",
+      "--junitxml=audit/neutts-rust-native-20261017/run-39082981266/rust-host-tests-native-cache-fix.xml"
+    ],
+    "environment": {
+      "HERMES_RUST_TLS_OPENSSL": "C:\\Strawberry\\c\\bin\\openssl.EXE",
+      "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "exit_code": 0,
+    "log": {
+      "bytes": 183,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/rust-host-tests-native-cache-fix.log",
+      "sha256": "b694e7816960f633e015fefa9db861c3b64f97d9c8db74a09b202c1ed01bf33e"
+    },
+    "observed_at": "2026-10-18T00:50:14.637724+00:00",
+    "openssl": "OpenSSL 3.6.1 27 Jan 2026 (Library: OpenSSL 3.6.1 27 Jan 2026)",
+    "python": "3.14.2 (tags/v3.14.2:df79316, Dec  5 2025, 17:18:21) [MSC v.1944 64 bit (AMD64)]",
+    "schema": "native-rust-cache-filename-host-gate/v1",
+    "suites": [
+      {
+        "errors": "0",
+        "failures": "0",
+        "hostname": "Precision5690",
+        "name": "pytest",
+        "skipped": "0",
+        "tests": "126",
+        "time": "3.825",
+        "timestamp": "2026-10-18T01:50:10.570841+01:00"
+      }
+    ],
+    "xml": {
+      "bytes": 20163,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/rust-host-tests-native-cache-fix.xml",
+      "sha256": "559e1125bbccd78d9cb8c8188b12bf4f5c75f01bbbdcfdd7dc9a5c2fc319b929"
+    }
+  },
+  "native_retry_status": "not run for this correction; pending parent source review/save/dispatch",
+  "observed_at": "2026-10-18T00:56:10.262577+00:00",
+  "owned_bytes_excluding_this_receipt": 16573180,
+  "owned_file_count_excluding_this_receipt": 129,
+  "owned_files_excluding_this_receipt": [
+    {
+      "bytes": 8,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/.gitattributes",
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "bytes": 19381,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/actual-host-native-cache-layout.json",
+      "sha256": "760d5b8e1797bef8381f38092a98e47387370eef092be2c3204118696a425ac5"
+    },
+    {
+      "bytes": 19122,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/actual-native-cache-layout-production-replay.json",
+      "sha256": "99c69acc74b28b075ff585f27b9d6ab3064fa728b2d26618a68219557e0c056f"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/actual-native-cache-layout-production-replay.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1681,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/actual-native-cache-layout-production-replay.stdout.log",
+      "sha256": "1ca437cb6066aca6916bbc7f8440a8605ee07fef80fd2f4511fd0adce1860f55"
+    },
+    {
+      "bytes": 150267,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/apt-reference-source/acquire-item.cc",
+      "sha256": "a567649e6d8611e7733f34b570f561959f7fdfaa1c888377395e88d3752cc82c"
+    },
+    {
+      "bytes": 1161,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/apt-reference-source/reference-source.json",
+      "sha256": "748c73adb13eba1c6d21bebc194c61af3781d5e957a24a4d410c41c0e3951aeb"
+    },
+    {
+      "bytes": 52462,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/apt-reference-source/strutl.cc",
+      "sha256": "ac2c9b2fa071f7f00c1cf45fab54e3feb049a538e5e0680ece59a67020f39000"
+    },
+    {
+      "bytes": 1542,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/artifacts-api-final.json",
+      "sha256": "746e9de603ec2228e2205b36465d5c793750620fe87f12cf4f48883bb8ebb2fb"
+    },
+    {
+      "bytes": 1542,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/artifacts.json",
+      "sha256": "746e9de603ec2228e2205b36465d5c793750620fe87f12cf4f48883bb8ebb2fb"
+    },
+    {
+      "bytes": 2350,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/capture_apt_reference_source.py",
+      "sha256": "3424d239deea04173985617002dc988e09a8a50b1fc83caa8062cfd326484c81"
+    },
+    {
+      "bytes": 11807,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/capture_exact_rust_artifacts.py",
+      "sha256": "3457643e93743dc79d207d69a652ca4c3883c5516921406a97aff223330f93de"
+    },
+    {
+      "bytes": 3138,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/capture_initial_failure.py",
+      "sha256": "9305b8e59fa8a303dc31a9f50e07b9399896b504640b1ca80f21c0c8e09e73a3"
+    },
+    {
+      "bytes": 4382,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/capture_preliminary_apt_diagnostic.py",
+      "sha256": "747c6722ecf41cc0106054f8eb9631d143d8745e0c71e81c8f245df8b837a8e2"
+    },
+    {
+      "bytes": 1164,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/complete-artifact-capture-summary.json",
+      "sha256": "5de4a703fc1fdbf4179ac6184ac2862bf2feeabd69dfb295b7a08c0ecab2f4ab"
+    },
+    {
+      "bytes": 12852,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/freeze_native_cache_fix.py",
+      "sha256": "5f92ac6bba6a3e191a8f371c9d57fd057104ef79d3bd0fd6e765163db8ef59b1"
+    },
+    {
+      "bytes": 2656,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/initial-failed-run-capture.json",
+      "sha256": "d3858cf48c56c964798809bf9caf344ac5a18e2b2b188bc238abd4b1eb2379cd"
+    },
+    {
+      "bytes": 205571,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/job-117543618809.log",
+      "sha256": "fd08f332b8a5366e4d6d8e1085765508b9db5365e24d3df87b1d6391a350525b"
+    },
+    {
+      "bytes": 352739,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/job-117543619025.log",
+      "sha256": "fe281985c4dd4a9689bd0d0ff687b4b5248e835ab08bc7eacd746d1c39bc52be"
+    },
+    {
+      "bytes": 4243,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/jobs-api-final.json",
+      "sha256": "1d917213c13f118443bd13cc621a1b1607e25b175d71232b6cbaaf67cedaaa34"
+    },
+    {
+      "bytes": 4243,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/jobs.json",
+      "sha256": "1d917213c13f118443bd13cc621a1b1607e25b175d71232b6cbaaf67cedaaa34"
+    },
+    {
+      "bytes": 5976,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/native-cache-failure-analysis.json",
+      "sha256": "b69667145f83a43c93435e92c89b8d7a4a681dfc90d454f210e226ebd2f19627"
+    },
+    {
+      "bytes": 19001,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/native-cache-fix.diff",
+      "sha256": "236f33291bafce9c558337e41f5f39466c0401ae43144dc77c63c23d2b4eb13d"
+    },
+    {
+      "bytes": 1423,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/native-cache-host-test-environment.json",
+      "sha256": "54b431fd4cb83a7b95c62226ceb9477710e1457c13db05ceea438dbaf0a97a9f"
+    },
+    {
+      "bytes": 1586,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/preliminary-range-proof.json",
+      "sha256": "5cceb10efb1896d1f1a84a8c8e55d59c524b4990356903a02e1b81926a770dc9"
+    },
+    {
+      "bytes": 14985,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/preliminary-range-proof/rust-components/RUST-COMPONENTS-RESULT.json",
+      "sha256": "6da5cbca8d1e8388509fe8d1825d1487e8e51230c019492879a82c5ff3faa49d"
+    },
+    {
+      "bytes": 92,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/preliminary-range-proof/rust-components/rust-apt-install.stderr.log",
+      "sha256": "6e9b6d66e9fb4e96a98afdb06323f494bda34a133c044237abeada96d193e9bd"
+    },
+    {
+      "bytes": 3674,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/preliminary-range-proof/rust-components/rust-apt-install.stdout.log",
+      "sha256": "97e400a15c6e6a325aa4633a5a41d67ed6c555b903026f7f8f460dbbc1ca0b0c"
+    },
+    {
+      "bytes": 32254,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/NEUTTS-APT-PYTHON-METADATA.json",
+      "sha256": "6fb50c94a727ee743580f3c763b8f119066e82bc6b5d3020f7f57b6877203c56"
+    },
+    {
+      "bytes": 173678,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/NEUTTS-APT-PYTHON-VALIDATION.json",
+      "sha256": "a69e50c3a66d31d45a688dfab645ed2cf52fae6c8955b919e9d7847f7dcc03c3"
+    },
+    {
+      "bytes": 141,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/NEUTTS-APT-PYTHON-VALIDATION.log",
+      "sha256": "fad891e4749fc619ae026aa4faebc8b99e2ab08c1c1ce59c947af0683acdf95b"
+    },
+    {
+      "bytes": 1471,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/NEUTTS-BASE-PACKAGES.tsv",
+      "sha256": "78ff2592d1d13be57ae34035e67f41de78677af37644cea50622877b590c6046"
+    },
+    {
+      "bytes": 40501,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/NEUTTS-CORE-RESULT.json",
+      "sha256": "a3502927fefca99088dd2dd2ada5b2272f1f0f2f126f5856dcad466576538f4e"
+    },
+    {
+      "bytes": 54,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/NEUTTS-EXIT.json",
+      "sha256": "868f263d1c2a443d1f3c3c2d00a4f4da64a3d873205db50ed16605ddda7ea3eb"
+    },
+    {
+      "bytes": 4804,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/NEUTTS-INSTALLED-PACKAGES.tsv",
+      "sha256": "40c4104a1cc044bd3f5297deb160e0f952208afe1e383f1b5b8fa3b441956bd3"
+    },
+    {
+      "bytes": 18469,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/NEUTTS-PINNED-APT.tsv",
+      "sha256": "7ad635d7f1ce1157c7f3b3d7808eaf113c8bb77c4e99a8fe30b6b155faf04c5e"
+    },
+    {
+      "bytes": 339,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/NEUTTS-PYTHON-CHECK.log",
+      "sha256": "2c025ce5a45cfa2b6f032ea3bc706e8173fa7c6a1c78ff860e40d669199a48bf"
+    },
+    {
+      "bytes": 2992,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/NEUTTS-PYTHON-INSTALL.log",
+      "sha256": "b6f168a7c490237e88b0756959eeb782b15fcd2ed77c0b1ca229f435d4dea5fa"
+    },
+    {
+      "bytes": 1448,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/NEUTTS-UPGRADED-BASE-PACKAGES.tsv",
+      "sha256": "132cb4a2c2714a6c97f61d2393ac17dd5f11edaf16eaaf1dbce3527972d076aa"
+    },
+    {
+      "bytes": 80,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/RUST-EXIT.json",
+      "sha256": "b639f99a345ef6057beda7d2d1d995a5495e8586873cbd532b7d836a793b0710"
+    },
+    {
+      "bytes": 2324,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/RUST-PROBE-INPUTS.json",
+      "sha256": "c0cf77bff0f487121b6d96fb67ad4c49034919f15a15b3c9a7b8719b5ba181e8"
+    },
+    {
+      "bytes": 14905,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-llvmlite.json",
+      "sha256": "73c00bd81765e6982107865719843f96c49dfb2f4f6fa31d422dba734431d6c2"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-llvmlite.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-llvmlite.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 18116,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-python_dependencies.json",
+      "sha256": "d969b57c1d1662709f18ee037905d842aa4fd90aaa44899158163223fccecb31"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-python_dependencies.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-python_dependencies.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 35798,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-scipy.json",
+      "sha256": "90f25189caa1b2c6302630e67db159e2b76b1c5c7c03596f9b40337f6a40c668"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-scipy.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-scipy.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 16445,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-soxr.json",
+      "sha256": "b7914bf73171af91500eef34deadc4af5d3127437ac674f0d8cfdfa194791746"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-soxr.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-soxr.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 59936,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-torch.json",
+      "sha256": "1823591126e0a978c940185db8a137a94a833c8bbcf2b4b0d71f1f33457cab77"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-torch.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-torch.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 61598,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-torchaudio.json",
+      "sha256": "af4eaf5d09e6559da6826db73261d2abdf17fd81458634e7bdde015279794e89"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-torchaudio.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-torchaudio.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 101229,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-torchcodec.json",
+      "sha256": "9793e541bb72a39148a8b2a0949a1052870a4208d66b16bc2467f8a244921b7c"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-torchcodec.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/neutts-torchcodec.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 17316,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/python-wheelhouse/neutts_core_python_lock.json",
+      "sha256": "ba927bae7ec87c331e23136ba883da86876ca24044485288d9866649130fab38"
+    },
+    {
+      "bytes": 16207,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/python-wheelhouse/python-wheelhouse-receipt.json",
+      "sha256": "3275d35f56ef39d59b67d9a19bfe1844091edebe5436e118af208b53ab0f8415"
+    },
+    {
+      "bytes": 866,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/python-wheelhouse/requirements.txt",
+      "sha256": "7a8c6c2672cf2b28305978102d9f3fb6025398015603947f362a79c700f8fdd1"
+    },
+    {
+      "bytes": 15285,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/rust-components/RUST-COMPONENTS-RESULT.json",
+      "sha256": "6dca1223cafccd2c2e71d03901d28469fdfb0e2c205b96a70348e28435ef192d"
+    },
+    {
+      "bytes": 92,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/rust-components/rust-apt-install.stderr.log",
+      "sha256": "6e9b6d66e9fb4e96a98afdb06323f494bda34a133c044237abeada96d193e9bd"
+    },
+    {
+      "bytes": 3674,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/rust-components/rust-apt-install.stdout.log",
+      "sha256": "97e400a15c6e6a325aa4633a5a41d67ed6c555b903026f7f8f460dbbc1ca0b0c"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/rust-components/rust-apt-plan.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 3111,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/rust-components/rust-apt-plan.stdout.log",
+      "sha256": "205a41d01c8014a340a048e761725db805b81fa310dac3b3b0e2620c9dabbca3"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/rust-components/rust-frozen-signed-index.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 785,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/rust-components/rust-frozen-signed-index.stdout.log",
+      "sha256": "04c2c7b86a8818f6e40fc0817556edffe1af90b3d133f8c7708c65863ce2cd77"
+    },
+    {
+      "bytes": 109321,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-locked-build/rust-native-probe.log",
+      "sha256": "19fd852260a1afd824204d04264658aa685acac8f32ae158e3a347b7d4704ae9"
+    },
+    {
+      "bytes": 32254,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/NEUTTS-APT-PYTHON-METADATA.json",
+      "sha256": "6fb50c94a727ee743580f3c763b8f119066e82bc6b5d3020f7f57b6877203c56"
+    },
+    {
+      "bytes": 173678,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/NEUTTS-APT-PYTHON-VALIDATION.json",
+      "sha256": "e9d05db529fafcf8ea260bca268603a219f4ece44c49c522595a505eb1979c2d"
+    },
+    {
+      "bytes": 141,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/NEUTTS-APT-PYTHON-VALIDATION.log",
+      "sha256": "fad891e4749fc619ae026aa4faebc8b99e2ab08c1c1ce59c947af0683acdf95b"
+    },
+    {
+      "bytes": 1471,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/NEUTTS-BASE-PACKAGES.tsv",
+      "sha256": "78ff2592d1d13be57ae34035e67f41de78677af37644cea50622877b590c6046"
+    },
+    {
+      "bytes": 40501,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/NEUTTS-CORE-RESULT.json",
+      "sha256": "d20c972a40df224585654de5b7029dcab456f5438f7d8964dbe2258828971ac4"
+    },
+    {
+      "bytes": 54,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/NEUTTS-EXIT.json",
+      "sha256": "868f263d1c2a443d1f3c3c2d00a4f4da64a3d873205db50ed16605ddda7ea3eb"
+    },
+    {
+      "bytes": 4804,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/NEUTTS-INSTALLED-PACKAGES.tsv",
+      "sha256": "40c4104a1cc044bd3f5297deb160e0f952208afe1e383f1b5b8fa3b441956bd3"
+    },
+    {
+      "bytes": 18469,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/NEUTTS-PINNED-APT.tsv",
+      "sha256": "7ad635d7f1ce1157c7f3b3d7808eaf113c8bb77c4e99a8fe30b6b155faf04c5e"
+    },
+    {
+      "bytes": 339,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/NEUTTS-PYTHON-CHECK.log",
+      "sha256": "2c025ce5a45cfa2b6f032ea3bc706e8173fa7c6a1c78ff860e40d669199a48bf"
+    },
+    {
+      "bytes": 2992,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/NEUTTS-PYTHON-INSTALL.log",
+      "sha256": "b6f168a7c490237e88b0756959eeb782b15fcd2ed77c0b1ca229f435d4dea5fa"
+    },
+    {
+      "bytes": 1448,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/NEUTTS-UPGRADED-BASE-PACKAGES.tsv",
+      "sha256": "132cb4a2c2714a6c97f61d2393ac17dd5f11edaf16eaaf1dbce3527972d076aa"
+    },
+    {
+      "bytes": 81,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/RUST-EXIT.json",
+      "sha256": "7ba67787bbf5a7be49555bd8405983cb3504d39bfa1600966b0c75a520d478ec"
+    },
+    {
+      "bytes": 2325,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/RUST-PROBE-INPUTS.json",
+      "sha256": "20dcb04f0fe4fe4a7239459cc2371c2ca589cb63fadf88b07b9451b7a02dcece"
+    },
+    {
+      "bytes": 14904,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-llvmlite.json",
+      "sha256": "a6e3edbc862fa54dc009491943c814473f77578aa249e622c329b56623ad30e8"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-llvmlite.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-llvmlite.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 18116,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-python_dependencies.json",
+      "sha256": "a720f9f4413cd3fc73f7c3f2ddf04fe4038701a83ecbbfca8867bbd64e51f418"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-python_dependencies.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-python_dependencies.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 35798,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-scipy.json",
+      "sha256": "270ed4c6579013f81730e80b1995e480aac0bb08a64a70a9e1d0121a2cd1e72b"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-scipy.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-scipy.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 16444,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-soxr.json",
+      "sha256": "f7c97cb5b69727e0e2dec50c6e0ae849b9daee55ae0f6f1efe4aa472601e0a33"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-soxr.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-soxr.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 59936,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-torch.json",
+      "sha256": "c231609882a48e03e81430775b1d36c1bfb05d4b08a98ce44952fd05eee82ab7"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-torch.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-torch.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 61598,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-torchaudio.json",
+      "sha256": "46cce8d1d164d7ebcdb54389234786df222788e20a2f2933582bf667f62da75b"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-torchaudio.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-torchaudio.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 101229,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-torchcodec.json",
+      "sha256": "59908ac93651a4ab47cc293de1201e3ef57e50b83c55ac93f5308d69563812a1"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-torchcodec.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/neutts-torchcodec.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 17316,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/python-wheelhouse/neutts_core_python_lock.json",
+      "sha256": "ba927bae7ec87c331e23136ba883da86876ca24044485288d9866649130fab38"
+    },
+    {
+      "bytes": 16207,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/python-wheelhouse/python-wheelhouse-receipt.json",
+      "sha256": "284ae75eb836a79f75043ed20a116f822cd728addbb1173ba7d2b17bbffc114d"
+    },
+    {
+      "bytes": 866,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/python-wheelhouse/requirements.txt",
+      "sha256": "7a8c6c2672cf2b28305978102d9f3fb6025398015603947f362a79c700f8fdd1"
+    },
+    {
+      "bytes": 14985,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/rust-components/RUST-COMPONENTS-RESULT.json",
+      "sha256": "6da5cbca8d1e8388509fe8d1825d1487e8e51230c019492879a82c5ff3faa49d"
+    },
+    {
+      "bytes": 92,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/rust-components/rust-apt-install.stderr.log",
+      "sha256": "6e9b6d66e9fb4e96a98afdb06323f494bda34a133c044237abeada96d193e9bd"
+    },
+    {
+      "bytes": 3674,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/rust-components/rust-apt-install.stdout.log",
+      "sha256": "97e400a15c6e6a325aa4633a5a41d67ed6c555b903026f7f8f460dbbc1ca0b0c"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/rust-components/rust-apt-plan.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 3111,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/rust-components/rust-apt-plan.stdout.log",
+      "sha256": "205a41d01c8014a340a048e761725db805b81fa310dac3b3b0e2620c9dabbca3"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/rust-components/rust-frozen-signed-index.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 785,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/rust-components/rust-frozen-signed-index.stdout.log",
+      "sha256": "bc6137148d3020cc60e70d6bde6f688adb9e7c004482ef8c4625b762279a0e7b"
+    },
+    {
+      "bytes": 108793,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/raw-termux-neutts-rust-tiktoken-lock/rust-native-probe.log",
+      "sha256": "9566dd88c0a27a507caed9c7308a2e0b3d905125866923658f0d6f6eafd2ee75"
+    },
+    {
+      "bytes": 4140,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/replay_actual_native_cache_layout.py",
+      "sha256": "587b7c32f3df054d932a16fe75c989b60703e9992078df7b209ef22dcfdcec7e"
+    },
+    {
+      "bytes": 13855,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/run-api-final.json",
+      "sha256": "79d87141eee93c969f73509eca600e4aa1f1f9e3f0dc5c81cbe471673a038802"
+    },
+    {
+      "bytes": 13855,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/run.json",
+      "sha256": "79d87141eee93c969f73509eca600e4aa1f1f9e3f0dc5c81cbe471673a038802"
+    },
+    {
+      "bytes": 1709,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/run_host_tests_native_cache_fix.py",
+      "sha256": "e62c8dcf65687aae295de4835905f8b48aedad99092b5f21cbd771435c7a03fc"
+    },
+    {
+      "bytes": 183,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/rust-host-tests-native-cache-fix.log",
+      "sha256": "b694e7816960f633e015fefa9db861c3b64f97d9c8db74a09b202c1ed01bf33e"
+    },
+    {
+      "bytes": 20163,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/rust-host-tests-native-cache-fix.xml",
+      "sha256": "559e1125bbccd78d9cb8c8188b12bf4f5c75f01bbbdcfdd7dc9a5c2fc319b929"
+    },
+    {
+      "bytes": 40534,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/verified-artifact-12119747428.json",
+      "sha256": "2e845f590a0886e21a2d60a8428b393e7cf58aa97c6a8b9a4e1eba62fbbee794"
+    },
+    {
+      "bytes": 13912224,
+      "path": "audit/neutts-rust-native-20261017/run-39082981266/verified-artifact-12119921806.json",
+      "sha256": "e099aac6626792e02d09bd99d0a45aab6f0d34897d4bd8e33ee6b6ec57770a85"
+    },
+    {
+      "bytes": 23975,
+      "path": "docs/neutts-rust-preparation.md",
+      "sha256": "d36755124519a83fe7be0b498ef3909424078ede39fb251f1a47f2da4a77aa56"
+    },
+    {
+      "bytes": 77692,
+      "path": "scripts/compatibility_probe_neutts_rust.py",
+      "sha256": "3d8287bf967003267d220e29380f610dbc50b42b165a9299821d76fa260e869e"
+    },
+    {
+      "bytes": 60152,
+      "path": "tests/test_neutts_rust_preparation.py",
+      "sha256": "f1f68e858433d3be5730ffd66f4e4a17e7cda06701a44d26e02b1a3beb0d9a59"
+    }
+  ],
+  "owned_ledger_sha256": "6b82e52da04c7f7641c949610c119a4274a164dd47872e5c4dd76da00355513b",
+  "production_staging_replay": {
+    "bytes": 19122,
+    "path": "audit/neutts-rust-native-20261017/run-39082981266/actual-native-cache-layout-production-replay.json",
+    "sha256": "99c69acc74b28b075ff585f27b9d6ab3064fa728b2d26618a68219557e0c056f"
+  },
+  "protected_files_rechecked": [
+    {
+      "bytes": 2206,
+      "path": ".github/workflows/neutts-rust-components.yml",
+      "sha256": "d88f44abc37d4995781833178e677bd0aa4ce428924e835934d2305e1b8118a9"
+    },
+    {
+      "bytes": 39577,
+      "path": "audit/neutts-rust-native-20261017/run-39077868589/complete-failed-run-capture-checkpoint.json",
+      "sha256": "83bb897eac24b803dc73cc973d8d6446865a03081d276d1220f8d9b918c9f07d"
+    },
+    {
+      "bytes": 8698,
+      "path": "audit/neutts-rust-native-20261017/run-39077868589/selected-index-fix-preparation.json",
+      "sha256": "fc4ff9fce51b54aa6a3cffbb9231fc0a2ae1fe1e732f0918dda960eddfa48ce6"
+    },
+    {
+      "bytes": 46223,
+      "path": "audit/neutts-rust-native-20261017/run-39079732704/compiler-input-fix-preparation.json",
+      "sha256": "e8708e04b79cd02199bd8b34febcf2f0168da0d108779a0914658d40d05b08f7"
+    },
+    {
+      "bytes": 5579,
+      "path": "scripts/compatibility_probe_neutts_rust.sh",
+      "sha256": "ef8396660721039b0c087b0e69915ba7e537ac723cead9229b3b9cee7dd25428"
+    },
+    {
+      "bytes": 15877,
+      "path": "scripts/neutts_rust_operations.py",
+      "sha256": "a8576c384d3c5aa3854c430df83e6cfb3b1f6a69ba75713079bb6947fee125a7"
+    },
+    {
+      "bytes": 552620,
+      "path": "scripts/neutts_rust_sources_lock.json",
+      "sha256": "de243480c74b12ad81efc2886b8f78a237abb958588c8424f070e5a6be766670"
+    },
+    {
+      "bytes": 28083,
+      "path": "scripts/prepare_neutts_rust_sources.py",
+      "sha256": "db8ce00daaece15f69b4f7b1de415accd207f13e256b2097d4efcb2d0894c428"
+    },
+    {
+      "bytes": 25625,
+      "path": "scripts/validate_neutts_apt_python.py",
+      "sha256": "7c051b0143675594aadd52f9a0b66ec71e6950e9953feef3f773acceafcb0a29"
+    }
+  ],
+  "schema": "native-rust-apt-cache-fix-preparation/v1",
+  "scope": "Preparation-only native writable APT cache basename correction; no source or lock selection changes.",
+  "source_change_boundary": {
+    "added_function": "apt_install_cache_basename",
+    "all_imports_and_preceding_functions_unchanged": true,
+    "changed_function": "stage_install_archives",
+    "install_toolchain_and_all_following_functions_unchanged": true,
+    "preparer_source_lock_operations_shell_workflow_unchanged": true
+  },
+  "source_diff": {
+    "bytes": 19001,
+    "path": "audit/neutts-rust-native-20261017/run-39082981266/native-cache-fix.diff",
+    "sha256": "236f33291bafce9c558337e41f5f39466c0401ae43144dc77c63c23d2b4eb13d"
+  }
+}

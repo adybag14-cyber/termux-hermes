@@ -699,30 +699,94 @@ def test_both_real_stage_download_plans_preserve_all_original_apt_pins(tmp_path,
     assert lock == before and prep.sha(raw) == prep.LOCK_SHA256
 
 
-def test_native_writable_apt_copy_restores_index_basename_and_preserves_input(tmp_path, monkeypatch):
+@pytest.mark.parametrize("in_foundation", [True, False])
+def test_native_writable_apt_cache_uses_actual_epoch_lookup_and_preserves_input(tmp_path, in_foundation):
+    raw, original = epoch_archive_fixture()
+    pin = {**original, "in_foundation": in_foundation}
+    before = deepcopy(pin)
+    source_dir, work, out = tmp_path / "inputs", tmp_path / "native-work", tmp_path / "proof"
+    source_dir.mkdir()
+    work.mkdir()
+    out.mkdir()
+    source = source_dir / prep.apt_archive_filename(pin)
+    source.write_bytes(raw)
+    result = native.stage_install_archives(SimpleNamespace(apt_archives=source_dir, out=out), [pin], work)
+    assert sorted(path.name for path in result.iterdir()) == ["fixture_1%3a1.0_all.deb", "partial"]
+    assert (result / "partial").is_dir()
+    target = result / "fixture_1%3a1.0_all.deb"
+    assert target.is_file() and not target.is_symlink()
+    assert target.read_bytes() == raw and native.sha_file(target) == pin["sha256"]
+    assert source.name == "fixture_1%3A1.0_all.deb" and source.read_bytes() == raw
+    assert pin == before and pin["filename"].endswith("fixture_1:1.0_all.deb")
+    receipt = json.loads((out / "rust-apt-cache-layout.json").read_bytes())
+    assert receipt["status"] == "passed" and receipt["archive_count"] == 1
+    assert receipt["archives"] == [{
+        "name": pin["name"], "version": pin["version"], "architecture": pin["architecture"],
+        "signed_filename": pin["filename"], "input_basename": source.name,
+        "apt_cache_basename": "fixture_1%3a1.0_all.deb",
+        "bytes": len(raw), "sha256": pin["sha256"]}]
+
+
+def test_native_cache_names_cover_frozen_foundation_and_new_epoch_packages():
+    lock, raw = prep.load_lock(ROOT / "scripts" / prep.LOCK_FILENAME)
+    original = deepcopy(lock)
+    pins = lock["build_apt"]["packages"]
+    names = {pin["name"]: native.apt_install_cache_basename(pin) for pin in pins}
+    assert len(names) == len(set(names.values())) == 47
+    changed = {pin["name"]: (names[pin["name"]], pin["in_foundation"]) for pin in pins
+               if names[pin["name"]] != Path(pin["filename"]).name}
+    assert changed == {
+        "ca-certificates": ("ca-certificates_1%3a2026.09.25_all.deb", True),
+        "openssl": ("openssl_1%3a3.6.5_aarch64.deb", True),
+        "openssl-tool": ("openssl-tool_1%3a3.6.5_aarch64.deb", False),
+    }
+    assert all(names[p["name"]].replace("%3a", ":") == Path(p["filename"]).name for p in pins)
+    assert lock == original and prep.sha(raw) == prep.LOCK_SHA256
+
+
+@pytest.mark.parametrize("field,value", [
+    ("filename", "pool/main/f/fixture/../fixture_1:1.0_all.deb"),
+    ("filename", "pool/main/f/fixture//fixture_1:1.0_all.deb"),
+    ("filename", "pool/main/f/fixture/fixture_1%3a1.0_all.deb"),
+    ("filename", "pool/main/f/fixture/fixture_1%3A1.0_all.deb"),
+    ("filename", "pool/main/f/fixture/fixture_1:1.0_all.deb:stream"),
+    ("filename", "pool/main/f/fixture\\fixture_1:1.0_all.deb"),
+    ("name", "fixture_alias"),
+    ("version", "1%3a1.0"),
+    ("version", "1:1.0:2"),
+    ("version", "1:1.0_extra"),
+    ("architecture", "aarch64.extra"),
+])
+def test_native_cache_name_rejects_false_identity_escape_and_prequoted_alias(field, value):
+    _, pin = epoch_archive_fixture()
+    with pytest.raises(native.ProbeError):
+        native.apt_install_cache_basename({**pin, field: value})
+
+
+@pytest.mark.parametrize("case_alias", [False, True])
+def test_native_cache_copy_rejects_aliases_before_creating_output(tmp_path, case_alias):
+    _, pin = epoch_archive_fixture()
+    pins = [pin, deepcopy(pin)]
+    if case_alias:
+        pins = []
+        for version in ("1:1a", "1:1A"):
+            filename = "pool/main/f/fixture/fixture_" + version + "_all.deb"
+            pins.append({**pin, "version": version, "filename": filename})
+    with pytest.raises(native.ProbeError, match="Duplicate or aliased"):
+        native.stage_install_archives(SimpleNamespace(apt_archives=tmp_path / "absent", out=tmp_path), pins, tmp_path)
+    assert not (tmp_path / "install-archives").exists()
+    assert not (tmp_path / "rust-apt-cache-layout.json").exists()
+
+
+def test_native_cache_copy_rejects_changed_input_without_success_receipt(tmp_path):
     raw, pin = epoch_archive_fixture()
     source_dir, work = tmp_path / "inputs", tmp_path / "native-work"
     source_dir.mkdir()
     work.mkdir()
-    source = source_dir / prep.apt_archive_filename(pin)
-    source.write_bytes(raw)
-    requested, stored = [], {}
-    copy, digest = shutil.copyfile, native.sha_file
-    def copy_to_native_name(origin, target):
-        requested.append(target.name)
-        # Windows cannot represent an epoch colon in a normal filename. Preserve
-        # the requested native name and adapt only this fixture's physical path.
-        actual = target.with_name(target.name.replace(":", "%3A")) if os.name == "nt" else target
-        stored[str(target)] = actual
-        return copy(origin, actual)
-    monkeypatch.setattr(native.shutil, "copyfile", copy_to_native_name)
-    monkeypatch.setattr(native, "sha_file", lambda path: digest(stored.get(str(path), path)))
-    result = native.stage_install_archives(SimpleNamespace(apt_archives=source_dir), [pin], work)
-    assert requested == ["fixture_1:1.0_all.deb"]
-    assert (result / "partial").is_dir()
-    assert source.read_bytes() == raw
-    assert list(stored.values())[0].read_bytes() == raw
-    assert digest(list(stored.values())[0]) == pin["sha256"]
+    (source_dir / prep.apt_archive_filename(pin)).write_bytes(raw.replace(b"owned", b"wrong"))
+    with pytest.raises(native.ProbeError, match="Retained APT archive bytes differ"):
+        native.stage_install_archives(SimpleNamespace(apt_archives=source_dir, out=tmp_path), [pin], work)
+    assert not (tmp_path / "rust-apt-cache-layout.json").exists()
 
 
 def apt_index_row(pin, **changed):
