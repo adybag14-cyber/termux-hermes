@@ -84,6 +84,9 @@ STUB_SHA = "74087792a86e3f90772627f2217797e422e5d5fc47f24ad825fc3bbb539a667a"
 STUB_URL = "https://packages.termux.dev/apt/termux-main/pool/main/liba/libandroid-stub/" + STUB_FILE
 OPENSLES_SHA = "87c61d872767541e332783d85f70bfdc1b2d48e373ef3025380345171bac4db9"
 OPENSLES_BYTES = 11480
+PLATFORM_NAMESPACE_FILE = "libtermux-platform-ns.so"
+PLATFORM_NAMESPACE_BYTES = 6552
+PLATFORM_NAMESPACE_SHA = "6c39c6a3318accd5e34f4f2c9e5c9e14eed113fb3a92e8c0be86006dc9256e34"
 PORTAUDIO_SHA = "116ff3e80f1b29042cad96e3f923d25dfe5325420d4b5140653fa2226ba47073"
 PORTAUDIO_FILES = ["libportaudio.so", "libportaudio.so.2", "libportaudio.so.2.0.0"]
 NEW_WHEELS = [
@@ -864,15 +867,30 @@ def extract_opensles(archive, destination, work):
     pinned(archive, STUB_BYTES, STUB_SHA)
     with tempfile.TemporaryDirectory(prefix="official-wrapper-", dir=work) as temporary:
         run_logged(["dpkg-deb", "--extract", str(archive), temporary], work, "extract-opensles")
-        source = Path(temporary) / PREFIX.relative_to("/") / "lib/libOpenSLES.so"
-        pinned(source, OPENSLES_BYTES, OPENSLES_SHA)
-        require(not destination.exists() and not destination.is_symlink(), "owned wrapper destination already exists")
-        shutil.copyfile(source, destination)
-        destination.chmod(0o644)
+        members = [
+            ("libOpenSLES.so", OPENSLES_BYTES, OPENSLES_SHA, destination),
+            (PLATFORM_NAMESPACE_FILE, PLATFORM_NAMESPACE_BYTES, PLATFORM_NAMESPACE_SHA,
+             destination.with_name(PLATFORM_NAMESPACE_FILE)),
+        ]
+        # The original wrapper directly needs its sibling namespace library.
+        # Validate both original members and both new destinations before copying.
+        for name, size, digest, target in members:
+            source = Path(temporary) / PREFIX.relative_to("/") / "lib" / name
+            require(not source.is_symlink(), "official audio member is a symlink: " + name)
+            pinned(source, size, digest)
+            require(not target.exists() and not target.is_symlink(),
+                    "owned audio library destination already exists: " + name)
+        for name, _size, _digest, target in members:
+            shutil.copyfile(Path(temporary) / PREFIX.relative_to("/") / "lib" / name, target)
+            target.chmod(0o644)
     return {"archive_sha256": STUB_SHA, "package": "libandroid-stub", "version": "30-2",
             "library_sha256": OPENSLES_SHA, "library_bytes": OPENSLES_BYTES,
             "source_url": STUB_URL, "system_framework": "/system/lib64/libOpenSLES.so",
-            "method": "Exact official archive extraction into owned payload; no dpkg installation."}
+            "namespace_library": {"file": PLATFORM_NAMESPACE_FILE,
+                                  "bytes": PLATFORM_NAMESPACE_BYTES, "sha256": PLATFORM_NAMESPACE_SHA,
+                                  "needed": ["libc.so", "libdl.so"]},
+            "wrapper_needed": ["libc.so", "libdl.so", PLATFORM_NAMESPACE_FILE],
+            "method": "Both exact official wrapper/namespace members extracted into owned payload; no dpkg installation."}
 
 
 def canonical_export(source, out, payload, cache, extras):
@@ -1301,7 +1319,7 @@ def allowed_changes(before, after):
     exact = {"manifest.json", "bundled-wheels.json", "enabled-features.json", "tools/facts.json", "native-wheels.json"}
     exact.update("app/" + p for p in SOURCE_FILES)
     exact.update("wheelhouse/" + p for p in NEW_WHEELS)
-    exact.update("runtime-libs/lib/" + p for p in [*PORTAUDIO_FILES, "libOpenSLES.so"])
+    exact.update("runtime-libs/lib/" + p for p in [*PORTAUDIO_FILES, "libOpenSLES.so", PLATFORM_NAMESPACE_FILE])
     changed = {}
     for name in sorted(set(before) | set(after)):
         if before.get(name) == after.get(name):

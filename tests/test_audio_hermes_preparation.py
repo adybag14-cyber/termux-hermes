@@ -1369,3 +1369,147 @@ def test_canonical_pm_selects_derived_bytes_against_original_locked_wheel_source
     assert len(selected) == 1 and selected[0].path == path
     assert selected[0].sha256 == prep.SOUNDDEVICE_WHEEL_AFTER[1]
     assert row["source"] == original_origin and row["source_fingerprint"] == original_fingerprint
+
+
+def original_audio_wrapper_members():
+    """Read two real archive members without running dpkg or native code."""
+    import tarfile
+
+    archive = ROOT / "tests/fixtures/audio_namespace" / prep.STUB_FILE
+    raw = archive.read_bytes()
+    assert (len(raw), hashlib.sha256(raw).hexdigest()) == (prep.STUB_BYTES, prep.STUB_SHA)
+    assert raw[:8] == b"!<arch>\n"
+    offset, parts = 8, {}
+    while offset < len(raw):
+        header = raw[offset:offset + 60]
+        assert len(header) == 60 and header[-2:] == bytes((96, 10))
+        size = int(header[48:58])
+        name = header[:16].decode().strip().rstrip("/")
+        assert name not in parts and offset + 60 + size <= len(raw)
+        parts[name] = raw[offset + 60:offset + 60 + size]
+        offset += 60 + size + size % 2
+    assert offset == len(raw) and parts["debian-binary"] == b"2.0\n"
+    name = next(n for n in parts if n.startswith("data.tar."))
+    result = {}
+    with tarfile.open(fileobj=io.BytesIO(parts[name]), mode="r:*") as tar:
+        for member in tar:
+            leaf = Path(member.name).name
+            if leaf in ("libOpenSLES.so", prep.PLATFORM_NAMESPACE_FILE):
+                assert member.isfile() and leaf not in result
+                result[leaf] = tar.extractfile(member).read()
+    assert set(result) == {"libOpenSLES.so", prep.PLATFORM_NAMESPACE_FILE}
+    return archive, result
+
+
+def emulate_wrapper_extraction(monkeypatch, members):
+    """The host test replaces only the external dpkg extraction boundary."""
+    calls = []
+
+    def extract(command, work, name, **kwargs):
+        assert command[:2] == ["dpkg-deb", "--extract"]
+        assert name == "extract-opensles" and not kwargs
+        source = Path(command[3]) / prep.PREFIX.relative_to("/") / "lib"
+        source.mkdir(parents=True)
+        for leaf, raw in members.items():
+            (source / leaf).write_bytes(raw)
+        calls.append(command)
+
+    monkeypatch.setattr(prep, "run_logged", extract)
+    return calls
+
+
+def test_owned_opensles_extraction_includes_original_namespace_dependency(tmp_path, monkeypatch):
+    import ast
+    import struct
+
+    archive, members = original_audio_wrapper_members()
+    calls = emulate_wrapper_extraction(monkeypatch, members)
+    destination = tmp_path / "libOpenSLES.so"
+    receipt = prep.extract_opensles(archive, destination, tmp_path)
+    assert len(calls) == 1
+    assert destination.read_bytes() == members["libOpenSLES.so"]
+    namespace = tmp_path / prep.PLATFORM_NAMESPACE_FILE
+    assert namespace.read_bytes() == members[prep.PLATFORM_NAMESPACE_FILE]
+    assert len(namespace.read_bytes()) == prep.PLATFORM_NAMESPACE_BYTES
+    assert hashlib.sha256(namespace.read_bytes()).hexdigest() == prep.PLATFORM_NAMESPACE_SHA
+    assert receipt["namespace_library"]["needed"] == ["libc.so", "libdl.so"]
+    assert receipt["wrapper_needed"] == ["libc.so", "libdl.so", prep.PLATFORM_NAMESPACE_FILE]
+    assert receipt["archive_sha256"] == prep.STUB_SHA
+    # Interpret the actual original ELF bytes with the independent packaging
+    # parser; this does not import either foreign-architecture library.
+    tree = ast.parse((ROOT / "scripts/build_wheels.py").read_text())
+    node = next(n for n in tree.body
+                if isinstance(n, ast.FunctionDef) and n.name == "_elf_needed_libraries")
+    scope = {}
+    exec(compile(ast.Module(body=[node], type_ignores=[]), "<original ELF parser>", "exec"), scope)
+    for name, raw in members.items():
+        assert raw[:6] == b"\x7fELF\x02\x01"
+        assert struct.unpack_from("<H", raw, 18)[0] == 183
+        expected = {"libc.so", "libdl.so"}
+        if name == "libOpenSLES.so":
+            expected.add(prep.PLATFORM_NAMESPACE_FILE)
+        assert scope["_elf_needed_libraries"](raw) == expected
+    assert sorted(p.name for p in tmp_path.iterdir()) == [
+        "libOpenSLES.so", prep.PLATFORM_NAMESPACE_FILE,
+    ]
+
+
+@pytest.mark.parametrize("leaf", ["libOpenSLES.so", prep.PLATFORM_NAMESPACE_FILE])
+@pytest.mark.parametrize("mutation", ["changed-byte", "missing"])
+def test_wrapper_extraction_rejects_missing_or_changed_member_before_copying(
+    tmp_path, monkeypatch, leaf, mutation,
+):
+    archive, members = original_audio_wrapper_members()
+    if mutation == "missing":
+        members.pop(leaf)
+    else:
+        raw = members[leaf]
+        members[leaf] = raw[:-1] + bytes([raw[-1] ^ 1])
+    emulate_wrapper_extraction(monkeypatch, members)
+    with pytest.raises(prep.PreparationError):
+        prep.extract_opensles(archive, tmp_path / "libOpenSLES.so", tmp_path)
+    assert not (tmp_path / "libOpenSLES.so").exists()
+    assert not (tmp_path / prep.PLATFORM_NAMESPACE_FILE).exists()
+
+
+@pytest.mark.parametrize("leaf", ["libOpenSLES.so", prep.PLATFORM_NAMESPACE_FILE])
+def test_wrapper_extraction_preserves_existing_destination_before_any_copy(tmp_path, monkeypatch, leaf):
+    archive, members = original_audio_wrapper_members()
+    emulate_wrapper_extraction(monkeypatch, members)
+    existing = tmp_path / leaf
+    existing.write_bytes(b"pre-existing owned content")
+    with pytest.raises(prep.PreparationError, match="destination already exists"):
+        prep.extract_opensles(archive, tmp_path / "libOpenSLES.so", tmp_path)
+    assert existing.read_bytes() == b"pre-existing owned content"
+    assert sorted(p.name for p in tmp_path.iterdir()) == [leaf]
+
+
+def test_wrapper_extraction_rejects_changed_archive_without_executing_dpkg(tmp_path, monkeypatch):
+    archive, members = original_audio_wrapper_members()
+    calls = emulate_wrapper_extraction(monkeypatch, members)
+    raw = archive.read_bytes()
+    altered = tmp_path / prep.STUB_FILE
+    altered.write_bytes(raw[:-1] + bytes([raw[-1] ^ 1]))
+    with pytest.raises(prep.PreparationError):
+        prep.extract_opensles(altered, tmp_path / "libOpenSLES.so", tmp_path)
+    assert calls == []
+    assert sorted(p.name for p in tmp_path.iterdir()) == [prep.STUB_FILE]
+
+
+def test_payload_oracle_allows_only_new_namespace_bytes_and_preserves_existing_libraries():
+    new_name = "runtime-libs/lib/" + prep.PLATFORM_NAMESPACE_FILE
+    row = {"kind": "file", "bytes": prep.PLATFORM_NAMESPACE_BYTES,
+           "sha256": prep.PLATFORM_NAMESPACE_SHA, "mode": 420}
+    original = {"runtime-libs/lib/libffi.so": {"kind": "file", "bytes": 1,
+                                              "sha256": "a" * 64, "mode": 420}}
+    after = copy.deepcopy(original)
+    after[new_name] = row
+    assert prep.allowed_changes(original, after) == {new_name: {"before": None, "after": row}}
+    changed = copy.deepcopy(after)
+    changed[new_name]["sha256"] = "f" * 64
+    with pytest.raises(prep.PreparationError, match="original runtime library changed"):
+        prep.allowed_changes(after, changed)
+    escaped = copy.deepcopy(after)
+    escaped["runtime-libs/lib/libunreviewed.so"] = row
+    with pytest.raises(prep.PreparationError, match="unreviewed staged payload change"):
+        prep.allowed_changes(original, escaped)

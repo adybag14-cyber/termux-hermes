@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "captured_at_utc": "2026-10-18T00:31:15.490258+00:00",
+  "status": "host-verified-native-retry-pending",
+  "failure": {
+    "run_id": 39080859246,
+    "head_sha": "eea63728f755b02a70c3a57da3653cdc6f79f1b3",
+    "audit": "audio-hermes-native-20261018/run-39080859246.json",
+    "message": "native import borrowed an undeclared prefix library: /data/data/com.termux/files/usr/lib/libtermux-platform-ns.so"
+  },
+  "original_archive": {
+    "file": "libandroid-stub_30-2_aarch64.deb",
+    "bytes": 26788,
+    "sha256": "74087792a86e3f90772627f2217797e422e5d5fc47f24ad825fc3bbb539a667a",
+    "version": "30-2",
+    "architecture": "aarch64",
+    "new_archive_added": false
+  },
+  "correction": [
+    "Copy both original OpenSL ES wrapper and exact namespace dependency into new owned runtime directory after checking both members and destinations",
+    "Explicitly load the pinned owned namespace before the wrapper and PortAudio",
+    "Require all three pinned owned library mapping hashes with unchanged external prefix policy",
+    "Preserve actual runtime observations before later provenance validation"
+  ],
+  "namespace": {
+    "file": "libtermux-platform-ns.so",
+    "bytes": 6552,
+    "sha256": "6c39c6a3318accd5e34f4f2c9e5c9e14eed113fb3a92e8c0be86006dc9256e34",
+    "needed": [
+      "libc.so",
+      "libdl.so"
+    ],
+    "original_archive_and_independent_elf_review": "audio-platform-namespace-20261018/original-wrapper-closure.json"
+  },
+  "sources": {
+    "scripts/prepare_audio_hermes_environment.py": {
+      "bytes": 86191,
+      "sha256": "cd84f5a9e23b4a81e5ed000e311546786c6dfb1d386cb234541fc4829161f515"
+    },
+    "scripts/compatibility_probe_audio_hermes.py": {
+      "bytes": 16165,
+      "sha256": "e9a40e9bb230e6ce672345d02fc871245b51c92ad3381e78bcbe8d9d9a6751e8"
+    },
+    "tests/test_audio_hermes_preparation.py": {
+      "bytes": 69473,
+      "sha256": "82b327dfca72e4a324608eecdc23d6663497a4f34182a047557387ee0bfa7267"
+    }
+  },
+  "host_tests": {
+    "passed": 173,
+    "skipped": 0,
+    "failed": 0,
+    "seconds": 4.09,
+    "new_cases": 9,
+    "fixture": "tests/fixtures/audio_namespace/libandroid-stub_30-2_aarch64.deb",
+    "original_archive_interpreted_without_native_loading": true,
+    "initial_executor_timeout": "explicitly uncompleted; see retained attempt1 record"
+  },
+  "independent_review": {
+    "path": "audio-platform-namespace-20261018/independent-review.json",
+    "bytes": 5197,
+    "sha256": "577946666f69e23885e49a5e9c688a44848903f730b7da1d39c67ed34afbb489",
+    "blocking_findings": 0,
+    "source_review_only": true
+  },
+  "unchanged": [
+    "original 100 wheel catalog rows and source identities",
+    "Sounddevice discovery derivative and exception behavior",
+    "Native numeric and initialization error checks",
+    "External prefix library policy",
+    "All original payload files, inputs and installed package"
+  ],
+  "raw_evidence": {
+    "directory": "audio-platform-namespace-20261018",
+    "files": 10,
+    "bytes": 53219,
+    "ledger_sha256": "0a1a9863e1a1e23873c84ea521e33bda9e14fd244ddce2835447d3d3216a9aca"
+  },
+  "physical_vad": "not-tested",
+  "microphone_accessed": false,
+  "audio_stream_opened": false,
+  "published": false
+}

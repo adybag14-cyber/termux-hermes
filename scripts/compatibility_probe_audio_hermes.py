@@ -97,9 +97,12 @@ def runtime_worker(request):
             "NumPy matrix multiplication failed")
     wrapper = payload / "runtime-libs/lib/libOpenSLES.so"
     portaudio = payload / "runtime-libs/lib/libportaudio.so.2"
+    namespace = payload / "runtime-libs/lib" / prep.PLATFORM_NAMESPACE_FILE
+    prep.pinned(namespace, prep.PLATFORM_NAMESPACE_BYTES, prep.PLATFORM_NAMESPACE_SHA)
     prep.pinned(wrapper, prep.OPENSLES_BYTES, prep.OPENSLES_SHA)
     prep.pinned(portaudio, 61976, prep.PORTAUDIO_SHA)
     # Explicit owned objects bind the SONAME before sounddevice's library discovery.
+    ctypes.CDLL(str(namespace))
     ctypes.CDLL(str(wrapper))
     ctypes.CDLL(str(portaudio))
     paths = {p: Path(p).exists() for p in (
@@ -134,10 +137,26 @@ def runtime_worker(request):
         except Exception as exc:
             device_error = {"type": type(exc).__name__, "message": str(exc)}
     mapped = mapped_files()
+    # Retain observations before a later provenance check can fail. This is
+    # diagnostic evidence, never a dependency-readiness or capture success.
+    prep.write_json(output.with_name("audio-runtime-observations.json"), {
+        "schema_version": 1, "status": "observed-before-provenance-validation",
+        "initialization_error": error, "device_inventory": devices,
+        "device_inventory_error": device_error, "android_framework_paths": paths,
+        "mapped_shared_objects": [
+            {"path": str(path), "bytes": path.stat().st_size, "sha256": prep.sha256(path)}
+            for path in mapped if ".so" in path.name
+        ],
+        "physical_vad": "not-tested", "microphone_accessed": False,
+        "audio_stream_opened": False, "published": False,
+    })
     audio_mappings = []
     for path in mapped:
-        if path.name.startswith(("libportaudio.so", "libOpenSLES.so")):
-            expected = prep.PORTAUDIO_SHA if path.name.startswith("libportaudio") else prep.OPENSLES_SHA
+        if (path.name.startswith(("libportaudio.so", "libOpenSLES.so"))
+                or path.name == prep.PLATFORM_NAMESPACE_FILE):
+            expected = (prep.PLATFORM_NAMESPACE_SHA if path.name == prep.PLATFORM_NAMESPACE_FILE
+                        else prep.PORTAUDIO_SHA if path.name.startswith("libportaudio")
+                        else prep.OPENSLES_SHA)
             # Android's genuine framework object is measured separately, never equated with the wrapper.
             if str(path).startswith("/system/"):
                 audio_mappings.append({"path": str(path), "sha256": prep.sha256(path), "kind": "Android framework"})
@@ -146,7 +165,9 @@ def runtime_worker(request):
                         "audio resolved an unreviewed runtime library")
                 audio_mappings.append({"path": str(path), "sha256": prep.sha256(path), "kind": "owned pinned library"})
     require(any(p["sha256"] == prep.PORTAUDIO_SHA for p in audio_mappings)
-            and any(p["sha256"] == prep.OPENSLES_SHA for p in audio_mappings), "owned audio mappings are incomplete")
+            and any(p["sha256"] == prep.OPENSLES_SHA for p in audio_mappings)
+            and any(p["sha256"] == prep.PLATFORM_NAMESPACE_SHA for p in audio_mappings),
+            "owned audio mappings are incomplete")
     originals = request["original_files"]
     borrowed = []
     for path in mapped:
