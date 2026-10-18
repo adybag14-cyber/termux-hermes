@@ -1,0 +1,306 @@
+{
+  "archive_path_audit": {
+    "bytes": 43003,
+    "path": "audit/neutts-rust-native-20261017/run-39079732704/compiler-input-archive-review-attempt3.json",
+    "sha256": "31c433d124add5a5bfe9693a77fedfd06b5005b7a5b5445cb7b93ffe0aa78343"
+  },
+  "artifacts": [
+    {
+      "artifact_id": 12118368092,
+      "bytes": 257676357,
+      "external_copies": 105,
+      "member_count": 154,
+      "raw_audit_copies": 55,
+      "receipt": {
+        "bytes": 42866,
+        "path": "audit/neutts-rust-native-20261017/run-39079732704/verified-artifact-12118368092.json",
+        "sha256": "6ec076343a59dee87b9a4449c02676b317d73d381b7a484f33918b12ca6e04dc"
+      },
+      "sha256": "483b38a24980094ae82d6eb0f5a2d8ee0b3d3c1640be41bedfd6d87d51dc7266"
+    },
+    {
+      "artifact_id": 12118308392,
+      "bytes": 559502534,
+      "external_copies": 917,
+      "member_count": 47390,
+      "raw_audit_copies": 55,
+      "receipt": {
+        "bytes": 13914556,
+        "path": "audit/neutts-rust-native-20261017/run-39079732704/verified-artifact-12118308392.json",
+        "sha256": "5b16f9eb16d7cc66148fe69f367398d6ea95d6ce3aaa5d00604c5a95def566c8"
+      },
+      "sha256": "3e6d1102a6f39c7335628e4def017721afb5e10995307d7961c326411c430761"
+    }
+  ],
+  "baseline_files": [
+    {
+      "bytes": 552039,
+      "path": "scripts/neutts_rust_sources_lock.json",
+      "sha256": "c72d8bfa5f9ae86205443b2c7c19892be77a2879ec7604ccd77aeda2a94775af"
+    },
+    {
+      "bytes": 28083,
+      "path": "scripts/prepare_neutts_rust_sources.py",
+      "sha256": "0f5db491b6a2d2cbe13e908fe24613b62f9db38ac2f0d33968328c499038a9a1"
+    },
+    {
+      "bytes": 72141,
+      "path": "scripts/compatibility_probe_neutts_rust.py",
+      "sha256": "a07d0ec7d1daf20491df69795c5f1ac8d10e7c2ea1e2b756c977c6783f8ce502"
+    },
+    {
+      "bytes": 15877,
+      "path": "scripts/neutts_rust_operations.py",
+      "sha256": "a8576c384d3c5aa3854c430df83e6cfb3b1f6a69ba75713079bb6947fee125a7"
+    },
+    {
+      "bytes": 5579,
+      "path": "scripts/compatibility_probe_neutts_rust.sh",
+      "sha256": "ef8396660721039b0c087b0e69915ba7e537ac723cead9229b3b9cee7dd25428"
+    },
+    {
+      "bytes": 2206,
+      "path": ".github/workflows/neutts-rust-components.yml",
+      "sha256": "d88f44abc37d4995781833178e677bd0aa4ce428924e835934d2305e1b8118a9"
+    },
+    {
+      "bytes": 44023,
+      "path": "tests/test_neutts_rust_preparation.py",
+      "sha256": "545f612761ef5cfe2e2b17a56bea4bc9433105b1ff890f1c0da8c01710f56b83"
+    },
+    {
+      "bytes": 16266,
+      "path": "docs/neutts-rust-preparation.md",
+      "sha256": "998195ee254f6c2f6171591767fc3b26f6ff50e956e1dcb8e36509cba6aa6165"
+    }
+  ],
+  "bounded_correction": {
+    "default_member_bound_bytes": 64000000,
+    "exact_large_member_bounds_required": true,
+    "path_diagnostics_must_distinguish_missing_from_escaped": true,
+    "preserve_all_46_original_records": true,
+    "preserve_source_cargo_python_pins": true,
+    "sole_new_apt_identity": {
+      "architecture": "aarch64",
+      "bytes": 278628,
+      "depends": "openssl (= 1:3.6.5)",
+      "filename": "pool/main/o/openssl-tool/openssl-tool_1:3.6.5_aarch64.deb",
+      "in_foundation": false,
+      "name": "openssl-tool",
+      "pre_depends": "",
+      "sha256": "91b6fd0e86f2585447a44c42a496e8c4da364ff3d7b13bec236a7e65be108109",
+      "url": "https://packages.termux.dev/apt/termux-main/pool/main/o/openssl-tool/openssl-tool_1:3.6.5_aarch64.deb",
+      "version": "1:3.6.5"
+    },
+    "tls_chain_and_hostname_checks_unchanged": true
+  },
+  "head_sha": "3109530049338f8a4fe063d5ad08bbae57f7e95f",
+  "investigation_attempts": {
+    "attempt2": "55-second host timeout interrupted the wrapper; partial zero-byte compiler-input-archive-review.json is not evidence.",
+    "attempt3": "Complete 43003-byte receipt is compiler-input-archive-review-attempt3.json. Its final console summary accidentally read the prior zero-byte filename; the receipt itself and actual hash are independently verified above.",
+    "original_parser_replay_failed": {
+      "bytes": 1228,
+      "path": "audit/neutts-rust-native-20261017/run-39079732704/compiler-input-archive-review-attempt1.stderr.log",
+      "sha256": "ecacd08578ab268fdb3cd03228fdf947c35c70f537af5670f97e4eddf2729612"
+    }
+  },
+  "native_correction_tested": false,
+  "observed_utc": "2026-10-18T00:05:47.000616+00:00",
+  "published_package_changed": false,
+  "release_output": false,
+  "run_id": 39079732704,
+  "schema": "native-rust-compiler-input-failure-analysis/v1",
+  "source_grounded_diagnosis": {
+    "diagnosis_scope": "Original requested path and exact original archive/control inventory; native error did not record the offending original/resolved path.",
+    "missing_from_original_archive_closure": [
+      "/data/data/com.termux/files/usr/bin/openssl"
+    ],
+    "missing_package": "openssl-tool",
+    "other_requested_paths": 88,
+    "raw_error_names_offending_path": false,
+    "two_additional_exact_member_bound_defects": [
+      {
+        "archive_sha256": "4aae6c31c71d0bb2847cedb077b45bc4bde20f964ce02987e8d368579faa7e5e",
+        "bytes": 67004390,
+        "independent_exact_archive_read_verified": true,
+        "original_native_parser_status": "rejected_by_64000000_byte_member_bound",
+        "package": "rust",
+        "path": "/data/data/com.termux/files/usr/lib/rustlib/aarch64-linux-android/lib/libcore-500d6d8d30fe7938.rmeta",
+        "sha256": "5c60ac0728315ea04853686a48e6376d8a6d7d88c1e0c82bfd27d6976ef18bd5"
+      },
+      {
+        "archive_sha256": "4aae6c31c71d0bb2847cedb077b45bc4bde20f964ce02987e8d368579faa7e5e",
+        "bytes": 78088296,
+        "independent_exact_archive_read_verified": true,
+        "original_native_parser_status": "rejected_by_64000000_byte_member_bound",
+        "package": "rust",
+        "path": "/data/data/com.termux/files/usr/lib/rustlib/aarch64-linux-android/lib/librustc_driver-d4b3d460e526cc9c.so",
+        "sha256": "342ce378f61409244f48dcd26d69c3db919fa1c104896e5a3f646fd34b9ecd63"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "cargo_resolution_or_source_build_started": false,
+      "compiler_install": {
+        "additional_count": 19,
+        "installed_pin_count": 46,
+        "status": "passed"
+      },
+      "error": "Compiler/runtime path escaped prefix",
+      "native_failure_stage": "native-compiler-abi",
+      "observed_native_control_outputs": {
+        "rust-api-execute": {
+          "receipt": {
+            "bytes": 3,
+            "path": "audit/neutts-rust-native-20261017/run-39079732704/raw-termux-neutts-rust-tiktoken-lock/rust-components/rust-api-execute.stdout.log",
+            "sha256": "68ca3fba3b7e864770cb61aeb306d4bd4354b68ab4dd38450860c5d823e42a53"
+          },
+          "text": "24\n"
+        },
+        "rust-cargo": {
+          "receipt": {
+            "bytes": 318,
+            "path": "audit/neutts-rust-native-20261017/run-39079732704/raw-termux-neutts-rust-tiktoken-lock/rust-components/rust-cargo.stdout.log",
+            "sha256": "7d9e7c9ae80558914587660fd06aae6759ae3f3dffc42f30e50e55e7b7d96166"
+          },
+          "text": "cargo 1.99.1 (5f94df478 2026-08-27) (built from a source tarball)\nrelease: 1.99.1\ncommit-hash: 5f94df4789f005f9a352888e8355ffc645b7ed0e\ncommit-date: 2026-08-27\nhost: aarch64-linux-android\nlibgit2: 1.9.6 (sys:0.21.0 vendored)\nlibcurl: 8.21.0-DEV (sys:0.4.90+curl-8.21.0 vendored ssl:OpenSSL/3.6.5)\nos: Android [64-bit]\n"
+        },
+        "rust-clang": {
+          "receipt": {
+            "bytes": 131,
+            "path": "audit/neutts-rust-native-20261017/run-39079732704/raw-termux-neutts-rust-tiktoken-lock/rust-components/rust-clang.stdout.log",
+            "sha256": "de78135dc0138338f33897fb853af0f614f913d701547b32ecf2450046e00b65"
+          },
+          "text": "clang version 21.1.8\nTarget: aarch64-unknown-linux-android24\nThread model: posix\nInstalledDir: /data/data/com.termux/files/usr/bin\n"
+        },
+        "rust-rustc": {
+          "receipt": {
+            "bytes": 223,
+            "path": "audit/neutts-rust-native-20261017/run-39079732704/raw-termux-neutts-rust-tiktoken-lock/rust-components/rust-rustc.stdout.log",
+            "sha256": "481adb50a1a63f35f62b2fb8ac7715ae65f476eca2730518d0e12d52a2eff4e7"
+          },
+          "text": "rustc 1.99.1 (58cf8f9c3 2026-10-13) (built from a source tarball)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: aarch64-linux-android\nrelease: 1.99.1\nLLVM version: 21.1.8\n"
+        }
+      },
+      "result": {
+        "bytes": 24184,
+        "path": "audit/neutts-rust-native-20261017/run-39079732704/raw-termux-neutts-rust-tiktoken-lock/rust-components/RUST-COMPONENTS-RESULT.json",
+        "sha256": "c700136453bf6c7decdbf87aea8b90e1fe46f2d29eb8c8156430f33d05c06c5f"
+      },
+      "runtime": {
+        "api_level": 24,
+        "base_prefix": "/data/data/com.termux/files/usr",
+        "executable": {
+          "bytes": 4448,
+          "class": 64,
+          "endianness": "little",
+          "machine": 183,
+          "path": "/data/data/com.termux/files/usr/bin/python3.14",
+          "sha256": "4f8d78ede7fc26e96e99342dd83ce42d32c9b4d0806bc9a99ff7151396269b25"
+        },
+        "machine": "aarch64",
+        "prefix": "/data/data/com.termux/files/usr",
+        "python": "3.14.6 (main, Jul  5 2026, 10:35:55) [Clang 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 5e96669f0",
+        "sys_platform": "android",
+        "uid": 1000
+      },
+      "signed_index": {
+        "authority": "native APT configured trust store",
+        "inrelease_sha256": "249dab3ab3da3993b2436d48c819506f9aa586f6985905d81a451e76f2de7901",
+        "insecure_repository_exceptions": false,
+        "matched_archives": 46,
+        "packages_gz_sha256": "dba73c2f0caaa828b65f02ba0e56cac694ee7186999a442ae7858b4258c321b6",
+        "packages_uncompressed_sha256": "95cf6e3b7cf347a81aef44e45199724b7a6cd21c29be7611cc1ac5ebaf2640e1",
+        "selected_index": {
+          "selected_record_count": 46,
+          "target_package_name_count": 3008,
+          "target_record_count": 3011
+        },
+        "status": "passed"
+      },
+      "stage": "tiktoken-lock"
+    },
+    {
+      "cargo_resolution_or_source_build_started": false,
+      "compiler_install": {
+        "additional_count": 19,
+        "installed_pin_count": 46,
+        "status": "passed"
+      },
+      "error": "Compiler/runtime path escaped prefix",
+      "native_failure_stage": "native-compiler-abi",
+      "observed_native_control_outputs": {
+        "rust-api-execute": {
+          "receipt": {
+            "bytes": 3,
+            "path": "audit/neutts-rust-native-20261017/run-39079732704/raw-termux-neutts-rust-locked-build/rust-components/rust-api-execute.stdout.log",
+            "sha256": "68ca3fba3b7e864770cb61aeb306d4bd4354b68ab4dd38450860c5d823e42a53"
+          },
+          "text": "24\n"
+        },
+        "rust-cargo": {
+          "receipt": {
+            "bytes": 318,
+            "path": "audit/neutts-rust-native-20261017/run-39079732704/raw-termux-neutts-rust-locked-build/rust-components/rust-cargo.stdout.log",
+            "sha256": "7d9e7c9ae80558914587660fd06aae6759ae3f3dffc42f30e50e55e7b7d96166"
+          },
+          "text": "cargo 1.99.1 (5f94df478 2026-08-27) (built from a source tarball)\nrelease: 1.99.1\ncommit-hash: 5f94df4789f005f9a352888e8355ffc645b7ed0e\ncommit-date: 2026-08-27\nhost: aarch64-linux-android\nlibgit2: 1.9.6 (sys:0.21.0 vendored)\nlibcurl: 8.21.0-DEV (sys:0.4.90+curl-8.21.0 vendored ssl:OpenSSL/3.6.5)\nos: Android [64-bit]\n"
+        },
+        "rust-clang": {
+          "receipt": {
+            "bytes": 131,
+            "path": "audit/neutts-rust-native-20261017/run-39079732704/raw-termux-neutts-rust-locked-build/rust-components/rust-clang.stdout.log",
+            "sha256": "de78135dc0138338f33897fb853af0f614f913d701547b32ecf2450046e00b65"
+          },
+          "text": "clang version 21.1.8\nTarget: aarch64-unknown-linux-android24\nThread model: posix\nInstalledDir: /data/data/com.termux/files/usr/bin\n"
+        },
+        "rust-rustc": {
+          "receipt": {
+            "bytes": 223,
+            "path": "audit/neutts-rust-native-20261017/run-39079732704/raw-termux-neutts-rust-locked-build/rust-components/rust-rustc.stdout.log",
+            "sha256": "481adb50a1a63f35f62b2fb8ac7715ae65f476eca2730518d0e12d52a2eff4e7"
+          },
+          "text": "rustc 1.99.1 (58cf8f9c3 2026-10-13) (built from a source tarball)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: aarch64-linux-android\nrelease: 1.99.1\nLLVM version: 21.1.8\n"
+        }
+      },
+      "result": {
+        "bytes": 24484,
+        "path": "audit/neutts-rust-native-20261017/run-39079732704/raw-termux-neutts-rust-locked-build/rust-components/RUST-COMPONENTS-RESULT.json",
+        "sha256": "70812571fe0173e8ebc3d760dd82126cc2d6886fe29aab8ad23d07b097f7f167"
+      },
+      "runtime": {
+        "api_level": 24,
+        "base_prefix": "/data/data/com.termux/files/usr",
+        "executable": {
+          "bytes": 4448,
+          "class": 64,
+          "endianness": "little",
+          "machine": 183,
+          "path": "/data/data/com.termux/files/usr/bin/python3.14",
+          "sha256": "4f8d78ede7fc26e96e99342dd83ce42d32c9b4d0806bc9a99ff7151396269b25"
+        },
+        "machine": "aarch64",
+        "prefix": "/data/data/com.termux/files/usr",
+        "python": "3.14.6 (main, Jul  5 2026, 10:35:55) [Clang 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 5e96669f0",
+        "sys_platform": "android",
+        "uid": 1000
+      },
+      "signed_index": {
+        "authority": "native APT configured trust store",
+        "inrelease_sha256": "249dab3ab3da3993b2436d48c819506f9aa586f6985905d81a451e76f2de7901",
+        "insecure_repository_exceptions": false,
+        "matched_archives": 46,
+        "packages_gz_sha256": "dba73c2f0caaa828b65f02ba0e56cac694ee7186999a442ae7858b4258c321b6",
+        "packages_uncompressed_sha256": "95cf6e3b7cf347a81aef44e45199724b7a6cd21c29be7611cc1ac5ebaf2640e1",
+        "selected_index": {
+          "selected_record_count": 46,
+          "target_package_name_count": 3008,
+          "target_record_count": 3011
+        },
+        "status": "passed"
+      },
+      "stage": "locked-build"
+    }
+  ]
+}

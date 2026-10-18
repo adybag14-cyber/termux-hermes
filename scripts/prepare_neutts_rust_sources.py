@@ -34,7 +34,7 @@ import zipfile
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 LOCK_FILENAME = "neutts_rust_sources_lock.json"
-LOCK_SHA256 = "c72d8bfa5f9ae86205443b2c7c19892be77a2879ec7604ccd77aeda2a94775af"
+LOCK_SHA256 = "de243480c74b12ad81efc2886b8f78a237abb958588c8424f070e5a6be766670"
 REGISTRY = "registry+https://github.com/rust-lang/crates.io-index"
 LOCKED_NAMES = ("maturin", "hf-xet", "safetensors", "tokenizers")
 ALL_NAMES = (*LOCKED_NAMES, "tiktoken")
@@ -397,7 +397,7 @@ def load_lock(path):
     require({p["name"] for p in lock["python_build_packages"]}
             == {"setuptools", "setuptools-rust", "semantic-version", "wheel", "packaging"}
             and len(lock["python_build_packages"]) == 5
-            and len(lock["build_apt"]["packages"]) == 46,
+            and len(lock["build_apt"]["packages"]) == 47,
             "Incomplete Python/compiler preparation closure")
     require(next(s for s in lock["sources"] if s["name"] == "tiktoken")["cargo_lock"] is None,
             "Tiktoken requires its separate reviewed native lock capture")

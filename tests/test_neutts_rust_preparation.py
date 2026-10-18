@@ -111,15 +111,15 @@ def rewrite_wheel(path, name, value):
 
 def test_frozen_source_closure_and_distinct_capture_stage():
     lock, raw = prep.load_lock(ROOT / "scripts" / prep.LOCK_FILENAME)
-    assert len(raw) == 552039
+    assert len(raw) == 552620
     assert len(lock["registry"]) == 804
     assert {p["source"] for p in lock["registry"]} == {prep.REGISTRY}
     assert {s["name"] for s in lock["sources"] if s["cargo_lock"]} == set(prep.LOCKED_NAMES)
     assert next(s for s in lock["sources"] if s["name"] == "tiktoken")["cargo_lock"] is None
-    assert len(lock["build_apt"]["packages"]) == 46
+    assert len(lock["build_apt"]["packages"]) == 47
     assert set(lock["build_apt"]["additional_to_foundation"]) == {
         p["name"] for p in lock["build_apt"]["packages"] if not p["in_foundation"]}
-    assert len(lock["build_apt"]["additional_to_foundation"]) == 19
+    assert len(lock["build_apt"]["additional_to_foundation"]) == 20
     assert lock["build_apt"]["apt_maturin_cli_installed"] is False
     assert lock["boundaries"]["four_component_runtime_complete"] is False
 
@@ -573,12 +573,13 @@ def test_frozen_apt_epoch_names_are_portable_bijective_and_metadata_exact():
     pins = lock["build_apt"]["packages"]
     before = deepcopy(pins)
     names = prep.apt_archive_names(pins)
-    assert len(names) == len(set(names.values())) == 46
+    assert len(names) == len(set(names.values())) == 47
     changed = {p["name"]: names[p["filename"]] for p in pins
                if names[p["filename"]] != Path(p["filename"]).name}
     assert changed == {
         "ca-certificates": "ca-certificates_1%3A2026.09.25_all.deb",
         "openssl": "openssl_1%3A3.6.5_aarch64.deb",
+        "openssl-tool": "openssl-tool_1%3A3.6.5_aarch64.deb",
     }
     for p in pins:
         assert names[p["filename"]].replace("%3A", ":") == Path(p["filename"]).name
@@ -682,7 +683,7 @@ def test_both_real_stage_download_plans_preserve_all_original_apt_pins(tmp_path,
         with pytest.raises(DownloadsPlanned):
             prep.prepare(ROOT / "scripts" / prep.LOCK_FILENAME, snapshot, output, stage)
         apt = {path.name: pin for pin, path in recorded if path.parent.name == "apt-archives"}
-        assert apt == expected_apt and len(apt) == 46
+        assert apt == expected_apt and len(apt) == 47
         assert {path.name for pin, path in recorded if path.parent.name == "archives"} == expected_sources
         assert len([path for pin, path in recorded if path.parent.name == "crates"]) == (804 if stage == "locked-build" else 0)
         assert len([path for pin, path in recorded if path.parent.name == "wheels"]) == (5 if stage == "locked-build" else 0)
@@ -747,7 +748,7 @@ def selected_index_fixture():
     return pin, selected, b"\n".join((other_version, unrelated, unrelated_old))
 
 
-def test_actual_frozen_index_preserves_all_rows_and_matches_all_46_selections():
+def test_actual_frozen_index_preserves_all_rows_and_matches_all_47_selections():
     lock, lock_raw = prep.load_lock(ROOT / "scripts" / prep.LOCK_FILENAME)
     snapshot = ROOT / "audit/neutts-runtime-index-20261017/Packages.gz"
     compressed = snapshot.read_bytes()
@@ -757,7 +758,7 @@ def test_actual_frozen_index_preserves_all_rows_and_matches_all_46_selections():
     before = bytes(raw), deepcopy(pins)
     assert native.verify_selected_apt_index(raw, pins) == {
         "target_record_count": 3011, "target_package_name_count": 3008,
-        "selected_record_count": 46}
+        "selected_record_count": 47}
     assert (raw, pins) == before
     assert snapshot.read_bytes() == compressed and prep.sha(lock_raw) == prep.LOCK_SHA256
 
@@ -857,9 +858,9 @@ def test_real_signed_snapshot_preserves_authentication_and_acquired_byte_oracles
     args = SimpleNamespace(inputs=inputs, out=output)
     if acquired == "exact":
         options, result = native.signed_snapshot(args, lock, work)
-        assert result["matched_archives"] == 46 and result["insecure_repository_exceptions"] is False
+        assert result["matched_archives"] == 47 and result["insecure_repository_exceptions"] is False
         assert result["selected_index"] == {"target_record_count": 3011,
-                                             "target_package_name_count": 3008, "selected_record_count": 46}
+                                             "target_package_name_count": 3008, "selected_record_count": 47}
         assert result["packages_uncompressed_sha256"] == prep.sha(raw)
         assert calls == ["update-fixture", "acquired-byte-fixture"]
     else:
@@ -869,3 +870,238 @@ def test_real_signed_snapshot_preserves_authentication_and_acquired_byte_oracles
         assert calls == (["update-fixture", "acquired-byte-fixture"] if acquired == "changed-packages" else ["update-fixture"])
     assert all((snapshot / filename).read_bytes() == (original / filename).read_bytes()
                for filename in ("InRelease", "Packages.gz"))
+
+
+def test_openssl_tool_is_the_only_frozen_input_closure_change():
+    lock, raw = prep.load_lock(ROOT / "scripts" / prep.LOCK_FILENAME)
+    original = deepcopy(lock)
+    tool = next(p for p in lock["build_apt"]["packages"] if p["name"] == "openssl-tool")
+    library = next(p for p in lock["build_apt"]["packages"] if p["name"] == "openssl")
+    assert tool["version"] == library["version"] == "1:3.6.5"
+    assert tool["depends"] == "openssl (= 1:3.6.5)"
+    assert tool["bytes"] == 278628
+    assert tool["sha256"] == "91b6fd0e86f2585447a44c42a496e8c4da364ff3d7b13bec236a7e65be108109"
+    assert tool["in_foundation"] is False and tool["pre_depends"] == ""
+    assert original["build_apt"]["roots"].pop("openssl-tool") == tool["version"]
+    original["build_apt"]["additional_to_foundation"].remove("openssl-tool")
+    original["build_apt"]["packages"].remove(tool)
+    # Removing exactly the reviewed addition reproduces every original lock byte,
+    # including all 46 archive records, source files, Cargo locks and runtime pins.
+    original_raw = (json.dumps(original, sort_keys=True, indent=2) + "\n").encode()
+    assert prep.sha(original_raw) == "c72d8bfa5f9ae86205443b2c7c19892be77a2879ec7604ccd77aeda2a94775af"
+    assert prep.sha(raw) == prep.LOCK_SHA256
+
+
+def compiler_archive_fixture(directory, member, contents, *, linked=False):
+    """Build a real ar/control/data fixture for the production archive reader."""
+    directory.mkdir(parents=True, exist_ok=True)
+    name = "compiler-input-fixture"
+    control = f"Package: {name}\nVersion: 1.0-1\nArchitecture: aarch64\n".encode()
+    values = []
+    for archive_name, member_name, payload in (
+            ("control.tar.gz", "./control", control),
+            ("data.tar.gz", "." + member, contents)):
+        buffer = io.BytesIO()
+        with tarfile.open(fileobj=buffer, mode="w:gz") as stream:
+            item = tarfile.TarInfo(member_name)
+            if archive_name.startswith("data.") and linked:
+                item.type, item.linkname = tarfile.SYMTYPE, "unreviewed-target"
+                stream.addfile(item)
+            else:
+                item.size = len(payload)
+                stream.addfile(item, io.BytesIO(payload))
+        values.append((archive_name, buffer.getvalue()))
+    raw = b"!<arch>\n"
+    for entry, value in [("debian-binary", b"2.0\n"), *values]:
+        header = (f"{entry + '/':<16}{0:<12}{0:<6}{0:<6}{'100644':<8}{len(value):<10}" + "\x60\n").encode()
+        assert len(header) == 60
+        raw += header + value + (b"\n" if len(value) % 2 else b"")
+    path = directory / (name + "_1.0-1_aarch64.deb")
+    path.write_bytes(raw)
+    pin = {"name": name, "version": "1.0-1", "architecture": "aarch64",
+           "bytes": len(raw), "sha256": prep.sha(raw)}
+    return path, pin
+
+
+@pytest.mark.parametrize("fault", [
+    "valid", "wrong-archive", "wrong-path", "short-bound", "long-bound", "wrong-body-hash", "symlink",
+])
+def test_exact_large_member_bounds_execute_real_archive_control_and_payload(tmp_path, monkeypatch, fault):
+    member = "/data/data/com.termux/files/usr/lib/compiler-fixture.rmeta"
+    contents = b"reviewed larger compiler fixture"
+    path, pin = compiler_archive_fixture(tmp_path, member, contents, linked=fault == "symlink")
+    identity = (pin["sha256"], member)
+    exact = {"bytes": len(contents), "sha256": prep.sha(contents)}
+    if fault == "wrong-archive":
+        identity = ("0" * 64, member)
+    elif fault == "wrong-path":
+        identity = (pin["sha256"], member + ".other")
+    elif fault == "short-bound":
+        exact["bytes"] -= 1
+    elif fault == "long-bound":
+        exact["bytes"] += 1
+    elif fault == "wrong-body-hash":
+        exact["sha256"] = "0" * 64
+    assert native.APT_MEMBER_MAX_BYTES == 64_000_000
+    # Scale only the resource bound and reviewed fixture identity. The production
+    # ar/control parser, exact length check and actual payload hashing still run.
+    monkeypatch.setattr(native, "APT_MEMBER_MAX_BYTES", 16)
+    monkeypatch.setattr(native, "APT_EXACT_LARGE_MEMBERS", {identity: exact})
+    if fault == "valid":
+        assert native.ar_data_members(path, pin, {member}) == {member: contents}
+        with pytest.raises(native.ProbeError, match="control identity differs"):
+            native.ar_data_members(path, {**pin, "version": "2.0-1"}, {member})
+    else:
+        with pytest.raises(native.ProbeError):
+            native.ar_data_members(path, pin, {member})
+
+
+def test_unlisted_large_member_still_fails_and_small_member_still_verifies(tmp_path, monkeypatch):
+    member = "/data/data/com.termux/files/usr/lib/compiler-fixture.rmeta"
+    monkeypatch.setattr(native, "APT_MEMBER_MAX_BYTES", 16)
+    path, pin = compiler_archive_fixture(tmp_path / "large", member, b"unlisted" * 8)
+    with pytest.raises(native.ProbeError, match="Invalid selected APT native member"):
+        native.ar_data_members(path, pin, {member})
+    path, pin = compiler_archive_fixture(tmp_path / "small", member, b"small")
+    assert native.ar_data_members(path, pin, {member}) == {member: b"small"}
+
+
+@pytest.mark.parametrize("kind,status,message", [
+    ("missing", "missing-file", "input is missing"),
+    ("directory", "not-regular-file", "not a regular file"),
+    ("escaped-link", "escaped-prefix", "escaped prefix"),
+    ("dangling-link", "missing-file", "input is missing"),
+    ("outside-file", "escaped-prefix", "escaped prefix"),
+])
+def test_compiler_path_diagnostics_retain_original_and_resolved_before_rejection(tmp_path, monkeypatch, kind, status, message):
+    prefix = (tmp_path / "prefix").resolve()
+    prefix.mkdir()
+    good = prefix / "good"
+    good.write_bytes(b"owned fixture")
+    candidate = prefix / "candidate"
+    if kind == "directory":
+        candidate.mkdir()
+    elif kind == "escaped-link":
+        target = tmp_path / "outside"
+        target.write_bytes(b"outside fixture")
+        candidate.symlink_to(target)
+    elif kind == "dangling-link":
+        candidate.symlink_to(prefix / "absent")
+    elif kind == "outside-file":
+        candidate = tmp_path / "outside"
+        candidate.write_bytes(b"outside fixture")
+    monkeypatch.setattr(native, "PREFIX", prefix)
+    diagnostic = tmp_path / "paths.json"
+    apt = SimpleNamespace(collect_owners=lambda paths: pytest.fail("Invalid paths must fail before owner admission"))
+    with pytest.raises(native.ProbeError, match=message) as error:
+        native.verify_apt_files([good, candidate], tmp_path, {}, apt, diagnostic_path=diagnostic)
+    report = json.loads(diagnostic.read_bytes())
+    assert report["status"] == "failed" and len(report["requested_paths"]) == 2
+    row = next(r for r in report["requested_paths"] if r["original_path"] == candidate.as_posix())
+    assert row["resolved_path"] == candidate.resolve().as_posix()
+    assert row["status"] == status
+    assert repr(row["original_path"]) in str(error.value)
+    assert repr(row["resolved_path"]) in str(error.value)
+    assert next(r for r in report["requested_paths"] if r["original_path"] == good.as_posix())["status"] == "regular-file-within-prefix"
+
+
+def test_compiler_aliases_verify_original_archive_bytes_and_reject_changed_install(tmp_path, monkeypatch):
+    prefix = (tmp_path / "prefix").resolve()
+    prefix.mkdir()
+    real = prefix / "compiler-real"
+    real.write_bytes(b"exact compiler payload")
+    alias = prefix / "compiler-alias"
+    alias.symlink_to(real)
+    member = "/data/data/com.termux/files/usr/bin/compiler-real"
+    archive, pin = compiler_archive_fixture(tmp_path / "archives", member, real.read_bytes())
+    monkeypatch.setattr(native, "PREFIX", prefix)
+    actual_reader = native.ar_data_members
+    physical = real.resolve().as_posix()
+    calls = []
+    def archive_adapter(path, selected_pin, wanted):
+        # Only map the host temporary location to the fixture's original POSIX
+        # archive path; the real archive/control/hash reader is left intact.
+        assert wanted == {physical}
+        calls.append((path, deepcopy(selected_pin)))
+        raw = actual_reader(path, selected_pin, {member})
+        return {physical: raw[member]}
+    monkeypatch.setattr(native, "ar_data_members", archive_adapter)
+    apt = SimpleNamespace(collect_owners=lambda paths: {physical: [pin["name"]]})
+    report = tmp_path / "paths.json"
+    result = native.verify_apt_files([real, alias], archive.parent, {pin["name"]: pin}, apt, diagnostic_path=report)
+    assert result == [{"path": physical, "package": pin["name"], "bytes": real.stat().st_size,
+                       "sha256": prep.sha(real.read_bytes())}]
+    rows = json.loads(report.read_bytes())["requested_paths"]
+    assert len(rows) == 2 and {r["resolved_path"] for r in rows} == {physical}
+    assert len(calls) == 1 and calls[0][0] == archive
+    real.write_bytes(b"changed compiler payload")
+    with pytest.raises(native.ProbeError, match="differs from its archive"):
+        native.verify_apt_files([real, alias], archive.parent, {pin["name"]: pin}, apt, diagnostic_path=report)
+
+
+@pytest.mark.parametrize("owners", [[], ["unreviewed-package"], ["first", "second"]])
+def test_compiler_path_presence_does_not_admit_unowned_or_ambiguous_file(tmp_path, monkeypatch, owners):
+    prefix = tmp_path.resolve()
+    member = prefix / "compiler"
+    member.write_bytes(b"present is insufficient")
+    monkeypatch.setattr(native, "PREFIX", prefix)
+    apt = SimpleNamespace(collect_owners=lambda paths: {member.as_posix(): owners})
+    with pytest.raises(native.ProbeError, match="Unowned/unpinned"):
+        native.verify_apt_files([member], tmp_path, {}, apt)
+
+
+@pytest.mark.parametrize("plan_case", ["valid", "missing-tool", "unexpected-package", "removal", "duplicate"])
+def test_native_toolchain_plan_keeps_exact_20_additions_and_27_foundation(tmp_path, monkeypatch, plan_case):
+    lock, _ = prep.load_lock(ROOT / "scripts" / prep.LOCK_FILENAME)
+    original = deepcopy(lock)
+    pins = lock["build_apt"]["packages"]
+    additions = [p for p in pins if not p["in_foundation"]]
+    foundation = [p for p in pins if p["in_foundation"]]
+    by_name = {p["name"]: p for p in pins}
+    calls, snapshots, copied = [], [], []
+    def snapshot(names):
+        snapshots.append(list(names))
+        return {name: {"version": by_name[name]["version"], "architecture": by_name[name]["architecture"],
+                       "status": "installed"} for name in names}
+    def stage_archives(args, selected, work):
+        assert selected == pins and len(selected) == 47
+        copied.append(deepcopy(selected))
+        result = work / "install-archives"
+        result.mkdir()
+        return result
+    def command(argv, out, label, timeout, *args):
+        calls.append((argv, label))
+        assert "--no-download" in argv and "--no-remove" in argv and "--reinstall" in argv
+        requested = argv[argv.index("install") + 1:]
+        assert requested == [p["name"] + "=" + p["version"] for p in additions]
+        assert requested.count("openssl-tool=1:3.6.5") == 1
+        if label == "rust-apt-plan":
+            proposed = [p["name"] for p in additions]
+            if plan_case == "missing-tool":
+                proposed.remove("openssl-tool")
+            elif plan_case == "unexpected-package":
+                proposed.append("unreviewed")
+            elif plan_case == "duplicate":
+                proposed.append("openssl-tool")
+            text = "".join("Inst " + name + " (fixture)\n" for name in proposed)
+            if plan_case == "removal":
+                text += "Remv pinned-foundation (fixture)\n"
+            (out / "rust-apt-plan.stdout.log").write_text(text)
+        return {"exit_code": 0, "controlled_native_command_fixture": True}
+    monkeypatch.setattr(native, "package_snapshot", snapshot)
+    monkeypatch.setattr(native, "stage_install_archives", stage_archives)
+    monkeypatch.setattr(native, "bounded_command", command)
+    args = SimpleNamespace(out=tmp_path, apt_archives=tmp_path / "verified-inputs")
+    if plan_case == "valid":
+        result = native.install_toolchain(args, lock, ["-o", "APT::Get::AllowUnauthenticated=false"], tmp_path)
+        assert result["status"] == "passed" and result["additional_count"] == 20
+        assert len(result["installed_packages"]) == 47
+        assert len(snapshots) == 2 and len(snapshots[0]) == 27 and len(snapshots[1]) == 47
+        assert [label for argv, label in calls] == ["rust-apt-plan", "rust-apt-install"]
+    else:
+        with pytest.raises(native.ProbeError):
+            native.install_toolchain(args, lock, [], tmp_path)
+        assert [label for argv, label in calls] == ["rust-apt-plan"]
+        assert len(snapshots) == 1
+    assert len(foundation) == 27 and len(additions) == 20 and len(copied) == 1
+    assert lock == original

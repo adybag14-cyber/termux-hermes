@@ -37,12 +37,25 @@ import zipfile
 
 PREFIX = Path("/data/data/com.termux/files/usr")
 SCRIPT_DIR = Path(__file__).resolve().parent
-PREPARER_SHA256 = "0f5db491b6a2d2cbe13e908fe24613b62f9db38ac2f0d33968328c499038a9a1"
+PREPARER_SHA256 = "db8ce00daaece15f69b4f7b1de415accd207f13e256b2097d4efcb2d0894c428"
 OPERATIONS_SHA256 = "a8576c384d3c5aa3854c430df83e6cfb3b1f6a69ba75713079bb6947fee125a7"
 APT_HELPER_SHA256 = "7c051b0143675594aadd52f9a0b66ec71e6950e9953feef3f773acceafcb0a29"
 FOUNDATION_PINS_SHA256 = "7ad635d7f1ce1157c7f3b3d7808eaf113c8bb77c4e99a8fe30b6b155faf04c5e"
 FOUNDATION_CASES = {"python_dependencies", "torch", "torchaudio", "torchcodec",
                     "scipy", "llvmlite", "soxr"}
+
+APT_MEMBER_MAX_BYTES = 64_000_000
+# The original pinned Rust package contains these two larger compiler inputs.
+# Their exact archive, path, size and body digest are required; all other APT
+# members retain the ordinary bound.
+APT_EXACT_LARGE_MEMBERS = {
+    ("4aae6c31c71d0bb2847cedb077b45bc4bde20f964ce02987e8d368579faa7e5e",
+     "/data/data/com.termux/files/usr/lib/rustlib/aarch64-linux-android/lib/libcore-500d6d8d30fe7938.rmeta"):
+        {"bytes": 67_004_390, "sha256": "5c60ac0728315ea04853686a48e6376d8a6d7d88c1e0c82bfd27d6976ef18bd5"},
+    ("4aae6c31c71d0bb2847cedb077b45bc4bde20f964ce02987e8d368579faa7e5e",
+     "/data/data/com.termux/files/usr/lib/rustlib/aarch64-linux-android/lib/librustc_driver-d4b3d460e526cc9c.so"):
+        {"bytes": 78_088_296, "sha256": "342ce378f61409244f48dcd26d69c3db919fa1c104896e5a3f646fd34b9ecd63"},
+}
 
 class ProbeError(RuntimeError):
     pass
@@ -215,9 +228,17 @@ def ar_data_members(path, pin, wanted):
                     seen.add(member)
                     if member not in wanted:
                         continue
-                    require(item.isfile() and item.size <= 64_000_000, "Invalid selected APT native member")
+                    exact = APT_EXACT_LARGE_MEMBERS.get((pin["sha256"], member))
+                    limit = exact["bytes"] if exact else APT_MEMBER_MAX_BYTES
+                    require(item.isfile() and 0 <= item.size <= limit,
+                            "Invalid selected APT native member: " + member)
+                    if exact:
+                        require(item.size == exact["bytes"], "Exact large APT member size differs: " + member)
                     value = archive.extractfile(item).read()
                     require(len(value) == item.size, "Truncated APT native member")
+                    if exact:
+                        require(sha_bytes(value) == exact["sha256"],
+                                "Exact large APT member hash differs: " + member)
                     result[member] = value
         elif name.startswith("control.tar."):
             control_count += 1
@@ -485,7 +506,7 @@ def verify_archive_set(args, lock, prep):
         ar_data_members(path, pin, set())
         rows.append({"name": pin["name"], "version": pin["version"],
                      "bytes": pin["bytes"], "sha256": pin["sha256"], "path": str(path)})
-    require(len(rows) == 46 and {Path(r["path"]).name for r in rows}
+    require(len(rows) == 47 and {Path(r["path"]).name for r in rows}
             == {p.name for p in args.apt_archives.iterdir()}, "Incomplete/extra compiler archives")
     return rows
 
@@ -508,7 +529,7 @@ def install_toolchain(args, lock, options, work):
     pins = lock["build_apt"]["packages"]
     existing = [p for p in pins if p["in_foundation"]]
     additions = [p for p in pins if not p["in_foundation"]]
-    require(len(existing) == 27 and len(additions) == 19, "Reviewed APT addition set differs")
+    require(len(existing) == 27 and len(additions) == 20, "Reviewed APT addition set differs")
     expected_existing = {p["name"]: {"version": p["version"], "architecture": p["architecture"],
                                     "status": "installed"} for p in existing}
     require(package_snapshot(list(expected_existing)) == expected_existing, "Foundation APT overlap differs")
@@ -532,12 +553,44 @@ def install_toolchain(args, lock, options, work):
             "plan": plan, "install": installed, "installed_packages": expected}
 
 
-def verify_apt_files(paths, archives, pins, apt):
-    paths = {Path(p).resolve().as_posix() for p in paths}
+def verify_apt_files(paths, archives, pins, apt, *, diagnostic_path=None):
+    checks = []
+    for original in sorted({Path(p) for p in paths}, key=lambda p: p.as_posix()):
+        row = {"original_path": original.as_posix(), "resolved_path": None}
+        try:
+            resolved = original.resolve()
+            row["resolved_path"] = resolved.as_posix()
+            if (not original.is_absolute() or not original.is_relative_to(PREFIX)
+                    or not resolved.is_relative_to(PREFIX)):
+                row["status"] = "escaped-prefix"
+            elif not resolved.exists():
+                row["status"] = "missing-file"
+            elif not resolved.is_file():
+                row["status"] = "not-regular-file"
+            else:
+                row["status"] = "regular-file-within-prefix"
+        except (OSError, RuntimeError) as exc:
+            row["status"] = "resolution-error"
+            row["error_type"] = type(exc).__name__
+        checks.append(row)
+    if diagnostic_path is not None:
+        save_json(diagnostic_path, {
+            "schema": "native-rust-requested-compiler-paths/v1",
+            "scope": "Requested path presence and containment; archive ownership and byte verification follow.",
+            "status": "passed" if all(r["status"] == "regular-file-within-prefix" for r in checks) else "failed",
+            "requested_paths": checks})
+    messages = {"escaped-prefix": "Compiler/runtime path escaped prefix",
+                "missing-file": "Compiler/runtime input is missing",
+                "not-regular-file": "Compiler/runtime input is not a regular file",
+                "resolution-error": "Compiler/runtime path could not be resolved"}
+    for row in checks:
+        if row["status"] != "regular-file-within-prefix":
+            raise ProbeError(messages[row["status"]] + ": original=" + repr(row["original_path"])
+                             + ", resolved=" + repr(row["resolved_path"]))
+    paths = {r["resolved_path"] for r in checks}
     owners = apt.collect_owners(paths)
     grouped, records = {}, []
     for path in paths:
-        require(Path(path).is_relative_to(PREFIX) and Path(path).is_file(), "Compiler/runtime path escaped prefix")
         candidates = owners.get(path, [])
         require(len(candidates) == 1 and candidates[0] in pins, "Unowned/unpinned compiler or TLS input")
         grouped.setdefault(candidates[0], set()).add(path)
@@ -582,7 +635,10 @@ def native_controls(args, lock, work, env, apt):
     std = PREFIX / "lib/rustlib/aarch64-linux-android/lib"
     require(std.is_dir(), "Pinned native Rust standard library is absent")
     paths += [p for p in std.iterdir() if p.is_file() and not p.is_symlink()]
-    results["original_apt_bytes"] = verify_apt_files(paths, args.apt_archives, pins, apt)
+    path_report = args.out / "rust-compiler-input-paths.json"
+    results["original_apt_bytes"] = verify_apt_files(paths, args.apt_archives, pins, apt,
+                                                     diagnostic_path=path_report)
+    results["requested_compiler_paths"] = {"path": path_report.name, "sha256": sha_file(path_report)}
     results["abi3_link_stub"] = elf(PREFIX / "lib/libpython3.so", dynamic=True)
     require("libpython3.14.so" in results["abi3_link_stub"]["needed"], "Real abi3 stub does not link the exact interpreter")
     return results

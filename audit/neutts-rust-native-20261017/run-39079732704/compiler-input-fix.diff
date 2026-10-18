@@ -1,0 +1,566 @@
+diff --git a/docs/neutts-rust-preparation.md b/docs/neutts-rust-preparation.md
+index 5ae546d..9fbcee8 100644
+--- a/docs/neutts-rust-preparation.md
++++ b/docs/neutts-rust-preparation.md
+@@ -22,7 +22,7 @@ The host preparer reads the fixed lock, downloads exact official archives, and v
+ 
+ The locked stage contains four complete source trees, 804 original .crate archives, a directory-source export, and five exact Python build wheels: Setuptools 83.0.0, Packaging 26.0, Wheel 0.46.3, setuptools-rust 1.13.0, and semantic-version 2.10.0. Cargo's directory-source checksum file is generated only after independently verifying the original archive. Verification compares every exported file with those original bytes. Changing both a source file and its Cargo checksum file cannot authorize the change.
+ 
+-Both stages include the exact **46-package APT closure** and frozen InRelease/Packages.gz pair. The unchanged scientific foundation supplies 27 of those packages; 19 compiler additions are installed afterward. Rust and its aarch64-linux-android standard library are 1.99.1. The APT Maturin CLI is excluded because it does not supply the Python PEP517 distribution. The actual package identities are in [the toolchain design](../audit/neutts-rust-routes-20261017/apt-toolchain-design.json) and [the APT Maturin inspection](../audit/neutts-rust-routes-20261017/maturin-apt-byte-inspection.json).
++Both stages include the exact **47-package APT closure** and frozen InRelease/Packages.gz pair. The unchanged scientific foundation supplies 27 of those packages; 20 compiler and test-tool additions are installed afterward. The sole addition to the original 46-package closure is `openssl-tool` 1:3.6.5, required by the existing TLS certificate controls; it uses the same signed snapshot and depends exactly on the already pinned OpenSSL library version. Rust and its aarch64-linux-android standard library are 1.99.1. The APT Maturin CLI is excluded because it does not supply the Python PEP517 distribution. The actual package identities are in [the toolchain design](../audit/neutts-rust-routes-20261017/apt-toolchain-design.json) and [the APT Maturin inspection](../audit/neutts-rust-routes-20261017/maturin-apt-byte-inspection.json).
+ 
+ The native runner asks APT to authenticate the saved index using its configured Termux trust store. It verifies the acquired InRelease and decompressed index, every retained archive's control and hash, and the proposed installation. It rejects removals, unexpected additions, upgrades, or omissions. Installation uses a fresh writable cache copied from verified read-only archives.
+ 
+@@ -79,7 +79,7 @@ The new host regressions exercise both actual stage download plans twice in fres
+ 
+ ## Second native attempt and signed-index selection
+ 
+-The retry, [run 39077868589](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39077868589), reached native Termux in both stages. All seven scientific foundation cases passed. Both stages then stopped in the saved APT index parser, before native APT signature authentication, compiler installation, Cargo resolution, or Rust wheel builds.
++The retry, [run 39077868589](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39077868589), reached native Termux in both stages. All seven scientific foundation cases passed. Both stages then stopped in the saved APT index parser, before the later Rust-specific APT signature check, compiler installation, Cargo resolution, or Rust wheel builds. The earlier scientific foundation had already recorded its own signed APT authentication.
+ 
+ The exact frozen index contains 3,011 target rows for 3,008 package names. Carapace, Chezmoi, and MPD each retain two versions. Requiring every package name in that whole repository to be unique incorrectly rejected those valid rows. All 46 selected build packages have exactly one row for their frozen name, version, and architecture, with their exact original Filename, size, and SHA256.
+ 
+@@ -87,6 +87,25 @@ The parser now retains those original rows and selects each frozen identity expl
+ 
+ The original error was reproduced through the original signed_snapshot function on the actual saved index before the correction. New regressions run the corrected selector on that same 3,011-row snapshot, exercise mixed-version and conflicting selections, and replay the full signed_snapshot path with controlled native-command fixtures. Those host fixtures verify the preserved byte and command contracts; actual native APT authentication remains a native retry gate. See [the separate failure receipt](../audit/neutts-rust-native-20261017/run-39077868589/selected-index-failure-analysis.json).
+ 
++## Third native attempt and compiler input verification
++
++The next retry, [run 39079732704](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39079732704), passed the Rust-specific native signed-index check and installed all 19 original compiler additions in both stages. Rust 1.99.1 and Cargo 1.99.1 reported their native `aarch64-linux-android` host. Clang 21.1.8 compiled the Android API 24 control, and the resulting native executable returned `24`.
++
++Both stages then failed while verifying the original compiler/runtime files. The old message combined missing-file and escaped-path conditions and did not identify the offending path. Inspection of all original archives showed that `bin/openssl` was the only requested path missing from the 46-package closure: Termux packages the command separately from the OpenSSL libraries. The exact `openssl-tool` archive is 278,628 bytes, SHA256 `91b6fd0e86f2585447a44c42a496e8c4da364ff3d7b13bec236a7e65be108109`, and declares `openssl (= 1:3.6.5)`. Its original AArch64 executable links the already pinned `libssl.so.3` and `libcrypto.so.3`, plus Android's `libc.so`.
++
++The complete archive replay also exposed two legitimate Rust files above the original 64,000,000-byte member limit. The probe still verifies both files, with individual bounds tied to the unchanged Rust archive SHA256, exact member path, exact size, and body digest:
++
++| Original Rust member | Bytes | SHA256 |
++|---|---:|---|
++| `libcore-500d6d8d30fe7938.rmeta` | 67,004,390 | `5c60ac0728315ea04853686a48e6376d8a6d7d88c1e0c82bfd27d6976ef18bd5` |
++| `librustc_driver-d4b3d460e526cc9c.so` | 78,088,296 | `342ce378f61409244f48dcd26d69c3db919fa1c104896e5a3f646fd34b9ecd63` |
++
++Every other member retains the 64,000,000-byte bound. Whole-archive hashes, original control identity, unique ownership, and installed-file byte comparisons remain required. The path report now records each original path and resolved target before admission and distinguishes a missing file, a path outside the prefix, a non-regular file, and a resolution error.
++
++The exact 47-archive union covers all 89 original requested paths: 14 fixed compiler/TLS inputs and 75 regular files from the native Rust library directory, resolving to 88 unique regular files. The [corrected production-parser replay](../audit/neutts-rust-native-20261017/run-39079732704/compiler-input-corrected-archive-replay.json) verifies every original archive/control and all 88 file bodies, with no reader or limit mocks. Every original archive record, source file, Cargo lock, Python build wheel and runtime dependency remains unchanged. The existing trusted-certificate, untrusted-certificate and wrong-hostname TLS controls remain required. This failed native run did not reach Cargo resolution, a Rust source build, or the HF TLS case.
++
++Both complete failed-run artifacts are retained with whole SHA256 and every ZIP-member CRC/SHA256. See [the original failure and archive diagnosis](../audit/neutts-rust-native-20261017/run-39079732704/compiler-input-failure-analysis.json), [the full requested-path inventory](../audit/neutts-rust-native-20261017/run-39079732704/compiler-input-archive-review-attempt3.json), and [the correction checkpoint](../audit/neutts-rust-native-20261017/run-39079732704/compiler-input-fix-preparation.json). The native retry remains a separate gate.
++
+ ## Running and reading results
+ 
+ After source review, the preparation-only workflow can run both stages or one selected stage. It uses the pinned native Termux Docker image on an ARM64 runner, UID 1000, two CPUs, six GiB of memory, and bounded timeouts. Its permissions only read repository contents.
+@@ -99,9 +118,9 @@ Equivalent ARM64 host entry points:
+     bash scripts/compatibility_probe_neutts_rust.sh \
+       --stage tiktoken-lock --out probe-results/rust-tiktoken-lock
+ 
+-Both require fresh outputs. The workflow retains all preparation inputs and actual native result files even after a failure. Component checkpoints retain completed wheel results if a later component fails. Subprocess stdout and stderr are preserved on errors and timeouts.
++Both require fresh outputs. The workflow retains the exact downloaded reconstruction archives and actual native result files even after a failure. GitHub's artifact upload omits hidden paths from the unpacked source/vendor copies. Those partial unpacked copies are not an admitted preparation directory; reconstruct them from the complete original archives with the canonical preparer. Component checkpoints retain completed wheel results if a later component fails. Subprocess stdout and stderr are preserved on errors and timeouts.
+ 
+-Host evidence currently covers 87 focused integrity checks with no skips. The source/cache checkpoint covers all 744 original source files, 11 expanded registry archives containing 2,474 files, and an actual 12-file directory-source export. The real export exposed a cross-platform path-ordering mismatch. The verifier now sorts canonical POSIX path strings while retaining every original file and checksum comparison. Subsequent complete capture of the first native run preserves all 804 original registry archives with their exact frozen checksums. The [separate cache admission receipt](../audit/neutts-rust-native-20261017/run-39076217343/captured-original-input-cache-admission.json) distinguishes that archive-byte admission from the earlier expanded-source checks and records the then-missing 42 APT archives.
++Host evidence currently covers 110 focused integrity checks with no skips. The source/cache checkpoint covers all 744 original source files, 11 expanded registry archives containing 2,474 files, and an actual 12-file directory-source export. The real export exposed a cross-platform path-ordering mismatch. The verifier now sorts canonical POSIX path strings while retaining every original file and checksum comparison. Subsequent complete capture of the first native run preserves all 804 original registry archives with their exact frozen checksums. The [separate cache admission receipt](../audit/neutts-rust-native-20261017/run-39076217343/captured-original-input-cache-admission.json) distinguishes that archive-byte admission from the earlier expanded-source checks and records the then-missing 42 APT archives.
+ 
+ Final review also exercised the production APT archive parser against the exact cached Python 3.14.6-1 archive. A missing standard-library import was captured as a real host failure, corrected, and replayed against both original libpython payload hashes. A separate regression executes the installed-wheel inventory and its adapter with actual wheel bytes and Python distribution metadata. See [the archive replay](../audit/neutts-rust-routes-20261017/archive-parser-exact-apt-replay.json).
+ 
+diff --git a/scripts/compatibility_probe_neutts_rust.py b/scripts/compatibility_probe_neutts_rust.py
+index 5aef131..82b2dc6 100644
+--- a/scripts/compatibility_probe_neutts_rust.py
++++ b/scripts/compatibility_probe_neutts_rust.py
+@@ -37,13 +37,26 @@ import zipfile
+ 
+ PREFIX = Path("/data/data/com.termux/files/usr")
+ SCRIPT_DIR = Path(__file__).resolve().parent
+-PREPARER_SHA256 = "0f5db491b6a2d2cbe13e908fe24613b62f9db38ac2f0d33968328c499038a9a1"
++PREPARER_SHA256 = "db8ce00daaece15f69b4f7b1de415accd207f13e256b2097d4efcb2d0894c428"
+ OPERATIONS_SHA256 = "a8576c384d3c5aa3854c430df83e6cfb3b1f6a69ba75713079bb6947fee125a7"
+ APT_HELPER_SHA256 = "7c051b0143675594aadd52f9a0b66ec71e6950e9953feef3f773acceafcb0a29"
+ FOUNDATION_PINS_SHA256 = "7ad635d7f1ce1157c7f3b3d7808eaf113c8bb77c4e99a8fe30b6b155faf04c5e"
+ FOUNDATION_CASES = {"python_dependencies", "torch", "torchaudio", "torchcodec",
+                     "scipy", "llvmlite", "soxr"}
+ 
++APT_MEMBER_MAX_BYTES = 64_000_000
++# The original pinned Rust package contains these two larger compiler inputs.
++# Their exact archive, path, size and body digest are required; all other APT
++# members retain the ordinary bound.
++APT_EXACT_LARGE_MEMBERS = {
++    ("4aae6c31c71d0bb2847cedb077b45bc4bde20f964ce02987e8d368579faa7e5e",
++     "/data/data/com.termux/files/usr/lib/rustlib/aarch64-linux-android/lib/libcore-500d6d8d30fe7938.rmeta"):
++        {"bytes": 67_004_390, "sha256": "5c60ac0728315ea04853686a48e6376d8a6d7d88c1e0c82bfd27d6976ef18bd5"},
++    ("4aae6c31c71d0bb2847cedb077b45bc4bde20f964ce02987e8d368579faa7e5e",
++     "/data/data/com.termux/files/usr/lib/rustlib/aarch64-linux-android/lib/librustc_driver-d4b3d460e526cc9c.so"):
++        {"bytes": 78_088_296, "sha256": "342ce378f61409244f48dcd26d69c3db919fa1c104896e5a3f646fd34b9ecd63"},
++}
++
+ class ProbeError(RuntimeError):
+     pass
+ 
+@@ -215,9 +228,17 @@ def ar_data_members(path, pin, wanted):
+                     seen.add(member)
+                     if member not in wanted:
+                         continue
+-                    require(item.isfile() and item.size <= 64_000_000, "Invalid selected APT native member")
++                    exact = APT_EXACT_LARGE_MEMBERS.get((pin["sha256"], member))
++                    limit = exact["bytes"] if exact else APT_MEMBER_MAX_BYTES
++                    require(item.isfile() and 0 <= item.size <= limit,
++                            "Invalid selected APT native member: " + member)
++                    if exact:
++                        require(item.size == exact["bytes"], "Exact large APT member size differs: " + member)
+                     value = archive.extractfile(item).read()
+                     require(len(value) == item.size, "Truncated APT native member")
++                    if exact:
++                        require(sha_bytes(value) == exact["sha256"],
++                                "Exact large APT member hash differs: " + member)
+                     result[member] = value
+         elif name.startswith("control.tar."):
+             control_count += 1
+@@ -485,7 +506,7 @@ def verify_archive_set(args, lock, prep):
+         ar_data_members(path, pin, set())
+         rows.append({"name": pin["name"], "version": pin["version"],
+                      "bytes": pin["bytes"], "sha256": pin["sha256"], "path": str(path)})
+-    require(len(rows) == 46 and {Path(r["path"]).name for r in rows}
++    require(len(rows) == 47 and {Path(r["path"]).name for r in rows}
+             == {p.name for p in args.apt_archives.iterdir()}, "Incomplete/extra compiler archives")
+     return rows
+ 
+@@ -508,7 +529,7 @@ def install_toolchain(args, lock, options, work):
+     pins = lock["build_apt"]["packages"]
+     existing = [p for p in pins if p["in_foundation"]]
+     additions = [p for p in pins if not p["in_foundation"]]
+-    require(len(existing) == 27 and len(additions) == 19, "Reviewed APT addition set differs")
++    require(len(existing) == 27 and len(additions) == 20, "Reviewed APT addition set differs")
+     expected_existing = {p["name"]: {"version": p["version"], "architecture": p["architecture"],
+                                     "status": "installed"} for p in existing}
+     require(package_snapshot(list(expected_existing)) == expected_existing, "Foundation APT overlap differs")
+@@ -532,12 +553,44 @@ def install_toolchain(args, lock, options, work):
+             "plan": plan, "install": installed, "installed_packages": expected}
+ 
+ 
+-def verify_apt_files(paths, archives, pins, apt):
+-    paths = {Path(p).resolve().as_posix() for p in paths}
++def verify_apt_files(paths, archives, pins, apt, *, diagnostic_path=None):
++    checks = []
++    for original in sorted({Path(p) for p in paths}, key=lambda p: p.as_posix()):
++        row = {"original_path": original.as_posix(), "resolved_path": None}
++        try:
++            resolved = original.resolve()
++            row["resolved_path"] = resolved.as_posix()
++            if (not original.is_absolute() or not original.is_relative_to(PREFIX)
++                    or not resolved.is_relative_to(PREFIX)):
++                row["status"] = "escaped-prefix"
++            elif not resolved.exists():
++                row["status"] = "missing-file"
++            elif not resolved.is_file():
++                row["status"] = "not-regular-file"
++            else:
++                row["status"] = "regular-file-within-prefix"
++        except (OSError, RuntimeError) as exc:
++            row["status"] = "resolution-error"
++            row["error_type"] = type(exc).__name__
++        checks.append(row)
++    if diagnostic_path is not None:
++        save_json(diagnostic_path, {
++            "schema": "native-rust-requested-compiler-paths/v1",
++            "scope": "Requested path presence and containment; archive ownership and byte verification follow.",
++            "status": "passed" if all(r["status"] == "regular-file-within-prefix" for r in checks) else "failed",
++            "requested_paths": checks})
++    messages = {"escaped-prefix": "Compiler/runtime path escaped prefix",
++                "missing-file": "Compiler/runtime input is missing",
++                "not-regular-file": "Compiler/runtime input is not a regular file",
++                "resolution-error": "Compiler/runtime path could not be resolved"}
++    for row in checks:
++        if row["status"] != "regular-file-within-prefix":
++            raise ProbeError(messages[row["status"]] + ": original=" + repr(row["original_path"])
++                             + ", resolved=" + repr(row["resolved_path"]))
++    paths = {r["resolved_path"] for r in checks}
+     owners = apt.collect_owners(paths)
+     grouped, records = {}, []
+     for path in paths:
+-        require(Path(path).is_relative_to(PREFIX) and Path(path).is_file(), "Compiler/runtime path escaped prefix")
+         candidates = owners.get(path, [])
+         require(len(candidates) == 1 and candidates[0] in pins, "Unowned/unpinned compiler or TLS input")
+         grouped.setdefault(candidates[0], set()).add(path)
+@@ -582,7 +635,10 @@ def native_controls(args, lock, work, env, apt):
+     std = PREFIX / "lib/rustlib/aarch64-linux-android/lib"
+     require(std.is_dir(), "Pinned native Rust standard library is absent")
+     paths += [p for p in std.iterdir() if p.is_file() and not p.is_symlink()]
+-    results["original_apt_bytes"] = verify_apt_files(paths, args.apt_archives, pins, apt)
++    path_report = args.out / "rust-compiler-input-paths.json"
++    results["original_apt_bytes"] = verify_apt_files(paths, args.apt_archives, pins, apt,
++                                                     diagnostic_path=path_report)
++    results["requested_compiler_paths"] = {"path": path_report.name, "sha256": sha_file(path_report)}
+     results["abi3_link_stub"] = elf(PREFIX / "lib/libpython3.so", dynamic=True)
+     require("libpython3.14.so" in results["abi3_link_stub"]["needed"], "Real abi3 stub does not link the exact interpreter")
+     return results
+diff --git a/scripts/neutts_rust_sources_lock.json b/scripts/neutts_rust_sources_lock.json
+index 8b773dc..57d7acd 100644
+--- a/scripts/neutts_rust_sources_lock.json
++++ b/scripts/neutts_rust_sources_lock.json
+@@ -45,6 +45,7 @@
+       "lld",
+       "llvm",
+       "ndk-sysroot",
++      "openssl-tool",
+       "pkg-config",
+       "rhash",
+       "rust",
+@@ -472,6 +473,18 @@
+         "url": "https://packages.termux.dev/apt/termux-main/pool/main/o/openssl/openssl_1:3.6.5_aarch64.deb",
+         "version": "1:3.6.5"
+       },
++      {
++        "architecture": "aarch64",
++        "bytes": 278628,
++        "depends": "openssl (= 1:3.6.5)",
++        "filename": "pool/main/o/openssl-tool/openssl-tool_1:3.6.5_aarch64.deb",
++        "in_foundation": false,
++        "name": "openssl-tool",
++        "pre_depends": "",
++        "sha256": "91b6fd0e86f2585447a44c42a496e8c4da364ff3d7b13bec236a7e65be108109",
++        "url": "https://packages.termux.dev/apt/termux-main/pool/main/o/openssl-tool/openssl-tool_1:3.6.5_aarch64.deb",
++        "version": "1:3.6.5"
++      },
+       {
+         "architecture": "aarch64",
+         "bytes": 1001320,
+@@ -608,6 +621,7 @@
+     "reason": "The original upstream Maturin bootstrap builds its full CLI and Python PEP517 distribution in the isolated build environment.",
+     "roots": {
+       "cmake": "4.4.4",
++      "openssl-tool": "1:3.6.5",
+       "pkg-config": "0.29.2-3",
+       "python-pip": "26.2.1",
+       "rust": "1.99.1",
+diff --git a/scripts/prepare_neutts_rust_sources.py b/scripts/prepare_neutts_rust_sources.py
+index 64a67c6..416a6d2 100644
+--- a/scripts/prepare_neutts_rust_sources.py
++++ b/scripts/prepare_neutts_rust_sources.py
+@@ -34,7 +34,7 @@ import zipfile
+ 
+ SCRIPT_DIR = Path(__file__).resolve().parent
+ LOCK_FILENAME = "neutts_rust_sources_lock.json"
+-LOCK_SHA256 = "c72d8bfa5f9ae86205443b2c7c19892be77a2879ec7604ccd77aeda2a94775af"
++LOCK_SHA256 = "de243480c74b12ad81efc2886b8f78a237abb958588c8424f070e5a6be766670"
+ REGISTRY = "registry+https://github.com/rust-lang/crates.io-index"
+ LOCKED_NAMES = ("maturin", "hf-xet", "safetensors", "tokenizers")
+ ALL_NAMES = (*LOCKED_NAMES, "tiktoken")
+@@ -397,7 +397,7 @@ def load_lock(path):
+     require({p["name"] for p in lock["python_build_packages"]}
+             == {"setuptools", "setuptools-rust", "semantic-version", "wheel", "packaging"}
+             and len(lock["python_build_packages"]) == 5
+-            and len(lock["build_apt"]["packages"]) == 46,
++            and len(lock["build_apt"]["packages"]) == 47,
+             "Incomplete Python/compiler preparation closure")
+     require(next(s for s in lock["sources"] if s["name"] == "tiktoken")["cargo_lock"] is None,
+             "Tiktoken requires its separate reviewed native lock capture")
+diff --git a/tests/test_neutts_rust_preparation.py b/tests/test_neutts_rust_preparation.py
+index 39b47e0..ea6d380 100644
+--- a/tests/test_neutts_rust_preparation.py
++++ b/tests/test_neutts_rust_preparation.py
+@@ -111,15 +111,15 @@ def rewrite_wheel(path, name, value):
+ 
+ def test_frozen_source_closure_and_distinct_capture_stage():
+     lock, raw = prep.load_lock(ROOT / "scripts" / prep.LOCK_FILENAME)
+-    assert len(raw) == 552039
++    assert len(raw) == 552620
+     assert len(lock["registry"]) == 804
+     assert {p["source"] for p in lock["registry"]} == {prep.REGISTRY}
+     assert {s["name"] for s in lock["sources"] if s["cargo_lock"]} == set(prep.LOCKED_NAMES)
+     assert next(s for s in lock["sources"] if s["name"] == "tiktoken")["cargo_lock"] is None
+-    assert len(lock["build_apt"]["packages"]) == 46
++    assert len(lock["build_apt"]["packages"]) == 47
+     assert set(lock["build_apt"]["additional_to_foundation"]) == {
+         p["name"] for p in lock["build_apt"]["packages"] if not p["in_foundation"]}
+-    assert len(lock["build_apt"]["additional_to_foundation"]) == 19
++    assert len(lock["build_apt"]["additional_to_foundation"]) == 20
+     assert lock["build_apt"]["apt_maturin_cli_installed"] is False
+     assert lock["boundaries"]["four_component_runtime_complete"] is False
+ 
+@@ -573,12 +573,13 @@ def test_frozen_apt_epoch_names_are_portable_bijective_and_metadata_exact():
+     pins = lock["build_apt"]["packages"]
+     before = deepcopy(pins)
+     names = prep.apt_archive_names(pins)
+-    assert len(names) == len(set(names.values())) == 46
++    assert len(names) == len(set(names.values())) == 47
+     changed = {p["name"]: names[p["filename"]] for p in pins
+                if names[p["filename"]] != Path(p["filename"]).name}
+     assert changed == {
+         "ca-certificates": "ca-certificates_1%3A2026.09.25_all.deb",
+         "openssl": "openssl_1%3A3.6.5_aarch64.deb",
++        "openssl-tool": "openssl-tool_1%3A3.6.5_aarch64.deb",
+     }
+     for p in pins:
+         assert names[p["filename"]].replace("%3A", ":") == Path(p["filename"]).name
+@@ -682,7 +683,7 @@ def test_both_real_stage_download_plans_preserve_all_original_apt_pins(tmp_path,
+         with pytest.raises(DownloadsPlanned):
+             prep.prepare(ROOT / "scripts" / prep.LOCK_FILENAME, snapshot, output, stage)
+         apt = {path.name: pin for pin, path in recorded if path.parent.name == "apt-archives"}
+-        assert apt == expected_apt and len(apt) == 46
++        assert apt == expected_apt and len(apt) == 47
+         assert {path.name for pin, path in recorded if path.parent.name == "archives"} == expected_sources
+         assert len([path for pin, path in recorded if path.parent.name == "crates"]) == (804 if stage == "locked-build" else 0)
+         assert len([path for pin, path in recorded if path.parent.name == "wheels"]) == (5 if stage == "locked-build" else 0)
+@@ -747,7 +748,7 @@ def selected_index_fixture():
+     return pin, selected, b"\n".join((other_version, unrelated, unrelated_old))
+ 
+ 
+-def test_actual_frozen_index_preserves_all_rows_and_matches_all_46_selections():
++def test_actual_frozen_index_preserves_all_rows_and_matches_all_47_selections():
+     lock, lock_raw = prep.load_lock(ROOT / "scripts" / prep.LOCK_FILENAME)
+     snapshot = ROOT / "audit/neutts-runtime-index-20261017/Packages.gz"
+     compressed = snapshot.read_bytes()
+@@ -757,7 +758,7 @@ def test_actual_frozen_index_preserves_all_rows_and_matches_all_46_selections():
+     before = bytes(raw), deepcopy(pins)
+     assert native.verify_selected_apt_index(raw, pins) == {
+         "target_record_count": 3011, "target_package_name_count": 3008,
+-        "selected_record_count": 46}
++        "selected_record_count": 47}
+     assert (raw, pins) == before
+     assert snapshot.read_bytes() == compressed and prep.sha(lock_raw) == prep.LOCK_SHA256
+ 
+@@ -857,9 +858,9 @@ def test_real_signed_snapshot_preserves_authentication_and_acquired_byte_oracles
+     args = SimpleNamespace(inputs=inputs, out=output)
+     if acquired == "exact":
+         options, result = native.signed_snapshot(args, lock, work)
+-        assert result["matched_archives"] == 46 and result["insecure_repository_exceptions"] is False
++        assert result["matched_archives"] == 47 and result["insecure_repository_exceptions"] is False
+         assert result["selected_index"] == {"target_record_count": 3011,
+-                                             "target_package_name_count": 3008, "selected_record_count": 46}
++                                             "target_package_name_count": 3008, "selected_record_count": 47}
+         assert result["packages_uncompressed_sha256"] == prep.sha(raw)
+         assert calls == ["update-fixture", "acquired-byte-fixture"]
+     else:
+@@ -869,3 +870,238 @@ def test_real_signed_snapshot_preserves_authentication_and_acquired_byte_oracles
+         assert calls == (["update-fixture", "acquired-byte-fixture"] if acquired == "changed-packages" else ["update-fixture"])
+     assert all((snapshot / filename).read_bytes() == (original / filename).read_bytes()
+                for filename in ("InRelease", "Packages.gz"))
++
++
++def test_openssl_tool_is_the_only_frozen_input_closure_change():
++    lock, raw = prep.load_lock(ROOT / "scripts" / prep.LOCK_FILENAME)
++    original = deepcopy(lock)
++    tool = next(p for p in lock["build_apt"]["packages"] if p["name"] == "openssl-tool")
++    library = next(p for p in lock["build_apt"]["packages"] if p["name"] == "openssl")
++    assert tool["version"] == library["version"] == "1:3.6.5"
++    assert tool["depends"] == "openssl (= 1:3.6.5)"
++    assert tool["bytes"] == 278628
++    assert tool["sha256"] == "91b6fd0e86f2585447a44c42a496e8c4da364ff3d7b13bec236a7e65be108109"
++    assert tool["in_foundation"] is False and tool["pre_depends"] == ""
++    assert original["build_apt"]["roots"].pop("openssl-tool") == tool["version"]
++    original["build_apt"]["additional_to_foundation"].remove("openssl-tool")
++    original["build_apt"]["packages"].remove(tool)
++    # Removing exactly the reviewed addition reproduces every original lock byte,
++    # including all 46 archive records, source files, Cargo locks and runtime pins.
++    original_raw = (json.dumps(original, sort_keys=True, indent=2) + "\n").encode()
++    assert prep.sha(original_raw) == "c72d8bfa5f9ae86205443b2c7c19892be77a2879ec7604ccd77aeda2a94775af"
++    assert prep.sha(raw) == prep.LOCK_SHA256
++
++
++def compiler_archive_fixture(directory, member, contents, *, linked=False):
++    """Build a real ar/control/data fixture for the production archive reader."""
++    directory.mkdir(parents=True, exist_ok=True)
++    name = "compiler-input-fixture"
++    control = f"Package: {name}\nVersion: 1.0-1\nArchitecture: aarch64\n".encode()
++    values = []
++    for archive_name, member_name, payload in (
++            ("control.tar.gz", "./control", control),
++            ("data.tar.gz", "." + member, contents)):
++        buffer = io.BytesIO()
++        with tarfile.open(fileobj=buffer, mode="w:gz") as stream:
++            item = tarfile.TarInfo(member_name)
++            if archive_name.startswith("data.") and linked:
++                item.type, item.linkname = tarfile.SYMTYPE, "unreviewed-target"
++                stream.addfile(item)
++            else:
++                item.size = len(payload)
++                stream.addfile(item, io.BytesIO(payload))
++        values.append((archive_name, buffer.getvalue()))
++    raw = b"!<arch>\n"
++    for entry, value in [("debian-binary", b"2.0\n"), *values]:
++        header = (f"{entry + '/':<16}{0:<12}{0:<6}{0:<6}{'100644':<8}{len(value):<10}" + "\x60\n").encode()
++        assert len(header) == 60
++        raw += header + value + (b"\n" if len(value) % 2 else b"")
++    path = directory / (name + "_1.0-1_aarch64.deb")
++    path.write_bytes(raw)
++    pin = {"name": name, "version": "1.0-1", "architecture": "aarch64",
++           "bytes": len(raw), "sha256": prep.sha(raw)}
++    return path, pin
++
++
++@pytest.mark.parametrize("fault", [
++    "valid", "wrong-archive", "wrong-path", "short-bound", "long-bound", "wrong-body-hash", "symlink",
++])
++def test_exact_large_member_bounds_execute_real_archive_control_and_payload(tmp_path, monkeypatch, fault):
++    member = "/data/data/com.termux/files/usr/lib/compiler-fixture.rmeta"
++    contents = b"reviewed larger compiler fixture"
++    path, pin = compiler_archive_fixture(tmp_path, member, contents, linked=fault == "symlink")
++    identity = (pin["sha256"], member)
++    exact = {"bytes": len(contents), "sha256": prep.sha(contents)}
++    if fault == "wrong-archive":
++        identity = ("0" * 64, member)
++    elif fault == "wrong-path":
++        identity = (pin["sha256"], member + ".other")
++    elif fault == "short-bound":
++        exact["bytes"] -= 1
++    elif fault == "long-bound":
++        exact["bytes"] += 1
++    elif fault == "wrong-body-hash":
++        exact["sha256"] = "0" * 64
++    assert native.APT_MEMBER_MAX_BYTES == 64_000_000
++    # Scale only the resource bound and reviewed fixture identity. The production
++    # ar/control parser, exact length check and actual payload hashing still run.
++    monkeypatch.setattr(native, "APT_MEMBER_MAX_BYTES", 16)
++    monkeypatch.setattr(native, "APT_EXACT_LARGE_MEMBERS", {identity: exact})
++    if fault == "valid":
++        assert native.ar_data_members(path, pin, {member}) == {member: contents}
++        with pytest.raises(native.ProbeError, match="control identity differs"):
++            native.ar_data_members(path, {**pin, "version": "2.0-1"}, {member})
++    else:
++        with pytest.raises(native.ProbeError):
++            native.ar_data_members(path, pin, {member})
++
++
++def test_unlisted_large_member_still_fails_and_small_member_still_verifies(tmp_path, monkeypatch):
++    member = "/data/data/com.termux/files/usr/lib/compiler-fixture.rmeta"
++    monkeypatch.setattr(native, "APT_MEMBER_MAX_BYTES", 16)
++    path, pin = compiler_archive_fixture(tmp_path / "large", member, b"unlisted" * 8)
++    with pytest.raises(native.ProbeError, match="Invalid selected APT native member"):
++        native.ar_data_members(path, pin, {member})
++    path, pin = compiler_archive_fixture(tmp_path / "small", member, b"small")
++    assert native.ar_data_members(path, pin, {member}) == {member: b"small"}
++
++
++@pytest.mark.parametrize("kind,status,message", [
++    ("missing", "missing-file", "input is missing"),
++    ("directory", "not-regular-file", "not a regular file"),
++    ("escaped-link", "escaped-prefix", "escaped prefix"),
++    ("dangling-link", "missing-file", "input is missing"),
++    ("outside-file", "escaped-prefix", "escaped prefix"),
++])
++def test_compiler_path_diagnostics_retain_original_and_resolved_before_rejection(tmp_path, monkeypatch, kind, status, message):
++    prefix = (tmp_path / "prefix").resolve()
++    prefix.mkdir()
++    good = prefix / "good"
++    good.write_bytes(b"owned fixture")
++    candidate = prefix / "candidate"
++    if kind == "directory":
++        candidate.mkdir()
++    elif kind == "escaped-link":
++        target = tmp_path / "outside"
++        target.write_bytes(b"outside fixture")
++        candidate.symlink_to(target)
++    elif kind == "dangling-link":
++        candidate.symlink_to(prefix / "absent")
++    elif kind == "outside-file":
++        candidate = tmp_path / "outside"
++        candidate.write_bytes(b"outside fixture")
++    monkeypatch.setattr(native, "PREFIX", prefix)
++    diagnostic = tmp_path / "paths.json"
++    apt = SimpleNamespace(collect_owners=lambda paths: pytest.fail("Invalid paths must fail before owner admission"))
++    with pytest.raises(native.ProbeError, match=message) as error:
++        native.verify_apt_files([good, candidate], tmp_path, {}, apt, diagnostic_path=diagnostic)
++    report = json.loads(diagnostic.read_bytes())
++    assert report["status"] == "failed" and len(report["requested_paths"]) == 2
++    row = next(r for r in report["requested_paths"] if r["original_path"] == candidate.as_posix())
++    assert row["resolved_path"] == candidate.resolve().as_posix()
++    assert row["status"] == status
++    assert repr(row["original_path"]) in str(error.value)
++    assert repr(row["resolved_path"]) in str(error.value)
++    assert next(r for r in report["requested_paths"] if r["original_path"] == good.as_posix())["status"] == "regular-file-within-prefix"
++
++
++def test_compiler_aliases_verify_original_archive_bytes_and_reject_changed_install(tmp_path, monkeypatch):
++    prefix = (tmp_path / "prefix").resolve()
++    prefix.mkdir()
++    real = prefix / "compiler-real"
++    real.write_bytes(b"exact compiler payload")
++    alias = prefix / "compiler-alias"
++    alias.symlink_to(real)
++    member = "/data/data/com.termux/files/usr/bin/compiler-real"
++    archive, pin = compiler_archive_fixture(tmp_path / "archives", member, real.read_bytes())
++    monkeypatch.setattr(native, "PREFIX", prefix)
++    actual_reader = native.ar_data_members
++    physical = real.resolve().as_posix()
++    calls = []
++    def archive_adapter(path, selected_pin, wanted):
++        # Only map the host temporary location to the fixture's original POSIX
++        # archive path; the real archive/control/hash reader is left intact.
++        assert wanted == {physical}
++        calls.append((path, deepcopy(selected_pin)))
++        raw = actual_reader(path, selected_pin, {member})
++        return {physical: raw[member]}
++    monkeypatch.setattr(native, "ar_data_members", archive_adapter)
++    apt = SimpleNamespace(collect_owners=lambda paths: {physical: [pin["name"]]})
++    report = tmp_path / "paths.json"
++    result = native.verify_apt_files([real, alias], archive.parent, {pin["name"]: pin}, apt, diagnostic_path=report)
++    assert result == [{"path": physical, "package": pin["name"], "bytes": real.stat().st_size,
++                       "sha256": prep.sha(real.read_bytes())}]
++    rows = json.loads(report.read_bytes())["requested_paths"]
++    assert len(rows) == 2 and {r["resolved_path"] for r in rows} == {physical}
++    assert len(calls) == 1 and calls[0][0] == archive
++    real.write_bytes(b"changed compiler payload")
++    with pytest.raises(native.ProbeError, match="differs from its archive"):
++        native.verify_apt_files([real, alias], archive.parent, {pin["name"]: pin}, apt, diagnostic_path=report)
++
++
++@pytest.mark.parametrize("owners", [[], ["unreviewed-package"], ["first", "second"]])
++def test_compiler_path_presence_does_not_admit_unowned_or_ambiguous_file(tmp_path, monkeypatch, owners):
++    prefix = tmp_path.resolve()
++    member = prefix / "compiler"
++    member.write_bytes(b"present is insufficient")
++    monkeypatch.setattr(native, "PREFIX", prefix)
++    apt = SimpleNamespace(collect_owners=lambda paths: {member.as_posix(): owners})
++    with pytest.raises(native.ProbeError, match="Unowned/unpinned"):
++        native.verify_apt_files([member], tmp_path, {}, apt)
++
++
++@pytest.mark.parametrize("plan_case", ["valid", "missing-tool", "unexpected-package", "removal", "duplicate"])
++def test_native_toolchain_plan_keeps_exact_20_additions_and_27_foundation(tmp_path, monkeypatch, plan_case):
++    lock, _ = prep.load_lock(ROOT / "scripts" / prep.LOCK_FILENAME)
++    original = deepcopy(lock)
++    pins = lock["build_apt"]["packages"]
++    additions = [p for p in pins if not p["in_foundation"]]
++    foundation = [p for p in pins if p["in_foundation"]]
++    by_name = {p["name"]: p for p in pins}
++    calls, snapshots, copied = [], [], []
++    def snapshot(names):
++        snapshots.append(list(names))
++        return {name: {"version": by_name[name]["version"], "architecture": by_name[name]["architecture"],
++                       "status": "installed"} for name in names}
++    def stage_archives(args, selected, work):
++        assert selected == pins and len(selected) == 47
++        copied.append(deepcopy(selected))
++        result = work / "install-archives"
++        result.mkdir()
++        return result
++    def command(argv, out, label, timeout, *args):
++        calls.append((argv, label))
++        assert "--no-download" in argv and "--no-remove" in argv and "--reinstall" in argv
++        requested = argv[argv.index("install") + 1:]
++        assert requested == [p["name"] + "=" + p["version"] for p in additions]
++        assert requested.count("openssl-tool=1:3.6.5") == 1
++        if label == "rust-apt-plan":
++            proposed = [p["name"] for p in additions]
++            if plan_case == "missing-tool":
++                proposed.remove("openssl-tool")
++            elif plan_case == "unexpected-package":
++                proposed.append("unreviewed")
++            elif plan_case == "duplicate":
++                proposed.append("openssl-tool")
++            text = "".join("Inst " + name + " (fixture)\n" for name in proposed)
++            if plan_case == "removal":
++                text += "Remv pinned-foundation (fixture)\n"
++            (out / "rust-apt-plan.stdout.log").write_text(text)
++        return {"exit_code": 0, "controlled_native_command_fixture": True}
++    monkeypatch.setattr(native, "package_snapshot", snapshot)
++    monkeypatch.setattr(native, "stage_install_archives", stage_archives)
++    monkeypatch.setattr(native, "bounded_command", command)
++    args = SimpleNamespace(out=tmp_path, apt_archives=tmp_path / "verified-inputs")
++    if plan_case == "valid":
++        result = native.install_toolchain(args, lock, ["-o", "APT::Get::AllowUnauthenticated=false"], tmp_path)
++        assert result["status"] == "passed" and result["additional_count"] == 20
++        assert len(result["installed_packages"]) == 47
++        assert len(snapshots) == 2 and len(snapshots[0]) == 27 and len(snapshots[1]) == 47
++        assert [label for argv, label in calls] == ["rust-apt-plan", "rust-apt-install"]
++    else:
++        with pytest.raises(native.ProbeError):
++            native.install_toolchain(args, lock, [], tmp_path)
++        assert [label for argv, label in calls] == ["rust-apt-plan"]
++        assert len(snapshots) == 1
++    assert len(foundation) == 27 and len(additions) == 20 and len(copied) == 1
++    assert lock == original
