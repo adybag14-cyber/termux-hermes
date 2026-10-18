@@ -389,13 +389,13 @@ def patched_text():
     return text
 
 
-def test_only_the_reviewed_sentencepiece_build_script_changes():
+def test_only_the_reviewed_sentencepiece_build_script_and_abseil_guard_change():
     for source in LOCK["sources"]:
         before = {row["path"]: row for row in source["files"]}
         after = {row["path"]: row for row in source["prepared_files"]}
         assert set(before) == set(after)
         changed = {name for name in before if before[name] != after[name]}
-        assert changed == ({"build_bundled.sh"} if source["name"] == "sentencepiece" else set())
+        assert changed == ({"build_bundled.sh", "sentencepiece/CMakeLists.txt"} if source["name"] == "sentencepiece" else set())
     assert sum(len(s["files"]) for s in LOCK["sources"]) == 7787
     assert digest(PATCH.read_bytes()) == SENTENCEPIECE["patch"]["sha256"]
 
@@ -405,10 +405,15 @@ def test_patch_applies_independently_with_git_and_matches_prepared_bytes(tmp_pat
     assert git, "Git is required for the independent patch replay"
     target = tmp_path / "build_bundled.sh"
     target.write_bytes(BASELINE.read_bytes())
+    cmake_target = tmp_path / "sentencepiece/CMakeLists.txt"
+    cmake_target.parent.mkdir()
+    cmake_target.write_bytes((BASELINE.parent / "sentencepiece_CMakeLists.txt").read_bytes())
     subprocess.run([git, "init", "-q", str(tmp_path)], check=True, capture_output=True)
     subprocess.run([git, "-C", str(tmp_path), "apply", "--check", str(PATCH)], check=True, capture_output=True)
     subprocess.run([git, "-C", str(tmp_path), "apply", str(PATCH)], check=True, capture_output=True)
     assert target.read_bytes() == patched_text().encode()
+    pin = SENTENCEPIECE["patch"]["files"][1]
+    assert digest(cmake_target.read_bytes()) == pin["after_sha256"]
 
 
 def bash_executable():
@@ -488,3 +493,497 @@ def test_invalid_parallel_budgets_fail_before_any_configuration(tmp_path, budget
     assert result.returncode == 2
     assert b"positive integer" in result.stderr
     assert calls == [] and nproc is False
+
+
+# These are structural/evidence-contract tests. The small ELF fixtures are never
+# imported or executed, and substituting host tag discovery is not Android proof.
+def elf_header(*, machine=183, elf_class=2, endian=1, length=64):
+    value = bytearray(max(length, 20))
+    value[:6] = b"\x7fELF" + bytes((elf_class, endian))
+    struct.pack_into("<H", value, 18, machine)
+    return bytes(value[:length])
+
+
+def audioop_wheel_fixture(directory, members):
+    source = next(p for p in LOCK["sources"] if p["name"] == "audioop-lts")
+    dist = "audioop_lts-" + source["version"] + ".dist-info"
+    meta = "\n".join(("Metadata-Version: 2.4", "Name: audioop-lts",
+                      "Version: " + source["version"], "Requires-Python: " + source["requires_python"],
+                      *("Requires-Dist: " + r for r in source["requires_dist"]))) + "\n\n"
+    entries = {**members, dist + "/METADATA": meta.encode(),
+               dist + "/WHEEL": ("Wheel-Version: 1.0\nRoot-Is-Purelib: false\nTag: "
+                                  + source["expected_tag"] + "\n\n").encode()}
+    record = dist + "/RECORD"
+    stream = io.StringIO(newline="")
+    writer = csv.writer(stream, lineterminator="\n")
+    for name, raw in entries.items():
+        writer.writerow((name, "sha256=" + base64.urlsafe_b64encode(hashlib.sha256(raw).digest()).decode().rstrip("="),
+                         str(len(raw))))
+    writer.writerow((record, "", ""))
+    entries[record] = stream.getvalue().encode()
+    path = directory / ("audioop_lts-" + source["version"] + "-" + source["expected_tag"] + ".whl")
+    with zipfile.ZipFile(path, "w") as archive:
+        for name, raw in entries.items():
+            archive.writestr(name, raw)
+    return path, source
+
+
+def host_accepts_only_the_locked_audioop_tag(monkeypatch, source):
+    from pip._vendor.packaging import tags
+    monkeypatch.setattr(tags, "sys_tags", lambda: iter(tags.parse_tag(source["expected_tag"])))
+
+
+def test_actual_audioop_package_namespace_passes_structural_wheel_checks(tmp_path, monkeypatch):
+    path, source = audioop_wheel_fixture(tmp_path, {"audioop/_audioop.abi3.so": elf_header()})
+    host_accepts_only_the_locked_audioop_tag(monkeypatch, source)
+    facts = NATIVE.built_wheel(path, source, PREP)
+    assert [item["member"] for item in facts["native_members"]] == ["audioop/_audioop.abi3.so"]
+    assert facts["requires_python"] == source["requires_python"]
+    assert facts["requires_dist"] == source["requires_dist"]
+
+
+@pytest.mark.parametrize("member", [
+    "audioop.abi3.so", "audioop/foreign.abi3.so", "audioop/_audioop_bad.abi3.so",
+    "audioop/_audioop.other.abi3.so", "foreign/_audioop.abi3.so",
+])
+def test_audioop_rejects_foreign_or_obsolete_native_names(tmp_path, monkeypatch, member):
+    path, source = audioop_wheel_fixture(tmp_path, {member: elf_header()})
+    host_accepts_only_the_locked_audioop_tag(monkeypatch, source)
+    with pytest.raises(NATIVE.ProbeError, match="namespace differs"):
+        NATIVE.built_wheel(path, source, PREP)
+
+
+@pytest.mark.parametrize("header", [
+    elf_header(machine=62), elf_header(elf_class=1), elf_header(endian=2),
+    elf_header(length=19), b"not an ELF" + b"x" * 80,
+])
+def test_audioop_native_abi_checks_remain_strict(tmp_path, monkeypatch, header):
+    path, source = audioop_wheel_fixture(tmp_path, {"audioop/_audioop.abi3.so": header})
+    host_accepts_only_the_locked_audioop_tag(monkeypatch, source)
+    with pytest.raises(NATIVE.ProbeError, match="foreign namespace or ABI"):
+        NATIVE.built_wheel(path, source, PREP)
+
+
+def test_audioop_cannot_smuggle_a_second_native_member(tmp_path, monkeypatch):
+    path, source = audioop_wheel_fixture(tmp_path, {
+        "audioop/_audioop.abi3.so": elf_header(), "audioop/_other.abi3.so": elf_header()})
+    host_accepts_only_the_locked_audioop_tag(monkeypatch, source)
+    with pytest.raises(NATIVE.ProbeError, match="namespace differs"):
+        NATIVE.built_wheel(path, source, PREP)
+
+
+def test_audioop_does_not_retag_for_an_unsupported_host(tmp_path, monkeypatch):
+    from pip._vendor.packaging import tags
+    path, source = audioop_wheel_fixture(tmp_path, {"audioop/_audioop.abi3.so": elf_header()})
+    monkeypatch.setattr(tags, "sys_tags", lambda: iter(tags.parse_tag("cp314-cp314-win_amd64")))
+    with pytest.raises(NATIVE.ProbeError, match="native wheel tag"):
+        NATIVE.built_wheel(path, source, PREP)
+
+
+def test_image_member_pins_keep_exact_same_run_and_owner_provenance():
+    platform = LOCK["platform_runtime"]
+    assert platform["native_image"] == "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303"
+    assert platform["package"] == {"name": "aosp-libs", "version": "9.0.0-r76-4",
+                                  "architecture": "aarch64", "status": "installed"}
+    assert {Path(row["path"]).name for row in platform["files"]} == {
+        "libc++.so", "libc.so", "libdl.so", "liblog.so", "libm.so"}
+    assert all(row["path"].startswith("/data/data/com.termux/files/usr/opt/aosp/lib64/")
+               and row["elf_class"] == 64 and row["machine"] == 183 for row in platform["files"])
+    proof = platform["provenance"]
+    assert proof["run_id"] == "39073990223"
+    assert proof["head_sha"] == "c3584d6348948063c442195c6e3f25ecd3cebc08"
+    assert proof["artifact_sha256"] == "6d31dda2133f6fdda39c8e297917a75b20a46df2130f59ea7ef7602f74e5fbe9"
+    assert len(proof["foundation_receipts"]) == 7
+    assert len({row["path"] for row in proof["foundation_receipts"]}) == 7
+
+
+def platform_fixture(tmp_path):
+    from types import SimpleNamespace
+    lock = copy.deepcopy(LOCK)
+    paths = set()
+    for index, pin in enumerate(lock["platform_runtime"]["files"]):
+        path = tmp_path / "image/opt/aosp/lib64" / Path(pin["path"]).name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        raw = elf_header() + bytes((index,))
+        path.write_bytes(raw)
+        pin.update(path=str(path), bytes=len(raw), sha256=digest(raw))
+        paths.add(path)
+    package = lock["platform_runtime"]["package"]
+    snapshot = {package["name"]: {key: package[key] for key in ("version", "architecture", "status")}}
+    owners = {path.as_posix(): ["aosp-libs"] for path in paths}
+    # The unchanged reader really checks the fixture header. No target loader or
+    # dynamic linker is called by this host-only owner/byte/ELF-header contract.
+    common = NATIVE.module_at("_test_image_platform_elf", ROOT / "scripts/compatibility_probe_phonemizer.py",
+                              NATIVE.COMPONENT_HELPER_SHA256)
+    methods = SimpleNamespace(package_snapshot=lambda names: snapshot,
+                              elf=lambda path, dynamic: common.elf(path, dynamic=False))
+    return lock, paths, methods, SimpleNamespace(collect_owners=lambda wanted: owners), snapshot, owners
+
+
+def test_exact_image_platform_members_require_bytes_headers_and_owner(tmp_path):
+    lock, paths, common, apt, _, _ = platform_fixture(tmp_path)
+    result = NATIVE.verify_image_platform_members(paths, lock, common, apt)
+    assert result["status"] == "verified-image-members"
+    assert len(result["members"]) == 5
+    assert all(row["package"] == "aosp-libs" and row["class"] == 64 for row in result["members"])
+
+
+@pytest.mark.parametrize("change", ["version", "architecture", "status"])
+def test_image_owner_snapshot_cannot_drift(tmp_path, change):
+    lock, paths, common, apt, snapshot, _ = platform_fixture(tmp_path)
+    snapshot["aosp-libs"][change] = "unreviewed"
+    with pytest.raises(NATIVE.ProbeError, match="owner version differs"):
+        NATIVE.verify_image_platform_members(paths, lock, common, apt)
+
+
+@pytest.mark.parametrize("owners_value", [[], ["other"], ["aosp-libs", "other"]])
+def test_image_member_requires_one_exact_owner(tmp_path, owners_value):
+    lock, paths, common, apt, _, owners = platform_fixture(tmp_path)
+    owners[next(iter(paths)).as_posix()] = owners_value
+    with pytest.raises(NATIVE.ProbeError, match="owner differs"):
+        NATIVE.verify_image_platform_members(paths, lock, common, apt)
+
+
+def test_changed_image_bytes_are_rejected(tmp_path):
+    lock, paths, common, apt, _, _ = platform_fixture(tmp_path)
+    path = next(iter(paths))
+    raw = path.read_bytes()
+    path.write_bytes(raw[:-1] + bytes((raw[-1] ^ 1,)))
+    with pytest.raises(NATIVE.ProbeError, match="member bytes differ"):
+        NATIVE.verify_image_platform_members(paths, lock, common, apt)
+
+
+def test_image_directory_cannot_substitute_for_a_regular_member(tmp_path):
+    lock, paths, common, apt, _, _ = platform_fixture(tmp_path)
+    path = next(iter(paths))
+    path.unlink()
+    path.mkdir()
+    with pytest.raises(NATIVE.ProbeError, match="exact regular path"):
+        NATIVE.verify_image_platform_members(paths, lock, common, apt)
+
+
+def test_another_file_inside_the_aosp_directory_is_not_admitted(tmp_path):
+    lock, paths, common, apt, _, _ = platform_fixture(tmp_path)
+    extra = next(iter(paths)).parent / "unreviewed.so"
+    extra.write_bytes(elf_header())
+    with pytest.raises(NATIVE.ProbeError, match="Unreviewed image platform member"):
+        NATIVE.verify_image_platform_members(paths | {extra}, lock, common, apt)
+
+
+def test_even_locally_rehashed_foreign_elf_is_rejected(tmp_path):
+    lock, paths, common, apt, _, _ = platform_fixture(tmp_path)
+    path = next(iter(paths))
+    raw = elf_header(machine=62)
+    path.write_bytes(raw)
+    pin = next(row for row in lock["platform_runtime"]["files"] if row["path"] == str(path))
+    pin.update(bytes=len(raw), sha256=digest(raw))
+    with pytest.raises(RuntimeError, match="little-endian AArch64 ELF"):
+        NATIVE.verify_image_platform_members(paths, lock, common, apt)
+
+
+def maps_line(path, *, deleted=False):
+    value = path.absolute().as_posix()
+    # Windows controls resolve drive-rooted /Users/... using the current drive;
+    # the production parser is unchanged and consumes genuine Android maps.
+    if os.name == "nt":
+        value = value[2:]
+    return ("1000-2000 r-xp 00000000 00:00 1 " + value + (" (deleted)" if deleted else "") + "\n").encode()
+
+
+@pytest.mark.parametrize("kind,expected", [
+    ("source", "source-extension"), ("apt", "apt-library"), ("image", "image-platform"),
+    ("unknown_site", "rejected-isolated-site"), ("unknown_aosp", "rejected-foreign"),
+    ("arbitrary_prefix", "rejected-foreign"), ("foreign", "rejected-foreign"),
+    ("deleted", "rejected-deleted"),
+])
+def test_native_map_classification_never_broadens_prefix_admission(tmp_path, monkeypatch, kind, expected):
+    prefix = tmp_path / "prefix"
+    site = tmp_path / "venv/lib/python3.14/site-packages"
+    source = site / "yaml/_yaml.so"
+    image = prefix / "opt/aosp/lib64/libc.so"
+    choices = {"source": source, "apt": prefix / "lib/libyaml.so", "image": image,
+               "unknown_site": site / "foreign.so", "unknown_aosp": image.parent / "foreign.so",
+               "arbitrary_prefix": prefix / "tmp/foreign.so", "foreign": tmp_path / "foreign.so",
+               "deleted": source}
+    monkeypatch.setattr(NATIVE, "PREFIX", prefix)
+    raw = maps_line(choices[kind], deleted=kind == "deleted")
+    rows = NATIVE.native_mapping_rows(raw, site, {source: {}}, {image})
+    assert len(rows) == 1 and rows[0]["classification"] == expected
+    assert rows[0]["mapped_path"] in raw.decode()
+    assert rows[0]["resolved_path"] == str(choices[kind].resolve())
+
+
+def test_unknown_mapping_failure_preserves_full_raw_and_exact_path(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    out = tmp_path / "evidence"
+    out.mkdir()
+    unexpected = tmp_path / "outside-prefix/unreviewed.so"
+    raw = maps_line(unexpected)
+    monkeypatch.setattr(NATIVE, "read_native_maps", lambda: raw)
+    args = SimpleNamespace(out=out)
+    with pytest.raises(NATIVE.ProbeError, match="unreviewed.so"):
+        NATIVE.verify_native_mappings({"wheels": [], "apt_python": []}, None, None, None, args, LOCK)
+    assert (out / "NATIVE-MAPPINGS.raw.txt").read_bytes() == raw
+    report = json.loads((out / "NATIVE-MAPPINGS.json").read_bytes())
+    assert report["raw_sha256"] == digest(raw)
+    assert report["mappings"][0]["resolved_path"] == str(unexpected.resolve())
+    assert report["mappings"][0]["classification"] == "rejected-foreign"
+
+
+def test_raw_map_bound_is_explicit(tmp_path):
+    with pytest.raises(NATIVE.ProbeError, match="evidence exceeds"):
+        NATIVE.native_mapping_rows(b"x" * (4 * 1024 * 1024 + 1), tmp_path, {}, set())
+
+
+def image_receipts_fixture(tmp_path):
+    from types import SimpleNamespace
+    image = LOCK["platform_runtime"]["native_image"]
+    receipt = tmp_path / "NONRUST-PROBE-INPUTS.json"
+    inputs = {
+        "schema_version": 1, "native_image": image,
+        "inputs": {
+            "scripts/compatibility_probe_neutts_nonrust.py": digest((ROOT / "scripts/compatibility_probe_neutts_nonrust.py").read_bytes()),
+            "scripts/compatibility_probe_neutts_nonrust.sh": digest((ROOT / "scripts/compatibility_probe_neutts_nonrust.sh").read_bytes()),
+            "scripts/prepare_neutts_nonrust_runtime.py": NATIVE.PREPARER_SHA256,
+            "scripts/neutts_nonrust_runtime_lock.json": digest((ROOT / "scripts/neutts_nonrust_runtime_lock.json").read_bytes()),
+        },
+    }
+    inspection = [{"Architecture": "arm64", "Os": "linux", "RepoDigests": [image], "Id": "sha256:" + "1" * 64}]
+    receipt.write_text(json.dumps(inputs))
+    (tmp_path / "NONRUST-SOURCE-IMAGE.json").write_text(json.dumps(inspection))
+    return SimpleNamespace(image_receipt=receipt, inputs=ROOT / "scripts"), inputs, inspection
+
+
+def test_image_receipt_binds_the_actual_digest_architecture_and_executing_inputs(tmp_path):
+    args, _, _ = image_receipts_fixture(tmp_path)
+    result = NATIVE.validate_source_image(args, LOCK)
+    assert result["status"] == "verified-pinned-image"
+    assert result["input_receipt_sha256"] == digest(args.image_receipt.read_bytes())
+
+
+@pytest.mark.parametrize("change", ["image", "script", "architecture", "os", "digest", "id", "duplicate"])
+def test_image_evidence_mismatches_fail_before_member_admission(tmp_path, change):
+    args, inputs, inspection = image_receipts_fixture(tmp_path)
+    if change == "image":
+        inputs["native_image"] = "unreviewed/image@sha256:" + "0" * 64
+    elif change == "script":
+        inputs["inputs"]["scripts/compatibility_probe_neutts_nonrust.py"] = "0" * 64
+    elif change == "architecture":
+        inspection[0]["Architecture"] = "amd64"
+    elif change == "os":
+        inspection[0]["Os"] = "windows"
+    elif change == "digest":
+        inspection[0]["RepoDigests"] = ["termux/termux-docker@sha256:" + "0" * 64]
+    elif change == "id":
+        inspection[0]["Id"] = "not-a-content-id"
+    else:
+        inspection.append(copy.deepcopy(inspection[0]))
+    args.image_receipt.write_text(json.dumps(inputs))
+    (tmp_path / "NONRUST-SOURCE-IMAGE.json").write_text(json.dumps(inspection))
+    with pytest.raises(NATIVE.ProbeError):
+        NATIVE.validate_source_image(args, LOCK)
+
+
+def cmake_source_text(*, patched):
+    raw = (BASELINE.parent / "sentencepiece_CMakeLists.txt").read_bytes()
+    pin = SENTENCEPIECE["patch"]["files"][1]
+    assert digest(raw) == pin["before_sha256"] and len(raw) == pin["before_bytes"]
+    text = raw.decode()
+    if patched:
+        for edit in pin["edits"]:
+            assert text.count(edit["old"]) == 1
+            text = text.replace(edit["old"], edit["new"], 1)
+        assert digest(text.encode()) == pin["after_sha256"]
+    return text
+
+
+def abseil_cmake_contract(directory, *, patched, tree):
+    # Execute the exact provider block with real CMake. The acquisition module is
+    # an offline control: it records original fetch arguments, never uses Git or
+    # a network, and lets add_subdirectory visit a tiny noncompiling fixture.
+    source = directory / "source"
+    build = directory / "build"
+    modules = source / "cmake"
+    modules.mkdir(parents=True)
+    (source / "third_party/absl").mkdir(parents=True)
+    bundled = source / "third_party/abseil-cpp"
+    visit = 'file(WRITE "' + build.as_posix() + '/bundled-visited.txt" "visited\\n")\n'
+    if tree == "file":
+        bundled.write_text("not a source tree\n")
+    elif tree != "absent":
+        bundled.mkdir()
+        if tree != "no-cmake":
+            if tree == "cmake-directory":
+                (bundled / "CMakeLists.txt").mkdir()
+            else:
+                (bundled / "CMakeLists.txt").write_text(visit)
+        (bundled / "absl/base").mkdir(parents=True)
+        if tree == "config-directory":
+            (bundled / "absl/base/config.h").mkdir()
+        elif tree != "no-config":
+            (bundled / "absl/base/config.h").write_text("// Offline structural fixture.\n")
+    fetch = r'''
+function(FetchContent_Populate)
+  file(WRITE "${CMAKE_BINARY_DIR}/fetch-args.txt" "${ARGV}\n")
+  if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third_party/abseil-cpp")
+    message(FATAL_ERROR "FETCH_ATTEMPTED_WITH_BUNDLED_TREE")
+  endif()
+  file(MAKE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/third_party/abseil-cpp/absl/base")
+  file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/third_party/abseil-cpp/absl/base/config.h" "// fixture\n")
+  file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/third_party/abseil-cpp/CMakeLists.txt"
+       "file(WRITE \"${CMAKE_BINARY_DIR}/bundled-visited.txt\" \"visited\\n\")\n")
+endfunction()
+'''
+    (modules / "FetchContent.cmake").write_text(fetch)
+    full = cmake_source_text(patched=patched)
+    start = full.index('if (SPM_ABSL_PROVIDER STREQUAL "module")')
+    end = full.index("\nif(SPM_ENABLE_BENCHMARK)", start)
+    block = full[start:end]
+    project = ('cmake_minimum_required(VERSION 3.14)\nproject(abseil_source_contract LANGUAGES NONE)\n'
+               'set(SPM_ABSL_PROVIDER "module")\n'
+               'list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")\n' + block)
+    (source / "CMakeLists.txt").write_text(project, encoding="utf-8", newline="\n")
+    cmake = shutil.which("cmake")
+    assert cmake, "A real host CMake is required for the acquisition-branch contract"
+    result = subprocess.run([cmake, "-G", "Ninja", "-S", str(source), "-B", str(build)],
+                            capture_output=True, timeout=30, check=False)
+    fetched = build / "fetch-args.txt"
+    arguments = fetched.read_text().strip().split(";") if fetched.exists() else None
+    return result, arguments, (build / "bundled-visited.txt").exists(), source
+
+
+def test_unpatched_cmake_reproduces_the_unconditional_bundled_tree_fetch(tmp_path):
+    result, arguments, visited, _ = abseil_cmake_contract(tmp_path, patched=False, tree="present")
+    assert result.returncode != 0 and b"FETCH_ATTEMPTED_WITH_BUNDLED_TREE" in result.stderr
+    assert arguments and visited is False
+
+
+def test_patched_cmake_uses_the_bundled_tree_without_fetching(tmp_path):
+    result, arguments, visited, _ = abseil_cmake_contract(tmp_path, patched=True, tree="present")
+    assert result.returncode == 0, result.stderr.decode()
+    assert arguments is None and visited is True
+
+
+def test_absent_tree_preserves_the_exact_upstream_fetch_arguments(tmp_path):
+    controls = []
+    for patched in (False, True):
+        result, arguments, visited, source = abseil_cmake_contract(tmp_path / str(patched),
+                                                                 patched=patched, tree="absent")
+        assert result.returncode == 0, result.stderr.decode()
+        assert visited is True
+        controls.append([arg.replace(source.as_posix(), "SOURCE") for arg in arguments])
+    assert controls[0] == controls[1] == [
+        "abseil-cpp", "GIT_REPOSITORY", "https://github.com/abseil/abseil-cpp.git",
+        "SOURCE_DIR", "SOURCE/third_party/abseil-cpp", "GIT_PROGRESS", "TRUE",
+        "GIT_TAG", "20260526.0"]
+
+
+@pytest.mark.parametrize("tree", ["file", "no-cmake", "cmake-directory", "no-config", "config-directory"])
+def test_invalid_present_abseil_trees_fail_without_fetch(tmp_path, tree):
+    result, arguments, visited, _ = abseil_cmake_contract(tmp_path, patched=True, tree=tree)
+    assert result.returncode != 0 and b"Bundled Abseil source tree is incomplete" in result.stderr
+    assert arguments is None and visited is False
+
+
+def rpath_control_fixture(tmp_path, monkeypatch, scenario):
+    from types import ModuleType, SimpleNamespace
+    import sys
+    fixture = BASELINE.parent / "meson_python_rpath.py"
+    assert digest(fixture.read_bytes()) == "cb3aa16e3aea81e69371c3c4340aafef1834446775bb178a5953e047612db882"
+    monkeypatch.setattr(NATIVE.sys, "platform", "android")
+    spec = importlib.util.spec_from_file_location("mesonpy._rpath", fixture)
+    backend = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(backend)
+    package = ModuleType("mesonpy")
+    package.__path__ = []
+    package._rpath = backend
+    monkeypatch.setitem(sys.modules, "mesonpy", package)
+    monkeypatch.setitem(sys.modules, "mesonpy._rpath", backend)
+    prefix = tmp_path / "prefix"
+    monkeypatch.setattr(NATIVE, "PREFIX", prefix)
+    work, out = tmp_path / "work", tmp_path / "out"
+    work.mkdir()
+    out.mkdir()
+    library = work / "rpath-control.so"
+    before = "$ORIGIN/before:" + str(prefix / "lib")
+    state = {"rpath": str(prefix / "lib") + ":" + before,
+             "calls": [], "backend_calls": [], "loaded": 0}
+    original_elf = NATIVE.module_at("_rpath_control_header", ROOT / "scripts/compatibility_probe_phonemizer.py",
+                                   NATIVE.COMPONENT_HELPER_SHA256)
+
+    def binary():
+        library.write_bytes(elf_header() + state["rpath"].encode())
+
+    def bounded(command, output, label, timeout, *args, **kwargs):
+        state["calls"].append(list(command))
+        if "-###" in command:
+            return {"exit_code": 0, "label": label, "diagnostic_only": True}
+        if "--set-rpath" in command:
+            state["rpath"] = command[command.index("--set-rpath") + 1]
+            if scenario == "seed-readback":
+                state["rpath"] += ":wrong"
+        binary()
+        return {"exit_code": 0, "label": label}
+
+    def check_output(command, *, text, timeout):
+        assert command[1] == "--print-rpath" and text is True
+        return state["rpath"] + "\n"
+
+    def backend_run(command, **kwargs):
+        state["backend_calls"].append(list(command))
+        assert command[0] == "patchelf"
+        if command[1] == "--print-rpath":
+            return SimpleNamespace(returncode=0, stdout=state["rpath"] + "\n", stderr="")
+        assert command[1] == "--set-rpath"
+        if scenario != "backend-noop":
+            state["rpath"] = command[2]
+            binary()
+        return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    class Function:
+        def __call__(self):
+            return 41 if scenario == "native-result" else 42
+
+    def load_library(path):
+        assert path == str(library)
+        state["loaded"] += 1
+        return SimpleNamespace(component_value=Function())
+
+    monkeypatch.setattr(NATIVE.subprocess, "check_output", check_output)
+    monkeypatch.setattr(backend.subprocess, "run", backend_run)
+    monkeypatch.setattr(NATIVE.ctypes, "CDLL", load_library)
+    monkeypatch.setattr(NATIVE.importlib.metadata, "version", lambda name: "0.21.1" if name == "meson-python" else None)
+    common = SimpleNamespace(bounded_command=bounded,
+                             elf=lambda path, dynamic: original_elf.elf(path, dynamic=False))
+    return SimpleNamespace(out=out), work, common, state, before
+
+
+def test_rpath_control_records_compiler_defaults_then_tests_real_backend_transform(tmp_path, monkeypatch):
+    args, work, common, state, before = rpath_control_fixture(tmp_path, monkeypatch, "passed")
+    result = NATIVE.patchelf_probe(args, LOCK, common, work)
+    assert result["status"] == "passed"
+    assert result["compiler_rpath"] != before and result["before"] == before
+    assert result["after"] == "$ORIGIN/after:" + str(NATIVE.PREFIX / "lib")
+    assert state["calls"][0][-1] == "-###"
+    assert "--set-rpath" in state["calls"][2]
+    assert state["backend_calls"] == [
+        ["patchelf", "--print-rpath", str(work / "rpath-control.so")],
+        ["patchelf", "--set-rpath", result["after"], str(work / "rpath-control.so")]]
+    assert state["loaded"] == 1 and result["native_function_result"] == 42
+    assert json.loads((args.out / "RPATH-CONTROL-RESULT.json").read_bytes()) == result
+
+
+@pytest.mark.parametrize("scenario,message,loaded", [
+    ("seed-readback", "control seed differs", 0),
+    ("backend-noop", "backend RPATH repair failed", 0),
+    ("native-result", "ELF did not execute", 1),
+])
+def test_rpath_controls_keep_seed_transform_and_execution_failures(tmp_path, monkeypatch, scenario, message, loaded):
+    args, work, common, state, before = rpath_control_fixture(tmp_path, monkeypatch, scenario)
+    with pytest.raises(NATIVE.ProbeError, match=message):
+        NATIVE.patchelf_probe(args, LOCK, common, work)
+    report = json.loads((args.out / "RPATH-CONTROL-RESULT.json").read_bytes())
+    assert report["status"] == "failed" and message in report["error"]["message"]
+    assert report["compiler_rpath"] != before and state["loaded"] == loaded
+    if scenario == "seed-readback":
+        assert state["backend_calls"] == []

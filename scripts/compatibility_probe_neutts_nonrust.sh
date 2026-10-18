@@ -74,6 +74,7 @@ PY_INPUTS
     --cache "$out/python-wheelhouse" --out "$out/nonrust-inputs"
   chmod 0777 "$out"
   docker pull "$image"
+  docker image inspect "$image" > "$out/NONRUST-SOURCE-IMAGE.json"
   [[ "$(docker image inspect "$image" --format '{{.Architecture}}')" == arm64 ]]
   container="hermes-neutts-nonrust-${GITHUB_RUN_ID:-local}-$$"
   timeout --signal=TERM --kill-after=20s 100m docker run --rm --name "$container" \
@@ -117,7 +118,7 @@ stage=exact-archive-download
 import hashlib, importlib.util, pathlib, sys
 scripts, inputs = map(pathlib.Path, sys.argv[1:3])
 path = scripts / "prepare_neutts_nonrust_runtime.py"
-if hashlib.sha256(path.read_bytes()).hexdigest() != "16298ad398312c6894bb0972bfc357232bf3bf04df57a593fc8b4413f542cbbf":
+if hashlib.sha256(path.read_bytes()).hexdigest() != "7712d2aec739ae62b226cb0f1b9d868a12fdb046448d4cb1848505b495258fbe":
     raise SystemExit("Reviewed non-Rust input verifier changed")
 spec = importlib.util.spec_from_file_location("_nonrust_shell_prepare", path)
 module = importlib.util.module_from_spec(spec)
@@ -145,6 +146,7 @@ done < "$out/nonrust-inputs/build-apt-closure.tsv"
 stage=independent-native-components
 "$PREFIX/bin/python" -I -B /probes/scripts/compatibility_probe_neutts_nonrust.py \
   --inputs "$out/nonrust-inputs" --apt-archives "$work/archives" \
-  --foundation-receipt "$out/NEUTTS-CORE-RESULT.json" --out "$out/nonrust-components"
+  --foundation-receipt "$out/NEUTTS-CORE-RESULT.json" \
+  --image-receipt "$out/NONRUST-PROBE-INPUTS.json" --out "$out/nonrust-components"
 stage=complete
 echo "NEUTTS_NONRUST_COMPONENTS_PASSED: six builds and complete isolated runtime operations"

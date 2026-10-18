@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 911, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 900, in main
+    return build_one(args, lock, prep, common)
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 594, in build_one
+    controls["android_rpath"] = patchelf_probe(args, lock, common, control_work)
+                                ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 554, in patchelf_probe
+    require(initial == before, "ELF RPATH control input differs")
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 52, in require
+    raise ProbeError(message)
+ProbeError: ELF RPATH control input differs

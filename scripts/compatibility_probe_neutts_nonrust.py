@@ -36,7 +36,7 @@ import zipfile
 
 PREFIX = Path("/data/data/com.termux/files/usr")
 SCRIPT_DIR = Path(__file__).resolve().parent
-PREPARER_SHA256 = "16298ad398312c6894bb0972bfc357232bf3bf04df57a593fc8b4413f542cbbf"
+PREPARER_SHA256 = "7712d2aec739ae62b226cb0f1b9d868a12fdb046448d4cb1848505b495258fbe"
 COMPONENT_HELPER_SHA256 = "6387ecead23b7777e879588d7e76bd4c8d462de5574de1d77092053efc596211"
 APT_HELPER_SHA256 = "7c051b0143675594aadd52f9a0b66ec71e6950e9953feef3f773acceafcb0a29"
 OPERATIONS_SHA256 = "ce18cd98cdba38695b26fe36958e7621812a54601522acce1f9734451f55e368"
@@ -545,24 +545,51 @@ def patchelf_probe(args, lock, common, work):
     source, library = work / "rpath-control.c", work / "rpath-control.so"
     source.write_text("int component_value(void) { return 42; }\n")
     before = "$ORIGIN/before:" + str(PREFIX / "lib")
-    common.bounded_command([str(PREFIX / "bin/clang"), *shlex.split(lock["build"]["cflags"]),
-                            "-shared", str(source), "-o", str(library), "-Wl,-rpath," + before],
-                           args.out, "rpath-control-build", 60)
-    initial_sha = sha(library)
-    initial = subprocess.check_output([str(PREFIX / "bin/patchelf"), "--print-rpath", str(library)],
-                                      text=True, timeout=15).strip()
-    require(initial == before, "ELF RPATH control input differs")
-    mesonpy._rpath.fix_rpath(library, "after")
-    after = subprocess.check_output([str(PREFIX / "bin/patchelf"), "--print-rpath", str(library)],
-                                    text=True, timeout=15).strip()
-    require(after == "$ORIGIN/after:" + str(PREFIX / "lib"), "Actual Android backend RPATH repair failed")
-    loaded = ctypes.CDLL(str(library))
-    loaded.component_value.argtypes = []
-    loaded.component_value.restype = ctypes.c_int
-    require(loaded.component_value() == 42, "Repaired Android ELF did not execute")
-    return {"status": "passed", "platform": sys.platform, "before": before, "after": after,
-            "before_sha256": initial_sha, "after_binary": common.elf(library, dynamic=True),
-            "native_function_result": 42, "backend_version": importlib.metadata.version("meson-python")}
+    command = [str(PREFIX / "bin/clang"), *shlex.split(lock["build"]["cflags"]),
+               "-shared", str(source), "-o", str(library), "-Wl,-rpath," + before]
+    report = {"schema_version": 1, "status": "failed", "platform": sys.platform,
+              "seed_rpath": before, "source": str(source), "library": str(library)}
+    try:
+        # Preserve the native driver's actual link command and initial RPATH.
+        # This control tests Meson's repair, independently of compiler defaults.
+        report["compiler_trace"] = common.bounded_command(
+            [*command, "-###"], args.out, "rpath-control-linker-trace", 60)
+        report["compile"] = common.bounded_command(
+            command, args.out, "rpath-control-build", 60)
+        report["compiler_binary"] = common.elf(library, dynamic=True)
+        report["compiler_rpath"] = subprocess.check_output(
+            [str(PREFIX / "bin/patchelf"), "--print-rpath", str(library)],
+            text=True, timeout=15).strip()
+        report["seed_process"] = common.bounded_command(
+            [str(PREFIX / "bin/patchelf"), "--set-rpath", before, str(library)],
+            args.out, "rpath-control-seed", 30)
+        initial = subprocess.check_output(
+            [str(PREFIX / "bin/patchelf"), "--print-rpath", str(library)],
+            text=True, timeout=15).strip()
+        report["before"] = initial
+        report["before_sha256"] = sha(library)
+        require(initial == before, "ELF RPATH control seed differs: " + repr(initial))
+        mesonpy._rpath.fix_rpath(library, "after")
+        after = subprocess.check_output(
+            [str(PREFIX / "bin/patchelf"), "--print-rpath", str(library)],
+            text=True, timeout=15).strip()
+        report["after"] = after
+        require(after == "$ORIGIN/after:" + str(PREFIX / "lib"),
+                "Actual Android backend RPATH repair failed: " + repr(after))
+        loaded = ctypes.CDLL(str(library))
+        loaded.component_value.argtypes = []
+        loaded.component_value.restype = ctypes.c_int
+        report["native_function_result"] = loaded.component_value()
+        require(report["native_function_result"] == 42, "Repaired Android ELF did not execute")
+        report["after_binary"] = common.elf(library, dynamic=True)
+        report["backend_version"] = importlib.metadata.version("meson-python")
+        report["status"] = "passed"
+        return report
+    except Exception as exc:
+        report["error"] = {"type": type(exc).__name__, "message": str(exc)}
+        raise
+    finally:
+        save_json(args.out / "RPATH-CONTROL-RESULT.json", report)
 
 
 def build_one(args, lock, prep, common):
@@ -658,7 +685,10 @@ def built_wheel(path, source, prep):
     require(sorted(map(key, facts["requires_dist"])) == sorted(map(key, source["requires_dist"])),
             "Source wheel changed declared runtime dependencies")
     require(facts["native_members"], "Source silently emitted no native extension")
-    prefix = {"audioop-lts": "audioop.", "pandas": "pandas/", "pycryptodomex": "Cryptodome/",
+    if source["name"] == "audioop-lts":
+        require([item["member"] for item in facts["native_members"]] == ["audioop/_audioop.abi3.so"],
+                "Built audioop extension namespace differs from the exact source")
+    prefix = {"audioop-lts": "audioop/_audioop.", "pandas": "pandas/", "pycryptodomex": "Cryptodome/",
               "pyyaml": "yaml/", "scikit-learn": "sklearn/", "sentencepiece": "sentencepiece/"}[source["name"]]
     with zipfile.ZipFile(path) as archive:
         for member in facts["native_members"]:
@@ -667,6 +697,104 @@ def built_wheel(path, source, prep):
                     and len(raw) >= 64 and struct.unpack_from("<H", raw, 18)[0] == 183,
                     "Built native extension has a foreign namespace or ABI")
     return facts
+
+
+def validate_source_image(args, lock):
+    """Bind image-owned members to the host's actual immutable image selection."""
+    origin = lock["platform_runtime"]
+    inputs = read_json(args.image_receipt, 1_000_000)
+    require(inputs.get("schema_version") == 1
+            and inputs.get("native_image") == origin["native_image"],
+            "Native source-image identity differs")
+    expected_inputs = {
+        "scripts/compatibility_probe_neutts_nonrust.py": sha(Path(__file__).resolve()),
+        "scripts/compatibility_probe_neutts_nonrust.sh": sha(SCRIPT_DIR / "compatibility_probe_neutts_nonrust.sh"),
+        "scripts/prepare_neutts_nonrust_runtime.py": PREPARER_SHA256,
+        "scripts/neutts_nonrust_runtime_lock.json": sha(args.inputs / "neutts_nonrust_runtime_lock.json"),
+    }
+    require(all(inputs.get("inputs", {}).get(name) == digest
+                for name, digest in expected_inputs.items()),
+            "Source-image input ledger differs from the executing preparation")
+    inspection_path = args.image_receipt.parent / "NONRUST-SOURCE-IMAGE.json"
+    inspected = read_json(inspection_path, 2_000_000)
+    require(isinstance(inspected, list) and len(inspected) == 1, "Ambiguous Docker image inspection")
+    image = inspected[0]
+    require(image.get("Architecture") == "arm64" and image.get("Os") == "linux"
+            and origin["native_image"] in image.get("RepoDigests", [])
+            and re.fullmatch(r"sha256:[0-9a-f]{64}", image.get("Id", "")),
+            "Inspected Docker image differs from the reviewed ARM64 image")
+    return {"status": "verified-pinned-image", "native_image": origin["native_image"],
+            "docker_image_id": image["Id"], "architecture": image["Architecture"],
+            "input_receipt": str(args.image_receipt), "input_receipt_sha256": sha(args.image_receipt),
+            "inspection": str(inspection_path), "inspection_sha256": sha(inspection_path)}
+
+
+def verify_image_platform_members(paths, lock, common, apt):
+    """Verify exact image-owned AOSP files separately from downloaded APT files."""
+    platform = lock["platform_runtime"]
+    pins = {Path(pin["path"]): pin for pin in platform["files"]}
+    require(len(pins) == 5 and len(pins) == len(platform["files"]),
+            "Pinned image platform-member set differs")
+    require(set(paths) <= set(pins), "Unreviewed image platform member")
+    package = platform["package"]
+    expected_owner = package["name"]
+    snapshot = common.package_snapshot([expected_owner])
+    require(snapshot == {expected_owner: {key: package[key] for key in ("version", "architecture", "status")}},
+            "Image platform owner version differs")
+    owners = apt.collect_owners({path.as_posix() for path in paths})
+    records = []
+    for path in sorted(paths):
+        pin = pins[path]
+        require(path.absolute() == path.resolve() and stat.S_ISREG(path.lstat().st_mode),
+                "Image platform member is not an exact regular path: " + str(path))
+        require(path.stat().st_size == pin["bytes"] and sha(path) == pin["sha256"],
+                "Image platform member bytes differ: " + str(path))
+        require(owners.get(path.as_posix()) == [expected_owner],
+                "Image platform member owner differs: " + str(path))
+        details = common.elf(path, dynamic=True)
+        require(details["class"] == pin["elf_class"] == 64
+                and details["machine"] == pin["machine"] == 183
+                and details["endianness"] == pin["endianness"] == "little",
+                "Image platform member ABI differs: " + str(path))
+        records.append({"package": expected_owner, "package_version": package["version"],
+                        "native_image": platform["native_image"], **details})
+    return {"status": "verified-image-members", "members": records,
+            "source": "Exact files from the pinned image; not represented as retained APT archives."}
+
+
+def native_mapping_rows(raw, site, native, platform):
+    """Classify every mapped .so path and retain rejection details before gating."""
+    require(len(raw) <= 4 * 1024 * 1024, "Native memory-map evidence exceeds its bound")
+    rows = []
+    for number, line in enumerate(raw.decode("utf-8", "surrogateescape").splitlines(), 1):
+        parts = line.split(None, 5)
+        if len(parts) != 6 or not parts[5].startswith("/") or ".so" not in parts[5]:
+            continue
+        original = parts[5]
+        deleted = original.endswith(" (deleted)")
+        path = Path(original.removesuffix(" (deleted)")).resolve()
+        if deleted:
+            classification = "rejected-deleted"
+        elif path.is_relative_to(site):
+            classification = "source-extension" if path in native else "rejected-isolated-site"
+        elif path in platform:
+            classification = ("image-platform" if Path(original).absolute() == path
+                              else "rejected-image-alias")
+        elif (path.is_relative_to(PREFIX / "lib")
+              and Path(original).absolute().is_relative_to(PREFIX / "lib")):
+            classification = "apt-library"
+        elif str(path).startswith(("/apex/", "/system/")):
+            classification = "android-system"
+        else:
+            classification = "rejected-foreign"
+        rows.append({"line": number, "mapped_path": original, "resolved_path": str(path),
+                     "classification": classification, "deleted": deleted})
+    return rows
+
+
+def read_native_maps():
+    with Path("/proc/self/maps").open("rb") as stream:
+        return stream.read(4 * 1024 * 1024 + 1)
 
 
 def verify_native_mappings(manifest, prep, common, apt, args, lock):
@@ -681,24 +809,26 @@ def verify_native_mappings(manifest, prep, common, apt, args, lock):
             if item["path"].endswith(".so") or ".so." in item["path"]:
                 native[(site / item["path"]).resolve()] = {"package": package["name"],
                                                          "sha256": item["sha256"], "bytes": item["bytes"]}
-    loaded = set()
-    for line in Path("/proc/self/maps").read_text().splitlines():
-        parts = line.split(None, 5)
-        if len(parts) != 6 or not parts[5].startswith("/") or ".so" not in parts[5]:
-            continue
-        require(not parts[5].endswith(" (deleted)"), "Deleted native library mapping")
-        path = Path(parts[5]).resolve()
-        if path.is_relative_to(site):
-            require(path in native, "Unreviewed native library mapped inside isolated site")
-            loaded.add(path)
-        else:
-            require(path.is_relative_to(PREFIX / "lib") or str(path).startswith(("/apex/", "/system/")),
-                    "Foreign native library outside verified runtime/APT/system paths")
+    platform = {Path(pin["path"]) for pin in lock["platform_runtime"]["files"]}
+    raw = read_native_maps()
+    raw_path = args.out / "NATIVE-MAPPINGS.raw.txt"
+    with raw_path.open("xb") as stream:
+        stream.write(raw)
+    rows = native_mapping_rows(raw, site, native, platform)
+    diagnostic = {"schema_version": 1, "raw": raw_path.name, "raw_bytes": len(raw),
+                  "raw_sha256": hashlib.sha256(raw).hexdigest(), "mappings": rows,
+                  "source_image": lock["platform_runtime"]["native_image"]}
+    save_json(args.out / "NATIVE-MAPPINGS.json", diagnostic)
+    rejected = [row for row in rows if row["classification"].startswith("rejected-")]
+    require(not rejected, "Unverified native mapping: " + json.dumps(rejected, ensure_ascii=True))
+    loaded = {Path(row["resolved_path"]) for row in rows if row["classification"] == "source-extension"}
+    image_loaded = {Path(row["resolved_path"]) for row in rows if row["classification"] == "image-platform"}
+    image_mappings = verify_image_platform_members(image_loaded, lock, common, apt)
     records = []
     for path in sorted(loaded):
         pin = native[path]
         require(path.stat().st_size == pin["bytes"] and sha(path) == pin["sha256"],
-                "Mapped native extension differs from source wheel/APT payload")
+                "Mapped native extension differs from source wheel/APT payload: " + str(path))
         details = common.elf(path, dynamic=True)
         require(not any(name in {"libc.so.6", "libstdc++.so.6", "libpython3.14.so.1.0"}
                         for name in details.get("needed", [])), "Foreign GNU/Linux ABI dependency")
@@ -709,7 +839,10 @@ def verify_native_mappings(manifest, prep, common, apt, args, lock):
     for pin in lock["build_apt"]["additional_to_141"]:
         all_pins[pin["name"]] = pin
     apt_mappings = common.verify_mapped_apt_libraries(args.apt_archives, all_pins, apt)
-    return {"status": "passed", "actually_mapped_extensions": records, "apt": apt_mappings}
+    return {"status": "passed", "actually_mapped_extensions": records, "apt": apt_mappings,
+            "image_platform": image_mappings, "diagnostic": "NATIVE-MAPPINGS.json",
+            "diagnostic_sha256": sha(args.out / "NATIVE-MAPPINGS.json"),
+            "raw_sha256": diagnostic["raw_sha256"]}
 
 
 def runtime_case(args, lock, prep, common, apt):
@@ -717,6 +850,7 @@ def runtime_case(args, lock, prep, common, apt):
               "speech_synthesis_tested": False, "production_admission_changed": False}
     try:
         report["native_runtime"] = native_runtime(common)
+        report["source_image"] = validate_source_image(args, lock)
         manifest = read_json(args.environment_manifest)
         roots = list(ORDER) if args.source_name == "combined" else [args.source_name]
         expected = closure_names(lock, roots)
@@ -750,7 +884,8 @@ def runtime_gate(args, lock, roots, built, runtime_directory, out, prep, common,
     command = [str(python), "-I", "-B", str(Path(__file__).resolve()),
                "--phase", "runtime", "--inputs", str(args.inputs), "--out", str(out),
                "--apt-archives", str(args.apt_archives), "--source-name", name,
-               "--environment-manifest", str(manifest_path)]
+               "--environment-manifest", str(manifest_path),
+               "--image-receipt", str(args.image_receipt)]
     process = common.bounded_command(command, out, "runtime-operations", 300, env)
     receipt = out / "RUNTIME-OPERATIONS-RESULT.json"
     report = read_json(receipt)
@@ -778,6 +913,7 @@ def run(args, lock, prep, common, apt):
               "components": [{"component": name, "status": "not-run"} for name in ORDER]}
     try:
         report["runtime"] = native_runtime(common)
+        report["source_image"] = validate_source_image(args, lock)
         report["foundation"] = common.validate_foundation(
             args.foundation_receipt, {"foundation": {"apt_metadata_ledger_sha256": lock["apt_metadata_ledger"]["sha256"]}})
         metadata = apt.load_manifest(SCRIPT_DIR / "neutts_apt_python_metadata.json")
@@ -886,6 +1022,7 @@ def main(argv=None):
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--apt-archives", type=Path)
     parser.add_argument("--foundation-receipt", type=Path)
+    parser.add_argument("--image-receipt", type=Path)
     parser.add_argument("--source-name", choices=(*ORDER, "combined"))
     parser.add_argument("--source-root", type=Path)
     parser.add_argument("--wheel-dir", type=Path)
@@ -898,7 +1035,8 @@ def main(argv=None):
                 and args.wheel_dir is not None and args.environment_manifest is not None,
                 "Build phase needs explicit isolated source/environment paths")
         return build_one(args, lock, prep, common)
-    require(args.apt_archives is not None, "Native runtime requires retained exact APT archives")
+    require(args.apt_archives is not None and args.image_receipt is not None,
+            "Native runtime requires retained exact APT archives and host image evidence")
     if args.phase == "runtime":
         require(args.source_name is not None and args.environment_manifest is not None,
                 "Runtime phase needs an explicit complete environment manifest")

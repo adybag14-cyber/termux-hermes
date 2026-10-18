@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 728, in runtime_case
+    report["native_mappings"] = verify_native_mappings(manifest, prep, common, apt, args, lock)
+                                ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 695, in verify_native_mappings
+    require(path.is_relative_to(PREFIX / "lib") or str(path).startswith(("/apex/", "/system/")),
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            "Foreign native library outside verified runtime/APT/system paths")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 52, in require
+    raise ProbeError(message)
+ProbeError: Foreign native library outside verified runtime/APT/system paths

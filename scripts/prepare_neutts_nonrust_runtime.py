@@ -33,7 +33,7 @@ import zipfile
 SCRIPT_DIR = Path(__file__).resolve().parent
 LOCK_FILENAME = "neutts_nonrust_runtime_lock.json"
 RECEIPT_FILENAME = "NONRUST-PREPARED-INPUTS.json"
-LOCK_SHA256 = "cf1c2453050f7a34e7aa733b1574a8ee3936f0e901293e21b5b6695a27b9a7a8"
+LOCK_SHA256 = "a97d01c1b9c491e0f3e62907df1739a73dab23c4dd80c381b6a445dfa4c0b8a5"
 BASE_PREPARER_SHA256 = "b6a358f87fb675f00a9e125b821d94ae81d9341cb9b4ab9fe2953ea1697318eb"
 EXPECTED_SOURCES = frozenset(("audioop-lts", "pandas", "pycryptodomex", "pyyaml",
                               "scikit-learn", "sentencepiece"))

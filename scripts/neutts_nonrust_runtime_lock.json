@@ -19396,6 +19396,122 @@
       }
     }
   ],
+  "platform_runtime": {
+    "files": [
+      {
+        "bytes": 926896,
+        "elf_class": 64,
+        "endianness": "little",
+        "machine": 183,
+        "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libc++.so",
+        "sha256": "3b3a556e1a175baa03cd5e82a4a9189182ad1b1824319f15c681a13fdfdc42f0"
+      },
+      {
+        "bytes": 1126832,
+        "elf_class": 64,
+        "endianness": "little",
+        "machine": 183,
+        "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libc.so",
+        "sha256": "f9eacc7c6402ae1cca97e6e080340e12203bcd43cb44b054522239a7eed64fc4"
+      },
+      {
+        "bytes": 67504,
+        "elf_class": 64,
+        "endianness": "little",
+        "machine": 183,
+        "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libdl.so",
+        "sha256": "cfee715580eac1a5cf3a7713ceebd61e83544a2889bd4799be7c23272356815b"
+      },
+      {
+        "bytes": 136800,
+        "elf_class": 64,
+        "endianness": "little",
+        "machine": 183,
+        "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/liblog.so",
+        "sha256": "af8872cb6e476b8d66bbf6d84eb6fb12e3312ea79a5c947a63a8428256b45a81"
+      },
+      {
+        "bytes": 265480,
+        "elf_class": 64,
+        "endianness": "little",
+        "machine": 183,
+        "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libm.so",
+        "sha256": "d99e586652e539e4840c4466d6a8d8a7fe169b662a48935000226eb7f1c41f9b"
+      }
+    ],
+    "native_image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
+    "package": {
+      "architecture": "aarch64",
+      "name": "aosp-libs",
+      "status": "installed",
+      "version": "9.0.0-r76-4"
+    },
+    "provenance": {
+      "artifact_bytes": 75627830,
+      "artifact_id": "12116645561",
+      "artifact_sha256": "6d31dda2133f6fdda39c8e297917a75b20a46df2130f59ea7ef7602f74e5fbe9",
+      "base_packages": {
+        "bytes": 1471,
+        "path": "NEUTTS-BASE-PACKAGES.tsv",
+        "sha256": "78ff2592d1d13be57ae34035e67f41de78677af37644cea50622877b590c6046"
+      },
+      "docker_pull_log": {
+        "bytes": 458328,
+        "path": "failed-job-log.txt",
+        "sha256": "2bcbccc826f56c5eef82b84fd3467a489fc6300a8c0a656a6b55200694c3bb3e"
+      },
+      "foundation_receipts": [
+        {
+          "bytes": 59936,
+          "path": "neutts-torch.json",
+          "sha256": "7d9689221153be9e22bbb5b37716f7cc5532f05c6c5b1752ed252b73c14f2fb4"
+        },
+        {
+          "bytes": 61598,
+          "path": "neutts-torchaudio.json",
+          "sha256": "914e453ade5e7efbe1b97ca6a32e33af174a6fbd6a7e2c7d24d5fc92608d647a"
+        },
+        {
+          "bytes": 101229,
+          "path": "neutts-torchcodec.json",
+          "sha256": "760f781be72b6f8db814aa62ac5bbf0fa0e7eb1038d0113cc820c0afb7eeb5c9"
+        },
+        {
+          "bytes": 14905,
+          "path": "neutts-llvmlite.json",
+          "sha256": "26606b1effe73ef69edfd2c4acf23c8dd6c4203ba00ff87f725efd1e4624fff6"
+        },
+        {
+          "bytes": 35798,
+          "path": "neutts-scipy.json",
+          "sha256": "68060a1618b4c2d6baa765dfd532a676b5e4a57647e3773f10a1858fcc2efe4f"
+        },
+        {
+          "bytes": 16445,
+          "path": "neutts-soxr.json",
+          "sha256": "451d8041a13d7ec9dc1eca06d7d531a0317ca5e256d520caed0f95f92222e33b"
+        },
+        {
+          "bytes": 18116,
+          "path": "neutts-python_dependencies.json",
+          "sha256": "dcd3ee8d7091f04a6e568b26018e96329ef4bbb3f7137875734986ab1918c2a9"
+        }
+      ],
+      "head_sha": "c3584d6348948063c442195c6e3f25ecd3cebc08",
+      "input_receipt": {
+        "bytes": 3630,
+        "path": "NONRUST-PROBE-INPUTS.json",
+        "sha256": "67fe37ef136a83ace1ff135d011a86c38d3f9364d3929e7dad73c175c05387ef"
+      },
+      "installed_packages": {
+        "bytes": 4804,
+        "path": "NEUTTS-INSTALLED-PACKAGES.tsv",
+        "sha256": "40c4104a1cc044bd3f5297deb160e0f952208afe1e383f1b5b8fa3b441956bd3"
+      },
+      "run_id": "39073990223",
+      "scope": "The exact image-owned AOSP files mapped by every passed foundation case; no new APT package or arbitrary directory admission."
+    }
+  },
   "schema_version": 1,
   "scope": "Preparation-only six native Python component experiments; complete fourteen-node runtime subset",
   "sources": [
@@ -92927,7 +93043,7 @@
       ],
       "name": "sentencepiece",
       "patch": {
-        "bytes": 893,
+        "bytes": 2508,
         "filename": "sentencepiece-bounded-build.patch",
         "files": [
           {
@@ -92950,10 +93066,23 @@
               }
             ],
             "path": "build_bundled.sh"
+          },
+          {
+            "after_bytes": 9462,
+            "after_sha256": "4b618a782cf08aedafbe62cd82dd2f294001371790877547c1c9213c06b4cc75",
+            "before_bytes": 8717,
+            "before_sha256": "4e121b824a08fb084ac259d3f3f87d9dc417c00c437046c990baf3df480d4c8f",
+            "edits": [
+              {
+                "new": "  # The Python source archive already contains the complete pinned Abseil tree.\n  # Reject a partial local tree; preserve the upstream fetch when it is absent.\n  set(_spm_bundled_absl \"${CMAKE_CURRENT_SOURCE_DIR}/third_party/abseil-cpp\")\n  if (EXISTS \"${_spm_bundled_absl}\")\n    if (NOT IS_DIRECTORY \"${_spm_bundled_absl}\"\n        OR NOT EXISTS \"${_spm_bundled_absl}/CMakeLists.txt\"\n        OR IS_DIRECTORY \"${_spm_bundled_absl}/CMakeLists.txt\"\n        OR NOT IS_DIRECTORY \"${_spm_bundled_absl}/absl\"\n        OR NOT EXISTS \"${_spm_bundled_absl}/absl/base/config.h\"\n        OR IS_DIRECTORY \"${_spm_bundled_absl}/absl/base/config.h\")\n      message(FATAL_ERROR \"Bundled Abseil source tree is incomplete\")\n    endif()\n  else()\n    include(FetchContent)\n    FetchContent_Populate(abseil-cpp\n          GIT_REPOSITORY  https://github.com/abseil/abseil-cpp.git\n          SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/abseil-cpp\n          GIT_PROGRESS TRUE\n          GIT_TAG 20260526.0)\n  endif()\n",
+                "old": "  include(FetchContent)\n  FetchContent_Populate(abseil-cpp\n        GIT_REPOSITORY  https://github.com/abseil/abseil-cpp.git\n        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/abseil-cpp\n        GIT_PROGRESS TRUE\n        GIT_TAG 20260526.0)\n"
+              }
+            ],
+            "path": "sentencepiece/CMakeLists.txt"
           }
         ],
         "path": "patches/next-stable/sentencepiece-bounded-build.patch",
-        "sha256": "22b79b03ef620a34ecac70a5ee500953cd1622f314373c0cae22e1d7359a42c3"
+        "sha256": "c794aeca455ba465872a50f2425e3f083a1bd051caf4aa094bec352e9566aeaf"
       },
       "prepared_files": [
         {
@@ -92999,10 +93128,10 @@
           "sha256": "c6e676d98935d7128812c773f123032522935e55bf654d0f4b429f6e4ea12312"
         },
         {
-          "bytes": 8717,
+          "bytes": 9462,
           "mode": "100644",
           "path": "sentencepiece/CMakeLists.txt",
-          "sha256": "4e121b824a08fb084ac259d3f3f87d9dc417c00c437046c990baf3df480d4c8f"
+          "sha256": "4b618a782cf08aedafbe62cd82dd2f294001371790877547c1c9213c06b4cc75"
         },
         {
           "bytes": 11358,

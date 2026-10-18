@@ -22,3 +22,39 @@ diff --git a/build_bundled.sh b/build_bundled.sh
 -cmake --build ${BUILD_DIR} --config Release --target install --parallel $(nproc)
 +  -DCMAKE_CXX_FLAGS="${CXXFLAGS:-} -fPIC -fvisibility=default -ffunction-sections -fdata-sections"
 +cmake --build ${BUILD_DIR} --config Release --target install --parallel "${BUILD_JOBS}"
+diff --git a/sentencepiece/CMakeLists.txt b/sentencepiece/CMakeLists.txt
+--- a/sentencepiece/CMakeLists.txt
++++ b/sentencepiece/CMakeLists.txt
+@@ -186,12 +186,26 @@
+ endif()
+ 
+ if (SPM_ABSL_PROVIDER STREQUAL "module")
+-  include(FetchContent)
+-  FetchContent_Populate(abseil-cpp
+-        GIT_REPOSITORY  https://github.com/abseil/abseil-cpp.git
+-        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/abseil-cpp
+-        GIT_PROGRESS TRUE
+-        GIT_TAG 20260526.0)
++  # The Python source archive already contains the complete pinned Abseil tree.
++  # Reject a partial local tree; preserve the upstream fetch when it is absent.
++  set(_spm_bundled_absl "${CMAKE_CURRENT_SOURCE_DIR}/third_party/abseil-cpp")
++  if (EXISTS "${_spm_bundled_absl}")
++    if (NOT IS_DIRECTORY "${_spm_bundled_absl}"
++        OR NOT EXISTS "${_spm_bundled_absl}/CMakeLists.txt"
++        OR IS_DIRECTORY "${_spm_bundled_absl}/CMakeLists.txt"
++        OR NOT IS_DIRECTORY "${_spm_bundled_absl}/absl"
++        OR NOT EXISTS "${_spm_bundled_absl}/absl/base/config.h"
++        OR IS_DIRECTORY "${_spm_bundled_absl}/absl/base/config.h")
++      message(FATAL_ERROR "Bundled Abseil source tree is incomplete")
++    endif()
++  else()
++    include(FetchContent)
++    FetchContent_Populate(abseil-cpp
++          GIT_REPOSITORY  https://github.com/abseil/abseil-cpp.git
++          SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/abseil-cpp
++          GIT_PROGRESS TRUE
++          GIT_TAG 20260526.0)
++  endif()
+   add_subdirectory(third_party/abseil-cpp)
+   if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/absl)
+     file(CREATE_LINK
