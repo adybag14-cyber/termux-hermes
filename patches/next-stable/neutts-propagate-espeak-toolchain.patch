@@ -1,0 +1,22 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -43,8 +43,16 @@
+         -DEXTRA_cmn:BOOL=ON
+         -DEXTRA_ru:BOOL=ON
+         # Need to explicitly add ucd include directory for CI
+-        "-DCMAKE_C_FLAGS=-D_FILE_OFFSET_BITS=64 -I${ESPEAKNG_SOURCE_DIR}/src/ucd-tools/src/include"
+-        "-DCMAKE_CXX_FLAGS=-D_FILE_OFFSET_BITS=64 -I${ESPEAKNG_SOURCE_DIR}/src/ucd-tools/src/include"
++        # Preserve the parent's compiler, target flags and link settings.
++        # Retain eSpeak's existing large-file define and ucd-tools include.
++        "-DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}"
++        "-DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}"
++        "-DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS} -D_FILE_OFFSET_BITS=64 -I${ESPEAKNG_SOURCE_DIR}/src/ucd-tools/src/include"
++        "-DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS} -D_FILE_OFFSET_BITS=64 -I${ESPEAKNG_SOURCE_DIR}/src/ucd-tools/src/include"
++        "-DCMAKE_EXE_LINKER_FLAGS:STRING=${CMAKE_EXE_LINKER_FLAGS}"
++        "-DCMAKE_SHARED_LINKER_FLAGS:STRING=${CMAKE_SHARED_LINKER_FLAGS}"
++        "-DCMAKE_MODULE_LINKER_FLAGS:STRING=${CMAKE_MODULE_LINKER_FLAGS}"
++        "-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=${CMAKE_EXPORT_COMPILE_COMMANDS}"
+     UPDATE_DISCONNECTED TRUE
+ )
+ 

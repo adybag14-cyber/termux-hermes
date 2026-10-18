@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "reviewed_at_utc": "2026-10-18T00:53:34.222544+00:00",
+  "status": "reviewed for native build and bundled C ABI validation",
+  "implementation_files_reviewed": [
+    {
+      "bytes": 17822,
+      "path": "scripts/neutts_engine_wheel_lock.json",
+      "sha256": "a732ff14c1145774ab7e2ba5750936df6f0c3261e1a687897699f6a0c7bfbae1"
+    },
+    {
+      "bytes": 1293,
+      "path": "patches/next-stable/neutts-propagate-espeak-toolchain.patch",
+      "sha256": "4b9ecf1ec8aafb2c3f144f41ebe87e6bf18d6d0dd98973d6289f1b7864f7af95"
+    },
+    {
+      "bytes": 13227,
+      "path": "scripts/prepare_neutts_engine_wheel.py",
+      "sha256": "be5582ebcd9cf81b64baff7c6684a74bcafd30339bda8cb4ac02c94a39b4f0bb"
+    },
+    {
+      "bytes": 21892,
+      "path": "scripts/verify_neutts_engine_wheel.py",
+      "sha256": "e5f55a90360efb11c550e4fd5e92bc0e543bc9bd253b7e831886ed73b69aa8bf"
+    },
+    {
+      "bytes": 29016,
+      "path": "scripts/compatibility_probe_neutts_engine_wheel.py",
+      "sha256": "2707476ae582747b76bb87972b7913c4af486ea84caa9f3080990dda951ba26b"
+    },
+    {
+      "bytes": 9498,
+      "path": "scripts/check_neutts_engine_wheel_cmake.py",
+      "sha256": "81d0db8e10196e6b1f2f1726031443b6f7f35ee6ef4a41d64a17490fe952bee0"
+    },
+    {
+      "bytes": 6776,
+      "path": "scripts/compatibility_probe_neutts_engine_wheel.sh",
+      "sha256": "38ae1bf19cbad53a4e3f14cf0093640a3d9cd065a1578c5d2a83ad579e84f0cb"
+    },
+    {
+      "bytes": 1737,
+      "path": ".github/workflows/neutts-engine-wheel.yml",
+      "sha256": "565d1953e6ed11af1a783cd434ad2105077fed88f3aeb0f50d67704b1645f5bc"
+    },
+    {
+      "bytes": 29807,
+      "path": "tests/test_neutts_engine_wheel_preparation.py",
+      "sha256": "5b8c109619bdbbf11d540244a231dfea4e935a6b0f4fba823611c3fe9c887dc5"
+    },
+    {
+      "bytes": 2991,
+      "path": "tests/fixtures/neutts_engine_wheel/CMakeLists.root-offline.txt",
+      "sha256": "bc542e595d86be9737026847a3ed2c25a4169e94357dd52b569af20364db4a8a"
+    },
+    {
+      "bytes": 908,
+      "path": "tests/fixtures/neutts_engine_wheel/pyproject.toml",
+      "sha256": "3d74df60f0db27733b308c93b88ae95f9deaa8f396f48183b0cf4f14eb3deb94"
+    },
+    {
+      "bytes": 12875,
+      "path": "tests/fixtures/neutts_engine_wheel/wheel-source-manifest.json",
+      "sha256": "c37b8a80004e0a2c1fa78c99f0af449d6881975818418156b2595b4ebd4011db"
+    },
+    {
+      "bytes": 127,
+      "path": "tests/fixtures/neutts_engine_wheel/.gitattributes",
+      "sha256": "a4d0324d6b32f304275dbc1d78992e827add6e798b5e1b30114d05c744b58b79"
+    },
+    {
+      "bytes": 6765,
+      "path": "docs/neutts-engine-wheel-build-only-preparation.md",
+      "sha256": "affe7942ff5aead5dd111a9ccf54ae08797075b3ebe16264d9845b3494c9ac4f"
+    }
+  ],
+  "focused_tests": {
+    "tests": 42,
+    "subtests": 61,
+    "skipped": 0,
+    "seconds": 1.41,
+    "exit_code": 0
+  },
+  "prepared_inputs_reverified": {
+    "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-engine-wheel-root-review-20261018\\ROOT-VERIFIED-INPUTS.json",
+    "bytes": 7595,
+    "sha256": "56dd016f513d6e8f473789d91ff62e43ed22656167873fffb481d293d582df23",
+    "source_files": 56,
+    "build_wheels": 3,
+    "build_edges": 2,
+    "compiler_archives": 44
+  },
+  "review_conclusions": [
+    "The source correction propagates parent compilers/flags/linker settings to eSpeak and preserves source acquisition and all original feature/default/install settings.",
+    "The native build must retain actual compiler evidence and all source/wheel/data/metadata bytes; all 14 C ABI cases use the exact wheel library.",
+    "The original nine base and six optional requirement entries remain. Requires-Python still excludes 3.14; no engine installation or import occurs.",
+    "Every frozen evidence and implementation file was reverified by size and SHA."
+  ],
+  "scope_limits": {
+    "audio_synthesis": false,
+    "bundled_reference_files": "Four original .pt/.txt speaker-reference pairs are copied/hash-verified as upstream assets and are never deserialized.",
+    "engine_imported": false,
+    "engine_installed": false,
+    "model_downloaded": false,
+    "model_inference": false,
+    "python314_admission": false,
+    "release_output": false,
+    "requires_python_unchanged": ">=3.10, <3.14"
+  },
+  "native_execution_passed": false,
+  "release_output": false
+}

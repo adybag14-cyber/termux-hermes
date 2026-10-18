@@ -1,0 +1,76 @@
+{
+  "bash_command": [
+    "C:\\Program Files\\Git\\bin\\bash.exe",
+    "-n",
+    "C:/Users/adyba/docker-chatgpt-devbox/workspace/termux-hermes-next-stable-20261017/scripts/compatibility_probe_neutts_engine_wheel.sh"
+  ],
+  "bash_exit_code": 0,
+  "no_dispatch": true,
+  "no_native_build": true,
+  "status": "passed",
+  "workflow": {
+    "concurrency": {
+      "cancel-in-progress": "false",
+      "group": "neutts-engine-wheel-${{ github.sha }}"
+    },
+    "jobs": {
+      "native-engine-wheel": {
+        "name": "Scientific foundation, exact wheel and bundled eSpeak C ABI",
+        "runs-on": "ubuntu-24.04-arm",
+        "steps": [
+          {
+            "name": "Checkout the reviewed preparation",
+            "uses": "actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd",
+            "with": {
+              "persist-credentials": "false",
+              "ref": "${{ github.sha }}"
+            }
+          },
+          {
+            "env": {
+              "NEUTTS_PROBE_HEAD_SHA": "${{ github.sha }}"
+            },
+            "name": "Prepare exact sources and run the native build-only gate",
+            "run": "bash scripts/compatibility_probe_neutts_engine_wheel.sh --out probe-results/neutts-engine-wheel"
+          },
+          {
+            "if": "always()",
+            "name": "Preserve original metadata, nested compiler and actual wheel C ABI evidence",
+            "uses": "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+            "with": {
+              "compression-level": "6",
+              "if-no-files-found": "warn",
+              "name": "termux-neutts-engine-wheel",
+              "path": "probe-results/neutts-engine-wheel/",
+              "retention-days": "14"
+            }
+          }
+        ],
+        "timeout-minutes": "55"
+      }
+    },
+    "name": "Prepare NeuTTS engine wheel without admission",
+    "on": {
+      "push": {
+        "branches": [
+          "prepare/termux-compatibility-next-stable"
+        ],
+        "paths": [
+          ".github/workflows/neutts-engine-wheel.yml",
+          "scripts/compatibility_probe_neutts_engine_wheel.sh",
+          "scripts/compatibility_probe_neutts_engine_wheel.py",
+          "scripts/prepare_neutts_engine_wheel.py",
+          "scripts/neutts_engine_wheel_lock.json",
+          "scripts/verify_neutts_engine_wheel.py",
+          "scripts/check_neutts_engine_wheel_cmake.py",
+          "patches/next-stable/neutts-propagate-espeak-toolchain.patch"
+        ]
+      },
+      "workflow_dispatch": ""
+    },
+    "permissions": {
+      "contents": "read"
+    }
+  },
+  "workflow_sha256": "565d1953e6ed11af1a783cd434ad2105077fed88f3aeb0f50d67704b1645f5bc"
+}
