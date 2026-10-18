@@ -1,0 +1,338 @@
+diff --git a/scripts/compatibility_probe_neutts_apt_extensions.py b/scripts/compatibility_probe_neutts_apt_extensions.py
+index 213f28d..3c22a2a 100644
+--- a/scripts/compatibility_probe_neutts_apt_extensions.py
++++ b/scripts/compatibility_probe_neutts_apt_extensions.py
+@@ -27,7 +27,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
+ PREFIX_TEXT = "/data/data/com.termux/files/usr"
+ PREFIX = Path(PREFIX_TEXT)
+ SITE = PREFIX / "lib/python3.14/site-packages"
+-PREPARER_SHA256 = "de07068e48e2a383771fa3b05caa4d46efa40430e216ef541d4f271bb82e9a6a"
++PREPARER_SHA256 = "0d954a2b4f9e68d8bb80ecea132b97e6e05a23f41835a2189ccf53884d811c3a"
+ COMMON_SHA256 = "862efa59b3c967fd360e1d9ce86d4ebadc5bbf9a4b0a3023f2990a66da130c74"
+ CASES = ("pyarrow", "lxml", "msgpack", "pillow", "psutil")
+ RESULT = "APT-EXTENSIONS-RESULT.json"
+@@ -315,12 +315,47 @@ def validate_image_foundation(lock, foundation, common, apt):
+             "authority": lock["image_runtime"]["authority"], "snapshot_archive_claim": False}
+ 
+ 
++def verify_extension_image_file(row, owners, owner_state, prep):
++    path = Path(row["path"])
++    require(path.resolve(strict=True) == path and path.is_file(),
++            "Extension image member is not a canonical regular file: " + str(path))
++    raw = prep.read_regular(path, row["bytes"])
++    require(len(raw) == row["bytes"] and prep.sha(raw) == row["sha256"],
++            "Extension image member bytes differ: " + str(path))
++    require(owners == row["owners"] and owner_state == row["owner_state"],
++            "Extension image member ownership/state differs: " + str(path))
++    info = path.stat()
++    require((stat.S_IMODE(info.st_mode), info.st_uid, info.st_gid) ==
++            (row["mode"], row["uid"], row["gid"]),
++            "Extension image member mode/UID/GID differs: " + str(path))
++    details = prep.elf_identity(raw)
++    require(details == row["elf"], "Extension image member ELF differs: " + str(path))
++    return {"path": row["path"], "bytes": len(raw), "sha256": prep.sha(raw), **details,
++            "owner": owners[0], "version": owner_state["version"],
++            "mode": row["mode"], "uid": row["uid"], "gid": row["gid"],
++            "authority": "pinned-image-aosp-extension"}
++
++
++def validate_extension_image(args, lock, apt, prep):
++    extension = lock["extension_image_runtime"]
++    owners = apt.collect_owners([row["path"] for row in extension["files"]])
++    states = package_snapshot(args.out, "extension-image-owner-state")
++    files = [verify_extension_image_file(row, owners.get(row["path"], []),
++                                        states.get(row["owners"][0]), prep)
++             for row in extension["files"]]
++    return {"status": "passed", "image": extension["image"], "files": files,
++            "authority": extension["authority"], "source_evidence": extension["source_evidence"],
++            "original_foundation_file_count": 5, "snapshot_archive_claim": False}
++
++
+ def classify_mapping(path, lock):
+     path = PurePosixPath(path)
+     require(path.is_absolute() and ".." not in path.parts, "Non-canonical native mapping: " + str(path))
+     image = {row["path"] for row in lock["image_runtime"]["files"]}
+     if str(path) in image:
+         return "pinned-image-aosp"
++    if str(path) in {row["path"] for row in lock["extension_image_runtime"]["files"]}:
++        return "pinned-image-aosp-extension"
+     if path.is_relative_to(PurePosixPath(PREFIX_TEXT + "/lib")):
+         return "apt"
+     raise ProbeError("Unreviewed native mapping outside exact APT/image paths: " + str(path))
+@@ -385,6 +420,8 @@ def verify_mappings(args, lock, apt, prep):
+     require(observations["complete"], "Native mapping observation incomplete; exact diagnostics retained")
+     pins = {p["package"]: p for p in lock["apt"]["provenance_packages"]}
+     image = {row["path"]: row for row in lock["image_runtime"]["files"]}
++    extension_image = {row["path"]: row for row in lock["extension_image_runtime"]["files"]}
++    observed = {row["resolved_path"]: row for row in observations["files"]}
+     apt_groups, records = {}, []
+     for name in sorted(paths):
+         kind = classify_mapping(name, lock)
+@@ -395,6 +432,11 @@ def verify_mappings(args, lock, apt, prep):
+             prep.elf_identity(prep.read_regular(name, row["bytes"]))
+             records.append({"path": name, "mapped_paths": sorted(aliases[name]), "authority": kind,
+                             "bytes": row["bytes"], "sha256": row["sha256"], "owner": "aosp-libs"})
++        elif kind == "pinned-image-aosp-extension":
++            row = extension_image[name]
++            details = verify_extension_image_file(row, owners.get(name, []),
++                                                   observed[name]["owner_states"].get(row["owners"][0]), prep)
++            records.append({**details, "mapped_paths": sorted(aliases[name])})
+         else:
+             own = owners.get(name, [])
+             require(len(own) == 1 and own[0] in pins,
+@@ -413,7 +455,8 @@ def verify_mappings(args, lock, apt, prep):
+     return {"status": "passed", "proc_maps_sha256": sha(args.out / "proc-self-maps.txt"),
+             "mapped_files": sorted(records, key=lambda row: row["path"]),
+             "apt_count": sum(row["authority"] == "exact APT archive" for row in records),
+-            "image_count": sum(row["authority"] == "pinned-image-aosp" for row in records)}
++            "image_count": sum(row["authority"] == "pinned-image-aosp" for row in records),
++            "extension_image_count": sum(row["authority"] == "pinned-image-aosp-extension" for row in records)}
+ 
+ 
+ def module_identity(module, distribution, lock):
+@@ -618,6 +661,7 @@ def run(args, lock, prep, common, apt, report):
+     report["installed_apt_controls"] = apt.installed_control(lock["apt"]["provenance_packages"])
+     report["original_files_before"] = verify_root_files(lock, apt, prep)
+     report["image_runtime"] = validate_image_foundation(lock, args.foundation_receipt, common, apt)
++    report["extension_image_runtime"] = validate_extension_image(args, lock, apt, prep)
+     pip = command([str(PREFIX / "bin/python"), "-I", "-B", "-m", "pip", "check"],
+                   args.out, "raw-pip-check", 60, expected=1)
+     raw_log = args.out / "raw-pip-check.txt"
+diff --git a/scripts/compatibility_probe_neutts_apt_extensions.sh b/scripts/compatibility_probe_neutts_apt_extensions.sh
+index 9233ef7..aa02f81 100644
+--- a/scripts/compatibility_probe_neutts_apt_extensions.sh
++++ b/scripts/compatibility_probe_neutts_apt_extensions.sh
+@@ -33,6 +33,7 @@ names = (
+     "scripts/compatibility_probe_neutts_apt_extensions.py",
+     "scripts/prepare_neutts_apt_extensions.py", "scripts/neutts_apt_extensions_lock.json",
+     *lock["source_pins"],
++    lock["extension_image_runtime"]["source_evidence"]["path"],
+     "audit/neutts-runtime-index-20261017/InRelease",
+     "audit/neutts-runtime-index-20261017/Packages.gz",
+     "audit/neutts-native-20261017/run-39058569758/NEUTTS-PINNED-APT.tsv",
+@@ -99,7 +100,7 @@ stage=exact-input-verification
+ import hashlib, importlib.util, pathlib, sys
+ scripts, inputs = map(pathlib.Path, sys.argv[1:3])
+ path = scripts / "prepare_neutts_apt_extensions.py"
+-if hashlib.sha256(path.read_bytes()).hexdigest() != "de07068e48e2a383771fa3b05caa4d46efa40430e216ef541d4f271bb82e9a6a":
++if hashlib.sha256(path.read_bytes()).hexdigest() != "0d954a2b4f9e68d8bb80ecea132b97e6e05a23f41835a2189ccf53884d811c3a":
+     raise SystemExit("Reviewed APT extension input verifier changed")
+ spec = importlib.util.spec_from_file_location("_apt_extensions_shell_prepare", path)
+ module = importlib.util.module_from_spec(spec)
+diff --git a/scripts/neutts_apt_extensions_lock.json b/scripts/neutts_apt_extensions_lock.json
+index a61d76f..44ba0a2 100644
+--- a/scripts/neutts_apt_extensions_lock.json
++++ b/scripts/neutts_apt_extensions_lock.json
+@@ -3896,6 +3896,38 @@
+     "psutil",
+     "pyarrow"
+   ],
++  "extension_image_runtime": {
++    "authority": "Exact observed AOSP member in immutable native run 39082604000 with unchanged aosp-libs state; separate from the original five-file foundation and from snapshot APT archive provenance.",
++    "files": [
++      {
++        "bytes": 1786584,
++        "elf": {
++          "class": 64,
++          "endianness": "little",
++          "machine": 183
++        },
++        "gid": 1000,
++        "mode": 493,
++        "owner_state": {
++          "architecture": "aarch64",
++          "status": "installed",
++          "version": "9.0.0-r76-4"
++        },
++        "owners": [
++          "aosp-libs"
++        ],
++        "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libicuuc.so",
++        "sha256": "58ee261d1206345aec389abd8f833b5ebe6d702309620bc31a18adc3b39c3367",
++        "uid": 1000
++      }
++    ],
++    "image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
++    "source_evidence": {
++      "bytes": 43592,
++      "path": "audit/neutts-apt-extensions-native-20261018/run-39082604000.json",
++      "sha256": "de19741e2aa7d824071ce2062bd7cfbb830b88c5b6cde05629f5ed069e257571"
++    }
++  },
+   "foundation": {
+     "apt_metadata_ledger_sha256": "2031c8a6915915ffffb980b268ad5107d42a186682cb2ca7009d803fe2abe200",
+     "cases": 7,
+diff --git a/scripts/prepare_neutts_apt_extensions.py b/scripts/prepare_neutts_apt_extensions.py
+index 1d3bf77..cee051f 100644
+--- a/scripts/prepare_neutts_apt_extensions.py
++++ b/scripts/prepare_neutts_apt_extensions.py
+@@ -22,7 +22,7 @@ import urllib.request
+ 
+ SCRIPT_DIR = Path(__file__).resolve().parent
+ LOCK_FILENAME = "neutts_apt_extensions_lock.json"
+-LOCK_SHA256 = "b20d35dc54da253578ffd499e0dc7a226c77b4f704b2601e37a22edb81fab8d4"
++LOCK_SHA256 = "52db5e627cf575312d8011b6c000feb0f6075f7266981a1ed5bda68319f42ac3"
+ APT_HELPER_SHA256 = "7c051b0143675594aadd52f9a0b66ec71e6950e9953feef3f773acceafcb0a29"
+ FOUNDATION_METADATA_SHA256 = "2031c8a6915915ffffb980b268ad5107d42a186682cb2ca7009d803fe2abe200"
+ ROOTS = frozenset(("python-pyarrow", "python-lxml", "python-msgpack", "python-pillow", "python-psutil"))
+@@ -144,9 +144,38 @@ def validate_manifest(lock, original):
+             and all(row["dpkg_owners"] == ["aosp-libs"] and row["machine"] == 183
+                     and row["elf_class"] == 64 for row in image_rows),
+             "Exact pinned-image AOSP runtime binding differs")
++    validate_extension_image_evidence(lock)
+     return lock
+ 
+ 
++def validate_extension_image_evidence(lock):
++    extension = lock["extension_image_runtime"]
++    pin = extension["source_evidence"]
++    require(extension["image"] == lock["image_runtime"]["image"]
++            and pin["path"] == "audit/neutts-apt-extensions-native-20261018/run-39082604000.json",
++            "Exact extension-image source binding differs")
++    raw = read_regular(SCRIPT_DIR.parent / pin["path"], pin["bytes"])
++    require(len(raw) == pin["bytes"] and sha(raw) == pin["sha256"],
++            "Frozen extension-image observation evidence differs")
++    evidence = json.loads(raw, object_pairs_hook=unique_object)
++    observed = evidence["observed_unknown_image_member"]
++    require(evidence["run"]["id"] == 39082604000
++            and evidence["run"]["head_sha"] == "2bf6e32b4009ca5233686d80a1dd2dcbf53cb7d2"
++            and evidence["run"]["conclusion"] == "failure"
++            and evidence["image_binding"]["image"] == extension["image"]
++            and evidence["image_binding"]["owner_package_selected_for_install"] is False
++            and observed["resolved_path"] == PREFIX_TEXT + "/opt/aosp/lib64/libicuuc.so"
++            and observed["owners"] == ["aosp-libs"] and observed["admitted"] is False,
++            "Exact native ICU observation binding differs")
++    expected = {key: observed[key] for key in ("bytes", "sha256", "elf", "owners", "mode", "uid", "gid")}
++    expected["path"] = observed["resolved_path"]
++    expected["owner_state"] = observed["owner_states"]["aosp-libs"]
++    require(evidence["image_binding"]["owner_state_before"] ==
++            evidence["image_binding"]["owner_state_after"] == expected["owner_state"]
++            and extension["files"] == [expected],
++            "Only the exact observed ICU member and unchanged owner state may be admitted")
++
++
+ def load_lock(path=None):
+     raw = read_regular(path or SCRIPT_DIR / LOCK_FILENAME, 1_000_000)
+     require(sha(raw) == LOCK_SHA256, "Frozen extension lock differs")
+diff --git a/tests/test_neutts_apt_extensions.py b/tests/test_neutts_apt_extensions.py
+index 711aa65..f45708a 100644
+--- a/tests/test_neutts_apt_extensions.py
++++ b/tests/test_neutts_apt_extensions.py
+@@ -108,6 +108,31 @@ class FrozenContractTests(unittest.TestCase):
+                 apt.raw_pip_record(path, 1, self.lock["metadata"])
+ 
+ 
++    def test_extension_pin_rejects_unrecorded_identity_or_second_member(self):
++        changes = (("path", PREP.PREFIX_TEXT + "/opt/aosp/lib64/other.so"),
++                   ("bytes", 1), ("sha256", "0" * 64), ("mode", 0),
++                   ("owners", ["other-owner"]),
++                   ("owner_state", {"version": "unreviewed", "architecture": "aarch64",
++                                    "status": "installed"}))
++        for key, value in changes:
++            with self.subTest(field=key):
++                lock = self.mutated()
++                lock["extension_image_runtime"]["files"][0][key] = value
++                with self.assertRaisesRegex(PREP.PreparationError, "exact observed ICU"):
++                    PREP.validate_manifest(lock, self.original)
++        lock = self.mutated()
++        lock["extension_image_runtime"]["files"].append(
++            copy.deepcopy(lock["extension_image_runtime"]["files"][0]))
++        with self.assertRaisesRegex(PREP.PreparationError, "exact observed ICU"):
++            PREP.validate_manifest(lock, self.original)
++
++    def test_extension_pin_requires_original_diagnostic_receipt_bytes(self):
++        lock = self.mutated()
++        lock["extension_image_runtime"]["source_evidence"]["sha256"] = "0" * 64
++        with self.assertRaisesRegex(PREP.PreparationError, "observation evidence differs"):
++            PREP.validate_manifest(lock, self.original)
++
++
+ class InstallAndMappingPolicyTests(unittest.TestCase):
+     @classmethod
+     def setUpClass(cls):
+@@ -185,6 +210,16 @@ class InstallAndMappingPolicyTests(unittest.TestCase):
+             self.assertEqual(PROBE.classify_mapping(row["path"], self.lock), "pinned-image-aosp")
+         self.assertEqual(PROBE.classify_mapping(PREP.PREFIX_TEXT + "/lib/libarrow.so", self.lock), "apt")
+ 
++    def test_only_exact_icu_path_uses_extension_image_authority(self):
++        path = PREP.PREFIX_TEXT + "/opt/aosp/lib64/libicuuc.so"
++        self.assertEqual(PROBE.classify_mapping(path, self.lock), "pinned-image-aosp-extension")
++        self.assertNotIn(path, {r["path"] for r in self.lock["image_runtime"]["files"]})
++        self.assertEqual(len(self.lock["image_runtime"]["files"]), 5)
++        for other in (path + ".unreviewed", PREP.PREFIX_TEXT + "/opt/aosp/lib/libicuuc.so"):
++            with self.subTest(path=other):
++                with self.assertRaisesRegex(PROBE.ProbeError, "Unreviewed native mapping"):
++                    PROBE.classify_mapping(other, self.lock)
++
+     def test_unknown_mapping_reports_actual_offender(self):
+         path = PREP.PREFIX_TEXT + "/opt/aosp/lib64/unreviewed.so"
+         with self.assertRaisesRegex(PROBE.ProbeError, re.escape(path)):
+@@ -437,5 +472,68 @@ class ActualArchiveFixtureTests(unittest.TestCase):
+             self.assertTrue((Path(temporary) / "MAPPED-LIBRARY-OBSERVATIONS.json").is_file())
+ 
+ 
++    def extension_image_fixture(self, temporary):
++        # Real original AArch64 bytes exercise the verifier on the host. This
++        # fixture is MsgPack, not a claim that the ICU library executed here.
++        elf = self.lock["root_native_files"]["python-msgpack"][0]
++        pin = self.pins["python-msgpack"]
++        raw = PREP.inspect_deb(self.inputs / "archives" / pin["filename"], pin,
++                              wanted={elf["path"]})["selected"][elf["path"]]
++        path = (Path(temporary) / "extension-image-fixture.so").resolve()
++        path.write_bytes(raw)
++        info = path.stat()
++        row = copy.deepcopy(self.lock["extension_image_runtime"]["files"][0])
++        row.update(path=path.as_posix(), bytes=len(raw), sha256=hashlib.sha256(raw).hexdigest(),
++                   mode=info.st_mode & 0o7777, uid=info.st_uid, gid=info.st_gid)
++        return path, row
++
++    def test_extension_member_uses_actual_elf_bytes_and_exact_owner_state(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            path, row = self.extension_image_fixture(temporary)
++            result = PROBE.verify_extension_image_file(row, row["owners"], row["owner_state"], PREP)
++            self.assertEqual(result["sha256"], hashlib.sha256(path.read_bytes()).hexdigest())
++            self.assertEqual(result["bytes"], path.stat().st_size)
++            self.assertEqual(result["machine"], 183)
++            self.assertEqual(result["owner"], "aosp-libs")
++            self.assertEqual(result["version"], "9.0.0-r76-4")
++            self.assertEqual(result["authority"], "pinned-image-aosp-extension")
++
++    def test_extension_member_rejects_actual_byte_corruption(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            path, row = self.extension_image_fixture(temporary)
++            raw = bytearray(path.read_bytes())
++            raw[-1] ^= 1
++            path.write_bytes(raw)
++            with self.assertRaisesRegex(PROBE.ProbeError, "member bytes differ"):
++                PROBE.verify_extension_image_file(row, row["owners"], row["owner_state"], PREP)
++
++    def test_extension_member_rejects_changed_owner_version_architecture_or_status(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            _, row = self.extension_image_fixture(temporary)
++            changes = (([], row["owner_state"]),
++                       (["other-owner"], row["owner_state"]),
++                       (row["owners"], {**row["owner_state"], "version": "unreviewed"}),
++                       (row["owners"], {**row["owner_state"], "architecture": "x86_64"}),
++                       (row["owners"], {**row["owner_state"], "status": "unpacked"}))
++            for owners, state in changes:
++                with self.subTest(owners=owners, state=state):
++                    with self.assertRaisesRegex(PROBE.ProbeError, "ownership/state differs"):
++                        PROBE.verify_extension_image_file(row, owners, state, PREP)
++
++    def test_extension_member_rejects_mode_owner_ids_or_elf_metadata_drift(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            _, row = self.extension_image_fixture(temporary)
++            for field in ("mode", "uid", "gid"):
++                changed = copy.deepcopy(row)
++                changed[field] ^= 1
++                with self.subTest(field=field):
++                    with self.assertRaisesRegex(PROBE.ProbeError, "mode/UID/GID differs"):
++                        PROBE.verify_extension_image_file(changed, row["owners"], row["owner_state"], PREP)
++            changed = copy.deepcopy(row)
++            changed["elf"]["machine"] = 62
++            with self.assertRaisesRegex(PROBE.ProbeError, "ELF differs"):
++                PROBE.verify_extension_image_file(changed, row["owners"], row["owner_state"], PREP)
++
++
+ if __name__ == "__main__":
+     unittest.main()

@@ -27,7 +27,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 PREFIX_TEXT = "/data/data/com.termux/files/usr"
 PREFIX = Path(PREFIX_TEXT)
 SITE = PREFIX / "lib/python3.14/site-packages"
-PREPARER_SHA256 = "de07068e48e2a383771fa3b05caa4d46efa40430e216ef541d4f271bb82e9a6a"
+PREPARER_SHA256 = "0d954a2b4f9e68d8bb80ecea132b97e6e05a23f41835a2189ccf53884d811c3a"
 COMMON_SHA256 = "862efa59b3c967fd360e1d9ce86d4ebadc5bbf9a4b0a3023f2990a66da130c74"
 CASES = ("pyarrow", "lxml", "msgpack", "pillow", "psutil")
 RESULT = "APT-EXTENSIONS-RESULT.json"
@@ -315,12 +315,47 @@ def validate_image_foundation(lock, foundation, common, apt):
             "authority": lock["image_runtime"]["authority"], "snapshot_archive_claim": False}
 
 
+def verify_extension_image_file(row, owners, owner_state, prep):
+    path = Path(row["path"])
+    require(path.resolve(strict=True) == path and path.is_file(),
+            "Extension image member is not a canonical regular file: " + str(path))
+    raw = prep.read_regular(path, row["bytes"])
+    require(len(raw) == row["bytes"] and prep.sha(raw) == row["sha256"],
+            "Extension image member bytes differ: " + str(path))
+    require(owners == row["owners"] and owner_state == row["owner_state"],
+            "Extension image member ownership/state differs: " + str(path))
+    info = path.stat()
+    require((stat.S_IMODE(info.st_mode), info.st_uid, info.st_gid) ==
+            (row["mode"], row["uid"], row["gid"]),
+            "Extension image member mode/UID/GID differs: " + str(path))
+    details = prep.elf_identity(raw)
+    require(details == row["elf"], "Extension image member ELF differs: " + str(path))
+    return {"path": row["path"], "bytes": len(raw), "sha256": prep.sha(raw), **details,
+            "owner": owners[0], "version": owner_state["version"],
+            "mode": row["mode"], "uid": row["uid"], "gid": row["gid"],
+            "authority": "pinned-image-aosp-extension"}
+
+
+def validate_extension_image(args, lock, apt, prep):
+    extension = lock["extension_image_runtime"]
+    owners = apt.collect_owners([row["path"] for row in extension["files"]])
+    states = package_snapshot(args.out, "extension-image-owner-state")
+    files = [verify_extension_image_file(row, owners.get(row["path"], []),
+                                        states.get(row["owners"][0]), prep)
+             for row in extension["files"]]
+    return {"status": "passed", "image": extension["image"], "files": files,
+            "authority": extension["authority"], "source_evidence": extension["source_evidence"],
+            "original_foundation_file_count": 5, "snapshot_archive_claim": False}
+
+
 def classify_mapping(path, lock):
     path = PurePosixPath(path)
     require(path.is_absolute() and ".." not in path.parts, "Non-canonical native mapping: " + str(path))
     image = {row["path"] for row in lock["image_runtime"]["files"]}
     if str(path) in image:
         return "pinned-image-aosp"
+    if str(path) in {row["path"] for row in lock["extension_image_runtime"]["files"]}:
+        return "pinned-image-aosp-extension"
     if path.is_relative_to(PurePosixPath(PREFIX_TEXT + "/lib")):
         return "apt"
     raise ProbeError("Unreviewed native mapping outside exact APT/image paths: " + str(path))
@@ -385,6 +420,8 @@ def verify_mappings(args, lock, apt, prep):
     require(observations["complete"], "Native mapping observation incomplete; exact diagnostics retained")
     pins = {p["package"]: p for p in lock["apt"]["provenance_packages"]}
     image = {row["path"]: row for row in lock["image_runtime"]["files"]}
+    extension_image = {row["path"]: row for row in lock["extension_image_runtime"]["files"]}
+    observed = {row["resolved_path"]: row for row in observations["files"]}
     apt_groups, records = {}, []
     for name in sorted(paths):
         kind = classify_mapping(name, lock)
@@ -395,6 +432,11 @@ def verify_mappings(args, lock, apt, prep):
             prep.elf_identity(prep.read_regular(name, row["bytes"]))
             records.append({"path": name, "mapped_paths": sorted(aliases[name]), "authority": kind,
                             "bytes": row["bytes"], "sha256": row["sha256"], "owner": "aosp-libs"})
+        elif kind == "pinned-image-aosp-extension":
+            row = extension_image[name]
+            details = verify_extension_image_file(row, owners.get(name, []),
+                                                   observed[name]["owner_states"].get(row["owners"][0]), prep)
+            records.append({**details, "mapped_paths": sorted(aliases[name])})
         else:
             own = owners.get(name, [])
             require(len(own) == 1 and own[0] in pins,
@@ -413,7 +455,8 @@ def verify_mappings(args, lock, apt, prep):
     return {"status": "passed", "proc_maps_sha256": sha(args.out / "proc-self-maps.txt"),
             "mapped_files": sorted(records, key=lambda row: row["path"]),
             "apt_count": sum(row["authority"] == "exact APT archive" for row in records),
-            "image_count": sum(row["authority"] == "pinned-image-aosp" for row in records)}
+            "image_count": sum(row["authority"] == "pinned-image-aosp" for row in records),
+            "extension_image_count": sum(row["authority"] == "pinned-image-aosp-extension" for row in records)}
 
 
 def module_identity(module, distribution, lock):
@@ -618,6 +661,7 @@ def run(args, lock, prep, common, apt, report):
     report["installed_apt_controls"] = apt.installed_control(lock["apt"]["provenance_packages"])
     report["original_files_before"] = verify_root_files(lock, apt, prep)
     report["image_runtime"] = validate_image_foundation(lock, args.foundation_receipt, common, apt)
+    report["extension_image_runtime"] = validate_extension_image(args, lock, apt, prep)
     pip = command([str(PREFIX / "bin/python"), "-I", "-B", "-m", "pip", "check"],
                   args.out, "raw-pip-check", 60, expected=1)
     raw_log = args.out / "raw-pip-check.txt"

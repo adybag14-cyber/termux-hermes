@@ -108,6 +108,31 @@ class FrozenContractTests(unittest.TestCase):
                 apt.raw_pip_record(path, 1, self.lock["metadata"])
 
 
+    def test_extension_pin_rejects_unrecorded_identity_or_second_member(self):
+        changes = (("path", PREP.PREFIX_TEXT + "/opt/aosp/lib64/other.so"),
+                   ("bytes", 1), ("sha256", "0" * 64), ("mode", 0),
+                   ("owners", ["other-owner"]),
+                   ("owner_state", {"version": "unreviewed", "architecture": "aarch64",
+                                    "status": "installed"}))
+        for key, value in changes:
+            with self.subTest(field=key):
+                lock = self.mutated()
+                lock["extension_image_runtime"]["files"][0][key] = value
+                with self.assertRaisesRegex(PREP.PreparationError, "exact observed ICU"):
+                    PREP.validate_manifest(lock, self.original)
+        lock = self.mutated()
+        lock["extension_image_runtime"]["files"].append(
+            copy.deepcopy(lock["extension_image_runtime"]["files"][0]))
+        with self.assertRaisesRegex(PREP.PreparationError, "exact observed ICU"):
+            PREP.validate_manifest(lock, self.original)
+
+    def test_extension_pin_requires_original_diagnostic_receipt_bytes(self):
+        lock = self.mutated()
+        lock["extension_image_runtime"]["source_evidence"]["sha256"] = "0" * 64
+        with self.assertRaisesRegex(PREP.PreparationError, "observation evidence differs"):
+            PREP.validate_manifest(lock, self.original)
+
+
 class InstallAndMappingPolicyTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -184,6 +209,16 @@ class InstallAndMappingPolicyTests(unittest.TestCase):
         for row in self.lock["image_runtime"]["files"]:
             self.assertEqual(PROBE.classify_mapping(row["path"], self.lock), "pinned-image-aosp")
         self.assertEqual(PROBE.classify_mapping(PREP.PREFIX_TEXT + "/lib/libarrow.so", self.lock), "apt")
+
+    def test_only_exact_icu_path_uses_extension_image_authority(self):
+        path = PREP.PREFIX_TEXT + "/opt/aosp/lib64/libicuuc.so"
+        self.assertEqual(PROBE.classify_mapping(path, self.lock), "pinned-image-aosp-extension")
+        self.assertNotIn(path, {r["path"] for r in self.lock["image_runtime"]["files"]})
+        self.assertEqual(len(self.lock["image_runtime"]["files"]), 5)
+        for other in (path + ".unreviewed", PREP.PREFIX_TEXT + "/opt/aosp/lib/libicuuc.so"):
+            with self.subTest(path=other):
+                with self.assertRaisesRegex(PROBE.ProbeError, "Unreviewed native mapping"):
+                    PROBE.classify_mapping(other, self.lock)
 
     def test_unknown_mapping_reports_actual_offender(self):
         path = PREP.PREFIX_TEXT + "/opt/aosp/lib64/unreviewed.so"
@@ -435,6 +470,69 @@ class ActualArchiveFixtureTests(unittest.TestCase):
             self.assertEqual(bad["sha256"], hashlib.sha256(b"not-an-ELF").hexdigest())
             self.assertIn("AArch64", bad["observation_error"]["message"])
             self.assertTrue((Path(temporary) / "MAPPED-LIBRARY-OBSERVATIONS.json").is_file())
+
+
+    def extension_image_fixture(self, temporary):
+        # Real original AArch64 bytes exercise the verifier on the host. This
+        # fixture is MsgPack, not a claim that the ICU library executed here.
+        elf = self.lock["root_native_files"]["python-msgpack"][0]
+        pin = self.pins["python-msgpack"]
+        raw = PREP.inspect_deb(self.inputs / "archives" / pin["filename"], pin,
+                              wanted={elf["path"]})["selected"][elf["path"]]
+        path = (Path(temporary) / "extension-image-fixture.so").resolve()
+        path.write_bytes(raw)
+        info = path.stat()
+        row = copy.deepcopy(self.lock["extension_image_runtime"]["files"][0])
+        row.update(path=path.as_posix(), bytes=len(raw), sha256=hashlib.sha256(raw).hexdigest(),
+                   mode=info.st_mode & 0o7777, uid=info.st_uid, gid=info.st_gid)
+        return path, row
+
+    def test_extension_member_uses_actual_elf_bytes_and_exact_owner_state(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path, row = self.extension_image_fixture(temporary)
+            result = PROBE.verify_extension_image_file(row, row["owners"], row["owner_state"], PREP)
+            self.assertEqual(result["sha256"], hashlib.sha256(path.read_bytes()).hexdigest())
+            self.assertEqual(result["bytes"], path.stat().st_size)
+            self.assertEqual(result["machine"], 183)
+            self.assertEqual(result["owner"], "aosp-libs")
+            self.assertEqual(result["version"], "9.0.0-r76-4")
+            self.assertEqual(result["authority"], "pinned-image-aosp-extension")
+
+    def test_extension_member_rejects_actual_byte_corruption(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path, row = self.extension_image_fixture(temporary)
+            raw = bytearray(path.read_bytes())
+            raw[-1] ^= 1
+            path.write_bytes(raw)
+            with self.assertRaisesRegex(PROBE.ProbeError, "member bytes differ"):
+                PROBE.verify_extension_image_file(row, row["owners"], row["owner_state"], PREP)
+
+    def test_extension_member_rejects_changed_owner_version_architecture_or_status(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            _, row = self.extension_image_fixture(temporary)
+            changes = (([], row["owner_state"]),
+                       (["other-owner"], row["owner_state"]),
+                       (row["owners"], {**row["owner_state"], "version": "unreviewed"}),
+                       (row["owners"], {**row["owner_state"], "architecture": "x86_64"}),
+                       (row["owners"], {**row["owner_state"], "status": "unpacked"}))
+            for owners, state in changes:
+                with self.subTest(owners=owners, state=state):
+                    with self.assertRaisesRegex(PROBE.ProbeError, "ownership/state differs"):
+                        PROBE.verify_extension_image_file(row, owners, state, PREP)
+
+    def test_extension_member_rejects_mode_owner_ids_or_elf_metadata_drift(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            _, row = self.extension_image_fixture(temporary)
+            for field in ("mode", "uid", "gid"):
+                changed = copy.deepcopy(row)
+                changed[field] ^= 1
+                with self.subTest(field=field):
+                    with self.assertRaisesRegex(PROBE.ProbeError, "mode/UID/GID differs"):
+                        PROBE.verify_extension_image_file(changed, row["owners"], row["owner_state"], PREP)
+            changed = copy.deepcopy(row)
+            changed["elf"]["machine"] = 62
+            with self.assertRaisesRegex(PROBE.ProbeError, "ELF differs"):
+                PROBE.verify_extension_image_file(changed, row["owners"], row["owner_state"], PREP)
 
 
 if __name__ == "__main__":

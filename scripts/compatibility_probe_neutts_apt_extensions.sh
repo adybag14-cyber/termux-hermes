@@ -33,6 +33,7 @@ names = (
     "scripts/compatibility_probe_neutts_apt_extensions.py",
     "scripts/prepare_neutts_apt_extensions.py", "scripts/neutts_apt_extensions_lock.json",
     *lock["source_pins"],
+    lock["extension_image_runtime"]["source_evidence"]["path"],
     "audit/neutts-runtime-index-20261017/InRelease",
     "audit/neutts-runtime-index-20261017/Packages.gz",
     "audit/neutts-native-20261017/run-39058569758/NEUTTS-PINNED-APT.tsv",
@@ -99,7 +100,7 @@ stage=exact-input-verification
 import hashlib, importlib.util, pathlib, sys
 scripts, inputs = map(pathlib.Path, sys.argv[1:3])
 path = scripts / "prepare_neutts_apt_extensions.py"
-if hashlib.sha256(path.read_bytes()).hexdigest() != "de07068e48e2a383771fa3b05caa4d46efa40430e216ef541d4f271bb82e9a6a":
+if hashlib.sha256(path.read_bytes()).hexdigest() != "0d954a2b4f9e68d8bb80ecea132b97e6e05a23f41835a2189ccf53884d811c3a":
     raise SystemExit("Reviewed APT extension input verifier changed")
 spec = importlib.util.spec_from_file_location("_apt_extensions_shell_prepare", path)
 module = importlib.util.module_from_spec(spec)

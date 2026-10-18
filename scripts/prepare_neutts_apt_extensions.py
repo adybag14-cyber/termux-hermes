@@ -22,7 +22,7 @@ import urllib.request
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 LOCK_FILENAME = "neutts_apt_extensions_lock.json"
-LOCK_SHA256 = "b20d35dc54da253578ffd499e0dc7a226c77b4f704b2601e37a22edb81fab8d4"
+LOCK_SHA256 = "52db5e627cf575312d8011b6c000feb0f6075f7266981a1ed5bda68319f42ac3"
 APT_HELPER_SHA256 = "7c051b0143675594aadd52f9a0b66ec71e6950e9953feef3f773acceafcb0a29"
 FOUNDATION_METADATA_SHA256 = "2031c8a6915915ffffb980b268ad5107d42a186682cb2ca7009d803fe2abe200"
 ROOTS = frozenset(("python-pyarrow", "python-lxml", "python-msgpack", "python-pillow", "python-psutil"))
@@ -144,7 +144,36 @@ def validate_manifest(lock, original):
             and all(row["dpkg_owners"] == ["aosp-libs"] and row["machine"] == 183
                     and row["elf_class"] == 64 for row in image_rows),
             "Exact pinned-image AOSP runtime binding differs")
+    validate_extension_image_evidence(lock)
     return lock
+
+
+def validate_extension_image_evidence(lock):
+    extension = lock["extension_image_runtime"]
+    pin = extension["source_evidence"]
+    require(extension["image"] == lock["image_runtime"]["image"]
+            and pin["path"] == "audit/neutts-apt-extensions-native-20261018/run-39082604000.json",
+            "Exact extension-image source binding differs")
+    raw = read_regular(SCRIPT_DIR.parent / pin["path"], pin["bytes"])
+    require(len(raw) == pin["bytes"] and sha(raw) == pin["sha256"],
+            "Frozen extension-image observation evidence differs")
+    evidence = json.loads(raw, object_pairs_hook=unique_object)
+    observed = evidence["observed_unknown_image_member"]
+    require(evidence["run"]["id"] == 39082604000
+            and evidence["run"]["head_sha"] == "2bf6e32b4009ca5233686d80a1dd2dcbf53cb7d2"
+            and evidence["run"]["conclusion"] == "failure"
+            and evidence["image_binding"]["image"] == extension["image"]
+            and evidence["image_binding"]["owner_package_selected_for_install"] is False
+            and observed["resolved_path"] == PREFIX_TEXT + "/opt/aosp/lib64/libicuuc.so"
+            and observed["owners"] == ["aosp-libs"] and observed["admitted"] is False,
+            "Exact native ICU observation binding differs")
+    expected = {key: observed[key] for key in ("bytes", "sha256", "elf", "owners", "mode", "uid", "gid")}
+    expected["path"] = observed["resolved_path"]
+    expected["owner_state"] = observed["owner_states"]["aosp-libs"]
+    require(evidence["image_binding"]["owner_state_before"] ==
+            evidence["image_binding"]["owner_state_after"] == expected["owner_state"]
+            and extension["files"] == [expected],
+            "Only the exact observed ICU member and unchanged owner state may be admitted")
 
 
 def load_lock(path=None):
