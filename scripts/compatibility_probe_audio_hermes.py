@@ -14,6 +14,8 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
+import stat
 import subprocess
 import sys
 import traceback
@@ -54,6 +56,88 @@ def mapped_files():
             if path.is_file():
                 result.add(path.resolve())
     return sorted(result)
+
+
+# Exact platform objects from the immutable Termux container image. These are
+# not application dependencies and are never copied into the device payload.
+IMAGE_PLATFORM_FILES = {
+    "libc++.so": (926896, "3b3a556e1a175baa03cd5e82a4a9189182ad1b1824319f15c681a13fdfdc42f0"),
+    "libc.so": (1126832, "f9eacc7c6402ae1cca97e6e080340e12203bcd43cb44b054522239a7eed64fc4"),
+    "libdl.so": (67504, "cfee715580eac1a5cf3a7713ceebd61e83544a2889bd4799be7c23272356815b"),
+    "liblog.so": (136800, "af8872cb6e476b8d66bbf6d84eb6fb12e3312ea79a5c947a63a8428256b45a81"),
+    "libm.so": (265480, "d99e586652e539e4840c4466d6a8d8a7fe169b662a48935000226eb7f1c41f9b"),
+}
+
+
+def image_shared_objects(mapped, prefix):
+    """Select image .so mappings without treating the linker as a dependency."""
+    return {path for path in mapped
+            if path.is_relative_to(prefix / "opt/aosp") and ".so" in path.name}
+
+
+def verify_image_platform_members(paths, inspection_path, evidence, prep):
+    """Admit only measured image files with exact bytes, ABI and ownership."""
+    require = prep.require
+    if not paths:
+        return {"status": "not-used", "members": [],
+                "interpretation": "No container image platform library was mapped."}
+    platform_root = prep.PREFIX / "opt/aosp/lib64"
+    pins = {platform_root / name: pin for name, pin in IMAGE_PLATFORM_FILES.items()}
+    require(set(paths) <= set(pins), "unreviewed container image platform member")
+    require(inspection_path is not None,
+            "container image platform members require the Docker image inspection")
+    inspection_path = Path(inspection_path)
+    require(inspection_path.is_file() and not inspection_path.is_symlink()
+            and inspection_path.stat().st_size <= 2_000_000, "invalid Docker image inspection")
+    raw = inspection_path.read_bytes()
+    images = json.loads(raw)
+    require(isinstance(images, list) and len(images) == 1 and isinstance(images[0], dict),
+            "ambiguous Docker image inspection")
+    image = images[0]
+    require(image.get("Architecture") == "arm64" and image.get("Os") == "linux"
+            and prep.IMAGE in image.get("RepoDigests", [])
+            and re.fullmatch(r"sha256:[0-9a-f]{64}", image.get("Id", "")) is not None,
+            "Docker image differs from the reviewed ARM64 image")
+    # Keep the unmodified host Docker observation with each independent probe.
+    with (evidence / "audio-source-image.json").open("xb") as stream:
+        stream.write(raw)
+    query = str(prep.PREFIX / "bin/dpkg-query")
+    snapshot = prep.run_logged([
+        query, "-W", "-f=${Package}\t${Version}\t${Architecture}\t${db:Status-Status}\n",
+        "aosp-libs",
+    ], evidence, "audio-image-owner", timeout=20).stdout
+    require(snapshot == b"aosp-libs\t9.0.0-r76-4\taarch64\tinstalled\n",
+            "container image platform owner version differs")
+    originals = sorted(set(paths))
+    owner_raw = prep.run_logged(
+        [query, "-S", *(str(path) for path in originals)],
+        evidence, "audio-image-path-owners", timeout=20).stdout
+    owners = {}
+    for line in owner_raw.decode("utf-8").splitlines():
+        owner, separator, name = line.rpartition(": ")
+        require(separator and owner == "aosp-libs" and name not in owners,
+                "container image platform owner differs or is ambiguous")
+        owners[name] = owner
+    require(set(owners) == {str(path) for path in originals},
+            "container image platform ownership is incomplete")
+    members = []
+    for path in originals:
+        require(path.absolute() == path.resolve() and stat.S_ISREG(path.lstat().st_mode),
+                "container image platform member is not an exact regular path")
+        prep.pinned(path, *pins[path])
+        with path.open("rb") as stream:
+            header = stream.read(64)
+        require(len(header) == 64 and header[:6] == b"\x7fELF\x02\x01"
+                and int.from_bytes(header[18:20], "little") == 183,
+                "container image platform member ABI differs")
+        members.append({"path": str(path), "bytes": pins[path][0], "sha256": pins[path][1],
+                        "elf_class": 64, "endianness": "little", "machine": 183,
+                        "package": owners[str(path)], "version": "9.0.0-r76-4",
+                        "architecture": "aarch64"})
+    return {"status": "verified-image-members", "native_image": prep.IMAGE,
+            "docker_image_id": image["Id"], "inspection_sha256": hashlib.sha256(raw).hexdigest(),
+            "members": members,
+            "interpretation": "Exact immutable-image platform files; no AOSP directory or device-library allowance."}
 
 
 def runtime_worker(request):
@@ -168,6 +252,9 @@ def runtime_worker(request):
             and any(p["sha256"] == prep.OPENSLES_SHA for p in audio_mappings)
             and any(p["sha256"] == prep.PLATFORM_NAMESPACE_SHA for p in audio_mappings),
             "owned audio mappings are incomplete")
+    image_paths = image_shared_objects(mapped, prep.PREFIX)
+    image_platform = verify_image_platform_members(
+        image_paths, request.get("image_inspection"), output.parent, prep)
     originals = request["original_files"]
     borrowed = []
     for path in mapped:
@@ -181,6 +268,9 @@ def runtime_worker(request):
                 require(row and row["kind"] == "file" and prep.sha256(path) == row["sha256"],
                         "mapped original runtime bytes differ")
                 borrowed.append({"path": relative, "sha256": row["sha256"]})
+        elif path in image_paths:
+            # The separate exact file/hash/ELF/owner/image checks above passed.
+            continue
         elif path.is_relative_to(prep.PREFIX) and ".so" in path.name:
             require(path.name in {"libc.so", "libdl.so", "libm.so", "liblog.so", "libandroid.so", "libz.so"},
                     "native import borrowed an undeclared prefix library: " + str(path))
@@ -199,6 +289,7 @@ def runtime_worker(request):
                         framework_present=paths["/system/lib64/libOpenSLES.so"], input_devices=input_count),
         "device_inventory": devices, "device_inventory_error": device_error,
         "android_framework_paths": paths, "mapped_audio_libraries": audio_mappings,
+        "image_platform_validation": image_platform,
         "mapped_original_payload_libraries": borrowed, "physical_vad": "not-tested",
         "microphone_accessed": False, "audio_stream_opened": False,
         "interpretation": "A complete dependency environment can be prepared while PortAudio initialization is unavailable. Android framework presence and real capture/VAD require separate device validation.",
@@ -226,7 +317,9 @@ def run(options):
     source = prep.json_object((evidence / "original-payload-inventory.json").read_bytes())["files"]
     request = evidence / "audio-readiness-request.json"
     prep.write_json(request, {"payload": str(payload), "out": str(evidence / "audio-readiness-probe.json"),
-                              "original_files": source})
+                              "original_files": source,
+                              "image_inspection": (str(options.image_inspection.resolve())
+                                                   if options.image_inspection is not None else None)})
     environment = prep.native_environment(payload, out / "state")
     prep.run_logged([str(payload / "venv/bin/python"), "-I", "-B", str(Path(__file__).resolve()),
                      "--runtime-worker", str(request)], evidence, "audio-readiness",
@@ -266,6 +359,8 @@ def exception_details(exc):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--environment", type=Path)
+    parser.add_argument("--image-inspection", type=Path,
+                        help="Host Docker image inspection for the container-only platform file gate")
     parser.add_argument("--runtime-worker", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
     request = None

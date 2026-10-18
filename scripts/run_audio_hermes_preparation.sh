@@ -27,7 +27,11 @@ if [[ "${1:-}" == --native ]]; then
   "$python" -I -B "$scripts/prepare_audio_hermes_environment.py" prepare \
     --candidate-dir "$candidate" --audio-inputs "$audio_inputs" --patch "$patch" --out "$out"
   if [[ "$mode" == prepare-and-probe ]]; then
-    "$python" -I -B "$scripts/compatibility_probe_audio_hermes.py" --environment "$out"
+    probe_args=(--environment "$out")
+    if [[ -n "${HERMES_AUDIO_SOURCE_IMAGE:-}" ]]; then
+      probe_args+=(--image-inspection "$HERMES_AUDIO_SOURCE_IMAGE")
+    fi
+    "$python" -I -B "$scripts/compatibility_probe_audio_hermes.py" "${probe_args[@]}"
   fi
   exit 0
 fi
@@ -44,9 +48,11 @@ chmod 0777 "$out"
 packaging="$(cd "$(dirname "$0")/.." && pwd)"
 image=termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303
 docker pull "$image"
+docker image inspect "$image" > "$out/AUDIO-SOURCE-IMAGE.json"
 test "$(docker image inspect --format '{{.Architecture}}' "$image")" = arm64
 # Host acquisition is complete. Both independent native preparations run offline.
 docker run --rm --platform linux/arm64 --network none --user 1000:1000 \
+  -e HERMES_AUDIO_SOURCE_IMAGE=/out/AUDIO-SOURCE-IMAGE.json \
   -v "$packaging:/probes:ro" -v "$candidate:/candidate:ro" -v "$audio_inputs:/audio-inputs:ro" \
   -v "$patch:/audio-readiness.patch:ro" -v "$out:/out" \
   "$image" bash /probes/scripts/run_audio_hermes_preparation.sh \
@@ -55,6 +61,7 @@ docker run --rm --platform linux/arm64 --network none --user 1000:1000 \
 
 # A second fresh final path proves reconstruction without reusing the first venv/cache.
 docker run --rm --platform linux/arm64 --network none --user 1000:1000 \
+  -e HERMES_AUDIO_SOURCE_IMAGE=/out/AUDIO-SOURCE-IMAGE.json \
   -v "$packaging:/probes:ro" -v "$candidate:/candidate:ro" -v "$audio_inputs:/audio-inputs:ro" \
   -v "$patch:/audio-readiness.patch:ro" -v "$out:/out" \
   "$image" bash /probes/scripts/run_audio_hermes_preparation.sh \

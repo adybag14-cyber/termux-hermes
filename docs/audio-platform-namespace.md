@@ -61,3 +61,12 @@ release, changes no package version and does not certify microphone/VAD.
 Evidence:
 [original native failure](../audit/audio-hermes-native-20261018/run-39080859246.json),
 [repair and host review](../audit/audio-platform-namespace-20261018.json).
+
+## Subsequent native observation
+
+The namespace repair is confirmed by the owned-library checks in
+[run 39083065999](../audit/audio-hermes-native-20261018/run-39083065999.json).
+That run retained the actual PortAudio initialization error before a later
+container-platform provenance failure. The exact follow-up is documented in
+[audio-image-platform-boundary.md](audio-image-platform-boundary.md); the original
+failed run above remains a failure and physical VAD remains untested.

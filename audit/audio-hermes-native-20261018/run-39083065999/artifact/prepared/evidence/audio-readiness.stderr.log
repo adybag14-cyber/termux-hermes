@@ -1,0 +1,13 @@
+Audio readiness probe failed: native import borrowed an undeclared prefix library: /data/data/com.termux/files/usr/opt/aosp/lib64/libc++.so
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_audio_hermes.py", line 275, in main
+    runtime_worker(request)
+    ~~~~~~~~~~~~~~^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_audio_hermes.py", line 185, in runtime_worker
+    require(path.name in {"libc.so", "libdl.so", "libm.so", "liblog.so", "libandroid.so", "libz.so"},
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            "native import borrowed an undeclared prefix library: " + str(path))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/prepare_audio_hermes_environment.py", line 281, in require
+    raise PreparationError(message)
+_audio_preparation_contract.PreparationError: native import borrowed an undeclared prefix library: /data/data/com.termux/files/usr/opt/aosp/lib64/libc++.so

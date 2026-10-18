@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "captured_at_utc": "2026-10-18T00:41:28.174515+00:00",
+  "run": {
+    "id": 39083065999,
+    "head_sha": "8c8ad4b018e8aa8cfecb2118766092be7e72482e",
+    "job_id": 117543861987,
+    "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39083065999",
+    "conclusion": "failure"
+  },
+  "artifact": {
+    "id": 12119498028,
+    "bytes": 33967739,
+    "sha256": "8661f1274ee7b2773f9dd341cdbb3479dcfe69c9f217516d77d70d39b3853f90",
+    "member_count": 84,
+    "all_member_crc_and_sha256_rechecked": true,
+    "retained_text_members": 34,
+    "generated_bytecode_members_retained_outside_git": 50
+  },
+  "first_preparation": {
+    "status": "passed",
+    "canonical_pm_runtime_fresh": true,
+    "canonical_application_fresh": true,
+    "application_distributions": 101,
+    "application_wheel_owned_files_checked": 6906,
+    "catalog_union": {
+      "additional_rows": 2,
+      "original_rows": 100,
+      "original_rows_preserved": true,
+      "total_rows": 102
+    },
+    "original_inventory_sha256": "dade6143af33f29c3d219578e68683269c1664f036e556f8399ff8a225be48b6",
+    "prepared_inventory_sha256": "d021fc2a4082643f034f9cf5289e72a5e520f6005ccee53e5a0cfee7cf5aa071"
+  },
+  "runtime_probe": {
+    "status": "failed",
+    "failure": "native import borrowed an undeclared prefix library: /data/data/com.termux/files/usr/opt/aosp/lib64/libc++.so",
+    "complete_dependency_readiness": false,
+    "owned_OpenSL_ES_wrapper_namespace_and_PortAudio_mappings": "exact hashes passed",
+    "initialization_error": {
+      "args": "('Error initializing PortAudio: Unanticipated host error', -9999, (-10000, -9999, 'Initializing engine failed'))",
+      "message": "Error initializing PortAudio: Unanticipated host error [PaErrorCode -9999]: 'Initializing engine failed' [<error getting host API: -10000> error -9999]",
+      "type": "PortAudioError"
+    },
+    "android_framework_paths": {
+      "/dev/binder": false,
+      "/dev/binderfs/binder": false,
+      "/dev/hwbinder": false,
+      "/dev/vndbinder": false,
+      "/system/bin/audioserver": false,
+      "/system/bin/servicemanager": false,
+      "/system/lib/libOpenSLES.so": false,
+      "/system/lib64/libOpenSLES.so": false
+    },
+    "mapped_image_files": [
+      {
+        "bytes": 926896,
+        "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libc++.so",
+        "sha256": "3b3a556e1a175baa03cd5e82a4a9189182ad1b1824319f15c681a13fdfdc42f0"
+      },
+      {
+        "bytes": 1126832,
+        "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libc.so",
+        "sha256": "f9eacc7c6402ae1cca97e6e080340e12203bcd43cb44b054522239a7eed64fc4"
+      },
+      {
+        "bytes": 67504,
+        "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libdl.so",
+        "sha256": "cfee715580eac1a5cf3a7713ceebd61e83544a2889bd4799be7c23272356815b"
+      },
+      {
+        "bytes": 136800,
+        "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/liblog.so",
+        "sha256": "af8872cb6e476b8d66bbf6d84eb6fb12e3312ea79a5c947a63a8428256b45a81"
+      },
+      {
+        "bytes": 265480,
+        "path": "/data/data/com.termux/files/usr/opt/aosp/lib64/libm.so",
+        "sha256": "d99e586652e539e4840c4466d6a8d8a7fe169b662a48935000226eb7f1c41f9b"
+      }
+    ],
+    "image_file_hashes_match_previously_verified_five_file_foundation_set": true,
+    "prior_platform_pin_source": "scripts/neutts_nonrust_runtime_lock.json",
+    "device_inventory": [],
+    "device_inventory_error": null
+  },
+  "second_reconstruction": "not reached",
+  "follow_up": "Validate only the exact five already reviewed image platform members, including Docker image inspection and current file hash/ELF/package ownership. Preserve the ordinary prefix-library restriction. Real device paths have no image-library exception.",
+  "raw_evidence": {
+    "directory": "run-39083065999",
+    "files": 40,
+    "bytes": 32747339,
+    "ledger_sha256": "75776bac27d076592da42598bd836e6e78456a54a1fe38acebd7b5cc41320326"
+  },
+  "physical_vad": "not-tested",
+  "microphone_accessed": false,
+  "audio_stream_opened": false,
+  "published": false
+}
