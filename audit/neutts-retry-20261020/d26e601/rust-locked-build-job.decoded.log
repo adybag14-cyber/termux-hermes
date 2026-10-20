@@ -1,0 +1,267 @@
+﻿2026-10-20T12:59:05.2898845Z Current runner version: '2.337.0'
+2026-10-20T12:59:05.2935168Z ##[group]Runner Image Provisioner
+2026-10-20T12:59:05.2936253Z Hosted Compute Agent
+2026-10-20T12:59:05.2937159Z Version: 20261015.610
+2026-10-20T12:59:05.2937900Z Commit: 267fdb4e8bbec4ab5ea31367f3a00d5c480c7656
+2026-10-20T12:59:05.2939316Z Build Date: 2026-10-14T17:06:54Z
+2026-10-20T12:59:05.2940064Z Worker ID: {4db5f63c-0474-4b3c-8f73-8b56580df047}
+2026-10-20T12:59:05.2940797Z Region: northcentralus
+2026-10-20T12:59:05.2941511Z Cloud: Azure
+2026-10-20T12:59:05.2942110Z ##[endgroup]
+2026-10-20T12:59:05.2944448Z ##[group]Operating System
+2026-10-20T12:59:05.2945546Z Ubuntu
+2026-10-20T12:59:05.2946111Z 24.04.5
+2026-10-20T12:59:05.2946862Z LTS
+2026-10-20T12:59:05.2947397Z ##[endgroup]
+2026-10-20T12:59:05.2948107Z ##[group]Runner Image
+2026-10-20T12:59:05.2948827Z Image: ubuntu-24.04-arm
+2026-10-20T12:59:05.2949459Z Version: 20261018.154.1
+2026-10-20T12:59:05.2951042Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24-arm64/20261018.154/images/ubuntu/Ubuntu2404-Arm64-Readme.md
+2026-10-20T12:59:05.2952834Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24-arm64%2F20261018.154
+2026-10-20T12:59:05.2953862Z ##[endgroup]
+2026-10-20T12:59:05.2955643Z ##[group]GITHUB_TOKEN Permissions
+2026-10-20T12:59:05.2959187Z Contents: read
+2026-10-20T12:59:05.2959939Z Metadata: read
+2026-10-20T12:59:05.2960766Z ##[endgroup]
+2026-10-20T12:59:05.2963717Z Secret source: Actions
+2026-10-20T12:59:05.2965438Z Cache mode: write
+2026-10-20T12:59:05.2966760Z Prepare workflow directory
+2026-10-20T12:59:05.3433107Z Prepare all required actions
+2026-10-20T12:59:05.3492917Z Getting action download info
+2026-10-20T12:59:05.6058588Z Download action repository 'actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd' (SHA:de0fac2e4500dabe0009e67214ff5f5447ce83dd)
+2026-10-20T12:59:05.7841585Z Download action repository 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+2026-10-20T12:59:05.9852489Z Complete job name: Native Rust preparation (locked-build)
+2026-10-20T12:59:06.0727224Z ##[group]Run actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+2026-10-20T12:59:06.0728690Z with:
+2026-10-20T12:59:06.0729640Z   ref: d26e601bebf468f86df24c657e63fdd0fe51eefe
+2026-10-20T12:59:06.0730407Z   persist-credentials: false
+2026-10-20T12:59:06.0731177Z   repository: adybag14-cyber/termux-hermes
+2026-10-20T12:59:06.0735647Z   token: ***
+2026-10-20T12:59:06.0736226Z   ssh-strict: true
+2026-10-20T12:59:06.0737042Z   ssh-user: git
+2026-10-20T12:59:06.0737603Z   clean: true
+2026-10-20T12:59:06.0738260Z   sparse-checkout-cone-mode: true
+2026-10-20T12:59:06.0738925Z   fetch-depth: 1
+2026-10-20T12:59:06.0739496Z   fetch-tags: false
+2026-10-20T12:59:06.0740194Z   show-progress: true
+2026-10-20T12:59:06.0740765Z   lfs: false
+2026-10-20T12:59:06.0741299Z   submodules: false
+2026-10-20T12:59:06.0742046Z   set-safe-directory: true
+2026-10-20T12:59:06.0743172Z ##[endgroup]
+2026-10-20T12:59:06.1678351Z Syncing repository: adybag14-cyber/termux-hermes
+2026-10-20T12:59:06.1681303Z ##[group]Getting Git version info
+2026-10-20T12:59:06.1682360Z Working directory is '/home/runner/work/termux-hermes/termux-hermes'
+2026-10-20T12:59:06.1690477Z [command]/usr/bin/git version
+2026-10-20T12:59:06.1799175Z git version 2.55.0
+2026-10-20T12:59:06.1820313Z ##[endgroup]
+2026-10-20T12:59:06.1836330Z Temporarily overriding HOME='/home/runner/work/_temp/241dad90-a02f-422b-965f-70389e79c0b4' before making global git config changes
+2026-10-20T12:59:06.1846307Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-20T12:59:06.1848309Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/termux-hermes/termux-hermes
+2026-10-20T12:59:06.1878358Z Deleting the contents of '/home/runner/work/termux-hermes/termux-hermes'
+2026-10-20T12:59:06.1883155Z ##[group]Initializing the repository
+2026-10-20T12:59:06.1888378Z [command]/usr/bin/git init /home/runner/work/termux-hermes/termux-hermes
+2026-10-20T12:59:06.1993297Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-20T12:59:06.2016024Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-20T12:59:06.2022360Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-20T12:59:06.2023868Z hint: call:
+2026-10-20T12:59:06.2025325Z hint:
+2026-10-20T12:59:06.2026115Z hint: 	git config --global init.defaultBranch <name>
+2026-10-20T12:59:06.2026844Z hint:
+2026-10-20T12:59:06.2027807Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-20T12:59:06.2028860Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-20T12:59:06.2029838Z hint:
+2026-10-20T12:59:06.2030454Z hint: 	git branch -m <name>
+2026-10-20T12:59:06.2031138Z hint:
+2026-10-20T12:59:06.2032081Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-20T12:59:06.2033303Z Initialized empty Git repository in /home/runner/work/termux-hermes/termux-hermes/.git/
+2026-10-20T12:59:06.2035851Z [command]/usr/bin/git remote add origin https://github.com/adybag14-cyber/termux-hermes
+2026-10-20T12:59:06.2071886Z ##[endgroup]
+2026-10-20T12:59:06.2073095Z ##[group]Disabling automatic garbage collection
+2026-10-20T12:59:06.2073959Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-20T12:59:06.2109284Z ##[endgroup]
+2026-10-20T12:59:06.2110468Z ##[group]Setting up auth
+2026-10-20T12:59:06.2111611Z Removing SSH command configuration
+2026-10-20T12:59:06.2112718Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-20T12:59:06.2148981Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-20T12:59:06.2506192Z Removing HTTP extra header
+2026-10-20T12:59:06.2512071Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-20T12:59:06.2547652Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-20T12:59:06.2787463Z Removing includeIf entries pointing to credentials config files
+2026-10-20T12:59:06.2795076Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-20T12:59:06.2832002Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-20T12:59:06.3079307Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-d81384d8-c626-4901-9ab8-6c9c2ea167d2.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-20T12:59:06.3123782Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git.path /home/runner/work/_temp/git-credentials-d81384d8-c626-4901-9ab8-6c9c2ea167d2.config
+2026-10-20T12:59:06.3161761Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-d81384d8-c626-4901-9ab8-6c9c2ea167d2.config
+2026-10-20T12:59:06.3198917Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-d81384d8-c626-4901-9ab8-6c9c2ea167d2.config
+2026-10-20T12:59:06.3236124Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-d81384d8-c626-4901-9ab8-6c9c2ea167d2.config
+2026-10-20T12:59:06.3272652Z ##[endgroup]
+2026-10-20T12:59:06.3273772Z ##[group]Fetching the repository
+2026-10-20T12:59:06.3280475Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin d26e601bebf468f86df24c657e63fdd0fe51eefe
+2026-10-20T12:59:08.7614871Z From https://github.com/adybag14-cyber/termux-hermes
+2026-10-20T12:59:08.7618088Z  * branch            d26e601bebf468f86df24c657e63fdd0fe51eefe -> FETCH_HEAD
+2026-10-20T12:59:08.7627773Z [command]/usr/bin/git rev-parse --verify --quiet d26e601bebf468f86df24c657e63fdd0fe51eefe^{object}
+2026-10-20T12:59:08.7671476Z d26e601bebf468f86df24c657e63fdd0fe51eefe
+2026-10-20T12:59:08.7676838Z ##[endgroup]
+2026-10-20T12:59:08.7678497Z ##[group]Determining the checkout info
+2026-10-20T12:59:08.7680539Z ##[endgroup]
+2026-10-20T12:59:08.7682685Z [command]/usr/bin/git sparse-checkout disable
+2026-10-20T12:59:08.7743959Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-20T12:59:08.7786163Z ##[group]Checking out the ref
+2026-10-20T12:59:08.7797292Z [command]/usr/bin/git checkout --progress --force d26e601bebf468f86df24c657e63fdd0fe51eefe
+2026-10-20T12:59:09.2861057Z Note: switching to 'd26e601bebf468f86df24c657e63fdd0fe51eefe'.
+2026-10-20T12:59:09.2861879Z 
+2026-10-20T12:59:09.2862249Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-20T12:59:09.2863055Z changes and commit them, and you can discard any commits you make in this
+2026-10-20T12:59:09.2863905Z state without impacting any branches by switching back to a branch.
+2026-10-20T12:59:09.2864259Z 
+2026-10-20T12:59:09.2864546Z If you want to create a new branch to retain commits you create, you may
+2026-10-20T12:59:09.2865428Z do so (now or later) by using -c with the switch command. Example:
+2026-10-20T12:59:09.2865881Z 
+2026-10-20T12:59:09.2866070Z   git switch -c <new-branch-name>
+2026-10-20T12:59:09.2866394Z 
+2026-10-20T12:59:09.2866562Z Or undo this operation with:
+2026-10-20T12:59:09.2866827Z 
+2026-10-20T12:59:09.2866974Z   git switch -
+2026-10-20T12:59:09.2867343Z 
+2026-10-20T12:59:09.2867707Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-20T12:59:09.2868066Z 
+2026-10-20T12:59:09.2868410Z HEAD is now at d26e601 Verify the pinned native CMake default for NeuTTS wheel builds
+2026-10-20T12:59:09.2972426Z ##[endgroup]
+2026-10-20T12:59:09.2975052Z [command]/usr/bin/git log -1 --format=%H
+2026-10-20T12:59:09.3002216Z d26e601bebf468f86df24c657e63fdd0fe51eefe
+2026-10-20T12:59:09.3011863Z ##[group]Removing auth
+2026-10-20T12:59:09.3012642Z Removing SSH command configuration
+2026-10-20T12:59:09.3015287Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-20T12:59:09.3047637Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-20T12:59:09.3286307Z Removing HTTP extra header
+2026-10-20T12:59:09.3292637Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-20T12:59:09.3326502Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-20T12:59:09.3556809Z Removing includeIf entries pointing to credentials config files
+2026-10-20T12:59:09.3558600Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-20T12:59:09.3584587Z includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git.path
+2026-10-20T12:59:09.3585457Z includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git/worktrees/*.path
+2026-10-20T12:59:09.3586219Z includeif.gitdir:/github/workspace/.git.path
+2026-10-20T12:59:09.3586697Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-20T12:59:09.3593717Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git.path
+2026-10-20T12:59:09.3620498Z /home/runner/work/_temp/git-credentials-d81384d8-c626-4901-9ab8-6c9c2ea167d2.config
+2026-10-20T12:59:09.3630754Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git.path /home/runner/work/_temp/git-credentials-d81384d8-c626-4901-9ab8-6c9c2ea167d2.config
+2026-10-20T12:59:09.3667695Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git/worktrees/*.path
+2026-10-20T12:59:09.3692207Z /home/runner/work/_temp/git-credentials-d81384d8-c626-4901-9ab8-6c9c2ea167d2.config
+2026-10-20T12:59:09.3700345Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-d81384d8-c626-4901-9ab8-6c9c2ea167d2.config
+2026-10-20T12:59:09.3738759Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-10-20T12:59:09.3763189Z /github/runner_temp/git-credentials-d81384d8-c626-4901-9ab8-6c9c2ea167d2.config
+2026-10-20T12:59:09.3770544Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-d81384d8-c626-4901-9ab8-6c9c2ea167d2.config
+2026-10-20T12:59:09.3809573Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-20T12:59:09.3836179Z /github/runner_temp/git-credentials-d81384d8-c626-4901-9ab8-6c9c2ea167d2.config
+2026-10-20T12:59:09.3842961Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-d81384d8-c626-4901-9ab8-6c9c2ea167d2.config
+2026-10-20T12:59:09.3878356Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-20T12:59:09.4138029Z Removing credentials config '/home/runner/work/_temp/git-credentials-d81384d8-c626-4901-9ab8-6c9c2ea167d2.config'
+2026-10-20T12:59:09.4139509Z ##[endgroup]
+2026-10-20T12:59:09.4367883Z ##[group]Run bash scripts/compatibility_probe_neutts_rust.sh --stage "$RUST_PREPARATION_STAGE" --out "probe-results/rust-$RUST_PREPARATION_STAGE"
+2026-10-20T12:59:09.4369202Z [36;1mbash scripts/compatibility_probe_neutts_rust.sh --stage "$RUST_PREPARATION_STAGE" --out "probe-results/rust-$RUST_PREPARATION_STAGE"[0m
+2026-10-20T12:59:09.4513493Z shell: /usr/bin/bash -e {0}
+2026-10-20T12:59:09.4513934Z env:
+2026-10-20T12:59:09.4514560Z   NEUTTS_PROBE_HEAD_SHA: d26e601bebf468f86df24c657e63fdd0fe51eefe
+2026-10-20T12:59:09.4515483Z   RUST_PREPARATION_STAGE: locked-build
+2026-10-20T12:59:09.4515913Z ##[endgroup]
+2026-10-20T12:59:09.9455451Z Prepared 9 verified wheels in /home/runner/work/termux-hermes/termux-hermes/probe-results/rust-locked-build/python-wheelhouse
+2026-10-20T12:59:37.1578427Z Traceback (most recent call last):
+2026-10-20T12:59:37.1579178Z   File "/home/runner/work/termux-hermes/termux-hermes/scripts/prepare_neutts_rust_sources.py", line 555, in <module>
+2026-10-20T12:59:37.1580051Z     raise SystemExit(main())
+2026-10-20T12:59:37.1580378Z                      ^^^^^^
+2026-10-20T12:59:37.1580941Z   File "/home/runner/work/termux-hermes/termux-hermes/scripts/prepare_neutts_rust_sources.py", line 549, in main
+2026-10-20T12:59:37.1582092Z     result = prepare(args.lock, args.snapshot, args.out, args.stage, tuple(args.cache))
+2026-10-20T12:59:37.1582801Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-20T12:59:37.1583460Z   File "/home/runner/work/termux-hermes/termux-hermes/scripts/prepare_neutts_rust_sources.py", line 511, in prepare
+2026-10-20T12:59:37.1584033Z     downloads = list(pool.map(acquire, jobs))
+2026-10-20T12:59:37.1584387Z                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-20T12:59:37.1585250Z   File "/usr/lib/python3.12/concurrent/futures/_base.py", line 619, in result_iterator
+2026-10-20T12:59:37.1585755Z     yield _result_or_cancel(fs.pop())
+2026-10-20T12:59:37.1586105Z           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-20T12:59:37.1586680Z   File "/usr/lib/python3.12/concurrent/futures/_base.py", line 317, in _result_or_cancel
+2026-10-20T12:59:37.1587215Z     return fut.result(timeout)
+2026-10-20T12:59:37.1587528Z            ^^^^^^^^^^^^^^^^^^^
+2026-10-20T12:59:37.1588455Z   File "/usr/lib/python3.12/concurrent/futures/_base.py", line 456, in result
+2026-10-20T12:59:37.1588941Z     return self.__get_result()
+2026-10-20T12:59:37.1589257Z            ^^^^^^^^^^^^^^^^^^^
+2026-10-20T12:59:37.1589936Z   File "/usr/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+2026-10-20T12:59:37.1590465Z     raise self._exception
+2026-10-20T12:59:37.1590820Z   File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+2026-10-20T12:59:37.1591241Z     result = self.fn(*self.args, **self.kwargs)
+2026-10-20T12:59:37.1591669Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-20T12:59:37.1592238Z   File "/home/runner/work/termux-hermes/termux-hermes/scripts/prepare_neutts_rust_sources.py", line 509, in acquire
+2026-10-20T12:59:37.1592899Z     **download(pin, destination, caches, deadline)}
+2026-10-20T12:59:37.1593228Z       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-20T12:59:37.1593818Z   File "/home/runner/work/termux-hermes/termux-hermes/scripts/prepare_neutts_rust_sources.py", line 189, in download
+2026-10-20T12:59:37.1594525Z     raise PrepareError("Artifact download returned HTTP " + str(code)) from None
+2026-10-20T12:59:37.1595250Z PrepareError: Artifact download returned HTTP 404
+2026-10-20T12:59:37.2143634Z ##[error]Process completed with exit code 1.
+2026-10-20T12:59:37.2277223Z ##[group]Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+2026-10-20T12:59:37.2277748Z with:
+2026-10-20T12:59:37.2277996Z   name: termux-neutts-rust-locked-build
+2026-10-20T12:59:37.2278421Z   path: probe-results/rust-locked-build/
+2026-10-20T12:59:37.2278732Z   if-no-files-found: warn
+2026-10-20T12:59:37.2279028Z   compression-level: 6
+2026-10-20T12:59:37.2279342Z   retention-days: 14
+2026-10-20T12:59:37.2279567Z   overwrite: false
+2026-10-20T12:59:37.2279853Z   include-hidden-files: false
+2026-10-20T12:59:37.2280114Z   archive: true
+2026-10-20T12:59:37.2280375Z ##[endgroup]
+2026-10-20T12:59:37.4786912Z With the provided path, there will be 871 files uploaded
+2026-10-20T12:59:37.4791573Z Artifact name is valid!
+2026-10-20T12:59:37.4792166Z Root directory input is valid!
+2026-10-20T12:59:37.7408758Z Uploading artifact: termux-neutts-rust-locked-build.zip
+2026-10-20T12:59:37.7442976Z Beginning upload of artifact content to blob storage
+2026-10-20T12:59:38.4503050Z Uploaded bytes 8388608
+2026-10-20T12:59:38.7403789Z Uploaded bytes 16777216
+2026-10-20T12:59:38.8276030Z Uploaded bytes 25165824
+2026-10-20T12:59:38.8956137Z Uploaded bytes 33554432
+2026-10-20T12:59:38.9823087Z Uploaded bytes 41943040
+2026-10-20T12:59:39.2058478Z Uploaded bytes 50331648
+2026-10-20T12:59:39.4471701Z Uploaded bytes 58720256
+2026-10-20T12:59:39.7074853Z Uploaded bytes 67108864
+2026-10-20T12:59:39.8431161Z Uploaded bytes 75497472
+2026-10-20T12:59:40.0476571Z Uploaded bytes 83886080
+2026-10-20T12:59:40.2416231Z Uploaded bytes 92274688
+2026-10-20T12:59:40.3685148Z Uploaded bytes 100663296
+2026-10-20T12:59:40.6550268Z Uploaded bytes 109051904
+2026-10-20T12:59:40.8018118Z Uploaded bytes 117440512
+2026-10-20T12:59:40.9709776Z Uploaded bytes 125829120
+2026-10-20T12:59:41.1913910Z Uploaded bytes 134217728
+2026-10-20T12:59:41.4673262Z Uploaded bytes 142606336
+2026-10-20T12:59:41.7093542Z Uploaded bytes 150994944
+2026-10-20T12:59:42.0445488Z Uploaded bytes 159383552
+2026-10-20T12:59:42.1896294Z Uploaded bytes 167772160
+2026-10-20T12:59:42.3297057Z Uploaded bytes 176160768
+2026-10-20T12:59:42.4978486Z Uploaded bytes 184549376
+2026-10-20T12:59:42.7081743Z Uploaded bytes 192937984
+2026-10-20T12:59:42.9482167Z Uploaded bytes 201326592
+2026-10-20T12:59:43.1675703Z Uploaded bytes 209715200
+2026-10-20T12:59:43.3970438Z Uploaded bytes 218103808
+2026-10-20T12:59:43.5701794Z Uploaded bytes 226492416
+2026-10-20T12:59:43.7941716Z Uploaded bytes 234881024
+2026-10-20T12:59:44.0497432Z Uploaded bytes 243269632
+2026-10-20T12:59:44.4171945Z Uploaded bytes 251658240
+2026-10-20T12:59:44.6894510Z Uploaded bytes 257426471
+2026-10-20T12:59:44.7258668Z Finished uploading artifact content to blob storage!
+2026-10-20T12:59:44.7260589Z SHA256 digest of uploaded artifact is a21fda826632061dd526906d40da69e47ecff16420cd795f9ba2d4a4958d9100
+2026-10-20T12:59:44.7262203Z Finalizing artifact upload
+2026-10-20T12:59:45.0314079Z Artifact termux-neutts-rust-locked-build successfully finalized. Artifact ID 12266191928
+2026-10-20T12:59:45.0315294Z Artifact termux-neutts-rust-locked-build has been successfully uploaded! Final size is 257426471 bytes. Artifact ID is 12266191928
+2026-10-20T12:59:45.0320152Z Artifact download URL: https://github.com/adybag14-cyber/termux-hermes/actions/runs/39426560512/artifacts/12266191928
+2026-10-20T12:59:45.1333542Z Post job cleanup.
+2026-10-20T12:59:45.2122593Z [command]/usr/bin/git version
+2026-10-20T12:59:45.2162192Z git version 2.55.0
+2026-10-20T12:59:45.2208851Z Temporarily overriding HOME='/home/runner/work/_temp/820e71b0-c6e8-4d9d-b45a-570edcaee934' before making global git config changes
+2026-10-20T12:59:45.2209815Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-20T12:59:45.2217909Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/termux-hermes/termux-hermes
+2026-10-20T12:59:45.2938610Z Removing SSH command configuration
+2026-10-20T12:59:45.2946744Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-20T12:59:45.2987224Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-20T12:59:45.3233327Z Removing HTTP extra header
+2026-10-20T12:59:45.3239329Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-20T12:59:45.3278231Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-20T12:59:45.3525913Z Removing includeIf entries pointing to credentials config files
+2026-10-20T12:59:45.3533578Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-20T12:59:45.3572149Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-20T12:59:45.3967006Z Cleaning up orphan processes
