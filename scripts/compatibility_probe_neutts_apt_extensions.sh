@@ -28,6 +28,7 @@ if json.loads((root / "manifest/release.json").read_text())["termux_image"] != s
     raise SystemExit("Review the native image pin")
 lock = json.loads((root / "scripts/neutts_apt_extensions_lock.json").read_bytes())
 names = (
+    "scripts/prepare_neutts_apt_snapshot.py", "scripts/neutts_apt_snapshot.sh",
     ".github/workflows/neutts-apt-extensions.yml",
     "scripts/compatibility_probe_neutts_apt_extensions.sh",
     "scripts/compatibility_probe_neutts_apt_extensions.py",
@@ -52,6 +53,9 @@ with (out / "APT-EXTENSIONS-PROBE-INPUTS.json").open("x") as stream:
     json.dump(receipt, stream, indent=2)
     stream.write("\n")
 PY_INPUTS
+  python3 -B "$packaging/scripts/prepare_neutts_apt_snapshot.py" \
+    --cache "$packaging/vendor/termux-preparation/apt-archives" \
+    --out "$out/foundation-apt-inputs"
   python3 -B "$packaging/scripts/prepare_neutts_core_python.py" \
     --lock "$packaging/scripts/neutts_core_python_lock.json" --out "$out/python-wheelhouse"
   python3 -B "$packaging/scripts/prepare_neutts_apt_extensions.py" --out "$out/apt-extension-inputs"
@@ -64,6 +68,7 @@ PY_INPUTS
     --tmpfs /bin:mode=1777 \
     -v "$packaging:/probes:ro" -v "$out:/out" \
     -v "$out/python-wheelhouse:/out/python-wheelhouse:ro" \
+    -v "$out/foundation-apt-inputs:/out/foundation-apt-inputs:ro" \
     -v "$out/apt-extension-inputs:/out/apt-extension-inputs:ro" \
     "$image" bash /probes/scripts/compatibility_probe_neutts_apt_extensions.sh --in-container --out /out \
     2>&1 | tee "$out/apt-extensions-native-probe.log"
@@ -100,7 +105,7 @@ stage=exact-input-verification
 import hashlib, importlib.util, pathlib, sys
 scripts, inputs = map(pathlib.Path, sys.argv[1:3])
 path = scripts / "prepare_neutts_apt_extensions.py"
-if hashlib.sha256(path.read_bytes()).hexdigest() != "0d954a2b4f9e68d8bb80ecea132b97e6e05a23f41835a2189ccf53884d811c3a":
+if hashlib.sha256(path.read_bytes()).hexdigest() != "42db2e03b89d08e05ac72de9615c585f5425488639968b746f56cf5d29aeb64f":
     raise SystemExit("Reviewed APT extension input verifier changed")
 spec = importlib.util.spec_from_file_location("_apt_extensions_shell_prepare", path)
 module = importlib.util.module_from_spec(spec)
@@ -120,8 +125,15 @@ while IFS=$'\t' read -r name version arch sha bytes archive_path; do
   destination="$work/archives/$(basename "$archive_path")"
   [[ ! -e "$destination" ]]
   cached="$out/apt-extension-inputs/archives/$(basename "$archive_path")"
-  if [[ -f "$cached" ]]; then
+  retained_name="$(basename "$archive_path")"
+  retained_name="${retained_name//:/%3A}"
+  retained="/probes/vendor/termux-preparation/apt-archives/$retained_name"
+  if [[ -e "$cached" || -L "$cached" ]]; then
+    [[ -f "$cached" && ! -L "$cached" ]]
     cp -- "$cached" "$destination"
+  elif [[ -e "$retained" || -L "$retained" ]]; then
+    [[ -f "$retained" && ! -L "$retained" ]]
+    cp -- "$retained" "$destination"
   else
     curl --proto '=https' --proto-redir '=https' --fail --show-error --silent --location \
       --retry 4 --retry-all-errors --connect-timeout 20 --max-time 180 --max-filesize "$bytes" \

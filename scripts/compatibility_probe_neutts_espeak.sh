@@ -29,6 +29,7 @@ if os.environ.get("NEUTTS_PROBE_HEAD_SHA", head) != head:
 if json.loads((root / "manifest/release.json").read_text())["termux_image"] != sys.argv[3]:
     raise SystemExit("review the native image pin")
 names = (
+    "scripts/prepare_neutts_apt_snapshot.py", "scripts/neutts_apt_snapshot.sh",
     "scripts/compatibility_probe_neutts_espeak.sh", "scripts/compatibility_probe_neutts_espeak.py",
     "scripts/prepare_neutts_espeak_source.py", "scripts/neutts_espeak_source_lock.json",
     "scripts/check_neutts_espeak_cmake.py", "patches/next-stable/espeak-ng-explicit-off-sonic.patch",
@@ -49,6 +50,9 @@ receipt = {"schema_version": 1, "head_sha": head, "workflow_ref_commit": os.envi
            "model_downloaded": False, "synthesis_tested": False, "release_output": False}
 (out / "ESPEAK-PROBE-INPUTS.json").write_text(json.dumps(receipt, indent=2) + "\n")
 PY
+  python3 -B "$packaging/scripts/prepare_neutts_apt_snapshot.py" --include-compiler \
+    --cache "$packaging/vendor/termux-preparation/apt-archives" \
+    --out "$out/foundation-apt-inputs"
   python3 -B "$packaging/scripts/prepare_neutts_core_python.py" \
     --lock "$packaging/scripts/neutts_core_python_lock.json" --out "$out/python-wheelhouse"
   python3 -B "$packaging/scripts/prepare_neutts_espeak_source.py" --out "$out/espeak-inputs"
@@ -79,6 +83,7 @@ PY
     --tmpfs /bin:mode=1777 \
     -v "$packaging:/probes:ro" -v "$out:/out" \
     -v "$out/python-wheelhouse:/out/python-wheelhouse:ro" \
+    -v "$out/foundation-apt-inputs:/out/foundation-apt-inputs:ro" \
     -v "$out/espeak-inputs:/out/espeak-inputs:ro" \
     -v "$out/phonemizer-inputs:/out/phonemizer-inputs:ro" \
     "$image" bash /probes/scripts/compatibility_probe_neutts_espeak.sh --in-container --out /out \
@@ -110,16 +115,11 @@ finish() {
 }
 trap finish EXIT
 bash /probes/scripts/compatibility_probe_neutts.sh --in-container --out "$out"
-stage=compiler-archive-download
-mkdir -p "$work/archives/partial"
-specs=()
-while IFS=$'\t' read -r name version arch sha bytes archive_path; do
-  specs+=("$name=$version")
-done < "$out/espeak-inputs/build-apt-closure.tsv"
-[[ "${#specs[@]}" == 44 ]]
-apt-get -o Acquire::Retries=5 -o Dpkg::Options::=--force-confnew \
-  -o Dir::Cache::archives="$work/archives" -y --no-install-recommends --no-remove \
-  --download-only --reinstall install "${specs[@]}"
+stage=compiler-archive-staging
+source /probes/scripts/neutts_apt_snapshot.sh
+neutts_apt_snapshot_open "$out/foundation-apt-inputs" "$work/frozen-apt" "$out/ESPEAK-FROZEN-APT"
+neutts_apt_stage_archives "$out/foundation-apt-inputs" "$out/espeak-inputs/build-apt-closure.tsv" \
+  "$work/archives" "$out/ESPEAK-FROZEN-COMPILER-ARCHIVES.tsv"
 shopt -s nullglob
 archives=("$work/archives/"*.deb)
 [[ "${#archives[@]}" == 44 ]]
@@ -128,11 +128,11 @@ stage=native-espeak
   --inputs "$out/espeak-inputs" --apt-archives "$work/archives" \
   --foundation-receipt "$out/NEUTTS-CORE-RESULT.json" --out "$out/espeak-component"
 echo "NEUTTS_ESPEAK_C_ABI_AND_DATA_PASSED"
-stage=python-pip-provenance-download
-(
-  cd "$work/archives"
-  apt-get -o Acquire::Retries=5 download python-pip=26.2.1
-)
+stage=python-pip-provenance-copy
+pip_source="$out/foundation-apt-inputs/apt-archives/python-pip_26.2.1_all.deb"
+[[ -f "$pip_source" && ! -L "$pip_source" ]]
+[[ ! -e "$work/archives/python-pip_26.2.1_all.deb" ]]
+cp -- "$pip_source" "$work/archives/python-pip_26.2.1_all.deb"
 stage=phonemizer-archive-union
 "$PREFIX/bin/python" -I -B - /probes/scripts "$work/archives" "$out" <<'PY_PIP_UNION'
 import hashlib, importlib.util, json, pathlib, sys

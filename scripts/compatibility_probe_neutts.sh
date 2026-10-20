@@ -27,6 +27,9 @@ if json.loads((root / "manifest/release.json").read_text())["termux_image"] != s
 names = ("scripts/compatibility_probe_neutts.sh", "scripts/compatibility_probe_neutts.py",
          "scripts/prepare_neutts_core_python.py", "scripts/neutts_core_python_lock.json",
          "scripts/validate_neutts_apt_python.py", "scripts/neutts_apt_python_metadata.json",
+         "scripts/prepare_neutts_apt_snapshot.py", "scripts/neutts_apt_snapshot.sh",
+         "audit/neutts-runtime-index-20261017/InRelease", "audit/neutts-runtime-index-20261017/Packages.gz",
+         "audit/neutts-native-20261017/run-39058569758/NEUTTS-PINNED-APT.tsv",
          ".github/workflows/neutts-termux-probe.yml")
 native_components = sys.argv[4] == "1"
 if native_components:
@@ -69,6 +72,11 @@ data = {
 PY
   python3 "$packaging/scripts/prepare_neutts_core_python.py" \
     --lock "$packaging/scripts/neutts_core_python_lock.json" --out "$out/python-wheelhouse"
+  apt_prepare_args=()
+  if [[ "$native_components" == 1 ]]; then apt_prepare_args=(--include-compiler); fi
+  python3 -B "$packaging/scripts/prepare_neutts_apt_snapshot.py" \
+    --cache "$packaging/vendor/termux-preparation/apt-archives" \
+    "${apt_prepare_args[@]}" --out "$out/foundation-apt-inputs"
   native_args=()
   native_mounts=()
   container_timeout=24m
@@ -91,6 +99,7 @@ PY
     --tmpfs /bin:mode=1777 \
     -v "$packaging:/probes:ro" -v "$out:/out" \
     -v "$out/python-wheelhouse:/out/python-wheelhouse:ro" \
+    -v "$out/foundation-apt-inputs:/out/foundation-apt-inputs:ro" \
     "${native_mounts[@]}" \
     "$image" bash /probes/scripts/compatibility_probe_neutts.sh --in-container "${native_args[@]}" --out /out \
     2>&1 | tee "$out/neutts-native-probe.log"
@@ -108,7 +117,7 @@ export PIP_FIND_LINKS="$NEUTTS_PYTHON_WHEELHOUSE"
 read -r neutts_lock_sha neutts_lock_file < <(sha256sum /probes/scripts/neutts_core_python_lock.json)
 export NEUTTS_PYTHON_LOCK_SHA256="$neutts_lock_sha"
 export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2
-unset LD_LIBRARY_PATH LD_PRELOAD PYTHONPATH PYTHONHOME HERMES_RUNTIME_DIR HERMES_HOME
+unset LD_LIBRARY_PATH LD_PRELOAD PYTHONPATH PYTHONHOME HERMES_RUNTIME_DIR HERMES_HOME APT_CONFIG
 umask 077
 mkdir -p "$TMPDIR"
 work="$(mktemp -d "$TMPDIR/neutts-core.XXXXXX")"
@@ -277,33 +286,30 @@ dpkg-query -W -f='${Package}\t${Version}\n' > "$out/NEUTTS-UPGRADED-BASE-PACKAGE
 [[ -e /bin/sh ]] || ln -s "$PREFIX/bin/sh" /bin/sh
 rm -rf -- "$work/bootstrap"
 
-stage=pinned-apt-download
-mkdir -p "$work/archives/partial"
+stage=frozen-signed-apt
+source /probes/scripts/neutts_apt_snapshot.sh
+neutts_apt_snapshot_open "$out/foundation-apt-inputs" "$work/frozen-apt" "$out/NEUTTS-FROZEN-APT"
+cmp "$work/PINNED-APT.tsv" "$out/foundation-apt-inputs/foundation.tsv"
+stage=pinned-apt-cache
+neutts_apt_stage_archives "$out/foundation-apt-inputs" "$work/PINNED-APT.tsv" \
+  "$work/archives" "$out/NEUTTS-APT-CACHE-LAYOUT.tsv"
 specs=()
 while IFS=$'\t' read -r name version arch sha bytes archive_path; do
   specs+=("$name=$version")
 done < "$work/PINNED-APT.tsv"
+stage=pinned-apt-plan
 apt-get "${apt_options[@]}" -o Dir::Cache::archives="$work/archives" \
-  -y --no-install-recommends --no-remove --download-only --reinstall install "${specs[@]}"
-downloaded=("$work/archives/"*.deb)
-[[ "${#downloaded[@]}" == "${#specs[@]}" ]] || { echo "APT added or omitted an unreviewed archive" >&2; exit 1; }
-while IFS=$'\t' read -r name version arch sha bytes archive_path; do
-  matches=("$work/archives/$name"_*.deb)
-  [[ "${#matches[@]}" == 1 && -f "${matches[0]}" && ! -L "${matches[0]}" ]]
-  file="${matches[0]}"
-  [[ "$(stat -c %s "$file")" == "$bytes" ]]
-  printf '%s  %s\n' "$sha" "$file" | sha256sum -c -
-  [[ "$(dpkg-deb -f "$file" Package)" == "$name" ]]
-  [[ "$(dpkg-deb -f "$file" Version)" == "$version" ]]
-  [[ "$(dpkg-deb -f "$file" Architecture)" == "$arch" ]]
-done < "$work/PINNED-APT.tsv"
-
+  -s --no-install-recommends --no-remove --no-download --reinstall install "${specs[@]}" \
+  > "$out/NEUTTS-APT-PLAN.log" 2>&1
+neutts_apt_validate_plan "$out/NEUTTS-APT-PLAN.log" "$work/PINNED-APT.tsv"
 stage=pinned-apt-install
 apt-get "${apt_options[@]}" -o Dir::Cache::archives="$work/archives" \
   -y --no-install-recommends --no-remove --no-download --reinstall install "${specs[@]}"
 dpkg-query -W -f='${Package}\t${Version}\t${Architecture}\n' > "$out/NEUTTS-INSTALLED-PACKAGES.tsv"
 while IFS=$'\t' read -r name version arch sha bytes archive_path; do
   [[ "$(dpkg-query -W -f='${Version}' "$name")" == "$version" ]]
+  [[ "$(dpkg-query -W -f='${Architecture}' "$name")" == "$arch" ]]
+  [[ "$(dpkg-query -W -f='${db:Status-Status}' "$name")" == installed ]]
 done < "$work/PINNED-APT.tsv"
 export LD_LIBRARY_PATH="$PREFIX/lib"
 
@@ -338,20 +344,14 @@ stage=native-scientific-behavior
 "$PREFIX/bin/python" -I -B "$work/native_core.py" "$out"
 echo "NATIVE_APT_CORE_PASSED: dependency feasibility only; NeuTTS synthesis remains untested"
 if [[ "$native_components" == 1 ]]; then
-  # The full scientific foundation must pass before adding any compiler. Download
-  # the exact build closure into the retained cache; the separate native helper
-  # verifies all 44 archives and installs only the 19 reviewed additions offline.
-  stage=native-component-apt-download
-  native_specs=()
-  while IFS=$'\t' read -r name version arch sha bytes archive_path; do
-    native_specs+=("$name=$version")
-  done < "$out/native-inputs/build-apt-closure.tsv"
-  [[ "${#native_specs[@]}" == 44 ]]
-  apt-get "${apt_options[@]}" -o Dir::Cache::archives="$work/archives" \
-    -y --no-install-recommends --no-remove --download-only --reinstall install "${native_specs[@]}"
+  # The unchanged compiler gate verifies all 44 archives and installs only
+  # its 19 reviewed additions against the same authenticated frozen index.
+  stage=native-component-apt-cache
+  neutts_apt_stage_archives "$out/foundation-apt-inputs" "$out/native-inputs/build-apt-closure.tsv" \
+    "$work/compiler-archives" "$out/NEUTTS-COMPILER-CACHE-LAYOUT.tsv"
   stage=native-source-components
   bash /probes/scripts/compatibility_probe_neutts_native.sh \
-    --inputs "$out/native-inputs" --apt-archives "$work/archives" \
+    --inputs "$out/native-inputs" --apt-archives "$work/compiler-archives" \
     --foundation-receipt "$out/NEUTTS-CORE-RESULT.json" --out "$out/native-components"
   echo "NATIVE_CPU_COMPONENTS_PASSED: Numba JIT and matching llama backend; synthesis remains untested"
 fi

@@ -1,6 +1,6 @@
 # Remaining portability work: speech and Android device integration
 
-Updated 17 October 2026. The audited release has **nine explicit compatibility
+Updated 20 October 2026. The audited release has **nine explicit compatibility
 restrictions**. Seven have repairs with native evidence, including the complete
 CUA-augmented candidate. **NeuTTS and physical microphone/VAD remain incomplete.**
 This document separates completed repairs from the work still needed for those
@@ -133,21 +133,76 @@ as a dependency but is not imported on the explicit-library path. The runtime's
 raw pip check exits zero. Root verified the complete 55,254,989-byte artifact and
 all 654 members; the earlier failures remain preserved.
 
-The [six C/C++ component preparations](neutts-nonrust-preparation.md) have 48
-passing host tests and exact verified sources/wheels. Their first native run
-39073990223 failed and is being diagnosed; none of those six is admitted from a
-host-only result. The [TorchAO component preparation](../audit/neutts-torchao-preparation-20261017.json)
-also reached a real native import failure after the exact wheel was installed:
-an eagerly imported optional compiler pass requires a missing Termux PyTorch
-Inductor module. Its [failure evidence](../audit/neutts-torchao-native-20261017/run-39074259828.json)
-is retained, and a narrow lazy-import repair is in progress. No CPU NF4 pass is
-claimed yet.
+### Current native component checkpoint (20 October 2026)
 
-The [NeuTTS offline source hook](neutts-engine-source-preparation.md) is saved
-with six passing host tests, complete verification of all 56 original files,
-and independent five-case real CMake acquisition replays. It changes only the
-source-selection CMake file; native wheel construction and the full engine
-still need verification, and the original Python upper bound is unchanged.
+The published package still has nine restrictions. Seven repairs belong to
+unpublished preparation candidates; complete NeuTTS and physical microphone/VAD
+remain the two outstanding feature gates.
+
+| Gate | Current result | Remaining limit |
+| --- | --- | --- |
+| Scientific foundation and Numba/Llama CPU | [Seven foundation cases](../audit/neutts-native-20261017/run-39058569758.json) and [native JIT/workqueue/backend operations](../audit/neutts-native-20261017/run-39064666810.json) pass. | No Llama model inference or complete speech engine. |
+| eSpeak/Phonemizer | [39073138135](../audit/neutts-espeak-native-20261017/run-39073138135.json) passes all 14 C ABI cases and the full 23-distribution, 26-edge public-wrapper environment. | Real codec/model integration remains. |
+| TorchAO NF4 | [39076217293](../audit/neutts-torchao-native-20261017/run-39076217293.json) passes import, quantization, independent dequantization, public linear forward and input gradient. The narrow lazy import preserves the other 346 wheel members and metadata. | CPU component result; no weight training or full engine. |
+| Five APT extensions | [39084149423](../audit/neutts-apt-extensions-native-20261018/run-39084149423.json) passes real PyArrow, lxml, MsgPack, Pillow and psutil operations and exact mapped-library ownership. All 893 original files, one link and 34 ELF files remain unchanged. | Raw pip retains 12 original legacy-tag diagnostics; the separate requirements/provenance gate passes. |
+| Six C/C++ dependencies | [39086276183](../audit/neutts-nonrust-native-20261020/run-39086276183.json), at saved `9edb088`, passes audioop-lts, PyCryptodomex, PyYAML, SentencePiece, pandas and scikit-learn individually and in their complete 14-distribution, 10-edge union with 5,655 verified site files and global site-packages hidden. | Complete engine integration remains. |
+| Full Hermes audio environment | [39084612542](../audit/audio-hermes-native-20261018/run-39084612542.json) passes two fresh canonical constructions: 101 application distributions/6,906 owned files and four PM distributions/75 owned files at each path. | PortAudio is unavailable in the measured container; no physical capture or VAD pass. |
+
+The C/C++ repair invokes scikit-learn's unchanged version/Tempita helpers through
+the selected native Python. It retains the original 51 build archives and
+21 requested installation additions. The exact already-installed GMP archive
+is added only for provenance verification, with no additional installation or
+upgrade. All 127 focused host checks passed before the successful native retry.
+
+The [successful C/C++ artifact](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39086276183/artifacts/12121660500)
+is 101,675,672 bytes, SHA-256
+`9fa19904c27a9e636f5598354dbe3a0527a1914dcccc968ef2dd6cc5e934c552`.
+Its 8,024 members and all individual/combined receipts were independently checked
+before the workspace reset. Artifact upload omitted ten hidden prepared-source
+files, including PyCryptodomex's `.separate_namespace`: the export contains
+7,777 of 7,787 expected source files. The ten-file, 28,335-byte supplement was
+recovered separately from exact original sdists before the reset. The uploaded
+tree alone is incomplete; reconstruct from the pinned original archives. The
+[20 October recovery receipt](../audit/neutts-nonrust-native-20261020/run-39086276183.json)
+rechecks the run identity and exact decoded job log; it does not claim a new
+complete raw-archive capture.
+
+The [Tiktoken lock review](../audit/neutts-rust-native-20261017/run-39084939992/TIKTOKEN-ROOT-REVIEW.json)
+is saved in `c1ea01d`: 27 original registry archives, 36 unchanged project files,
+and a 25-node/41-edge Android-filtered graph. Native wheel construction and
+tokenizer operations remain. Its uploaded vendor tree also requires hidden
+files to be reconstructed from the exact original crates.
+
+[The Rust run](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39084939992)
+built and exercised Maturin's native CLI and full PEP517 backend before its
+HF-Xet identity verifier rejected two legitimate crates: the `hf_xet` root
+and its `hf-xet` backing dependency. The recovered narrow identity correction
+has 155 passing Windows host tests and is saved in commit `c2a817b`;
+a passing native retry is still required.
+Both native-TLS selections, Reqwest/no-HTTP3 and OpenSSL checks remain required.
+No HF TLS operation, Safetensors operation or complete Tokenizers runtime is
+certified by the failed run.
+
+[The engine wheel run](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39084452780)
+completed its backend, then failed a nested CMake verifier. Exact CMake 4.4.4
+initializes the nested Android build type to `RelWithDebInfo`, while the verifier
+expected an empty value. Parent `Release` and API 24/ARMv8 flags were observed
+intact. The [narrow expectation correction](../audit/neutts-engine-wheel-cmake-fix-20261020/REVIEW.json)
+is saved in `d26e601`, with 50 focused tests and 78 additional subtests passing,
+no skips, and exact CMake module/native-cache fixtures. It changes no engine
+source, API/architecture flags or Python bound. Complete native wheel admission,
+installation and engine import still require a passing retry.
+
+XXHash's native operation, the complete Perth watermark subset, exact output
+handoffs between components and the complete 117-distribution runtime still need
+completion. A narrow local Perth resource-lookup proposal addresses its obsolete
+`pkg_resources` import without dropping Librosa/scikit-learn/Soundfile dependencies.
+It is not a completed native gate. Model execution additionally needs authorized
+access to the exact gated weights and reference audio with its transcript.
+
+The earlier saved [host CI, 39086773257](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39086773257),
+for source `c1ea01d`, passed **999 tests with 80 skips and 72 additional subtests**
+on Python 3.14.8. These are separate from the native component gates above.
 
 The exact eSpeak source's optional Sonic fetch is covered by the reviewed
 explicit-OFF guard and native phonemization probe described above. This
@@ -159,7 +214,8 @@ The model audit fixes the default model revisions and files. Unauthenticated
 HEAD requests to the two default Neuphonic weight files returned HTTP 401 with
 `GatedRepo`; the W2V-BERT weight endpoint was public. The three advertised
 weight sizes total 4,009,627,472 bytes. These are advertised identities and sizes,
-not proof that the weight bodies have been downloaded and checked.
+not proof that the weight bodies have been downloaded and checked. Reference
+audio and its matching transcript are also needed for the engine gate.
 
 | Model | Exact reviewed revision | Access result |
 | --- | --- | --- |
@@ -258,6 +314,8 @@ inventory as microphone readiness. Its
 [source/test receipt](../audit/audio-readiness-preparation-20261017.json) records
 the reviewed behavior.
 
+### Earlier audio preparation checkpoints
+
 The [initial audio preparer](../audit/audio-hermes-environment-preparation-20261017.json)
 passed 39 focused host tests and full four-path source replay. Its first complete
 native run, [39067100543](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39067100543),
@@ -313,19 +371,40 @@ unchanged GPL text, and leaves every executable/library containment and
 existence check in place. It makes no payload repair. All 118 focused host
 tests pass with no skips, including all 90 earlier cases.
 
-The next native retry must pass the final link gate, execute the audio dependency
-probe, and repeat construction at a second independent path.
-Both environments are built fresh through canonical APIs from the exact main
-candidate and original wheel catalog. The original candidate, installed payload,
-lock files and existing wheels must remain unchanged. The workflow preserves a
-reconstruction-input bundle separately from build/probe evidence; each phone
-must construct its own environment at its final private destination.
+### Current complete audio environment
 
-After that staging gate, the [device guide](audio-readiness-device-validation.md)
-covers the remaining physical tests: real microphone permission and PCM capture,
-silence timing/VAD, maximum duration, interruption/cancellation, playback/audio
-focus and cleanup. Container dependency success must stay separate from an
-actual Android capture result.
+[Run 39084612542](../audit/audio-hermes-native-20261018/run-39084612542.json)
+passes the final link and dependency gates at independently constructed
+`/out/prepared` and `/out/reconstructed` paths. Each has 101 application
+distributions/6,906 wheel-owned files, four PM distributions/75 owned files,
+and 102 catalog rows including all 100 original rows. Canonical construction,
+source/payload/metadata/link/library checks, CFFI and NumPy arithmetic, FFT,
+LAPACK and matrix multiplication pass. All 199 focused host checks passed
+before the native run.
+
+Selected catalog, source patches and wheel results agree across the two paths.
+Path-specific bytecode and environment metadata differ; full-environment
+byte-for-byte equality is not claimed. Both probes record PortAudio error -9999,
+`Initializing engine failed`, with all eight measured Android framework/Binder
+paths absent. Neither opens a microphone stream. Physical PCM capture, silence
+detection and automatic stopping remain untested.
+
+The complete [offline device inputs](../audit/audio-hermes-native-20261018/device-inputs-39084612542.json)
+contain the exact candidate, original audio inputs, wrapper, source helpers,
+patches and reconstruction scripts, rather than a copied CI venv. The ZIP is
+233,720,666 bytes, SHA-256
+`794cef032430d5dea92a316872cd2d7a6015ec854e4c15a38999c880b6b37177`;
+all 21 members and 20 manifest entries were checked. Its Actions expiry is
+17 November 2026 at 00:56:38 UTC. The separate native-proof ZIP is 67,968,381
+bytes, SHA-256
+`92c6c20e54c93ba5bd9ddb51affe4775ec01cc1970ad93a9990759e2f6236e43`;
+all 186 members were checked. Their retained success evidence is saved locally
+in commit `9877b37` after Devbox access returned.
+
+The [device guide](audio-readiness-device-validation.md) supplies fresh-path
+reconstruction, non-recording readiness checks and a later owner-initiated
+bounded PCM/VAD test with private profile, cache and recording directories.
+No physical device result is inferred from container dependency success.
 
 ## Stable-release boundary
 

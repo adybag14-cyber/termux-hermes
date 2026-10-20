@@ -5,6 +5,13 @@ on:
   push:
     branches: [prepare/termux-compatibility-next-stable]
     paths:
+      - 'scripts/compatibility_probe_neutts.sh'
+      - 'scripts/prepare_neutts_apt_snapshot.py'
+      - 'scripts/neutts_apt_snapshot.sh'
+      - 'tests/test_neutts_apt_snapshot_preparation.py'
+      - 'vendor/termux-preparation/**'
+      - 'audit/neutts-runtime-index-20261017/**'
+      - 'audit/neutts-native-20261017/run-39058569758/NEUTTS-PINNED-APT.tsv'
       - '.github/workflows/neutts-engine-components.yml'
       - 'scripts/prepare_neutts_native_sources.py'
       - 'scripts/neutts_native_sources_lock.json'

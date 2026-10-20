@@ -29,6 +29,7 @@ if os.environ.get("NEUTTS_PROBE_HEAD_SHA", head) != head:
 if json.loads((root / "manifest/release.json").read_text())["termux_image"] != sys.argv[3]:
     raise SystemExit("Review the native image pin")
 names = (
+    "scripts/prepare_neutts_apt_snapshot.py", "scripts/neutts_apt_snapshot.sh",
     ".github/workflows/neutts-nonrust-components.yml",
     "scripts/compatibility_probe_neutts_nonrust.sh", "scripts/compatibility_probe_neutts_nonrust.py",
     "scripts/prepare_neutts_nonrust_runtime.py", "scripts/neutts_nonrust_runtime_lock.json",
@@ -57,6 +58,9 @@ receipt = {
 }
 (out / "NONRUST-PROBE-INPUTS.json").write_text(json.dumps(receipt, indent=2) + "\n")
 PY_INPUTS
+  python3 -B "$packaging/scripts/prepare_neutts_apt_snapshot.py" \
+    --cache "$packaging/vendor/termux-preparation/apt-archives" \
+    --out "$out/foundation-apt-inputs"
   python3 -B "$packaging/scripts/prepare_neutts_core_python.py" \
     --lock "$packaging/scripts/neutts_core_python_lock.json" --out "$out/python-wheelhouse"
   python3 -B "$packaging/scripts/fetch_compatibility_candidate.py" --out "$host_work/candidate"
@@ -83,6 +87,7 @@ PY_INPUTS
     --tmpfs /bin:mode=1777 \
     -v "$packaging:/probes:ro" -v "$out:/out" \
     -v "$out/python-wheelhouse:/out/python-wheelhouse:ro" \
+    -v "$out/foundation-apt-inputs:/out/foundation-apt-inputs:ro" \
     -v "$out/nonrust-inputs:/out/nonrust-inputs:ro" \
     "$image" bash /probes/scripts/compatibility_probe_neutts_nonrust.sh --in-container --out /out \
     2>&1 | tee "$out/nonrust-native-probe.log"
@@ -136,9 +141,17 @@ while IFS=$'\t' read -r name version arch sha bytes archive_path; do
   [[ "$archive_path" == pool/main/* && "$archive_path" != *..* && "$archive_path" == *.deb ]]
   destination="$work/archives/$(basename "$archive_path")"
   [[ ! -e "$destination" ]]
-  curl --proto '=https' --proto-redir '=https' --fail --show-error --silent --location \
-    --retry 4 --retry-all-errors --connect-timeout 20 --max-time 180 --max-filesize "$bytes" \
-    --output "$destination" "https://packages.termux.dev/apt/termux-main/$archive_path"
+  retained_name="$(basename "$archive_path")"
+  retained_name="${retained_name//:/%3A}"
+  retained="/probes/vendor/termux-preparation/apt-archives/$retained_name"
+  if [[ -e "$retained" || -L "$retained" ]]; then
+    [[ -f "$retained" && ! -L "$retained" ]]
+    cp -- "$retained" "$destination"
+  else
+    curl --proto '=https' --proto-redir '=https' --fail --show-error --silent --location \
+      --retry 4 --retry-all-errors --connect-timeout 20 --max-time 180 --max-filesize "$bytes" \
+      --output "$destination" "https://packages.termux.dev/apt/termux-main/$archive_path"
+  fi
   [[ "$(wc -c < "$destination")" == "$bytes" ]]
   printf '%s  %s\n' "$sha" "$destination" | sha256sum --check --status
   archive_count=$((archive_count + 1))

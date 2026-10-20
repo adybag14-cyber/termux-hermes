@@ -22,7 +22,7 @@ import urllib.request
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 LOCK_FILENAME = "neutts_apt_extensions_lock.json"
-LOCK_SHA256 = "52db5e627cf575312d8011b6c000feb0f6075f7266981a1ed5bda68319f42ac3"
+LOCK_SHA256 = "c8226572fd116afd4fee3402bc325289b5729249d2c6f223ec45468cc19a56b9"
 APT_HELPER_SHA256 = "7c051b0143675594aadd52f9a0b66ec71e6950e9953feef3f773acceafcb0a29"
 FOUNDATION_METADATA_SHA256 = "2031c8a6915915ffffb980b268ad5107d42a186682cb2ca7009d803fe2abe200"
 ROOTS = frozenset(("python-pyarrow", "python-lxml", "python-msgpack", "python-pillow", "python-psutil"))

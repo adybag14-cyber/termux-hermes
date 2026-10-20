@@ -35,6 +35,8 @@ names = set(lock["helpers"]) | {
     "patches/next-stable/neutts-propagate-espeak-toolchain.patch",
     ".github/workflows/neutts-engine-wheel.yml",
     "scripts/compatibility_probe_neutts.sh", "scripts/compatibility_probe_neutts.py",
+    "scripts/prepare_neutts_apt_snapshot.py", "scripts/neutts_apt_snapshot.sh",
+    "audit/neutts-runtime-index-20261017/InRelease", "audit/neutts-runtime-index-20261017/Packages.gz",
     "audit/neutts-native-20261017/run-39058569758/NEUTTS-PINNED-APT.tsv",
 }
 receipt = {"schema_version": 1, "head_sha": head, "workflow_ref_commit": os.environ.get("GITHUB_SHA"),
@@ -46,6 +48,8 @@ receipt = {"schema_version": 1, "head_sha": head, "workflow_ref_commit": os.envi
 PY_SOURCE
   python3 -B "$packaging/scripts/prepare_neutts_core_python.py" \
     --lock "$packaging/scripts/neutts_core_python_lock.json" --out "$out/python-wheelhouse"
+  python3 -B "$packaging/scripts/prepare_neutts_apt_snapshot.py" --include-compiler \
+    --cache "$packaging/vendor/termux-preparation/apt-archives" --out "$out/foundation-apt-inputs"
   python3 -B "$packaging/scripts/prepare_neutts_engine_wheel.py" --out "$out/engine-wheel-inputs"
   python3 -B "$packaging/scripts/check_neutts_engine_wheel_cmake.py" \
     --inputs "$out/engine-wheel-inputs" --out "$out/host-cmake-regression"
@@ -68,6 +72,7 @@ PY_IMAGE
     --tmpfs /bin:mode=1777 \
     -v "$packaging:/probes:ro" -v "$out:/out" \
     -v "$out/python-wheelhouse:/out/python-wheelhouse:ro" \
+    -v "$out/foundation-apt-inputs:/out/foundation-apt-inputs:ro" \
     -v "$out/engine-wheel-inputs:/out/engine-wheel-inputs:ro" \
     "$image" bash /probes/scripts/compatibility_probe_neutts_engine_wheel.sh --in-container --out /out \
     2>&1 | tee "$out/engine-wheel-native.log"
@@ -99,25 +104,18 @@ finish() {
 trap finish EXIT
 
 bash /probes/scripts/compatibility_probe_neutts.sh --in-container --out "$out"
-stage=original-compiler-archive-download
-mkdir -p "$work/compiler-archives/partial"
-specs=()
-while IFS=$'\t' read -r name version arch sha bytes archive_path; do
-  specs+=("$name=$version")
-done < "$out/engine-wheel-inputs/build-apt-closure.tsv"
-[[ "${#specs[@]}" == 44 ]]
-apt-get -o Acquire::Retries=5 -o Dpkg::Options::=--force-confnew \
-  -o Dir::Cache::archives="$work/compiler-archives" -y --no-install-recommends --no-remove \
-  --download-only --reinstall install "${specs[@]}"
-shopt -s nullglob
-archives=("$work/compiler-archives/"*.deb)
-[[ "${#archives[@]}" == 44 ]]
-stage=already-installed-pip-provenance-download
+stage=frozen-signed-compiler-apt
+source /probes/scripts/neutts_apt_snapshot.sh
+neutts_apt_snapshot_open "$out/foundation-apt-inputs" "$work/frozen-apt" "$out/ENGINE-WHEEL-FROZEN-APT"
+stage=original-compiler-archive-cache
+neutts_apt_stage_archives "$out/foundation-apt-inputs" "$out/engine-wheel-inputs/build-apt-closure.tsv" \
+  "$work/compiler-archives" "$out/ENGINE-WHEEL-COMPILER-CACHE.tsv"
+stage=already-installed-pip-provenance-cache
 mkdir "$work/python-pip"
-(
-  cd "$work/python-pip"
-  apt-get -o Acquire::Retries=5 download python-pip=26.2.1
-)
+cp "$out/foundation-apt-inputs/apt-archives/python-pip_26.2.1_all.deb" \
+  "$work/python-pip/python-pip_26.2.1_all.deb"
+neutts_apt_file "$work/python-pip/python-pip_26.2.1_all.deb" 1190440 \
+  92a9cb4b3c99dd20086f90fedc95c604eefc5bd0f88d1862690884474f82de44
 stage=native-engine-wheel
 "$PREFIX/bin/python" -I -B /probes/scripts/compatibility_probe_neutts_engine_wheel.py \
   --inputs "$out/engine-wheel-inputs" --apt-archives "$work/compiler-archives" \

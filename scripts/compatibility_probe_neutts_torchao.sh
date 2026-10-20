@@ -21,7 +21,9 @@ if os.environ.get("NEUTTS_PROBE_HEAD_SHA", head) != head:
     raise SystemExit("advertised source head differs")
 if json.loads((root / "manifest/release.json").read_bytes())["termux_image"] != sys.argv[3]:
     raise SystemExit("review the native image pin")
-names = ("scripts/compatibility_probe_neutts_torchao.sh", "scripts/compatibility_probe_neutts_torchao.py",
+names = (
+    "scripts/prepare_neutts_apt_snapshot.py", "scripts/neutts_apt_snapshot.sh",
+    "scripts/compatibility_probe_neutts_torchao.sh", "scripts/compatibility_probe_neutts_torchao.py",
          "scripts/prepare_neutts_torchao.py", "scripts/neutts_torchao_component_lock.json",
          "patches/next-stable/torchao-lazy-sdpa.patch",
          ".github/workflows/neutts-torchao-component.yml",
@@ -39,6 +41,9 @@ with (out / "TORCHAO-PROBE-INPUTS.json").open("x", encoding="utf-8", newline="\n
     json.dump(receipt, stream, sort_keys=True, indent=2)
     stream.write("\n")
 PY
+  python3 -B "$packaging/scripts/prepare_neutts_apt_snapshot.py" \
+    --cache "$packaging/vendor/termux-preparation/apt-archives" \
+    --out "$out/foundation-apt-inputs"
   python3 -B "$packaging/scripts/prepare_neutts_core_python.py" \
     --lock "$packaging/scripts/neutts_core_python_lock.json" --out "$out/python-wheelhouse"
   python3 -B "$packaging/scripts/prepare_neutts_torchao.py" \
@@ -54,6 +59,7 @@ PY
     --tmpfs /bin:mode=1777 \
     -v "$packaging:/probes:ro" -v "$out:/out" \
     -v "$out/python-wheelhouse:/out/python-wheelhouse:ro" \
+    -v "$out/foundation-apt-inputs:/out/foundation-apt-inputs:ro" \
     -v "$out/torchao-inputs:/out/torchao-inputs:ro" \
     "$image" bash /probes/scripts/compatibility_probe_neutts_torchao.sh --in-container --out /out \
     2>&1 | tee "$out/torchao-native-probe.log"

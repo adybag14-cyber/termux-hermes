@@ -120,8 +120,10 @@
     {
       "id": "native-cua",
       "baseline": "Default local CUA driver does not support Android; MCP dependency alone is not a native backend.",
-      "status": "standalone_native_foreground_x11_passed_hermes_integration_pending",
-      "evidence": "cua-native-20261017/run-39052290704.json"
+      "status": "standalone_and_packaged_default_native_foreground_X11_plus_fresh_lifecycle_passed",
+      "evidence": "cua-native-20261017/run-39063611615.json",
+      "scope": "Owned foreground virtual X11 desktop; arbitrary Android phone UI is not certified.",
+      "published_package_repaired": false
     },
     {
       "id": "bot-desktop",
@@ -136,7 +138,9 @@
     {
       "id": "recorder-silence-vad",
       "baseline": "Termux:API recorder does not provide the sounddevice silence/VAD auto-stop path.",
-      "status": "numpy_native_passed_container_android_audio_framework_measured_absent_microphone_unverified"
+      "status": "two_fresh_complete_Hermes_audio_environments_passed_physical_PCM_and_VAD_unverified",
+      "evidence": "audio-hermes-native-20261018/run-39084612542.json",
+      "microphone_stream_started": false
     }
   ],
   "adjacent_defects": [
@@ -182,7 +186,7 @@
       "uvloop": "native_behavior_and_original_payload_linkage_passed",
       "matrix": "native_encrypted_protocol_and_original_payload_linkage_passed",
       "nemo-relay": "native_build_behavior_original_payload_linkage_and_artifact_capture_passed",
-      "neutts": "scientific_foundation_and_native_numba_llama_components_passed_complete_engine_pending"
+      "neutts": "foundation_Numba_llama_Phonemizer_TorchAO_APT_extensions_and_six_C_components_passed_complete_engine_pending"
     },
     "initial_native_run": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39037495656",
     "pm_selection_stamp_catalog_tests": {
@@ -354,7 +358,8 @@
       "raw_job_log_sha256": "4b70f974a317640f713597ca06ceb3406be9d3843a0de5cf715e9b7800d8b814",
       "raw_job_log_bytes": 22734,
       "evidence_directory": "ci-boundary-5cace91-20261017",
-      "duplicate_push_run_not_added_to_test_count": 39063611603
+      "duplicate_push_run_not_added_to_test_count": 39063611603,
+      "record_role": "Historical CI for its stated run/head, separate from later source commits."
     },
     "neutts_apt_core_probe": {
       "status": "native_foundation_passed",
@@ -494,7 +499,7 @@
         "log": "NEUTTS-PYTHON-CHECK.log",
         "log_sha256": "2c025ce5a45cfa2b6f032ea3bc706e8173fa7c6a1c78ff860e40d669199a48bf"
       },
-      "next_gate": "Complete exact NeuTTS runtime, eSpeak/Phonemizer and codec/model synthesis; the separate Numba/Llama CPU gate now passes in run39064666810.",
+      "next_gate": "Foundation, Numba/Llama CPU, Phonemizer, TorchAO NF4, five APT extensions and six C/C++ components have passing native gates. Complete runtime/model/synthesis and remaining Rust/watermark work remain.",
       "rolling_base_upgrade_recorded_separately_from_pinned_dependency_archives": true
     },
     "neutts_apt_probe_history": [
@@ -603,104 +608,55 @@
     "audio_readiness_preparation": {
       "patch": "../patches/next-stable/audio-readiness.patch",
       "patch_sha256": "82b92d5095ceabc05f0200569da1cc16b861c77b166095982b05d57940573db7",
-      "evidence": "audio-readiness-preparation-20261017.json",
-      "evidence_sha256": "e96c40ab39516a1a59b87e6a2d55bf5ed533576cb2e012183fb1befa79bd1bd0",
+      "initial_evidence": "audio-readiness-preparation-20261017.json",
       "guide": "../docs/audio-readiness-device-validation.md",
-      "status": "import_time_PortAudio_failure_and_output_only_inventory_fixed_host_tested",
+      "status": "two_fresh_complete_Hermes_audio_environments_passed_physical_PCM_and_VAD_pending",
+      "evidence": "audio-hermes-native-20261018/run-39084612542.json",
+      "device_inputs_evidence": "audio-hermes-native-20261018/device-inputs-39084612542.json",
+      "local_evidence_commit": "9877b37c54fea6e1df2047072948fe71ee3aefbf",
+      "host_tests_passed": 199,
+      "host_tests_skipped": 0,
+      "run": 39084612542,
+      "head": "a0c4b96a52657bf8bc0dc05151f6b1f13e20f8ec",
+      "fresh_environments": 2,
+      "application_distributions_each": 101,
+      "application_wheel_files_each": 6906,
+      "manager_distributions_each": 4,
+      "manager_wheel_files_each": 75,
+      "original_catalog_rows_preserved": 100,
+      "catalog_rows": 102,
+      "full_environment_hash_equality_claimed": false,
+      "portaudio_initialization": "unavailable",
+      "initialization_error": "PaErrorCode -9999: Initializing engine failed",
+      "measured_framework_and_Binder_paths": 8,
+      "present_framework_and_Binder_paths": 0,
+      "device_inventory": [],
+      "microphone_stream_started": false,
       "physical_microphone_or_vad_certified": false,
-      "included_in_main_candidate": false,
-      "isolated_complete_environment": {
-        "status": "native_cache_normalization_and_strict_payload_oracle_passed_exact_baseline_doclink_fix_118_host_tests_passed_retry_pending",
-        "workflow": "../.github/workflows/audio-hermes-preparation.yml",
-        "evidence": "audio-hermes-environment-preparation-20261017.json",
-        "host_tests_passed": 118,
-        "full_four_path_patch_applied": true,
-        "catalog_wheels": 102,
-        "independent_fresh_preparations_required": 2,
-        "physical_microphone_or_vad_certified": false,
-        "canonical_pm_tests_passed": 17,
-        "host_tests_skipped": 0,
-        "failure_run": 39072170354,
-        "failure_evidence": "audio-hermes-native-20261017/run-39072170354.json",
-        "independent_review": "audio-hermes-native-20261017/run-39072170354/root-review/ROOT-REVIEW.json",
-        "failure_stage": "final link existence check rejected exact preexisting missing FFmpeg copyright destination",
-        "current_preparer_sha256": "9c0186ac96cb897fee764a51995b0834586b7c953439092e6b184097753dad88",
-        "real_microphone_started": false,
-        "original_bootstrap_failure": {
-          "failure_run": 39067100543,
-          "failure_evidence": "audio-hermes-native-20261017/run-39067100543/packaged-tool-verification-fix.json",
-          "failure_stage": "build-cache verifier rejected the published flat Python tool entry before manager construction"
+      "published": false,
+      "artifact": {
+        "id": 12120044034,
+        "bytes": 67968381,
+        "sha256": "92c6c20e54c93ba5bd9ddb51affe4775ec01cc1970ad93a9990759e2f6236e43",
+        "all_member_crc_and_sha256_rechecked": true,
+        "member_count": 186,
+        "generated_bytecode_members_retained_outside_git": 100
+      },
+      "device_inputs": {
+        "artifact": {
+          "id": 12119969057,
+          "name": "termux-audio-device-preparation-inputs",
+          "bytes": 233720666,
+          "sha256": "794cef032430d5dea92a316872cd2d7a6015ec854e4c15a38999c880b6b37177",
+          "github_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39084612542/artifacts/12119969057",
+          "expires_at_utc": "2026-11-17T00:56:38Z",
+          "all_21_member_crcs_sizes_sha256_reverified": true,
+          "all_20_manifest_files_reverified": true,
+          "complete_original_archive_preserved_in_devbox": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\audio-device-inputs-evidence-20261018\\39084612542\\artifact.zip"
         },
-        "supplemental_patch": {
-          "path": "../patches/next-stable/audio-pm-marker-bytecode.patch",
-          "bytes": 533,
-          "sha256": "f4e63265aa3a71ceb0f69f11f7876a7e32e1f7e8a0704de5c8df96860e3aa390"
-        },
-        "first_path_canonical_build": {
-          "application_distributions": 101,
-          "manager_distributions": 4,
-          "original_catalog_rows_preserved": 100,
-          "catalog_rows": 102,
-          "final_payload_integrity": "strict_allowed_changes_passed_link_gate_failed_on_exact_baseline_documentation_gap"
-        },
-        "canonical_marker_regression": {
-          "original_cache_files": 25,
-          "patched_cache_files": 0,
-          "marker_facts_equal": true
-        },
-        "native_audio_initialization": "not-probed",
-        "complete_independent_preparations_passed": 0,
-        "previous_marker_failure": {
-          "run": 39068675759,
-          "evidence": "audio-hermes-native-20261017/run-39068675759/marker-bytecode-failure-fix.json",
-          "host_tests_passed": 62,
-          "original_cache_files": 25,
-          "patched_cache_files": 0,
-          "marker_facts_equal": true
-        },
-        "generated_tool_bytecode_normalization": {
-          "status": "native_passed",
-          "actual_canonical_uv_compile_host_cache_files": 50,
-          "host_validated_archived_and_removed": 50,
-          "host_original_inventory_restored": true,
-          "baseline_cache_removal": false,
-          "original_source_changes": false,
-          "final_payload_oracle_relaxed": false,
-          "native_stage_inventories": 7,
-          "validation": "Selected CPython314 magic, canonical filename/path, PEP552 header, original source SHA, recursive fresh-compile equality, archive all bytes, restore exact original Python inventory",
-          "native_run": 39072170354,
-          "native_validated_archived_and_removed": 50,
-          "native_new_directories_removed": 6,
-          "native_original_inventory_restored": true,
-          "native_original_python_inventory_sha256": "30ae06924f786a6b8818497717bb848fb34c646f6c7e417772e8c1b2e6a402a8",
-          "native_final_python_inventory_sha256": "30ae06924f786a6b8818497717bb848fb34c646f6c7e417772e8c1b2e6a402a8"
-        },
-        "previous_cache_failure": {
-          "failure_run": 39070305665,
-          "failure_evidence": "audio-hermes-native-20261017/run-39070305665/generated-tool-bytecode-normalization.json",
-          "failure_stage": "strict final inventory still rejected newly generated stdlib caches after the marker no-bytecode repair; exact native writer stage pending"
-        },
-        "baseline_documentation_gap": {
-          "stage": "final-link-validation",
-          "cause": "One unchanged FFmpeg copyright link points to a missing documentation target already absent from exact candidate e271. All other runtime link checks remain strict.",
-          "link": "tools/ffmpeg/data/data/com.termux/files/usr/share/doc/ffmpeg/copyright",
-          "target": "../../LICENSES/GPL-3.0.txt",
-          "post_build_symlinks": 77,
-          "post_build_relative_symlinks": 77,
-          "other_destinations_present_by_inventory": 76,
-          "original_symlink_rows_unchanged": 76,
-          "canonical_venv_python_absolute_to_relative_conversion": 1
-        },
-        "baseline_documentation_gap_fix": {
-          "preparer_sha256": "9c0186ac96cb897fee764a51995b0834586b7c953439092e6b184097753dad88",
-          "tests_sha256": "060a870039f6af702ce2e59b8399d01fb712effe4a8b5423104d1fb42f9bcc98",
-          "host_tests_passed": 118,
-          "host_tests_skipped": 0,
-          "original_90_tests_preserved": true,
-          "baseline_inventory_sha256": "dade6143af33f29c3d219578e68683269c1664f036e556f8399ff8a225be48b6",
-          "missing_documentation_reported_as_working": false,
-          "payload_changes_for_documentation_fix": 0,
-          "native_recheck_passed": false
+        "reconstruction_manifest": {
+          "bytes": 3412,
+          "sha256": "8bb30ca0762fc5bd5db76c7c8f88690e932935b7699eebc724d879ec107e4c94"
         }
       }
     },
@@ -818,7 +774,9 @@
         "neutts",
         "microphone-vad"
       ],
-      "baseline_restriction_count": 9
+      "baseline_restriction_count": 9,
+      "published_package_contains_these_repairs": false,
+      "scope": "Seven native-validated unpublished preparation repairs; published restriction count remains nine."
     },
     "neutts_engine_dependency_review": {
       "status": "metadata_witness_not_installable_lock",
@@ -849,9 +807,14 @@
       "patch": "../patches/next-stable/phonemizer-lazy-dlinfo.patch",
       "patch_sha256": "cd1406f9a005ac56fe24c2da491631d1842c404c4d71c99db5e01ba6fc92e7f5",
       "evidence": "phonemizer-dlinfo-20261017.json",
-      "status": "source_patch_and_30_host_contract_tests_passed_native_wrapper_gate_pending",
+      "status": "native_complete_23_distribution_26_edge_public_wrapper_passed",
       "original_files_unchanged": 55,
-      "metadata_unchanged": true
+      "metadata_unchanged": true,
+      "native_run": 39073138135,
+      "native_evidence": "neutts-espeak-native-20261017/run-39073138135.json",
+      "dlinfo_dependency_retained": true,
+      "dlinfo_imported": false,
+      "complete_engine_passed": false
     },
     "neutts_espeak_phonemizer_preparation": {
       "status": "native_espeak_C_ABI_data_and_complete_23_distribution_public_Phonemizer_API_passed",
@@ -897,58 +860,338 @@
       "native_dlinfo_imported": false
     },
     "packaging_ci_latest_saved": {
-      "head": "ce1e4eaebf523c4d58ea81848f3a5f7130a339ec",
-      "run": 39068678772,
-      "job": 117501552075,
+      "head": "c1ea01d2f06b77dfab14e2f50daf7d72b5ad18d8",
+      "run": 39086773257,
+      "job": 117554881564,
       "status": "passed",
-      "tests_passed": 520,
-      "tests_skipped": 29,
-      "duration_seconds": 2.66,
-      "evidence": "ci-boundary-ce1e4ea-20261017",
-      "merge_checkout": "b00322f",
-      "raw_job_log_sha256": "2b8b61b2dd7ca01456ad497cfeab4c2c24fdd91297f7a1b64d08d260b145e0bc"
+      "tests_passed": 999,
+      "tests_skipped": 80,
+      "additional_subtests_passed": 72,
+      "python": "3.14.8",
+      "duration_seconds": 14.75,
+      "merge_checkout": "02ebc08dd23a73b48a60f1518a2f8f04615797e6",
+      "scope": "Host CI for this exact source, separate from native component checks; no CI result is inferred for later local commits."
     },
     "neutts_engine_source_preparation": {
-      "status": "source_hook_and_real_CMake_acquisition_host_verified_native_wheel_pending",
+      "status": "native_backend_completed_nested_CMake_expectation_corrected_host_validated_native_retry_required",
       "evidence": "neutts-engine-source-preparation-20261017.json",
       "guide": "../docs/neutts-engine-source-preparation.md",
       "source_files": 56,
       "unchanged_files": 55,
-      "host_tests_passed": 6,
+      "host_tests_passed": 50,
       "host_tests_skipped": 0,
       "cmake_cases_per_replay": 5,
-      "requires_python_unchanged": ">=3.10, <3.14",
-      "native_wheel_built": false,
-      "complete_engine_passed": false
+      "requires_python_unchanged": ">=3.10,<3.14",
+      "complete_engine_passed": false,
+      "native_run": 39084452780,
+      "native_run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39084452780",
+      "native_wheel_backend_completed": true,
+      "complete_native_wheel_validation_passed": false,
+      "nested_CMake_actual_default": "RelWithDebInfo",
+      "parent_build_type": "Release",
+      "API24_and_ARMv8_flags_observed_intact": true,
+      "model_downloaded": false,
+      "correction_commit": "d26e601bebf468f86df24c657e63fdd0fe51eefe",
+      "correction_evidence": "neutts-engine-wheel-cmake-fix-20261020/REVIEW.json",
+      "additional_subtests_passed": 78,
+      "engine_source_and_API_architecture_flags_unchanged": true
     },
     "neutts_nonrust_components": {
-      "status": "host_preparation_48_tests_passed_first_native_run_failed_diagnosis_in_progress",
-      "evidence": "neutts-nonrust-preparation-20261017.json",
+      "status": "all_six_native_components_and_combined_isolated_environment_passed",
       "guide": "../docs/neutts-nonrust-preparation.md",
-      "host_tests_passed": 48,
+      "native_run": 39086276183,
+      "native_run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39086276183",
+      "native_head": "9edb088217fe5573875ca7f0dfee9922f763c2fb",
+      "components": [
+        "audioop-lts",
+        "pycryptodomex",
+        "pyyaml",
+        "sentencepiece",
+        "pandas",
+        "scikit-learn"
+      ],
+      "host_tests_passed": 127,
       "host_tests_skipped": 0,
-      "source_packages": 6,
-      "source_files_verified": 7787,
-      "input_wheels_verified": 15,
       "runtime_nodes": 14,
       "runtime_edges": 10,
-      "native_run": 39073990223,
-      "native_run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39073990223",
-      "complete_component_group_passed": false
+      "site_files": 5655,
+      "global_site_visible": false,
+      "complete_component_group_passed": true,
+      "full_engine_passed": false,
+      "build_apt_archives_preserved": 51,
+      "requested_installation_additions_preserved": 21,
+      "extra_GMP_install": false,
+      "artifact": {
+        "id": 12121660500,
+        "bytes": 101675672,
+        "sha256": "9fa19904c27a9e636f5598354dbe3a0527a1914dcccc968ef2dd6cc5e934c552",
+        "members_checked_before_reset": 8024
+      },
+      "source_export": {
+        "expected_files": 7787,
+        "uploaded_files": 7777,
+        "hidden_files_omitted": 10,
+        "supplement_bytes": 28335,
+        "exact_original_sdist_supplement_recovered_before_reset": true,
+        "uploaded_tree_complete": false
+      },
+      "evidence_persistence": "The 20 October receipt rechecks the run, API metadata and exact decoded job log. Complete archive/native-receipt verification remains a before-reset observation; no new complete raw success capture is claimed.",
+      "evidence": "neutts-nonrust-native-20261020/run-39086276183.json"
     },
     "neutts_torchao_component": {
-      "status": "original_wheel_installed_but_native_import_failed_on_optional_Inductor_module_repair_in_progress",
-      "evidence": "neutts-torchao-preparation-20261017.json",
+      "status": "native_import_NF4_quantization_dequantization_public_linear_and_input_gradient_passed",
+      "evidence": "neutts-torchao-native-20261017/run-39076217293.json",
       "native_failure_evidence": "neutts-torchao-native-20261017/run-39074259828.json",
-      "host_test_methods_passed": 20,
-      "additional_root_subtests_passed": 3,
-      "host_tests_skipped": 0,
-      "native_run": 39074259828,
-      "native_foundation_cases_passed": 7,
-      "native_original_wheel_files_verified": 347,
-      "native_installed_files": 351,
-      "native_NF4_cases_passed": 0,
+      "native_run": 39076217293,
+      "native_component_cases_passed": 5,
+      "native_NF4_cases_passed": 4,
+      "other_original_wheel_members_preserved": 346,
+      "metadata_preserved": true,
+      "full_engine_passed": false,
+      "weight_training_proved": false,
+      "model_downloaded": false
+    },
+    "historical_checkpoints": {
+      "before_2026_10_20": {
+        "source_commit": "c1ea01d2f06b77dfab14e2f50daf7d72b5ad18d8",
+        "source_sha256": "d7ec7ba7a20dbff82c448b809a816b0e601cd16656fcec767c528ea6322de167",
+        "role": "Superseded status objects preserved verbatim; counts apply to the stated earlier runs.",
+        "audio_readiness_preparation": {
+          "patch": "../patches/next-stable/audio-readiness.patch",
+          "patch_sha256": "82b92d5095ceabc05f0200569da1cc16b861c77b166095982b05d57940573db7",
+          "evidence": "audio-readiness-preparation-20261017.json",
+          "evidence_sha256": "e96c40ab39516a1a59b87e6a2d55bf5ed533576cb2e012183fb1befa79bd1bd0",
+          "guide": "../docs/audio-readiness-device-validation.md",
+          "status": "import_time_PortAudio_failure_and_output_only_inventory_fixed_host_tested",
+          "physical_microphone_or_vad_certified": false,
+          "included_in_main_candidate": false,
+          "isolated_complete_environment": {
+            "status": "native_cache_normalization_and_strict_payload_oracle_passed_exact_baseline_doclink_fix_118_host_tests_passed_retry_pending",
+            "workflow": "../.github/workflows/audio-hermes-preparation.yml",
+            "evidence": "audio-hermes-environment-preparation-20261017.json",
+            "host_tests_passed": 118,
+            "full_four_path_patch_applied": true,
+            "catalog_wheels": 102,
+            "independent_fresh_preparations_required": 2,
+            "physical_microphone_or_vad_certified": false,
+            "canonical_pm_tests_passed": 17,
+            "host_tests_skipped": 0,
+            "failure_run": 39072170354,
+            "failure_evidence": "audio-hermes-native-20261017/run-39072170354.json",
+            "independent_review": "audio-hermes-native-20261017/run-39072170354/root-review/ROOT-REVIEW.json",
+            "failure_stage": "final link existence check rejected exact preexisting missing FFmpeg copyright destination",
+            "current_preparer_sha256": "9c0186ac96cb897fee764a51995b0834586b7c953439092e6b184097753dad88",
+            "real_microphone_started": false,
+            "original_bootstrap_failure": {
+              "failure_run": 39067100543,
+              "failure_evidence": "audio-hermes-native-20261017/run-39067100543/packaged-tool-verification-fix.json",
+              "failure_stage": "build-cache verifier rejected the published flat Python tool entry before manager construction"
+            },
+            "supplemental_patch": {
+              "path": "../patches/next-stable/audio-pm-marker-bytecode.patch",
+              "bytes": 533,
+              "sha256": "f4e63265aa3a71ceb0f69f11f7876a7e32e1f7e8a0704de5c8df96860e3aa390"
+            },
+            "first_path_canonical_build": {
+              "application_distributions": 101,
+              "manager_distributions": 4,
+              "original_catalog_rows_preserved": 100,
+              "catalog_rows": 102,
+              "final_payload_integrity": "strict_allowed_changes_passed_link_gate_failed_on_exact_baseline_documentation_gap"
+            },
+            "canonical_marker_regression": {
+              "original_cache_files": 25,
+              "patched_cache_files": 0,
+              "marker_facts_equal": true
+            },
+            "native_audio_initialization": "not-probed",
+            "complete_independent_preparations_passed": 0,
+            "previous_marker_failure": {
+              "run": 39068675759,
+              "evidence": "audio-hermes-native-20261017/run-39068675759/marker-bytecode-failure-fix.json",
+              "host_tests_passed": 62,
+              "original_cache_files": 25,
+              "patched_cache_files": 0,
+              "marker_facts_equal": true
+            },
+            "generated_tool_bytecode_normalization": {
+              "status": "native_passed",
+              "actual_canonical_uv_compile_host_cache_files": 50,
+              "host_validated_archived_and_removed": 50,
+              "host_original_inventory_restored": true,
+              "baseline_cache_removal": false,
+              "original_source_changes": false,
+              "final_payload_oracle_relaxed": false,
+              "native_stage_inventories": 7,
+              "validation": "Selected CPython314 magic, canonical filename/path, PEP552 header, original source SHA, recursive fresh-compile equality, archive all bytes, restore exact original Python inventory",
+              "native_run": 39072170354,
+              "native_validated_archived_and_removed": 50,
+              "native_new_directories_removed": 6,
+              "native_original_inventory_restored": true,
+              "native_original_python_inventory_sha256": "30ae06924f786a6b8818497717bb848fb34c646f6c7e417772e8c1b2e6a402a8",
+              "native_final_python_inventory_sha256": "30ae06924f786a6b8818497717bb848fb34c646f6c7e417772e8c1b2e6a402a8"
+            },
+            "previous_cache_failure": {
+              "failure_run": 39070305665,
+              "failure_evidence": "audio-hermes-native-20261017/run-39070305665/generated-tool-bytecode-normalization.json",
+              "failure_stage": "strict final inventory still rejected newly generated stdlib caches after the marker no-bytecode repair; exact native writer stage pending"
+            },
+            "baseline_documentation_gap": {
+              "stage": "final-link-validation",
+              "cause": "One unchanged FFmpeg copyright link points to a missing documentation target already absent from exact candidate e271. All other runtime link checks remain strict.",
+              "link": "tools/ffmpeg/data/data/com.termux/files/usr/share/doc/ffmpeg/copyright",
+              "target": "../../LICENSES/GPL-3.0.txt",
+              "post_build_symlinks": 77,
+              "post_build_relative_symlinks": 77,
+              "other_destinations_present_by_inventory": 76,
+              "original_symlink_rows_unchanged": 76,
+              "canonical_venv_python_absolute_to_relative_conversion": 1
+            },
+            "baseline_documentation_gap_fix": {
+              "preparer_sha256": "9c0186ac96cb897fee764a51995b0834586b7c953439092e6b184097753dad88",
+              "tests_sha256": "060a870039f6af702ce2e59b8399d01fb712effe4a8b5423104d1fb42f9bcc98",
+              "host_tests_passed": 118,
+              "host_tests_skipped": 0,
+              "original_90_tests_preserved": true,
+              "baseline_inventory_sha256": "dade6143af33f29c3d219578e68683269c1664f036e556f8399ff8a225be48b6",
+              "missing_documentation_reported_as_working": false,
+              "payload_changes_for_documentation_fix": 0,
+              "native_recheck_passed": false
+            }
+          }
+        },
+        "phonemizer_dlinfo_adapter": {
+          "patch": "../patches/next-stable/phonemizer-lazy-dlinfo.patch",
+          "patch_sha256": "cd1406f9a005ac56fe24c2da491631d1842c404c4d71c99db5e01ba6fc92e7f5",
+          "evidence": "phonemizer-dlinfo-20261017.json",
+          "status": "source_patch_and_30_host_contract_tests_passed_native_wrapper_gate_pending",
+          "original_files_unchanged": 55,
+          "metadata_unchanged": true
+        },
+        "neutts_nonrust_components": {
+          "status": "host_preparation_48_tests_passed_first_native_run_failed_diagnosis_in_progress",
+          "evidence": "neutts-nonrust-preparation-20261017.json",
+          "guide": "../docs/neutts-nonrust-preparation.md",
+          "host_tests_passed": 48,
+          "host_tests_skipped": 0,
+          "source_packages": 6,
+          "source_files_verified": 7787,
+          "input_wheels_verified": 15,
+          "runtime_nodes": 14,
+          "runtime_edges": 10,
+          "native_run": 39073990223,
+          "native_run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39073990223",
+          "complete_component_group_passed": false
+        },
+        "neutts_torchao_component": {
+          "status": "original_wheel_installed_but_native_import_failed_on_optional_Inductor_module_repair_in_progress",
+          "evidence": "neutts-torchao-preparation-20261017.json",
+          "native_failure_evidence": "neutts-torchao-native-20261017/run-39074259828.json",
+          "host_test_methods_passed": 20,
+          "additional_root_subtests_passed": 3,
+          "host_tests_skipped": 0,
+          "native_run": 39074259828,
+          "native_foundation_cases_passed": 7,
+          "native_original_wheel_files_verified": 347,
+          "native_installed_files": 351,
+          "native_NF4_cases_passed": 0,
+          "full_engine_passed": false
+        },
+        "neutts_engine_source_preparation": {
+          "status": "source_hook_and_real_CMake_acquisition_host_verified_native_wheel_pending",
+          "evidence": "neutts-engine-source-preparation-20261017.json",
+          "guide": "../docs/neutts-engine-source-preparation.md",
+          "source_files": 56,
+          "unchanged_files": 55,
+          "host_tests_passed": 6,
+          "host_tests_skipped": 0,
+          "cmake_cases_per_replay": 5,
+          "requires_python_unchanged": ">=3.10, <3.14",
+          "native_wheel_built": false,
+          "complete_engine_passed": false
+        },
+        "packaging_ci_latest_saved": {
+          "head": "ce1e4eaebf523c4d58ea81848f3a5f7130a339ec",
+          "run": 39068678772,
+          "job": 117501552075,
+          "status": "passed",
+          "tests_passed": 520,
+          "tests_skipped": 29,
+          "duration_seconds": 2.66,
+          "evidence": "ci-boundary-ce1e4ea-20261017",
+          "merge_checkout": "b00322f",
+          "raw_job_log_sha256": "2b8b61b2dd7ca01456ad497cfeab4c2c24fdd91297f7a1b64d08d260b145e0bc"
+        },
+        "native_cua_restriction": {
+          "id": "native-cua",
+          "baseline": "Default local CUA driver does not support Android; MCP dependency alone is not a native backend.",
+          "status": "standalone_native_foreground_x11_passed_hermes_integration_pending",
+          "evidence": "cua-native-20261017/run-39052290704.json"
+        },
+        "recorder_silence_vad_restriction": {
+          "id": "recorder-silence-vad",
+          "baseline": "Termux:API recorder does not provide the sounddevice silence/VAD auto-stop path.",
+          "status": "numpy_native_passed_container_android_audio_framework_measured_absent_microphone_unverified"
+        },
+        "neutts_apt_core_next_gate": "Complete exact NeuTTS runtime, eSpeak/Phonemizer and codec/model synthesis; the separate Numba/Llama CPU gate now passes in run39064666810."
+      }
+    },
+    "neutts_apt_extensions": {
+      "status": "all_five_native_operations_and_exact_library_provenance_passed",
+      "run": 39084149423,
+      "evidence": "neutts-apt-extensions-native-20261018/run-39084149423.json",
+      "components": [
+        "pyarrow",
+        "lxml",
+        "msgpack",
+        "pillow",
+        "psutil"
+      ],
+      "original_files_preserved": 893,
+      "links_preserved": 1,
+      "ELF_files_preserved": 34,
+      "raw_pip_exit": 1,
+      "original_legacy_tag_diagnostics": 12,
+      "separate_requirements_and_provenance": "passed",
+      "metadata_and_tags_rewritten": false,
       "full_engine_passed": false
+    },
+    "neutts_rust_preparation": {
+      "run": 39084939992,
+      "status": "Maturin_passed_Tiktoken_lock_saved_HF_identity_fix_host_tested_native_retry_required",
+      "maturin_CLI_and_full_PEP517_backend_passed": true,
+      "tiktoken": {
+        "lock_evidence": "neutts-rust-native-20261017/run-39084939992/TIKTOKEN-ROOT-REVIEW.json",
+        "saved_commit": "c1ea01d2f06b77dfab14e2f50daf7d72b5ad18d8",
+        "registry_archives": 27,
+        "original_project_files": 36,
+        "android_graph_nodes": 25,
+        "android_graph_edges": 41,
+        "native_build_passed": false
+      },
+      "hf_identity_fix": {
+        "local_commit": "c2a817b360bf34e406307dcef4022fe87d1ae990",
+        "host_tests_passed": 155,
+        "host_tests_skipped": 0,
+        "scope": "Bind actual hf_xet root, hf-xet backing crate and dependency identity while preserving native-TLS, Reqwest/no-HTTP3 and OpenSSL checks.",
+        "native_retry_passed": false
+      },
+      "full_engine_passed": false
+    },
+    "checkpoint": {
+      "date": "2026-10-20",
+      "published_restrictions": 9,
+      "natively_validated_preparation_repairs": 7,
+      "remaining_full_feature_gates": [
+        "neutts",
+        "microphone-vad"
+      ],
+      "published_package_unchanged": true,
+      "complete_engine_or_physical_microphone_certified": false,
+      "recovery": "Devbox access returned; preserved audio evidence and HF correction were reconciled locally. C/C++ complete archive review remains a before-reset observation.",
+      "source_version": "0.22.2-1",
+      "release_created": false
     }
-  }
+  },
+  "updated_at": "2026-10-20"
 }

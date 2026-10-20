@@ -37,10 +37,14 @@ names = (
     "scripts/neutts_rust_operations.py", ".github/workflows/neutts-rust-components.yml",
     "scripts/compatibility_probe_neutts.sh", "scripts/compatibility_probe_neutts.py",
     "scripts/prepare_neutts_core_python.py", "scripts/neutts_core_python_lock.json",
+    "scripts/prepare_neutts_apt_snapshot.py", "scripts/neutts_apt_snapshot.sh",
     "scripts/validate_neutts_apt_python.py", "scripts/neutts_apt_python_metadata.json",
     "audit/neutts-runtime-index-20261017/InRelease", "audit/neutts-runtime-index-20261017/Packages.gz",
     "audit/neutts-native-20261017/run-39058569758/NEUTTS-PINNED-APT.tsv",
 )
+preparation_root = root / "vendor/termux-preparation"
+names += tuple(sorted(path.relative_to(root).as_posix()
+                      for path in preparation_root.rglob("*") if path.is_file()))
 receipt = {"schema_version": 1, "head_sha": head, "workflow_ref_commit": os.environ.get("GITHUB_SHA"),
            "run_id": os.environ.get("GITHUB_RUN_ID"), "native_image": sys.argv[3], "stage": sys.argv[4],
            "inputs": {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in names},
@@ -48,11 +52,15 @@ receipt = {"schema_version": 1, "head_sha": head, "workflow_ref_commit": os.envi
            "four_component_runtime_admitted": False, "model_downloaded": False, "release_output": False}
 (out / "RUST-PROBE-INPUTS.json").write_text(json.dumps(receipt, indent=2) + "\n")
 PY
+  python3 -B "$packaging/scripts/prepare_neutts_apt_snapshot.py" \
+    --cache "$packaging/vendor/termux-preparation/apt-archives" \
+    --out "$out/foundation-apt-inputs"
   python3 -B "$packaging/scripts/prepare_neutts_core_python.py" \
     --lock "$packaging/scripts/neutts_core_python_lock.json" --out "$out/python-wheelhouse"
   python3 -B "$packaging/scripts/prepare_neutts_rust_sources.py" \
     --lock "$packaging/scripts/neutts_rust_sources_lock.json" \
     --snapshot "$packaging/audit/neutts-runtime-index-20261017" \
+    --cache "$packaging/vendor/termux-preparation/apt-archives" \
     --stage "$selected_stage" --out "$out/rust-inputs"
   chmod 0777 "$out"
   docker pull "$image"
@@ -62,6 +70,7 @@ PY
     --platform linux/arm64 --user 1000:1000 --cpus 2 --memory 6g --pids-limit 512 \
     --tmpfs /bin:mode=1777 \
     -v "$packaging:/probes:ro" -v "$out:/out" \
+    -v "$out/foundation-apt-inputs:/out/foundation-apt-inputs:ro" \
     -v "$out/python-wheelhouse:/out/python-wheelhouse:ro" \
     -v "$out/rust-inputs:/out/rust-inputs:ro" \
     "$image" bash /probes/scripts/compatibility_probe_neutts_rust.sh \
