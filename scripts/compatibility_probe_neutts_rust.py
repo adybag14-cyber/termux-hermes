@@ -390,6 +390,49 @@ def clean_environment(lock, work, python=None, *, online_lock_capture=False):
     return env
 
 
+# Android's ABI3 stub forwards to the real interpreter without exporting its
+# symbols itself. Retain this one dependency across the linker's --as-needed
+# scope; keep Maturin, Safetensors, Tokenizers and all original source locks exact.
+HF_ABI3_LINK_FLAGS = (
+    "-C link-arg=-Wl,--push-state,--no-as-needed "
+    "-C link-arg=-lpython3 "
+    "-C link-arg=-Wl,--pop-state"
+)
+
+
+def source_build_environment(lock, environment, name):
+    require(name in {"maturin", "hf-xet", "safetensors", "tokenizers"},
+            "Unknown component linker scope")
+    require(environment.get("RUSTFLAGS") == lock["build"]["rustflags"],
+            "Original Rust flags changed before component scoping")
+    scoped = dict(environment)
+    if name == "hf-xet":
+        scoped["RUSTFLAGS"] += " " + HF_ABI3_LINK_FLAGS
+    return scoped
+
+
+def validate_hf_python_linkage(rows):
+    require(len(rows) == 1 and rows[0]["wheel_member"] == "hf_xet/hf_xet.abi3.so",
+            "Original HF ABI3 extension layout changed")
+    require("libpython3.so" in rows[0]["needed"],
+            "HF ABI3 extension lost the pinned Android Python forwarding stub")
+
+
+def abi3_python_link_contract():
+    stub = elf(PREFIX / "lib/libpython3.so", dynamic=True)
+    runtime = elf(PREFIX / "lib/libpython3.14.so", dynamic=True)
+    require(stub["bytes"] == 4160 and stub["sha256"]
+            == "acedc2bbf5904ed6c7f5ff161416d7a38ec043fb73eec2ee54f5806ac58e2159"
+            and "libpython3.14.so" in stub["needed"],
+            "Original Python ABI3 forwarding stub changed")
+    require(runtime["bytes"] == 5842848 and runtime["sha256"]
+            == "ca65f712012251e4ae5abf4a96d9d83ed5d125d56cb025b6fc6fa373055b6e1c",
+            "Original actual Python runtime library changed")
+    return {"status": "passed", "forwarding_stub": stub, "runtime_library": runtime,
+            "linker_scope": "HF Xet only; push-state/no-as-needed/libpython3/pop-state",
+            "python_global_preload_used": False}
+
+
 def cargo_source_config(home, vendor):
     require(not home.exists(), "Use a fresh Cargo home")
     home.mkdir()
@@ -673,8 +716,8 @@ def native_controls(args, lock, work, env, apt):
     results["original_apt_bytes"] = verify_apt_files(paths, args.apt_archives, pins, apt,
                                                      diagnostic_path=path_report)
     results["requested_compiler_paths"] = {"path": path_report.name, "sha256": sha_file(path_report)}
-    results["abi3_link_stub"] = elf(PREFIX / "lib/libpython3.so", dynamic=True)
-    require("libpython3.14.so" in results["abi3_link_stub"]["needed"], "Real abi3 stub does not link the exact interpreter")
+    results["abi3_python_link_contract"] = abi3_python_link_contract()
+    results["abi3_link_stub"] = results["abi3_python_link_contract"]["forwarding_stub"]
     return results
 
 
@@ -1019,6 +1062,11 @@ def build_one(args, lock, prep):
     require(os.environ.get("CARGO_NET_OFFLINE") == "true"
             and os.environ.get("PYO3_PYTHON") == sys.executable
             and os.environ.get("ANDROID_API_LEVEL") == "24", "Native backend controls differ")
+    expected_rustflags = lock["build"]["rustflags"]
+    if source["name"] == "hf-xet":
+        expected_rustflags += " " + HF_ABI3_LINK_FLAGS
+    require(os.environ.get("RUSTFLAGS") == expected_rustflags,
+            "Native backend linker flags escaped their reviewed component scope")
     dynamic = backend.get_requires_for_build_wheel(config_settings=settings)
     require(isinstance(dynamic, list) and all(isinstance(v, str) for v in dynamic),
             "Backend returned invalid dynamic requirements")
@@ -1035,7 +1083,8 @@ def build_one(args, lock, prep):
         "backend_path": str(backend_path), "backend_sha256": sha_file(backend_path),
         "declared_build_requirements": requirements, "dynamic_build_requirements": dynamic_report,
         "build_environment": inventory, "config_settings": settings, "source_after": unchanged,
-        "wheel": filename, "sys_platform": sys.platform, "platform_override_used": False})
+        "wheel": filename, "sys_platform": sys.platform, "platform_override_used": False,
+        "rustflags": expected_rustflags, "hf_python_stub_forced_needed": source["name"] == "hf-xet"})
 
 
 def built_wheel(path, source, prep):
@@ -1083,6 +1132,8 @@ def inspect_wheel_elf(path, facts, out, prep):
             target = directory / (str(index) + "-" + Path(member["member"]).name)
             prep.write_new(target, archive.read(member["member"]), 0o755)
             rows.append({"wheel_member": member["member"], **elf(target, dynamic=True)})
+    if facts["name"] == "hf-xet":
+        validate_hf_python_linkage(rows)
     return rows
 
 
@@ -1105,6 +1156,11 @@ def runtime_case(args, lock, prep, apt):
     operations = ops.operations(args.work / "operations", args.out / "operations", dict(os.environ), run)
     pins = {p["name"]: p for p in lock["build_apt"]["packages"]}
     apt_mappings = verify_mapped_apt_libraries(args.apt_archives, pins, apt)
+    python_contract = abi3_python_link_contract()
+    require({"libpython3.so", "libpython3.14.so"} <= {
+                Path(row["path"]).name for row in apt_mappings["mapped_apt_libraries"]
+                if row["package"] == "python"},
+            "Actual fresh HF runtime did not map the original stub and interpreter")
     selected_native = {}
     site = Path(sys.prefix) / "lib/python3.14/site-packages"
     for package in manifest["wheels"]:
@@ -1127,7 +1183,8 @@ def runtime_case(args, lock, prep, apt):
         "schema_version": 1, "status": "passed", "complete_distribution_count": 2,
         "scope": "HF Xet and Safetensors complete base dependencies only; their optional framework extras are separate.",
         "before": before, "operations": operations, "after": after, "mapped_extensions": sorted(mapped),
-        "apt_provenance": apt_mappings, "tokenizers_full_runtime_admitted": False,
+        "apt_provenance": apt_mappings, "abi3_python_link_contract": python_contract,
+        "tokenizers_full_runtime_admitted": False,
         "tiktoken_built": False, "engine_installed": False, "model_downloaded": False})
 
 
@@ -1274,7 +1331,8 @@ def run(args, lock, prep, apt):
                     root = work / "sources" / source["archive_root"]
                     shutil.copytree(args.inputs / "sources" / source["archive_root"], root)
                     prep.verify_source(root, source)
-                    graph = capture_cargo_metadata(source, root, lock, args, build_env)
+                    component_env = source_build_environment(lock, build_env, name)
+                    graph = capture_cargo_metadata(source, root, lock, args, component_env)
                     wheel_dir = args.out / "wheels" / name
                     wheel_dir.mkdir()
                     component_out = args.out / "components" / name
@@ -1285,7 +1343,7 @@ def run(args, lock, prep, apt):
                                "--inputs", str(args.inputs), "--out", str(component_out)]
                     timeout = {"maturin": 1800, "hf-xet": 2400, "safetensors": 1200, "tokenizers": 1800}[name]
                     build_record = bounded_command(command, component_out, "native-build-" + name,
-                                                   timeout, build_env, root)
+                                                   timeout, component_env, root)
                     outputs = list(wheel_dir.iterdir())
                     require(len(outputs) == 1 and outputs[0].suffix == ".whl", "Native backend emitted wrong outputs")
                     facts = built_wheel(outputs[0], source, prep)

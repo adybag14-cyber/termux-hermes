@@ -25,6 +25,7 @@ on:
       - 'scripts/neutts_rust_sources_lock.json'
       - 'scripts/neutts_rust_operations.py'
       - 'tests/test_neutts_rust_preparation.py'
+      - 'tests/test_neutts_hf_python_linkage.py'
 
 permissions:
   contents: read
@@ -54,6 +55,28 @@ jobs:
           NEUTTS_PROBE_HEAD_SHA: ${{ github.sha }}
           RUST_PREPARATION_STAGE: ${{ matrix.stage }}
         run: bash scripts/compatibility_probe_neutts_rust.sh --stage "$RUST_PREPARATION_STAGE" --out "probe-results/rust-$RUST_PREPARATION_STAGE"
+
+      - name: Preserve small original native wheel handoff
+        if: always() && matrix.stage == 'locked-build'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-neutts-rust-native-handoff
+          path: |
+            probe-results/rust-locked-build/RUST-PROBE-INPUTS.json
+            probe-results/rust-locked-build/RUST-EXIT.json
+            probe-results/rust-locked-build/NEUTTS-CORE-RESULT.json
+            probe-results/rust-locked-build/NEUTTS-APT-PYTHON-VALIDATION.json
+            probe-results/rust-locked-build/rust-components/RUST-COMPONENTS-RESULT.json
+            probe-results/rust-locked-build/rust-components/RUST-COMPONENT-CHECKPOINT.json
+            probe-results/rust-locked-build/rust-components/components/*/RUST-WHEEL-RESULT.json
+            probe-results/rust-locked-build/rust-components/components/*/SOURCE-BACKEND-RESULT.json
+            probe-results/rust-locked-build/rust-components/wheels/hf-xet/*.whl
+            probe-results/rust-locked-build/rust-components/wheels/safetensors/*.whl
+            probe-results/rust-locked-build/rust-components/wheels/tokenizers/*.whl
+            probe-results/rust-locked-build/rust-components/base-runtime-operations/
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 14
 
       - name: Preserve original inputs, Cargo graphs, wheels, and separate behavior evidence
         if: always()

@@ -1,0 +1,151 @@
+{
+  "apt_package_set_unchanged_sha256": "87fbeafb2e3221b884977d6cdef3172b1533855ac06b6e2b47033e7ae02fd31c",
+  "candidate_modified": false,
+  "commands": [
+    {
+      "command": [
+        "/data/data/com.termux/files/usr/bin/python",
+        "-I",
+        "-B",
+        "-m",
+        "venv",
+        "--without-pip",
+        "/data/data/com.termux/files/usr/tmp/xxhash-component-m7prrdc8/runtime"
+      ],
+      "exit_code": 0,
+      "logs": {
+        "stderr": {
+          "bytes": 0,
+          "path": "create-venv.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "truncated": false
+        },
+        "stdout": {
+          "bytes": 0,
+          "path": "create-venv.stdout.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "truncated": false
+        }
+      },
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/data/data/com.termux/files/usr/bin/python",
+        "-I",
+        "-B",
+        "-m",
+        "pip",
+        "--python",
+        "/data/data/com.termux/files/usr/tmp/xxhash-component-m7prrdc8/runtime/bin/python",
+        "install",
+        "--no-index",
+        "--no-deps",
+        "--no-compile",
+        "--no-cache-dir",
+        "--only-binary=:all:",
+        "--report",
+        "/out/xxhash-component/XXHASH-PIP-INSTALL.json",
+        "/out/xxhash-inputs/xxhash-4.0.1-cp314-cp314-android_24_arm64_v8a.whl"
+      ],
+      "exit_code": 0,
+      "logs": {
+        "stderr": {
+          "bytes": 0,
+          "path": "install-exact-wheel.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "truncated": false
+        },
+        "stdout": {
+          "bytes": 154,
+          "path": "install-exact-wheel.stdout.log",
+          "sha256": "56e58dd00117f66642eaa96c656eaee21ac65eba538406dad82ede1bbf1510f0",
+          "truncated": false
+        }
+      },
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/data/data/com.termux/files/usr/tmp/xxhash-component-m7prrdc8/runtime/bin/python",
+        "-I",
+        "-B",
+        "/probes/scripts/compatibility_probe_neutts_xxhash.py",
+        "--phase",
+        "runtime",
+        "--inputs",
+        "/out/xxhash-inputs",
+        "--foundation-receipt",
+        "/out/NEUTTS-CORE-RESULT.json",
+        "--out",
+        "/out/xxhash-component"
+      ],
+      "exit_code": 0,
+      "logs": {
+        "stderr": {
+          "bytes": 0,
+          "path": "actual-native-runtime.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "truncated": false
+        },
+        "stdout": {
+          "bytes": 0,
+          "path": "actual-native-runtime.stdout.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "truncated": false
+        }
+      },
+      "timed_out": false
+    }
+  ],
+  "complete_engine_tested": false,
+  "foundation": {
+    "apt_validation_sha256": "40b94764fc2206756915a3733c9cbe2f90bd7bed721c516617c092836563dd2d",
+    "case_count": 7,
+    "current_selected_apt_files_rechecked": 474,
+    "current_selected_apt_manifest_sha256": "1873b3eb283cf4833800e08bd29030a61fb81d3bbcedd497ff6ecb086b36a2ff",
+    "path": "/out/NEUTTS-CORE-RESULT.json",
+    "raw_pip_exit_code": 1,
+    "sha256": "7c544ffde319ee2612b05c099c9be1bd6ce6531850e0a9e006820d7c2374cc47",
+    "status": "passed"
+  },
+  "foundation_after": {
+    "apt_validation_sha256": "40b94764fc2206756915a3733c9cbe2f90bd7bed721c516617c092836563dd2d",
+    "case_count": 7,
+    "current_selected_apt_files_rechecked": 474,
+    "current_selected_apt_manifest_sha256": "1873b3eb283cf4833800e08bd29030a61fb81d3bbcedd497ff6ecb086b36a2ff",
+    "path": "/out/NEUTTS-CORE-RESULT.json",
+    "raw_pip_exit_code": 1,
+    "sha256": "7c544ffde319ee2612b05c099c9be1bd6ce6531850e0a9e006820d7c2374cc47",
+    "status": "passed"
+  },
+  "lock_sha256": "a9e8e228dc9157f3b9613e970f7de97fc0656e0124ef5684da4ef4c185286e3b",
+  "model_downloaded": false,
+  "production_admission_changed": false,
+  "release_output": false,
+  "runtime": {
+    "api_level": 24,
+    "base_prefix": "/data/data/com.termux/files/usr",
+    "executable": {
+      "bytes": 4448,
+      "class": 64,
+      "endianness": "little",
+      "machine": 183,
+      "path": "/data/data/com.termux/files/usr/bin/python3.14",
+      "sha256": "4f8d78ede7fc26e96e99342dd83ce42d32c9b4d0806bc9a99ff7151396269b25"
+    },
+    "machine": "aarch64",
+    "prefix": "/data/data/com.termux/files/usr",
+    "python": "3.14.6 (main, Jul  5 2026, 10:35:55) [Clang 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 5e96669f0",
+    "sys_platform": "android",
+    "uid": 1000
+  },
+  "runtime_receipt": {
+    "path": "XXHASH-RUNTIME-RESULT.json",
+    "sha256": "a254b8914fb6f760739ec545263df9c58eac9401db1ced364268e7697d618433"
+  },
+  "schema_version": 1,
+  "scope": "One exact XXHash wheel, real import and native hash operations over native APT foundation",
+  "stage": "complete",
+  "status": "passed"
+}

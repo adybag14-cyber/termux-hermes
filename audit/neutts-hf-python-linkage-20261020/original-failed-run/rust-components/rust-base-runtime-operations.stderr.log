@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_neutts_rust.py", line 1389, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/probes/scripts/compatibility_probe_neutts_rust.py", line 1380, in main
+    runtime_case(args, lock, prep, apt)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_rust.py", line 1105, in runtime_case
+    operations = ops.operations(args.work / "operations", args.out / "operations", dict(os.environ), run)
+  File "/probes/scripts/neutts_rust_operations.py", line 308, in operations
+    return {"hf_xet": hash_operation(work),
+                      ~~~~~~~~~~~~~~^^^^^^
+  File "/probes/scripts/neutts_rust_operations.py", line 54, in hash_operation
+    import hf_xet
+  File "/data/data/com.termux/files/usr/tmp/neutts-rust-8mneahvr/base-runtime/lib/python3.14/site-packages/hf_xet/__init__.py", line 1, in <module>
+    from .hf_xet import *
+ImportError: dlopen failed: cannot locate symbol "_Py_FalseStruct" referenced by "/data/data/com.termux/files/usr/tmp/neutts-rust-8mneahvr/base-runtime/lib/python3.14/site-packages/hf_xet/hf_xet.abi3.so"...

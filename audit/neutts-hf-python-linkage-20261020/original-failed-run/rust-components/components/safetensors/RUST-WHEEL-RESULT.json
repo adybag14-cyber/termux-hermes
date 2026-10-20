@@ -1,0 +1,140 @@
+{
+  "build": {
+    "command": [
+      "/data/data/com.termux/files/usr/tmp/neutts-rust-8mneahvr/build-venv/bin/python",
+      "-I",
+      "-B",
+      "/probes/scripts/compatibility_probe_neutts_rust.py",
+      "--mode",
+      "build",
+      "--source-name",
+      "safetensors",
+      "--source-root",
+      "/data/data/com.termux/files/usr/tmp/neutts-rust-8mneahvr/sources/safetensors-0.8.0",
+      "--wheel-dir",
+      "/out/rust-components/wheels/safetensors",
+      "--environment-manifest",
+      "/out/rust-components/rust-full-backend-installed-closure.json",
+      "--inputs",
+      "/out/rust-inputs",
+      "--out",
+      "/out/rust-components/components/safetensors"
+    ],
+    "exit_code": 0,
+    "stderr_sha256": "7b5b6f9e34aac18a71ddd7b422e2412623050d73ea1ed769cb8fc53ed2194f4b",
+    "stdout_sha256": "2158345d51109c9428ca433ade0608ab7fd651d9ee7f0db67d2a64f6a687c9de"
+  },
+  "cargo_graph": {
+    "path": "/out/rust-components/CARGO-GRAPH-safetensors.json",
+    "resolved_nodes": 35,
+    "sha256": "13dd1887fcf58bebd613e3c08025d43c65ba07f0128cd73bc2489548cacc81c7"
+  },
+  "name": "safetensors",
+  "native_elf": [
+    {
+      "bytes": 1413704,
+      "class": 64,
+      "endianness": "little",
+      "machine": 183,
+      "needed": [
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "/out/rust-components/components/safetensors/native-elf/0-_safetensors_rust.abi3.so",
+      "runpath": [
+        "/data/data/com.termux/files/usr/bin/../../usr/lib:/data/data/com.termux/files/usr/lib"
+      ],
+      "sha256": "aca3223a300bb4e3227e070bc99cc0e42276cdc34488e38ccd4ca8565fe65116",
+      "wheel_member": "safetensors/_safetensors_rust.abi3.so"
+    }
+  ],
+  "source_after": {
+    "derived_files": [],
+    "original_files_unchanged": 53
+  },
+  "status": "wheel-built-and-verified",
+  "wheel": {
+    "artifact": {
+      "bytes": 527306,
+      "filename": "safetensors-0.8.0-cp310-abi3-android_24_arm64_v8a.whl",
+      "sha256": "fdecdda08d5f1ee364a36bf9d4ddbad69eefe4091caf547f3540c66a2eed6945"
+    },
+    "base_requires_dist": [],
+    "built_native_binary_members": [
+      {
+        "bytes": 1413704,
+        "member": "safetensors/_safetensors_rust.abi3.so",
+        "sha256": "aca3223a300bb4e3227e070bc99cc0e42276cdc34488e38ccd4ca8565fe65116"
+      }
+    ],
+    "name": "safetensors",
+    "native_members": [
+      {
+        "bytes": 1413704,
+        "member": "safetensors/_safetensors_rust.abi3.so",
+        "sha256": "aca3223a300bb4e3227e070bc99cc0e42276cdc34488e38ccd4ca8565fe65116"
+      }
+    ],
+    "requires_dist": [
+      "safetensors[torch] ; extra == 'all'",
+      "safetensors[numpy] ; extra == 'all'",
+      "safetensors[jax] ; extra == 'all'",
+      "safetensors[paddlepaddle] ; extra == 'all'",
+      "safetensors[convert] ; extra == 'all'",
+      "safetensors[quality] ; extra == 'all'",
+      "safetensors[testing] ; extra == 'all'",
+      "safetensors[torch] ; extra == 'convert'",
+      "huggingface-hub>=1.4 ; extra == 'convert'",
+      "safetensors[all] ; extra == 'dev'",
+      "safetensors[pinned-tf] ; extra == 'dev'",
+      "safetensors[numpy] ; extra == 'jax'",
+      "flax>=0.6.3 ; extra == 'jax'",
+      "jax>=0.3.25 ; extra == 'jax'",
+      "jaxlib>=0.3.25 ; extra == 'jax'",
+      "mlx>=0.0.9 ; extra == 'mlx'",
+      "numpy>=1.24.6 ; extra == 'numpy'",
+      "safetensors[numpy] ; extra == 'paddlepaddle'",
+      "paddlepaddle>=2.4.1 ; extra == 'paddlepaddle'",
+      "safetensors[numpy] ; extra == 'pinned-tf'",
+      "tensorflow==2.18.0 ; extra == 'pinned-tf'",
+      "ruff ; extra == 'quality'",
+      "safetensors[numpy] ; extra == 'tensorflow'",
+      "tensorflow>=2.11.0 ; extra == 'tensorflow'",
+      "safetensors[numpy] ; extra == 'testing'",
+      "h5py>=3.7.0 ; extra == 'testing'",
+      "setuptools-rust>=1.12.0 ; extra == 'testing'",
+      "pytest>=9.0 ; extra == 'testing'",
+      "pytest-benchmark>=5.2 ; extra == 'testing'",
+      "hypothesis>=6.70.2 ; extra == 'testing'",
+      "fsspec>=2024.6.0 ; extra == 'testing'",
+      "s3fs>=2024.6.0 ; extra == 'testing'",
+      "safetensors[numpy] ; extra == 'tf-nightly'",
+      "tf-nightly ; extra == 'tf-nightly'",
+      "safetensors[numpy] ; extra == 'torch'",
+      "torch>=2.4 ; extra == 'torch'"
+    ],
+    "requires_python": ">=3.10",
+    "version": "0.8.0",
+    "wheel": {
+      "declared_requires_dist_count": 36,
+      "declared_requires_dist_sha256": "c773c31026deecb58bed073eca8f00b378200e75ddff36c7df4007f01928215e",
+      "entry_count": 14,
+      "file_count": 14,
+      "max_member_bytes": 1413704,
+      "members_sha256": "4e9a289f0a6b8449502547acc189d7694201a071fac860ea4000da80f0ce933f",
+      "metadata_member": "safetensors-0.8.0.dist-info/METADATA",
+      "metadata_sha256": "645be7b8d55e91534f991d144dc9e279581ea8dbea1a8c5b0be14e529d01e345",
+      "record_member": "safetensors-0.8.0.dist-info/RECORD",
+      "record_sha256": "0ee0f9578f2967225b25305bdd546c1a4c1cd5408a58ff73a422e24605b5397b",
+      "root_is_purelib": false,
+      "tags": [
+        "cp310-abi3-android_24_arm64_v8a"
+      ],
+      "uncompressed_bytes": 1487623,
+      "wheel_member": "safetensors-0.8.0.dist-info/WHEEL",
+      "wheel_sha256": "9baec0f6c4d49d85284ab3adeaeb8f7d830d7cbac640b9da7697ffc29b5644f2"
+    },
+    "wheel_path": "/out/rust-components/wheels/safetensors/safetensors-0.8.0-cp310-abi3-android_24_arm64_v8a.whl"
+  }
+}

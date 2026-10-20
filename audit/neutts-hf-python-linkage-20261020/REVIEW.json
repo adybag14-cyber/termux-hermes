@@ -1,0 +1,99 @@
+{
+  "all_member_crc_size_sha256_verified": true,
+  "correction": "HF-only scoped --push-state,--no-as-needed / -lpython3 / --pop-state; no source, Cargo, ABI3 tag, TLS backend or version change.",
+  "diagnosis": "HF ABI3 extension omitted DT_NEEDED libpython3.so. Actual pinned CPython3.14.6 exports the reported symbol; its ABI3 forwarding stub has no own selected exports and depends on libpython3.14.so.",
+  "failed_hf_elf_sha256": "cb54c250d97dc2239d62f5c5a5558eb5eb1223444d3591029d883c97247aad8e",
+  "failed_hf_needed": [
+    "libssl.so.3",
+    "libcrypto.so.3",
+    "libdl.so",
+    "libm.so",
+    "libc.so"
+  ],
+  "inventory_uncompressed_sha256": "747f2e66ce1d4aacd4930f40e55b1759f010d3f937115ca4dea61e20c93e7e6f",
+  "member_count": 47595,
+  "native_retry": "pending",
+  "original_artifact_bytes": 765083696,
+  "original_artifact_id": 12268143080,
+  "original_artifact_sha256": "92ab2478f6576f826c9e32daac3308a3fe7ad9434a3a962abcad385347ffd03e",
+  "original_head_sha": "d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4",
+  "original_job_id": 118650993975,
+  "original_python": [
+    {
+      "bytes": 5842848,
+      "member": "./data/data/com.termux/files/usr/lib/libpython3.14.so",
+      "needed": [
+        "libandroid-support.so",
+        "libm.so",
+        "libdl.so",
+        "liblog.so",
+        "libc.so"
+      ],
+      "selected_symbols": [
+        {
+          "binding": 1,
+          "bytes": 20,
+          "defined": true,
+          "symbol": "Py_IsFalse",
+          "visibility": 0
+        },
+        {
+          "binding": 1,
+          "bytes": 20,
+          "defined": true,
+          "symbol": "Py_IsNone",
+          "visibility": 0
+        },
+        {
+          "binding": 1,
+          "bytes": 16,
+          "defined": true,
+          "symbol": "_Py_NoneStruct",
+          "visibility": 0
+        },
+        {
+          "binding": 1,
+          "bytes": 20,
+          "defined": true,
+          "symbol": "Py_IsTrue",
+          "visibility": 0
+        },
+        {
+          "binding": 1,
+          "bytes": 32,
+          "defined": true,
+          "symbol": "_Py_FalseStruct",
+          "visibility": 0
+        },
+        {
+          "binding": 1,
+          "bytes": 32,
+          "defined": true,
+          "symbol": "_Py_TrueStruct",
+          "visibility": 0
+        }
+      ],
+      "sha256": "ca65f712012251e4ae5abf4a96d9d83ed5d125d56cb025b6fc6fa373055b6e1c"
+    },
+    {
+      "bytes": 4160,
+      "member": "./data/data/com.termux/files/usr/lib/libpython3.so",
+      "needed": [
+        "libandroid-support.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "selected_symbols": [],
+      "sha256": "acedc2bbf5904ed6c7f5ff161416d7a38ec043fb73eec2ee54f5806ac58e2159"
+    }
+  ],
+  "original_run_id": 39429636237,
+  "prior_selected_members_equal_full_artifact": true,
+  "python314_engine_admitted": false,
+  "release_output": false,
+  "reviewed_at": "2026-10-20T14:27:40.854864+00:00",
+  "schema_version": 1,
+  "uncompressed_bytes": 1603024879,
+  "whole_archive_verified": true
+}

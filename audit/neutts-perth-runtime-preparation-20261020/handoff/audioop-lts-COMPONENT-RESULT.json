@@ -1,0 +1,119 @@
+{
+  "backend_receipt_sha256": "da2f7e9545b704d9a49b2e93f8412573fe914c1465e6962d6520674d3bbbfe09",
+  "build_process": {
+    "command": [
+      "/data/data/com.termux/files/usr/tmp/nonrust-native-4cjr6mxn/build-venv/bin/python",
+      "-I",
+      "-B",
+      "/probes/scripts/compatibility_probe_neutts_nonrust.py",
+      "--phase",
+      "build",
+      "--inputs",
+      "/out/nonrust-inputs",
+      "--out",
+      "/out/nonrust-components/audioop-lts",
+      "--source-name",
+      "audioop-lts",
+      "--source-root",
+      "/data/data/com.termux/files/usr/tmp/nonrust-native-4cjr6mxn/audioop_lts-0.2.2",
+      "--wheel-dir",
+      "/out/nonrust-components/audioop-lts/wheels",
+      "--environment-manifest",
+      "/out/nonrust-components/build-environment/build-installed-closure.json"
+    ],
+    "exit_code": 0,
+    "stderr_sha256": "8995e8cc62d964b7fedcbe7e25c28a9639531d076bc4981c73e741bf687c51eb",
+    "stdout_sha256": "21878c46e3e22ab1675986d8d9ca5b5dee1361cc217d959691854f06681a8261"
+  },
+  "component": "audioop-lts",
+  "model_downloaded": false,
+  "production_admission_changed": false,
+  "release_output": false,
+  "runtime": {
+    "active_edge_count": 0,
+    "actual_runtime_distribution_count": 1,
+    "copied_apt_payloads": [],
+    "process": {
+      "command": [
+        "/data/data/com.termux/files/usr/tmp/nonrust-native-4cjr6mxn/runtime-audioop-lts/bin/python",
+        "-I",
+        "-B",
+        "/probes/scripts/compatibility_probe_neutts_nonrust.py",
+        "--phase",
+        "runtime",
+        "--inputs",
+        "/out/nonrust-inputs",
+        "--out",
+        "/out/nonrust-components/audioop-lts",
+        "--apt-archives",
+        "/data/data/com.termux/files/usr/tmp/neutts-nonrust.UGHixp/archives",
+        "--source-name",
+        "audioop-lts",
+        "--environment-manifest",
+        "/out/nonrust-components/audioop-lts/runtime-installed-closure.json",
+        "--image-receipt",
+        "/out/NONRUST-PROBE-INPUTS.json"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw_pip": {
+      "authority": "copied file manifests and exact APT provenance are separate required gates",
+      "elapsed_seconds": 0.459,
+      "exit_code": 0,
+      "log": "RAW-PIP-CHECK.log",
+      "original_apt_tag_diagnostics": [],
+      "pip_check_passed": true,
+      "requirements_have_no_missing_or_conflicting_dependencies": true,
+      "sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09",
+      "text": "No broken requirements found.\n"
+    },
+    "receipt": "RUNTIME-OPERATIONS-RESULT.json",
+    "receipt_sha256": "9cf35d3b16b140048c77161ce571455c5566ba7db0e338ef7ddff1fa2d0e3459",
+    "status": "passed"
+  },
+  "schema_version": 1,
+  "source_archive_sha256": "64d0c62d88e67b98a1a5e71987b7aa7b5bcffc7dcee65b635823dbdd0a8dbbd0",
+  "stage": "complete",
+  "status": "passed",
+  "wheel": {
+    "artifact": {
+      "bytes": 26275,
+      "filename": "audioop_lts-0.2.2-cp313-abi3-android_24_arm64_v8a.whl",
+      "sha256": "e57e7a4edfe5b9254d3663fdb966fd68181088c7e9c0302695897f9003c479b2"
+    },
+    "base_requires_dist": [],
+    "name": "audioop-lts",
+    "native_members": [
+      {
+        "bytes": 47896,
+        "member": "audioop/_audioop.abi3.so",
+        "sha256": "b88296e3d6ef3a28c51b9d6f391197a933432632b1118e717a025a6a647c55c8"
+      }
+    ],
+    "requires_dist": [],
+    "requires_python": ">=3.13",
+    "version": "0.2.2",
+    "wheel": {
+      "declared_requires_dist_count": 0,
+      "declared_requires_dist_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "entry_count": 9,
+      "file_count": 9,
+      "max_member_bytes": 47896,
+      "members_sha256": "a1c87ddf7852624a1505066708a6847219c63918b54f8d43ca39e3b6ec7c7792",
+      "metadata_member": "audioop_lts-0.2.2.dist-info/METADATA",
+      "metadata_sha256": "d87beabf0a9d7321e730006af8747ece4ded5b750579d20a0d2bf2cfb207a2be",
+      "record_member": "audioop_lts-0.2.2.dist-info/RECORD",
+      "record_sha256": "1e7c97b75c447ffa7e565d5558c01f143e9c412e62cb93c6b5407de6a96c2607",
+      "root_is_purelib": false,
+      "tags": [
+        "cp313-abi3-android_24_arm64_v8a"
+      ],
+      "uncompressed_bytes": 67539,
+      "wheel_member": "audioop_lts-0.2.2.dist-info/WHEEL",
+      "wheel_sha256": "469ef276a2825ea48d321c5147dd6c63219e36fd2c46bce75d721efb397991c1"
+    },
+    "wheel_path": "/out/nonrust-components/audioop-lts/wheels/audioop_lts-0.2.2-cp313-abi3-android_24_arm64_v8a.whl"
+  }
+}

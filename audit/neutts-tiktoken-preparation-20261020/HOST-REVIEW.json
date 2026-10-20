@@ -1,0 +1,199 @@
+{
+  "cargo": {
+    "approved_capture_commit": "c1ea01d2f06b77dfab14e2f50daf7d72b5ad18d8",
+    "backend_build_policy": "Run original Setuptools-Rust backend unchanged with Cargo offline and the exact independently verified directory source; verify --locked --offline metadata before the build and byte-identical approved Cargo.lock before and after. No unsupported locked environment variable or source patch.",
+    "cargo_lock": {
+      "bytes": 6462,
+      "path": "Cargo.lock",
+      "raw_audit_path": "raw-termux-neutts-rust-tiktoken-lock/rust-components/captured-tiktoken-inputs/sources/tiktoken-0.14.0/Cargo.lock",
+      "sha256": "44c9797be677b8af84478a3d54d09ac34d5a654e4ed8ee3e36a871415bc3dd80"
+    },
+    "original_backend_modified": false,
+    "target_filtered_edges": 41,
+    "target_filtered_packages": 25
+  },
+  "engine_admitted": false,
+  "final_shared_helper_binding": {
+    "check": {
+      "bytes": 1263,
+      "path": "audit/neutts-tiktoken-preparation-20261020/final-helper-check.json",
+      "sha256": "ab9c384bbef9d7ec32439067dc49a57c3994d594bfd201cbb8165c325bc27b56"
+    },
+    "scope": "Only the explicit shared Rust helper SHA changed after independent review; no original lock, source, flags, operations or preparation input was changed.",
+    "status": "verified",
+    "tests": {
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/test_neutts_tiktoken.py",
+        "-q"
+      ],
+      "exit_code": 0,
+      "passed": 31,
+      "skipped": 0,
+      "stderr": {
+        "bytes": 0,
+        "path": "audit/neutts-tiktoken-preparation-20261020/final-helper-tests.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 82,
+        "path": "audit/neutts-tiktoken-preparation-20261020/final-helper-tests.stdout.log",
+        "sha256": "3a2e53d4503163c3a23c3be600bf875dc8f3cce74e450a22ea1fa08d79561722"
+      },
+      "subtests_passed": 39
+    }
+  },
+  "host_platform": "Windows-11-10.0.26300-SP0",
+  "host_python": "3.14.2",
+  "independent_peer_review": {
+    "bytes": 2941,
+    "path": "audit/neutts-tiktoken-preparation-20261020/INDEPENDENT-PEER-REVIEW.json",
+    "sha256": "f5a9924f7543b63f543de71218c2ad2fdfd003cb60ea841d6ae61dcdcf269825"
+  },
+  "input_preparation": {
+    "cargo_executed": false,
+    "generated_directory_checksums": 27,
+    "job": {
+      "bytes": 1209,
+      "path": "audit/neutts-tiktoken-preparation-20261020/input-preparation-job.json",
+      "sha256": "8d26cad68cf2710276073a3b9da30e777db967417fd4059e6492e49133878085"
+    },
+    "original_apt_archives": 47,
+    "original_prebuilt_wheels": 10,
+    "original_registry_archive_bytes": 5589389,
+    "original_registry_archives": 27,
+    "original_registry_files": 1863,
+    "original_source_files": 58,
+    "receipt": {
+      "bytes": 24398,
+      "path": "audit/neutts-tiktoken-preparation-20261020/TIKTOKEN-PREPARED-INPUTS.json",
+      "sha256": "caf4b4896280d57df64e8f3098eed376e748b6e81896396fb7407534e2d59be0"
+    },
+    "source_backend_executed": false,
+    "status": "verified-inputs"
+  },
+  "metadata_only_host_rehearsal": {
+    "all_other_original_native_source_files_required_identical": true,
+    "build_wheel_called": false,
+    "cargo_called": false,
+    "permitted_generated_manifests": {
+      "regex": {
+        "bytes": 409,
+        "original_bytes": 399,
+        "original_sha256": "abfb745dfe9a84cb6594f8896b4b5e431b03c0098be2c502edc07e36d21ae16f",
+        "path": "regex.egg-info/SOURCES.txt",
+        "reason": "Original Setuptools egg_info lists the already present generated setup.cfg in its working-copy SOURCES.txt; no other original file or dependency declaration may change.",
+        "replay_evidence": "audit/neutts-tiktoken-preparation-20261020/metadata-replay/regex.SOURCES.txt",
+        "sha256": "09afb60e53ff5a0e701583de57c64e1a9575470308fa6f5c2ac7677d21c4e8c0"
+      },
+      "tiktoken": {
+        "bytes": 692,
+        "original_bytes": 682,
+        "original_sha256": "431d40d56292ce6136dc488e0d614e60c715fc7babf7e71d979dfd64791e7773",
+        "path": "tiktoken.egg-info/SOURCES.txt",
+        "reason": "Original Setuptools egg_info lists the already present generated setup.cfg in its working-copy SOURCES.txt; no other original file or dependency declaration may change.",
+        "replay_evidence": "audit/neutts-tiktoken-preparation-20261020/metadata-replay/tiktoken.SOURCES.txt",
+        "sha256": "a7535cab2fbc1a3996ade0814983281739e8c7663b4efe0c024b40c453f337b2"
+      }
+    },
+    "review": {
+      "bytes": 1907,
+      "path": "audit/neutts-tiktoken-preparation-20261020/metadata-replay/REVIEW.json",
+      "sha256": "e56c626c866824babc600e4d18f504f0c35112c64b45a94a332d0ce84256556a"
+    },
+    "source_backend_get_requires_called": true
+  },
+  "model_downloaded": false,
+  "native_build_performed": false,
+  "native_operations_proved": false,
+  "recorded_at": "2026-10-20T14:27:21.403814+00:00",
+  "release_output": false,
+  "released_package_changed": false,
+  "schema_version": 1,
+  "scope": "Standalone original Tiktoken0.14.0 and Regex2026.9.10 source builds; complete unchanged seven-node/six-edge base runtime",
+  "shared_rust_probe_current": {
+    "bytes": 85180,
+    "path": "scripts/compatibility_probe_neutts_rust.py",
+    "sha256": "4be7888378ff598dfc25610368bd7eb261056617e2c338e7ab697aeecd9fa871"
+  },
+  "source_files": [
+    {
+      "bytes": 15430,
+      "path": "scripts/prepare_neutts_tiktoken.py",
+      "sha256": "5cb1e90882272c84f95702de67ff34d36ea82064ecbd237adca19ea6b958bf6b"
+    },
+    {
+      "bytes": 30913,
+      "path": "scripts/compatibility_probe_neutts_tiktoken.py",
+      "sha256": "379438277fe7a8987c9d634e082d441fec631acfec24f6507fdc5d0791d5d197"
+    },
+    {
+      "bytes": 6060,
+      "path": "scripts/compatibility_probe_neutts_tiktoken.sh",
+      "sha256": "5232e4b0e486a0219ac0994fdca6e8cf842916efe4ea2850a0696c694aaea88f"
+    },
+    {
+      "bytes": 72296,
+      "path": "scripts/neutts_tiktoken_lock.json",
+      "sha256": "6d7e2d5f10f35547eea573ec1d38cbfb88ed2f09ff58fe86cb56f1be134e7f21"
+    },
+    {
+      "bytes": 17336,
+      "path": "tests/test_neutts_tiktoken.py",
+      "sha256": "566a346fd3b8fdfa70cd9a7b0909e111f27ecd43a6f029fc6b0030afca1306df"
+    },
+    {
+      "bytes": 2556,
+      "path": ".github/workflows/neutts-tiktoken-component.yml",
+      "sha256": "0a4662810db5468bfd10ce186dfc4121aee67018ca4cfe984c03eab089400a17"
+    }
+  ],
+  "status": "host-integrity-passed-native-pending",
+  "syntax": {
+    "bash_environment": "Local Linux syntax-only check of byte-identical wrapper; no wrapper command executed",
+    "bash_n_exit_code": 0,
+    "bash_source_sha256": "5232e4b0e486a0219ac0994fdca6e8cf842916efe4ea2850a0696c694aaea88f",
+    "python_ast_blocks": 4,
+    "trailing_whitespace": false
+  },
+  "tests": {
+    "command": [
+      "python",
+      "-B",
+      "-m",
+      "pytest",
+      "tests/test_neutts_tiktoken.py",
+      "-q"
+    ],
+    "exit_code": 0,
+    "passed": 31,
+    "skipped": 0,
+    "stderr": {
+      "bytes": 0,
+      "path": "audit/neutts-tiktoken-preparation-20261020/host-tests.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 82,
+      "path": "audit/neutts-tiktoken-preparation-20261020/host-tests.stdout.log",
+      "sha256": "59b48dab4ead9f88b1d9822e185cb3d6513bacad4d83d2c189f965651409c0b8"
+    },
+    "subtests_passed": 39
+  },
+  "workflow": {
+    "artifact_includes_hidden_files": true,
+    "checkout_credentials_persist": false,
+    "docker_cpus": 2,
+    "docker_memory": "6g",
+    "docker_pids_limit": 512,
+    "docker_timeout": "65m",
+    "native_runner": "ubuntu-24.04-arm",
+    "permissions": {
+      "contents": "read"
+    },
+    "timeout_minutes": 95
+  }
+}
