@@ -1,0 +1,2126 @@
+﻿2026-10-20T13:21:11.0068786Z Current runner version: '2.337.0'
+2026-10-20T13:21:11.0100278Z ##[group]Runner Image Provisioner
+2026-10-20T13:21:11.0101253Z Hosted Compute Agent
+2026-10-20T13:21:11.0102086Z Version: 20261015.610
+2026-10-20T13:21:11.0102817Z Commit: 267fdb4e8bbec4ab5ea31367f3a00d5c480c7656
+2026-10-20T13:21:11.0103572Z Build Date: 2026-10-14T17:06:54Z
+2026-10-20T13:21:11.0104778Z Worker ID: {155cc5ab-3891-49b7-aa36-f10ac38e8a60}
+2026-10-20T13:21:11.0105556Z Region: westus2
+2026-10-20T13:21:11.0106132Z Cloud: Azure
+2026-10-20T13:21:11.0106880Z ##[endgroup]
+2026-10-20T13:21:11.0108673Z ##[group]Operating System
+2026-10-20T13:21:11.0109525Z Ubuntu
+2026-10-20T13:21:11.0110110Z 24.04.5
+2026-10-20T13:21:11.0110675Z LTS
+2026-10-20T13:21:11.0111317Z ##[endgroup]
+2026-10-20T13:21:11.0111910Z ##[group]Runner Image
+2026-10-20T13:21:11.0113092Z Image: ubuntu-24.04-arm
+2026-10-20T13:21:11.0114158Z Version: 20261018.154.1
+2026-10-20T13:21:11.0115759Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24-arm64/20261018.154/images/ubuntu/Ubuntu2404-Arm64-Readme.md
+2026-10-20T13:21:11.0117409Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24-arm64%2F20261018.154
+2026-10-20T13:21:11.0118450Z ##[endgroup]
+2026-10-20T13:21:11.0119959Z ##[group]GITHUB_TOKEN Permissions
+2026-10-20T13:21:11.0122962Z Contents: read
+2026-10-20T13:21:11.0124026Z Metadata: read
+2026-10-20T13:21:11.0124626Z ##[endgroup]
+2026-10-20T13:21:11.0127412Z Secret source: Actions
+2026-10-20T13:21:11.0128440Z Cache mode: write
+2026-10-20T13:21:11.0129651Z Prepare workflow directory
+2026-10-20T13:21:11.0527494Z Prepare all required actions
+2026-10-20T13:21:11.0584361Z Getting action download info
+2026-10-20T13:21:11.4228010Z Download action repository 'actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd' (SHA:de0fac2e4500dabe0009e67214ff5f5447ce83dd)
+2026-10-20T13:21:11.6438652Z Download action repository 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+2026-10-20T13:21:11.8203434Z Complete job name: Scientific foundation, exact wheel and bundled eSpeak C ABI
+2026-10-20T13:21:11.9083421Z ##[group]Run actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+2026-10-20T13:21:11.9085760Z with:
+2026-10-20T13:21:11.9086674Z   ref: d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4
+2026-10-20T13:21:11.9087465Z   persist-credentials: false
+2026-10-20T13:21:11.9088201Z   repository: adybag14-cyber/termux-hermes
+2026-10-20T13:21:11.9092451Z   token: ***
+2026-10-20T13:21:11.9093030Z   ssh-strict: true
+2026-10-20T13:21:11.9094172Z   ssh-user: git
+2026-10-20T13:21:11.9094799Z   clean: true
+2026-10-20T13:21:11.9095417Z   sparse-checkout-cone-mode: true
+2026-10-20T13:21:11.9096200Z   fetch-depth: 1
+2026-10-20T13:21:11.9096801Z   fetch-tags: false
+2026-10-20T13:21:11.9097413Z   show-progress: true
+2026-10-20T13:21:11.9098077Z   lfs: false
+2026-10-20T13:21:11.9098671Z   submodules: false
+2026-10-20T13:21:11.9099333Z   set-safe-directory: true
+2026-10-20T13:21:11.9100586Z ##[endgroup]
+2026-10-20T13:21:12.0050337Z Syncing repository: adybag14-cyber/termux-hermes
+2026-10-20T13:21:12.0053357Z ##[group]Getting Git version info
+2026-10-20T13:21:12.0054767Z Working directory is '/home/runner/work/termux-hermes/termux-hermes'
+2026-10-20T13:21:12.0056472Z [command]/usr/bin/git version
+2026-10-20T13:21:12.0142061Z git version 2.55.0
+2026-10-20T13:21:12.0167059Z ##[endgroup]
+2026-10-20T13:21:12.0183960Z Temporarily overriding HOME='/home/runner/work/_temp/0b098145-91f4-4c43-9499-8344f4754fac' before making global git config changes
+2026-10-20T13:21:12.0185537Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-20T13:21:12.0190575Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/termux-hermes/termux-hermes
+2026-10-20T13:21:12.0228274Z Deleting the contents of '/home/runner/work/termux-hermes/termux-hermes'
+2026-10-20T13:21:12.0233552Z ##[group]Initializing the repository
+2026-10-20T13:21:12.0238495Z [command]/usr/bin/git init /home/runner/work/termux-hermes/termux-hermes
+2026-10-20T13:21:12.0400706Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-20T13:21:12.0402386Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-20T13:21:12.0405174Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-20T13:21:12.0414819Z hint: call:
+2026-10-20T13:21:12.0416286Z hint:
+2026-10-20T13:21:12.0423397Z hint: 	git config --global init.defaultBranch <name>
+2026-10-20T13:21:12.0424624Z hint:
+2026-10-20T13:21:12.0425393Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-20T13:21:12.0426657Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-20T13:21:12.0427919Z hint:
+2026-10-20T13:21:12.0428494Z hint: 	git branch -m <name>
+2026-10-20T13:21:12.0429247Z hint:
+2026-10-20T13:21:12.0430020Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-20T13:21:12.0431431Z Initialized empty Git repository in /home/runner/work/termux-hermes/termux-hermes/.git/
+2026-10-20T13:21:12.0433855Z [command]/usr/bin/git remote add origin https://github.com/adybag14-cyber/termux-hermes
+2026-10-20T13:21:12.0470377Z ##[endgroup]
+2026-10-20T13:21:12.0471620Z ##[group]Disabling automatic garbage collection
+2026-10-20T13:21:12.0472427Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-20T13:21:12.0537542Z ##[endgroup]
+2026-10-20T13:21:12.0539180Z ##[group]Setting up auth
+2026-10-20T13:21:12.0540214Z Removing SSH command configuration
+2026-10-20T13:21:12.0541667Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-20T13:21:12.0567311Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-20T13:21:12.0943616Z Removing HTTP extra header
+2026-10-20T13:21:12.0949060Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-20T13:21:12.0984346Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-20T13:21:12.1209779Z Removing includeIf entries pointing to credentials config files
+2026-10-20T13:21:12.1216683Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-20T13:21:12.1252041Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-20T13:21:12.1503203Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-422e5359-153e-47b6-9eab-b0f491edba66.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-20T13:21:12.1549890Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git.path /home/runner/work/_temp/git-credentials-422e5359-153e-47b6-9eab-b0f491edba66.config
+2026-10-20T13:21:12.1590223Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-422e5359-153e-47b6-9eab-b0f491edba66.config
+2026-10-20T13:21:12.1632400Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-422e5359-153e-47b6-9eab-b0f491edba66.config
+2026-10-20T13:21:12.1672326Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-422e5359-153e-47b6-9eab-b0f491edba66.config
+2026-10-20T13:21:12.1711881Z ##[endgroup]
+2026-10-20T13:21:12.1712881Z ##[group]Fetching the repository
+2026-10-20T13:21:12.1720999Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4
+2026-10-20T13:21:15.3479630Z From https://github.com/adybag14-cyber/termux-hermes
+2026-10-20T13:21:15.3482251Z  * branch            d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4 -> FETCH_HEAD
+2026-10-20T13:21:15.3494864Z [command]/usr/bin/git rev-parse --verify --quiet d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4^{object}
+2026-10-20T13:21:15.3525753Z d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4
+2026-10-20T13:21:15.3529995Z ##[endgroup]
+2026-10-20T13:21:15.3531708Z ##[group]Determining the checkout info
+2026-10-20T13:21:15.3533622Z ##[endgroup]
+2026-10-20T13:21:15.3535183Z [command]/usr/bin/git sparse-checkout disable
+2026-10-20T13:21:15.3645255Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-20T13:21:15.3681411Z ##[group]Checking out the ref
+2026-10-20T13:21:15.3684368Z [command]/usr/bin/git checkout --progress --force d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4
+2026-10-20T13:21:15.9161611Z Note: switching to 'd2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4'.
+2026-10-20T13:21:15.9162502Z 
+2026-10-20T13:21:15.9162849Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-20T13:21:15.9163973Z changes and commit them, and you can discard any commits you make in this
+2026-10-20T13:21:15.9164848Z state without impacting any branches by switching back to a branch.
+2026-10-20T13:21:15.9165247Z 
+2026-10-20T13:21:15.9165538Z If you want to create a new branch to retain commits you create, you may
+2026-10-20T13:21:15.9166144Z do so (now or later) by using -c with the switch command. Example:
+2026-10-20T13:21:15.9166448Z 
+2026-10-20T13:21:15.9166831Z   git switch -c <new-branch-name>
+2026-10-20T13:21:15.9167184Z 
+2026-10-20T13:21:15.9167477Z Or undo this operation with:
+2026-10-20T13:21:15.9167752Z 
+2026-10-20T13:21:15.9167878Z   git switch -
+2026-10-20T13:21:15.9168260Z 
+2026-10-20T13:21:15.9168597Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-20T13:21:15.9168961Z 
+2026-10-20T13:21:15.9169324Z HEAD is now at d215961 Recover exact frozen Termux inputs and record compatibility progress
+2026-10-20T13:21:15.9240537Z ##[endgroup]
+2026-10-20T13:21:15.9284391Z [command]/usr/bin/git log -1 --format=%H
+2026-10-20T13:21:15.9310664Z d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4
+2026-10-20T13:21:15.9319451Z ##[group]Removing auth
+2026-10-20T13:21:15.9320100Z Removing SSH command configuration
+2026-10-20T13:21:15.9323102Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-20T13:21:15.9353973Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-20T13:21:15.9574124Z Removing HTTP extra header
+2026-10-20T13:21:15.9576946Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-20T13:21:15.9609273Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-20T13:21:15.9846304Z Removing includeIf entries pointing to credentials config files
+2026-10-20T13:21:15.9848241Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-20T13:21:15.9874395Z includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git.path
+2026-10-20T13:21:15.9875149Z includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git/worktrees/*.path
+2026-10-20T13:21:15.9875982Z includeif.gitdir:/github/workspace/.git.path
+2026-10-20T13:21:15.9876495Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-20T13:21:15.9884189Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git.path
+2026-10-20T13:21:15.9910231Z /home/runner/work/_temp/git-credentials-422e5359-153e-47b6-9eab-b0f491edba66.config
+2026-10-20T13:21:15.9922234Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git.path /home/runner/work/_temp/git-credentials-422e5359-153e-47b6-9eab-b0f491edba66.config
+2026-10-20T13:21:15.9966204Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git/worktrees/*.path
+2026-10-20T13:21:15.9994652Z /home/runner/work/_temp/git-credentials-422e5359-153e-47b6-9eab-b0f491edba66.config
+2026-10-20T13:21:16.0005003Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/termux-hermes/termux-hermes/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-422e5359-153e-47b6-9eab-b0f491edba66.config
+2026-10-20T13:21:16.0049407Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-10-20T13:21:16.0078783Z /github/runner_temp/git-credentials-422e5359-153e-47b6-9eab-b0f491edba66.config
+2026-10-20T13:21:16.0088203Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-422e5359-153e-47b6-9eab-b0f491edba66.config
+2026-10-20T13:21:16.0138920Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-20T13:21:16.0168221Z /github/runner_temp/git-credentials-422e5359-153e-47b6-9eab-b0f491edba66.config
+2026-10-20T13:21:16.0176556Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-422e5359-153e-47b6-9eab-b0f491edba66.config
+2026-10-20T13:21:16.0221403Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-20T13:21:16.0460108Z Removing credentials config '/home/runner/work/_temp/git-credentials-422e5359-153e-47b6-9eab-b0f491edba66.config'
+2026-10-20T13:21:16.0472182Z ##[endgroup]
+2026-10-20T13:21:16.0703932Z ##[group]Run bash scripts/compatibility_probe_neutts_engine_wheel.sh --out probe-results/neutts-engine-wheel
+2026-10-20T13:21:16.0705256Z [36;1mbash scripts/compatibility_probe_neutts_engine_wheel.sh --out probe-results/neutts-engine-wheel[0m
+2026-10-20T13:21:16.0886841Z shell: /usr/bin/bash -e {0}
+2026-10-20T13:21:16.0887388Z env:
+2026-10-20T13:21:16.0887803Z   NEUTTS_PROBE_HEAD_SHA: d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4
+2026-10-20T13:21:16.0888543Z ##[endgroup]
+2026-10-20T13:21:16.7929427Z Prepared 9 verified wheels in /home/runner/work/termux-hermes/termux-hermes/probe-results/neutts-engine-wheel/python-wheelhouse
+2026-10-20T13:21:42.5046735Z {"archive_bytes": 240783372, "archive_count": 141, "status": "verified-original-inputs"}
+2026-10-20T13:21:47.7155795Z {
+2026-10-20T13:21:47.7158554Z   "status": "verified-exact-inputs",
+2026-10-20T13:21:47.7159528Z   "out": "/home/runner/work/termux-hermes/termux-hermes/probe-results/neutts-engine-wheel/engine-wheel-inputs",
+2026-10-20T13:21:47.7160421Z   "source_files": 56
+2026-10-20T13:21:47.7160801Z }
+2026-10-20T13:21:49.9727421Z {
+2026-10-20T13:21:49.9727860Z   "status": "passed",
+2026-10-20T13:21:49.9728431Z   "cases": 5
+2026-10-20T13:21:49.9728751Z }
+2026-10-20T13:21:50.7353610Z docker.io/termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303: Pulling from termux/termux-docker
+2026-10-20T13:21:50.7360941Z 4be35323a92b: Pulling fs layer
+2026-10-20T13:21:50.7362186Z 4f4fb700ef54: Pulling fs layer
+2026-10-20T13:21:51.0402117Z 4f4fb700ef54: Download complete
+2026-10-20T13:21:52.7456843Z 4be35323a92b: Verifying Checksum
+2026-10-20T13:21:52.7457955Z 4be35323a92b: Download complete
+2026-10-20T13:21:53.9374080Z 4be35323a92b: Pull complete
+2026-10-20T13:21:54.7571972Z 4f4fb700ef54: Pull complete
+2026-10-20T13:21:54.7637907Z Digest: sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303
+2026-10-20T13:21:54.7672925Z Status: Downloaded newer image for termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303
+2026-10-20T13:21:54.7686129Z docker.io/termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303
+2026-10-20T13:21:55.9995255Z Get:1 https://packages.termux.dev/apt/termux-main stable InRelease [14.0 kB]
+2026-10-20T13:21:56.3380017Z Get:2 https://packages.termux.dev/apt/termux-main stable/main aarch64 Packages [586 kB]
+2026-10-20T13:21:57.0632781Z Fetched 600 kB in 2s (299 kB/s)
+2026-10-20T13:21:57.0788656Z Reading package lists...
+2026-10-20T13:21:57.1038736Z Reading package lists...
+2026-10-20T13:21:57.1056392Z Building dependency tree...
+2026-10-20T13:21:57.1103326Z Calculating upgrade...
+2026-10-20T13:21:57.1216044Z The following packages will be upgraded:
+2026-10-20T13:21:57.1217263Z   bash ca-certificates command-not-found coreutils curl dash findutils gawk
+2026-10-20T13:21:57.1217844Z   gpgv gzip inetutils less libandroid-stub libc++ libcap-ng libcurl libffi
+2026-10-20T13:21:57.1218718Z   libgcrypt libiconv liblzma libmd libmpfr libnpth libsmartcols libtirpc
+2026-10-20T13:21:57.1219302Z   libunbound openssl pcre2 procps readline sed termux-am termux-keyring
+2026-10-20T13:21:57.1219782Z   util-linux xxhash xz-utils
+2026-10-20T13:21:58.0592858Z 36 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+2026-10-20T13:21:58.0593931Z Need to get 13.6 MB of archives.
+2026-10-20T13:21:58.0594323Z After this operation, 1364 kB of additional disk space will be used.
+2026-10-20T13:21:58.8379731Z Get:1 https://packages.termux.dev/apt/termux-main stable/main aarch64 readline aarch64 8.3.6 [294 kB]
+2026-10-20T13:21:58.8380519Z Get:2 https://packages.termux.dev/apt/termux-main stable/main aarch64 libiconv aarch64 1.19 [563 kB]
+2026-10-20T13:21:58.9967656Z Get:3 https://packages.termux.dev/apt/termux-main stable/main aarch64 bash aarch64 5.3.20 [957 kB]
+2026-10-20T13:21:59.1555420Z Get:4 https://packages.termux.dev/apt/termux-main stable/main aarch64 ca-certificates all 1:2026.09.25 [105 kB]
+2026-10-20T13:21:59.3063002Z Get:5 https://packages.termux.dev/apt/termux-main stable/main aarch64 openssl aarch64 1:3.6.5 [2483 kB]
+2026-10-20T13:21:59.4673385Z Get:6 https://packages.termux.dev/apt/termux-main stable/main aarch64 coreutils aarch64 9.12 [824 kB]
+2026-10-20T13:21:59.4717274Z Get:7 https://packages.termux.dev/apt/termux-main stable/main aarch64 libcurl aarch64 8.23.0 [1043 kB]
+2026-10-20T13:21:59.4771572Z Get:8 https://packages.termux.dev/apt/termux-main stable/main aarch64 curl aarch64 8.23.0 [246 kB]
+2026-10-20T13:21:59.4788815Z Get:9 https://packages.termux.dev/apt/termux-main stable/main aarch64 dash aarch64 0.5.13.5 [70.6 kB]
+2026-10-20T13:21:59.4795387Z Get:10 https://packages.termux.dev/apt/termux-main stable/main aarch64 findutils aarch64 4.11.0 [261 kB]
+2026-10-20T13:21:59.4812291Z Get:11 https://packages.termux.dev/apt/termux-main stable/main aarch64 libmpfr aarch64 4.2.2 [274 kB]
+2026-10-20T13:21:59.4828707Z Get:12 https://packages.termux.dev/apt/termux-main stable/main aarch64 gawk aarch64 5.4.1 [928 kB]
+2026-10-20T13:21:59.6217795Z Get:13 https://packages.termux.dev/apt/termux-main stable/main aarch64 gzip aarch64 1.15 [75.6 kB]
+2026-10-20T13:21:59.6222757Z Get:14 https://packages.termux.dev/apt/termux-main stable/main aarch64 pcre2 aarch64 10.49 [1001 kB]
+2026-10-20T13:21:59.8202506Z Get:15 https://packages.termux.dev/apt/termux-main stable/main aarch64 less aarch64 710 [144 kB]
+2026-10-20T13:21:59.8210869Z Get:16 https://packages.termux.dev/apt/termux-main stable/main aarch64 libc++ aarch64 30 [342 kB]
+2026-10-20T13:21:59.8231254Z Get:17 https://packages.termux.dev/apt/termux-main stable/main aarch64 liblzma aarch64 5.8.4 [195 kB]
+2026-10-20T13:21:59.8244662Z Get:18 https://packages.termux.dev/apt/termux-main stable/main aarch64 xz-utils aarch64 5.8.4 [71.4 kB]
+2026-10-20T13:21:59.8252184Z Get:19 https://packages.termux.dev/apt/termux-main stable/main aarch64 procps aarch64 4.0.7-2 [226 kB]
+2026-10-20T13:21:59.8267106Z Get:20 https://packages.termux.dev/apt/termux-main stable/main aarch64 sed aarch64 4.10 [123 kB]
+2026-10-20T13:21:59.8276068Z Get:21 https://packages.termux.dev/apt/termux-main stable/main aarch64 termux-keyring all 3.14 [45.0 kB]
+2026-10-20T13:21:59.8280940Z Get:22 https://packages.termux.dev/apt/termux-main stable/main aarch64 libsmartcols aarch64 2.42.4 [104 kB]
+2026-10-20T13:21:59.8289573Z Get:23 https://packages.termux.dev/apt/termux-main stable/main aarch64 libcap-ng aarch64 2:0.9.6 [57.5 kB]
+2026-10-20T13:21:59.9781487Z Get:24 https://packages.termux.dev/apt/termux-main stable/main aarch64 util-linux aarch64 2.42.4 [780 kB]
+2026-10-20T13:21:59.9875616Z Get:25 https://packages.termux.dev/apt/termux-main stable/main aarch64 libgcrypt aarch64 1.12.4 [513 kB]
+2026-10-20T13:21:59.9915536Z Get:26 https://packages.termux.dev/apt/termux-main stable/main aarch64 libnpth aarch64 1.8 [11.3 kB]
+2026-10-20T13:21:59.9920858Z Get:27 https://packages.termux.dev/apt/termux-main stable/main aarch64 gpgv aarch64 2.5.24 [197 kB]
+2026-10-20T13:21:59.9934139Z Get:28 https://packages.termux.dev/apt/termux-main stable/main aarch64 libffi aarch64 3.8.0 [37.6 kB]
+2026-10-20T13:21:59.9938975Z Get:29 https://packages.termux.dev/apt/termux-main stable/main aarch64 libmd aarch64 1.3.0 [50.8 kB]
+2026-10-20T13:21:59.9944643Z Get:30 https://packages.termux.dev/apt/termux-main stable/main aarch64 libunbound aarch64 1.26.1 [387 kB]
+2026-10-20T13:21:59.9965701Z Get:31 https://packages.termux.dev/apt/termux-main stable/main aarch64 termux-am all 0.8.1 [576 kB]
+2026-10-20T13:21:59.9995806Z Get:32 https://packages.termux.dev/apt/termux-main stable/main aarch64 xxhash aarch64 0.8.4 [80.2 kB]
+2026-10-20T13:22:00.1339211Z Get:33 https://packages.termux.dev/apt/termux-main stable/main aarch64 command-not-found aarch64 3.5.0-16 [118 kB]
+2026-10-20T13:22:00.2901336Z Get:34 https://packages.termux.dev/apt/termux-main stable/main aarch64 inetutils aarch64 2.8-1 [240 kB]
+2026-10-20T13:22:00.2912226Z Get:35 https://packages.termux.dev/apt/termux-main stable/main aarch64 libandroid-stub aarch64 30-2 [26.8 kB]
+2026-10-20T13:22:00.2918124Z Get:36 https://packages.termux.dev/apt/termux-main stable/main aarch64 libtirpc aarch64 1.3.8 [124 kB]
+2026-10-20T13:22:00.2936591Z Fetched 13.6 MB in 3s (4282 kB/s)
+2026-10-20T13:22:00.2937156Z Download complete and in download only mode
+2026-10-20T13:22:00.3185461Z Reading package lists...
+2026-10-20T13:22:00.3203432Z Building dependency tree...
+2026-10-20T13:22:00.3255855Z Calculating upgrade...
+2026-10-20T13:22:00.3291756Z The following packages will be upgraded:
+2026-10-20T13:22:00.3292466Z   bash ca-certificates command-not-found coreutils curl dash findutils gawk
+2026-10-20T13:22:00.3293003Z   gpgv gzip inetutils less libandroid-stub libc++ libcap-ng libcurl libffi
+2026-10-20T13:22:00.3293575Z   libgcrypt libiconv liblzma libmd libmpfr libnpth libsmartcols libtirpc
+2026-10-20T13:22:00.3294424Z   libunbound openssl pcre2 procps readline sed termux-am termux-keyring
+2026-10-20T13:22:00.3294835Z   util-linux xxhash xz-utils
+2026-10-20T13:22:00.3449407Z 36 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+2026-10-20T13:22:00.3449964Z After this operation, 1364 kB of additional disk space will be used.
+2026-10-20T13:22:00.3592304Z (Reading database ... 
+2026-10-20T13:22:00.3593041Z (Reading database ... 5%
+2026-10-20T13:22:00.3593354Z (Reading database ... 10%
+2026-10-20T13:22:00.3593895Z (Reading database ... 15%
+2026-10-20T13:22:00.3594165Z (Reading database ... 20%
+2026-10-20T13:22:00.3594444Z (Reading database ... 25%
+2026-10-20T13:22:00.3594756Z (Reading database ... 30%
+2026-10-20T13:22:00.3612369Z (Reading database ... 35%
+2026-10-20T13:22:00.3615181Z (Reading database ... 40%
+2026-10-20T13:22:00.3616048Z (Reading database ... 45%
+2026-10-20T13:22:00.3617468Z (Reading database ... 50%
+2026-10-20T13:22:00.3618349Z (Reading database ... 55%
+2026-10-20T13:22:00.3622166Z (Reading database ... 60%
+2026-10-20T13:22:00.3624003Z (Reading database ... 65%
+2026-10-20T13:22:00.3625342Z (Reading database ... 70%
+2026-10-20T13:22:00.3626293Z (Reading database ... 75%
+2026-10-20T13:22:00.3628028Z (Reading database ... 80%
+2026-10-20T13:22:00.3628437Z (Reading database ... 85%
+2026-10-20T13:22:00.3629342Z (Reading database ... 90%
+2026-10-20T13:22:00.3629842Z (Reading database ... 95%
+2026-10-20T13:22:00.3630180Z (Reading database ... 100%
+2026-10-20T13:22:00.3631007Z (Reading database ... 4985 files and directories currently installed.)
+2026-10-20T13:22:00.3633354Z Preparing to unpack .../readline_8.3.6_aarch64.deb ...
+2026-10-20T13:22:00.3671413Z Unpacking readline (8.3.6) over (8.3.3) ...
+2026-10-20T13:22:00.4414886Z Setting up readline (8.3.6) ...
+2026-10-20T13:22:00.4622253Z (Reading database ... 
+2026-10-20T13:22:00.4622855Z (Reading database ... 5%
+2026-10-20T13:22:00.4623480Z (Reading database ... 10%
+2026-10-20T13:22:00.4624196Z (Reading database ... 15%
+2026-10-20T13:22:00.4624600Z (Reading database ... 20%
+2026-10-20T13:22:00.4625102Z (Reading database ... 25%
+2026-10-20T13:22:00.4625545Z (Reading database ... 30%
+2026-10-20T13:22:00.4638477Z (Reading database ... 35%
+2026-10-20T13:22:00.4642162Z (Reading database ... 40%
+2026-10-20T13:22:00.4642448Z (Reading database ... 45%
+2026-10-20T13:22:00.4644134Z (Reading database ... 50%
+2026-10-20T13:22:00.4645157Z (Reading database ... 55%
+2026-10-20T13:22:00.4647430Z (Reading database ... 60%
+2026-10-20T13:22:00.4649049Z (Reading database ... 65%
+2026-10-20T13:22:00.4650312Z (Reading database ... 70%
+2026-10-20T13:22:00.4651841Z (Reading database ... 75%
+2026-10-20T13:22:00.4652213Z (Reading database ... 80%
+2026-10-20T13:22:00.4654543Z (Reading database ... 85%
+2026-10-20T13:22:00.4655739Z (Reading database ... 90%
+2026-10-20T13:22:00.4656828Z (Reading database ... 95%
+2026-10-20T13:22:00.4657446Z (Reading database ... 100%
+2026-10-20T13:22:00.4657809Z (Reading database ... 4985 files and directories currently installed.)
+2026-10-20T13:22:00.4660316Z Preparing to unpack .../libiconv_1.19_aarch64.deb ...
+2026-10-20T13:22:00.4697123Z Unpacking libiconv (1.19) over (1.18-1) ...
+2026-10-20T13:22:00.5324677Z Setting up libiconv (1.19) ...
+2026-10-20T13:22:00.5532294Z (Reading database ... 
+2026-10-20T13:22:00.5532875Z (Reading database ... 5%
+2026-10-20T13:22:00.5533352Z (Reading database ... 10%
+2026-10-20T13:22:00.5533630Z (Reading database ... 15%
+2026-10-20T13:22:00.5534219Z (Reading database ... 20%
+2026-10-20T13:22:00.5534584Z (Reading database ... 25%
+2026-10-20T13:22:00.5534875Z (Reading database ... 30%
+2026-10-20T13:22:00.5537546Z (Reading database ... 35%
+2026-10-20T13:22:00.5552680Z (Reading database ... 40%
+2026-10-20T13:22:00.5553106Z (Reading database ... 45%
+2026-10-20T13:22:00.5555943Z (Reading database ... 50%
+2026-10-20T13:22:00.5556234Z (Reading database ... 55%
+2026-10-20T13:22:00.5558028Z (Reading database ... 60%
+2026-10-20T13:22:00.5560100Z (Reading database ... 65%
+2026-10-20T13:22:00.5560942Z (Reading database ... 70%
+2026-10-20T13:22:00.5561874Z (Reading database ... 75%
+2026-10-20T13:22:00.5563251Z (Reading database ... 80%
+2026-10-20T13:22:00.5565365Z (Reading database ... 85%
+2026-10-20T13:22:00.5566473Z (Reading database ... 90%
+2026-10-20T13:22:00.5568208Z (Reading database ... 95%
+2026-10-20T13:22:00.5568806Z (Reading database ... 100%
+2026-10-20T13:22:00.5569328Z (Reading database ... 4985 files and directories currently installed.)
+2026-10-20T13:22:00.5571523Z Preparing to unpack .../bash_5.3.20_aarch64.deb ...
+2026-10-20T13:22:00.5606743Z Unpacking bash (5.3.20) over (5.3.15) ...
+2026-10-20T13:22:00.7504295Z Setting up bash (5.3.20) ...
+2026-10-20T13:22:00.7731929Z (Reading database ... 
+2026-10-20T13:22:00.7733236Z (Reading database ... 5%
+2026-10-20T13:22:00.7733635Z (Reading database ... 10%
+2026-10-20T13:22:00.7734160Z (Reading database ... 15%
+2026-10-20T13:22:00.7734522Z (Reading database ... 20%
+2026-10-20T13:22:00.7734780Z (Reading database ... 25%
+2026-10-20T13:22:00.7735095Z (Reading database ... 30%
+2026-10-20T13:22:00.7735516Z (Reading database ... 35%
+2026-10-20T13:22:00.7750824Z (Reading database ... 40%
+2026-10-20T13:22:00.7752766Z (Reading database ... 45%
+2026-10-20T13:22:00.7753393Z (Reading database ... 50%
+2026-10-20T13:22:00.7754232Z (Reading database ... 55%
+2026-10-20T13:22:00.7758219Z (Reading database ... 60%
+2026-10-20T13:22:00.7759123Z (Reading database ... 65%
+2026-10-20T13:22:00.7759591Z (Reading database ... 70%
+2026-10-20T13:22:00.7761124Z (Reading database ... 75%
+2026-10-20T13:22:00.7762388Z (Reading database ... 80%
+2026-10-20T13:22:00.7762844Z (Reading database ... 85%
+2026-10-20T13:22:00.7764708Z (Reading database ... 90%
+2026-10-20T13:22:00.7767158Z (Reading database ... 95%
+2026-10-20T13:22:00.7767756Z (Reading database ... 100%
+2026-10-20T13:22:00.7768305Z (Reading database ... 4986 files and directories currently installed.)
+2026-10-20T13:22:00.7770009Z Preparing to unpack .../ca-certificates_1%3a2026.09.25_all.deb ...
+2026-10-20T13:22:00.7805947Z Unpacking ca-certificates (1:2026.09.25) over (1:2026.07.16) ...
+2026-10-20T13:22:00.8075422Z Setting up ca-certificates (1:2026.09.25) ...
+2026-10-20T13:22:00.8273357Z (Reading database ... 
+2026-10-20T13:22:00.8274261Z (Reading database ... 5%
+2026-10-20T13:22:00.8274798Z (Reading database ... 10%
+2026-10-20T13:22:00.8275069Z (Reading database ... 15%
+2026-10-20T13:22:00.8275355Z (Reading database ... 20%
+2026-10-20T13:22:00.8275611Z (Reading database ... 25%
+2026-10-20T13:22:00.8275891Z (Reading database ... 30%
+2026-10-20T13:22:00.8277028Z (Reading database ... 35%
+2026-10-20T13:22:00.8288354Z (Reading database ... 40%
+2026-10-20T13:22:00.8292785Z (Reading database ... 45%
+2026-10-20T13:22:00.8293464Z (Reading database ... 50%
+2026-10-20T13:22:00.8293883Z (Reading database ... 55%
+2026-10-20T13:22:00.8295046Z (Reading database ... 60%
+2026-10-20T13:22:00.8310046Z (Reading database ... 65%
+2026-10-20T13:22:00.8310371Z (Reading database ... 70%
+2026-10-20T13:22:00.8310872Z (Reading database ... 75%
+2026-10-20T13:22:00.8311143Z (Reading database ... 80%
+2026-10-20T13:22:00.8311412Z (Reading database ... 85%
+2026-10-20T13:22:00.8311743Z (Reading database ... 90%
+2026-10-20T13:22:00.8311981Z (Reading database ... 95%
+2026-10-20T13:22:00.8312265Z (Reading database ... 100%
+2026-10-20T13:22:00.8312918Z (Reading database ... 4986 files and directories currently installed.)
+2026-10-20T13:22:00.8313491Z Preparing to unpack .../openssl_1%3a3.6.5_aarch64.deb ...
+2026-10-20T13:22:00.8338186Z Unpacking openssl (1:3.6.5) over (1:3.6.3) ...
+2026-10-20T13:22:01.0821438Z Setting up openssl (1:3.6.5) ...
+2026-10-20T13:22:01.1052933Z (Reading database ... 
+2026-10-20T13:22:01.1054388Z (Reading database ... 5%
+2026-10-20T13:22:01.1054778Z (Reading database ... 10%
+2026-10-20T13:22:01.1055517Z (Reading database ... 15%
+2026-10-20T13:22:01.1055797Z (Reading database ... 20%
+2026-10-20T13:22:01.1056058Z (Reading database ... 25%
+2026-10-20T13:22:01.1056388Z (Reading database ... 30%
+2026-10-20T13:22:01.1056673Z (Reading database ... 35%
+2026-10-20T13:22:01.1073774Z (Reading database ... 40%
+2026-10-20T13:22:01.1075855Z (Reading database ... 45%
+2026-10-20T13:22:01.1076142Z (Reading database ... 50%
+2026-10-20T13:22:01.1076511Z (Reading database ... 55%
+2026-10-20T13:22:01.1078437Z (Reading database ... 60%
+2026-10-20T13:22:01.1078698Z (Reading database ... 65%
+2026-10-20T13:22:01.1080467Z (Reading database ... 70%
+2026-10-20T13:22:01.1081862Z (Reading database ... 75%
+2026-10-20T13:22:01.1083209Z (Reading database ... 80%
+2026-10-20T13:22:01.1084758Z (Reading database ... 85%
+2026-10-20T13:22:01.1086163Z (Reading database ... 90%
+2026-10-20T13:22:01.1088213Z (Reading database ... 95%
+2026-10-20T13:22:01.1088480Z (Reading database ... 100%
+2026-10-20T13:22:01.1089205Z (Reading database ... 4986 files and directories currently installed.)
+2026-10-20T13:22:01.1090304Z Preparing to unpack .../coreutils_9.12_aarch64.deb ...
+2026-10-20T13:22:01.1153170Z Unpacking coreutils (9.12) over (9.11-1) ...
+2026-10-20T13:22:01.2783976Z Setting up coreutils (9.12) ...
+2026-10-20T13:22:01.3033453Z (Reading database ... 
+2026-10-20T13:22:01.3034069Z (Reading database ... 5%
+2026-10-20T13:22:01.3034392Z (Reading database ... 10%
+2026-10-20T13:22:01.3034739Z (Reading database ... 15%
+2026-10-20T13:22:01.3035141Z (Reading database ... 20%
+2026-10-20T13:22:01.3035433Z (Reading database ... 25%
+2026-10-20T13:22:01.3035704Z (Reading database ... 30%
+2026-10-20T13:22:01.3035983Z (Reading database ... 35%
+2026-10-20T13:22:01.3052831Z (Reading database ... 40%
+2026-10-20T13:22:01.3054288Z (Reading database ... 45%
+2026-10-20T13:22:01.3056028Z (Reading database ... 50%
+2026-10-20T13:22:01.3056512Z (Reading database ... 55%
+2026-10-20T13:22:01.3057834Z (Reading database ... 60%
+2026-10-20T13:22:01.3059399Z (Reading database ... 65%
+2026-10-20T13:22:01.3060053Z (Reading database ... 70%
+2026-10-20T13:22:01.3062072Z (Reading database ... 75%
+2026-10-20T13:22:01.3063567Z (Reading database ... 80%
+2026-10-20T13:22:01.3065814Z (Reading database ... 85%
+2026-10-20T13:22:01.3067245Z (Reading database ... 90%
+2026-10-20T13:22:01.3076775Z (Reading database ... 95%
+2026-10-20T13:22:01.3077253Z (Reading database ... 100%
+2026-10-20T13:22:01.3078701Z (Reading database ... 4986 files and directories currently installed.)
+2026-10-20T13:22:01.3079222Z Preparing to unpack .../libcurl_8.23.0_aarch64.deb ...
+2026-10-20T13:22:01.3110323Z Unpacking libcurl (8.23.0) over (8.21.0) ...
+2026-10-20T13:22:01.8927602Z Setting up libcurl (8.23.0) ...
+2026-10-20T13:22:01.9108319Z (Reading database ... 
+2026-10-20T13:22:01.9109557Z (Reading database ... 5%
+2026-10-20T13:22:01.9110258Z (Reading database ... 10%
+2026-10-20T13:22:01.9110827Z (Reading database ... 15%
+2026-10-20T13:22:01.9111213Z (Reading database ... 20%
+2026-10-20T13:22:01.9111785Z (Reading database ... 25%
+2026-10-20T13:22:01.9112177Z (Reading database ... 30%
+2026-10-20T13:22:01.9112605Z (Reading database ... 35%
+2026-10-20T13:22:01.9127041Z (Reading database ... 40%
+2026-10-20T13:22:01.9127984Z (Reading database ... 45%
+2026-10-20T13:22:01.9129052Z (Reading database ... 50%
+2026-10-20T13:22:01.9129488Z (Reading database ... 55%
+2026-10-20T13:22:01.9129882Z (Reading database ... 60%
+2026-10-20T13:22:01.9130361Z (Reading database ... 65%
+2026-10-20T13:22:01.9131670Z (Reading database ... 70%
+2026-10-20T13:22:01.9133594Z (Reading database ... 75%
+2026-10-20T13:22:01.9135805Z (Reading database ... 80%
+2026-10-20T13:22:01.9136076Z (Reading database ... 85%
+2026-10-20T13:22:01.9137243Z (Reading database ... 90%
+2026-10-20T13:22:01.9141136Z (Reading database ... 95%
+2026-10-20T13:22:01.9141440Z (Reading database ... 100%
+2026-10-20T13:22:01.9142046Z (Reading database ... 4990 files and directories currently installed.)
+2026-10-20T13:22:01.9144952Z Preparing to unpack .../curl_8.23.0_aarch64.deb ...
+2026-10-20T13:22:01.9175396Z Unpacking curl (8.23.0) over (8.21.0) ...
+2026-10-20T13:22:01.9466215Z Setting up curl (8.23.0) ...
+2026-10-20T13:22:01.9654787Z (Reading database ... 
+2026-10-20T13:22:01.9655186Z (Reading database ... 5%
+2026-10-20T13:22:01.9655757Z (Reading database ... 10%
+2026-10-20T13:22:01.9656031Z (Reading database ... 15%
+2026-10-20T13:22:01.9656274Z (Reading database ... 20%
+2026-10-20T13:22:01.9656579Z (Reading database ... 25%
+2026-10-20T13:22:01.9656835Z (Reading database ... 30%
+2026-10-20T13:22:01.9659700Z (Reading database ... 35%
+2026-10-20T13:22:01.9672324Z (Reading database ... 40%
+2026-10-20T13:22:01.9673469Z (Reading database ... 45%
+2026-10-20T13:22:01.9674524Z (Reading database ... 50%
+2026-10-20T13:22:01.9675588Z (Reading database ... 55%
+2026-10-20T13:22:01.9676333Z (Reading database ... 60%
+2026-10-20T13:22:01.9677422Z (Reading database ... 65%
+2026-10-20T13:22:01.9677694Z (Reading database ... 70%
+2026-10-20T13:22:01.9679250Z (Reading database ... 75%
+2026-10-20T13:22:01.9680891Z (Reading database ... 80%
+2026-10-20T13:22:01.9681932Z (Reading database ... 85%
+2026-10-20T13:22:01.9683136Z (Reading database ... 90%
+2026-10-20T13:22:01.9687593Z (Reading database ... 95%
+2026-10-20T13:22:01.9688044Z (Reading database ... 100%
+2026-10-20T13:22:01.9688469Z (Reading database ... 4990 files and directories currently installed.)
+2026-10-20T13:22:01.9690403Z Preparing to unpack .../dash_0.5.13.5_aarch64.deb ...
+2026-10-20T13:22:01.9721321Z Unpacking dash (0.5.13.5) over (0.5.12-2) ...
+2026-10-20T13:22:01.9993826Z Setting up dash (0.5.13.5) ...
+2026-10-20T13:22:02.0193181Z (Reading database ... 
+2026-10-20T13:22:02.0194265Z (Reading database ... 5%
+2026-10-20T13:22:02.0194809Z (Reading database ... 10%
+2026-10-20T13:22:02.0195482Z (Reading database ... 15%
+2026-10-20T13:22:02.0195850Z (Reading database ... 20%
+2026-10-20T13:22:02.0196174Z (Reading database ... 25%
+2026-10-20T13:22:02.0196429Z (Reading database ... 30%
+2026-10-20T13:22:02.0196755Z (Reading database ... 35%
+2026-10-20T13:22:02.0214078Z (Reading database ... 40%
+2026-10-20T13:22:02.0214484Z (Reading database ... 45%
+2026-10-20T13:22:02.0217363Z (Reading database ... 50%
+2026-10-20T13:22:02.0217800Z (Reading database ... 55%
+2026-10-20T13:22:02.0218120Z (Reading database ... 60%
+2026-10-20T13:22:02.0218797Z (Reading database ... 65%
+2026-10-20T13:22:02.0219518Z (Reading database ... 70%
+2026-10-20T13:22:02.0221015Z (Reading database ... 75%
+2026-10-20T13:22:02.0222143Z (Reading database ... 80%
+2026-10-20T13:22:02.0223301Z (Reading database ... 85%
+2026-10-20T13:22:02.0225667Z (Reading database ... 90%
+2026-10-20T13:22:02.0228762Z (Reading database ... 95%
+2026-10-20T13:22:02.0229105Z (Reading database ... 100%
+2026-10-20T13:22:02.0229639Z (Reading database ... 4990 files and directories currently installed.)
+2026-10-20T13:22:02.0232108Z Preparing to unpack .../findutils_4.11.0_aarch64.deb ...
+2026-10-20T13:22:02.0264569Z Unpacking findutils (4.11.0) over (4.10.0-1) ...
+2026-10-20T13:22:02.0695779Z Setting up findutils (4.11.0) ...
+2026-10-20T13:22:02.0893451Z (Reading database ... 
+2026-10-20T13:22:02.0894064Z (Reading database ... 5%
+2026-10-20T13:22:02.0894462Z (Reading database ... 10%
+2026-10-20T13:22:02.0894824Z (Reading database ... 15%
+2026-10-20T13:22:02.0895075Z (Reading database ... 20%
+2026-10-20T13:22:02.0895363Z (Reading database ... 25%
+2026-10-20T13:22:02.0895620Z (Reading database ... 30%
+2026-10-20T13:22:02.0895937Z (Reading database ... 35%
+2026-10-20T13:22:02.0913121Z (Reading database ... 40%
+2026-10-20T13:22:02.0914776Z (Reading database ... 45%
+2026-10-20T13:22:02.0915179Z (Reading database ... 50%
+2026-10-20T13:22:02.0917577Z (Reading database ... 55%
+2026-10-20T13:22:02.0917851Z (Reading database ... 60%
+2026-10-20T13:22:02.0918685Z (Reading database ... 65%
+2026-10-20T13:22:02.0919679Z (Reading database ... 70%
+2026-10-20T13:22:02.0920894Z (Reading database ... 75%
+2026-10-20T13:22:02.0921694Z (Reading database ... 80%
+2026-10-20T13:22:02.0923497Z (Reading database ... 85%
+2026-10-20T13:22:02.0926132Z (Reading database ... 90%
+2026-10-20T13:22:02.0929802Z (Reading database ... 95%
+2026-10-20T13:22:02.0930251Z (Reading database ... 100%
+2026-10-20T13:22:02.0930627Z (Reading database ... 4990 files and directories currently installed.)
+2026-10-20T13:22:02.0932950Z Preparing to unpack .../libmpfr_4.2.2_aarch64.deb ...
+2026-10-20T13:22:02.0968652Z Unpacking libmpfr (4.2.2) over (4.2.1-1) ...
+2026-10-20T13:22:02.1498696Z Setting up libmpfr (4.2.2) ...
+2026-10-20T13:22:02.1695960Z (Reading database ... 
+2026-10-20T13:22:02.1696442Z (Reading database ... 5%
+2026-10-20T13:22:02.1696737Z (Reading database ... 10%
+2026-10-20T13:22:02.1697210Z (Reading database ... 15%
+2026-10-20T13:22:02.1697464Z (Reading database ... 20%
+2026-10-20T13:22:02.1697964Z (Reading database ... 25%
+2026-10-20T13:22:02.1698311Z (Reading database ... 30%
+2026-10-20T13:22:02.1698641Z (Reading database ... 35%
+2026-10-20T13:22:02.1715575Z (Reading database ... 40%
+2026-10-20T13:22:02.1716589Z (Reading database ... 45%
+2026-10-20T13:22:02.1717132Z (Reading database ... 50%
+2026-10-20T13:22:02.1718175Z (Reading database ... 55%
+2026-10-20T13:22:02.1718948Z (Reading database ... 60%
+2026-10-20T13:22:02.1720106Z (Reading database ... 65%
+2026-10-20T13:22:02.1720958Z (Reading database ... 70%
+2026-10-20T13:22:02.1721788Z (Reading database ... 75%
+2026-10-20T13:22:02.1723121Z (Reading database ... 80%
+2026-10-20T13:22:02.1725956Z (Reading database ... 85%
+2026-10-20T13:22:02.1726869Z (Reading database ... 90%
+2026-10-20T13:22:02.1729536Z (Reading database ... 95%
+2026-10-20T13:22:02.1729845Z (Reading database ... 100%
+2026-10-20T13:22:02.1730328Z (Reading database ... 4990 files and directories currently installed.)
+2026-10-20T13:22:02.1731717Z Preparing to unpack .../gawk_5.4.1_aarch64.deb ...
+2026-10-20T13:22:02.1792934Z Unpacking gawk (5.4.1) over (5.3.2) ...
+2026-10-20T13:22:02.3408675Z Setting up gawk (5.4.1) ...
+2026-10-20T13:22:02.3593313Z (Reading database ... 
+2026-10-20T13:22:02.3594434Z (Reading database ... 5%
+2026-10-20T13:22:02.3595006Z (Reading database ... 10%
+2026-10-20T13:22:02.3595269Z (Reading database ... 15%
+2026-10-20T13:22:02.3595557Z (Reading database ... 20%
+2026-10-20T13:22:02.3595921Z (Reading database ... 25%
+2026-10-20T13:22:02.3596167Z (Reading database ... 30%
+2026-10-20T13:22:02.3596464Z (Reading database ... 35%
+2026-10-20T13:22:02.3611122Z (Reading database ... 40%
+2026-10-20T13:22:02.3612381Z (Reading database ... 45%
+2026-10-20T13:22:02.3613423Z (Reading database ... 50%
+2026-10-20T13:22:02.3614395Z (Reading database ... 55%
+2026-10-20T13:22:02.3617826Z (Reading database ... 60%
+2026-10-20T13:22:02.3618187Z (Reading database ... 65%
+2026-10-20T13:22:02.3618436Z (Reading database ... 70%
+2026-10-20T13:22:02.3618866Z (Reading database ... 75%
+2026-10-20T13:22:02.3620722Z (Reading database ... 80%
+2026-10-20T13:22:02.3621146Z (Reading database ... 85%
+2026-10-20T13:22:02.3622004Z (Reading database ... 90%
+2026-10-20T13:22:02.3626042Z (Reading database ... 95%
+2026-10-20T13:22:02.3626367Z (Reading database ... 100%
+2026-10-20T13:22:02.3626726Z (Reading database ... 4993 files and directories currently installed.)
+2026-10-20T13:22:02.3628339Z Preparing to unpack .../gzip_1.15_aarch64.deb ...
+2026-10-20T13:22:02.3660156Z Unpacking gzip (1.15) over (1.14-1) ...
+2026-10-20T13:22:02.4167810Z Setting up gzip (1.15) ...
+2026-10-20T13:22:02.4357880Z (Reading database ... 
+2026-10-20T13:22:02.4358409Z (Reading database ... 5%
+2026-10-20T13:22:02.4358948Z (Reading database ... 10%
+2026-10-20T13:22:02.4359211Z (Reading database ... 15%
+2026-10-20T13:22:02.4359797Z (Reading database ... 20%
+2026-10-20T13:22:02.4360136Z (Reading database ... 25%
+2026-10-20T13:22:02.4360422Z (Reading database ... 30%
+2026-10-20T13:22:02.4361879Z (Reading database ... 35%
+2026-10-20T13:22:02.4376731Z (Reading database ... 40%
+2026-10-20T13:22:02.4377023Z (Reading database ... 45%
+2026-10-20T13:22:02.4377510Z (Reading database ... 50%
+2026-10-20T13:22:02.4379433Z (Reading database ... 55%
+2026-10-20T13:22:02.4380453Z (Reading database ... 60%
+2026-10-20T13:22:02.4381424Z (Reading database ... 65%
+2026-10-20T13:22:02.4382010Z (Reading database ... 70%
+2026-10-20T13:22:02.4383475Z (Reading database ... 75%
+2026-10-20T13:22:02.4385953Z (Reading database ... 80%
+2026-10-20T13:22:02.4386464Z (Reading database ... 85%
+2026-10-20T13:22:02.4396708Z (Reading database ... 90%
+2026-10-20T13:22:02.4397048Z (Reading database ... 95%
+2026-10-20T13:22:02.4398273Z (Reading database ... 100%
+2026-10-20T13:22:02.4398786Z (Reading database ... 4993 files and directories currently installed.)
+2026-10-20T13:22:02.4399237Z Preparing to unpack .../pcre2_10.49_aarch64.deb ...
+2026-10-20T13:22:02.4427498Z Unpacking pcre2 (10.49) over (10.47) ...
+2026-10-20T13:22:02.7464647Z Setting up pcre2 (10.49) ...
+2026-10-20T13:22:02.7676303Z (Reading database ... 
+2026-10-20T13:22:02.7677094Z (Reading database ... 5%
+2026-10-20T13:22:02.7677411Z (Reading database ... 10%
+2026-10-20T13:22:02.7677674Z (Reading database ... 15%
+2026-10-20T13:22:02.7678098Z (Reading database ... 20%
+2026-10-20T13:22:02.7678353Z (Reading database ... 25%
+2026-10-20T13:22:02.7678630Z (Reading database ... 30%
+2026-10-20T13:22:02.7678902Z (Reading database ... 35%
+2026-10-20T13:22:02.7695122Z (Reading database ... 40%
+2026-10-20T13:22:02.7697437Z (Reading database ... 45%
+2026-10-20T13:22:02.7699410Z (Reading database ... 50%
+2026-10-20T13:22:02.7701454Z (Reading database ... 55%
+2026-10-20T13:22:02.7701833Z (Reading database ... 60%
+2026-10-20T13:22:02.7702092Z (Reading database ... 65%
+2026-10-20T13:22:02.7702414Z (Reading database ... 70%
+2026-10-20T13:22:02.7705868Z (Reading database ... 75%
+2026-10-20T13:22:02.7706601Z (Reading database ... 80%
+2026-10-20T13:22:02.7706951Z (Reading database ... 85%
+2026-10-20T13:22:02.7710170Z (Reading database ... 90%
+2026-10-20T13:22:02.7711026Z (Reading database ... 95%
+2026-10-20T13:22:02.7711287Z (Reading database ... 100%
+2026-10-20T13:22:02.7711684Z (Reading database ... 4996 files and directories currently installed.)
+2026-10-20T13:22:02.7712481Z Preparing to unpack .../bootstrap/less_710_aarch64.deb ...
+2026-10-20T13:22:02.7770167Z Unpacking less (710) over (704) ...
+2026-10-20T13:22:02.8100156Z Setting up less (710) ...
+2026-10-20T13:22:02.8312940Z (Reading database ... 
+2026-10-20T13:22:02.8313445Z (Reading database ... 5%
+2026-10-20T13:22:02.8313923Z (Reading database ... 10%
+2026-10-20T13:22:02.8314197Z (Reading database ... 15%
+2026-10-20T13:22:02.8314505Z (Reading database ... 20%
+2026-10-20T13:22:02.8314753Z (Reading database ... 25%
+2026-10-20T13:22:02.8315029Z (Reading database ... 30%
+2026-10-20T13:22:02.8327186Z (Reading database ... 35%
+2026-10-20T13:22:02.8328203Z (Reading database ... 40%
+2026-10-20T13:22:02.8330253Z (Reading database ... 45%
+2026-10-20T13:22:02.8330933Z (Reading database ... 50%
+2026-10-20T13:22:02.8331618Z (Reading database ... 55%
+2026-10-20T13:22:02.8332569Z (Reading database ... 60%
+2026-10-20T13:22:02.8334815Z (Reading database ... 65%
+2026-10-20T13:22:02.8336027Z (Reading database ... 70%
+2026-10-20T13:22:02.8336449Z (Reading database ... 75%
+2026-10-20T13:22:02.8338537Z (Reading database ... 80%
+2026-10-20T13:22:02.8340074Z (Reading database ... 85%
+2026-10-20T13:22:02.8340369Z (Reading database ... 90%
+2026-10-20T13:22:02.8343973Z (Reading database ... 95%
+2026-10-20T13:22:02.8344400Z (Reading database ... 100%
+2026-10-20T13:22:02.8344749Z (Reading database ... 4995 files and directories currently installed.)
+2026-10-20T13:22:02.8346909Z Preparing to unpack .../libc++_30_aarch64.deb ...
+2026-10-20T13:22:02.8372436Z Unpacking libc++ (30) over (29) ...
+2026-10-20T13:22:02.8793137Z Setting up libc++ (30) ...
+2026-10-20T13:22:02.8985281Z (Reading database ... 
+2026-10-20T13:22:02.8985676Z (Reading database ... 5%
+2026-10-20T13:22:02.8986196Z (Reading database ... 10%
+2026-10-20T13:22:02.8986497Z (Reading database ... 15%
+2026-10-20T13:22:02.8986739Z (Reading database ... 20%
+2026-10-20T13:22:02.8987095Z (Reading database ... 25%
+2026-10-20T13:22:02.8987349Z (Reading database ... 30%
+2026-10-20T13:22:02.8987650Z (Reading database ... 35%
+2026-10-20T13:22:02.9004356Z (Reading database ... 40%
+2026-10-20T13:22:02.9004752Z (Reading database ... 45%
+2026-10-20T13:22:02.9007241Z (Reading database ... 50%
+2026-10-20T13:22:02.9007592Z (Reading database ... 55%
+2026-10-20T13:22:02.9009829Z (Reading database ... 60%
+2026-10-20T13:22:02.9010401Z (Reading database ... 65%
+2026-10-20T13:22:02.9012878Z (Reading database ... 70%
+2026-10-20T13:22:02.9014723Z (Reading database ... 75%
+2026-10-20T13:22:02.9015028Z (Reading database ... 80%
+2026-10-20T13:22:02.9016684Z (Reading database ... 85%
+2026-10-20T13:22:02.9018121Z (Reading database ... 90%
+2026-10-20T13:22:02.9019894Z (Reading database ... 95%
+2026-10-20T13:22:02.9020307Z (Reading database ... 100%
+2026-10-20T13:22:02.9020672Z (Reading database ... 4995 files and directories currently installed.)
+2026-10-20T13:22:02.9024071Z Preparing to unpack .../liblzma_5.8.4_aarch64.deb ...
+2026-10-20T13:22:02.9055663Z Unpacking liblzma (5.8.4) over (5.8.3) ...
+2026-10-20T13:22:02.9686946Z Setting up liblzma (5.8.4) ...
+2026-10-20T13:22:02.9875083Z (Reading database ... 
+2026-10-20T13:22:02.9875835Z (Reading database ... 5%
+2026-10-20T13:22:02.9876117Z (Reading database ... 10%
+2026-10-20T13:22:02.9876435Z (Reading database ... 15%
+2026-10-20T13:22:02.9876686Z (Reading database ... 20%
+2026-10-20T13:22:02.9876929Z (Reading database ... 25%
+2026-10-20T13:22:02.9877257Z (Reading database ... 30%
+2026-10-20T13:22:02.9877507Z (Reading database ... 35%
+2026-10-20T13:22:02.9892422Z (Reading database ... 40%
+2026-10-20T13:22:02.9894501Z (Reading database ... 45%
+2026-10-20T13:22:02.9894986Z (Reading database ... 50%
+2026-10-20T13:22:02.9895749Z (Reading database ... 55%
+2026-10-20T13:22:02.9896093Z (Reading database ... 60%
+2026-10-20T13:22:02.9897283Z (Reading database ... 65%
+2026-10-20T13:22:02.9898679Z (Reading database ... 70%
+2026-10-20T13:22:02.9899020Z (Reading database ... 75%
+2026-10-20T13:22:02.9900432Z (Reading database ... 80%
+2026-10-20T13:22:02.9901286Z (Reading database ... 85%
+2026-10-20T13:22:02.9904644Z (Reading database ... 90%
+2026-10-20T13:22:02.9906646Z (Reading database ... 95%
+2026-10-20T13:22:02.9906966Z (Reading database ... 100%
+2026-10-20T13:22:02.9907408Z (Reading database ... 4995 files and directories currently installed.)
+2026-10-20T13:22:02.9909767Z Preparing to unpack .../xz-utils_5.8.4_aarch64.deb ...
+2026-10-20T13:22:02.9939396Z Unpacking xz-utils (5.8.4) over (5.8.3) ...
+2026-10-20T13:22:03.0346378Z Setting up xz-utils (5.8.4) ...
+2026-10-20T13:22:03.0532309Z (Reading database ... 
+2026-10-20T13:22:03.0532941Z (Reading database ... 5%
+2026-10-20T13:22:03.0533361Z (Reading database ... 10%
+2026-10-20T13:22:03.0533624Z (Reading database ... 15%
+2026-10-20T13:22:03.0534862Z (Reading database ... 20%
+2026-10-20T13:22:03.0535125Z (Reading database ... 25%
+2026-10-20T13:22:03.0535435Z (Reading database ... 30%
+2026-10-20T13:22:03.0536487Z (Reading database ... 35%
+2026-10-20T13:22:03.0552301Z (Reading database ... 40%
+2026-10-20T13:22:03.0553083Z (Reading database ... 45%
+2026-10-20T13:22:03.0555137Z (Reading database ... 50%
+2026-10-20T13:22:03.0556215Z (Reading database ... 55%
+2026-10-20T13:22:03.0556859Z (Reading database ... 60%
+2026-10-20T13:22:03.0558095Z (Reading database ... 65%
+2026-10-20T13:22:03.0559087Z (Reading database ... 70%
+2026-10-20T13:22:03.0559868Z (Reading database ... 75%
+2026-10-20T13:22:03.0561311Z (Reading database ... 80%
+2026-10-20T13:22:03.0562710Z (Reading database ... 85%
+2026-10-20T13:22:03.0566669Z (Reading database ... 90%
+2026-10-20T13:22:03.0568244Z (Reading database ... 95%
+2026-10-20T13:22:03.0569146Z (Reading database ... 100%
+2026-10-20T13:22:03.0569903Z (Reading database ... 4995 files and directories currently installed.)
+2026-10-20T13:22:03.0571225Z Preparing to unpack .../procps_4.0.7-2_aarch64.deb ...
+2026-10-20T13:22:03.0602958Z Unpacking procps (4.0.7-2) over (3.3.17-6) ...
+2026-10-20T13:22:03.1201406Z Setting up procps (4.0.7-2) ...
+2026-10-20T13:22:03.1392442Z (Reading database ... 
+2026-10-20T13:22:03.1393190Z (Reading database ... 5%
+2026-10-20T13:22:03.1394073Z (Reading database ... 10%
+2026-10-20T13:22:03.1394432Z (Reading database ... 15%
+2026-10-20T13:22:03.1394838Z (Reading database ... 20%
+2026-10-20T13:22:03.1395102Z (Reading database ... 25%
+2026-10-20T13:22:03.1395349Z (Reading database ... 30%
+2026-10-20T13:22:03.1395758Z (Reading database ... 35%
+2026-10-20T13:22:03.1412705Z (Reading database ... 40%
+2026-10-20T13:22:03.1413843Z (Reading database ... 45%
+2026-10-20T13:22:03.1415155Z (Reading database ... 50%
+2026-10-20T13:22:03.1415643Z (Reading database ... 55%
+2026-10-20T13:22:03.1416791Z (Reading database ... 60%
+2026-10-20T13:22:03.1418149Z (Reading database ... 65%
+2026-10-20T13:22:03.1419287Z (Reading database ... 70%
+2026-10-20T13:22:03.1420232Z (Reading database ... 75%
+2026-10-20T13:22:03.1420889Z (Reading database ... 80%
+2026-10-20T13:22:03.1422203Z (Reading database ... 85%
+2026-10-20T13:22:03.1426127Z (Reading database ... 90%
+2026-10-20T13:22:03.1428508Z (Reading database ... 95%
+2026-10-20T13:22:03.1428857Z (Reading database ... 100%
+2026-10-20T13:22:03.1429256Z (Reading database ... 4995 files and directories currently installed.)
+2026-10-20T13:22:03.1430110Z Preparing to unpack .../bootstrap/sed_4.10_aarch64.deb ...
+2026-10-20T13:22:03.1462294Z Unpacking sed (4.10) over (4.9-2) ...
+2026-10-20T13:22:03.1804575Z Setting up sed (4.10) ...
+2026-10-20T13:22:03.2005156Z (Reading database ... 
+2026-10-20T13:22:03.2005539Z (Reading database ... 5%
+2026-10-20T13:22:03.2006093Z (Reading database ... 10%
+2026-10-20T13:22:03.2006467Z (Reading database ... 15%
+2026-10-20T13:22:03.2006829Z (Reading database ... 20%
+2026-10-20T13:22:03.2007084Z (Reading database ... 25%
+2026-10-20T13:22:03.2007325Z (Reading database ... 30%
+2026-10-20T13:22:03.2007646Z (Reading database ... 35%
+2026-10-20T13:22:03.2015241Z (Reading database ... 40%
+2026-10-20T13:22:03.2015850Z (Reading database ... 45%
+2026-10-20T13:22:03.2017711Z (Reading database ... 50%
+2026-10-20T13:22:03.2018398Z (Reading database ... 55%
+2026-10-20T13:22:03.2018898Z (Reading database ... 60%
+2026-10-20T13:22:03.2019570Z (Reading database ... 65%
+2026-10-20T13:22:03.2020840Z (Reading database ... 70%
+2026-10-20T13:22:03.2021365Z (Reading database ... 75%
+2026-10-20T13:22:03.2023387Z (Reading database ... 80%
+2026-10-20T13:22:03.2025488Z (Reading database ... 85%
+2026-10-20T13:22:03.2027402Z (Reading database ... 90%
+2026-10-20T13:22:03.2029258Z (Reading database ... 95%
+2026-10-20T13:22:03.2029668Z (Reading database ... 100%
+2026-10-20T13:22:03.2030130Z (Reading database ... 4995 files and directories currently installed.)
+2026-10-20T13:22:03.2032990Z Preparing to unpack .../termux-keyring_3.14_all.deb ...
+2026-10-20T13:22:03.2062886Z Unpacking termux-keyring (3.14) over (3.13) ...
+2026-10-20T13:22:03.2409011Z Setting up termux-keyring (3.14) ...
+2026-10-20T13:22:03.2603313Z (Reading database ... 
+2026-10-20T13:22:03.2604022Z (Reading database ... 5%
+2026-10-20T13:22:03.2604314Z (Reading database ... 10%
+2026-10-20T13:22:03.2604667Z (Reading database ... 15%
+2026-10-20T13:22:03.2604914Z (Reading database ... 20%
+2026-10-20T13:22:03.2605267Z (Reading database ... 25%
+2026-10-20T13:22:03.2605528Z (Reading database ... 30%
+2026-10-20T13:22:03.2607645Z (Reading database ... 35%
+2026-10-20T13:22:03.2620772Z (Reading database ... 40%
+2026-10-20T13:22:03.2621421Z (Reading database ... 45%
+2026-10-20T13:22:03.2622061Z (Reading database ... 50%
+2026-10-20T13:22:03.2622698Z (Reading database ... 55%
+2026-10-20T13:22:03.2623431Z (Reading database ... 60%
+2026-10-20T13:22:03.2625089Z (Reading database ... 65%
+2026-10-20T13:22:03.2626659Z (Reading database ... 70%
+2026-10-20T13:22:03.2627214Z (Reading database ... 75%
+2026-10-20T13:22:03.2629066Z (Reading database ... 80%
+2026-10-20T13:22:03.2630472Z (Reading database ... 85%
+2026-10-20T13:22:03.2632796Z (Reading database ... 90%
+2026-10-20T13:22:03.2635079Z (Reading database ... 95%
+2026-10-20T13:22:03.2635595Z (Reading database ... 100%
+2026-10-20T13:22:03.2636304Z (Reading database ... 4995 files and directories currently installed.)
+2026-10-20T13:22:03.2638655Z Preparing to unpack .../libsmartcols_2.42.4_aarch64.deb ...
+2026-10-20T13:22:03.2667783Z Unpacking libsmartcols (2.42.4) over (2.42.1-4) ...
+2026-10-20T13:22:03.2947062Z Setting up libsmartcols (2.42.4) ...
+2026-10-20T13:22:03.3134931Z (Reading database ... 
+2026-10-20T13:22:03.3135670Z (Reading database ... 5%
+2026-10-20T13:22:03.3135939Z (Reading database ... 10%
+2026-10-20T13:22:03.3136351Z (Reading database ... 15%
+2026-10-20T13:22:03.3136608Z (Reading database ... 20%
+2026-10-20T13:22:03.3136848Z (Reading database ... 25%
+2026-10-20T13:22:03.3137189Z (Reading database ... 30%
+2026-10-20T13:22:03.3137447Z (Reading database ... 35%
+2026-10-20T13:22:03.3155144Z (Reading database ... 40%
+2026-10-20T13:22:03.3155612Z (Reading database ... 45%
+2026-10-20T13:22:03.3157969Z (Reading database ... 50%
+2026-10-20T13:22:03.3158937Z (Reading database ... 55%
+2026-10-20T13:22:03.3159259Z (Reading database ... 60%
+2026-10-20T13:22:03.3159644Z (Reading database ... 65%
+2026-10-20T13:22:03.3162742Z (Reading database ... 70%
+2026-10-20T13:22:03.3163082Z (Reading database ... 75%
+2026-10-20T13:22:03.3163500Z (Reading database ... 80%
+2026-10-20T13:22:03.3163914Z (Reading database ... 85%
+2026-10-20T13:22:03.3166137Z (Reading database ... 90%
+2026-10-20T13:22:03.3167786Z (Reading database ... 95%
+2026-10-20T13:22:03.3168193Z (Reading database ... 100%
+2026-10-20T13:22:03.3168710Z (Reading database ... 4995 files and directories currently installed.)
+2026-10-20T13:22:03.3171269Z Preparing to unpack .../libcap-ng_2%3a0.9.6_aarch64.deb ...
+2026-10-20T13:22:03.3200801Z Unpacking libcap-ng (2:0.9.6) over (2:0.9.5) ...
+2026-10-20T13:22:03.3809197Z Setting up libcap-ng (2:0.9.6) ...
+2026-10-20T13:22:03.4034932Z (Reading database ... 
+2026-10-20T13:22:03.4036508Z (Reading database ... 5%
+2026-10-20T13:22:03.4037285Z (Reading database ... 10%
+2026-10-20T13:22:03.4037556Z (Reading database ... 15%
+2026-10-20T13:22:03.4037884Z (Reading database ... 20%
+2026-10-20T13:22:03.4038201Z (Reading database ... 25%
+2026-10-20T13:22:03.4038513Z (Reading database ... 30%
+2026-10-20T13:22:03.4038813Z (Reading database ... 35%
+2026-10-20T13:22:03.4053026Z (Reading database ... 40%
+2026-10-20T13:22:03.4057109Z (Reading database ... 45%
+2026-10-20T13:22:03.4058166Z (Reading database ... 50%
+2026-10-20T13:22:03.4058606Z (Reading database ... 55%
+2026-10-20T13:22:03.4058952Z (Reading database ... 60%
+2026-10-20T13:22:03.4059220Z (Reading database ... 65%
+2026-10-20T13:22:03.4059954Z (Reading database ... 70%
+2026-10-20T13:22:03.4061268Z (Reading database ... 75%
+2026-10-20T13:22:03.4062553Z (Reading database ... 80%
+2026-10-20T13:22:03.4064510Z (Reading database ... 85%
+2026-10-20T13:22:03.4067641Z (Reading database ... 90%
+2026-10-20T13:22:03.4070565Z (Reading database ... 95%
+2026-10-20T13:22:03.4070963Z (Reading database ... 100%
+2026-10-20T13:22:03.4071777Z (Reading database ... 4995 files and directories currently installed.)
+2026-10-20T13:22:03.4073146Z Preparing to unpack .../util-linux_2.42.4_aarch64.deb ...
+2026-10-20T13:22:03.4131226Z Unpacking util-linux (2.42.4) over (2.42.1-4) ...
+2026-10-20T13:22:03.6882948Z Setting up util-linux (2.42.4) ...
+2026-10-20T13:22:03.7145735Z (Reading database ... 
+2026-10-20T13:22:03.7146269Z (Reading database ... 5%
+2026-10-20T13:22:03.7147089Z (Reading database ... 10%
+2026-10-20T13:22:03.7147713Z (Reading database ... 15%
+2026-10-20T13:22:03.7148581Z (Reading database ... 20%
+2026-10-20T13:22:03.7149119Z (Reading database ... 25%
+2026-10-20T13:22:03.7149545Z (Reading database ... 30%
+2026-10-20T13:22:03.7149997Z (Reading database ... 35%
+2026-10-20T13:22:03.7157384Z (Reading database ... 40%
+2026-10-20T13:22:03.7157877Z (Reading database ... 45%
+2026-10-20T13:22:03.7158406Z (Reading database ... 50%
+2026-10-20T13:22:03.7159468Z (Reading database ... 55%
+2026-10-20T13:22:03.7166145Z (Reading database ... 60%
+2026-10-20T13:22:03.7166411Z (Reading database ... 65%
+2026-10-20T13:22:03.7166741Z (Reading database ... 70%
+2026-10-20T13:22:03.7167003Z (Reading database ... 75%
+2026-10-20T13:22:03.7167249Z (Reading database ... 80%
+2026-10-20T13:22:03.7167813Z (Reading database ... 85%
+2026-10-20T13:22:03.7170097Z (Reading database ... 90%
+2026-10-20T13:22:03.7173103Z (Reading database ... 95%
+2026-10-20T13:22:03.7173552Z (Reading database ... 100%
+2026-10-20T13:22:03.7174242Z (Reading database ... 4989 files and directories currently installed.)
+2026-10-20T13:22:03.7176329Z Preparing to unpack .../libgcrypt_1.12.4_aarch64.deb ...
+2026-10-20T13:22:03.7211306Z Unpacking libgcrypt (1.12.4) over (1.12.2) ...
+2026-10-20T13:22:03.7783637Z Setting up libgcrypt (1.12.4) ...
+2026-10-20T13:22:03.7973989Z (Reading database ... 
+2026-10-20T13:22:03.7974719Z (Reading database ... 5%
+2026-10-20T13:22:03.7975894Z (Reading database ... 10%
+2026-10-20T13:22:03.7976234Z (Reading database ... 15%
+2026-10-20T13:22:03.7976525Z (Reading database ... 20%
+2026-10-20T13:22:03.7976952Z (Reading database ... 25%
+2026-10-20T13:22:03.7977211Z (Reading database ... 30%
+2026-10-20T13:22:03.7977530Z (Reading database ... 35%
+2026-10-20T13:22:03.7995949Z (Reading database ... 40%
+2026-10-20T13:22:03.7996454Z (Reading database ... 45%
+2026-10-20T13:22:03.7996983Z (Reading database ... 50%
+2026-10-20T13:22:03.7997881Z (Reading database ... 55%
+2026-10-20T13:22:03.7999491Z (Reading database ... 60%
+2026-10-20T13:22:03.8000495Z (Reading database ... 65%
+2026-10-20T13:22:03.8002151Z (Reading database ... 70%
+2026-10-20T13:22:03.8002707Z (Reading database ... 75%
+2026-10-20T13:22:03.8004412Z (Reading database ... 80%
+2026-10-20T13:22:03.8006715Z (Reading database ... 85%
+2026-10-20T13:22:03.8008046Z (Reading database ... 90%
+2026-10-20T13:22:03.8010233Z (Reading database ... 95%
+2026-10-20T13:22:03.8010704Z (Reading database ... 100%
+2026-10-20T13:22:03.8011112Z (Reading database ... 4989 files and directories currently installed.)
+2026-10-20T13:22:03.8013480Z Preparing to unpack .../libnpth_1.8_aarch64.deb ...
+2026-10-20T13:22:03.8045407Z Unpacking libnpth (1.8) over (1.6-3) ...
+2026-10-20T13:22:03.8364504Z Setting up libnpth (1.8) ...
+2026-10-20T13:22:03.8559539Z (Reading database ... 
+2026-10-20T13:22:03.8559923Z (Reading database ... 5%
+2026-10-20T13:22:03.8560448Z (Reading database ... 10%
+2026-10-20T13:22:03.8560817Z (Reading database ... 15%
+2026-10-20T13:22:03.8561063Z (Reading database ... 20%
+2026-10-20T13:22:03.8561397Z (Reading database ... 25%
+2026-10-20T13:22:03.8561659Z (Reading database ... 30%
+2026-10-20T13:22:03.8564141Z (Reading database ... 35%
+2026-10-20T13:22:03.8580892Z (Reading database ... 40%
+2026-10-20T13:22:03.8581668Z (Reading database ... 45%
+2026-10-20T13:22:03.8582681Z (Reading database ... 50%
+2026-10-20T13:22:03.8583611Z (Reading database ... 55%
+2026-10-20T13:22:03.8584737Z (Reading database ... 60%
+2026-10-20T13:22:03.8587282Z (Reading database ... 65%
+2026-10-20T13:22:03.8587666Z (Reading database ... 70%
+2026-10-20T13:22:03.8589972Z (Reading database ... 75%
+2026-10-20T13:22:03.8590258Z (Reading database ... 80%
+2026-10-20T13:22:03.8592867Z (Reading database ... 85%
+2026-10-20T13:22:03.8595466Z (Reading database ... 90%
+2026-10-20T13:22:03.8596746Z (Reading database ... 95%
+2026-10-20T13:22:03.8597155Z (Reading database ... 100%
+2026-10-20T13:22:03.8597772Z (Reading database ... 4989 files and directories currently installed.)
+2026-10-20T13:22:03.8599315Z Preparing to unpack .../gpgv_2.5.24_aarch64.deb ...
+2026-10-20T13:22:03.8630135Z Unpacking gpgv (2.5.24) over (2.5.17) ...
+2026-10-20T13:22:03.8947948Z Setting up gpgv (2.5.24) ...
+2026-10-20T13:22:03.9136086Z (Reading database ... 
+2026-10-20T13:22:03.9136461Z (Reading database ... 5%
+2026-10-20T13:22:03.9137466Z (Reading database ... 10%
+2026-10-20T13:22:03.9137786Z (Reading database ... 15%
+2026-10-20T13:22:03.9138034Z (Reading database ... 20%
+2026-10-20T13:22:03.9138370Z (Reading database ... 25%
+2026-10-20T13:22:03.9138625Z (Reading database ... 30%
+2026-10-20T13:22:03.9138927Z (Reading database ... 35%
+2026-10-20T13:22:03.9154978Z (Reading database ... 40%
+2026-10-20T13:22:03.9156213Z (Reading database ... 45%
+2026-10-20T13:22:03.9158716Z (Reading database ... 50%
+2026-10-20T13:22:03.9159113Z (Reading database ... 55%
+2026-10-20T13:22:03.9159365Z (Reading database ... 60%
+2026-10-20T13:22:03.9160307Z (Reading database ... 65%
+2026-10-20T13:22:03.9161391Z (Reading database ... 70%
+2026-10-20T13:22:03.9163248Z (Reading database ... 75%
+2026-10-20T13:22:03.9164055Z (Reading database ... 80%
+2026-10-20T13:22:03.9166974Z (Reading database ... 85%
+2026-10-20T13:22:03.9168981Z (Reading database ... 90%
+2026-10-20T13:22:03.9170681Z (Reading database ... 95%
+2026-10-20T13:22:03.9171074Z (Reading database ... 100%
+2026-10-20T13:22:03.9171521Z (Reading database ... 4989 files and directories currently installed.)
+2026-10-20T13:22:03.9173590Z Preparing to unpack .../libffi_3.8.0_aarch64.deb ...
+2026-10-20T13:22:03.9206075Z Unpacking libffi (3.8.0) over (3.5.2) ...
+2026-10-20T13:22:03.9537257Z Setting up libffi (3.8.0) ...
+2026-10-20T13:22:03.9731875Z (Reading database ... 
+2026-10-20T13:22:03.9732852Z (Reading database ... 5%
+2026-10-20T13:22:03.9733138Z (Reading database ... 10%
+2026-10-20T13:22:03.9733413Z (Reading database ... 15%
+2026-10-20T13:22:03.9733881Z (Reading database ... 20%
+2026-10-20T13:22:03.9734145Z (Reading database ... 25%
+2026-10-20T13:22:03.9734480Z (Reading database ... 30%
+2026-10-20T13:22:03.9734761Z (Reading database ... 35%
+2026-10-20T13:22:03.9755992Z (Reading database ... 40%
+2026-10-20T13:22:03.9757652Z (Reading database ... 45%
+2026-10-20T13:22:03.9758530Z (Reading database ... 50%
+2026-10-20T13:22:03.9759698Z (Reading database ... 55%
+2026-10-20T13:22:03.9760198Z (Reading database ... 60%
+2026-10-20T13:22:03.9760499Z (Reading database ... 65%
+2026-10-20T13:22:03.9760890Z (Reading database ... 70%
+2026-10-20T13:22:03.9766727Z (Reading database ... 75%
+2026-10-20T13:22:03.9767113Z (Reading database ... 80%
+2026-10-20T13:22:03.9770900Z (Reading database ... 85%
+2026-10-20T13:22:03.9771274Z (Reading database ... 90%
+2026-10-20T13:22:03.9771650Z (Reading database ... 95%
+2026-10-20T13:22:03.9771969Z (Reading database ... 100%
+2026-10-20T13:22:03.9772328Z (Reading database ... 4989 files and directories currently installed.)
+2026-10-20T13:22:03.9772896Z Preparing to unpack .../libmd_1.3.0_aarch64.deb ...
+2026-10-20T13:22:03.9807357Z Unpacking libmd (1.3.0) over (1.1.0-1) ...
+2026-10-20T13:22:04.0326560Z Setting up libmd (1.3.0) ...
+2026-10-20T13:22:04.0514335Z (Reading database ... 
+2026-10-20T13:22:04.0514935Z (Reading database ... 5%
+2026-10-20T13:22:04.0515604Z (Reading database ... 10%
+2026-10-20T13:22:04.0516006Z (Reading database ... 15%
+2026-10-20T13:22:04.0516463Z (Reading database ... 20%
+2026-10-20T13:22:04.0516924Z (Reading database ... 25%
+2026-10-20T13:22:04.0517302Z (Reading database ... 30%
+2026-10-20T13:22:04.0517728Z (Reading database ... 35%
+2026-10-20T13:22:04.0535188Z (Reading database ... 40%
+2026-10-20T13:22:04.0535812Z (Reading database ... 45%
+2026-10-20T13:22:04.0537851Z (Reading database ... 50%
+2026-10-20T13:22:04.0538783Z (Reading database ... 55%
+2026-10-20T13:22:04.0540548Z (Reading database ... 60%
+2026-10-20T13:22:04.0541336Z (Reading database ... 65%
+2026-10-20T13:22:04.0541832Z (Reading database ... 70%
+2026-10-20T13:22:04.0543302Z (Reading database ... 75%
+2026-10-20T13:22:04.0543605Z (Reading database ... 80%
+2026-10-20T13:22:04.0546784Z (Reading database ... 85%
+2026-10-20T13:22:04.0548389Z (Reading database ... 90%
+2026-10-20T13:22:04.0550019Z (Reading database ... 95%
+2026-10-20T13:22:04.0550319Z (Reading database ... 100%
+2026-10-20T13:22:04.0550674Z (Reading database ... 5029 files and directories currently installed.)
+2026-10-20T13:22:04.0555145Z Preparing to unpack .../libunbound_1.26.1_aarch64.deb ...
+2026-10-20T13:22:04.0584327Z Unpacking libunbound (1.26.1) over (1.26.0) ...
+2026-10-20T13:22:04.1314830Z Setting up libunbound (1.26.1) ...
+2026-10-20T13:22:04.1501048Z (Reading database ... 
+2026-10-20T13:22:04.1501452Z (Reading database ... 5%
+2026-10-20T13:22:04.1501910Z (Reading database ... 10%
+2026-10-20T13:22:04.1502163Z (Reading database ... 15%
+2026-10-20T13:22:04.1502408Z (Reading database ... 20%
+2026-10-20T13:22:04.1502743Z (Reading database ... 25%
+2026-10-20T13:22:04.1503016Z (Reading database ... 30%
+2026-10-20T13:22:04.1503298Z (Reading database ... 35%
+2026-10-20T13:22:04.1521413Z (Reading database ... 40%
+2026-10-20T13:22:04.1521709Z (Reading database ... 45%
+2026-10-20T13:22:04.1522651Z (Reading database ... 50%
+2026-10-20T13:22:04.1522906Z (Reading database ... 55%
+2026-10-20T13:22:04.1526717Z (Reading database ... 60%
+2026-10-20T13:22:04.1527060Z (Reading database ... 65%
+2026-10-20T13:22:04.1528803Z (Reading database ... 70%
+2026-10-20T13:22:04.1529442Z (Reading database ... 75%
+2026-10-20T13:22:04.1529981Z (Reading database ... 80%
+2026-10-20T13:22:04.1531882Z (Reading database ... 85%
+2026-10-20T13:22:04.1533410Z (Reading database ... 90%
+2026-10-20T13:22:04.1536612Z (Reading database ... 95%
+2026-10-20T13:22:04.1537161Z (Reading database ... 100%
+2026-10-20T13:22:04.1537708Z (Reading database ... 5029 files and directories currently installed.)
+2026-10-20T13:22:04.1538682Z Preparing to unpack .../termux-am_0.8.1_all.deb ...
+2026-10-20T13:22:04.1571485Z Unpacking termux-am (0.8.1) over (0.8.0-2) ...
+2026-10-20T13:22:04.1939501Z Setting up termux-am (0.8.1) ...
+2026-10-20T13:22:04.2147865Z (Reading database ... 
+2026-10-20T13:22:04.2148832Z (Reading database ... 5%
+2026-10-20T13:22:04.2149322Z (Reading database ... 10%
+2026-10-20T13:22:04.2149605Z (Reading database ... 15%
+2026-10-20T13:22:04.2149856Z (Reading database ... 20%
+2026-10-20T13:22:04.2150265Z (Reading database ... 25%
+2026-10-20T13:22:04.2150518Z (Reading database ... 30%
+2026-10-20T13:22:04.2150861Z (Reading database ... 35%
+2026-10-20T13:22:04.2169769Z (Reading database ... 40%
+2026-10-20T13:22:04.2170711Z (Reading database ... 45%
+2026-10-20T13:22:04.2171296Z (Reading database ... 50%
+2026-10-20T13:22:04.2172492Z (Reading database ... 55%
+2026-10-20T13:22:04.2174925Z (Reading database ... 60%
+2026-10-20T13:22:04.2176110Z (Reading database ... 65%
+2026-10-20T13:22:04.2176497Z (Reading database ... 70%
+2026-10-20T13:22:04.2178426Z (Reading database ... 75%
+2026-10-20T13:22:04.2179064Z (Reading database ... 80%
+2026-10-20T13:22:04.2181187Z (Reading database ... 85%
+2026-10-20T13:22:04.2182793Z (Reading database ... 90%
+2026-10-20T13:22:04.2185646Z (Reading database ... 95%
+2026-10-20T13:22:04.2186002Z (Reading database ... 100%
+2026-10-20T13:22:04.2186499Z (Reading database ... 5029 files and directories currently installed.)
+2026-10-20T13:22:04.2189318Z Preparing to unpack .../xxhash_0.8.4_aarch64.deb ...
+2026-10-20T13:22:04.2221436Z Unpacking xxhash (0.8.4) over (0.8.3-1) ...
+2026-10-20T13:22:04.2556825Z Setting up xxhash (0.8.4) ...
+2026-10-20T13:22:04.2744058Z (Reading database ... 
+2026-10-20T13:22:04.2744987Z (Reading database ... 5%
+2026-10-20T13:22:04.2745412Z (Reading database ... 10%
+2026-10-20T13:22:04.2745827Z (Reading database ... 15%
+2026-10-20T13:22:04.2746334Z (Reading database ... 20%
+2026-10-20T13:22:04.2746749Z (Reading database ... 25%
+2026-10-20T13:22:04.2747165Z (Reading database ... 30%
+2026-10-20T13:22:04.2748562Z (Reading database ... 35%
+2026-10-20T13:22:04.2764356Z (Reading database ... 40%
+2026-10-20T13:22:04.2766112Z (Reading database ... 45%
+2026-10-20T13:22:04.2767155Z (Reading database ... 50%
+2026-10-20T13:22:04.2768261Z (Reading database ... 55%
+2026-10-20T13:22:04.2769253Z (Reading database ... 60%
+2026-10-20T13:22:04.2769810Z (Reading database ... 65%
+2026-10-20T13:22:04.2770824Z (Reading database ... 70%
+2026-10-20T13:22:04.2771508Z (Reading database ... 75%
+2026-10-20T13:22:04.2775262Z (Reading database ... 80%
+2026-10-20T13:22:04.2776010Z (Reading database ... 85%
+2026-10-20T13:22:04.2777316Z (Reading database ... 90%
+2026-10-20T13:22:04.2779299Z (Reading database ... 95%
+2026-10-20T13:22:04.2779815Z (Reading database ... 100%
+2026-10-20T13:22:04.2780477Z (Reading database ... 5029 files and directories currently installed.)
+2026-10-20T13:22:04.2781927Z Preparing to unpack .../command-not-found_3.5.0-16_aarch64.deb ...
+2026-10-20T13:22:04.2820791Z Unpacking command-not-found (3.5.0-16) over (3.5.0-9) ...
+2026-10-20T13:22:04.3170447Z Preparing to unpack .../inetutils_2.8-1_aarch64.deb ...
+2026-10-20T13:22:04.3196939Z Unpacking inetutils (2.8-1) over (2.7) ...
+2026-10-20T13:22:04.3725810Z Preparing to unpack .../libandroid-stub_30-2_aarch64.deb ...
+2026-10-20T13:22:04.3750693Z Unpacking libandroid-stub (30-2) over (29-2) ...
+2026-10-20T13:22:04.4032926Z Preparing to unpack .../libtirpc_1.3.8_aarch64.deb ...
+2026-10-20T13:22:04.4058131Z Unpacking libtirpc (1.3.8) over (1.3.7-1) ...
+2026-10-20T13:22:04.4938365Z Setting up libtirpc (1.3.8) ...
+2026-10-20T13:22:04.4965086Z Setting up inetutils (2.8-1) ...
+2026-10-20T13:22:04.4987930Z Setting up command-not-found (3.5.0-16) ...
+2026-10-20T13:22:04.5015103Z Setting up libandroid-stub (30-2) ...
+2026-10-20T13:22:15.7018121Z Reading package lists...
+2026-10-20T13:22:15.7034497Z Building dependency tree...
+2026-10-20T13:22:15.7035081Z Reading state information...
+2026-10-20T13:22:15.7078677Z Suggested packages:
+2026-10-20T13:22:15.7079114Z   python-tkinter
+2026-10-20T13:22:15.7079576Z Recommended packages:
+2026-10-20T13:22:15.7079922Z   xorg-xauth python-ensurepip-wheels clang make pkg-config
+2026-10-20T13:22:15.7136982Z The following NEW packages will be installed:
+2026-10-20T13:22:15.7137792Z   abseil-cpp brotli ffmpeg fftw fmt fontconfig freetype fribidi game-music-emu
+2026-10-20T13:22:15.7138333Z   gdbm gdk-pixbuf gflags giflib glib glslang google-glog harfbuzz highway
+2026-10-20T13:22:15.7138971Z   libandroid-complex-math libandroid-execinfo libandroid-shmem libaom libass
+2026-10-20T13:22:15.7139536Z   libavif libbluray libbs2b libcairo libcrypt libdav1d libde265 libdrm
+2026-10-20T13:22:15.7140070Z   libdvdnav libdvdread libexpat libflac libgraphite libheif libjpeg-turbo
+2026-10-20T13:22:15.7140635Z   libjxl libllvm liblzo libmp3lame libmpg123 libmysofa libogg libopenblas
+2026-10-20T13:22:15.7141646Z   libopencore-amr libopenmpt libopus libpixman libplacebo libpng libprotobuf
+2026-10-20T13:22:15.7142235Z   librav1e libsamplerate libsndfile libsodium libsoxr libsqlite libsrt libssh
+2026-10-20T13:22:15.7142767Z   libtheora libtiff libudfread libv4l libvidstab libvmaf libvo-amrwbenc
+2026-10-20T13:22:15.7143330Z   libvorbis libvpx libwayland libwebp libx11 libx264 libx265 libxau libxcb
+2026-10-20T13:22:15.7144171Z   libxdmcp libxext libxml2 libxrender libxshmfence libzimg libzmq littlecms
+2026-10-20T13:22:15.7144705Z   mesa-vulkan-icd-swrast ncurses-ui-libs ocl-icd python python-llvmlite
+2026-10-20T13:22:15.7145245Z   python-numpy python-pip python-scipy python-soxr python-torch
+2026-10-20T13:22:15.7145779Z   python-torchaudio python-torchcodec rubberband svt-av1 ttf-dejavu vulkan-icd
+2026-10-20T13:22:15.7146315Z   vulkan-loader-generic xorg-util-macros xorgproto xvidcore
+2026-10-20T13:22:15.7363020Z 0 upgraded, 105 newly installed, 17 reinstalled, 0 to remove and 0 not upgraded.
+2026-10-20T13:22:15.7364228Z After this operation, 958 MB of additional disk space will be used.
+2026-10-20T13:22:15.7520076Z (Reading database ... 
+2026-10-20T13:22:15.7520928Z (Reading database ... 5%
+2026-10-20T13:22:15.7521366Z (Reading database ... 10%
+2026-10-20T13:22:15.7521861Z (Reading database ... 15%
+2026-10-20T13:22:15.7522334Z (Reading database ... 20%
+2026-10-20T13:22:15.7522756Z (Reading database ... 25%
+2026-10-20T13:22:15.7523191Z (Reading database ... 30%
+2026-10-20T13:22:15.7523569Z (Reading database ... 35%
+2026-10-20T13:22:15.7539152Z (Reading database ... 40%
+2026-10-20T13:22:15.7539638Z (Reading database ... 45%
+2026-10-20T13:22:15.7539904Z (Reading database ... 50%
+2026-10-20T13:22:15.7540145Z (Reading database ... 55%
+2026-10-20T13:22:15.7543029Z (Reading database ... 60%
+2026-10-20T13:22:15.7543497Z (Reading database ... 65%
+2026-10-20T13:22:15.7548077Z (Reading database ... 70%
+2026-10-20T13:22:15.7562655Z (Reading database ... 75%
+2026-10-20T13:22:15.7563829Z (Reading database ... 80%
+2026-10-20T13:22:15.7564514Z (Reading database ... 85%
+2026-10-20T13:22:15.7564790Z (Reading database ... 90%
+2026-10-20T13:22:15.7565094Z (Reading database ... 95%
+2026-10-20T13:22:15.7565364Z (Reading database ... 100%
+2026-10-20T13:22:15.7565712Z (Reading database ... 5030 files and directories currently installed.)
+2026-10-20T13:22:15.7566264Z Preparing to unpack .../libiconv_1.19_aarch64.deb ...
+2026-10-20T13:22:15.7590107Z Unpacking libiconv (1.19) over (1.19) ...
+2026-10-20T13:22:15.8113058Z Setting up libiconv (1.19) ...
+2026-10-20T13:22:15.8300179Z (Reading database ... 
+2026-10-20T13:22:15.8300656Z (Reading database ... 5%
+2026-10-20T13:22:15.8301143Z (Reading database ... 10%
+2026-10-20T13:22:15.8301396Z (Reading database ... 15%
+2026-10-20T13:22:15.8301674Z (Reading database ... 20%
+2026-10-20T13:22:15.8302037Z (Reading database ... 25%
+2026-10-20T13:22:15.8302313Z (Reading database ... 30%
+2026-10-20T13:22:15.8303927Z (Reading database ... 35%
+2026-10-20T13:22:15.8318188Z (Reading database ... 40%
+2026-10-20T13:22:15.8319052Z (Reading database ... 45%
+2026-10-20T13:22:15.8320373Z (Reading database ... 50%
+2026-10-20T13:22:15.8321202Z (Reading database ... 55%
+2026-10-20T13:22:15.8322975Z (Reading database ... 60%
+2026-10-20T13:22:15.8323318Z (Reading database ... 65%
+2026-10-20T13:22:15.8325008Z (Reading database ... 70%
+2026-10-20T13:22:15.8326918Z (Reading database ... 75%
+2026-10-20T13:22:15.8329258Z (Reading database ... 80%
+2026-10-20T13:22:15.8331514Z (Reading database ... 85%
+2026-10-20T13:22:15.8332221Z (Reading database ... 90%
+2026-10-20T13:22:15.8334469Z (Reading database ... 95%
+2026-10-20T13:22:15.8334997Z (Reading database ... 100%
+2026-10-20T13:22:15.8336000Z (Reading database ... 5030 files and directories currently installed.)
+2026-10-20T13:22:15.8338479Z Preparing to unpack .../libandroid-support_29-1_aarch64.deb ...
+2026-10-20T13:22:15.8369343Z Unpacking libandroid-support (29-1) over (29-1) ...
+2026-10-20T13:22:15.8607858Z Setting up libandroid-support (29-1) ...
+2026-10-20T13:22:15.8800552Z (Reading database ... 
+2026-10-20T13:22:15.8800919Z (Reading database ... 5%
+2026-10-20T13:22:15.8801380Z (Reading database ... 10%
+2026-10-20T13:22:15.8801653Z (Reading database ... 15%
+2026-10-20T13:22:15.8802448Z (Reading database ... 20%
+2026-10-20T13:22:15.8803006Z (Reading database ... 25%
+2026-10-20T13:22:15.8803276Z (Reading database ... 30%
+2026-10-20T13:22:15.8804750Z (Reading database ... 35%
+2026-10-20T13:22:15.8818579Z (Reading database ... 40%
+2026-10-20T13:22:15.8819411Z (Reading database ... 45%
+2026-10-20T13:22:15.8820751Z (Reading database ... 50%
+2026-10-20T13:22:15.8821029Z (Reading database ... 55%
+2026-10-20T13:22:15.8821723Z (Reading database ... 60%
+2026-10-20T13:22:15.8823022Z (Reading database ... 65%
+2026-10-20T13:22:15.8824210Z (Reading database ... 70%
+2026-10-20T13:22:15.8825587Z (Reading database ... 75%
+2026-10-20T13:22:15.8827825Z (Reading database ... 80%
+2026-10-20T13:22:15.8829948Z (Reading database ... 85%
+2026-10-20T13:22:15.8830290Z (Reading database ... 90%
+2026-10-20T13:22:15.8832218Z (Reading database ... 95%
+2026-10-20T13:22:15.8832790Z (Reading database ... 100%
+2026-10-20T13:22:15.8833293Z (Reading database ... 5030 files and directories currently installed.)
+2026-10-20T13:22:15.8836074Z Preparing to unpack .../libbz2_1.0.8-8_aarch64.deb ...
+2026-10-20T13:22:15.8867367Z Unpacking libbz2 (1.0.8-8) over (1.0.8-8) ...
+2026-10-20T13:22:15.9118089Z Setting up libbz2 (1.0.8-8) ...
+2026-10-20T13:22:15.9308409Z (Reading database ... 
+2026-10-20T13:22:15.9309112Z (Reading database ... 5%
+2026-10-20T13:22:15.9309768Z (Reading database ... 10%
+2026-10-20T13:22:15.9310205Z (Reading database ... 15%
+2026-10-20T13:22:15.9310568Z (Reading database ... 20%
+2026-10-20T13:22:15.9311051Z (Reading database ... 25%
+2026-10-20T13:22:15.9312283Z (Reading database ... 30%
+2026-10-20T13:22:15.9312999Z (Reading database ... 35%
+2026-10-20T13:22:15.9326820Z (Reading database ... 40%
+2026-10-20T13:22:15.9327157Z (Reading database ... 45%
+2026-10-20T13:22:15.9328465Z (Reading database ... 50%
+2026-10-20T13:22:15.9328755Z (Reading database ... 55%
+2026-10-20T13:22:15.9330268Z (Reading database ... 60%
+2026-10-20T13:22:15.9330918Z (Reading database ... 65%
+2026-10-20T13:22:15.9332806Z (Reading database ... 70%
+2026-10-20T13:22:15.9335785Z (Reading database ... 75%
+2026-10-20T13:22:15.9336246Z (Reading database ... 80%
+2026-10-20T13:22:15.9337632Z (Reading database ... 85%
+2026-10-20T13:22:15.9339274Z (Reading database ... 90%
+2026-10-20T13:22:15.9340343Z (Reading database ... 95%
+2026-10-20T13:22:15.9341461Z (Reading database ... 100%
+2026-10-20T13:22:15.9342532Z (Reading database ... 5030 files and directories currently installed.)
+2026-10-20T13:22:15.9343486Z Preparing to unpack .../archives/libc++_30_aarch64.deb ...
+2026-10-20T13:22:15.9374145Z Unpacking libc++ (30) over (30) ...
+2026-10-20T13:22:15.9757941Z Setting up libc++ (30) ...
+2026-10-20T13:22:15.9958962Z (Reading database ... 
+2026-10-20T13:22:15.9959543Z (Reading database ... 5%
+2026-10-20T13:22:15.9959855Z (Reading database ... 10%
+2026-10-20T13:22:15.9960187Z (Reading database ... 15%
+2026-10-20T13:22:15.9960444Z (Reading database ... 20%
+2026-10-20T13:22:15.9960734Z (Reading database ... 25%
+2026-10-20T13:22:15.9961034Z (Reading database ... 30%
+2026-10-20T13:22:15.9963018Z (Reading database ... 35%
+2026-10-20T13:22:15.9979747Z (Reading database ... 40%
+2026-10-20T13:22:15.9980198Z (Reading database ... 45%
+2026-10-20T13:22:15.9982650Z (Reading database ... 50%
+2026-10-20T13:22:15.9982997Z (Reading database ... 55%
+2026-10-20T13:22:15.9983491Z (Reading database ... 60%
+2026-10-20T13:22:15.9985300Z (Reading database ... 65%
+2026-10-20T13:22:15.9986953Z (Reading database ... 70%
+2026-10-20T13:22:15.9989462Z (Reading database ... 75%
+2026-10-20T13:22:15.9990508Z (Reading database ... 80%
+2026-10-20T13:22:15.9992223Z (Reading database ... 85%
+2026-10-20T13:22:15.9993623Z (Reading database ... 90%
+2026-10-20T13:22:15.9995184Z (Reading database ... 95%
+2026-10-20T13:22:15.9995717Z (Reading database ... 100%
+2026-10-20T13:22:15.9996725Z (Reading database ... 5030 files and directories currently installed.)
+2026-10-20T13:22:15.9998488Z Preparing to unpack .../liblzma_5.8.4_aarch64.deb ...
+2026-10-20T13:22:16.0030482Z Unpacking liblzma (5.8.4) over (5.8.4) ...
+2026-10-20T13:22:16.0470054Z Setting up liblzma (5.8.4) ...
+2026-10-20T13:22:16.0659182Z (Reading database ... 
+2026-10-20T13:22:16.0659867Z (Reading database ... 5%
+2026-10-20T13:22:16.0660201Z (Reading database ... 10%
+2026-10-20T13:22:16.0660549Z (Reading database ... 15%
+2026-10-20T13:22:16.0660806Z (Reading database ... 20%
+2026-10-20T13:22:16.0661094Z (Reading database ... 25%
+2026-10-20T13:22:16.0661396Z (Reading database ... 30%
+2026-10-20T13:22:16.0663601Z (Reading database ... 35%
+2026-10-20T13:22:16.0678348Z (Reading database ... 40%
+2026-10-20T13:22:16.0686319Z (Reading database ... 45%
+2026-10-20T13:22:16.0686869Z (Reading database ... 50%
+2026-10-20T13:22:16.0687138Z (Reading database ... 55%
+2026-10-20T13:22:16.0687384Z (Reading database ... 60%
+2026-10-20T13:22:16.0687702Z (Reading database ... 65%
+2026-10-20T13:22:16.0687957Z (Reading database ... 70%
+2026-10-20T13:22:16.0690483Z (Reading database ... 75%
+2026-10-20T13:22:16.0690872Z (Reading database ... 80%
+2026-10-20T13:22:16.0699956Z (Reading database ... 85%
+2026-10-20T13:22:16.0700405Z (Reading database ... 90%
+2026-10-20T13:22:16.0700671Z (Reading database ... 95%
+2026-10-20T13:22:16.0700916Z (Reading database ... 100%
+2026-10-20T13:22:16.0701318Z (Reading database ... 5030 files and directories currently installed.)
+2026-10-20T13:22:16.0701848Z Preparing to unpack .../ca-certificates_1%3a2026.09.25_all.deb ...
+2026-10-20T13:22:16.0726729Z Unpacking ca-certificates (1:2026.09.25) over (1:2026.09.25) ...
+2026-10-20T13:22:16.0984087Z Setting up ca-certificates (1:2026.09.25) ...
+2026-10-20T13:22:16.1164206Z (Reading database ... 
+2026-10-20T13:22:16.1164840Z (Reading database ... 5%
+2026-10-20T13:22:16.1165113Z (Reading database ... 10%
+2026-10-20T13:22:16.1165403Z (Reading database ... 15%
+2026-10-20T13:22:16.1165701Z (Reading database ... 20%
+2026-10-20T13:22:16.1165985Z (Reading database ... 25%
+2026-10-20T13:22:16.1166296Z (Reading database ... 30%
+2026-10-20T13:22:16.1168296Z (Reading database ... 35%
+2026-10-20T13:22:16.1182318Z (Reading database ... 40%
+2026-10-20T13:22:16.1183137Z (Reading database ... 45%
+2026-10-20T13:22:16.1184623Z (Reading database ... 50%
+2026-10-20T13:22:16.1185875Z (Reading database ... 55%
+2026-10-20T13:22:16.1187358Z (Reading database ... 60%
+2026-10-20T13:22:16.1188093Z (Reading database ... 65%
+2026-10-20T13:22:16.1189646Z (Reading database ... 70%
+2026-10-20T13:22:16.1192656Z (Reading database ... 75%
+2026-10-20T13:22:16.1195370Z (Reading database ... 80%
+2026-10-20T13:22:16.1196068Z (Reading database ... 85%
+2026-10-20T13:22:16.1196707Z (Reading database ... 90%
+2026-10-20T13:22:16.1204265Z (Reading database ... 95%
+2026-10-20T13:22:16.1204576Z (Reading database ... 100%
+2026-10-20T13:22:16.1205045Z (Reading database ... 5030 files and directories currently installed.)
+2026-10-20T13:22:16.1205551Z Preparing to unpack .../libandroid-glob_0.6-3_aarch64.deb ...
+2026-10-20T13:22:16.1234994Z Unpacking libandroid-glob (0.6-3) over (0.6-3) ...
+2026-10-20T13:22:16.1464711Z Setting up libandroid-glob (0.6-3) ...
+2026-10-20T13:22:16.1648659Z (Reading database ... 
+2026-10-20T13:22:16.1649216Z (Reading database ... 5%
+2026-10-20T13:22:16.1649498Z (Reading database ... 10%
+2026-10-20T13:22:16.1649754Z (Reading database ... 15%
+2026-10-20T13:22:16.1650056Z (Reading database ... 20%
+2026-10-20T13:22:16.1650357Z (Reading database ... 25%
+2026-10-20T13:22:16.1650669Z (Reading database ... 30%
+2026-10-20T13:22:16.1652659Z (Reading database ... 35%
+2026-10-20T13:22:16.1668757Z (Reading database ... 40%
+2026-10-20T13:22:16.1670684Z (Reading database ... 45%
+2026-10-20T13:22:16.1671698Z (Reading database ... 50%
+2026-10-20T13:22:16.1672689Z (Reading database ... 55%
+2026-10-20T13:22:16.1673184Z (Reading database ... 60%
+2026-10-20T13:22:16.1673597Z (Reading database ... 65%
+2026-10-20T13:22:16.1675760Z (Reading database ... 70%
+2026-10-20T13:22:16.1677141Z (Reading database ... 75%
+2026-10-20T13:22:16.1679010Z (Reading database ... 80%
+2026-10-20T13:22:16.1680608Z (Reading database ... 85%
+2026-10-20T13:22:16.1681495Z (Reading database ... 90%
+2026-10-20T13:22:16.1683307Z (Reading database ... 95%
+2026-10-20T13:22:16.1684242Z (Reading database ... 100%
+2026-10-20T13:22:16.1684623Z (Reading database ... 5030 files and directories currently installed.)
+2026-10-20T13:22:16.1686639Z Preparing to unpack .../libandroid-posix-semaphore_0.1-4_aarch64.deb ...
+2026-10-20T13:22:16.1718609Z Unpacking libandroid-posix-semaphore (0.1-4) over (0.1-4) ...
+2026-10-20T13:22:16.1944524Z Setting up libandroid-posix-semaphore (0.1-4) ...
+2026-10-20T13:22:16.2117401Z (Reading database ... 
+2026-10-20T13:22:16.2117747Z (Reading database ... 5%
+2026-10-20T13:22:16.2118191Z (Reading database ... 10%
+2026-10-20T13:22:16.2118451Z (Reading database ... 15%
+2026-10-20T13:22:16.2118834Z (Reading database ... 20%
+2026-10-20T13:22:16.2119114Z (Reading database ... 25%
+2026-10-20T13:22:16.2119376Z (Reading database ... 30%
+2026-10-20T13:22:16.2121074Z (Reading database ... 35%
+2026-10-20T13:22:16.2133783Z (Reading database ... 40%
+2026-10-20T13:22:16.2134718Z (Reading database ... 45%
+2026-10-20T13:22:16.2137473Z (Reading database ... 50%
+2026-10-20T13:22:16.2138073Z (Reading database ... 55%
+2026-10-20T13:22:16.2138675Z (Reading database ... 60%
+2026-10-20T13:22:16.2140838Z (Reading database ... 65%
+2026-10-20T13:22:16.2141253Z (Reading database ... 70%
+2026-10-20T13:22:16.2143600Z (Reading database ... 75%
+2026-10-20T13:22:16.2145818Z (Reading database ... 80%
+2026-10-20T13:22:16.2146862Z (Reading database ... 85%
+2026-10-20T13:22:16.2148491Z (Reading database ... 90%
+2026-10-20T13:22:16.2149730Z (Reading database ... 95%
+2026-10-20T13:22:16.2150028Z (Reading database ... 100%
+2026-10-20T13:22:16.2150382Z (Reading database ... 5030 files and directories currently installed.)
+2026-10-20T13:22:16.2152776Z Preparing to unpack .../libffi_3.8.0_aarch64.deb ...
+2026-10-20T13:22:16.2181406Z Unpacking libffi (3.8.0) over (3.8.0) ...
+2026-10-20T13:22:16.2455253Z Setting up libffi (3.8.0) ...
+2026-10-20T13:22:16.2641337Z (Reading database ... 
+2026-10-20T13:22:16.2641908Z (Reading database ... 5%
+2026-10-20T13:22:16.2642175Z (Reading database ... 10%
+2026-10-20T13:22:16.2642482Z (Reading database ... 15%
+2026-10-20T13:22:16.2642839Z (Reading database ... 20%
+2026-10-20T13:22:16.2643098Z (Reading database ... 25%
+2026-10-20T13:22:16.2643393Z (Reading database ... 30%
+2026-10-20T13:22:16.2646341Z (Reading database ... 35%
+2026-10-20T13:22:16.2660308Z (Reading database ... 40%
+2026-10-20T13:22:16.2661431Z (Reading database ... 45%
+2026-10-20T13:22:16.2661755Z (Reading database ... 50%
+2026-10-20T13:22:16.2663252Z (Reading database ... 55%
+2026-10-20T13:22:16.2663593Z (Reading database ... 60%
+2026-10-20T13:22:16.2666491Z (Reading database ... 65%
+2026-10-20T13:22:16.2667222Z (Reading database ... 70%
+2026-10-20T13:22:16.2668375Z (Reading database ... 75%
+2026-10-20T13:22:16.2670821Z (Reading database ... 80%
+2026-10-20T13:22:16.2671182Z (Reading database ... 85%
+2026-10-20T13:22:16.2672511Z (Reading database ... 90%
+2026-10-20T13:22:16.2673558Z (Reading database ... 95%
+2026-10-20T13:22:16.2674275Z (Reading database ... 100%
+2026-10-20T13:22:16.2674736Z (Reading database ... 5030 files and directories currently installed.)
+2026-10-20T13:22:16.2677171Z Preparing to unpack .../ncurses_6.6.20260307+really6.5.20250830_aarch64.deb ...
+2026-10-20T13:22:16.2706834Z Unpacking ncurses (6.6.20260307+really6.5.20250830) over (6.6.20260307+really6.5.20250830) ...
+2026-10-20T13:22:16.5561419Z Setting up ncurses (6.6.20260307+really6.5.20250830) ...
+2026-10-20T13:22:16.5760518Z (Reading database ... 
+2026-10-20T13:22:16.5761198Z (Reading database ... 5%
+2026-10-20T13:22:16.5761492Z (Reading database ... 10%
+2026-10-20T13:22:16.5761841Z (Reading database ... 15%
+2026-10-20T13:22:16.5762159Z (Reading database ... 20%
+2026-10-20T13:22:16.5762411Z (Reading database ... 25%
+2026-10-20T13:22:16.5764015Z (Reading database ... 30%
+2026-10-20T13:22:16.5765351Z (Reading database ... 35%
+2026-10-20T13:22:16.5780207Z (Reading database ... 40%
+2026-10-20T13:22:16.5781500Z (Reading database ... 45%
+2026-10-20T13:22:16.5781888Z (Reading database ... 50%
+2026-10-20T13:22:16.5783487Z (Reading database ... 55%
+2026-10-20T13:22:16.5784445Z (Reading database ... 60%
+2026-10-20T13:22:16.5785841Z (Reading database ... 65%
+2026-10-20T13:22:16.5787403Z (Reading database ... 70%
+2026-10-20T13:22:16.5790295Z (Reading database ... 75%
+2026-10-20T13:22:16.5792360Z (Reading database ... 80%
+2026-10-20T13:22:16.5793187Z (Reading database ... 85%
+2026-10-20T13:22:16.5795483Z (Reading database ... 90%
+2026-10-20T13:22:16.5796076Z (Reading database ... 95%
+2026-10-20T13:22:16.5796431Z (Reading database ... 100%
+2026-10-20T13:22:16.5796794Z (Reading database ... 5030 files and directories currently installed.)
+2026-10-20T13:22:16.5799116Z Preparing to unpack .../openssl_1%3a3.6.5_aarch64.deb ...
+2026-10-20T13:22:16.5832217Z Unpacking openssl (1:3.6.5) over (1:3.6.5) ...
+2026-10-20T13:22:16.7404755Z Preparing to unpack .../zlib_1.3.2_aarch64.deb ...
+2026-10-20T13:22:16.7432895Z Unpacking zlib (1.3.2) over (1.3.2) ...
+2026-10-20T13:22:16.7729959Z Setting up zlib (1.3.2) ...
+2026-10-20T13:22:16.7758946Z Setting up openssl (1:3.6.5) ...
+2026-10-20T13:22:16.7964244Z (Reading database ... 
+2026-10-20T13:22:16.7964664Z (Reading database ... 5%
+2026-10-20T13:22:16.7965154Z (Reading database ... 10%
+2026-10-20T13:22:16.7965426Z (Reading database ... 15%
+2026-10-20T13:22:16.7965702Z (Reading database ... 20%
+2026-10-20T13:22:16.7966076Z (Reading database ... 25%
+2026-10-20T13:22:16.7966330Z (Reading database ... 30%
+2026-10-20T13:22:16.7977949Z (Reading database ... 35%
+2026-10-20T13:22:16.7980495Z (Reading database ... 40%
+2026-10-20T13:22:16.7986217Z (Reading database ... 45%
+2026-10-20T13:22:16.7987317Z (Reading database ... 50%
+2026-10-20T13:22:16.7987656Z (Reading database ... 55%
+2026-10-20T13:22:16.7987990Z (Reading database ... 60%
+2026-10-20T13:22:16.7988361Z (Reading database ... 65%
+2026-10-20T13:22:16.7989963Z (Reading database ... 70%
+2026-10-20T13:22:16.7996447Z (Reading database ... 75%
+2026-10-20T13:22:16.7997631Z (Reading database ... 80%
+2026-10-20T13:22:16.7998448Z (Reading database ... 85%
+2026-10-20T13:22:16.7999398Z (Reading database ... 90%
+2026-10-20T13:22:16.8000483Z (Reading database ... 95%
+2026-10-20T13:22:16.8000973Z (Reading database ... 100%
+2026-10-20T13:22:16.8001406Z (Reading database ... 5030 files and directories currently installed.)
+2026-10-20T13:22:16.8001834Z Preparing to unpack .../pcre2_10.49_aarch64.deb ...
+2026-10-20T13:22:16.8031442Z Unpacking pcre2 (10.49) over (10.49) ...
+2026-10-20T13:22:16.9519055Z Setting up pcre2 (10.49) ...
+2026-10-20T13:22:16.9711230Z (Reading database ... 
+2026-10-20T13:22:16.9711687Z (Reading database ... 5%
+2026-10-20T13:22:16.9711933Z (Reading database ... 10%
+2026-10-20T13:22:16.9712391Z (Reading database ... 15%
+2026-10-20T13:22:16.9712676Z (Reading database ... 20%
+2026-10-20T13:22:16.9712966Z (Reading database ... 25%
+2026-10-20T13:22:16.9713234Z (Reading database ... 30%
+2026-10-20T13:22:16.9728622Z (Reading database ... 35%
+2026-10-20T13:22:16.9731441Z (Reading database ... 40%
+2026-10-20T13:22:16.9735381Z (Reading database ... 45%
+2026-10-20T13:22:16.9736184Z (Reading database ... 50%
+2026-10-20T13:22:16.9736702Z (Reading database ... 55%
+2026-10-20T13:22:16.9737109Z (Reading database ... 60%
+2026-10-20T13:22:16.9739472Z (Reading database ... 65%
+2026-10-20T13:22:16.9740207Z (Reading database ... 70%
+2026-10-20T13:22:16.9742488Z (Reading database ... 75%
+2026-10-20T13:22:16.9743594Z (Reading database ... 80%
+2026-10-20T13:22:16.9745409Z (Reading database ... 85%
+2026-10-20T13:22:16.9748222Z (Reading database ... 90%
+2026-10-20T13:22:16.9749154Z (Reading database ... 95%
+2026-10-20T13:22:16.9749557Z (Reading database ... 100%
+2026-10-20T13:22:16.9750193Z (Reading database ... 5030 files and directories currently installed.)
+2026-10-20T13:22:16.9752815Z Preparing to unpack .../readline_8.3.6_aarch64.deb ...
+2026-10-20T13:22:16.9785122Z Unpacking readline (8.3.6) over (8.3.6) ...
+2026-10-20T13:22:17.0299676Z Setting up readline (8.3.6) ...
+2026-10-20T13:22:17.0501679Z (Reading database ... 
+2026-10-20T13:22:17.0502241Z (Reading database ... 5%
+2026-10-20T13:22:17.0502517Z (Reading database ... 10%
+2026-10-20T13:22:17.0502804Z (Reading database ... 15%
+2026-10-20T13:22:17.0503150Z (Reading database ... 20%
+2026-10-20T13:22:17.0503403Z (Reading database ... 25%
+2026-10-20T13:22:17.0503909Z (Reading database ... 30%
+2026-10-20T13:22:17.0516586Z (Reading database ... 35%
+2026-10-20T13:22:17.0518922Z (Reading database ... 40%
+2026-10-20T13:22:17.0521201Z (Reading database ... 45%
+2026-10-20T13:22:17.0521525Z (Reading database ... 50%
+2026-10-20T13:22:17.0524649Z (Reading database ... 55%
+2026-10-20T13:22:17.0525090Z (Reading database ... 60%
+2026-10-20T13:22:17.0525799Z (Reading database ... 65%
+2026-10-20T13:22:17.0527423Z (Reading database ... 70%
+2026-10-20T13:22:17.0530145Z (Reading database ... 75%
+2026-10-20T13:22:17.0530576Z (Reading database ... 80%
+2026-10-20T13:22:17.0531658Z (Reading database ... 85%
+2026-10-20T13:22:17.0533270Z (Reading database ... 90%
+2026-10-20T13:22:17.0535425Z (Reading database ... 95%
+2026-10-20T13:22:17.0535718Z (Reading database ... 100%
+2026-10-20T13:22:17.0536133Z (Reading database ... 5030 files and directories currently installed.)
+2026-10-20T13:22:17.0538347Z Preparing to unpack .../resolv-conf_1.3_aarch64.deb ...
+2026-10-20T13:22:17.0570177Z Unpacking resolv-conf (1.3) over (1.3) ...
+2026-10-20T13:22:17.0781758Z Setting up resolv-conf (1.3) ...
+2026-10-20T13:22:17.1008803Z (Reading database ... 
+2026-10-20T13:22:17.1009427Z (Reading database ... 5%
+2026-10-20T13:22:17.1010097Z (Reading database ... 10%
+2026-10-20T13:22:17.1010407Z (Reading database ... 15%
+2026-10-20T13:22:17.1010767Z (Reading database ... 20%
+2026-10-20T13:22:17.1011085Z (Reading database ... 25%
+2026-10-20T13:22:17.1011431Z (Reading database ... 30%
+2026-10-20T13:22:17.1023721Z (Reading database ... 35%
+2026-10-20T13:22:17.1026966Z (Reading database ... 40%
+2026-10-20T13:22:17.1028447Z (Reading database ... 45%
+2026-10-20T13:22:17.1028811Z (Reading database ... 50%
+2026-10-20T13:22:17.1031025Z (Reading database ... 55%
+2026-10-20T13:22:17.1031763Z (Reading database ... 60%
+2026-10-20T13:22:17.1032650Z (Reading database ... 65%
+2026-10-20T13:22:17.1036910Z (Reading database ... 70%
+2026-10-20T13:22:17.1037712Z (Reading database ... 75%
+2026-10-20T13:22:17.1038486Z (Reading database ... 80%
+2026-10-20T13:22:17.1040000Z (Reading database ... 85%
+2026-10-20T13:22:17.1041144Z (Reading database ... 90%
+2026-10-20T13:22:17.1042831Z (Reading database ... 95%
+2026-10-20T13:22:17.1043399Z (Reading database ... 100%
+2026-10-20T13:22:17.1148132Z (Reading database ... 5030 files and directories currently installed.)
+2026-10-20T13:22:17.1148708Z Preparing to unpack .../zstd_1.5.7-1_aarch64.deb ...
+2026-10-20T13:22:17.1149004Z Unpacking zstd (1.5.7-1) over (1.5.7-1) ...
+2026-10-20T13:22:17.1611293Z Setting up zstd (1.5.7-1) ...
+2026-10-20T13:22:17.1843343Z Selecting previously unselected package abseil-cpp.
+2026-10-20T13:22:17.1847901Z (Reading database ... 
+2026-10-20T13:22:17.1848142Z (Reading database ... 5%
+2026-10-20T13:22:17.1848343Z (Reading database ... 10%
+2026-10-20T13:22:17.1848542Z (Reading database ... 15%
+2026-10-20T13:22:17.1848735Z (Reading database ... 20%
+2026-10-20T13:22:17.1848936Z (Reading database ... 25%
+2026-10-20T13:22:17.1849135Z (Reading database ... 30%
+2026-10-20T13:22:17.1849330Z (Reading database ... 35%
+2026-10-20T13:22:17.1867036Z (Reading database ... 40%
+2026-10-20T13:22:17.1867817Z (Reading database ... 45%
+2026-10-20T13:22:17.1868588Z (Reading database ... 50%
+2026-10-20T13:22:17.1870428Z (Reading database ... 55%
+2026-10-20T13:22:17.1871543Z (Reading database ... 60%
+2026-10-20T13:22:17.1872440Z (Reading database ... 65%
+2026-10-20T13:22:17.1876419Z (Reading database ... 70%
+2026-10-20T13:22:17.1886176Z (Reading database ... 75%
+2026-10-20T13:22:17.1887100Z (Reading database ... 80%
+2026-10-20T13:22:17.1887399Z (Reading database ... 85%
+2026-10-20T13:22:17.1887829Z (Reading database ... 90%
+2026-10-20T13:22:17.1888266Z (Reading database ... 95%
+2026-10-20T13:22:17.1888571Z (Reading database ... 100%
+2026-10-20T13:22:17.1888950Z (Reading database ... 5030 files and directories currently installed.)
+2026-10-20T13:22:17.1889514Z Preparing to unpack .../000-abseil-cpp_20260526.0_aarch64.deb ...
+2026-10-20T13:22:17.1899525Z Unpacking abseil-cpp (20260526.0) ...
+2026-10-20T13:22:17.3669832Z Selecting previously unselected package brotli.
+2026-10-20T13:22:17.3679791Z Preparing to unpack .../001-brotli_1.2.0_aarch64.deb ...
+2026-10-20T13:22:17.3692235Z Unpacking brotli (1.2.0) ...
+2026-10-20T13:22:17.4096482Z Selecting previously unselected package libpng.
+2026-10-20T13:22:17.4102662Z Preparing to unpack .../002-libpng_1.6.59_aarch64.deb ...
+2026-10-20T13:22:17.4114459Z Unpacking libpng (1.6.59) ...
+2026-10-20T13:22:17.4415520Z Selecting previously unselected package freetype.
+2026-10-20T13:22:17.4423641Z Preparing to unpack .../003-freetype_2.15.0_aarch64.deb ...
+2026-10-20T13:22:17.4434730Z Unpacking freetype (2.15.0) ...
+2026-10-20T13:22:17.4866427Z Selecting previously unselected package libexpat.
+2026-10-20T13:22:17.4872690Z Preparing to unpack .../004-libexpat_2.9.0_aarch64.deb ...
+2026-10-20T13:22:17.4885115Z Unpacking libexpat (2.9.0) ...
+2026-10-20T13:22:17.5179624Z Selecting previously unselected package ttf-dejavu.
+2026-10-20T13:22:17.5187343Z Preparing to unpack .../005-ttf-dejavu_2.37-8_all.deb ...
+2026-10-20T13:22:17.5199444Z Unpacking ttf-dejavu (2.37-8) ...
+2026-10-20T13:22:17.6504377Z Selecting previously unselected package fontconfig.
+2026-10-20T13:22:17.6512343Z Preparing to unpack .../006-fontconfig_2.18.3_aarch64.deb ...
+2026-10-20T13:22:17.6525196Z Unpacking fontconfig (2.18.3) ...
+2026-10-20T13:22:17.6930217Z Selecting previously unselected package gdbm.
+2026-10-20T13:22:17.6938446Z Preparing to unpack .../007-gdbm_1.26-1_aarch64.deb ...
+2026-10-20T13:22:17.6950466Z Unpacking gdbm (1.26-1) ...
+2026-10-20T13:22:17.7264352Z Selecting previously unselected package libcrypt.
+2026-10-20T13:22:17.7272375Z Preparing to unpack .../008-libcrypt_0.2-6_aarch64.deb ...
+2026-10-20T13:22:17.7285412Z Unpacking libcrypt (0.2-6) ...
+2026-10-20T13:22:17.7528591Z Selecting previously unselected package libsqlite.
+2026-10-20T13:22:17.7537291Z Preparing to unpack .../009-libsqlite_3.54.1_aarch64.deb ...
+2026-10-20T13:22:17.7548584Z Unpacking libsqlite (3.54.1) ...
+2026-10-20T13:22:17.8135617Z Selecting previously unselected package ncurses-ui-libs.
+2026-10-20T13:22:17.8143640Z Preparing to unpack .../010-ncurses-ui-libs_6.6.20260307+really6.5.20250830_aarch64.deb ...
+2026-10-20T13:22:17.8154611Z Unpacking ncurses-ui-libs (6.6.20260307+really6.5.20250830) ...
+2026-10-20T13:22:17.8447534Z Selecting previously unselected package python.
+2026-10-20T13:22:17.8455206Z Preparing to unpack .../011-python_3.14.6-1_aarch64.deb ...
+2026-10-20T13:22:17.8467469Z Unpacking python (3.14.6-1) ...
+2026-10-20T13:22:18.1128993Z Selecting previously unselected package glib.
+2026-10-20T13:22:18.1141568Z Preparing to unpack .../012-glib_2.90.1_aarch64.deb ...
+2026-10-20T13:22:18.1159470Z Unpacking glib (2.90.1) ...
+2026-10-20T13:22:18.2867452Z Selecting previously unselected package fribidi.
+2026-10-20T13:22:18.2877361Z Preparing to unpack .../013-fribidi_1.0.17_aarch64.deb ...
+2026-10-20T13:22:18.2889581Z Unpacking fribidi (1.0.17) ...
+2026-10-20T13:22:18.3218610Z Selecting previously unselected package game-music-emu.
+2026-10-20T13:22:18.3228843Z Preparing to unpack .../014-game-music-emu_0.6.5_aarch64.deb ...
+2026-10-20T13:22:18.3239832Z Unpacking game-music-emu (0.6.5) ...
+2026-10-20T13:22:18.3519168Z Selecting previously unselected package libandroid-shmem.
+2026-10-20T13:22:18.3528462Z Preparing to unpack .../015-libandroid-shmem_0.7_aarch64.deb ...
+2026-10-20T13:22:18.3539106Z Unpacking libandroid-shmem (0.7) ...
+2026-10-20T13:22:18.3776078Z Selecting previously unselected package libandroid-execinfo.
+2026-10-20T13:22:18.3784776Z Preparing to unpack .../016-libandroid-execinfo_0.1-3_aarch64.deb ...
+2026-10-20T13:22:18.3796237Z Unpacking libandroid-execinfo (0.1-3) ...
+2026-10-20T13:22:18.4029722Z Selecting previously unselected package liblzo.
+2026-10-20T13:22:18.4039846Z Preparing to unpack .../017-liblzo_2.10-5_aarch64.deb ...
+2026-10-20T13:22:18.4051372Z Unpacking liblzo (2.10-5) ...
+2026-10-20T13:22:18.4351370Z Selecting previously unselected package libpixman.
+2026-10-20T13:22:18.4361073Z Preparing to unpack .../018-libpixman_0.46.4-1_aarch64.deb ...
+2026-10-20T13:22:18.4374570Z Unpacking libpixman (0.46.4-1) ...
+2026-10-20T13:22:18.4689431Z Selecting previously unselected package libxau.
+2026-10-20T13:22:18.4699391Z Preparing to unpack .../019-libxau_1.0.12-2_aarch64.deb ...
+2026-10-20T13:22:18.4712349Z Unpacking libxau (1.0.12-2) ...
+2026-10-20T13:22:18.4971625Z Selecting previously unselected package libxdmcp.
+2026-10-20T13:22:18.4980923Z Preparing to unpack .../020-libxdmcp_1.1.5-2_aarch64.deb ...
+2026-10-20T13:22:18.4991456Z Unpacking libxdmcp (1.1.5-2) ...
+2026-10-20T13:22:18.5239399Z Selecting previously unselected package libxcb.
+2026-10-20T13:22:18.5249569Z Preparing to unpack .../021-libxcb_1.17.0-1_aarch64.deb ...
+2026-10-20T13:22:18.5261964Z Unpacking libxcb (1.17.0-1) ...
+2026-10-20T13:22:19.0397093Z Selecting previously unselected package xorg-util-macros.
+2026-10-20T13:22:19.0415745Z Preparing to unpack .../022-xorg-util-macros_1.20.2_all.deb ...
+2026-10-20T13:22:19.0427372Z Unpacking xorg-util-macros (1.20.2) ...
+2026-10-20T13:22:19.0664653Z Selecting previously unselected package xorgproto.
+2026-10-20T13:22:19.0676057Z Preparing to unpack .../023-xorgproto_2026.1_all.deb ...
+2026-10-20T13:22:19.0686627Z Unpacking xorgproto (2026.1) ...
+2026-10-20T13:22:19.1440214Z Selecting previously unselected package libx11.
+2026-10-20T13:22:19.1452545Z Preparing to unpack .../024-libx11_1.8.14_aarch64.deb ...
+2026-10-20T13:22:19.1463383Z Unpacking libx11 (1.8.14) ...
+2026-10-20T13:22:19.4416846Z Selecting previously unselected package libxext.
+2026-10-20T13:22:19.4432929Z Preparing to unpack .../025-libxext_1.3.7_aarch64.deb ...
+2026-10-20T13:22:19.4443077Z Unpacking libxext (1.3.7) ...
+2026-10-20T13:22:19.4890816Z Selecting previously unselected package libxrender.
+2026-10-20T13:22:19.4903349Z Preparing to unpack .../026-libxrender_0.9.13_aarch64.deb ...
+2026-10-20T13:22:19.4913987Z Unpacking libxrender (0.9.13) ...
+2026-10-20T13:22:19.5164474Z Selecting previously unselected package libcairo.
+2026-10-20T13:22:19.5177023Z Preparing to unpack .../027-libcairo_1.18.6_aarch64.deb ...
+2026-10-20T13:22:19.5187565Z Unpacking libcairo (1.18.6) ...
+2026-10-20T13:22:19.5669108Z Selecting previously unselected package libgraphite.
+2026-10-20T13:22:19.5681813Z Preparing to unpack .../028-libgraphite_1.3.15_aarch64.deb ...
+2026-10-20T13:22:19.5692872Z Unpacking libgraphite (1.3.15) ...
+2026-10-20T13:22:19.5959056Z Selecting previously unselected package harfbuzz.
+2026-10-20T13:22:19.5972205Z Preparing to unpack .../029-harfbuzz_14.6.0_aarch64.deb ...
+2026-10-20T13:22:19.5984500Z Unpacking harfbuzz (14.6.0) ...
+2026-10-20T13:22:19.6677589Z Selecting previously unselected package libaom.
+2026-10-20T13:22:19.6690064Z Preparing to unpack .../030-libaom_3.15.2_aarch64.deb ...
+2026-10-20T13:22:19.6701539Z Unpacking libaom (3.15.2) ...
+2026-10-20T13:22:19.7979475Z Selecting previously unselected package libass.
+2026-10-20T13:22:19.7992049Z Preparing to unpack .../031-libass_0.17.5_aarch64.deb ...
+2026-10-20T13:22:19.8004116Z Unpacking libass (0.17.5) ...
+2026-10-20T13:22:19.8275026Z Selecting previously unselected package libudfread.
+2026-10-20T13:22:19.8287789Z Preparing to unpack .../032-libudfread_1.2.0_aarch64.deb ...
+2026-10-20T13:22:19.8298477Z Unpacking libudfread (1.2.0) ...
+2026-10-20T13:22:19.8528567Z Selecting previously unselected package libxml2.
+2026-10-20T13:22:19.8541364Z Preparing to unpack .../033-libxml2_2.15.4-1_aarch64.deb ...
+2026-10-20T13:22:19.8551335Z Unpacking libxml2 (2.15.4-1) ...
+2026-10-20T13:22:19.8987549Z Selecting previously unselected package libbluray.
+2026-10-20T13:22:19.9000618Z Preparing to unpack .../034-libbluray_1.5.1_aarch64.deb ...
+2026-10-20T13:22:19.9010555Z Unpacking libbluray (1.5.1) ...
+2026-10-20T13:22:19.9278575Z Selecting previously unselected package libogg.
+2026-10-20T13:22:19.9291591Z Preparing to unpack .../035-libogg_1.3.6-1_aarch64.deb ...
+2026-10-20T13:22:19.9302911Z Unpacking libogg (1.3.6-1) ...
+2026-10-20T13:22:19.9740053Z Selecting previously unselected package libflac.
+2026-10-20T13:22:19.9754552Z Preparing to unpack .../036-libflac_1.5.0-1_aarch64.deb ...
+2026-10-20T13:22:19.9766177Z Unpacking libflac (1.5.0-1) ...
+2026-10-20T13:22:20.0127583Z Selecting previously unselected package libmpg123.
+2026-10-20T13:22:20.0140322Z Preparing to unpack .../037-libmpg123_1.33.7_aarch64.deb ...
+2026-10-20T13:22:20.0151947Z Unpacking libmpg123 (1.33.7) ...
+2026-10-20T13:22:20.0460411Z Selecting previously unselected package libmp3lame.
+2026-10-20T13:22:20.0473288Z Preparing to unpack .../038-libmp3lame_4.0-1_aarch64.deb ...
+2026-10-20T13:22:20.0484380Z Unpacking libmp3lame (4.0-1) ...
+2026-10-20T13:22:20.0761737Z Selecting previously unselected package libopus.
+2026-10-20T13:22:20.0774924Z Preparing to unpack .../039-libopus_1.6.1_aarch64.deb ...
+2026-10-20T13:22:20.0786546Z Unpacking libopus (1.6.1) ...
+2026-10-20T13:22:20.1101319Z Selecting previously unselected package libvorbis.
+2026-10-20T13:22:20.1114519Z Preparing to unpack .../040-libvorbis_1.3.7-4_aarch64.deb ...
+2026-10-20T13:22:20.1125166Z Unpacking libvorbis (1.3.7-4) ...
+2026-10-20T13:22:20.1739903Z Selecting previously unselected package libsndfile.
+2026-10-20T13:22:20.1753760Z Preparing to unpack .../041-libsndfile_1.2.2-3_aarch64.deb ...
+2026-10-20T13:22:20.1765303Z Unpacking libsndfile (1.2.2-3) ...
+2026-10-20T13:22:20.2114629Z Selecting previously unselected package libbs2b.
+2026-10-20T13:22:20.2128075Z Preparing to unpack .../042-libbs2b_3.1.0-2_aarch64.deb ...
+2026-10-20T13:22:20.2138874Z Unpacking libbs2b (3.1.0-2) ...
+2026-10-20T13:22:20.2384420Z Selecting previously unselected package libdav1d.
+2026-10-20T13:22:20.2397956Z Preparing to unpack .../043-libdav1d_1.5.4_aarch64.deb ...
+2026-10-20T13:22:20.2408447Z Unpacking libdav1d (1.5.4) ...
+2026-10-20T13:22:20.2765822Z Selecting previously unselected package libdvdread.
+2026-10-20T13:22:20.2779438Z Preparing to unpack .../044-libdvdread_7.1.1_aarch64.deb ...
+2026-10-20T13:22:20.2789876Z Unpacking libdvdread (7.1.1) ...
+2026-10-20T13:22:20.3066794Z Selecting previously unselected package libdvdnav.
+2026-10-20T13:22:20.3080021Z Preparing to unpack .../045-libdvdnav_7.0.0_aarch64.deb ...
+2026-10-20T13:22:20.3091629Z Unpacking libdvdnav (7.0.0) ...
+2026-10-20T13:22:20.3355267Z Selecting previously unselected package giflib.
+2026-10-20T13:22:20.3368201Z Preparing to unpack .../046-giflib_6.1.3_aarch64.deb ...
+2026-10-20T13:22:20.3379421Z Unpacking giflib (6.1.3) ...
+2026-10-20T13:22:20.3657258Z Selecting previously unselected package highway.
+2026-10-20T13:22:20.3672277Z Preparing to unpack .../047-highway_1.4.0-1_aarch64.deb ...
+2026-10-20T13:22:20.3685002Z Unpacking highway (1.4.0-1) ...
+2026-10-20T13:22:20.4299452Z Selecting previously unselected package libjpeg-turbo.
+2026-10-20T13:22:20.4313427Z Preparing to unpack .../048-libjpeg-turbo_3.2.0_aarch64.deb ...
+2026-10-20T13:22:20.4323930Z Unpacking libjpeg-turbo (3.2.0) ...
+2026-10-20T13:22:20.4779735Z Selecting previously unselected package libjxl.
+2026-10-20T13:22:20.4793918Z Preparing to unpack .../049-libjxl_0.12.0-2_aarch64.deb ...
+2026-10-20T13:22:20.4804819Z Unpacking libjxl (0.12.0-2) ...
+2026-10-20T13:22:20.5515134Z Selecting previously unselected package libmysofa.
+2026-10-20T13:22:20.5528886Z Preparing to unpack .../050-libmysofa_1.3.5_aarch64.deb ...
+2026-10-20T13:22:20.5540953Z Unpacking libmysofa (1.3.5) ...
+2026-10-20T13:22:20.5960187Z Selecting previously unselected package libopencore-amr.
+2026-10-20T13:22:20.5972995Z Preparing to unpack .../051-libopencore-amr_0.1.6-1_aarch64.deb ...
+2026-10-20T13:22:20.5983604Z Unpacking libopencore-amr (0.1.6-1) ...
+2026-10-20T13:22:20.6260918Z Selecting previously unselected package libopenmpt.
+2026-10-20T13:22:20.6274747Z Preparing to unpack .../052-libopenmpt_0.8.9_aarch64.deb ...
+2026-10-20T13:22:20.6285817Z Unpacking libopenmpt (0.8.9) ...
+2026-10-20T13:22:20.6797841Z Selecting previously unselected package littlecms.
+2026-10-20T13:22:20.6810628Z Preparing to unpack .../053-littlecms_2.19.1_aarch64.deb ...
+2026-10-20T13:22:20.6822056Z Unpacking littlecms (2.19.1) ...
+2026-10-20T13:22:20.7120585Z Selecting previously unselected package glslang.
+2026-10-20T13:22:20.7134096Z Preparing to unpack .../054-glslang_16.6.0_aarch64.deb ...
+2026-10-20T13:22:20.7145368Z Unpacking glslang (16.6.0) ...
+2026-10-20T13:22:20.8810014Z Selecting previously unselected package libdrm.
+2026-10-20T13:22:20.8824619Z Preparing to unpack .../055-libdrm_2.4.134_aarch64.deb ...
+2026-10-20T13:22:20.8835594Z Unpacking libdrm (2.4.134) ...
+2026-10-20T13:22:20.9194079Z Selecting previously unselected package libllvm.
+2026-10-20T13:22:20.9207716Z Preparing to unpack .../056-libllvm_21.1.8-3_aarch64.deb ...
+2026-10-20T13:22:20.9218486Z Unpacking libllvm (21.1.8-3) ...
+2026-10-20T13:22:22.6620538Z Selecting previously unselected package libxshmfence.
+2026-10-20T13:22:22.6644508Z Preparing to unpack .../057-libxshmfence_1.3.3-1_aarch64.deb ...
+2026-10-20T13:22:22.6656196Z Unpacking libxshmfence (1.3.3-1) ...
+2026-10-20T13:22:22.6919345Z Selecting previously unselected package libwayland.
+2026-10-20T13:22:22.6936000Z Preparing to unpack .../058-libwayland_1.26.0_aarch64.deb ...
+2026-10-20T13:22:22.6946958Z Unpacking libwayland (1.26.0) ...
+2026-10-20T13:22:22.7303057Z Selecting previously unselected package vulkan-loader-generic.
+2026-10-20T13:22:22.7318473Z Preparing to unpack .../059-vulkan-loader-generic_1.4.365_aarch64.deb ...
+2026-10-20T13:22:22.7332825Z Unpacking vulkan-loader-generic (1.4.365) ...
+2026-10-20T13:22:22.7649480Z Selecting previously unselected package mesa-vulkan-icd-swrast.
+2026-10-20T13:22:22.7664879Z Preparing to unpack .../060-mesa-vulkan-icd-swrast_26.2.5_aarch64.deb ...
+2026-10-20T13:22:22.7679984Z Unpacking mesa-vulkan-icd-swrast (26.2.5) ...
+2026-10-20T13:22:22.9192754Z Selecting previously unselected package vulkan-icd.
+2026-10-20T13:22:22.9208707Z Preparing to unpack .../061-vulkan-icd_0.1-1_all.deb ...
+2026-10-20T13:22:22.9219107Z Unpacking vulkan-icd (0.1-1) ...
+2026-10-20T13:22:22.9440247Z Selecting previously unselected package libplacebo.
+2026-10-20T13:22:22.9456286Z Preparing to unpack .../062-libplacebo_7.360.1_aarch64.deb ...
+2026-10-20T13:22:22.9470527Z Unpacking libplacebo (7.360.1) ...
+2026-10-20T13:22:22.9909660Z Selecting previously unselected package librav1e.
+2026-10-20T13:22:22.9925420Z Preparing to unpack .../063-librav1e_0.8.1_aarch64.deb ...
+2026-10-20T13:22:22.9935682Z Unpacking librav1e (0.8.1) ...
+2026-10-20T13:22:23.0498552Z Selecting previously unselected package libsoxr.
+2026-10-20T13:22:23.0514138Z Preparing to unpack .../064-libsoxr_0.1.3-8_aarch64.deb ...
+2026-10-20T13:22:23.0524238Z Unpacking libsoxr (0.1.3-8) ...
+2026-10-20T13:22:23.0915305Z Selecting previously unselected package libsrt.
+2026-10-20T13:22:23.0930302Z Preparing to unpack .../065-libsrt_1.5.7_aarch64.deb ...
+2026-10-20T13:22:23.0942661Z Unpacking libsrt (1.5.7) ...
+2026-10-20T13:22:23.1299944Z Selecting previously unselected package libssh.
+2026-10-20T13:22:23.1314674Z Preparing to unpack .../066-libssh_0.12.2_aarch64.deb ...
+2026-10-20T13:22:23.1325249Z Unpacking libssh (0.12.2) ...
+2026-10-20T13:22:23.1700157Z Selecting previously unselected package libtheora.
+2026-10-20T13:22:23.1715941Z Preparing to unpack .../067-libtheora_1.2.0-1_aarch64.deb ...
+2026-10-20T13:22:23.1728289Z Unpacking libtheora (1.2.0-1) ...
+2026-10-20T13:22:23.2036862Z Selecting previously unselected package libv4l.
+2026-10-20T13:22:23.2052783Z Preparing to unpack .../068-libv4l_1.32.0-1_aarch64.deb ...
+2026-10-20T13:22:23.2065322Z Unpacking libv4l (1.32.0-1) ...
+2026-10-20T13:22:23.2359756Z Selecting previously unselected package libvidstab.
+2026-10-20T13:22:23.2375830Z Preparing to unpack .../069-libvidstab_1.1.2_aarch64.deb ...
+2026-10-20T13:22:23.2388445Z Unpacking libvidstab (1.1.2) ...
+2026-10-20T13:22:23.2780072Z Selecting previously unselected package libvmaf.
+2026-10-20T13:22:23.2795570Z Preparing to unpack .../070-libvmaf_3.2.1_aarch64.deb ...
+2026-10-20T13:22:23.2811853Z Unpacking libvmaf (3.2.1) ...
+2026-10-20T13:22:23.3182543Z Selecting previously unselected package libvo-amrwbenc.
+2026-10-20T13:22:23.3198492Z Preparing to unpack .../071-libvo-amrwbenc_0.1.3-2_aarch64.deb ...
+2026-10-20T13:22:23.3210611Z Unpacking libvo-amrwbenc (0.1.3-2) ...
+2026-10-20T13:22:23.3476761Z Selecting previously unselected package libvpx.
+2026-10-20T13:22:23.3492172Z Preparing to unpack .../072-libvpx_1%3a1.17.0_aarch64.deb ...
+2026-10-20T13:22:23.3502981Z Unpacking libvpx (1:1.17.0) ...
+2026-10-20T13:22:23.4139925Z Selecting previously unselected package libtiff.
+2026-10-20T13:22:23.4155459Z Preparing to unpack .../073-libtiff_4.7.2_aarch64.deb ...
+2026-10-20T13:22:23.4168973Z Unpacking libtiff (4.7.2) ...
+2026-10-20T13:22:23.5409668Z Selecting previously unselected package libwebp.
+2026-10-20T13:22:23.5425932Z Preparing to unpack .../074-libwebp_1.6.0-rc1-0_aarch64.deb ...
+2026-10-20T13:22:23.5442012Z Unpacking libwebp (1.6.0-rc1-0) ...
+2026-10-20T13:22:23.5860456Z Selecting previously unselected package libx264.
+2026-10-20T13:22:23.5875892Z Preparing to unpack .../075-libx264_1%3a0.164.3191-1_aarch64.deb ...
+2026-10-20T13:22:23.5886784Z Unpacking libx264 (1:0.164.3191-1) ...
+2026-10-20T13:22:23.6308826Z Selecting previously unselected package libx265.
+2026-10-20T13:22:23.6325128Z Preparing to unpack .../076-libx265_4.3_aarch64.deb ...
+2026-10-20T13:22:23.6340164Z Unpacking libx265 (4.3) ...
+2026-10-20T13:22:23.7674418Z Selecting previously unselected package libzimg.
+2026-10-20T13:22:23.7690309Z Preparing to unpack .../077-libzimg_3.0.6_aarch64.deb ...
+2026-10-20T13:22:23.7701661Z Unpacking libzimg (3.0.6) ...
+2026-10-20T13:22:23.8037370Z Selecting previously unselected package libsodium.
+2026-10-20T13:22:23.8054313Z Preparing to unpack .../078-libsodium_1.0.22-1_aarch64.deb ...
+2026-10-20T13:22:23.8071359Z Unpacking libsodium (1.0.22-1) ...
+2026-10-20T13:22:23.8522167Z Selecting previously unselected package libzmq.
+2026-10-20T13:22:23.8538845Z Preparing to unpack .../079-libzmq_4.3.5-2_aarch64.deb ...
+2026-10-20T13:22:23.8550485Z Unpacking libzmq (4.3.5-2) ...
+2026-10-20T13:22:23.9059111Z Selecting previously unselected package ocl-icd.
+2026-10-20T13:22:23.9075279Z Preparing to unpack .../080-ocl-icd_2.3.5_aarch64.deb ...
+2026-10-20T13:22:23.9086174Z Unpacking ocl-icd (2.3.5) ...
+2026-10-20T13:22:23.9403554Z Selecting previously unselected package fftw.
+2026-10-20T13:22:23.9419881Z Preparing to unpack .../081-fftw_3.3.11_aarch64.deb ...
+2026-10-20T13:22:23.9437676Z Unpacking fftw (3.3.11) ...
+2026-10-20T13:22:24.0179473Z Selecting previously unselected package libsamplerate.
+2026-10-20T13:22:24.0195078Z Preparing to unpack .../082-libsamplerate_0.2.2-4_aarch64.deb ...
+2026-10-20T13:22:24.0213102Z Unpacking libsamplerate (0.2.2-4) ...
+2026-10-20T13:22:24.0880966Z Selecting previously unselected package rubberband.
+2026-10-20T13:22:24.0896760Z Preparing to unpack .../083-rubberband_4.0.0-1_aarch64.deb ...
+2026-10-20T13:22:24.0908849Z Unpacking rubberband (4.0.0-1) ...
+2026-10-20T13:22:24.1849344Z Selecting previously unselected package svt-av1.
+2026-10-20T13:22:24.1865000Z Preparing to unpack .../084-svt-av1_4.2.0_aarch64.deb ...
+2026-10-20T13:22:24.1875330Z Unpacking svt-av1 (4.2.0) ...
+2026-10-20T13:22:24.2846935Z Selecting previously unselected package xvidcore.
+2026-10-20T13:22:24.2862840Z Preparing to unpack .../085-xvidcore_1.3.7-1_aarch64.deb ...
+2026-10-20T13:22:24.2874141Z Unpacking xvidcore (1.3.7-1) ...
+2026-10-20T13:22:24.3181932Z Selecting previously unselected package ffmpeg.
+2026-10-20T13:22:24.3197938Z Preparing to unpack .../086-ffmpeg_9.0.2_aarch64.deb ...
+2026-10-20T13:22:24.3210184Z Unpacking ffmpeg (9.0.2) ...
+2026-10-20T13:22:24.7917487Z Selecting previously unselected package fmt.
+2026-10-20T13:22:24.7935268Z Preparing to unpack .../087-fmt_1%3a11.2.0-1_aarch64.deb ...
+2026-10-20T13:22:24.7947787Z Unpacking fmt (1:11.2.0-1) ...
+2026-10-20T13:22:24.8293838Z Selecting previously unselected package gdk-pixbuf.
+2026-10-20T13:22:24.8309872Z Preparing to unpack .../088-gdk-pixbuf_2.44.8_aarch64.deb ...
+2026-10-20T13:22:24.8321377Z Unpacking gdk-pixbuf (2.44.8) ...
+2026-10-20T13:22:24.8674029Z Selecting previously unselected package gflags.
+2026-10-20T13:22:24.8690295Z Preparing to unpack .../089-gflags_2.3.1_aarch64.deb ...
+2026-10-20T13:22:24.8701910Z Unpacking gflags (2.3.1) ...
+2026-10-20T13:22:24.8990762Z Selecting previously unselected package google-glog.
+2026-10-20T13:22:24.9007131Z Preparing to unpack .../090-google-glog_0.7.1-2_aarch64.deb ...
+2026-10-20T13:22:24.9018991Z Unpacking google-glog (0.7.1-2) ...
+2026-10-20T13:22:24.9328022Z Selecting previously unselected package libandroid-complex-math.
+2026-10-20T13:22:24.9345088Z Preparing to unpack .../091-libandroid-complex-math_0.2_aarch64.deb ...
+2026-10-20T13:22:24.9358543Z Unpacking libandroid-complex-math (0.2) ...
+2026-10-20T13:22:24.9626570Z Preparing to unpack .../092-libandroid-stub_30-2_aarch64.deb ...
+2026-10-20T13:22:24.9655399Z Unpacking libandroid-stub (30-2) over (30-2) ...
+2026-10-20T13:22:24.9948935Z Selecting previously unselected package libavif.
+2026-10-20T13:22:24.9965324Z Preparing to unpack .../093-libavif_1.4.2_aarch64.deb ...
+2026-10-20T13:22:24.9984256Z Unpacking libavif (1.4.2) ...
+2026-10-20T13:22:25.0408996Z Selecting previously unselected package libde265.
+2026-10-20T13:22:25.0425624Z Preparing to unpack .../094-libde265_1.1.3_aarch64.deb ...
+2026-10-20T13:22:25.0439100Z Unpacking libde265 (1.1.3) ...
+2026-10-20T13:22:25.0779013Z Selecting previously unselected package libheif.
+2026-10-20T13:22:25.0795129Z Preparing to unpack .../095-libheif_1.23.6_aarch64.deb ...
+2026-10-20T13:22:25.0807014Z Unpacking libheif (1.23.6) ...
+2026-10-20T13:22:25.1337607Z Selecting previously unselected package libopenblas.
+2026-10-20T13:22:25.1354099Z Preparing to unpack .../096-libopenblas_0.3.34_aarch64.deb ...
+2026-10-20T13:22:25.1365658Z Unpacking libopenblas (0.3.34) ...
+2026-10-20T13:22:25.3068371Z Selecting previously unselected package libprotobuf.
+2026-10-20T13:22:25.3085034Z Preparing to unpack .../097-libprotobuf_2%3a36.2_aarch64.deb ...
+2026-10-20T13:22:25.3096259Z Unpacking libprotobuf (2:36.2) ...
+2026-10-20T13:22:25.4314059Z Selecting previously unselected package python-pip.
+2026-10-20T13:22:25.4332741Z Preparing to unpack .../098-python-pip_26.2.1_all.deb ...
+2026-10-20T13:22:25.4345578Z Unpacking python-pip (26.2.1) ...
+2026-10-20T13:22:25.5813429Z Selecting previously unselected package python-llvmlite.
+2026-10-20T13:22:25.5832103Z Preparing to unpack .../099-python-llvmlite_0.49.0-3_aarch64.deb ...
+2026-10-20T13:22:25.5842513Z Unpacking python-llvmlite (0.49.0-3) ...
+2026-10-20T13:22:26.6669502Z Selecting previously unselected package python-numpy.
+2026-10-20T13:22:26.6686775Z Preparing to unpack .../100-python-numpy_2.5.4_aarch64.deb ...
+2026-10-20T13:22:26.6703590Z Unpacking python-numpy (2.5.4) ...
+2026-10-20T13:22:26.9579662Z Selecting previously unselected package python-scipy.
+2026-10-20T13:22:26.9600721Z Preparing to unpack .../101-python-scipy_1.18.1-1_aarch64.deb ...
+2026-10-20T13:22:26.9613483Z Unpacking python-scipy (1.18.1-1) ...
+2026-10-20T13:22:27.5391342Z Selecting previously unselected package python-soxr.
+2026-10-20T13:22:27.5415399Z Preparing to unpack .../102-python-soxr_1.1.0-2_aarch64.deb ...
+2026-10-20T13:22:27.5430925Z Unpacking python-soxr (1.1.0-2) ...
+2026-10-20T13:22:27.5741782Z Selecting previously unselected package python-torch.
+2026-10-20T13:22:27.5760669Z Preparing to unpack .../103-python-torch_2.14.1-2_aarch64.deb ...
+2026-10-20T13:22:27.5770168Z Unpacking python-torch (2.14.1-2) ...
+2026-10-20T13:22:31.5188345Z Selecting previously unselected package python-torchcodec.
+2026-10-20T13:22:31.5267042Z Preparing to unpack .../104-python-torchcodec_0.17.0-1_aarch64.deb ...
+2026-10-20T13:22:31.5279069Z Unpacking python-torchcodec (0.17.0-1) ...
+2026-10-20T13:22:31.5937281Z Selecting previously unselected package python-torchaudio.
+2026-10-20T13:22:31.5964785Z Preparing to unpack .../105-python-torchaudio_2.11.0-4_aarch64.deb ...
+2026-10-20T13:22:31.5976502Z Unpacking python-torchaudio (2.11.0-4) ...
+2026-10-20T13:22:31.6644222Z Setting up libopus (1.6.1) ...
+2026-10-20T13:22:31.6680500Z Setting up svt-av1 (4.2.0) ...
+2026-10-20T13:22:31.6706078Z Setting up libpng (1.6.59) ...
+2026-10-20T13:22:31.6736438Z Setting up libssh (0.12.2) ...
+2026-10-20T13:22:31.6774447Z Setting up libpixman (0.46.4-1) ...
+2026-10-20T13:22:31.6802378Z Setting up littlecms (2.19.1) ...
+2026-10-20T13:22:31.6831091Z Setting up libvpx (1:1.17.0) ...
+2026-10-20T13:22:31.6867469Z Setting up libudfread (1.2.0) ...
+2026-10-20T13:22:31.6895064Z Setting up libxdmcp (1.1.5-2) ...
+2026-10-20T13:22:31.6921432Z Setting up libgraphite (1.3.15) ...
+2026-10-20T13:22:31.6954652Z Setting up libdrm (2.4.134) ...
+2026-10-20T13:22:31.6981405Z Setting up libsoxr (0.1.3-8) ...
+2026-10-20T13:22:31.7008665Z Setting up gdbm (1.26-1) ...
+2026-10-20T13:22:31.7043852Z Setting up libdvdread (7.1.1) ...
+2026-10-20T13:22:31.7070029Z Setting up libandroid-shmem (0.7) ...
+2026-10-20T13:22:31.7098381Z Setting up libvmaf (3.2.1) ...
+2026-10-20T13:22:31.7131858Z Setting up libogg (1.3.6-1) ...
+2026-10-20T13:22:31.7161175Z Setting up fmt (1:11.2.0-1) ...
+2026-10-20T13:22:31.7190409Z Setting up glslang (16.6.0) ...
+2026-10-20T13:22:31.7222167Z Setting up libsamplerate (0.2.2-4) ...
+2026-10-20T13:22:31.7250858Z Setting up fftw (3.3.11) ...
+2026-10-20T13:22:31.7283443Z Setting up libexpat (2.9.0) ...
+2026-10-20T13:22:31.7311384Z Setting up libaom (3.15.2) ...
+2026-10-20T13:22:31.7338824Z Setting up libmpg123 (1.33.7) ...
+2026-10-20T13:22:31.7366557Z Setting up libvorbis (1.3.7-4) ...
+2026-10-20T13:22:31.7399823Z Setting up libsqlite (3.54.1) ...
+2026-10-20T13:22:31.7425461Z Setting up libvo-amrwbenc (0.1.3-2) ...
+2026-10-20T13:22:31.7452199Z Setting up libde265 (1.1.3) ...
+2026-10-20T13:22:31.7481706Z Setting up xvidcore (1.3.7-1) ...
+2026-10-20T13:22:31.7519420Z Setting up ttf-dejavu (2.37-8) ...
+2026-10-20T13:22:31.7608538Z Setting up libandroid-execinfo (0.1-3) ...
+2026-10-20T13:22:31.7634189Z Setting up gflags (2.3.1) ...
+2026-10-20T13:22:31.7664546Z Setting up libtheora (1.2.0-1) ...
+2026-10-20T13:22:31.7701312Z Setting up libcrypt (0.2-6) ...
+2026-10-20T13:22:31.7729428Z Setting up vulkan-loader-generic (1.4.365) ...
+2026-10-20T13:22:31.7757947Z Setting up ncurses-ui-libs (6.6.20260307+really6.5.20250830) ...
+2026-10-20T13:22:31.7791890Z Setting up libsodium (1.0.22-1) ...
+2026-10-20T13:22:31.7822422Z Setting up xorg-util-macros (1.20.2) ...
+2026-10-20T13:22:31.7854322Z Setting up libxau (1.0.12-2) ...
+2026-10-20T13:22:31.7888770Z Setting up libdav1d (1.5.4) ...
+2026-10-20T13:22:31.7914113Z Setting up libjpeg-turbo (3.2.0) ...
+2026-10-20T13:22:31.7943223Z Setting up game-music-emu (0.6.5) ...
+2026-10-20T13:22:31.7971645Z Setting up ocl-icd (2.3.5) ...
+2026-10-20T13:22:31.8005714Z Setting up libopenblas (0.3.34) ...
+2026-10-20T13:22:31.8033853Z Setting up libmp3lame (4.0-1) ...
+2026-10-20T13:22:31.8064052Z Setting up libmysofa (1.3.5) ...
+2026-10-20T13:22:31.8090840Z Setting up librav1e (0.8.1) ...
+2026-10-20T13:22:31.8120352Z Setting up libx264 (1:0.164.3191-1) ...
+2026-10-20T13:22:31.8156126Z Setting up giflib (6.1.3) ...
+2026-10-20T13:22:31.8182649Z Setting up libandroid-complex-math (0.2) ...
+2026-10-20T13:22:31.8208649Z Setting up xorgproto (2026.1) ...
+2026-10-20T13:22:31.8241113Z Setting up libvidstab (1.1.2) ...
+2026-10-20T13:22:31.8267331Z Setting up libxcb (1.17.0-1) ...
+2026-10-20T13:22:31.8300983Z Setting up libandroid-stub (30-2) ...
+2026-10-20T13:22:31.8334639Z Setting up libx265 (4.3) ...
+2026-10-20T13:22:31.8361142Z Setting up libzimg (3.0.6) ...
+2026-10-20T13:22:31.8389151Z Setting up libopenmpt (0.8.9) ...
+2026-10-20T13:22:31.8422989Z Setting up liblzo (2.10-5) ...
+2026-10-20T13:22:31.8452254Z Setting up python (3.14.6-1) ...
+2026-10-20T13:22:34.8073643Z Setting up libflac (1.5.0-1) ...
+2026-10-20T13:22:34.8104804Z Setting up libxshmfence (1.3.3-1) ...
+2026-10-20T13:22:34.8130514Z Setting up libopencore-amr (0.1.6-1) ...
+2026-10-20T13:22:34.8159681Z Setting up libxml2 (2.15.4-1) ...
+2026-10-20T13:22:34.8187226Z Setting up highway (1.4.0-1) ...
+2026-10-20T13:22:34.8213592Z Setting up abseil-cpp (20260526.0) ...
+2026-10-20T13:22:34.8252430Z Setting up brotli (1.2.0) ...
+2026-10-20T13:22:34.8276163Z Setting up libsrt (1.5.7) ...
+2026-10-20T13:22:34.8311086Z Setting up libv4l (1.32.0-1) ...
+2026-10-20T13:22:34.8341009Z Setting up libdvdnav (7.0.0) ...
+2026-10-20T13:22:34.8366399Z Setting up libzmq (4.3.5-2) ...
+2026-10-20T13:22:34.8390426Z Setting up python-numpy (2.5.4) ...
+2026-10-20T13:22:37.6596750Z Setting up libwayland (1.26.0) ...
+2026-10-20T13:22:37.6620580Z Setting up libtiff (4.7.2) ...
+2026-10-20T13:22:37.6648312Z Setting up google-glog (0.7.1-2) ...
+2026-10-20T13:22:37.6676683Z Setting up libprotobuf (2:36.2) ...
+2026-10-20T13:22:37.6700464Z Setting up libx11 (1.8.14) ...
+2026-10-20T13:22:37.6728223Z Setting up freetype (2.15.0) ...
+2026-10-20T13:22:37.6763093Z Setting up libsndfile (1.2.2-3) ...
+2026-10-20T13:22:37.6787435Z Setting up python-pip (26.2.1) ...
+2026-10-20T13:22:37.6831396Z pip setup...
+2026-10-20T13:22:38.1940174Z [31mERROR: Fatal Internal error [id=2]. Please report as a bug.[0m[31m
+2026-10-20T13:22:39.5243198Z [0mSetting up libllvm (21.1.8-3) ...
+2026-10-20T13:22:39.5280298Z Setting up libxext (1.3.7) ...
+2026-10-20T13:22:39.5304584Z Setting up glib (2.90.1) ...
+2026-10-20T13:22:39.5887747Z No schema files found: doing nothing.
+2026-10-20T13:22:39.5907948Z Setting up gdk-pixbuf (2.44.8) ...
+2026-10-20T13:22:39.6076803Z Setting up python-torch (2.14.1-2) ...
+2026-10-20T13:22:39.6109737Z Installing dependencies for python-torch through pip...
+2026-10-20T13:22:39.9458128Z Looking in links: /out/python-wheelhouse
+2026-10-20T13:22:39.9462186Z Requirement already satisfied: torch in ./data/data/com.termux/files/usr/lib/python3.14/site-packages (2.14.1)
+2026-10-20T13:22:39.9513825Z Processing ./out/python-wheelhouse/filelock-3.32.4-py3-none-any.whl (from torch)
+2026-10-20T13:22:39.9548002Z Processing ./out/python-wheelhouse/typing_extensions-4.16.0-py3-none-any.whl (from torch)
+2026-10-20T13:22:39.9571819Z Processing ./out/python-wheelhouse/setuptools-83.0.0-py3-none-any.whl (from torch)
+2026-10-20T13:22:39.9668876Z Processing ./out/python-wheelhouse/sympy-1.14.0-py3-none-any.whl (from torch)
+2026-10-20T13:22:39.9841002Z Processing ./out/python-wheelhouse/networkx-3.6.1-py3-none-any.whl (from torch)
+2026-10-20T13:22:39.9940189Z Processing ./out/python-wheelhouse/jinja2-3.1.6-py3-none-any.whl (from torch)
+2026-10-20T13:22:39.9966079Z Processing ./out/python-wheelhouse/fsspec-2026.7.0-py3-none-any.whl (from torch)
+2026-10-20T13:22:40.0165752Z Processing ./out/python-wheelhouse/mpmath-1.3.0-py3-none-any.whl (from sympy>=1.13.3->torch)
+2026-10-20T13:22:40.0214375Z Processing ./out/python-wheelhouse/markupsafe-3.0.4-cp314-cp314-android_24_arm64_v8a.whl (from jinja2->torch)
+2026-10-20T13:22:40.0782036Z Installing collected packages: mpmath, typing-extensions, sympy, setuptools, networkx, MarkupSafe, fsspec, filelock, jinja2
+2026-10-20T13:22:40.2621336Z [?25l
+2026-10-20T13:22:40.4340857Z [2K   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0/9[0m [mpmath]
+2026-10-20T13:22:40.6032967Z [2K   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0/9[0m [mpmath]
+2026-10-20T13:22:40.7710959Z [2K   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0/9[0m [mpmath]
+2026-10-20T13:22:40.9388858Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:41.1069098Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:41.2812193Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:41.4491148Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:41.6220077Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:41.8073643Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:41.9820343Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:42.1615190Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:42.3292357Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:42.4983538Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:42.6855718Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:42.8597830Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:43.0293600Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:43.1970589Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:43.3785983Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:43.5469131Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:43.7148342Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:43.8828924Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:44.0891965Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:44.2603784Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:44.4380245Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:44.6148948Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:44.7825846Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:44.9616852Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:45.1302728Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:45.3905738Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:45.5624813Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:45.7308229Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:45.9328617Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:46.1119326Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:46.2811004Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:46.4491844Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:46.6186366Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:46.7906806Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:46.9959142Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:47.1999449Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:47.3711106Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:47.5389765Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:47.7123899Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:47.8803425Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:48.0525662Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:48.2240221Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:48.3920743Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:48.5781864Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:48.7835696Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:48.9533892Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:49.1260403Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:49.2962964Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:49.4679774Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:49.6417713Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:49.8122182Z [2K   [91m━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/9[0m [sympy]
+2026-10-20T13:22:49.9809711Z [2K   [91m━━━━━━━━━━━━━[0m[90m╺[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m3/9[0m [setuptools]
+2026-10-20T13:22:50.1495249Z [2K   [91m━━━━━━━━━━━━━[0m[90m╺[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m3/9[0m [setuptools]
+2026-10-20T13:22:50.3913113Z [2K   [91m━━━━━━━━━━━━━[0m[90m╺[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m3/9[0m [setuptools]
+2026-10-20T13:22:50.5602653Z [2K   [91m━━━━━━━━━━━━━[0m[90m╺[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m3/9[0m [setuptools]
+2026-10-20T13:22:50.7282270Z [2K   [91m━━━━━━━━━━━━━[0m[90m╺[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m3/9[0m [setuptools]
+2026-10-20T13:22:50.8962743Z [2K   [91m━━━━━━━━━━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━[0m [32m4/9[0m [networkx]
+2026-10-20T13:22:51.0661713Z [2K   [91m━━━━━━━━━━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━[0m [32m4/9[0m [networkx]
+2026-10-20T13:22:51.2345368Z [2K   [91m━━━━━━━━━━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━[0m [32m4/9[0m [networkx]
+2026-10-20T13:22:51.4027443Z [2K   [91m━━━━━━━━━━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━[0m [32m4/9[0m [networkx]
+2026-10-20T13:22:51.5791260Z [2K   [91m━━━━━━━━━━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━[0m [32m4/9[0m [networkx]
+2026-10-20T13:22:51.7497543Z [2K   [91m━━━━━━━━━━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━[0m [32m4/9[0m [networkx]
+2026-10-20T13:22:51.9199467Z [2K   [91m━━━━━━━━━━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━[0m [32m4/9[0m [networkx]
+2026-10-20T13:22:52.0891994Z [2K   [91m━━━━━━━━━━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━[0m [32m4/9[0m [networkx]
+2026-10-20T13:22:52.2604993Z [2K   [91m━━━━━━━━━━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━[0m [32m4/9[0m [networkx]
+2026-10-20T13:22:52.4487246Z [2K   [91m━━━━━━━━━━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━[0m [32m4/9[0m [networkx]
+2026-10-20T13:22:52.6170524Z [2K   [91m━━━━━━━━━━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━[0m [32m4/9[0m [networkx]
+2026-10-20T13:22:52.7852864Z [2K   [91m━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━[0m [32m6/9[0m [fsspec]
+2026-10-20T13:22:52.9537851Z [2K   [91m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[90m╺[0m[90m━━━━━━━━[0m [32m7/9[0m [filelock]
+2026-10-20T13:22:53.0103817Z [2K   [91m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[91m╸[0m[90m━━━━[0m [32m8/9[0m [jinja2]
+2026-10-20T13:22:53.0105194Z [2K   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m9/9[0m [jinja2]
+2026-10-20T13:22:53.0105563Z [?25h
+2026-10-20T13:22:53.0128329Z [1A[2KSuccessfully installed MarkupSafe-3.0.4 filelock-3.32.4 fsspec-2026.7.0 jinja2-3.1.6 mpmath-1.3.0 networkx-3.6.1 setuptools-83.0.0 sympy-1.14.0 typing-extensions-4.16.0
+2026-10-20T13:23:08.1130811Z Setting up rubberband (4.0.0-1) ...
+2026-10-20T13:23:08.1156127Z Setting up python-scipy (1.18.1-1) ...
+2026-10-20T13:23:08.1189456Z Installing dependencies for python-scipy through pip...
+2026-10-20T13:23:08.4516619Z Looking in links: /out/python-wheelhouse
+2026-10-20T13:23:08.4518572Z Requirement already satisfied: scipy in ./data/data/com.termux/files/usr/lib/python3.14/site-packages (1.18.1)
+2026-10-20T13:23:08.4540233Z Requirement already satisfied: numpy<2.8,>=2.0.0 in ./data/data/com.termux/files/usr/lib/python3.14/site-packages (from scipy) (2.5.4)
+2026-10-20T13:23:14.4423494Z Setting up mesa-vulkan-icd-swrast (26.2.5) ...
+2026-10-20T13:23:14.4446228Z Setting up libwebp (1.6.0-rc1-0) ...
+2026-10-20T13:23:14.4468761Z Setting up fontconfig (2.18.3) ...
+2026-10-20T13:23:14.4491418Z Setting up libbs2b (3.1.0-2) ...
+2026-10-20T13:23:14.4515879Z Setting up libxrender (0.9.13) ...
+2026-10-20T13:23:14.4540092Z Setting up libjxl (0.12.0-2) ...
+2026-10-20T13:23:14.4568571Z Setting up libheif (1.23.6) ...
+2026-10-20T13:23:14.4595810Z Setting up python-llvmlite (0.49.0-3) ...
+2026-10-20T13:23:14.7750119Z Setting up vulkan-icd (0.1-1) ...
+2026-10-20T13:23:14.7775411Z Setting up python-soxr (1.1.0-2) ...
+2026-10-20T13:23:14.7808663Z Installing dependencies for python-soxr through pip...
+2026-10-20T13:23:15.1158170Z Looking in links: /out/python-wheelhouse
+2026-10-20T13:23:15.1160732Z Requirement already satisfied: soxr in ./data/data/com.termux/files/usr/lib/python3.14/site-packages (1.1.0)
+2026-10-20T13:23:15.1176517Z Requirement already satisfied: numpy in ./data/data/com.termux/files/usr/lib/python3.14/site-packages (from soxr) (2.5.4)
+2026-10-20T13:23:15.3872221Z Setting up libbluray (1.5.1) ...
+2026-10-20T13:23:15.3898219Z Setting up fribidi (1.0.17) ...
+2026-10-20T13:23:15.3924080Z Setting up libavif (1.4.2) ...
+2026-10-20T13:23:15.3947714Z Setting up libplacebo (7.360.1) ...
+2026-10-20T13:23:15.3971367Z Setting up libcairo (1.18.6) ...
+2026-10-20T13:23:15.3994433Z Setting up harfbuzz (14.6.0) ...
+2026-10-20T13:23:15.4018571Z Setting up libass (0.17.5) ...
+2026-10-20T13:23:15.4043490Z Setting up ffmpeg (9.0.2) ...
+2026-10-20T13:23:15.4544769Z Setting up python-torchcodec (0.17.0-1) ...
+2026-10-20T13:23:15.6656745Z Setting up python-torchaudio (2.11.0-4) ...
+2026-10-20T13:23:43.0310618Z {"status": "passed", "pip_check": {"exit_code": 1, "log": "NEUTTS-PYTHON-CHECK.log", "log_sha256": "7331d1b7cf797e0b999b3d9f7b4eb61d7cd039ca38e7446029e6bc854b3def5b"}, "apt_python_metadata": {"receipt": "NEUTTS-APT-PYTHON-METADATA.json", "sha256": "6fb50c94a727ee743580f3c763b8f119066e82bc6b5d3020f7f57b6877203c56", "unsupported_distribution_names": ["torch", "torchaudio", "torchcodec", "scipy", "llvmlite", "soxr", "numpy"]}, "apt_python_validation": {"status": "requirements-and-provenance-passed", "exit_code": 0, "receipt": "NEUTTS-APT-PYTHON-VALIDATION.json", "sha256": "e25b9b73a0a47e6d408370a621c80ac6230ba338031e88167c1a4d6fdfceb015", "metadata_ledger_sha256": "2031c8a6915915ffffb980b268ad5107d42a186682cb2ca7009d803fe2abe200", "raw_pip_check_preserved": true}, "cases": [{"component": "python_dependencies", "exit_code": 0, "status": "passed", "timed_out": false, "receipt": "neutts-python_dependencies.json", "receipt_sha256": "764584f9ca81fafb9f19a4c4e297935eb8a713370b73fb90f62100dccf9b5d3e", "stdout_bytes": 0, "stdout_saved_bytes": 0, "stdout_truncated": false, "stderr_bytes": 0, "stderr_saved_bytes": 0, "stderr_truncated": false}, {"component": "torch", "exit_code": 0, "status": "passed", "timed_out": false, "receipt": "neutts-torch.json", "receipt_sha256": "abe9125a1d8d0e52acc0266018b2104602cbcca0d9dbf864d287bf627fb1511d", "stdout_bytes": 0, "stdout_saved_bytes": 0, "stdout_truncated": false, "stderr_bytes": 0, "stderr_saved_bytes": 0, "stderr_truncated": false}, {"component": "torchaudio", "exit_code": 0, "status": "passed", "timed_out": false, "receipt": "neutts-torchaudio.json", "receipt_sha256": "051853e86210fa24a774ad179bef1780796c06485e89be0587d0257f04a041ac", "stdout_bytes": 0, "stdout_saved_bytes": 0, "stdout_truncated": false, "stderr_bytes": 0, "stderr_saved_bytes": 0, "stderr_truncated": false}, {"component": "torchcodec", "exit_code": 0, "status": "passed", "timed_out": false, "receipt": "neutts-torchcodec.json", "receipt_sha256": "15fb52f7f915d3e79e3e68842a9f6a0d98cc759e467779c83498b830d40e9805", "stdout_bytes": 0, "stdout_saved_bytes": 0, "stdout_truncated": false, "stderr_bytes": 0, "stderr_saved_bytes": 0, "stderr_truncated": false}, {"component": "scipy", "exit_code": 0, "status": "passed", "timed_out": false, "receipt": "neutts-scipy.json", "receipt_sha256": "126c6e29538f92491c54d13c15f603cca24abe5538f630d1bbed0527bda232f3", "stdout_bytes": 0, "stdout_saved_bytes": 0, "stdout_truncated": false, "stderr_bytes": 0, "stderr_saved_bytes": 0, "stderr_truncated": false}, {"component": "llvmlite", "exit_code": 0, "status": "passed", "timed_out": false, "receipt": "neutts-llvmlite.json", "receipt_sha256": "3fbdcdddda9ae9cfefb4726401dbc0abd8cbd3edf1c711c86bbe6a850c5eaaf0", "stdout_bytes": 0, "stdout_saved_bytes": 0, "stdout_truncated": false, "stderr_bytes": 0, "stderr_saved_bytes": 0, "stderr_truncated": false}, {"component": "soxr", "exit_code": 0, "status": "passed", "timed_out": false, "receipt": "neutts-soxr.json", "receipt_sha256": "0522ff63f6e69318b3a3226be83171a1004922f79ca094937d10d726d4b724a0", "stdout_bytes": 0, "stdout_saved_bytes": 0, "stdout_truncated": false, "stderr_bytes": 0, "stderr_saved_bytes": 0, "stderr_truncated": false}]}
+2026-10-20T13:23:43.0743174Z NATIVE_APT_CORE_PASSED: dependency feasibility only; NeuTTS synthesis remains untested
+2026-10-20T13:24:21.6751241Z Traceback (most recent call last):
+2026-10-20T13:24:21.6757352Z   File "/probes/scripts/compatibility_probe_neutts_engine_wheel.py", line 451, in run
+2026-10-20T13:24:21.6758008Z     report["wheel"] = checks.verify_built_wheel(
+2026-10-20T13:24:21.6758275Z                       ~~~~~~~~~~~~~~~~~~~~~~~~~^
+2026-10-20T13:24:21.6758679Z         built_path, lock, source, install, data_manifest, helper.core_verifier().safe_member,
+2026-10-20T13:24:21.6759106Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-20T13:24:21.6759518Z         {str(t) for t in sys_tags()}, args.out / "inspected-wheel")
+2026-10-20T13:24:21.6759836Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-20T13:24:21.6760231Z   File "/probes/scripts/verify_neutts_engine_wheel.py", line 289, in verify_built_wheel
+2026-10-20T13:24:21.6761069Z     safe_member(item)
+2026-10-20T13:24:21.6761240Z     ~~~~~~~~~~~^^^^^^
+2026-10-20T13:24:21.6761541Z   File "/probes/scripts/prepare_neutts_core_python.py", line 183, in safe_member
+2026-10-20T13:24:21.6761970Z     raise PrepareError("Wheel member exceeds its bounded size")
+2026-10-20T13:24:21.6762399Z _neutts_frozen_wheel_verifier.PrepareError: Wheel member exceeds its bounded size
+2026-10-20T13:24:21.8479592Z {"status": "failed", "stage": "wheel-content-and-data", "engine_installed": false, "python314_admission": false}
+2026-10-20T13:24:31.1306895Z ##[error]Process completed with exit code 1.
+2026-10-20T13:24:31.1405939Z ##[group]Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+2026-10-20T13:24:31.1406378Z with:
+2026-10-20T13:24:31.1406560Z   name: termux-neutts-engine-wheel
+2026-10-20T13:24:31.1406814Z   path: probe-results/neutts-engine-wheel/
+2026-10-20T13:24:31.1407066Z   if-no-files-found: warn
+2026-10-20T13:24:31.1407264Z   compression-level: 6
+2026-10-20T13:24:31.1407475Z   retention-days: 14
+2026-10-20T13:24:31.1407656Z   overwrite: false
+2026-10-20T13:24:31.1407843Z   include-hidden-files: false
+2026-10-20T13:24:31.1408046Z   archive: true
+2026-10-20T13:24:31.1408216Z ##[endgroup]
+2026-10-20T13:24:31.3626974Z With the provided path, there will be 402 files uploaded
+2026-10-20T13:24:31.3632701Z Artifact name is valid!
+2026-10-20T13:24:31.3633148Z Root directory input is valid!
+2026-10-20T13:24:31.7281674Z Uploading artifact: termux-neutts-engine-wheel.zip
+2026-10-20T13:24:31.7315704Z Beginning upload of artifact content to blob storage
+2026-10-20T13:24:32.9656291Z Uploaded bytes 8388608
+2026-10-20T13:24:33.2766076Z Uploaded bytes 16777216
+2026-10-20T13:24:33.4547535Z Uploaded bytes 25165824
+2026-10-20T13:24:33.6143976Z Uploaded bytes 33554432
+2026-10-20T13:24:33.6404109Z Uploaded bytes 41943040
+2026-10-20T13:24:33.6939644Z Uploaded bytes 50331648
+2026-10-20T13:24:33.7696000Z Uploaded bytes 58720256
+2026-10-20T13:24:33.9561290Z Uploaded bytes 67108864
+2026-10-20T13:24:34.1128123Z Uploaded bytes 75497472
+2026-10-20T13:24:34.3265671Z Uploaded bytes 83886080
+2026-10-20T13:24:34.4793875Z Uploaded bytes 92274688
+2026-10-20T13:24:34.7229885Z Uploaded bytes 100663296
+2026-10-20T13:24:34.8215298Z Uploaded bytes 109051904
+2026-10-20T13:24:35.0405870Z Uploaded bytes 117440512
+2026-10-20T13:24:35.3079058Z Uploaded bytes 125829120
+2026-10-20T13:24:35.4015164Z Uploaded bytes 134217728
+2026-10-20T13:24:35.5989579Z Uploaded bytes 142606336
+2026-10-20T13:24:35.8689699Z Uploaded bytes 150994944
+2026-10-20T13:24:36.0389559Z Uploaded bytes 159383552
+2026-10-20T13:24:36.2026665Z Uploaded bytes 167772160
+2026-10-20T13:24:36.3949268Z Uploaded bytes 176160768
+2026-10-20T13:24:36.6091706Z Uploaded bytes 184549376
+2026-10-20T13:24:36.8118917Z Uploaded bytes 192937984
+2026-10-20T13:24:36.9447007Z Uploaded bytes 201326592
+2026-10-20T13:24:37.1598882Z Uploaded bytes 209715200
+2026-10-20T13:24:37.3745935Z Uploaded bytes 218103808
+2026-10-20T13:24:37.5136128Z Uploaded bytes 226492416
+2026-10-20T13:24:37.7478885Z Uploaded bytes 234881024
+2026-10-20T13:24:38.0164528Z Uploaded bytes 243269632
+2026-10-20T13:24:38.1143845Z Uploaded bytes 251658240
+2026-10-20T13:24:38.4917968Z Uploaded bytes 260046848
+2026-10-20T13:24:38.6826915Z Uploaded bytes 268435456
+2026-10-20T13:24:38.7594028Z Uploaded bytes 276824064
+2026-10-20T13:24:38.8890783Z Uploaded bytes 285212672
+2026-10-20T13:24:39.2700797Z Uploaded bytes 292860648
+2026-10-20T13:24:39.3473886Z Finished uploading artifact content to blob storage!
+2026-10-20T13:24:39.3476959Z SHA256 digest of uploaded artifact is 93d0c924d0b5daa8036a07dc41c4d6df7ce5d7b94db9916a1759d17f4e10fb3f
+2026-10-20T13:24:39.3478856Z Finalizing artifact upload
+2026-10-20T13:24:39.7909207Z Artifact termux-neutts-engine-wheel successfully finalized. Artifact ID 12267563161
+2026-10-20T13:24:39.7909943Z Artifact termux-neutts-engine-wheel has been successfully uploaded! Final size is 292860648 bytes. Artifact ID is 12267563161
+2026-10-20T13:24:39.7915062Z Artifact download URL: https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636253/artifacts/12267563161
+2026-10-20T13:24:39.8221203Z Post job cleanup.
+2026-10-20T13:24:39.8975079Z [command]/usr/bin/git version
+2026-10-20T13:24:39.9012312Z git version 2.55.0
+2026-10-20T13:24:39.9047256Z Temporarily overriding HOME='/home/runner/work/_temp/94b0998c-8cdd-4002-963d-12e1ba355bdc' before making global git config changes
+2026-10-20T13:24:39.9048166Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-20T13:24:39.9052285Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/termux-hermes/termux-hermes
+2026-10-20T13:24:39.9083844Z Removing SSH command configuration
+2026-10-20T13:24:39.9089805Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-20T13:24:39.9124027Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-20T13:24:39.9340548Z Removing HTTP extra header
+2026-10-20T13:24:39.9347645Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-20T13:24:39.9380818Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-20T13:24:39.9608068Z Removing includeIf entries pointing to credentials config files
+2026-10-20T13:24:39.9617082Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-20T13:24:39.9649917Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-20T13:24:40.0062381Z Cleaning up orphan processes

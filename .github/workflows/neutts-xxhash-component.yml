@@ -1,0 +1,63 @@
+name: Prepare NeuTTS XXHash native component
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [prepare/termux-compatibility-next-stable]
+    paths:
+      - 'scripts/compatibility_probe_neutts.sh'
+      - 'scripts/prepare_neutts_apt_snapshot.py'
+      - 'scripts/neutts_apt_snapshot.sh'
+      - 'tests/test_neutts_apt_snapshot_preparation.py'
+      - 'vendor/termux-preparation/**'
+      - 'audit/neutts-runtime-index-20261017/**'
+      - 'audit/neutts-native-20261017/run-39058569758/NEUTTS-PINNED-APT.tsv'
+      - '.github/workflows/neutts-xxhash-component.yml'
+      - 'scripts/compatibility_probe_neutts_xxhash.sh'
+      - 'scripts/compatibility_probe_neutts_xxhash.py'
+      - 'scripts/prepare_neutts_xxhash.py'
+      - 'scripts/neutts_public_wheels_lock.json'
+      - 'scripts/neutts_runtime_closure_design.json'
+      - 'scripts/compatibility_probe_neutts.py'
+      - 'scripts/compatibility_probe_neutts_native.py'
+      - 'scripts/prepare_neutts_core_python.py'
+      - 'scripts/neutts_core_python_lock.json'
+      - 'scripts/validate_neutts_apt_python.py'
+      - 'scripts/neutts_apt_python_metadata.json'
+      - 'tests/test_neutts_xxhash.py'
+      - 'audit/neutts-xxhash-preparation-20261020/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neutts-xxhash-component-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  native-xxhash:
+    name: Scientific foundation and actual XXHash native hash operations
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 45
+    steps:
+      - name: Checkout the reviewed source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact wheel and run installed native hash operations
+        env:
+          NEUTTS_PROBE_HEAD_SHA: ${{ github.sha }}
+        run: bash scripts/compatibility_probe_neutts_xxhash.sh --out probe-results/neutts-xxhash
+
+      - name: Preserve separate wheel, foundation and actual operation evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-neutts-xxhash-component
+          path: probe-results/neutts-xxhash/
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 14
+          include-hidden-files: true

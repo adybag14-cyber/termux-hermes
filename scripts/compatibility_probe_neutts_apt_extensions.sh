@@ -58,7 +58,8 @@ PY_INPUTS
     --out "$out/foundation-apt-inputs"
   python3 -B "$packaging/scripts/prepare_neutts_core_python.py" \
     --lock "$packaging/scripts/neutts_core_python_lock.json" --out "$out/python-wheelhouse"
-  python3 -B "$packaging/scripts/prepare_neutts_apt_extensions.py" --out "$out/apt-extension-inputs"
+  python3 -B "$packaging/scripts/prepare_neutts_apt_extensions.py" \
+    --cache "$packaging/vendor/termux-preparation/apt-archives" --out "$out/apt-extension-inputs"
   chmod 0777 "$out"
   docker pull "$image"
   [[ "$(docker image inspect "$image" --format '{{.Architecture}}')" == arm64 ]]

@@ -37,7 +37,7 @@ apache-orc, libarrow-cpp, libgcrypt, libgpg-error, libimagequant, liblz4, libraq
 
 The fresh official InRelease/Packages pair was fetched at 20:05 UTC on 2026-10-17. Packages.gz SHA-256 `dba73c2f0caaa828b65f02ba0e56cac694ee7186999a442ae7858b4258c321b6`, 727,968 bytes, matches the SHA256 section in InRelease SHA-256 `249dab3ab3da3993b2436d48c819506f9aa586f6985905d81a451e76f2de7901`. The later native gate authenticates this same snapshot with the configured Termux trust store; the original host hash binding remains separate evidence.
 
-The index differs from the earlier native snapshot. **All 122 foundation and all 44 compiler archive identities still match** by package, version, architecture, size, SHA-256 and repository filename. No existing archive has drifted. The successful native APT gate verifies the exact complete plan with no unrecorded dependency substitutions.
+At the original **17 October acquisition checkpoint**, the index differed from the earlier native snapshot, but **all 122 foundation and all 44 compiler archive identities matched** by package, version, architecture, size, SHA-256 and repository filename. The statement that no existing archive had drifted described those captured bytes and that checkpoint. Several rolling pool URLs later disappeared; the 20 October recoveries below retain their exact original bytes and pins. The successful native APT gate verifies the exact complete plan with no unrecorded dependency substitutions.
 
 All five extension .deb archives were actually downloaded and inspected. Their control fields match the pinned index, and their original METADATA requirements match the frozen graph. Their original WHEEL tags use `android_aarch64`: four use CPython 3.14 tags, while psutil uses `cp36-abi3-android_aarch64`. Those tags are preserved. [Native run 39084149423](../audit/neutts-apt-extensions-native-20261018/run-39084149423.json) passes all seven foundation cases and all five extension operations, checking the exact 18-archive installation plan and all 893 original files, one link and 34 ELF files. Every observed mapping has exact retained APT or pinned-image ownership. PyArrow's extra ICU image member is separately verified without broadening the original five-file foundation policy. Raw pip retains twelve original legacy-tag diagnostics; the independent requirements/provenance gate passes without rewriting WHEEL or METADATA.
 
@@ -67,6 +67,45 @@ The frozen NumPy 2.5.4 and SciPy 1.18.1 satisfy the scientific build bounds abov
 The published package still has nine restrictions. Seven repairs belong to
 unpublished preparation candidates; complete NeuTTS and physical microphone/VAD
 remain the two outstanding feature gates.
+
+#### Fresh retries at d215961 and bounded follow-up fixes
+
+The [20 October CI run, 39429636399](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636399),
+for saved source `d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4`, passed
+**1,057 tests, 154 additional subtests and 80 skips**. These host results are
+separate from the native workflow conclusions below. The [fresh API/log
+checkpoint](../audit/neutts-native-retry-d215961-20261020/REVIEW.json) covers these
+eight completed non-Rust runs; it does not claim independent full-artifact
+verification. The engine has its separate actual-wheel review below. Rust
+requires its own artifact diagnosis.
+
+| Fresh d215961 gate | Observed result | Next boundary |
+| --- | --- | --- |
+| [Scientific foundation, 39429636519](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636519) | Workflow succeeded. | Full engine/model integration remains. |
+| [TorchAO, 39429635992](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429635992), [eSpeak/Phonemizer, 39429635986](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429635986), and [Numba/Llama CPU, 39429636156](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636156) | All three workflows succeeded again. | Component success does not certify codec/model/synthesis. |
+| [Six C/C++ dependencies, 39429636032](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636032) | API confirms completed workflow success. | Independent verification of its complete new artifact is pending; the older detailed proof below remains separately identified. |
+| [Five APT extensions, 39429635899](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429635899) | Host acquisition failed with HTTP 404 after foundation inputs were prepared, before Docker. | Five additional exact original archives were recovered; a retry is required. |
+| [Engine wheel, 39429636253](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636253) | Native CMake and backend build passed; wheel-content validation rejected the original Russian dictionary above the shared 2 MiB member guard. | The engine-only correction is host-validated; its native retry remains pending. |
+| [Rust, 39429636237](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636237) | Tiktoken lock job `118650994583` succeeded. Locked-build job `118650993975` failed in the `rust-base-runtime-operations` child (exit 1). | The child cause remains under investigation; the parent log alone does not certify all four wheel builds or their operations. |
+
+The [retained input cache](../vendor/termux-preparation/README.md) now contains
+**twelve original archives**, following the first seven-archive recovery.
+The five additions are apache-orc, libarrow-cpp, libre2, Pillow and PyArrow.
+The [recovery receipt](../vendor/termux-preparation/apt-extension-recovery-provenance.json)
+binds each to its original signed-index size, hash, control fields and license
+members. Launcher/cache selection changed; original package pins, signatures
+and dependency declarations did not. The earlier [d26e601 retry failures](../audit/neutts-retry-20261020/d26e601/SUMMARY.json)
+remain acquisition failures before the corrected HF/engine verifiers.
+
+The [engine dictionary correction](../audit/neutts-engine-wheel-member-bound-fix-20261020/REVIEW.json)
+accepts only `neutts/espeak-ng-data/ru_dict` under a finite 16 MiB ceiling,
+with the actual generated manifest, exact size/hash and complete ZIP CRC/RECORD
+checks. Its original **8,733,078 bytes** are retained. The shared 2 MiB guard
+for ordinary members remains unchanged. **106 core/engine tests and 111
+additional subtests passed, with no skips.** Host review of the actual failed-run
+wheel does not certify downstream native C ABI execution or engine installation.
+
+#### Earlier component proofs retained
 
 | Gate | Current result | Remaining limit |
 | --- | --- | --- |
@@ -122,12 +161,23 @@ no skips, and exact CMake module/native-cache fixtures. It changes no engine
 source, API/architecture flags or Python bound. Complete native wheel admission,
 installation and engine import still require a passing retry.
 
-XXHash's native operation, the complete Perth watermark subset, exact output
-handoffs between components and the complete 117-distribution runtime still need
-completion. A narrow local Perth resource-lookup proposal addresses its obsolete
-`pkg_resources` import without dropping Librosa/scikit-learn/Soundfile dependencies.
-It is not a completed native gate. Model execution additionally needs authorized
+The [standalone XXHash gate](../audit/neutts-xxhash-preparation-20261020/HOST-REVIEW.json)
+is prepared against the unchanged original 4.0.1 Android wheel: **21 host tests
+and 19 subtests pass, with no skips**. Its independent native hash-operation
+job is pending.
+
+The [Perth resource-only derivative](../scripts/prepare_neutts_perth_resource.py)
+replaces obsolete `pkg_resources` resource lookup with `pathlib`.
+Version, dependency metadata, embedded checkpoint and all other 26 wheel
+members are preserved; **12 host tests and two subtests pass, with no skips**,
+and the source change has passed peer review. Full native Perth watermark
+validation remains pending; Librosa, scikit-learn and Soundfile remain required.
+
+Exact output handoffs between components and the complete 117-distribution
+runtime still need completion. Model execution additionally needs authorized
 access to the exact gated weights and reference audio with its transcript.
+The original NeuTTS Python upper bound is unchanged; no Python 3.14 production
+admission follows from these component preparations.
 
 The earlier saved [host CI, 39086773257](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39086773257),
 for source `c1ea01d`, passed **999 tests with 80 skips and 72 additional subtests**
@@ -145,6 +195,6 @@ The sibling eSpeak component's C ABI test and the Python wrapper test are distin
 
 ## Access and completion boundary
 
-No access blocker was found for the selected public model-free source and dependency artifacts. Remaining work is to finish the Rust and XXHash operations, the complete Perth subset, corrected engine-wheel verification, exact component output handoffs and the full 117-distribution environment. Passing individual components does not remove the original Python upper bound.
+At the original **17 October acquisition checkpoint**, no access blocker was found for the selected public model-free source and dependency artifacts. This was not a continuing availability guarantee: rolling Termux URLs later returned HTTP 404, and twelve exact original archives have now been retained after recovery. Remaining work is to finish the Rust and XXHash operations, the complete Perth subset, corrected engine-wheel verification, exact component output handoffs and the full 117-distribution environment. Passing individual components does not remove the original Python upper bound.
 
 Full default NeuTTS synthesis additionally requires authorized access to the exact gated GGUF and NeuCodec repositories documented in `docs/neutts-engine-closure.md`, and reference audio plus its transcript. The authorized public Resemble-Perth dependency wheel includes an embedded checkpoint; any later download must record those checkpoint bytes explicitly. No watermark behavior, precision setting, dependency declaration or model path is changed by this preparation.

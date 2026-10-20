@@ -500,7 +500,15 @@
         "log_sha256": "2c025ce5a45cfa2b6f032ea3bc706e8173fa7c6a1c78ff860e40d669199a48bf"
       },
       "next_gate": "Foundation, Numba/Llama CPU, Phonemizer, TorchAO NF4, five APT extensions and six C/C++ components have passing native gates. Complete runtime/model/synthesis and remaining Rust/watermark work remain.",
-      "rolling_base_upgrade_recorded_separately_from_pinned_dependency_archives": true
+      "rolling_base_upgrade_recorded_separately_from_pinned_dependency_archives": true,
+      "latest_retry": {
+        "run_id": 39429636519,
+        "head_sha": "d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4",
+        "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636519",
+        "workflow_conclusion": "success",
+        "evidence_scope": "Fresh workflow success; earlier detailed component receipts remain separately identified. No new complete artifact verification is claimed here.",
+        "evidence": "neutts-native-retry-d215961-20261020/REVIEW.json"
+      }
     },
     "neutts_apt_probe_history": [
       {
@@ -714,7 +722,15 @@
           "evidence": "neutts-native-20261017/run-39063611598.json",
           "diagnosis": "Both wheels and Numba passed; Llama probe read obsolete use_mmap field. Corrected probe validates actual load_mode and separately measures mmap capability."
         }
-      ]
+      ],
+      "latest_retry": {
+        "run_id": 39429636156,
+        "head_sha": "d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4",
+        "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636156",
+        "workflow_conclusion": "success",
+        "evidence_scope": "Fresh workflow success; earlier detailed component receipts remain separately identified. No new complete artifact verification is claimed here.",
+        "evidence": "neutts-native-retry-d215961-20261020/REVIEW.json"
+      }
     },
     "cua_packaged_default_preparation": {
       "status": "native_packaged_default_and_fresh_runtime_only_lifecycle_passed",
@@ -857,23 +873,29 @@
       "native_rpds_operation_passed": true,
       "native_public_output": "həlˈoʊ",
       "native_without_stress": "həloʊ",
-      "native_dlinfo_imported": false
+      "native_dlinfo_imported": false,
+      "latest_retry": {
+        "run_id": 39429635986,
+        "head_sha": "d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4",
+        "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429635986",
+        "workflow_conclusion": "success",
+        "evidence_scope": "Fresh workflow success; earlier detailed component receipts remain separately identified. No new complete artifact verification is claimed here.",
+        "evidence": "neutts-native-retry-d215961-20261020/REVIEW.json"
+      }
     },
     "packaging_ci_latest_saved": {
-      "head": "c1ea01d2f06b77dfab14e2f50daf7d72b5ad18d8",
-      "run": 39086773257,
-      "job": 117554881564,
+      "head": "d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4",
+      "run": 39429636399,
+      "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636399",
       "status": "passed",
-      "tests_passed": 999,
+      "tests_passed": 1057,
       "tests_skipped": 80,
-      "additional_subtests_passed": 72,
-      "python": "3.14.8",
-      "duration_seconds": 14.75,
-      "merge_checkout": "02ebc08dd23a73b48a60f1518a2f8f04615797e6",
-      "scope": "Host CI for this exact source, separate from native component checks; no CI result is inferred for later local commits."
+      "additional_subtests_passed": 154,
+      "scope": "Host CI for d215961, separate from native component checks; no CI result is inferred for later local changes.",
+      "evidence": "neutts-native-retry-d215961-20261020/REVIEW.json"
     },
     "neutts_engine_source_preparation": {
-      "status": "native_backend_completed_nested_CMake_expectation_corrected_host_validated_native_retry_required",
+      "status": "native_CMake_and_backend_passed_ru_dict_member_guard_corrected_native_retry_pending",
       "evidence": "neutts-engine-source-preparation-20261017.json",
       "guide": "../docs/neutts-engine-source-preparation.md",
       "source_files": 56,
@@ -894,7 +916,39 @@
       "correction_commit": "d26e601bebf468f86df24c657e63fdd0fe51eefe",
       "correction_evidence": "neutts-engine-wheel-cmake-fix-20261020/REVIEW.json",
       "additional_subtests_passed": 78,
-      "engine_source_and_API_architecture_flags_unchanged": true
+      "engine_source_and_API_architecture_flags_unchanged": true,
+      "latest_retry": {
+        "run_id": 39429636253,
+        "head_sha": "d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4",
+        "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636253",
+        "workflow_conclusion": "failure",
+        "evidence_scope": "Native CMake and backend build passed; wheel-content-and-data validation rejected the sole original ru_dict member above the shared 2 MiB guard.",
+        "native_cmake_passed": true,
+        "native_backend_build_passed": true,
+        "failed_stage": "wheel-content-and-data",
+        "engine_installed": false,
+        "engine_imported": false,
+        "native_c_abi_verified": false,
+        "evidence": "neutts-native-retry-d215961-20261020/REVIEW.json"
+      },
+      "dictionary_member_guard_fix": {
+        "evidence": "neutts-engine-wheel-member-bound-fix-20261020/REVIEW.json",
+        "actual_wheel_review": "neutts-engine-wheel-member-bound-fix-20261020/ACTUAL-WHEEL-HOST-REVIEW.json",
+        "exact_exception_path": "neutts/espeak-ng-data/ru_dict",
+        "original_member_bytes": 8733078,
+        "original_member_sha256": "75a686f8ae951faaa73231973d13045f19bc1653a3754b41894eb61a7451099d",
+        "finite_specific_bound_bytes": 16777216,
+        "unchanged_ordinary_bound_bytes": 2097152,
+        "actual_generated_manifest_and_exact_size_sha256_required": true,
+        "all_crc_and_record_checks_preserved": true,
+        "original_dictionary_preserved": true,
+        "core_and_engine_tests_passed": 106,
+        "additional_subtests_passed": 111,
+        "tests_skipped": 0,
+        "native_retry_passed": false,
+        "python_requirement_unchanged": ">=3.10,<3.14",
+        "production_python314_admission": false
+      }
     },
     "neutts_nonrust_components": {
       "status": "all_six_native_components_and_combined_isolated_environment_passed",
@@ -936,7 +990,16 @@
         "uploaded_tree_complete": false
       },
       "evidence_persistence": "The 20 October receipt rechecks the run, API metadata and exact decoded job log. Complete archive/native-receipt verification remains a before-reset observation; no new complete raw success capture is claimed.",
-      "evidence": "neutts-nonrust-native-20261020/run-39086276183.json"
+      "evidence": "neutts-nonrust-native-20261020/run-39086276183.json",
+      "latest_retry": {
+        "run_id": 39429636032,
+        "head_sha": "d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4",
+        "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636032",
+        "workflow_conclusion": "success",
+        "evidence_scope": "Fresh completed success confirmed by API; complete new artifact independent verification is pending.",
+        "complete_new_artifact_independently_verified": false,
+        "evidence": "neutts-native-retry-d215961-20261020/REVIEW.json"
+      }
     },
     "neutts_torchao_component": {
       "status": "native_import_NF4_quantization_dequantization_public_linear_and_input_gradient_passed",
@@ -949,7 +1012,15 @@
       "metadata_preserved": true,
       "full_engine_passed": false,
       "weight_training_proved": false,
-      "model_downloaded": false
+      "model_downloaded": false,
+      "latest_retry": {
+        "run_id": 39429635992,
+        "head_sha": "d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4",
+        "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429635992",
+        "workflow_conclusion": "success",
+        "evidence_scope": "Fresh workflow success; earlier detailed component receipts remain separately identified. No new complete artifact verification is claimed here.",
+        "evidence": "neutts-native-retry-d215961-20261020/REVIEW.json"
+      }
     },
     "historical_checkpoints": {
       "before_2026_10_20": {
@@ -1134,6 +1205,84 @@
           "status": "numpy_native_passed_container_android_audio_framework_measured_absent_microphone_unverified"
         },
         "neutts_apt_core_next_gate": "Complete exact NeuTTS runtime, eSpeak/Phonemizer and codec/model synthesis; the separate Numba/Llama CPU gate now passes in run39064666810."
+      },
+      "before_d215_native_retries": {
+        "source_commit": "d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4",
+        "source_json_sha256": "d8f773b30657a52e112d947082df16c892626410097b33c2690b783e8b4cea15",
+        "role": "Earlier status objects preserved before the fresh 20 October retries and bounded follow-up fixes.",
+        "packaging_ci_latest_saved": {
+          "head": "c1ea01d2f06b77dfab14e2f50daf7d72b5ad18d8",
+          "run": 39086773257,
+          "job": 117554881564,
+          "status": "passed",
+          "tests_passed": 999,
+          "tests_skipped": 80,
+          "additional_subtests_passed": 72,
+          "python": "3.14.8",
+          "duration_seconds": 14.75,
+          "merge_checkout": "02ebc08dd23a73b48a60f1518a2f8f04615797e6",
+          "scope": "Host CI for this exact source, separate from native component checks; no CI result is inferred for later local commits."
+        },
+        "neutts_engine_source_preparation": {
+          "status": "native_backend_completed_nested_CMake_expectation_corrected_host_validated_native_retry_required",
+          "evidence": "neutts-engine-source-preparation-20261017.json",
+          "guide": "../docs/neutts-engine-source-preparation.md",
+          "source_files": 56,
+          "unchanged_files": 55,
+          "host_tests_passed": 50,
+          "host_tests_skipped": 0,
+          "cmake_cases_per_replay": 5,
+          "requires_python_unchanged": ">=3.10,<3.14",
+          "complete_engine_passed": false,
+          "native_run": 39084452780,
+          "native_run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39084452780",
+          "native_wheel_backend_completed": true,
+          "complete_native_wheel_validation_passed": false,
+          "nested_CMake_actual_default": "RelWithDebInfo",
+          "parent_build_type": "Release",
+          "API24_and_ARMv8_flags_observed_intact": true,
+          "model_downloaded": false,
+          "correction_commit": "d26e601bebf468f86df24c657e63fdd0fe51eefe",
+          "correction_evidence": "neutts-engine-wheel-cmake-fix-20261020/REVIEW.json",
+          "additional_subtests_passed": 78,
+          "engine_source_and_API_architecture_flags_unchanged": true
+        },
+        "neutts_rust_preparation": {
+          "run": 39084939992,
+          "status": "Maturin_passed_Tiktoken_lock_saved_HF_identity_fix_host_tested_native_retry_required",
+          "maturin_CLI_and_full_PEP517_backend_passed": true,
+          "tiktoken": {
+            "lock_evidence": "neutts-rust-native-20261017/run-39084939992/TIKTOKEN-ROOT-REVIEW.json",
+            "saved_commit": "c1ea01d2f06b77dfab14e2f50daf7d72b5ad18d8",
+            "registry_archives": 27,
+            "original_project_files": 36,
+            "android_graph_nodes": 25,
+            "android_graph_edges": 41,
+            "native_build_passed": false
+          },
+          "hf_identity_fix": {
+            "local_commit": "c2a817b360bf34e406307dcef4022fe87d1ae990",
+            "host_tests_passed": 155,
+            "host_tests_skipped": 0,
+            "scope": "Bind actual hf_xet root, hf-xet backing crate and dependency identity while preserving native-TLS, Reqwest/no-HTTP3 and OpenSSL checks.",
+            "native_retry_passed": false
+          },
+          "full_engine_passed": false
+        },
+        "checkpoint": {
+          "date": "2026-10-20",
+          "published_restrictions": 9,
+          "natively_validated_preparation_repairs": 7,
+          "remaining_full_feature_gates": [
+            "neutts",
+            "microphone-vad"
+          ],
+          "published_package_unchanged": true,
+          "complete_engine_or_physical_microphone_certified": false,
+          "recovery": "Devbox access returned; preserved audio evidence and HF correction were reconciled locally. C/C++ complete archive review remains a before-reset observation.",
+          "source_version": "0.22.2-1",
+          "release_created": false
+        }
       }
     },
     "neutts_apt_extensions": {
@@ -1154,11 +1303,31 @@
       "original_legacy_tag_diagnostics": 12,
       "separate_requirements_and_provenance": "passed",
       "metadata_and_tags_rewritten": false,
-      "full_engine_passed": false
+      "full_engine_passed": false,
+      "latest_retry": {
+        "run_id": 39429635899,
+        "head_sha": "d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4",
+        "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429635899",
+        "workflow_conclusion": "failure",
+        "evidence_scope": "HTTP 404 during host acquisition after foundation inputs, before Docker or native operations.",
+        "native_started": false,
+        "original_versions_changed": false,
+        "additional_archives_recovered": 5,
+        "additional_archive_names": [
+          "apache-orc",
+          "libarrow-cpp",
+          "libre2",
+          "python-pillow",
+          "python-pyarrow"
+        ],
+        "recovery_evidence": "../vendor/termux-preparation/apt-extension-recovery-provenance.json",
+        "corrected_retry_passed": false,
+        "evidence": "neutts-native-retry-d215961-20261020/REVIEW.json"
+      }
     },
     "neutts_rust_preparation": {
       "run": 39084939992,
-      "status": "Maturin_passed_Tiktoken_lock_saved_HF_identity_fix_host_tested_native_retry_required",
+      "status": "prior_Maturin_passed_fresh_Tiktoken_lock_succeeded_locked_build_runtime_child_failed_cause_pending",
       "maturin_CLI_and_full_PEP517_backend_passed": true,
       "tiktoken": {
         "lock_evidence": "neutts-rust-native-20261017/run-39084939992/TIKTOKEN-ROOT-REVIEW.json",
@@ -1176,7 +1345,29 @@
         "scope": "Bind actual hf_xet root, hf-xet backing crate and dependency identity while preserving native-TLS, Reqwest/no-HTTP3 and OpenSSL checks.",
         "native_retry_passed": false
       },
-      "full_engine_passed": false
+      "full_engine_passed": false,
+      "latest_retry": {
+        "run_id": 39429636237,
+        "head_sha": "d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4",
+        "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636237",
+        "tiktoken_lock_job_id": 118650994583,
+        "tiktoken_lock_conclusion": "success",
+        "locked_build_status": "failed",
+        "complete_native_rust_operations_passed": false,
+        "full_engine_passed": false,
+        "workflow_conclusion": "failure",
+        "locked_build_job_id": 118650993975,
+        "failed_stage": "rust-base-runtime-operations",
+        "child_exit_code": 1,
+        "child_cause": "under investigation; parent log alone is insufficient",
+        "all_four_builds_or_runtime_success_claimed": false,
+        "artifact": {
+          "id": 12268143080,
+          "bytes": 765083696,
+          "sha256": "92ab2478f6576f826c9e32daac3308a3fe7ad9434a3a962abcad385347ffd03e",
+          "independent_whole_artifact_verification_pending": true
+        }
+      }
     },
     "checkpoint": {
       "date": "2026-10-20",
@@ -1188,9 +1379,53 @@
       ],
       "published_package_unchanged": true,
       "complete_engine_or_physical_microphone_certified": false,
-      "recovery": "Devbox access returned; preserved audio evidence and HF correction were reconciled locally. C/C++ complete archive review remains a before-reset observation.",
+      "recovery": "Exact original rolling APT inputs have been recovered into a twelve-archive retained cache. Fresh foundation, TorchAO, eSpeak and CPU workflows succeeded; fresh NonRust success is API-confirmed with complete new artifact review pending. Engine dictionary, XXHash and Perth changes are host-validated with native gates pending. Rust lock succeeded; locked-build failed in its base-runtime-operations child, with the child cause under investigation.",
       "source_version": "0.22.2-1",
-      "release_created": false
+      "release_created": false,
+      "source_checkpoint": "d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4",
+      "fresh_host_tests_passed": 1057,
+      "fresh_host_additional_subtests_passed": 154,
+      "fresh_host_tests_skipped": 80
+    },
+    "neutts_xxhash_preparation": {
+      "status": "standalone_native_gate_prepared_host_validated_native_pending",
+      "guide": "neutts-xxhash-preparation-20261020/README.md",
+      "evidence": "neutts-xxhash-preparation-20261020/HOST-REVIEW.json",
+      "version": "4.0.1",
+      "original_wheel_bytes": 43747,
+      "original_wheel_sha256": "af05a3f650220a6c59fa0ad2410249f2d2470a05225807c378fb67458693f8df",
+      "archive_metadata_and_dependencies_unchanged": true,
+      "host_tests_passed": 21,
+      "additional_subtests_passed": 19,
+      "tests_skipped": 0,
+      "native_operations_passed": false
+    },
+    "neutts_perth_resource_preparation": {
+      "status": "resource_lookup_derivative_host_validated_peer_reviewed_full_native_pending",
+      "preparer": "../scripts/prepare_neutts_perth_resource.py",
+      "patch": "../patches/next-stable/perth-resource-path.patch",
+      "version": "1.0.1",
+      "change": "Replace obsolete pkg_resources resource lookup with pathlib; original version, dependency metadata, embedded checkpoint and all other 26 wheel members remain unchanged.",
+      "host_tests_passed": 12,
+      "additional_subtests_passed": 2,
+      "tests_skipped": 0,
+      "source_peer_review_passed": true,
+      "full_native_perth_passed": false,
+      "librosa_scikit_learn_soundfile_requirements_preserved": true
+    },
+    "frozen_apt_input_recovery_oct20": {
+      "original_acquisition_checkpoint": "2026-10-17",
+      "original_no_archive_drift_and_no_public_access_blocker_claims_are_historical": true,
+      "later_rolling_url_http404_observed": true,
+      "retained_original_archives": 12,
+      "initial_recovery_archives": 7,
+      "additional_extension_archives": 5,
+      "cache_guide": "../vendor/termux-preparation/README.md",
+      "extension_recovery_evidence": "../vendor/termux-preparation/apt-extension-recovery-provenance.json",
+      "original_archive_sizes_hashes_control_and_license_members_preserved": true,
+      "original_versions_or_dependency_pins_changed": false,
+      "signature_checks_relaxed": false,
+      "native_retry_still_required_for_corrected_apt_extension_launcher": true
     }
   },
   "updated_at": "2026-10-20"

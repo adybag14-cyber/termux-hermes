@@ -270,6 +270,15 @@ If a user separately wants to verify the normal CLI with their existing chosen S
 
 ## Host preparation proof
 
+The overall repository [CI run 39429636399](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636399)
+at `d215961` passed 1,057 tests, 154 additional subtests and 80 skips.
+That broad host run is separate from the focused audio counts below and from
+physical microphone validation. The [20 October component checkpoint](remaining-portability-work.md#current-native-component-checkpoint-20-october-2026)
+retains nine published restrictions, seven native-validated unpublished repairs
+and two incomplete feature gates: complete NeuTTS and physical microphone/VAD.
+No new microphone capture or VAD result is claimed; the two fresh-path audio
+preparations above remain the measured software evidence.
+
 The current preparer passed 199 focused host tests with no skips before the two
 complete fresh-path native successes linked above. The following earlier patch
 checks remain historical evidence; their overlapping counts are not aggregated.

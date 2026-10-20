@@ -506,6 +506,206 @@ class TestWheelStructure(TemporaryTest):
             self.verify(destination)
 
 
+
+    def add_native_russian_dictionary(self):
+        with zipfile.ZipFile(FIXTURE / "native-ru-dict-39429636253.zip") as archive:
+            raw = archive.read(CHECK.LARGE_GENERATED_DICTIONARY)
+        actual = json.loads((FIXTURE / "native-wheel-39429636253-data.json").read_bytes())
+        row = next(row for row in actual["files"] if row["path"] == "ru_dict")
+        self.data["files"].append(row)
+        self.members[CHECK.LARGE_GENERATED_DICTIONARY] = raw
+
+    def test_actual_russian_dictionary_passes_with_every_other_core_header_checked(self):
+        self.add_native_russian_dictionary()
+        self.write_wheel()
+        with mock.patch.object(CORE, "safe_member", wraps=CORE.safe_member) as guard:
+            result = self.verify()
+        checked = {call.args[0].filename for call in guard.call_args_list}
+        with zipfile.ZipFile(self.path) as archive:
+            names = set(archive.namelist())
+        self.assertEqual(checked, names - {CHECK.LARGE_GENERATED_DICTIONARY})
+        row = next(row for row in result["members"] if row["path"] == CHECK.LARGE_GENERATED_DICTIONARY)
+        self.assertEqual(row["bytes"], 8733078)
+        self.assertEqual(row["sha256"], "75a686f8ae951faaa73231973d13045f19bc1653a3754b41894eb61a7451099d")
+        self.assertFalse(result["wheel_installed"])
+        self.assertFalse(result["engine_imported"])
+        self.assertFalse(result["python314_admission"])
+
+    def test_large_dictionary_content_change_rejected_with_valid_rewritten_record(self):
+        self.add_native_russian_dictionary()
+        raw = self.members[CHECK.LARGE_GENERATED_DICTIONARY]
+        self.members[CHECK.LARGE_GENERATED_DICTIONARY] = bytes([raw[0] ^ 1]) + raw[1:]
+        self.write_wheel()
+        with self.assertRaisesRegex(CHECK.EngineWheelError, "Wheel source/install member differs"):
+            self.verify()
+
+    def test_large_dictionary_missing_or_changed_generated_size_rejected(self):
+        self.add_native_russian_dictionary()
+        row = self.data["files"][-1]
+        for mutation in ("missing", "changed-size"):
+            with self.subTest(mutation=mutation):
+                if mutation == "missing":
+                    self.data["files"].pop()
+                else:
+                    self.data["files"][-1] = {**row, "bytes": row["bytes"] + 1}
+                self.write_wheel()
+                with self.assertRaisesRegex(CHECK.EngineWheelError, "actual native data manifest"):
+                    self.verify()
+                self.data["files"] = [self.data["files"][0], row]
+
+    def test_large_ordinary_source_and_other_dictionary_still_use_original_core_limit(self):
+        raw = b"x" * (CORE.MAX_MEMBER_BYTES + 1)
+        names = ("neutts/neutts.py", "neutts/espeak-ng-data/phondata")
+        for name in names:
+            original = self.members[name]
+            self.members[name] = raw
+            if name == names[0]:
+                row = next(row for row in self.lock["engine_source"]["required_wheel_source_members"]
+                           if row["wheel_path"] == name)
+            else:
+                row = self.data["files"][0]
+            saved = dict(row)
+            row.update(bytes=len(raw), sha256=sha(raw))
+            self.write_wheel()
+            with self.subTest(name=name), self.assertRaisesRegex(CORE.PrepareError, "bounded size"):
+                self.verify()
+            self.members[name] = original
+            row.clear()
+            row.update(saved)
+
+    def test_total_and_compressed_wheel_bounds_remain_enforced(self):
+        self.add_native_russian_dictionary()
+        self.write_wheel()
+        original = self.lock["build"]["wheel_size_limit_bytes"]
+        self.lock["build"]["wheel_size_limit_bytes"] = self.path.stat().st_size
+        with self.assertRaisesRegex(CHECK.EngineWheelError, "Invalid or oversized built wheel"):
+            self.verify()
+        self.lock["build"]["wheel_size_limit_bytes"] = original
+        with zipfile.ZipFile(self.path) as archive:
+            self.lock["build"]["wheel_uncompressed_limit_bytes"] = sum(i.file_size for i in archive.infolist())
+        with self.assertRaisesRegex(CHECK.EngineWheelError, "oversized built-wheel inventory"):
+            self.verify()
+
+    def test_duplicate_large_dictionary_inventory_rejected(self):
+        self.add_native_russian_dictionary()
+        with self.assertWarns(UserWarning):
+            self.write_wheel(extra_info=(CHECK.LARGE_GENERATED_DICTIONARY,
+                                         self.members[CHECK.LARGE_GENERATED_DICTIONARY]))
+        with self.assertRaisesRegex(CHECK.EngineWheelError, "Duplicate or oversized"):
+            self.verify()
+
+
+class TestRecordedNativeRussianDictionary(TemporaryTest):
+    """Actual member bytes establish the regression; mutated headers are controls."""
+
+    def setUp(self):
+        super().setUp()
+        with zipfile.ZipFile(FIXTURE / "native-ru-dict-39429636253.zip") as archive:
+            self.info = copy.copy(archive.getinfo(CHECK.LARGE_GENERATED_DICTIONARY))
+            self.raw = archive.read(self.info)
+        self.pin = {"bytes": 8733078,
+                    "sha256": "75a686f8ae951faaa73231973d13045f19bc1653a3754b41894eb61a7451099d",
+                    "origin": "actual-nested-language-data"}
+        self.expected = {CHECK.LARGE_GENERATED_DICTIONARY: self.pin}
+
+    def test_exact_native_fixture_inventory_manifest_and_license_identity(self):
+        review_raw = (FIXTURE / "native-wheel-39429636253-review.json").read_bytes()
+        self.assertEqual(sha(review_raw), "991d4fb64146a080ec1cfdcbb9f85262c6ea6db2affa4a69094ff3e947a34cad")
+        review = json.loads(review_raw)
+        for row in review["fixture_files"]:
+            raw = (FIXTURE / row["path"]).read_bytes()
+            with self.subTest(path=row["path"]):
+                self.assertEqual((len(raw), sha(raw)), (row["bytes"], row["sha256"]))
+        self.assertEqual(review["source"]["head_sha"], "d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4")
+        self.assertEqual(review["source"]["artifact_sha256"],
+                         "93d0c924d0b5daa8036a07dc41c4d6df7ce5d7b94db9916a1759d17f4e10fb3f")
+        self.assertEqual(review["wheel"]["sha256"],
+                         "153d5db0d35f56a4e92a2be61ad9fda1439b4d8f50e4251bda7470002b473816")
+        rows = json.loads((FIXTURE / "native-wheel-39429636253-members.json").read_bytes())
+        self.assertEqual((len(rows), sum(row["bytes"] for row in rows)), (392, 22476006))
+        oversized = [row for row in rows if row["bytes"] > CORE.MAX_MEMBER_BYTES]
+        self.assertEqual(oversized, review["oversized_members"])
+        self.assertEqual([row["path"] for row in oversized], [CHECK.LARGE_GENERATED_DICTIONARY])
+        native = oversized[0]
+        self.assertEqual((len(self.raw), sha(self.raw)), (native["bytes"], native["sha256"]))
+        self.assertEqual(self.info.CRC, int(native["crc32"], 16))
+        self.assertEqual(self.info.external_attr, native["external_attr"])
+        self.assertEqual(self.info.compress_type, native["compression"])
+        self.assertEqual(self.info.flag_bits, native["flag_bits"])
+        data = json.loads((FIXTURE / "native-wheel-39429636253-data.json").read_bytes())
+        self.assertEqual((data["file_count"], data["dictionary_count"]), (371, 117))
+        self.assertEqual(next(row for row in data["files"] if row["path"] == "ru_dict"),
+                         {"path": "ru_dict", "bytes": len(self.raw), "sha256": sha(self.raw)})
+        self.assertFalse(review["limits"]["native_retry_passed"])
+        self.assertFalse(review["limits"]["native_c_abi_verified"])
+
+    def test_unchanged_shared_core_rejects_the_actual_native_dictionary(self):
+        self.assertEqual(CORE.MAX_MEMBER_BYTES, 2 * 1024 * 1024)
+        self.assertEqual(CORE.MAX_UNCOMPRESSED_BYTES, 64 * 1024 * 1024)
+        with self.assertRaisesRegex(CORE.PrepareError, "Wheel member exceeds its bounded size"):
+            CORE.safe_member(self.info)
+
+    def test_actual_native_dictionary_passes_the_specific_header_guard(self):
+        CHECK.safe_generated_dictionary(self.info, self.expected)
+        self.assertGreater(self.info.file_size, CORE.MAX_MEMBER_BYTES)
+        self.assertEqual(CHECK.MAX_GENERATED_DICTIONARY_BYTES, 16 * 1024 * 1024)
+
+    def test_all_unreviewed_and_unnormalized_paths_rejected(self):
+        paths = ("../ru_dict", "/neutts/espeak-ng-data/ru_dict",
+                 "neutts/../espeak-ng-data/ru_dict", "neutts//espeak-ng-data/ru_dict",
+                 "neutts/./espeak-ng-data/ru_dict", "neutts\\espeak-ng-data\\ru_dict",
+                 "neutts/espeak-ng-data/ru_dict:stream", "neutts/espeak-ng-data/\nru_dict",
+                 "neutts/espeak-ng-data/en_dict", "neutts/espeak-ng-data/ru_dict/")
+        for path in paths:
+            info = copy.copy(self.info)
+            info.filename = info.orig_filename = path
+            with self.subTest(path=path), self.assertRaisesRegex(CHECK.EngineWheelError, "path"):
+                CHECK.safe_generated_dictionary(info, self.expected)
+        info = copy.copy(self.info)
+        info.orig_filename += "\0hidden"
+        with self.assertRaisesRegex(CHECK.EngineWheelError, "path"):
+            CHECK.safe_generated_dictionary(info, self.expected)
+
+    def test_symlink_directory_and_special_types_rejected(self):
+        for kind in (stat.S_IFLNK, stat.S_IFDIR, stat.S_IFIFO, stat.S_IFSOCK, stat.S_IFBLK, stat.S_IFCHR):
+            info = copy.copy(self.info)
+            info.external_attr = (kind | 0o644) << 16
+            with self.subTest(kind=kind), self.assertRaisesRegex(CHECK.EngineWheelError, "nonregular"):
+                CHECK.safe_generated_dictionary(info, self.expected)
+
+    def test_encryption_and_unexpected_compression_rejected(self):
+        info = copy.copy(self.info)
+        info.flag_bits |= 1
+        with self.assertRaisesRegex(CHECK.EngineWheelError, "Encrypted"):
+            CHECK.safe_generated_dictionary(info, self.expected)
+        for method in (zipfile.ZIP_BZIP2, zipfile.ZIP_LZMA, 99):
+            info = copy.copy(self.info)
+            info.compress_type = method
+            with self.subTest(method=method), self.assertRaisesRegex(CHECK.EngineWheelError, "compression"):
+                CHECK.safe_generated_dictionary(info, self.expected)
+
+    def test_finite_sixteen_mib_boundary_cannot_be_overridden_by_the_manifest(self):
+        # These are header-bound controls, not purported native build outputs.
+        limit = CHECK.MAX_GENERATED_DICTIONARY_BYTES
+        for size in (-1, limit, limit + 1):
+            info = copy.copy(self.info)
+            info.file_size = size
+            expected = {info.filename: {**self.pin, "bytes": size}}
+            with self.subTest(size=size):
+                if size == limit:
+                    CHECK.safe_generated_dictionary(info, expected)
+                else:
+                    with self.assertRaisesRegex(CHECK.EngineWheelError, "bounded size"):
+                        CHECK.safe_generated_dictionary(info, expected)
+
+    def test_missing_wrong_origin_and_wrong_actual_size_rejected(self):
+        for pin in (None, {**self.pin, "origin": "original-engine-source"},
+                    {**self.pin, "bytes": self.pin["bytes"] - 1}):
+            expected = {} if pin is None else {self.info.filename: pin}
+            with self.subTest(pin=pin), self.assertRaisesRegex(CHECK.EngineWheelError, "actual native data manifest"):
+                CHECK.safe_generated_dictionary(self.info, expected)
+
+
 class TestSourceImageReceipt(TemporaryTest):
     def setUp(self):
         super().setUp()
