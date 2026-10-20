@@ -14,7 +14,7 @@ import importlib.util
 import io
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import shutil
 import signal
 import ssl
@@ -1169,3 +1169,182 @@ def test_native_toolchain_plan_keeps_exact_20_additions_and_27_foundation(tmp_pa
         assert len(snapshots) == 1
     assert len(foundation) == 27 and len(additions) == 20 and len(copied) == 1
     assert lock == original
+
+
+HF_NATIVE_AUDIT = ROOT / "audit/neutts-rust-native-20261017/run-39084939992"
+HF_NATIVE_METADATA_SHA = "fd944c9ddd49c18d2c1068633303ee30679da22102c9f29543ac3ab619ae80a7"
+
+
+def actual_hf_metadata_fixture(tmp_path):
+    """Replay real Cargo output; only native filesystem paths are rebased."""
+    lock, _ = prep.load_lock(ROOT / "scripts" / prep.LOCK_FILENAME)
+    source = next(s for s in lock["sources"] if s["name"] == "hf-xet")
+    raw = (HF_NATIVE_AUDIT / "raw-termux-neutts-rust-locked-build/rust-components/"
+           "cargo-metadata-hf-xet.stdout.log").read_bytes()
+    assert len(raw) == 1139905 and prep.sha(raw) == HF_NATIVE_METADATA_SHA
+    value = json.loads(raw)
+    root = tmp_path / "sources" / source["archive_root"]
+    for pin in source["files"]:
+        if PurePosixPath(pin["path"]).name != "Cargo.toml":
+            continue
+        original = (HF_NATIVE_AUDIT / "hf-original-manifests" / pin["path"]).read_bytes()
+        assert len(original) == pin["bytes"] and prep.sha(original) == pin["sha256"]
+        target = root / pin["path"]
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(original)
+    args = SimpleNamespace(inputs=tmp_path / "inputs", out=tmp_path / "out")
+    args.out.mkdir()
+    native_extension = next(p for p in value["packages"] if p["id"] == value["resolve"]["root"])
+    old_source_root = PurePosixPath(native_extension["manifest_path"]).parents[1]
+    for package in value["packages"]:
+        if package["source"] is None:
+            relative = PurePosixPath(package["manifest_path"]).relative_to(old_source_root)
+            package["manifest_path"] = str(root.joinpath(*relative.parts))
+            assert Path(package["manifest_path"]).is_file()
+        else:
+            package["manifest_path"] = str(args.inputs / "vendor"
+                                          / (package["name"] + "-" + package["version"]) / "Cargo.toml")
+    return source, root, value, lock, args
+
+
+def replay_hf_command(monkeypatch, module_under_test, value):
+    def command(command, out, stem, timeout, env, cwd):
+        assert stem == "cargo-metadata-hf-xet"
+        assert command[1:7] == ["metadata", "--format-version", "1", "--locked", "--offline",
+                                "--filter-platform"]
+        assert command[7] == "aarch64-linux-android"
+        assert command[-2:] == ["--features", "pyo3/extension-module,native-tls"]
+        raw = json.dumps(value).encode()
+        (out / (stem + ".stdout.log")).write_bytes(raw)
+        return {"command": command, "exit_code": 0, "stdout_sha256": prep.sha(raw),
+                "stderr_sha256": prep.sha(b""), "host_test_replays_native_metadata": True}
+    monkeypatch.setattr(module_under_test, "bounded_command", command)
+
+
+def test_actual_hf_graph_reproduces_old_failure_and_binds_both_original_packages(tmp_path, monkeypatch):
+    source, root, value, lock, args = actual_hf_metadata_fixture(tmp_path)
+    packages = {p["id"]: p for p in value["packages"]}
+    old_matches = [n for n in value["resolve"]["nodes"]
+                   if packages[n["id"]]["name"] in ("hf-xet", "hf_xet")]
+    assert len(old_matches) == 2 and all("native-tls" in n["features"] for n in old_matches)
+    baseline_path = HF_NATIVE_AUDIT / "hf-tls-fix-before/scripts/compatibility_probe_neutts_rust.py"
+    assert prep.sha_file(baseline_path) == "3d8287bf967003267d220e29380f610dbc50b42b165a9299821d76fa260e869e"
+    spec = importlib.util.spec_from_file_location("_test_prior_hf_identity_native", baseline_path)
+    prior = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(prior)
+    replay_hf_command(monkeypatch, prior, value)
+    with pytest.raises(prior.ProbeError, match="HF native TLS feature did not resolve"):
+        prior.capture_cargo_metadata(source, root, lock, args, {})
+    replay_hf_command(monkeypatch, native, value)
+    result = native.capture_cargo_metadata(source, root, lock, args, {})
+    assert result["resolved_nodes"] == 250
+    report = json.loads(Path(result["path"]).read_bytes())
+    identity = report["hf_tls_identity"]
+    assert identity["extension"]["id"] == value["resolve"]["root"]
+    assert identity["extension"]["name"] == "hf_xet"
+    assert identity["backing"]["name"] == "hf-xet"
+    assert identity["extension"]["id"] != identity["backing"]["id"]
+    assert identity["normal_backing_dependency"]["pkg"] == identity["backing"]["id"]
+    assert identity["normal_backing_dependency"]["dep_kinds"] == [{"kind": None, "target": None}]
+    assert all("native-tls" in identity[key]["features"] for key in ("extension", "backing"))
+    assert report["original_cargo_lock_sha256"] == "042146dd9c975cf623bd50a5cdb319d132ec715f6dd770342942992895d59f6f"
+    selected_reqwest = [p for p in report["selected_packages"] if p["name"] == "reqwest"]
+    assert len(selected_reqwest) == 1 and "native-tls" in selected_reqwest[0]["features"]
+    assert "http3" not in selected_reqwest[0]["features"]
+    assert any(p["name"] == "openssl-sys" for p in report["selected_packages"])
+
+
+@pytest.mark.parametrize("fault", [
+    "missing-root", "backing-is-root", "root-name", "root-version", "root-path", "root-registry",
+    "missing-root-feature", "missing-backing-edge", "duplicate-backing-edge", "dev-backing-edge",
+    "conditional-backing-edge", "backing-aliases-root", "backing-node-missing",
+    "backing-name", "backing-version", "backing-path", "backing-registry",
+    "missing-backing-feature", "duplicate-package", "duplicate-node",
+])
+def test_actual_hf_identity_rejects_wrong_roots_paths_features_and_dependency_edges(tmp_path, fault):
+    source, root, value, _, _ = actual_hf_metadata_fixture(tmp_path)
+    packages = {p["id"]: p for p in value["packages"]}
+    nodes = {n["id"]: n for n in value["resolve"]["nodes"]}
+    root_id = value["resolve"]["root"]
+    extension, extension_node = packages[root_id], nodes[root_id]
+    edge = next(e for e in extension_node["deps"] if e["name"] == "xet_pkg")
+    backing_id = edge["pkg"]
+    backing, backing_node = packages[backing_id], nodes[backing_id]
+    if fault == "missing-root":
+        value["resolve"]["root"] = "missing-package"
+    elif fault == "backing-is-root":
+        value["resolve"]["root"] = backing_id
+    elif fault == "root-name":
+        extension["name"] = "hf-xet"
+    elif fault == "root-version":
+        extension["version"] = "1.6.1"
+    elif fault == "root-path":
+        extension["manifest_path"] = str(root / "xet_pkg/Cargo.toml")
+    elif fault == "root-registry":
+        extension["source"] = prep.REGISTRY
+    elif fault == "missing-root-feature":
+        extension_node["features"].remove("native-tls")
+    elif fault == "missing-backing-edge":
+        extension_node["deps"].remove(edge)
+    elif fault == "duplicate-backing-edge":
+        extension_node["deps"].append(deepcopy(edge))
+    elif fault == "dev-backing-edge":
+        edge["dep_kinds"] = [{"kind": "dev", "target": None}]
+    elif fault == "conditional-backing-edge":
+        edge["dep_kinds"] = [{"kind": None, "target": "cfg(windows)"}]
+    elif fault == "backing-aliases-root":
+        edge["pkg"] = root_id
+    elif fault == "backing-node-missing":
+        value["resolve"]["nodes"].remove(backing_node)
+    elif fault == "backing-name":
+        backing["name"] = "hf_xet"
+    elif fault == "backing-version":
+        backing["version"] = "1.6.1"
+    elif fault == "backing-path":
+        backing["manifest_path"] = str(root / "hf_xet/Cargo.toml")
+    elif fault == "backing-registry":
+        backing["source"] = prep.REGISTRY
+    elif fault == "missing-backing-feature":
+        backing_node["features"].remove("native-tls")
+    elif fault == "duplicate-package":
+        value["packages"].append(deepcopy(backing))
+    elif fault == "duplicate-node":
+        value["resolve"]["nodes"].append(deepcopy(extension_node))
+    with pytest.raises(native.ProbeError):
+        native.verify_hf_tls_identity(source, root, value)
+
+
+@pytest.mark.parametrize("manifest", ["Cargo.toml", "hf_xet/Cargo.toml", "xet_pkg/Cargo.toml"])
+def test_actual_hf_identity_rejects_changed_original_manifest_bytes(tmp_path, manifest):
+    source, root, value, _, _ = actual_hf_metadata_fixture(tmp_path)
+    target = root / manifest
+    target.write_bytes(target.read_bytes() + b"\n# changed original input\n")
+    with pytest.raises(native.ProbeError, match="Original HF manifest bytes differ"):
+        native.verify_hf_tls_identity(source, root, value)
+
+
+@pytest.mark.parametrize("fault", ["missing-native-tls", "http3", "missing-openssl", "duplicate-reqwest",
+                                   "unreviewed-registry"])
+def test_actual_hf_graph_preserves_reqwest_openssl_and_registry_gates(tmp_path, monkeypatch, fault):
+    source, root, value, lock, args = actual_hf_metadata_fixture(tmp_path)
+    packages = {p["id"]: p for p in value["packages"]}
+    reqwest_package = next(p for p in value["packages"] if p["name"] == "reqwest")
+    reqwest_node = next(n for n in value["resolve"]["nodes"] if n["id"] == reqwest_package["id"])
+    if fault == "missing-native-tls":
+        reqwest_node["features"].remove("native-tls")
+    elif fault == "http3":
+        reqwest_node["features"].append("http3")
+    elif fault == "missing-openssl":
+        value["resolve"]["nodes"] = [n for n in value["resolve"]["nodes"]
+                                    if packages[n["id"]]["name"] != "openssl-sys"]
+    elif fault == "duplicate-reqwest":
+        package, node = deepcopy(reqwest_package), deepcopy(reqwest_node)
+        package["id"] += "-duplicate"
+        node["id"] = package["id"]
+        value["packages"].append(package)
+        value["resolve"]["nodes"].append(node)
+    elif fault == "unreviewed-registry":
+        reqwest_package["source"] = "git+https://example.invalid/unreviewed"
+    replay_hf_command(monkeypatch, native, value)
+    with pytest.raises(native.ProbeError):
+        native.capture_cargo_metadata(source, root, lock, args, {})

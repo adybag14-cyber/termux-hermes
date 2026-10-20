@@ -687,6 +687,82 @@ def source_originals_unchanged(root, source, prep):
             "derived_files": [row for row in rows if row["path"] not in original]}
 
 
+def verify_hf_tls_identity(source, root, value):
+    """Bind the distinct original extension and backing Cargo package identities."""
+    source_files = {row["path"]: row for row in source["files"]}
+    require(len(source_files) == len(source["files"]), "Duplicate original HF source path")
+
+    def original_manifest(relative):
+        require(relative in source_files, "HF manifest is not an original pinned source file")
+        path = root / relative
+        pin = source_files[relative]
+        require(path.is_file() and not path.is_symlink()
+                and path.resolve().is_relative_to(root.resolve()),
+                "Original HF manifest is missing or escaped")
+        raw = path.read_bytes()
+        require(len(raw) == pin["bytes"] and sha_bytes(raw) == pin["sha256"],
+                "Original HF manifest bytes differ")
+        return path, tomllib.loads(raw.decode())
+
+    extension_path, extension_source = original_manifest(source["cargo_manifest"]["path"])
+    require(extension_source["package"]["name"] == "hf_xet"
+            and extension_source["package"]["version"] == source["version"],
+            "Original HF extension package identity differs")
+    dependency = extension_source["dependencies"]["xet-pkg"]
+    require(dependency["package"] == "hf-xet" and dependency["path"] == "../xet_pkg"
+            and dependency.get("optional", False) is False
+            and extension_source["features"]["native-tls"] == ["xet-pkg/native-tls"],
+            "Original HF backing dependency or TLS forwarding differs")
+    backing_path, backing_source = original_manifest("xet_pkg/Cargo.toml")
+    workspace_path, workspace_source = original_manifest("Cargo.toml")
+    require(backing_source["package"]["name"] == "hf-xet"
+            and backing_source["package"]["version"] == {"workspace": True}
+            and workspace_source["workspace"]["package"]["version"] == source["version"]
+            and (extension_path.parent / dependency["path"] / "Cargo.toml").resolve()
+                == backing_path.resolve(),
+            "Original HF backing package identity differs")
+
+    packages = {package["id"]: package for package in value["packages"]}
+    nodes = {node["id"]: node for node in value["resolve"]["nodes"]}
+    require(len(packages) == len(value["packages"])
+            and len(nodes) == len(value["resolve"]["nodes"]),
+            "Duplicate HF Cargo package or node identity")
+    root_id = value["resolve"]["root"]
+    require(root_id in packages and root_id in nodes, "HF Cargo resolve root is missing")
+    extension, extension_node = packages[root_id], nodes[root_id]
+    require(extension["source"] is None and extension["name"] == "hf_xet"
+            and extension["version"] == source["version"]
+            and Path(extension["manifest_path"]) == extension_path,
+            "HF Cargo resolve root is not the exact original extension package")
+    require("native-tls" in extension_node["features"],
+            "HF extension native TLS feature did not resolve")
+    backing_edges = [edge for edge in extension_node["deps"] if edge["name"] == "xet_pkg"]
+    require(len(backing_edges) == 1
+            and backing_edges[0]["dep_kinds"] == [{"kind": None, "target": None}],
+            "HF extension normal backing dependency did not resolve")
+    backing_id = backing_edges[0]["pkg"]
+    require(backing_id != root_id and backing_id in packages and backing_id in nodes,
+            "HF backing Cargo package is missing or aliases the extension")
+    backing, backing_node = packages[backing_id], nodes[backing_id]
+    require(backing["source"] is None and backing["name"] == "hf-xet"
+            and backing["version"] == source["version"]
+            and Path(backing["manifest_path"]) == backing_path,
+            "HF backing dependency is not the exact original backing package")
+    require("native-tls" in backing_node["features"],
+            "HF backing native TLS feature did not resolve")
+    return {
+        "extension": {"id": root_id, "name": extension["name"], "version": extension["version"],
+                      "manifest_path": str(extension_path),
+                      "features": sorted(extension_node["features"])},
+        "backing": {"id": backing_id, "name": backing["name"], "version": backing["version"],
+                    "manifest_path": str(backing_path),
+                    "features": sorted(backing_node["features"])},
+        "normal_backing_dependency": backing_edges[0],
+        "original_manifest_sha256": {path.relative_to(root).as_posix(): sha_file(path)
+                                    for path in (extension_path, backing_path, workspace_path)},
+    }
+
+
 def capture_cargo_metadata(source, root, lock, args, env):
     features = list(source["maturin_config"].get("features", [])) + source["extra_cargo_features"]
     options = ["--no-default-features"] if source["name"] == "maturin" else []
@@ -723,10 +799,10 @@ def capture_cargo_metadata(source, root, lock, args, env):
     selected = [{"name": packages[n["id"]]["name"], "version": packages[n["id"]]["version"],
                  "source": packages[n["id"]]["source"], "features": sorted(n["features"]),
                  "deps": n["deps"]} for n in nodes]
+    hf_identity = None
     if source["name"] == "hf-xet":
-        hf = [n for n in selected if n["name"] == "hf-xet" or n["name"] == "hf_xet"]
+        hf_identity = verify_hf_tls_identity(source, root, value)
         reqwest = [n for n in selected if n["name"] == "reqwest"]
-        require(len(hf) == 1 and "native-tls" in hf[0]["features"], "HF native TLS feature did not resolve")
         require(len(reqwest) == 1 and "native-tls" in reqwest[0]["features"]
                 and "http3" not in reqwest[0]["features"], "Real reqwest feature graph differs from reviewed TLS route")
         require(any(n["name"] == "openssl-sys" for n in selected), "Native OpenSSL edge is missing")
@@ -735,6 +811,8 @@ def capture_cargo_metadata(source, root, lock, args, env):
               "full_embedded_union_count": 804, "target_filtered_resolved_node_count": len(nodes),
               "graph_scope": "Cargo metadata target-filtered resolve graph; includes active development/build edges, not only linked final ELF crates.",
               "local_original_workspace_packages": local, "selected_packages": selected}
+    if hf_identity is not None:
+        report["hf_tls_identity"] = hf_identity
     save_json(args.out / ("CARGO-GRAPH-" + source["name"] + ".json"), report)
     return {"path": str(args.out / ("CARGO-GRAPH-" + source["name"] + ".json")),
             "sha256": sha_file(args.out / ("CARGO-GRAPH-" + source["name"] + ".json")),
