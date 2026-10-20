@@ -1,0 +1,95 @@
+name: Prepare complete NeuTTS dependency runtime
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [prepare/termux-compatibility-next-stable]
+    paths:
+      - '.github/workflows/neutts-complete-runtime.yml'
+      - 'scripts/compatibility_probe_neutts_complete_runtime.*'
+      - 'scripts/compatibility_probe_neutts_perth.py'
+      - 'scripts/prepare_neutts_complete_runtime.py'
+      - 'scripts/prepare_neutts_perth_runtime.py'
+      - 'scripts/neutts_complete_runtime_lock.json'
+      - 'scripts/neutts_apt_extensions_lock.json'
+      - 'tests/test_neutts_complete_runtime.py'
+      - 'audit/neutts-complete-runtime-preparation-20261020/**'
+      - 'audit/neutts-perth-runtime-preparation-20261020/**'
+      - 'audit/neutts-tokenizers-runtime-preparation-20261020/**'
+      - 'scripts/neutts_rust_operations.py'
+      - 'scripts/neutts_nonrust_operations.py'
+      - 'scripts/neutts_tokenizers_operations.py'
+      - 'scripts/compatibility_probe_neutts_tiktoken.py'
+      - 'scripts/prepare_neutts_perth_resource.py'
+      - 'scripts/neutts_perth_resource_lock.json'
+      - 'scripts/prepare_neucodec_wheel.py'
+      - 'scripts/neucodec_wheel_lock.json'
+      - 'tests/test_neucodec_wheel.py'
+      - 'audit/neucodec-wheel-preparation-20261020/**'
+      - 'patches/next-stable/neucodec-hub1-download.patch'
+      - 'scripts/prepare_neutts_soundfile.py'
+      - 'scripts/neutts_soundfile_lock.json'
+      - 'patches/next-stable/soundfile-android-library.patch'
+      - 'tests/test_neutts_soundfile.py'
+      - 'audit/neutts-soundfile-discovery-fix-20261020/**'
+      - 'patches/next-stable/perth-resource-path.patch'
+      - 'scripts/prepare_neutts_apt_snapshot.py'
+      - 'scripts/neutts_apt_snapshot.sh'
+      - 'tests/test_neutts_apt_snapshot_preparation.py'
+      - 'vendor/termux-preparation/**'
+      - 'audit/neutts-runtime-index-20261017/**'
+      - 'audit/neutts-native-20261017/run-39058569758/NEUTTS-PINNED-APT.tsv'
+      - 'scripts/compatibility_probe_neutts.sh'
+      - 'scripts/compatibility_probe_neutts.py'
+      - 'scripts/prepare_neutts_core_python.py'
+      - 'scripts/neutts_core_python_lock.json'
+      - 'scripts/validate_neutts_apt_python.py'
+      - 'scripts/neutts_apt_python_metadata.json'
+      - 'scripts/prepare_neutts_nonrust_runtime.py'
+      - 'scripts/compatibility_probe_neutts_nonrust.py'
+      - 'scripts/neutts_runtime_elf.py'
+      - 'tests/test_neutts_runtime_elf.py'
+      - 'scripts/prepare_phonemizer_runtime.py'
+      - 'scripts/compatibility_probe_phonemizer.py'
+      - 'scripts/extract_phonemizer_catalog.py'
+      - 'scripts/fetch_compatibility_candidate.py'
+      - 'scripts/neutts_runtime_closure_design.json'
+      - 'scripts/neutts_public_wheels_lock.json'
+      - 'audit/neutts-runtime-reuse-20261017/main-bundled-wheels.json'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: neutts-complete-runtime-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  native-complete-dependencies:
+    name: Original 116 dependencies in one isolated native environment
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 75
+    steps:
+      - name: Checkout the reviewed preparation source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify original dependency inputs and execute native APIs offline
+        env:
+          NEUTTS_PROBE_HEAD_SHA: ${{ github.sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/compatibility_probe_neutts_complete_runtime.sh --out probe-results/neutts-complete-runtime
+
+      - name: Preserve exact inputs, raw diagnostics and separate runtime evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-neutts-complete-runtime
+          path: probe-results/neutts-complete-runtime/
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 14
+          include-hidden-files: true
