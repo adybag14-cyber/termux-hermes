@@ -1,0 +1,68 @@
+--- original-complete-probe-3f1f404.py
++++ scripts/compatibility_probe_neutts_complete_runtime.py
+@@ -25,7 +25,7 @@
+ SCRIPT_DIR = Path(__file__).resolve().parent
+ ROOT = SCRIPT_DIR.parent
+ PREFIX = Path("/data/data/com.termux/files/usr")
+-PREPARER_SHA256 = "f12add142a48890c8933dc609d86f3e08105925cb0575bc07fee73d3eb9c4bc2"
++PREPARER_SHA256 = "a537ec2d19cfee4b2cfffcbf96b1eb7a3f1259199b471d10c0da5431b94fc8ed"
+ PERTH_SHA256 = "7780965f1a336afa8244136e7c40b44d9483d91e17e662f6d07c2cbb78fcd7a2"
+ NONRUST_SHA256 = "11d0dc5ed34dd45c855bffbba51c02eecf74ce8c5a5dd38cb1483e57f1d14e4b"
+ FALSE_FLAGS = ("neutts_engine_installed", "default_speech_model_downloaded",
+@@ -475,6 +475,40 @@
+     return result
+ 
+ 
++def torchao_compiler_api_operation():
++    """Verify the derivative resolves to the exact real signed Torch helpers."""
++    import hashlib
++    import sympy
++    from torch._inductor.kernel.flex import common
++    from torchao.prototype.inductor import int8_sdpa_lowering as lowering
++
++    expected = "d20df6180978954f79a576f20b32a021558318f0c53d2c7c3bb8164edfa1918d"
++    source = Path(common.__file__).resolve()
++    require(source.is_file() and hashlib.sha256(source.read_bytes()).hexdigest() == expected,
++            "Actual Torch compiler helper source changed")
++    require(lowering.construct_strides is common.construct_strides
++            and lowering.maybe_realize is common.maybe_realize
++            and common.construct_strides.__module__ == "torch._inductor.kernel.flex.common"
++            and common.maybe_realize.__module__ == "torch._inductor.kernel.flex.common",
++            "TorchAO did not retain the real current Torch compiler functions")
++    contiguous = lowering.construct_strides([2, 3, 4], [2, 1, 0])
++    transposed = lowering.construct_strides([2, 3, 4], [0, 1, 2])
++    require(contiguous == [12, 4, 1] and transposed == [1, 2, 6]
++            and lowering.construct_strides([], []) == [],
++            "Real Torch compiler stride construction changed")
++    symbol = sympy.Symbol("complete_dependency_dimension", integer=True, positive=True)
++    integer = sympy.Integer(7)
++    realized = lowering.maybe_realize([None, symbol, integer])
++    require(len(realized) == 3 and realized[0] is None
++            and realized[1] is symbol and realized[2] is integer,
++            "Real Torch compiler optional/symbolic input realization changed")
++    return {"status": "passed", "provider": "torch._inductor.kernel.flex.common",
++            "source_path": str(source), "source_sha256": expected,
++            "exact_function_identity": True, "contiguous_strides": contiguous,
++            "transposed_strides": transposed, "optional_symbolic_realization": "passed",
++            "functions_replaced": False}
++
++
+ def complete_integration_operation(work):
+     import numpy as np
+     import pandas as pd
+@@ -487,6 +521,7 @@
+     import transformers
+     import torchtune
+     import torchao
++    compiler_api = torchao_compiler_api_operation()
+     import neucodec
+     from neucodec import NeuCodec
+     import torch
+@@ -521,6 +556,7 @@
+             "lxml_xpath_sum": 10, "pillow_png": "passed", "psutil_pid": process.pid,
+             "neucodec_class": NeuCodec.__module__ + "." + NeuCodec.__name__,
+             "torchtune_origin": torchtune.__file__, "torchao_origin": torchao.__file__,
++            "torchao_compiler_api": compiler_api,
+             "transformers_config": {"hidden_size": config.hidden_size, "vocab_size": config.vocab_size},
+             "torch_numpy": "passed", "gated_weights_requested": False}
+ 

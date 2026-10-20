@@ -1,0 +1,13 @@
+# TorchAO compiler API compatibility preparation
+
+Native complete-dependency run [39456043425](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39456043425), at source commit 3f1f404c72addb91f1d4937342c20e555be58a58, passed the original 116-node/183-edge closure, the installed wheel inventory, 13,818 RECORD rows across 105 wheels, and ten actual operation groups. Its final integration group failed when TorchAO 0.12.0 imported construct_strides and maybe_realize from the removed private Torch module torch._inductor.kernel.flex_attention. Torchtune wrapped that ModuleNotFoundError in its generic "torchao not installed" message. The final native mappings and after-operation inventories were not reached, so this was not a combined runtime pass.
+
+The exact signed Torch 2.14.1 payload contains both real functions in torch._inductor.kernel.flex.common. The compatibility derivative retains the original import for older Torch and selects that real new provider only when the missing module is exactly the old path. Unrelated ModuleNotFoundError, ordinary ImportError, and a missing replacement provider still propagate. No helper function, registration, operation, or native integrity check is replaced or skipped.
+
+The derivative changes only torchao/prototype/inductor/int8_sdpa_lowering.py and the truthful wheel RECORD. All 422 original member names and their order remain. Every other payload, including METADATA, WHEEL, licenses, package version, and all original requirements, is byte-identical. The deterministic original/derived archive comparison and exact current Torch source are retained under audit/neutts-complete-runtime-preparation-20261020/torchao-api/.
+
+The native gate additionally requires TorchAO's two imported objects to be the exact original objects exported by the current Torch module, verifies that module's source hash, and exercises real stride construction and optional/SymPy input realization. This new native check remains pending until the corrected gate runs.
+
+Host validation passed 30 focused tests and 54 subtests with zero skips. A fresh full input preparation verifies all 105 wheels, 11 original APT Python payloads, and the original 122-archive foundation. The 28,936 installed targets retain distinct owners. Host evidence and the exact prepared-input receipt are in this directory; independent source and derivative review evidence is retained separately here.
+
+The original dependency graph and package versions are unchanged. NeuTTS itself remains excluded, its original Python bound is untouched, no gated speech weights were requested, and this work does not change production admission or create a release.

@@ -1,7 +1,10 @@
 """Targeted host checks for the original complete dependency environment."""
 from __future__ import annotations
 
+import ast
+import builtins
 import copy
+import inspect
 import gc
 import hashlib
 import importlib.util
@@ -266,6 +269,130 @@ class DocumentationCollisionTests(unittest.TestCase):
         for invalid in ("../escape", "fixture.data/data/../escape", "fixture.data/headers/header.h"):
             with self.subTest(member=invalid), self.assertRaises((ValueError, prep.helper().wheel_helper().PrepareError)):
                 prep.installed_target(invalid)
+
+
+class TorchAOCompilerCompatibilityTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.lock, _ = prep.load_lock()
+        cls.rule = cls.lock["torchao_compiler_import_compatibility"]
+        cls.package = next(p for p in cls.lock["packages"] if p["name"] == "torchao")
+        cls.derivative = ROOT / cls.package["origin"]["retained_path"]
+        with zipfile.ZipFile(cls.derivative) as archive:
+            cls.source = archive.read(cls.rule["target_member"]).decode()
+        tree = ast.parse(cls.source)
+        block = next(node for node in tree.body if isinstance(node, ast.Try)
+                     and any(isinstance(item, ast.ImportFrom)
+                             and item.module == "torch._inductor.kernel.flex_attention"
+                             for item in node.body))
+        cls.import_code = compile(ast.get_source_segment(cls.source, block),
+                                  cls.rule["target_member"], "exec")
+
+    def execute_import(self, importer):
+        namespace = {"__builtins__": {**vars(builtins), "__import__": importer}}
+        exec(self.import_code, namespace)
+        return namespace
+
+    def current_functions(self):
+        provider = self.rule["torch_provider"]
+        raw = prep.verified_bytes(ROOT / provider["retained_path"], provider)
+        source = raw.decode()
+        tree = ast.parse(source)
+        nodes = [node for node in tree.body if isinstance(node, ast.FunctionDef)
+                 and node.name in ("construct_strides", "maybe_realize")]
+        self.assertEqual({node.name for node in nodes}, {"construct_strides", "maybe_realize"})
+        # Compile the two exact retained source bodies for a host signature/stride check.
+        # The native operation imports and tests the actual installed module itself.
+        code = "from __future__ import annotations\n" + "\n\n".join(
+            ast.get_source_segment(source, node) for node in nodes)
+        namespace = {"__name__": "torch._inductor.kernel.flex.common"}
+        exec(compile(code, provider["member"], "exec"), namespace)
+        return namespace
+
+    def test_derivative_changes_only_exact_import_and_record(self):
+        self.assertEqual(prep.torchao_compiler_import_bytes(self.lock), self.derivative.read_bytes())
+        prep.verify_wheel(self.derivative, self.package)
+        with zipfile.ZipFile(ROOT / self.rule["upstream_path"]) as original, zipfile.ZipFile(self.derivative) as derived:
+            self.assertEqual(original.namelist(), derived.namelist())
+            changed = {name for name in original.namelist() if original.read(name) != derived.read(name)}
+            self.assertEqual(changed, {self.rule["target_member"], self.package["wheel"]["record_member"]})
+            self.assertEqual(derived.read(self.rule["target_member"]),
+                             original.read(self.rule["target_member"]).replace(
+                                 self.rule["old_import"].encode(), self.rule["new_import"].encode()))
+            self.assertEqual(original.read(self.package["wheel"]["metadata_member"]),
+                             derived.read(self.package["wheel"]["metadata_member"]))
+        self.assertEqual(self.package["version"], "0.12.0")
+        self.assertEqual(self.package["requires_python"], "")
+
+    def test_existing_old_module_exports_are_retained_without_new_import(self):
+        old_stride = lambda sizes, order: (sizes, order)
+        old_realize = lambda args: args
+        exports = type("OriginalExports", (), {
+            "construct_strides": staticmethod(old_stride), "maybe_realize": staticmethod(old_realize)})
+        calls = []
+        def importer(name, globals=None, locals=None, fromlist=(), level=0):
+            calls.append(name)
+            self.assertEqual(name, "torch._inductor.kernel.flex_attention")
+            self.assertEqual(tuple(fromlist), ("construct_strides", "maybe_realize"))
+            return exports
+        selected = self.execute_import(importer)
+        self.assertIs(selected["construct_strides"], old_stride)
+        self.assertIs(selected["maybe_realize"], old_realize)
+        self.assertEqual(calls, ["torch._inductor.kernel.flex_attention"])
+
+    def test_missing_old_path_selects_original_current_helpers_with_compatible_apis(self):
+        functions = self.current_functions()
+        exports = type("CurrentExports", (), {
+            name: staticmethod(functions[name]) for name in ("construct_strides", "maybe_realize")})
+        calls = []
+        def importer(name, globals=None, locals=None, fromlist=(), level=0):
+            calls.append(name)
+            if name == "torch._inductor.kernel.flex_attention":
+                raise ModuleNotFoundError("original path moved", name=name)
+            self.assertEqual(name, "torch._inductor.kernel.flex.common")
+            return exports
+        selected = self.execute_import(importer)
+        self.assertIs(selected["construct_strides"], functions["construct_strides"])
+        self.assertIs(selected["maybe_realize"], functions["maybe_realize"])
+        self.assertEqual(list(inspect.signature(selected["construct_strides"]).parameters), ["sizes", "fill_order"])
+        self.assertEqual(list(inspect.signature(selected["maybe_realize"]).parameters), ["args"])
+        for sizes, order, expected in (
+                ([2, 3, 4], [2, 1, 0], [12, 4, 1]),
+                ([2, 3, 4], [0, 1, 2], [1, 2, 6]),
+                ([], [], [])):
+            with self.subTest(sizes=sizes, order=order):
+                self.assertEqual(selected["construct_strides"](sizes, order), expected)
+        with self.assertRaisesRegex(AssertionError, "Length of sizes"):
+            selected["construct_strides"]([2, 3], [0])
+        self.assertEqual(calls, ["torch._inductor.kernel.flex_attention", "torch._inductor.kernel.flex.common"])
+
+    def test_unrelated_import_errors_are_not_hidden(self):
+        for error in (
+                ModuleNotFoundError("missing transitive dependency", name="triton"),
+                ModuleNotFoundError("missing parent package", name="torch._inductor.kernel"),
+                ImportError("old module lacks one exported function")):
+            with self.subTest(error=type(error).__name__, missing=getattr(error, "name", None)):
+                calls = []
+                def importer(name, globals=None, locals=None, fromlist=(), level=0):
+                    calls.append(name)
+                    raise error
+                with self.assertRaises(type(error)) as raised:
+                    self.execute_import(importer)
+                self.assertIs(raised.exception, error)
+                self.assertEqual(calls, ["torch._inductor.kernel.flex_attention"])
+
+    def test_missing_current_provider_propagates_without_a_stub(self):
+        error = ModuleNotFoundError("missing current provider", name="torch._inductor.kernel.flex.common")
+        calls = []
+        def importer(name, globals=None, locals=None, fromlist=(), level=0):
+            calls.append(name)
+            if name == "torch._inductor.kernel.flex_attention":
+                raise ModuleNotFoundError("old path absent", name=name)
+            raise error
+        with self.assertRaises(ModuleNotFoundError) as raised:
+            self.execute_import(importer)
+        self.assertIs(raised.exception, error)
+        self.assertEqual(calls, ["torch._inductor.kernel.flex_attention", "torch._inductor.kernel.flex.common"])
 
 
 class SharedInventoryIntegrationTests(unittest.TestCase):

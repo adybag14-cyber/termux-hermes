@@ -1,0 +1,127 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792513339.933242    9835 sentencepiece_trainer.cc:105] Starts training with : 
+trainer_spec {
+  input: /data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/actual-operations/sentencepiece/synthetic-corpus.txt
+  input_format: 
+  model_prefix: /data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/actual-operations/sentencepiece/synthetic-tokenizer
+  model_type: BPE
+  vocab_size: 64
+  self_test_sample_size: 0
+  character_coverage: 1
+  input_sentence_size: 0
+  shuffle_input_sentence: 0
+  seed_sentencepiece_size: 1000000
+  shrinking_factor: 0.75
+  max_sentence_length: 4192
+  num_threads: 2
+  num_sub_iterations: 2
+  max_sentencepiece_length: 16
+  split_by_unicode_script: 1
+  split_by_number: 1
+  split_by_whitespace: 1
+  split_digits: 0
+  pretokenization_delimiter: 
+  treat_whitespace_as_suffix: 0
+  allow_whitespace_only_pieces: 0
+  required_chars: 
+  byte_fallback: 0
+  vocabulary_output_piece_score: 1
+  train_extremely_large_corpus: 0
+  seed_sentencepieces_file: 
+  hard_vocab_limit: 0
+  use_all_vocab: 0
+  unk_id: 0
+  bos_id: 1
+  eos_id: 2
+  pad_id: -1
+  unk_piece: <unk>
+  bos_piece: <s>
+  eos_piece: </s>
+  pad_piece: <pad>
+  unk_surface:  ⁇ 
+  enable_differential_privacy: 0
+  differential_privacy_noise_level: 0
+  differential_privacy_clipping_threshold: 0
+}
+normalizer_spec {
+  name: nmt_nfkc
+  add_dummy_prefix: 1
+  remove_extra_whitespaces: 1
+  escape_whitespaces: 1
+  normalization_rule_tsv: 
+}
+denormalizer_spec {}
+I0000 00:00:1792513339.933345    9835 trainer_interface.cc:364] SentenceIterator is not specified. Using MultiFileSentenceIterator.
+I0000 00:00:1792513339.933377    9835 trainer_interface.cc:193] Loading corpus: /data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/actual-operations/sentencepiece/synthetic-corpus.txt
+I0000 00:00:1792513339.933442    9835 trainer_interface.cc:422] Loaded all 128 sentences
+I0000 00:00:1792513339.933531    9835 trainer_interface.cc:440] Adding meta_piece: <unk>
+I0000 00:00:1792513339.933543    9835 trainer_interface.cc:440] Adding meta_piece: <s>
+I0000 00:00:1792513339.933553    9835 trainer_interface.cc:440] Adding meta_piece: </s>
+I0000 00:00:1792513339.933576    9835 trainer_interface.cc:445] Normalizing sentences...
+I0000 00:00:1792513339.934112    9835 trainer_interface.cc:555] all chars count=5376
+I0000 00:00:1792513339.934146    9835 trainer_interface.cc:578] Alphabet size=25
+I0000 00:00:1792513339.934157    9835 trainer_interface.cc:579] Final character coverage=1
+I0000 00:00:1792513339.934332    9835 trainer_interface.cc:609] Done! preprocessed 128 sentences.
+I0000 00:00:1792513339.934351    9835 trainer_interface.cc:615] Tokenizing input sentences with whitespace: 128
+I0000 00:00:1792513339.934415    9835 trainer_interface.cc:626] Done! 11
+I0000 00:00:1792513339.938447    9835 bpe_model_trainer.cc:321] Added: freq=128 size=20 all=78 active=52 piece=▁world
+I0000 00:00:1792513339.938545    9835 trainer_interface.cc:702] Saving model: /data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/actual-operations/sentencepiece/synthetic-tokenizer.model
+I0000 00:00:1792513339.939086    9835 trainer_interface.cc:714] Saving vocabs: /data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/actual-operations/sentencepiece/synthetic-tokenizer.vocab
+WARNING:torchao.kernel.intmm:Warning: Detected no triton, on systems without Triton certain kernels will not work
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/complete-runtime/lib/python3.14/site-packages/torchtune/__init__.py", line 16, in <module>
+    import torchao  # noqa
+    ^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/complete-runtime/lib/python3.14/site-packages/torchao/__init__.py", line 41, in <module>
+    from torchao.quantization import (
+    ...<2 lines>...
+    )
+  File "/data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/complete-runtime/lib/python3.14/site-packages/torchao/quantization/__init__.py", line 6, in <module>
+    from .autoquant import (
+    ...<8 lines>...
+    )
+  File "/data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/complete-runtime/lib/python3.14/site-packages/torchao/quantization/autoquant.py", line 11, in <module>
+    from torchao.dtypes import (
+    ...<6 lines>...
+    )
+  File "/data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/complete-runtime/lib/python3.14/site-packages/torchao/dtypes/__init__.py", line 1, in <module>
+    from . import affine_quantized_tensor_ops
+  File "/data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/complete-runtime/lib/python3.14/site-packages/torchao/dtypes/affine_quantized_tensor_ops.py", line 28, in <module>
+    from torchao.dtypes.uintx.block_sparse_layout import (
+    ...<2 lines>...
+    )
+  File "/data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/complete-runtime/lib/python3.14/site-packages/torchao/dtypes/uintx/__init__.py", line 7, in <module>
+    from .dyn_int8_act_int4_wei_cpu_layout import (
+        Int8DynamicActInt4WeightCPULayout,
+    )
+  File "/data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/complete-runtime/lib/python3.14/site-packages/torchao/dtypes/uintx/dyn_int8_act_int4_wei_cpu_layout.py", line 320, in <module>
+    from ...prototype.inductor.fx_passes import register_da8w4_concat_linear_cpu_pass
+  File "/data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/complete-runtime/lib/python3.14/site-packages/torchao/prototype/inductor/fx_passes/__init__.py", line 2, in <module>
+    from .int8_sdpa_fusion import _int8_sdpa_init
+  File "/data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/complete-runtime/lib/python3.14/site-packages/torchao/prototype/inductor/fx_passes/int8_sdpa_fusion.py", line 22, in <module>
+    from ..int8_sdpa_lowering import register_int8_sdpa  # noqa: F401
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/complete-runtime/lib/python3.14/site-packages/torchao/prototype/inductor/int8_sdpa_lowering.py", line 6, in <module>
+    from torch._inductor.kernel.flex_attention import construct_strides, maybe_realize
+ModuleNotFoundError: No module named 'torch._inductor.kernel.flex_attention'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_neutts_complete_runtime.py", line 572, in runtime_case
+    operations[name] = operation()
+                       ~~~~~~~~~^^
+  File "/probes/scripts/compatibility_probe_neutts_complete_runtime.py", line 567, in <lambda>
+    ("complete_dependency_integration", lambda: complete_integration_operation(work)),
+                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_complete_runtime.py", line 488, in complete_integration_operation
+    import torchtune
+  File "/data/data/com.termux/files/usr/tmp/neutts-complete.ytzyst/complete-runtime/lib/python3.14/site-packages/torchtune/__init__.py", line 18, in <module>
+    raise ImportError(
+    ...<5 lines>...
+    ) from e
+ImportError: 
+        torchao not installed.
+        Please follow the instructions at https://pytorch.org/torchtune/main/install.html#pre-requisites
+        to install torchao.
+        

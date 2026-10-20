@@ -123456,10 +123456,9 @@
     },
     {
       "artifact": {
-        "bytes": 962232,
+        "bytes": 5595904,
         "filename": "torchao-0.12.0-py3-none-any.whl",
-        "sha256": "103f2a9164d2e4f705332af1aafbb8473eadd14d9164e45857ca187cde1f13d2",
-        "url": "https://files.pythonhosted.org/packages/6c/5f/6bf9b5bed6d31e286516d23e1db7320d2ccfbf1b2234749833ad1e3d25a5/torchao-0.12.0-py3-none-any.whl"
+        "sha256": "9e46ba0b03a57cf3e0d24b0ac4e7fa02d0a8556e69c8c0e96f34061abffd7016"
       },
       "base_requires_dist": [],
       "frozen_graph_requires_dist": [
@@ -123491,8 +123490,10 @@
       "name": "torchao",
       "native_members": [],
       "origin": {
-        "kind": "original-public-wheel",
-        "source_lock": "scripts/neutts_public_wheels_lock.json"
+        "kind": "torchao-compiler-import-derivative",
+        "retained_path": "audit/neutts-complete-runtime-preparation-20261020/torchao-api/derived/torchao-0.12.0-py3-none-any.whl",
+        "runtime_status": "prepared-exact-original-wheel-derivative-native-import-pending",
+        "upstream_wheel_sha256": "103f2a9164d2e4f705332af1aafbb8473eadd14d9164e45857ca187cde1f13d2"
       },
       "requires_dist": [
         "pytest; extra == \"dev\"",
@@ -123532,12 +123533,12 @@
         "metadata_member": "torchao-0.12.0.dist-info/METADATA",
         "metadata_sha256": "1fce0be31c323a3049634baa0af2e888a64631bb7a27ba889680b70a67ddca4f",
         "record_member": "torchao-0.12.0.dist-info/RECORD",
-        "record_sha256": "09ee202b061917b6ecb96014f8d1a09a1e16baba7da342f33ca8f49e35879815",
+        "record_sha256": "e39941c570a5ed7bef99749ad9235be9b93ba03216485840e2da8f70e036b313",
         "root_is_purelib": true,
         "tags": [
           "py3-none-any"
         ],
-        "uncompressed_bytes": 5529470,
+        "uncompressed_bytes": 5529404,
         "wheel_member": "torchao-0.12.0.dist-info/WHEEL",
         "wheel_sha256": "95353a07a7887d8a224094d935cf9fc9a47a0692fa7a14f3537c466319f69fc9"
       }
@@ -125138,6 +125139,26 @@
       "sha256": "a8cb789a4dd0d6df4b785c8d4afea91fa2263ff5ac3baf58c6038dd0375069fe"
     },
     {
+      "bytes": 133820,
+      "path": "audit/neutts-complete-runtime-preparation-20261020/torchao-api/TORCHAO-COMPILER-IMPORT.json",
+      "sha256": "760307fdda2ed8937d51461ff4a5379bbe8130f6ab9d8d364738323c05b4a2d8"
+    },
+    {
+      "bytes": 5595904,
+      "path": "audit/neutts-complete-runtime-preparation-20261020/torchao-api/derived/torchao-0.12.0-py3-none-any.whl",
+      "sha256": "9e46ba0b03a57cf3e0d24b0ac4e7fa02d0a8556e69c8c0e96f34061abffd7016"
+    },
+    {
+      "bytes": 962232,
+      "path": "audit/neutts-complete-runtime-preparation-20261020/torchao-api/original/torchao-0.12.0-py3-none-any.whl",
+      "sha256": "103f2a9164d2e4f705332af1aafbb8473eadd14d9164e45857ca187cde1f13d2"
+    },
+    {
+      "bytes": 17627,
+      "path": "audit/neutts-complete-runtime-preparation-20261020/torchao-api/torch-flex-common.py",
+      "sha256": "d20df6180978954f79a576f20b32a021558318f0c53d2c7c3bb8164edfa1918d"
+    },
+    {
       "bytes": 10869054,
       "path": "audit/neutts-engine-wheel-native-20261020/run-39434727788/built-wheel/neutts-1.4.1-cp314-cp314-android_24_arm64_v8a.whl",
       "sha256": "3c5c687910037e87633175c8e7fe5d94e0f9e412214598dd4c82867b81bed5f3"
@@ -125388,5 +125409,114 @@
       "sha256": "7c051b0143675594aadd52f9a0b66ec71e6950e9953feef3f773acceafcb0a29"
     }
   ],
+  "torchao_compiler_import_compatibility": {
+    "new_import": "try:\n    from torch._inductor.kernel.flex_attention import construct_strides, maybe_realize\nexcept ModuleNotFoundError as error:\n    if error.name != \"torch._inductor.kernel.flex_attention\":\n        raise\n    # Newer Torch keeps these same Inductor helpers in the flex subpackage.\n    from torch._inductor.kernel.flex.common import construct_strides, maybe_realize\n",
+    "old_import": "from torch._inductor.kernel.flex_attention import construct_strides, maybe_realize\n",
+    "proof_path": "audit/neutts-complete-runtime-preparation-20261020/torchao-api/TORCHAO-COMPILER-IMPORT.json",
+    "target_member": "torchao/prototype/inductor/int8_sdpa_lowering.py",
+    "torch_provider": {
+      "archive": {
+        "architecture": "aarch64",
+        "bytes": 36675500,
+        "filename": "pool/main/p/python-torch/python-torch_2.14.1-2_aarch64.deb",
+        "name": "python-torch",
+        "sha256": "cb5d96877f30bca10a0a19bcd32934a4f477ec7e5bfd00c2a82ac5c9e7d0eb73",
+        "version": "2.14.1-2"
+      },
+      "bytes": 17627,
+      "member": "torch/_inductor/kernel/flex/common.py",
+      "retained_path": "audit/neutts-complete-runtime-preparation-20261020/torchao-api/torch-flex-common.py",
+      "sha256": "d20df6180978954f79a576f20b32a021558318f0c53d2c7c3bb8164edfa1918d"
+    },
+    "upstream_package": {
+      "artifact": {
+        "bytes": 962232,
+        "filename": "torchao-0.12.0-py3-none-any.whl",
+        "sha256": "103f2a9164d2e4f705332af1aafbb8473eadd14d9164e45857ca187cde1f13d2",
+        "url": "https://files.pythonhosted.org/packages/6c/5f/6bf9b5bed6d31e286516d23e1db7320d2ccfbf1b2234749833ad1e3d25a5/torchao-0.12.0-py3-none-any.whl"
+      },
+      "base_requires_dist": [],
+      "frozen_graph_requires_dist": [
+        "pytest; extra == \"dev\"",
+        "unittest-xml-reporting; extra == \"dev\"",
+        "parameterized; extra == \"dev\"",
+        "packaging; extra == \"dev\"",
+        "transformers; extra == \"dev\"",
+        "hypothesis; extra == \"dev\"",
+        "sentencepiece; extra == \"dev\"",
+        "expecttest; extra == \"dev\"",
+        "bitsandbytes; extra == \"dev\"",
+        "matplotlib; extra == \"dev\"",
+        "pandas; extra == \"dev\"",
+        "fire; extra == \"dev\"",
+        "tabulate; extra == \"dev\"",
+        "tiktoken; extra == \"dev\"",
+        "blobfile; extra == \"dev\"",
+        "lm_eval; extra == \"dev\"",
+        "diskcache; extra == \"dev\"",
+        "pycocotools; extra == \"dev\"",
+        "tqdm; extra == \"dev\"",
+        "importlib_metadata; extra == \"dev\"",
+        "ninja; extra == \"dev\"",
+        "cmake<4.0.0,>=3.19.0; extra == \"dev\"",
+        "ruff==0.11.6; extra == \"dev\"",
+        "pre-commit; extra == \"dev\""
+      ],
+      "name": "torchao",
+      "native_members": [],
+      "origin": {
+        "kind": "original-public-wheel",
+        "source_lock": "scripts/neutts_public_wheels_lock.json"
+      },
+      "requires_dist": [
+        "pytest; extra == \"dev\"",
+        "unittest-xml-reporting; extra == \"dev\"",
+        "parameterized; extra == \"dev\"",
+        "packaging; extra == \"dev\"",
+        "transformers; extra == \"dev\"",
+        "hypothesis; extra == \"dev\"",
+        "sentencepiece; extra == \"dev\"",
+        "expecttest; extra == \"dev\"",
+        "bitsandbytes; extra == \"dev\"",
+        "matplotlib; extra == \"dev\"",
+        "pandas; extra == \"dev\"",
+        "fire; extra == \"dev\"",
+        "tabulate; extra == \"dev\"",
+        "tiktoken; extra == \"dev\"",
+        "blobfile; extra == \"dev\"",
+        "lm_eval; extra == \"dev\"",
+        "diskcache; extra == \"dev\"",
+        "pycocotools; extra == \"dev\"",
+        "tqdm; extra == \"dev\"",
+        "importlib_metadata; extra == \"dev\"",
+        "ninja; extra == \"dev\"",
+        "cmake<4.0.0,>=3.19.0; extra == \"dev\"",
+        "ruff==0.11.6; extra == \"dev\"",
+        "pre-commit; extra == \"dev\""
+      ],
+      "requires_python": "",
+      "version": "0.12.0",
+      "wheel": {
+        "declared_requires_dist_count": 24,
+        "declared_requires_dist_sha256": "416b8b5c601a718b99febb63ec61964eb6e33eb0ccb2a5431a72cff0182ffa15",
+        "entry_count": 422,
+        "file_count": 348,
+        "max_member_bytes": 1975954,
+        "members_sha256": "3f38a717c4a4ca853860a3b19d84d7e73989f720807bda578021d7c2e208304b",
+        "metadata_member": "torchao-0.12.0.dist-info/METADATA",
+        "metadata_sha256": "1fce0be31c323a3049634baa0af2e888a64631bb7a27ba889680b70a67ddca4f",
+        "record_member": "torchao-0.12.0.dist-info/RECORD",
+        "record_sha256": "09ee202b061917b6ecb96014f8d1a09a1e16baba7da342f33ca8f49e35879815",
+        "root_is_purelib": true,
+        "tags": [
+          "py3-none-any"
+        ],
+        "uncompressed_bytes": 5529470,
+        "wheel_member": "torchao-0.12.0.dist-info/WHEEL",
+        "wheel_sha256": "95353a07a7887d8a224094d935cf9fc9a47a0692fa7a14f3537c466319f69fc9"
+      }
+    },
+    "upstream_path": "audit/neutts-complete-runtime-preparation-20261020/torchao-api/original/torchao-0.12.0-py3-none-any.whl"
+  },
   "wheel_count": 105
 }
