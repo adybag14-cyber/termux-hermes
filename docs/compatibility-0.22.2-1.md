@@ -20,14 +20,22 @@ Bot Desktop, and managed gateway service**. Its separate CUA-augmented package
 also passes **all eleven standalone and seven packaged-default computer-use
 checks**, same-version reinstall, a fresh published-to-candidate upgrade, user
 state preservation, optional installation without compilers, and repeated
-environment reuse. These computer-use results concern the owned virtual X11
+environment reuse. These computer-use results concern the owned foreground virtual X11
 desktop; they do not certify arbitrary Android phone UI control.
 
 NeuTTS's scientific foundation, Numba/Llama CPU, complete eSpeak/Phonemizer,
 TorchAO NF4, five APT extensions and six C/C++ dependency components now have
 native successes. The engine wheel and bundled C ABI also pass, along with
-standalone XXHash. The complete engine environment and actual codec/model/
-synthesis path remain unproved. Full Hermes audio preparation now passes at two fresh paths,
+standalone XXHash. The complete 25-package Tokenizers runtime now has independently
+verified native success. Tiktoken's seven-package runtime and the locked Rust
+build/base operations also have independently reviewed native evidence, as does
+Perth's complete 43-package public watermark runtime. Its measured synthetic-signal
+API behavior carries no watermark-quality claim. **The corrected 116-package
+combined run 39458842068 at 2d4408f passes all eleven operation groups and final
+integrity, library and network checks.** Its [complete artifact/source review](../audit/neutts-complete-runtime-native-20261020/run-39458842068/full-artifact-review/NATIVE-SUCCESS-REVIEW.json)
+also passes. The three preceding failures remain documented
+below. Engine admission, default initialization and synthesis remain unproved. Full Hermes
+audio preparation now passes at two fresh paths,
 each with 101 application distributions and 6,906 owned files. Physical microphone
 capture and silence/VAD auto-stop still need a real Android device. These are
 the two remaining complete feature gates; the baseline count remains nine.
@@ -111,7 +119,7 @@ source-reviewed judgment, distinct from distribution inventory.
 | uvloop event-loop acceleration | Android marker excludes uvloop 0.22.1. Its setup backend runs shell/configure commands assuming a conventional Unix shell path; the old preconfigure workaround is overwritten by setup.py's later copy/configure sequence. Standard asyncio remains available. | Verify the exact locked source archive, patch the commands actually executed to use Termux's `CONFIG_SHELL`, and admit Android aarch64. Supply the resulting wheel through the reusable bundle cache. | Corrected native ARM TCP/task/shutdown job passed in run 39039959324, including original-payload runtime and successful artifact capture. |
 | Matrix messaging with encryption | Five requirements and the PM extra gate admit Linux only. The encrypted backend's python-olm 3.2.16 builds an older vendored libolm with CMake compatibility assumptions and an incorrectly const-qualified pointer rejected by current Clang. | Preserve bundled static libolm, apply Termux's CMake policy and const-pointer corrections, and admit Android aarch64 for the complete encrypted dependency group. Bundle reusable native wheels. | Native ARM Olm/Megolm, AES, asyncpg codec, HTTP and SQLite probes passed with original payload libraries; no undeclared runtime libraries. |
 | Nemo Relay | Core platform marker excludes Android. The 0.10.0 Rust source unconditionally requests a vendored protoc binary whose platform table lacks Android, ignoring the available system `PROTOC`. The old builder also silently skipped Nemo if it reached the build list. | Verify the locked sdist, honor the system protoc executable, remove the silent omission paths, and require Nemo in completeness checks. | Android Rust build, native plugin validation and scope/trace behavior passed in run 39039959324, including original-payload execution and successful artifact capture. |
-| NeuTTS local speech engine | NeuTTS 1.4.1 declares Python >=3.10,<3.14; the Hermes lock excludes its full group under CPython 3.14.6. Its PyPI release has platform wheels but no sdist; exact public source exists. | Prepare a separate complete, pinned native runtime. Fix the actual Android Llama loader, native build invocation, NeuCodec Hub compatibility and Phonemizer library discovery. Keep the original engine exclusion until complete runtime and synthesis validation support changing it. | All seven scientific-foundation gates pass. [Run 39064666810](../audit/neutts-native-20261017/run-39064666810.json) also builds both exact native wheels and passes installed-input verification, Numba nopython JIT/workqueue operations, and Llama backend initialization/cleanup with verified mapped libraries. NeuCodec and Phonemizer patches pass 34 and 30 focused host tests respectively. The full [117-package/194-edge dependency review](neutts-engine-closure.md) is a metadata witness, not an installable lock. Remaining native runtime, codec and model tests are explicit; no engine or synthesis is certified. |
+| NeuTTS local speech engine | NeuTTS 1.4.1 declares Python >=3.10,<3.14; the Hermes lock excludes its full group under CPython 3.14.6. Its PyPI release has platform wheels but no sdist; exact public source exists. | Prepare a separate complete, pinned native runtime. Fix the actual Android Llama loader, native build invocation, NeuCodec Hub compatibility and Phonemizer library discovery. Keep the original engine exclusion until complete runtime and synthesis validation support changing it. | The scientific foundation, CPU, Phonemizer, APT extensions, engine wheel/C ABI and XXHash pass their separate native gates. The complete 25-package/29-edge Tokenizers and seven-package/six-edge Tiktoken runtimes are independently verified, alongside Rust builds and actual HF-Xet/Safetensors/TLS operations. Perth's complete 43/50 public-watermark runtime also passes independent review, within its explicit API-only quality limit. The original 116-dependency/183-edge environment now passes all eleven actual operation groups and final inventory/RECORD, mapped-library and disconnected-network checks in run 39458842068; independent whole-artifact/source review also passes. Original NeuTTS Python bounds remain unchanged; no engine or synthesis is certified. |
 
 The uvloop, Olm and Nemo adapters reject unexpected source bytes or changed build
 hooks. They do not bypass checksums or substitute unpinned upstream branches.
@@ -131,7 +139,7 @@ The reviewed exact source digests are also embedded in the preparation helpers.
 | Capability | Published behavior | Preparation status |
 | --- | --- | --- |
 | Local managed browser | PM has no Bionic artifact for either AgentBrowser or Chromium. Remote browser/CDP paths are distinct and can remain usable. | Fixed and passed native ARM validation under UID 1000: raw static driver, real PM installation/discovery, built-in browser tools, and the default `browser_exec` handler with the backend unset. Navigation, exact loopback URL/heading, DOM interaction, PNG screenshot and product cleanup all passed. Product PM/discovery integration also passed 139 regression tests. Chromium remains an explicitly APT-owned dependency. See the [final browser evidence](../audit/native-probes-e20e8c4-20261017/browser-summary.json). |
-| Default native computer use | The default CUA driver rejects Android; the MCP dependency does not supply a native backend. | The separate CUA-augmented candidate now passes [the complete native workflow](../audit/cua-native-20261017/run-39063611615.json): 11 standalone and 7 registered-Hermes checks with normal bundled PM discovery and omitted delivery mode. Foreground is resolved before approval; absent approvers, explicit background requests and background-only grants are refused. Three once approvals, real image/input oracles, viewer leases, cleanup, reinstall, fresh published-package upgrade and compiler-free optional install/reuse pass. The candidate contains the other six repairs and retains the same package version. Scope is its owned virtual X11 desktop. Android phone UI, AT-SPI trees, encrypted history and parallel uinput/background input remain uncertified. |
+| Default native computer use | The default CUA driver rejects Android; the MCP dependency does not supply a native backend. | The separate CUA-augmented candidate now passes [the complete native workflow](../audit/cua-native-20261017/run-39063611615.json): 11 standalone and 7 registered-Hermes checks with normal bundled PM discovery and omitted delivery mode. Foreground is resolved before approval; absent approvers, explicit background requests and background-only grants are refused. Three once approvals, real image/input oracles, viewer leases, cleanup, reinstall, fresh published-package upgrade and compiler-free optional install/reuse pass. The candidate contains the other six repairs and retains the same package version. Scope is its owned foreground virtual X11 desktop. Android phone UI, AT-SPI trees, encrypted history and parallel uinput/background input remain uncertified. |
 | Bot Desktop | Virtual display host is Linux-only. | Added a local Termux Xvnc/Xfce adapter, prefix-aware runtime paths and screenshot capture through scrot. Desktop/remote-provider regressions pass, including real resolver result types. Native ARM UID 1000 validation passed: Xfce, an 800x600 RFB framebuffer, private Xauthority/socket permissions, no TCP display listener, real product screenshot capture and cleanup. |
 | Managed gateway service | Service install/start/uninstall paths reject Termux/APT provenance. Manual foreground/background gateway paths remain available. | Added a per-home Termux runit adapter with owned service directories, separate start-now/login policy, graceful stop and crash supervision. Twenty-four gateway tests pass. Native ARM install/start/status/restart/stop/crash-respawn/uninstall checks also passed, including same-basename home isolation and preservation of the shared supervisor. |
 | Recorder silence auto-stop | The Termux:API recorder does not provide the sounddevice VAD/silence path. Manual stop remains available. | Added explicit auto, sounddevice and termux-api capture selection with accurate diagnostics. The PCM path retains the existing VAD implementation. The full [two-path Hermes audio preparation](../audit/audio-hermes-native-20261018/run-39084612542.json) now passes canonical dependency, payload, CFFI and NumPy checks. PortAudio initialization remains unavailable alongside eight absent measured Android framework/Binder paths; no stream was started, and physical microphone/VAD remains unverified. Termux:API itself has no PCM stream for this VAD path. A separate [audio-readiness patch](../patches/next-stable/audio-readiness.patch) catches import-time PortAudio failures and rejects output-only device inventories. The [device guide](audio-readiness-device-validation.md) preserves the remaining physical capture/VAD gate. |
@@ -259,70 +267,227 @@ that Android ports are impossible.
 
 ### Current native component checkpoint (20 October 2026)
 
-The published package still has nine restrictions. Seven repairs belong to
-unpublished preparation candidates; complete NeuTTS and physical microphone/VAD
-remain the two outstanding feature gates.
+The result remains **9 published restrictions / 7 repairs with native
+preparation evidence / 2 incomplete features**. The new successes establish more
+of NeuTTS's original dependency runtime. Complete engine admission and physical
+microphone/VAD are still separate, unfinished feature gates.
 
-#### Verified b8 component results and current 4a95a07 checkpoint
+**Current combined gate:** [run 39458842068](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39458842068)
+at **2d4408f** passes all eleven actual operation groups, the original
+116-distribution/183-edge closure and final inventory/RECORD, native-library
+ownership and disconnected-network checks. Its child receipt has been
+independently verified against the [complete artifact and source review](../audit/neutts-complete-runtime-native-20261020/run-39458842068/full-artifact-review/NATIVE-SUCCESS-REVIEW.json).
+Engine import, default initialization and complete model/synthesis behavior
+remain unmeasured under the unchanged Python bound. The three failed attempts
+below are historical results.
 
-The published baseline remains **9 restrictions / 7 repairs with native
-preparation evidence / 2 incomplete features**. The complete NeuTTS engine and
-physical microphone/VAD have not been certified.
+#### Native results and evidence strength
 
-| Exact native gate | Verified result | Limit retained |
+| Exact native gate | Result and practical meaning | Evidence and limit |
 | --- | --- | --- |
-| [Engine wheel, 39434727788](../audit/neutts-engine-wheel-native-20261020/run-39434727788/REVIEW.json) | Original backend build, all 392 wheel members and CRC/RECORD checks, 117 dictionaries and all 14 bundled eSpeak C ABI cases pass. | The engine was neither installed nor imported. Its original Python >=3.10,<3.14 bound remains unchanged; no speech synthesis or Python 3.14 admission is claimed. |
-| [APT extensions, 39434727717](../audit/neutts-apt-extensions-native-20261020/run-39434727717/REVIEW.json) | All five groups pass actual operations; strict original requirements and provenance pass for 12 APT distributions, with 893 regular files and 34 native files unchanged. | Raw pip still exits 1 for the 12 original legacy-tag diagnostics. No metadata or tag is rewritten. |
-| [XXHash, 39434727829](../audit/neutts-xxhash-native-20261020/run-39434727829/REVIEW.json) | All seven cases pass: real import, four fixed-vector algorithm groups, streaming/seed/copy/reset and actual mapped-library provenance. | This validates the unchanged 4.0.1 Android wheel, not complete NeuTTS. |
+| [Tokenizers runtime, 39447721557](../audit/neutts-tokenizers-runtime-native-20261020/run-39447721557/REVIEW.json) | The complete original **25-distribution/29-edge** environment passes. WordPiece IDs, Unicode offsets, serialization, BPE training and batches, local HTTP/YAML/Hub behavior, HF-Xet hashing and Safetensors TensorSpec/corrupt-input checks all run successfully. | Whole artifact and all 247 members independently checked. All 25 wheels, 775 inner members, 750 original RECORD payload hashes and 44 loaded APT library byte comparisons pass. The 825-file installed inventory is identical before/after; isolated pip check exits zero. |
+| [Tiktoken runtime, 39446824110](../audit/neutts-tiktoken-native-20261020/run-39446824110/NATIVE-REVIEW.json) | The original Tiktoken/Regex backend builds and complete **seven-distribution/six-edge** environment pass. Six literal CoreBPE vectors, Unicode, batch, binary-token and special-token APIs exercise the real native extension. | All 2,280 artifact members, both native wheel RECORDs/original metadata, 80 source inputs and 39 mapped APT library bytes independently checked. The 151-file inventory is unchanged; no vocabulary or speech model is downloaded. |
+| [Public Perth runtime, 39446824120](../audit/neutts-perth-native-20261020/run-39446824120/NATIVE-REVIEW.json) | The complete **43-distribution/50-edge** runtime passes with the original bundled public checkpoint. Real watermark apply/decode and SoundFile FLOAT-WAV roundtrips execute at 24/32 kHz; auxiliary native/JIT operations pass. | All 274 artifact members and 52 source inputs independently checked; 19,937 installed files are unchanged. Native ownership verifies 162 extension and 148 APT library mappings. Low detection confidences and zero rounded detections remain explicit; these synthetic-signal checks do not certify watermark quality. |
+| [Rust builds/base operations, 39446837699](../audit/neutts-rust-native-20261020/run-39446837699/REVIEW.json) | Four original native wheels build. The exact two-distribution HF-Xet/Safetensors runtime passes real file hashing, TensorSpec serialization and three corrupt-input checks. Actual HF TLS accepts the trusted fixture and rejects an unknown CA and wrong host before HTTP. | Whole 765,103,959-byte artifact/all 47,629 members and the 53-member small handoff checked. Original metadata, 55 wheel RECORD payloads, 35 source inputs and 34 mapped APT libraries verified; all 24 installed files are unchanged. Tokenizers operations use their separate reviewed 25-node gate. |
+| [Engine wheel, 39434727788](../audit/neutts-engine-wheel-native-20261020/run-39434727788/REVIEW.json) | Original backend build, all **392 wheel members**, **117 dictionaries** and all **14 bundled eSpeak C ABI cases** pass. | Whole artifact verified. The engine was neither installed nor imported; its original Python **>=3.10,<3.14** bound remains unchanged. |
+| [APT extensions, 39434727717](../audit/neutts-apt-extensions-native-20261020/run-39434727717/REVIEW.json) | PyArrow, lxml, MsgPack, Pillow and psutil operations pass. Strict original requirements/provenance pass for **12 APT distributions**, with 893 files and 34 native files unchanged. | Whole artifact verified. Raw pip's 12 original legacy-tag diagnostics remain; no metadata or tag is rewritten. |
+| [XXHash, 39434727829](../audit/neutts-xxhash-native-20261020/run-39434727829/REVIEW.json) | All **seven cases** pass, including fixed vectors, streaming, seed/copy/reset and actual mapped-library provenance. | Whole artifact verified for the unchanged 4.0.1 Android wheel. This is a dependency result, not an engine or synthesis result. |
 
-These three b8 artifacts were each downloaded in full and checked against their
-whole size/hash and every member's CRC, size and SHA-256. They supersede the
-pending retry descriptions in the historical checkpoint below.
+The Tokenizers result is tied to source
+**8995678c0e20c117bbab9830b919e49ba0689a5d**: all 79 recorded inputs match both
+their SHA-256 ledger and that exact source tree. Its actual native target is
+Android API 24/AArch64/Python 3.14.6, with only loopback available during the
+operations. The original [CI evidence](../audit/neutts-tokenizers-runtime-native-20261020/run-39447721557/ci/ci-push-original-job-log.txt)
+at the same source records **1,241 tests and 577 additional subtests passing,
+with 84 skips**, in 28.34 seconds. This includes the Linux preparation check
+under a private umask; duplicate push/PR results are not added together.
 
-At source **4a95a07086a0b88d209485ac7a01cdd40e268f40**, both [push CI
-39440363551](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39440363551)
-and [PR CI 39440378190](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39440378190)
-pass: **1,193 tests, 457 additional subtests and 84 skips**. The duplicate runs
-are not added together, and their result does not certify later corrections.
+#### Complete dependency environment: all eleven groups pass
 
-The [HF linkage review](../audit/neutts-hf-python-linkage-20261020/REVIEW.json)
-now verifies the entire 765,083,696-byte failed d215961 artifact and all 47,595
-members. All four wheel builds completed before HF-Xet import failed on
-_Py_FalseStruct. The exact Python runtime exports that symbol; HF's extension
-omitted the libpython3.so forwarding-stub dependency. The HF-only scoped linker
-correction preserves source, Cargo, ABI3 tags, TLS and versions; **170 host tests
-pass with no skips**. [Corrected Rust run 39440363583](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39440363583)
-advanced through actual HF import and file hashing, then failed because the
-Safetensors 0.8 probe supplied the old nested-dictionary serialization shape
-instead of TensorSpec. The probe is being adapted to the exact shipped API;
-the complete Rust runtime still requires a passing retry.
+The complete preparation binds **105 actual wheels and 11 original APT Python
+payloads** into the original **116-distribution/183-edge dependency graph**.
+It excludes only NeuTTS and its 11 outgoing edges from the original 117/194
+design. Every selected dependency version, original requirement and the engine's
+**Python >=3.10,<3.14** bound remain unchanged.
 
-[Standalone Tiktoken run 39440363758](../audit/neutts-tiktoken-native-20261020/run-39440363758/REVIEW.json)
-built and verified the original Tiktoken wheel with the approved 27-crate lock,
-then failed before Regex's backend because the verifier compared requirement
-whitespace literally. The original source says "setuptools > 77.0.3"; its lock
-has the equivalent canonical spelling. The correction compares parsed PEP 508
-requirements while preserving exact source hashes and declarations. **35 host
-tests and 50 subtests pass, no skips**; Regex construction and the complete
-seven-distribution/six-edge runtime still require a successful native retry.
+The first two native attempts stopped before operation groups ran, and both
+failures remain recorded:
 
-[Public Perth run 39440363735](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39440363735)
-passed the foundation, exact 43-distribution/50-edge closure and auxiliary
-operations, then failed at SoundFile library lookup before public watermark
-validation. The [retained failure](../audit/neutts-soundfile-discovery-fix-20261020/NATIVE-FAILURE-REVIEW.json)
-shows the original libsndfile installed. The [narrow Android fallback](../patches/next-stable/soundfile-android-library.patch)
-preserves all eight wheel members except the source edit and truthful RECORD,
-leaving version, metadata and Linux packaged-library behavior intact.
-**62 focused tests and 232 subtests pass, no skips**; actual loading, WAV I/O,
-watermark operations and final runtime provenance still require the native retry.
+1. [Run 39450032929](../audit/neutts-complete-runtime-native-20261020/run-39450032929/FAILURE-REVIEW.json)
+   at 88e2810 exposed the complete preparer's missing safe_relative adapter.
+   The [interface correction](../audit/neutts-complete-runtime-native-20261020/interface-fix/INDEPENDENT-INTERFACE-REVIEW.json),
+   saved at 11f7bb6, passed 21 tests and 41 subtests. The additional generic
+   fatal stderr line did not establish a native library defect.
+2. [Run 39452440876](../audit/neutts-complete-runtime-native-20261020/run-39452440876/full-artifact-review/NATIVE-FAILURE-REVIEW.json)
+   at 11f7bb6 then reached strict installed-file verification. Einx 0.4.3 and
+   Phonemizer 3.3.0 packaged different documentation bytes at the same
+   docs/source/conf.py destination. The independent full input census found
+   exactly this one duplicate target. The unchanged byte check correctly
+   rejected the overwrite; no operation group passed in that attempt.
 
-The complete **25-distribution/29-edge Tokenizers gate** is drafted, awaiting the
-corrected native HF-Xet, Safetensors and Tokenizers wheels. Reconciliation and
-execution of all **116 dependency distributions** remain public implementation
-work. The full design remains 117 distributions including NeuTTS, with 194
-active edges; it is not an installable or admitted Python 3.14 engine lock.
-Exact gated weights, reference audio/transcript and later device tests are
-additional requirements, not explanations for unfinished public dependency work.
+The [packaging correction](../audit/neutts-complete-runtime-native-20261020/docs-collision-fix/README.md)
+is saved at **3f1f404c72addb91f1d4937342c20e555be58a58**. It moves Einx's
+unchanged documentation into its own share/doc/einx-0.4.3/source/conf.py through
+the standard wheel data scheme and regenerates RECORD. All runtime code,
+metadata, licenses, versions and requirements are preserved; Phonemizer is
+unchanged. Original and derived wheels plus the
+[131-member comparison](../audit/neutts-complete-runtime-preparation-20261020/einx-docs/EINX-DOCS-RELOCATION.json)
+remain available. The derivative is reproduced and verified during preparation
+and every input verification.
+
+The new preflight maps all 105 wheels and 11 APT payloads into one
+prefix-relative namespace and verifies **28,936 unique file targets**. It
+rejects any duplicate owner, including identical bytes, aliases through wheel
+data schemes and file/directory conflicts. Its result is bound into the
+[prepared input receipt](../audit/neutts-complete-runtime-native-20261020/docs-collision-fix/COMPLETE-PREPARED-INPUTS.json).
+The [focused and independent checks](../audit/neutts-complete-runtime-native-20261020/docs-collision-fix/independent-review/INDEPENDENT-FROZEN-GUARD-REVIEW.json)
+each pass **25 tests and 48 subtests, with no skips**; these separate runs are
+not added together.
+
+An [independent real offline pip installation](../audit/neutts-complete-runtime-native-20261020/docs-collision-fix/independent-review/INDEPENDENT-EINX-INSTALL-REVIEW.json)
+uses an explicit Android-style install scheme inside an actual private host
+venv. The unchanged shared validators verify **181 original payloads, all 188
+installed RECORD rows, 186 site files and two distributions**, with both original
+documentation files at distinct paths. This proves the installer layout and
+byte preservation on the host. It does not execute Android package operations.
+The native probe changes only its preparer hash; its existing file, metadata,
+RECORD and library checks remain intact.
+
+The next [native run 39456043425](../audit/neutts-complete-runtime-native-20261020/run-39456043425/full-artifact-review/NATIVE-FAILURE-REVIEW.json)
+at 3f1f404 passes the original 116-node/183-edge closure, the initial
+**29,140-file installed inventory** and all **13,818 installed wheel RECORD
+rows**. It then completes **ten actual operation groups**: foundation/audio,
+the selected C/C++ data/tokenizer operations, HF-Xet, Safetensors, local
+Hub/HTTP/YAML, Tokenizers, Tiktoken, Phonemizer, Llama CPU context and public
+Perth watermark operations. The Llama context check does not perform inference.
+
+**Historical run 39456043425 fails final integration.** Torchtune imports TorchAO, whose
+int8_sdpa_lowering module refers to the removed
+torch._inductor.kernel.flex_attention path. The original traceback identifies
+this missing module beneath Torchtune's misleading "torchao not installed"
+wrapper message. Exact signed Torch source places both real helpers,
+construct_strides and maybe_realize, in torch._inductor.kernel.flex.common.
+The [guarded TorchAO correction](../audit/neutts-complete-runtime-native-20261020/torchao-api-fix/README.md)
+is saved and pushed at **2d4408fea01af1721e3caca612624002a20c4494**.
+It retains the old import for older Torch and falls back only when the missing
+module is exactly that old path. Ordinary ImportError, unrelated
+ModuleNotFoundError and a missing new provider still propagate. Only the one
+compiler-import source member and truthful RECORD change; all other 420 wheel
+members, metadata, licenses, versions and requirements are byte-identical.
+No helper implementation, registration or operation is replaced or skipped.
+
+The [independent source and derivative review](../audit/neutts-complete-runtime-native-20261020/torchao-api-fix/independent-review/INDEPENDENT-TORCHAO-DERIVATIVE-REVIEW.json)
+verifies both whole wheel archives/RECORDs and all 26 directly reached imported
+symbols in 11 exact Torch modules. Focused and independent suites each pass
+**30 tests and 54 subtests, with no skips**. The fresh
+[full preparation](../audit/neutts-complete-runtime-native-20261020/torchao-api-fix/HOST-VALIDATION.json)
+verifies the 105 wheels, 11 APT Python payloads and original 122-archive
+foundation; all 28,936 targets remain uniquely owned.
+
+The native gate now also checks that TorchAO's imported objects are the actual
+current Torch exports, verifies their exact source hash, and exercises literal
+contiguous/transposed strides and optional/SymPy realization. Those new native
+checks pass in corrected run 39458842068, whose actual child result is summarized below.
+
+In historical run 39456043425, the final integration group did not pass;
+after-operation inventory/RECORD and loaded-library ownership checks were
+**not reached**.
+The [complete historical failure artifact](../audit/neutts-complete-runtime-native-20261020/run-39456043425/full-artifact-review/NATIVE-FAILURE-REVIEW.json)
+has now been independently verified: all **760 members** of the
+416,393,127-byte archive pass size, CRC and SHA-256 checks. This strengthens the
+record of the failed run; it does not turn that result into a pass.
+**The corrected [combined native run 39458842068](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39458842068)
+at 2d4408f passes all eleven actual operation groups** (job 118752673393).
+The original 116-distribution/183-edge closure passes; all **29,140 installed
+site files** and **13,818 RECORD rows across 105 wheels** are identical before
+and after. Final native-library ownership passes with **246 mapped extensions**,
+and the container is disconnected before and after operations. Final integration
+imports the real NeuCodec class and Torchtune/TorchAO and exercises the new real
+Torch helper identity, source and literal behavior checks. The gate installs and
+verifies the entire selected environment; its eleven operation groups do not
+certify every public API of every distribution. The NeuCodec check imports its
+real class without loading a codec model or exercising encode/decode.
+
+The [independent complete-artifact review](../audit/neutts-complete-runtime-native-20261020/run-39458842068/full-artifact-review/NATIVE-SUCCESS-REVIEW.json)
+passes all **763 members** of the 416,333,967-byte archive and matches all
+**122 recorded source inputs** to exact commit 2d4408f. The actual child receipt
+and complete final inventory/network evidence are retained. The reviewer rehashes
+all 246 loaded extensions and 178 APT libraries, plus the original Torch helper
+source: **425 original members**, using verified wheels and 55 exact APT archives.
+Six image files match the pinned manifest, and ten eSpeak copies match their
+original asset. This is a verified dependency-operation result; it does not
+install/admit NeuTTS, change its Python bound, load speech models or prove synthesis.
+
+Raw pip check still exits **1** with **eleven original APT platform-tag
+diagnostics** and no missing or conflicting declared requirements. The strict
+original-requirement and native-provenance checks pass. Original metadata and
+supported tags are not rewritten to obtain a nominal pip pass.
+
+The latest [retained host CI at 2d4408f](../audit/neutts-complete-runtime-native-20261020/run-39458842068/full-artifact-review/HOST-CI-REVIEW.json)
+passes **1,271 tests and 631 additional subtests, with 84 skips**, in
+19.65 seconds (push job 118752672409). The separate
+[PR CI run 39458856008](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39458856008)
+also passes the same counts in 25.00 seconds (job 118752722094). These duplicate
+runs are not added together. Input-selected skips in the other PR workflows
+are expected planner results, not additional native passes.
+
+The [saved 3f1f404 CI](../audit/neutts-complete-runtime-native-20261020/run-39456043425/full-artifact-review/HOST-CI-REVIEW.json)
+remains historical evidence: 1,266 tests and 625 subtests passed, with 84 skips
+(push 35.10 seconds; PR 25.21 seconds). The earlier
+[11f7bb6 CI](../audit/neutts-complete-runtime-native-20261020/docs-collision-fix/host-ci-11f7bb6/REVIEW.json)
+and [88e2810 CI](../audit/neutts-complete-runtime-native-20261020/run-39450032929/host-ci-88e2810/original-job-log.txt)
+also remain preserved. Host CI does not change any failed native outcome.
+
+The [NeuCodec wheel preparation](../audit/neucodec-wheel-preparation-20261020/INDEPENDENT-WHEEL-REVIEW.json)
+preserves original metadata, license and its 20-member inventory, changing only
+model.py and its truthful RECORD. Its 14 tests and 40 subtests pass, including
+the earlier 34 adapter cases. Native codec/model behavior remains a later gate;
+source packaging does not demonstrate inference.
+
+Remaining work is to assess engine admission under its unchanged Python
+requirement and validate
+engine import, default initialization, codec/model behavior and actual synthesis.
+No Python 3.14-specific engine defect has been proved by the bounded static review;
+the declared upper bound remains the actual admission boundary.
+
+The [exact Hermes helper](../audit/neutts-default-gguf-source-20261017.json)
+selects AIR-q4, the full NeuCodec and CPU execution. For this selected route,
+both owner-supplied reference audio and its matching transcript are required.
+The [three immutable model identities](neutts-engine-closure.md) cover the
+gated AIR/NeuCodec weights and the public W2V-BERT model used by the real codec
+constructor. The helper does not pass immutable revisions, so a later test
+must bind actual authorized model bytes or a private cache to those identities;
+metadata and body-free access observations are not downloaded-weight proof.
+The public Perth gate uses its injected original model API; the engine's
+default optional watermarker factory remains unmeasured. Physical microphone
+capture and silence/VAD stopping require the separate native Android device check.
+
+#### Preserved failures and narrow corrections
+
+The [HF linkage investigation](../audit/neutts-hf-python-linkage-20261020/REVIEW.json)
+preserves the failed d215961 run and its whole 765,083,696-byte artifact, including
+all 47,595 members. HF's ABI3 extension omitted the libpython3.so forwarding
+stub; the scoped linker repair preserves original source, Cargo, TLS, versions
+and tags. The later 4a95a07 run reached HF import/hashing before the Safetensors
+probe used an obsolete nested-dictionary argument. The
+[TensorSpec probe correction](../audit/neutts-safetensors-api-fix-20261020/host-validation/HOST-VALIDATION.json)
+uses the shipped 0.8 API and an owned backing buffer. The independently reviewed
+Tokenizers25 result now passes both operations; the independently reviewed Rust
+retry also verifies the real HF TLS behavior without disabling certificate checks.
+
+The [earlier Tiktoken failure](../audit/neutts-tiktoken-native-20261020/run-39440363758/REVIEW.json)
+built the original wheel before a verifier rejected equivalent whitespace in
+Regex's Setuptools requirement. Parsed PEP 508 comparison fixes that verifier
+without rewriting source, requirements or pins; 35 tests and 50 subtests passed
+before the successful retry. The [earlier Perth failure](../audit/neutts-soundfile-discovery-fix-20261020/NATIVE-FAILURE-REVIEW.json)
+found the original libsndfile installed but undiscoverable through SoundFile's
+platform fallback. The Android-only filename addition preserves metadata and
+Linux behavior; 62 focused tests and 232 subtests passed before the successful
+public-watermark retry.
+
+The earlier 4a95a07 CI result remains historical evidence: 1,193 tests and
+457 additional subtests passed, with 84 skips. It is not combined with the
+newer CI count, and none of the earlier failed native runs is relabeled.
 
 #### Historical d215961 retries and bounded follow-up fixes
 
@@ -342,9 +507,9 @@ requires its own artifact diagnosis.
 | --- | --- | --- |
 | [Scientific foundation, 39429636519](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636519) | Workflow succeeded. | Full engine/model integration remains. |
 | [TorchAO, 39429635992](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429635992), [eSpeak/Phonemizer, 39429635986](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429635986), and [Numba/Llama CPU, 39429636156](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636156) | All three workflows succeeded again. | Component success does not certify codec/model/synthesis. |
-| [Six C/C++ dependencies, 39429636032](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636032) | API confirms completed workflow success. | Independent verification of its complete new artifact is pending; the older detailed proof below remains separately identified. |
+| [Six C/C++ dependencies, 39429636032](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636032) | API confirms completed workflow success. | Independent verification of that complete new artifact was pending at this historical checkpoint; the older detailed proof remains separately identified. |
 | [Five APT extensions, 39429635899](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429635899) | Host acquisition failed with HTTP 404 after foundation inputs were prepared, before Docker. | Five additional exact original archives were recovered; a retry is required. |
-| [Engine wheel, 39429636253](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636253) | Native CMake and backend build passed; wheel-content validation rejected the original Russian dictionary above the shared 2 MiB member guard. | The engine-only correction is host-validated; its native retry remains pending. |
+| [Engine wheel, 39429636253](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636253) | Native CMake and backend build passed; wheel-content validation rejected the original Russian dictionary above the shared 2 MiB member guard. | The engine-only correction was host-validated at this checkpoint; its later native wheel/C ABI pass is recorded above. |
 | [Rust, 39429636237](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39429636237) | Tiktoken lock job `118650994583` succeeded. Locked-build job `118650993975` failed in the `rust-base-runtime-operations` child (exit 1). | The child cause remains under investigation; the parent log alone does not certify all four wheel builds or their operations. |
 
 The [retained input cache](../vendor/termux-preparation/README.md) now contains
@@ -404,11 +569,11 @@ files to be reconstructed from the exact original crates.
 built and exercised Maturin's native CLI and full PEP517 backend before its
 HF-Xet identity verifier rejected two legitimate crates: the `hf_xet` root
 and its `hf-xet` backing dependency. The recovered narrow identity correction
-has 155 passing Windows host tests and is saved in commit `c2a817b`;
-a passing native retry is still required.
-Both native-TLS selections, Reqwest/no-HTTP3 and OpenSSL checks remain required.
-No HF TLS operation, Safetensors operation or complete Tokenizers runtime is
-certified by the failed run.
+has 155 passing Windows host tests and is saved in commit `c2a817b`.
+A passing native retry was still required at that historical checkpoint.
+The later independently reviewed Rust and Tokenizers25 successes are recorded
+above, including native-TLS, Reqwest/no-HTTP3, OpenSSL and actual HF/Safetensors
+operations. The earlier failed run is not relabeled as a success.
 
 [The engine wheel run](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39084452780)
 completed its backend, then failed a nested CMake verifier. Exact CMake 4.4.4
@@ -430,14 +595,18 @@ The [Perth resource-only derivative](../scripts/prepare_neutts_perth_resource.py
 replaces obsolete `pkg_resources` resource lookup with `pathlib`.
 Version, dependency metadata, embedded checkpoint and all other 26 wheel
 members are preserved; **12 host tests and two subtests pass, with no skips**,
-and the source change has passed peer review. Full native Perth watermark
-validation remains pending; Librosa, scikit-learn and Soundfile remain required.
+and the source change has passed peer review. The later complete public
+Perth runtime passes in run 39446824120, retaining Librosa, scikit-learn and
+SoundFile. Its measured synthetic-signal behavior does not certify watermark
+quality or the engine's separate default watermarker factory.
 
-Exact output handoffs between components and the complete 117-distribution
-runtime still need completion. Model execution additionally needs authorized
-access to the exact gated weights and reference audio with its transcript.
-The original NeuTTS Python upper bound is unchanged; no Python 3.14 production
-admission follows from these component preparations.
+These historical component preparations now supply exact inputs to the
+116-dependency combined gate described above. NeuTTS itself remains outside
+that environment. Its original Python upper bound is unchanged; dependency
+success does not establish engine admission, default initialization or synthesis.
+The selected Hermes AIR/full-NeuCodec route additionally needs the exact model
+bytes, authorized gated access or an existing verified cache, and the owner's
+reference audio with its matching transcript.
 
 The earlier saved [host CI, 39086773257](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39086773257),
 for source `c1ea01d`, passed **999 tests with 80 skips and 72 additional subtests**

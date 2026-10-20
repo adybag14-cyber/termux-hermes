@@ -5,13 +5,24 @@ Prepared on 2026-10-17; updated 2026-10-20. This is a separate robustness experi
 ## What is fixed, and what is still unproved
 
 The 20 October checkpoint remains **nine published restrictions, seven
-native-validated unpublished repairs and two incomplete features**. The new
-engine-wheel, APT-extension and XXHash successes are recorded in the
-[compatibility audit](compatibility-0.22.2-1.md#remaining-native-runtime-work).
-Those software component results do not establish physical capture, permission,
-silence stopping or VAD. Public NeuTTS dependency integration also remains work;
-the remaining task is not solely waiting for device or model access. No command
-in this guide was executed as part of that checkpoint.
+native-validated unpublished repairs and two incomplete features**. The
+[compatibility audit](compatibility-0.22.2-1.md#remaining-native-runtime-work)
+now includes independently reviewed Tokenizers25, Tiktoken7 and locked Rust
+native results and the complete public Perth runtime's measured API operations.
+The complete 116-package gate now has a reviewed documentation relocation
+after two pre-operation failures. Its original 105 wheels/11 APT payloads map
+to 28,936 unique file targets; actual offline host installation and 25 tests
+plus 48 subtests pass. The next native run passes ten actual operation groups but fails final
+integration at a moved TorchAO/PyTorch helper import. Its guarded correction
+is saved at 2d4408f and independently passes 30 tests plus 54 subtests.
+Corrected run 39458842068 passes all eleven operation groups and final integrity,
+library and disconnected-network checks. Its [independent whole-artifact and
+source review](../audit/neutts-complete-runtime-native-20261020/run-39458842068/full-artifact-review/NATIVE-SUCCESS-REVIEW.json)
+also passes. These software results do not establish
+physical capture, permission, silence stopping or VAD. NeuTTS engine admission,
+default initialization and actual synthesis remain unmeasured alongside the
+later physical-device checks.
+No command in this guide was executed as part of this checkpoint.
 
 The standalone [audio-readiness patch](../patches/next-stable/audio-readiness.patch) turns an optional library's import-time native initialization failure into a readable diagnostic, retaining the original exception and message. It also rejects a populated PortAudio inventory that contains only output devices. Missing Python modules and a missing PortAudio shared library retain their existing diagnostics; empty or failed forwarded-audio inventories retain their existing handling. This patch does not provide an Android audio framework or establish microphone/VAD support.
 

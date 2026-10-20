@@ -1,0 +1,72 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792514396.809488    9835 sentencepiece_trainer.cc:105] Starts training with : 
+trainer_spec {
+  input: /data/data/com.termux/files/usr/tmp/neutts-complete.i5CFJt/actual-operations/sentencepiece/synthetic-corpus.txt
+  input_format: 
+  model_prefix: /data/data/com.termux/files/usr/tmp/neutts-complete.i5CFJt/actual-operations/sentencepiece/synthetic-tokenizer
+  model_type: BPE
+  vocab_size: 64
+  self_test_sample_size: 0
+  character_coverage: 1
+  input_sentence_size: 0
+  shuffle_input_sentence: 0
+  seed_sentencepiece_size: 1000000
+  shrinking_factor: 0.75
+  max_sentence_length: 4192
+  num_threads: 2
+  num_sub_iterations: 2
+  max_sentencepiece_length: 16
+  split_by_unicode_script: 1
+  split_by_number: 1
+  split_by_whitespace: 1
+  split_digits: 0
+  pretokenization_delimiter: 
+  treat_whitespace_as_suffix: 0
+  allow_whitespace_only_pieces: 0
+  required_chars: 
+  byte_fallback: 0
+  vocabulary_output_piece_score: 1
+  train_extremely_large_corpus: 0
+  seed_sentencepieces_file: 
+  hard_vocab_limit: 0
+  use_all_vocab: 0
+  unk_id: 0
+  bos_id: 1
+  eos_id: 2
+  pad_id: -1
+  unk_piece: <unk>
+  bos_piece: <s>
+  eos_piece: </s>
+  pad_piece: <pad>
+  unk_surface:  ⁇ 
+  enable_differential_privacy: 0
+  differential_privacy_noise_level: 0
+  differential_privacy_clipping_threshold: 0
+}
+normalizer_spec {
+  name: nmt_nfkc
+  add_dummy_prefix: 1
+  remove_extra_whitespaces: 1
+  escape_whitespaces: 1
+  normalization_rule_tsv: 
+}
+denormalizer_spec {}
+I0000 00:00:1792514396.809582    9835 trainer_interface.cc:364] SentenceIterator is not specified. Using MultiFileSentenceIterator.
+I0000 00:00:1792514396.809613    9835 trainer_interface.cc:193] Loading corpus: /data/data/com.termux/files/usr/tmp/neutts-complete.i5CFJt/actual-operations/sentencepiece/synthetic-corpus.txt
+I0000 00:00:1792514396.809668    9835 trainer_interface.cc:422] Loaded all 128 sentences
+I0000 00:00:1792514396.809754    9835 trainer_interface.cc:440] Adding meta_piece: <unk>
+I0000 00:00:1792514396.809768    9835 trainer_interface.cc:440] Adding meta_piece: <s>
+I0000 00:00:1792514396.809777    9835 trainer_interface.cc:440] Adding meta_piece: </s>
+I0000 00:00:1792514396.809792    9835 trainer_interface.cc:445] Normalizing sentences...
+I0000 00:00:1792514396.810220    9835 trainer_interface.cc:555] all chars count=5376
+I0000 00:00:1792514396.810251    9835 trainer_interface.cc:578] Alphabet size=25
+I0000 00:00:1792514396.810262    9835 trainer_interface.cc:579] Final character coverage=1
+I0000 00:00:1792514396.810452    9835 trainer_interface.cc:609] Done! preprocessed 128 sentences.
+I0000 00:00:1792514396.810470    9835 trainer_interface.cc:615] Tokenizing input sentences with whitespace: 128
+I0000 00:00:1792514396.810568    9835 trainer_interface.cc:626] Done! 11
+I0000 00:00:1792514396.814179    9835 bpe_model_trainer.cc:321] Added: freq=128 size=20 all=78 active=52 piece=▁world
+I0000 00:00:1792514396.814252    9835 trainer_interface.cc:702] Saving model: /data/data/com.termux/files/usr/tmp/neutts-complete.i5CFJt/actual-operations/sentencepiece/synthetic-tokenizer.model
+I0000 00:00:1792514396.814625    9835 trainer_interface.cc:714] Saving vocabs: /data/data/com.termux/files/usr/tmp/neutts-complete.i5CFJt/actual-operations/sentencepiece/synthetic-tokenizer.vocab
+WARNING:torchao.kernel.intmm:Warning: Detected no triton, on systems without Triton certain kernels will not work
+/data/data/com.termux/files/usr/tmp/neutts-complete.i5CFJt/complete-runtime/lib/python3.14/site-packages/torch/jit/_script.py:1485: FutureWarning: `torch.jit.script` is not supported in Python 3.14+ and may break. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
