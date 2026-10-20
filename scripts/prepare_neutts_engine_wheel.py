@@ -14,7 +14,7 @@ import tomllib
 import urllib.request
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-LOCK_SHA256 = "a732ff14c1145774ab7e2ba5750936df6f0c3261e1a687897699f6a0c7bfbae1"
+LOCK_SHA256 = "14acfdf2162c1d70cad30c2f6971655398241ba0014b37928c9059dff49424ac"
 SUPPORT_SHA256 = "7e4abf6794f848d399d15a877e9c8a74db1a44ba5e87ceb898d5d4777169f744"
 
 

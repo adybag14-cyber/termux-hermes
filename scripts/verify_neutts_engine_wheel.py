@@ -168,9 +168,11 @@ def verify_cmake(parent_raw, nested_raw, parent_system, nested_system, commands,
     for key in ("CMAKE_EXE_LINKER_FLAGS", "CMAKE_SHARED_LINKER_FLAGS", "CMAKE_MODULE_LINKER_FLAGS"):
         require(parent.get(key) == lock["build"]["ldflags"] and nested.get(key) == parent[key],
                 "Nested linker settings differ from parent: " + key)
+    # The pinned native CMake Android initializer selects RelWithDebInfo.
+    # NeuTTS does not pass a nested build-type override; do not impose one.
     require(parent.get("CMAKE_BUILD_TYPE") == lock["build"]["parent_cmake_build_type"]
-            and nested.get("CMAKE_BUILD_TYPE", "") == "",
-            "The source's original nested build-type default changed")
+            and nested.get("CMAKE_BUILD_TYPE") == lock["build"]["nested_cmake_build_type"],
+            "The original parent or pinned native nested build-type default changed")
     require(parent.get("CMAKE_EXPORT_COMPILE_COMMANDS") == nested.get("CMAKE_EXPORT_COMPILE_COMMANDS") == "ON",
             "Actual nested compile-command export was disabled")
     require(Path(parent.get("CMAKE_HOME_DIRECTORY", "")).resolve() == Path(engine_source).resolve()

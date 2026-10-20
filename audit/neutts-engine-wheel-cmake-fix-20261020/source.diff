@@ -1,0 +1,256 @@
+diff --git a/docs/neutts-engine-wheel-build-only-preparation.md b/docs/neutts-engine-wheel-build-only-preparation.md
+index 1c41458..edeea77 100644
+--- a/docs/neutts-engine-wheel-build-only-preparation.md
++++ b/docs/neutts-engine-wheel-build-only-preparation.md
+@@ -25,7 +25,7 @@ The project retains all nine base requirements, all six optional requirement ent
+ 
+ The upstream nested eSpeak CMake invocation replaces C and C++ flags with two hardcoded source-specific flags. That discards the parent Android API and architecture flags. The new companion patch passes the selected parent C/C++ compiler paths, C/C++ flags, and executable/shared/module linker settings into the nested build while appending the two original eSpeak flags.
+ 
+-The patch also propagates compilation-database export so the native gate can inspect actual nested commands. It preserves the existing local-source hook and default upstream Git revision, all eSpeak feature options, language selection, data generation, source files, installation rules, and the original empty nested build-type default. The native compiler remains responsible for executing the data-generation tools.
++The patch also propagates compilation-database export so the native gate can inspect actual nested commands. It preserves the existing local-source hook and default upstream Git revision, all eSpeak feature options, language selection, data generation, source files, installation rules, and the nested build type selected by the pinned native CMake platform initializer. The native compiler remains responsible for executing the data-generation tools.
+ 
+ ## Required native evidence
+ 
+@@ -45,4 +45,18 @@ The source preparation replay passed with all 56 NeuTTS entries, all eSpeak inpu
+ 
+ Those CMake fixtures use `LANGUAGES NONE` explicitly and do not claim compiler or Android ABI execution. The focused host suite passed 42 tests and 61 subtests with no skips. It covers dependency omissions, original metadata and source identity, path/interpreter preservation, conflicting compiler settings, wheel corruption and unexpected payloads, complete generated data, and image/source provenance. Synthetic ELF headers in unit fixtures exercise structural rejection only. Shell syntax and workflow parsing also passed.
+ 
+-The exact source pins, file hashes and raw validation receipts are saved under `audit/neutts-engine-wheel-preparation-20261017/`. Native execution has not been performed for this new gate at the source-preparation checkpoint. Review and save the gate before launching it; preserve a failed result without turning a build-only success into Python 3.14 or full-engine admission.
++The exact source pins, file hashes and raw validation receipts for that initial checkpoint are saved under `audit/neutts-engine-wheel-preparation-20261017/`. The later native result and verifier correction are recorded below.
++
++## Native result and verifier correction — 20 October 2026
++
++[Run 39084452780](https://github.com/adybag14-cyber/termux-hermes/actions/runs/39084452780), source `4fe7b8f2d6e7d43de3457e372fe1285c0acd14d3`, completed the backend and the isolated build-environment checks. Its emitted wheel was 10,869,139 bytes, SHA-256 `6813696b028e1d11aa25d423d45e9ad782d6a2bc91ccd139bf4859c98ae04091`. The subsequent actual nested-toolchain verifier failed because it expected an empty `CMAKE_BUILD_TYPE`. This failed run did not reach complete wheel-content/data or bundled C ABI admission.
++
++The original pinned CMake 4.4.4 APT archive contains an Android initialization module that sets `CMAKE_BUILD_TYPE_INIT` to `RelWithDebInfo` before its native-Android early return. Its unchanged configuration initializer uses that default unless the caller explicitly sets a build type. The actual parent cache records `Release`; the actual nested cache records `RelWithDebInfo`. API 24, ARMv8-A and the original common/source flags remain in the recorded commands.
++
++The correction changes only the lock's expected nested value, the preparer's lock digest, and the verifier's comparison. It does not add a source or backend build-type override. Parent `Release`, compiler paths, target flags, the original source patch, all metadata, all dependency archives and the original Python bound remain unchanged.
++
++[The retained correction evidence](../audit/neutts-engine-wheel-cmake-fix-20261020/REVIEW.json) binds the original 49,728,270-byte artifact (SHA-256 `4d7250c50477155e6f2331f11adaa6a8bf755075ffaa8fc3fbb1d153bcb4330f`) and all 237 original ZIP member identities. It also binds the exact 10,645,092-byte CMake APT archive and the three original module bodies. Tests retain the actual caches, native CMake system records, compilation database and old verifier.
++
++The updated focused suite passes **50 tests and 78 subtests with no skips**. Eight new tests reproduce the old rejection, accept the unchanged native records after correction, reject missing/incorrect build types and altered target/compiler settings, and execute the three unchanged CMake 4.4.4 module bodies with real host CMake 4.2.1. Recorded POSIX path replay is explicitly lexical; it does not prove native filesystem resolution. Module execution does not repeat native compilation.
++
++A fresh native workflow must still pass the complete wheel-content, language-data and all fourteen bundled C ABI checks. Neither this host correction nor the failed backend run establishes an installed engine, Python 3.14 admission, model inference or synthesis.
+diff --git a/scripts/neutts_engine_wheel_lock.json b/scripts/neutts_engine_wheel_lock.json
+index 85c1691..b77436f 100644
+--- a/scripts/neutts_engine_wheel_lock.json
++++ b/scripts/neutts_engine_wheel_lock.json
+@@ -24,7 +24,7 @@
+       "python_version": "3.14",
+       "sys_platform": "android"
+     },
+-    "nested_cmake_build_type": "upstream default (empty; no new type override)",
++    "nested_cmake_build_type": "RelWithDebInfo",
+     "parent_cmake_build_type": "Release",
+     "python_artifact_bytes": 425144,
+     "python_distribution_count": 3,
+diff --git a/scripts/prepare_neutts_engine_wheel.py b/scripts/prepare_neutts_engine_wheel.py
+index 95abbf8..df232da 100644
+--- a/scripts/prepare_neutts_engine_wheel.py
++++ b/scripts/prepare_neutts_engine_wheel.py
+@@ -14,7 +14,7 @@ import tomllib
+ import urllib.request
+ 
+ SCRIPT_DIR = Path(__file__).resolve().parent
+-LOCK_SHA256 = "a732ff14c1145774ab7e2ba5750936df6f0c3261e1a687897699f6a0c7bfbae1"
++LOCK_SHA256 = "14acfdf2162c1d70cad30c2f6971655398241ba0014b37928c9059dff49424ac"
+ SUPPORT_SHA256 = "7e4abf6794f848d399d15a877e9c8a74db1a44ba5e87ceb898d5d4777169f744"
+ 
+ 
+diff --git a/scripts/verify_neutts_engine_wheel.py b/scripts/verify_neutts_engine_wheel.py
+index dc3f33d..1abb00a 100644
+--- a/scripts/verify_neutts_engine_wheel.py
++++ b/scripts/verify_neutts_engine_wheel.py
+@@ -168,9 +168,11 @@ def verify_cmake(parent_raw, nested_raw, parent_system, nested_system, commands,
+     for key in ("CMAKE_EXE_LINKER_FLAGS", "CMAKE_SHARED_LINKER_FLAGS", "CMAKE_MODULE_LINKER_FLAGS"):
+         require(parent.get(key) == lock["build"]["ldflags"] and nested.get(key) == parent[key],
+                 "Nested linker settings differ from parent: " + key)
++    # The pinned native CMake Android initializer selects RelWithDebInfo.
++    # NeuTTS does not pass a nested build-type override; do not impose one.
+     require(parent.get("CMAKE_BUILD_TYPE") == lock["build"]["parent_cmake_build_type"]
+-            and nested.get("CMAKE_BUILD_TYPE", "") == "",
+-            "The source's original nested build-type default changed")
++            and nested.get("CMAKE_BUILD_TYPE") == lock["build"]["nested_cmake_build_type"],
++            "The original parent or pinned native nested build-type default changed")
+     require(parent.get("CMAKE_EXPORT_COMPILE_COMMANDS") == nested.get("CMAKE_EXPORT_COMPILE_COMMANDS") == "ON",
+             "Actual nested compile-command export was disabled")
+     require(Path(parent.get("CMAKE_HOME_DIRECTORY", "")).resolve() == Path(engine_source).resolve()
+diff --git a/tests/test_neutts_engine_wheel_preparation.py b/tests/test_neutts_engine_wheel_preparation.py
+index 036c452..b60e109 100644
+--- a/tests/test_neutts_engine_wheel_preparation.py
++++ b/tests/test_neutts_engine_wheel_preparation.py
+@@ -14,7 +14,8 @@ import importlib.util
+ import io
+ import json
+ import os
+-from pathlib import Path
++from pathlib import Path, PurePosixPath
++import posixpath
+ import shutil
+ import stat
+ import struct
+@@ -571,5 +572,164 @@ class TestSourceImageReceipt(TemporaryTest):
+             PROBE.source_identity(self.path, LOCK, CHECK)
+ 
+ 
++class TestRecordedNativeCMakeDefault(TemporaryTest):
++    """Replay exact native records; lexical paths are not a filesystem proof."""
++
++    fixture = FIXTURE / "native-cmake-39084452780"
++    pins = {
++        "recorded/parent-CMakeCache.txt": "243ff75ca3a24c1b09586583fbe26cb1dc4bc3abccd7061cbafcb78f47ab4332",
++        "recorded/nested-CMakeCache.txt": "ff96fd62a2346cc52460ae3fd3989338605fd23d2b1086830866dd6cb0a21801",
++        "recorded/parent-CMakeSystem.cmake": "cc17e12ba3ffd3ae2e8f31a8dd495f778ba3f3a460297edeb88641f538b2bf2e",
++        "recorded/nested-CMakeSystem.cmake": "cc17e12ba3ffd3ae2e8f31a8dd495f778ba3f3a460297edeb88641f538b2bf2e",
++        "recorded/compile_commands.json": "af07c9ff534e38d7c76ac644859273f68aef1ce1a79b21ee4cf16d4e1f361c8f",
++        "cmake-4.4.4/Modules/Platform/Android-Initialize.cmake": "d14ef0bc8c6e105a985c587f6bfa5225a8e02ccbbbac5aa5774dadf5918a5d5e",
++        "cmake-4.4.4/Modules/Platform/Linux-Initialize.cmake": "b89e1a323d77ca0a9f0c5409f14cac593af4b2ebede80a314611095ef5140fd1",
++        "cmake-4.4.4/Modules/CMakeInitializeConfigs.cmake": "1301ec4871a37c30a333a76084d33a4af82a5b6daaa2d6afbb7a7369b00097e5",
++        "original-verify-neutts-engine-wheel.py": "e5f55a90360efb11c550e4fd5e92bc0e543bc9bd253b7e831886ed73b69aa8bf",
++    }
++
++    class RecordedPosixPath(PurePosixPath):
++        def resolve(self, strict=False):
++            # Only these already-captured absolute POSIX records are replayed.
++            # Do not claim host/native filesystem, symlink or permission checks.
++            return type(self)(posixpath.normpath(str(self)))
++
++    def setUp(self):
++        super().setUp()
++        for relative, expected in self.pins.items():
++            self.assertEqual(sha((self.fixture / relative).read_bytes()), expected, relative)
++        self.parent = (self.fixture / "recorded/parent-CMakeCache.txt").read_bytes()
++        self.nested = (self.fixture / "recorded/nested-CMakeCache.txt").read_bytes()
++        self.parent_system = (self.fixture / "recorded/parent-CMakeSystem.cmake").read_bytes()
++        self.nested_system = (self.fixture / "recorded/nested-CMakeSystem.cmake").read_bytes()
++        self.commands = json.loads((self.fixture / "recorded/compile_commands.json").read_bytes())
++        parent_values, nested_values = CHECK.cache_values(self.parent), CHECK.cache_values(self.nested)
++        self.engine_source = parent_values["CMAKE_HOME_DIRECTORY"]
++        self.espeak_source = nested_values["CMAKE_HOME_DIRECTORY"]
++        self.nested_build = nested_values["CMAKE_CACHEFILE_DIR"]
++
++    def replay(self, checker=CHECK, *, parent=None, nested=None, commands=None):
++        with mock.patch.object(checker, "Path", self.RecordedPosixPath):
++            return checker.verify_cmake(
++                self.parent if parent is None else parent,
++                self.nested if nested is None else nested,
++                self.parent_system, self.nested_system,
++                self.commands if commands is None else commands,
++                LOCK, self.engine_source, self.espeak_source, self.nested_build)
++
++    def cache_with(self, raw, key, value):
++        lines = raw.decode("utf-8").splitlines()
++        selected = [i for i, line in enumerate(lines) if line.startswith(key + ":")]
++        self.assertEqual(len(selected), 1)
++        index = selected[0]
++        if value is None:
++            del lines[index]
++        else:
++            lines[index] = lines[index].split("=", 1)[0] + "=" + value
++        return ("\n".join(lines) + "\n").encode()
++
++    def test_exact_native_fixture_and_original_apt_module_identity(self):
++        manifest = json.loads((self.fixture / "FIXTURE-MANIFEST.json").read_bytes())
++        self.assertEqual(manifest["source_run"], 39084452780)
++        self.assertEqual(manifest["artifact_id"], 12120270875)
++        self.assertEqual(manifest["artifact"], {
++            "bytes": 49728270,
++            "sha256": "4d7250c50477155e6f2331f11adaa6a8bf755075ffaa8fc3fbb1d153bcb4330f"})
++        self.assertEqual({row["path"]: row["sha256"] for row in manifest["files"]}, self.pins)
++        apt = manifest["source_apt"]
++        native = json.loads((ROOT / "scripts/neutts_native_sources_lock.json").read_bytes())
++        cmake = [p for p in native["build_apt"]["packages"] if p["name"] == "cmake"]
++        self.assertEqual(len(cmake), 1)
++        self.assertEqual(cmake[0]["version"], "4.4.4")
++        self.assertEqual(cmake[0]["bytes"], apt["archive"]["bytes"])
++        self.assertEqual(cmake[0]["sha256"], apt["archive"]["sha256"])
++        self.assertEqual(PREP.load_lock()[0]["build"]["nested_cmake_build_type"], "RelWithDebInfo")
++
++    def test_original_verifier_rejects_actual_unmodified_native_caches(self):
++        path = self.fixture / "original-verify-neutts-engine-wheel.py"
++        spec = importlib.util.spec_from_file_location("_engine_wheel_original_default_verifier", path)
++        original = importlib.util.module_from_spec(spec)
++        spec.loader.exec_module(original)
++        with self.assertRaisesRegex(original.EngineWheelError, "nested build-type default changed"):
++            self.replay(original)
++
++    def test_corrected_verifier_accepts_every_recorded_native_command(self):
++        result = self.replay()
++        self.assertEqual(result["parent_build_type"], "Release")
++        self.assertEqual(result["nested_build_type"], "RelWithDebInfo")
++        self.assertEqual(result["compile_commands"], len(self.commands))
++        self.assertTrue(result["every_command_api24_armv8_checked"])
++        self.assertTrue(result["recorded_compile_commands_verified"])
++
++    def test_missing_empty_or_other_nested_build_type_remains_rejected(self):
++        for value in (None, "", "Release", "Debug", "MinSizeRel", "relwithdebinfo"):
++            with self.subTest(value=value), self.assertRaises(CHECK.EngineWheelError):
++                self.replay(nested=self.cache_with(self.nested, "CMAKE_BUILD_TYPE", value))
++
++    def test_parent_release_requirement_is_not_relaxed(self):
++        for value in (None, "", "RelWithDebInfo", "Debug"):
++            with self.subTest(value=value), self.assertRaises(CHECK.EngineWheelError):
++                self.replay(parent=self.cache_with(self.parent, "CMAKE_BUILD_TYPE", value))
++
++    def test_actual_target_flags_and_compiler_identity_remain_required(self):
++        for key, before, after in (
++            ("CMAKE_C_FLAGS", "--target=aarch64-linux-android24", "--target=aarch64-linux-android35"),
++            ("CMAKE_CXX_FLAGS", "-march=armv8-a", "-march=armv8.2-a"),
++            ("CMAKE_C_FLAGS", "-fPIC", ""),
++            ("CMAKE_C_COMPILER", "/bin/clang", "/bin/unreviewed-clang"),
++        ):
++            value = CHECK.cache_values(self.nested)[key]
++            self.assertIn(before, value)
++            with self.subTest(key=key, before=before), self.assertRaises(CHECK.EngineWheelError):
++                self.replay(nested=self.cache_with(self.nested, key, value.replace(before, after)))
++        commands = copy.deepcopy(self.commands)
++        self.assertIn("command", commands[0])
++        self.assertIn("--target=aarch64-linux-android24", commands[0]["command"])
++        commands[0]["command"] = commands[0]["command"].replace(
++            "--target=aarch64-linux-android24", "--target=aarch64-linux-android35")
++        with self.assertRaises(CHECK.EngineWheelError):
++            self.replay(commands=commands)
++
++    def real_module_case(self, label, explicit=None):
++        cmake = shutil.which("cmake")
++        self.assertIsNotNone(cmake, "Real host CMake is required for the original module regression")
++        folder = self.base / label
++        folder.mkdir()
++        result = folder / "actual-default.txt"
++        script = folder / "original-modules.cmake"
++        modules = (self.fixture / "cmake-4.4.4/Modules").as_posix()
++        script.write_text(
++            "cmake_minimum_required(VERSION 3.25)\n"
++            + "list(PREPEND CMAKE_MODULE_PATH [[" + modules + "]])\n"
++            + "set(CMAKE_HOST_SYSTEM_NAME Android)\n"
++            + "set(CMAKE_SYSTEM_VERSION 24)\n"
++            + "include(Platform/Android-Initialize)\n"
++            + "include(CMakeInitializeConfigs)\n"
++            + 'cmake_initialize_per_config_variable(CMAKE_C_FLAGS "Original C flags")\n'
++            + 'file(WRITE "' + result.as_posix()
++            + '" "INIT=' + '${CMAKE_BUILD_TYPE_INIT}' + '\\nBUILD='
++            + '${CMAKE_BUILD_TYPE}' + '\\nANDROID=' + '${ANDROID}' + '\\n")\n',
++            encoding="utf-8", newline="\n")
++        command = [cmake]
++        if explicit is not None:
++            command.append("-DCMAKE_BUILD_TYPE=" + explicit)
++        command += ["-P", str(script)]
++        env = {key: value for key, value in os.environ.items()
++               if not key.startswith(("CMAKE_", "SKBUILD_"))}
++        run = subprocess.run(command, cwd=folder, env=env, capture_output=True, timeout=20)
++        self.assertEqual(run.returncode, 0, run.stderr.decode("utf-8", errors="replace"))
++        return dict(line.split("=", 1) for line in result.read_text("utf-8").splitlines())
++
++    def test_original_android_module_sets_nested_default_in_real_cmake(self):
++        actual = self.real_module_case("unset")
++        self.assertEqual(actual, {"INIT": "RelWithDebInfo", "BUILD": "RelWithDebInfo", "ANDROID": "1"})
++
++    def test_original_cmake_modules_preserve_an_explicit_callers_build_type(self):
++        for selected in ("Release", "Debug", ""):
++            with self.subTest(selected=selected):
++                actual = self.real_module_case("explicit-" + (selected or "empty"), selected)
++                self.assertEqual(actual, {"INIT": "RelWithDebInfo", "BUILD": selected, "ANDROID": "1"})
++
++
+ if __name__ == "__main__":
+     unittest.main()
