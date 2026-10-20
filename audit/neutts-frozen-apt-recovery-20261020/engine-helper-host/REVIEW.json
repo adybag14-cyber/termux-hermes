@@ -1,0 +1,95 @@
+{
+  "engine_admission_changed": false,
+  "failed_native_run": {
+    "engine_build_or_corrected_verifier_reached": false,
+    "head": "d26e601bebf468f86df24c657e63fdd0fe51eefe",
+    "id": 39426560433,
+    "job_id": 118640493920,
+    "missing_current_index_packages": [
+      "abseil-cpp",
+      "fmt",
+      "libprotobuf",
+      "libwebp",
+      "python",
+      "python-torch",
+      "python-torchcodec"
+    ],
+    "stage": "foundation pinned APT resolution"
+  },
+  "host_test_command": [
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_neutts_apt_snapshot_preparation.py",
+    "tests/test_neutts_engine_wheel_preparation.py",
+    "--junitxml",
+    "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\audit\\neutts-frozen-apt-recovery-20261020\\engine-helper-host\\host-tests.xml"
+  ],
+  "host_test_exit": 0,
+  "host_test_summary": "71 passed, 143 subtests passed in 3.88s",
+  "inrelease_sha256": "249dab3ab3da3993b2436d48c819506f9aa586f6985905d81a451e76f2de7901",
+  "native_install_performed_here": false,
+  "native_signature_verified_here": false,
+  "original_compiler_tsv_sha256": "83e67a558d1322b8ea55c2d3d885e0dde9725e54694faa490f3ea16064978af3",
+  "original_foundation_tsv_sha256": "7ad635d7f1ce1157c7f3b3d7808eaf113c8bb77c4e99a8fe30b6b155faf04c5e",
+  "packages_gz_sha256": "dba73c2f0caaa828b65f02ba0e56cac694ee7186999a442ae7858b4258c321b6",
+  "pins_changed": false,
+  "profiles": [
+    {
+      "archive_bytes": 173952336,
+      "archive_count": 122,
+      "method_counts": {
+        "verified-retained-cache": 122
+      },
+      "profile": "foundation",
+      "receipt": "audit/neutts-frozen-apt-recovery-20261020/engine-helper-host/foundation-APT-PREPARED-INPUTS.json",
+      "receipt_sha256": "9b2d97125d52ac428031718853ed2baf171ed9ec933c07a55898a13feaac46c5",
+      "retained_archive_directory": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-frozen-foundation-recovery-20261020\\foundation-host-inputs\\apt-archives"
+    },
+    {
+      "archive_bytes": 240783372,
+      "archive_count": 141,
+      "method_counts": {
+        "original-https-archive": 134,
+        "verified-retained-cache": 7
+      },
+      "profile": "engine",
+      "receipt": "audit/neutts-frozen-apt-recovery-20261020/engine-helper-host/engine-APT-PREPARED-INPUTS.json",
+      "receipt_sha256": "48ddabdb8b22d64045aa2adc3d2cfd89238dd44f5618780d834bb5305eceeb83",
+      "retained_archive_directory": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-frozen-foundation-recovery-20261020\\engine-host-inputs\\apt-archives"
+    }
+  ],
+  "python_bound_changed": false,
+  "release_output": false,
+  "reviewed_at_utc": "2026-10-20T13:14:40.938860+00:00",
+  "schema": "neutts-frozen-apt-engine-helper-host-review/v1",
+  "scope": "Exact original signed snapshot and archive bytes; host preparation and rejection controls only. Native APT signature authentication, actual solver/install, scientific runtime and engine-wheel gates remain required.",
+  "source_files": [
+    {
+      "bytes": 31627,
+      "path": "scripts/compatibility_probe_neutts.sh",
+      "sha256": "479a9466466d99f7ba091d5096a36049a695cbbb5925decea1b17b202bb8f45a"
+    },
+    {
+      "bytes": 7199,
+      "path": "scripts/compatibility_probe_neutts_engine_wheel.sh",
+      "sha256": "d8c215dd42ba226539e9c421bfe2fc03a126d64ca3b62459f33a4b67c5e9b7dd"
+    },
+    {
+      "bytes": 20101,
+      "path": "scripts/prepare_neutts_apt_snapshot.py",
+      "sha256": "d7aacac1084448d544f4b78891acb72556a2a039ec5c4fd026ac1979b027d179"
+    },
+    {
+      "bytes": 7762,
+      "path": "scripts/neutts_apt_snapshot.sh",
+      "sha256": "63727793b6e47d1bde058ce60dc03e1ee7f3ad9ae312275e025b12c6b7a6e4c1"
+    },
+    {
+      "bytes": 19197,
+      "path": "tests/test_neutts_apt_snapshot_preparation.py",
+      "sha256": "bba2a17541be73f5691968c1d740ffba805fa4178b8b6628c53ec90ccf51cbfc"
+    }
+  ]
+}

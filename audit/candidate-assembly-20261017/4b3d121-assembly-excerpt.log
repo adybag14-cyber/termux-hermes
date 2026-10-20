@@ -1,0 +1,38 @@
+2026-10-17T15:08:17.9102420Z [command]/usr/bin/git log -1 --format=%H
+2026-10-17T15:08:17.9125595Z b66d4a89c7bdddaf1821dea697c8c977e9d923ea
+2026-10-17T15:08:22.8382812Z [command]/usr/bin/git log -1 --format=%H
+2026-10-17T15:08:22.8408507Z d923a5eb487a17c0a68801bba9ef0f56c81040a8
+2026-10-17T16:00:50.9751008Z   imported watchfiles
+2026-10-17T16:00:51.0620024Z   import gate: every built native wheel imports
+2026-10-17T16:00:51.1923106Z wheelhouse complete: 100 wheels in /out/wheelhouse
+2026-10-17T16:00:51.2301508Z ==> Wheelhouse container phase complete
+2026-10-17T16:01:09.6609450Z ==> Emitting index.json and SHA256SUMS
+2026-10-17T16:01:09.7342719Z ==> Wheelhouse complete: /home/runner/work/termux-hermes/termux-hermes/hermes-source/termux-build/payload/wheelhouse
+2026-10-17T16:01:11.2985030Z Cache saved with key: termux314-wheels-a154ab57068f0059151d57543885f09098a41a7d3538aec70abc35fdf503b887
+2026-10-17T16:01:18.4901327Z ==> Creating application and PM environments with the bundled CPython (inside the container)
+2026-10-17T16:01:21.5530093Z   → Installing Python packages…
+2026-10-17T16:01:21.8046049Z   ✓ Installing Python packages
+2026-10-17T16:01:23.3328487Z   → Installing Python packages…
+2026-10-17T16:01:24.2371426Z   ✓ Installing Python packages
+2026-10-17T16:01:26.6801594Z ==> Writing app/install-stamp.json
+2026-10-17T16:01:27.6913819Z [write_install_stamp] wrote /home/runner/work/termux-hermes/termux-hermes/hermes-source/termux-build/payload/app/install-stamp.json -> d923a5eb487a (6/merge) [DIRTY]
+2026-10-17T16:01:27.7077020Z ==> Staging the package tree
+2026-10-17T16:01:28.9803754Z Traceback (most recent call last):
+2026-10-17T16:01:28.9807981Z   File "/home/runner/work/termux-hermes/termux-hermes/hermes-source/scripts/termux/payload_facts.py", line 64, in <module>
+2026-10-17T16:01:28.9808730Z     write_facts(args.payload, args.payload / "app/pm/lock.json", args.build_set, args.tui_product,
+2026-10-17T16:01:28.9809220Z     ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-17T16:01:28.9809577Z                 args.venv_selection, args.requirements)
+2026-10-17T16:01:28.9810385Z                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-17T16:01:28.9811006Z   File "/home/runner/work/termux-hermes/termux-hermes/hermes-source/scripts/termux/payload_facts.py", line 44, in write_facts
+2026-10-17T16:01:28.9811745Z     manifest["bundled_wheels"] = write_catalog(
+2026-10-17T16:01:28.9812019Z                                  ~~~~~~~~~~~~~^
+2026-10-17T16:01:28.9812305Z         payload, wheelhouse=payload / "wheelhouse",
+2026-10-17T16:01:28.9812590Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-17T16:01:28.9812886Z         lock_paths=(repo / "uv.lock", repo / "pm/uv.lock"),
+2026-10-17T16:01:28.9813194Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-17T16:01:28.9813444Z     )
+2026-10-17T16:01:28.9813603Z     ^
+2026-10-17T16:01:28.9814024Z   File "/home/runner/work/termux-hermes/termux-hermes/hermes-source/pm/bundled_wheels.py", line 137, in write_catalog
+2026-10-17T16:01:28.9814563Z     from packaging.utils import canonicalize_name
+2026-10-17T16:01:28.9814905Z ModuleNotFoundError: No module named 'packaging'
+2026-10-17T16:01:29.0106645Z ##[error]Process completed with exit code 1.

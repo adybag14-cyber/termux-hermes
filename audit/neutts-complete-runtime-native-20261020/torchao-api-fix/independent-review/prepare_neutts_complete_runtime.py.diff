@@ -1,0 +1,117 @@
+--- original-complete-preparer-3f1f404.py
++++ scripts/prepare_neutts_complete_runtime.py
+@@ -26,7 +26,7 @@
+ ROOT = SCRIPT_DIR.parent
+ LOCK_FILENAME = "neutts_complete_runtime_lock.json"
+ RECEIPT_FILENAME = "COMPLETE-PREPARED-INPUTS.json"
+-LOCK_SHA256 = "0e4818b8da88237f3aacb79d0e0a928605b4851c5a1fb8e4613918142a9c7c19"
++LOCK_SHA256 = "7c05ccac08c2c7875b622ff9b1ef98731a9f72e1f5bf4312f58d63eb25d5eb7e"
+ PERTH_PREPARER_SHA256 = "7445bf89b0fd26f9f74a7935724e394b24b331409f200ecca9f2904ffacb40db"
+ NEUCODEC_PREPARER_SHA256 = "ea54baa56bbb9f9a82558233f68c4f2fca02c167e55f785ab3f31cf1cf980d7b"
+ GRAPH_SHA256 = "d8596ac31c12b042d76419712802e9787c092b32e66827cd64c720118be7ae68"
+@@ -160,6 +160,60 @@
+     package = next(p for p in lock["packages"] if p["name"] == "einx")
+     require(raw == verified_bytes(ROOT / package["origin"]["retained_path"], package["artifact"]),
+             "Documentation derivative is not byte-reproducible")
++    return raw
++
++
++def torchao_compiler_import_bytes(lock):
++    """Use the real relocated Torch compiler helpers, preserving every other payload."""
++    rule = lock["torchao_compiler_import_compatibility"]
++    upstream = rule["upstream_package"]
++    path = ROOT / rule["upstream_path"]
++    verify_wheel(path, upstream)
++    target = "torchao/prototype/inductor/int8_sdpa_lowering.py"
++    old = b"from torch._inductor.kernel.flex_attention import construct_strides, maybe_realize\n"
++    new = (b"try:\n"
++           b"    from torch._inductor.kernel.flex_attention import construct_strides, maybe_realize\n"
++           b"except ModuleNotFoundError as error:\n"
++           b"    if error.name != \"torch._inductor.kernel.flex_attention\":\n"
++           b"        raise\n"
++           b"    # Newer Torch keeps these same Inductor helpers in the flex subpackage.\n"
++           b"    from torch._inductor.kernel.flex.common import construct_strides, maybe_realize\n")
++    require(rule["target_member"] == target and rule["old_import"] == old.decode()
++            and rule["new_import"] == new.decode(), "Unreviewed TorchAO import replacement")
++    record = upstream["wheel"]["record_member"]
++    with zipfile.ZipFile(path) as archive:
++        infos = archive.infolist()
++        before = {item.filename: archive.read(item) for item in infos}
++    require(len(infos) == len(before) == 422 and before[target].count(old) == 1,
++            "Original TorchAO import or member set changed")
++    content = dict(before)
++    content[target] = before[target].replace(old, new)
++    buffer = io.StringIO(newline="")
++    writer = csv.writer(buffer, lineterminator="\n")
++    for name, _, _ in csv.reader(io.StringIO(before[record].decode("utf-8"))):
++        if name == record:
++            writer.writerow((name, "", ""))
++        else:
++            body = content[name]
++            writer.writerow((name, "sha256=" + base64.urlsafe_b64encode(
++                hashlib.sha256(body).digest()).decode().rstrip("="), len(body)))
++    content[record] = buffer.getvalue().encode("utf-8")
++    require({name for name in before if before[name] != content[name]} == {target, record},
++            "TorchAO compatibility derivative changed another original payload")
++    output = io.BytesIO()
++    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED) as archive:
++        for original in infos:
++            item = zipfile.ZipInfo(original.filename, date_time=(1980, 1, 1, 0, 0, 0))
++            item.create_system = 3
++            item.create_version = item.extract_version = 20
++            item.external_attr = original.external_attr
++            item.internal_attr = 0
++            item.compress_type = zipfile.ZIP_STORED
++            archive.writestr(item, content[item.filename])
++    raw = output.getvalue()
++    package = next(p for p in lock["packages"] if p["name"] == "torchao")
++    require(raw == verified_bytes(ROOT / package["origin"]["retained_path"], package["artifact"]),
++            "TorchAO compatibility derivative is not byte-reproducible")
+     return raw
+ 
+ 
+@@ -338,6 +392,24 @@
+             and all(einx["wheel"][k] == original["wheel"][k]
+                     for k in ("metadata_sha256", "wheel_sha256", "file_count")),
+             "Original Einx metadata, runtime boundary or reviewed docs relocation changed")
++    compiler = lock["torchao_compiler_import_compatibility"]
++    ao = next(p for p in packages if p["name"] == "torchao")
++    original_ao = compiler["upstream_package"]
++    provider = compiler["torch_provider"]
++    torch = next(p for p in apt_python if p["name"] == "torch")
++    require(original_ao["artifact"]["sha256"]
++            == "103f2a9164d2e4f705332af1aafbb8473eadd14d9164e45857ca187cde1f13d2"
++            and ao["origin"]["kind"] == "torchao-compiler-import-derivative"
++            and all(ao[k] == original_ao[k] for k in ("name", "version", "requires_python", "requires_dist",
++                    "base_requires_dist", "frozen_graph_requires_dist", "native_members"))
++            and all(ao["wheel"][k] == original_ao["wheel"][k]
++                    for k in ("metadata_sha256", "wheel_sha256", "file_count", "entry_count"))
++            and provider["archive"] == torch["archive"]
++            and provider["member"] == "torch/_inductor/kernel/flex/common.py"
++            and provider["sha256"] == "d20df6180978954f79a576f20b32a021558318f0c53d2c7c3bb8164edfa1918d"
++            and any(f["path"] == provider["member"] and f["sha256"] == provider["sha256"]
++                    and f["bytes"] == provider["bytes"] for f in torch["files"]),
++            "Original TorchAO metadata or real Torch compiler provider changed")
+     metadata = {p["name"]: {k: p[k] for k in ("version", "requires_dist", "requires_python")}
+                 for p in packages + apt_python}
+     validate_closure(lock, metadata, lock["environment"])
+@@ -452,6 +524,9 @@
+     einx = next(p for p in lock["packages"] if p["name"] == "einx")
+     require(read_regular(directory / "wheels" / einx["artifact"]["filename"], 2 * 1024 * 1024)
+             == einx_documentation_bytes(lock), "Prepared Einx documentation derivative changed")
++    ao = next(p for p in lock["packages"] if p["name"] == "torchao")
++    require(read_regular(directory / "wheels" / ao["artifact"]["filename"], 8 * 1024 * 1024)
++            == torchao_compiler_import_bytes(lock), "Prepared TorchAO compiler derivative changed")
+     targets = validate_install_targets(directory / "wheels", lock["packages"], lock["apt_python"])
+     for name, subdir in (("resemble-perth", "perth-resource-inputs"), ("soundfile", "soundfile-inputs"),
+                          ("neucodec", "neucodec-inputs")):
+@@ -529,6 +604,9 @@
+             kind, artifact = p["origin"]["kind"], p["artifact"]
+             if kind == "main-catalog":
+                 continue
++            if kind == "torchao-compiler-import-derivative":
++                write_new(staging / "wheels" / artifact["filename"], torchao_compiler_import_bytes(lock))
++                continue
+             if kind == "einx-documentation-derivative":
+                 write_new(staging / "wheels" / artifact["filename"], einx_documentation_bytes(lock))
+                 continue

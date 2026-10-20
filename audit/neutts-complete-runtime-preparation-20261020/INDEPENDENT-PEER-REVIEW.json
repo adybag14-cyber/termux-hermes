@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "reviewer": "docs_recover_final",
+  "date": "2026-10-20",
+  "scope": "Read-only independent review of the original 116-distribution/183-edge native preparation gate; no engine admission",
+  "files": [
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\scripts\\prepare_neutts_complete_runtime.py",
+      "bytes": 24496,
+      "sha256": "f5ff834eb23f60201ce17757a06df26e3d6688005308ffecb6c3388f88333467"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\scripts\\compatibility_probe_neutts_complete_runtime.py",
+      "bytes": 38591,
+      "sha256": "2a8ca0e6ba3b16c43a565a593649bbcc3bc50e2affbc0824f802afefe9643cc2"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\scripts\\compatibility_probe_neutts_complete_runtime.sh",
+      "bytes": 10761,
+      "sha256": "1d6f137b70caf550da98a8ad29851867ad1d4aa72f7f159f83478b8bc398a5c6"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\.github\\workflows\\neutts-complete-runtime.yml",
+      "bytes": 4053,
+      "sha256": "6cc23194c485d02c6cc9dbea99e61e01694a8350f2a3aecdd1e934f2aa7ce4dd"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\tests\\test_neutts_complete_runtime.py",
+      "bytes": 15911,
+      "sha256": "c862ea66d8e2e2bac33e35127b97d946103a6db3028d616c7c94d87088061aeb"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\scripts\\neutts_complete_runtime_lock.json",
+      "bytes": 4746633,
+      "sha256": "883d0fec890062f93eee763e8c89dfae7deba29970a376c6b951e5fc0b0aa1b5"
+    }
+  ],
+  "unresolved_findings": [],
+  "resolved_findings": [
+    {
+      "id": "espeak-temporary-library-lifetime",
+      "original_problem": "Original public Phonemizer calls and backend availability/version/language checks create transient EspeakAPI objects. Android cleanup removes their copied library files without dlclose, conflicting with strict final rejection of deleted native mappings.",
+      "correction": "A bounded Python profile-return observer matches only the exact original constructor code and exact class, retains only fully initialized actual API objects, caps constructor calls at 32, and restores the previous profiler in finally. Strong references survive until native mapping verification. All original public calls and literal phoneme oracles remain unchanged.",
+      "provenance": "The exact installed api.py is compared to the original verified wheel; method/source identities and every unique copied path, size and hash are recorded. Every retained copy must occur in actual maps. The original asset mapping remains separately allowed; deleted or foreign mappings are still rejected.",
+      "original_wheel": {
+        "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-complete-runtime-preparation-20261020\\prepared-inputs-v1\\wheels\\phonemizer-3.3.0-py3-none-any.whl",
+        "bytes": 106164,
+        "sha256": "8e0ae407d381db31d176f4aed74ee43808659f73e9f93c00ca34bde8662a2906"
+      },
+      "primary_source_members": [
+        {
+          "member": "phonemizer/backend/espeak/api.py",
+          "bytes": 10136,
+          "sha256": "ef4587d0e261e98a6f6c3b0585611676a8fcf1c87f9ea916a35ea802fcb8c88a"
+        },
+        {
+          "member": "phonemizer/backend/espeak/wrapper.py",
+          "bytes": 13346,
+          "sha256": "0571a22bf0d7fba0feadbf8d8c2c0e13deb22517acd4e02f1a5d1a9c6508b9dd"
+        },
+        {
+          "member": "phonemizer/backend/espeak/base.py",
+          "bytes": 3746,
+          "sha256": "12982d26e98022c9fceab53b3bb34337d92aa61ed3f489a1db2ba76a7f8a5d8a"
+        },
+        {
+          "member": "phonemizer/backend/base.py",
+          "bytes": 9185,
+          "sha256": "77a903e95008663143c34dd131c9ddd8cd646d76e667533dfaa14ccd5a36bead"
+        },
+        {
+          "member": "phonemizer/phonemize.py",
+          "bytes": 12872,
+          "sha256": "f77fe71146edbff9e458485838c36eeaa3d029b7e4ec1768acf2fa25f1402fea"
+        }
+      ]
+    }
+  ],
+  "review_checks": [
+    "Original graph hash, all 116 nodes and 183 active requirement clauses are preserved. Every original declaration, selected fsspec[http] extra, version and interpreter bound is re-evaluated. NeuTTS is the only excluded engine and its >=3.10,<3.14 metadata remains intact.",
+    "105 actual wheels and 11 exact APT Python payloads form the isolated environment. Pip and torchcodec remain foundation support outside this graph; no global-site or engine distribution is admitted.",
+    "Exact original wheels and truthful RECORD, three derivative preparations, signed snapshot-bound APT inputs and the complete copied eSpeak asset inventory are verified before use.",
+    "The generic environment helper creates a venv without pip/global site and uses offline hash-required wheel installation. Installed original metadata, complete owned files and rewritten RECORD are verified before and after actual operations.",
+    "Every actually mapped source extension is tied to exact installed bytes and Android AArch64 ELF identity. Global Python payload mappings, foreign paths and deleted mappings are rejected; mapped APT and six specific image members retain exact owner/hash provenance.",
+    "The engine wheel supplies only the already reviewed eSpeak library, 371 data files and licenses; no engine Python files or distribution metadata are installed or imported.",
+    "Immutable native image, exact container Id, resource limits, disconnected Docker bridge, loopback-only interface and empty route table are checked before and after runtime. Public native operations run offline in finite process/container/workflow time limits.",
+    "All eleven operation groups use actual APIs with literal/data-integrity checks: foundation/JIT/audio, NonRust, HF-Xet, Safetensors, Tokenizers, Hub/HTTP/YAML, Tiktoken, Phonemizer, Llama CPU backend, bundled public Perth watermarking, and combined Datasets/Arrow/Pandas/NeuCodec imports.",
+    "The public Perth checkpoint is the exact bundled original and uses weights_only CPU loading and strict state matching. No gated/default speech weights, reference audio, physical microphone, release or production admission operation is included.",
+    "Read-only Actions permissions, immutable Actions/image pins, retained original APT caches, source/input receipts and artifact preservation remain explicit."
+  ],
+  "host_validation": {
+    "exit_code": 0,
+    "tests": 19,
+    "subtests": 37,
+    "skips": 0,
+    "elapsed_seconds": 2.3272299999989627,
+    "evidence": [
+      {
+        "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-complete-runtime-preparation-20261020\\independent-review\\final\\HOST-TESTS.stdout.log",
+        "bytes": 82,
+        "sha256": "029362e3d0e421e145eb55e1c78d0b6bd48199887420f099bcf8eb1f6556e0c0"
+      },
+      {
+        "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-complete-runtime-preparation-20261020\\independent-review\\final\\HOST-TESTS.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-complete-runtime-preparation-20261020\\independent-review\\final\\HOST-TESTS.xml",
+        "bytes": 3087,
+        "sha256": "7897b411f1fd10997f6ae4f948f1a876d29197ab15001faad7a8a00a5ada7edc"
+      }
+    ]
+  },
+  "input_validation": {
+    "evidence": {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-complete-runtime-preparation-20261020\\independent-review\\HOST-VALIDATION.json",
+      "bytes": 3796,
+      "sha256": "1d47b2ca807dab82302c2c2f2a39e2a58e57e8a990a1b8f5fad452d024651780"
+    },
+    "result": "Independent verify_inputs(prepared-inputs-v1) passed before the probe-only lifetime delta; preparer, lock, original inputs and deterministic prepared receipt are unchanged.",
+    "prepared_receipt": {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-complete-runtime-preparation-20261020\\prepared-inputs-v1\\COMPLETE-PREPARED-INPUTS.json",
+      "bytes": 270934,
+      "sha256": "8c55d71c4f83d0e39588bdc3de32c6a05fa184e615282e3c310c4fb7e1712a3e"
+    },
+    "foundation_rescan_performed": false
+  },
+  "bash_syntax_validation": {
+    "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-complete-runtime-preparation-20261020\\independent-review\\BASH-SYNTAX-REVIEW.json",
+    "bytes": 356,
+    "sha256": "6cc220e87e1aa40bfd7d4c23bf0df79ba42acb1eb64836971c0b73a35d624ed1"
+  },
+  "neucodec_peer_review": {
+    "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neucodec-wheel-peer-review-20261020\\INDEPENDENT-WHEEL-REVIEW.json",
+    "bytes": 5095,
+    "sha256": "20aec89e736d1fb279ef09e2561755421d56029ff4042ad58394e7160d90f0e5"
+  },
+  "source_edits_performed": false,
+  "git_operations_performed": false,
+  "native_runtime_executed": false,
+  "release_performed": false,
+  "limits": [
+    "This peer review and host preparation do not claim a passed combined native job.",
+    "A future passing gate proves the exact original dependency environment and its defined API cases; it does not prove all package APIs, engine Python admission, gated codec/speech inference, synthesis or physical microphone/VAD behavior."
+  ]
+}

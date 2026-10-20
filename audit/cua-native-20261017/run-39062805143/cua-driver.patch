@@ -1,0 +1,1285 @@
+diff --git a/libs/cua-driver/rust/Cargo.toml b/libs/cua-driver/rust/Cargo.toml
+index df90cdc..65cc0d5 100644
+--- a/libs/cua-driver/rust/Cargo.toml
++++ b/libs/cua-driver/rust/Cargo.toml
+@@ -51,3 +51,9 @@ time = { version = "0.3", features = ["formatting", "parsing"] }
+ getrandom = "0.4"
+ fs2 = "0.4"
+ hmac = "0.12"
++
++# Candidate-only Termux source adapters. prepare_cua_termux_source.py verifies
++# these exact registry archives before extracting and applying the reviewed edits.
++[patch.crates-io]
++clipboard-rs = { path = "termux-vendor/clipboard-rs-0.3.5" }
++x11rb-protocol = { path = "termux-vendor/x11rb-protocol-0.13.2" }
+diff --git a/libs/cua-driver/rust/crates/cua-driver-core/src/daemon.rs b/libs/cua-driver/rust/crates/cua-driver-core/src/daemon.rs
+index 004ece3..fc5aac5 100644
+--- a/libs/cua-driver/rust/crates/cua-driver-core/src/daemon.rs
++++ b/libs/cua-driver/rust/crates/cua-driver-core/src/daemon.rs
+@@ -147,7 +147,7 @@ pub fn socket_path_for_namespace(namespace: &str) -> String {
+         let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".into());
+         format!("{home}/Library/Caches/{namespace}/{namespace}.sock")
+     }
+-    #[cfg(target_os = "linux")]
++    #[cfg(any(target_os = "linux", target_os = "android"))]
+     {
+         let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".into());
+         format!("{home}/.cache/{namespace}/{namespace}.sock")
+@@ -156,7 +156,7 @@ pub fn socket_path_for_namespace(namespace: &str) -> String {
+     {
+         format!(r"\\.\pipe\{namespace}")
+     }
+-    #[cfg(not(any(target_os = "macos", target_os = "linux", target_os = "windows")))]
++    #[cfg(not(any(target_os = "macos", any(target_os = "linux", target_os = "android"), target_os = "windows")))]
+     {
+         format!("/tmp/{namespace}.sock")
+     }
+diff --git a/libs/cua-driver/rust/crates/cua-driver-sdk/Cargo.toml b/libs/cua-driver/rust/crates/cua-driver-sdk/Cargo.toml
+index 24d6d1f..b9d3be4 100644
+--- a/libs/cua-driver/rust/crates/cua-driver-sdk/Cargo.toml
++++ b/libs/cua-driver/rust/crates/cua-driver-sdk/Cargo.toml
+@@ -31,7 +31,7 @@ core-foundation = "0.10"
+ [target.'cfg(target_os = "windows")'.dependencies]
+ platform-windows = { path = "../platform-windows" }
+ 
+-[target.'cfg(target_os = "linux")'.dependencies]
++[target.'cfg(any(target_os = "linux", target_os = "android"))'.dependencies]
+ platform-linux = { path = "../platform-linux" }
+ 
+ [features]
+diff --git a/libs/cua-driver/rust/crates/cua-driver-sdk/src/runtime.rs b/libs/cua-driver/rust/crates/cua-driver-sdk/src/runtime.rs
+index e9bed70..5a8cc81 100644
+--- a/libs/cua-driver/rust/crates/cua-driver-sdk/src/runtime.rs
++++ b/libs/cua-driver/rust/crates/cua-driver-sdk/src/runtime.rs
+@@ -50,7 +50,7 @@ pub(crate) struct RuntimeOptions {
+     pub host_owns_permission_ux: bool,
+     pub host_bundle_id: Option<String>,
+     pub compatibility_mode: bool,
+-    #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
++    #[cfg_attr(not(any(target_os = "linux", target_os = "android")), allow(dead_code))]
+     pub prepare_desktop_environment: bool,
+     pub register_host_tools: Option<fn(&mut ToolRegistry)>,
+     pub authorization_ceiling: Option<SessionModeCeiling>,
+@@ -544,7 +544,7 @@ fn build_registry(options: &RuntimeOptions) -> ToolRegistry {
+         )
+     };
+ 
+-    #[cfg(target_os = "linux")]
++    #[cfg(any(target_os = "linux", target_os = "android"))]
+     let mut registry = {
+         configure_linux_runtime(options.prepare_desktop_environment);
+         platform_linux::register_tools_with_cursor_and_provider(
+@@ -554,7 +554,7 @@ fn build_registry(options: &RuntimeOptions) -> ToolRegistry {
+         )
+     };
+ 
+-    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
++    #[cfg(not(any(target_os = "macos", target_os = "windows", any(target_os = "linux", target_os = "android"))))]
+     let mut registry = {
+         let _ = options;
+         ToolRegistry::new()
+@@ -627,7 +627,7 @@ fn configure_windows_runtime() {
+     ));
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn configure_linux_runtime(prepare_desktop_environment: bool) {
+     if prepare_desktop_environment {
+         platform_linux::xauth::ensure_xauthority_discovered();
+diff --git a/libs/cua-driver/rust/crates/cua-driver/Cargo.toml b/libs/cua-driver/rust/crates/cua-driver/Cargo.toml
+index 3b76b02..ab04f2d 100644
+--- a/libs/cua-driver/rust/crates/cua-driver/Cargo.toml
++++ b/libs/cua-driver/rust/crates/cua-driver/Cargo.toml
+@@ -58,7 +58,7 @@ windows = { version = "0.61", features = [
+     "Win32_System_Threading",
+ ] }
+ 
+-[target.'cfg(target_os = "linux")'.dependencies]
++[target.'cfg(any(target_os = "linux", target_os = "android"))'.dependencies]
+ platform-linux = { path = "../platform-linux" }
+ 
+ [features]
+diff --git a/libs/cua-driver/rust/crates/cua-driver/src/cli.rs b/libs/cua-driver/rust/crates/cua-driver/src/cli.rs
+index 8f68e01..fb5d6a4 100644
+--- a/libs/cua-driver/rust/crates/cua-driver/src/cli.rs
++++ b/libs/cua-driver/rust/crates/cua-driver/src/cli.rs
+@@ -1490,6 +1490,13 @@ fn restart_managed_daemon_if_present(executable: &std::path::Path) -> bool {
+             .is_ok_and(|status| status.success())
+ }
+ 
++// Termux has no Cua-owned systemd service to restart. The foreground/MCP
++// runtime remains usable; do not claim Linux service-manager integration.
++#[cfg(target_os = "android")]
++fn restart_managed_daemon_if_present(_executable: &std::path::Path) -> bool {
++    false
++}
++
+ #[cfg(target_os = "linux")]
+ fn restart_managed_daemon_if_present(_executable: &std::path::Path) -> bool {
+     use std::process::{Command as Cmd, Stdio};
+diff --git a/libs/cua-driver/rust/crates/cua-driver/src/history_runtime.rs b/libs/cua-driver/rust/crates/cua-driver/src/history_runtime.rs
+index 0d72ffc..928cca4 100644
+--- a/libs/cua-driver/rust/crates/cua-driver/src/history_runtime.rs
++++ b/libs/cua-driver/rust/crates/cua-driver/src/history_runtime.rs
+@@ -433,7 +433,7 @@ pub fn history_root() -> PathBuf {
+             .join(crate::bundle::state_namespace())
+             .join("computer-history");
+     }
+-    #[cfg(target_os = "linux")]
++    #[cfg(any(target_os = "linux", target_os = "android"))]
+     {
+         let root = std::env::var_os("XDG_STATE_HOME")
+             .filter(|value| !value.is_empty())
+@@ -484,7 +484,7 @@ fn platform_key_provider() -> std::sync::Arc<dyn KeyProvider> {
+     return platform_macos::history::MacosKeychainKeyProvider::shared();
+     #[cfg(target_os = "windows")]
+     return platform_windows::history::WindowsCredentialKeyProvider::shared();
+-    #[cfg(target_os = "linux")]
++    #[cfg(any(target_os = "linux", target_os = "android"))]
+     return platform_linux::history::LinuxSecretServiceKeyProvider::shared();
+ }
+ 
+@@ -493,7 +493,7 @@ fn platform_application_identity_provider() -> std::sync::Arc<dyn ApplicationIde
+     return platform_macos::history::application_identity_provider();
+     #[cfg(target_os = "windows")]
+     return platform_windows::history::application_identity_provider();
+-    #[cfg(target_os = "linux")]
++    #[cfg(any(target_os = "linux", target_os = "android"))]
+     return platform_linux::history::application_identity_provider();
+ }
+ 
+diff --git a/libs/cua-driver/rust/crates/cua-driver/src/serve.rs b/libs/cua-driver/rust/crates/cua-driver/src/serve.rs
+index 029ef80..2e6afcc 100644
+--- a/libs/cua-driver/rust/crates/cua-driver/src/serve.rs
++++ b/libs/cua-driver/rust/crates/cua-driver/src/serve.rs
+@@ -381,7 +381,7 @@ pub fn default_pid_file_path() -> String {
+         let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".into());
+         format!("{home}/Library/Caches/{namespace}/{namespace}.pid")
+     }
+-    #[cfg(target_os = "linux")]
++    #[cfg(any(target_os = "linux", target_os = "android"))]
+     {
+         let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".into());
+         format!("{home}/.cache/{namespace}/{namespace}.pid")
+@@ -391,7 +391,7 @@ pub fn default_pid_file_path() -> String {
+         let local = std::env::var("LOCALAPPDATA").unwrap_or_else(|_| "C:/Temp".into());
+         format!("{local}/{namespace}/{namespace}.pid")
+     }
+-    #[cfg(not(any(target_os = "macos", target_os = "linux", target_os = "windows")))]
++    #[cfg(not(any(target_os = "macos", target_os = "linux", target_os = "android", target_os = "windows")))]
+     {
+         "/tmp/cua-driver.pid".to_owned()
+     }
+@@ -714,7 +714,7 @@ fn authenticate_history_cli_connection(stream: &tokio::net::UnixStream) -> anyho
+     crate::history_runtime::verify_history_cli_executable_path(&path)
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn authenticate_history_cli_connection(stream: &tokio::net::UnixStream) -> anyhow::Result<()> {
+     let peer_pid = stream
+         .peer_cred()
+diff --git a/libs/cua-driver/rust/crates/cua-driver/src/telemetry.rs b/libs/cua-driver/rust/crates/cua-driver/src/telemetry.rs
+index 2453fec..0fb93d8 100644
+--- a/libs/cua-driver/rust/crates/cua-driver/src/telemetry.rs
++++ b/libs/cua-driver/rust/crates/cua-driver/src/telemetry.rs
+@@ -2563,6 +2563,13 @@ fn os_version() -> String {
+     let command = std::process::Command::new("cmd")
+         .args(["/c", "ver"])
+         .output();
++    // Android Build.VERSION.RELEASE reads this public system property:
++    // aosp-mirror/platform_frameworks_base@1cdfff555f4a21f71ccc978290e2e212e2f8b168
++    // core/java/android/os/Build.java. Missing getprop keeps the existing fallback.
++    #[cfg(target_os = "android")]
++    let command = std::process::Command::new("/system/bin/getprop")
++        .arg("ro.build.version.release")
++        .output();
+     #[cfg(target_os = "linux")]
+     {
+         return std::fs::read_to_string("/etc/os-release")
+diff --git a/libs/cua-driver/rust/crates/platform-linux/Cargo.toml b/libs/cua-driver/rust/crates/platform-linux/Cargo.toml
+index 5a54b73..ac5afda 100644
+--- a/libs/cua-driver/rust/crates/platform-linux/Cargo.toml
++++ b/libs/cua-driver/rust/crates/platform-linux/Cargo.toml
+@@ -20,7 +20,7 @@ getrandom = { workspace = true }
+ # tiny-skia for cursor rendering (shared cross-platform)
+ tiny-skia = { version = "0.11", default-features = false, features = ["std"] }
+ 
+-[target.'cfg(target_os = "linux")'.dependencies]
++[target.'cfg(any(target_os = "linux", target_os = "android"))'.dependencies]
+ clipboard-rs = { version = "0.3.5", features = ["wayland"] }
+ keyring = { version = "4.1.6", default-features = false, features = ["v1"] }
+ # X11 background input + window enumeration + MIT-SHM capture
+diff --git a/libs/cua-driver/rust/crates/platform-linux/src/health_report.rs b/libs/cua-driver/rust/crates/platform-linux/src/health_report.rs
+index 0907a35..c87e5e8 100644
+--- a/libs/cua-driver/rust/crates/platform-linux/src/health_report.rs
++++ b/libs/cua-driver/rust/crates/platform-linux/src/health_report.rs
+@@ -427,12 +427,12 @@ fn classify_wayland_backend(
+ 
+ // ── Probes ───────────────────────────────────────────────────────────────────
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn probe_x11_connect() -> bool {
+     x11rb::rust_connection::RustConnection::connect(None).is_ok()
+ }
+ 
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ fn probe_x11_connect() -> bool {
+     false
+ }
+@@ -441,7 +441,7 @@ fn probe_x11_connect() -> bool {
+ /// canonical AT-SPI prerequisite on Wayland, where there is no X server to
+ /// stand in. Returns false on any error (no session bus, no a11y service,
+ /// timeout, etc.) so the doctor message stays simple.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub(crate) fn probe_a11y_bus() -> bool {
+     use atspi::zbus;
+     let rt = match tokio::runtime::Builder::new_current_thread()
+@@ -471,7 +471,7 @@ pub(crate) fn probe_a11y_bus() -> bool {
+     })
+ }
+ 
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ pub(crate) fn probe_a11y_bus() -> bool {
+     false
+ }
+@@ -479,83 +479,83 @@ pub(crate) fn probe_a11y_bus() -> bool {
+ /// True when the Wayland backend is opted in and a Wayland session is
+ /// active. Wrapper around `wayland::is_wayland()` so non-Linux builds of
+ /// this file compile (the `wayland` module is gated on `target_os = linux`).
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn is_wayland_session() -> bool {
+     crate::wayland::is_wayland()
+ }
+ 
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ fn is_wayland_session() -> bool {
+     false
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn wayland_opt_in_enabled() -> bool {
+     crate::wayland::wayland_enabled()
+ }
+ 
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ fn wayland_opt_in_enabled() -> bool {
+     false
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn wayland_env_name() -> &'static str {
+     crate::wayland::ENABLE_WAYLAND_ENV
+ }
+ 
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ fn wayland_env_name() -> &'static str {
+     "CUA_DRIVER_RS_ENABLE_WAYLAND"
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn portal_input_enabled() -> bool {
+     crate::wayland::PORTAL_INPUT_ENABLED
+ }
+ 
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ fn portal_input_enabled() -> bool {
+     false
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn target_activation_available() -> bool {
+     crate::wayland::shell_helper::list_windows(None).is_some()
+ }
+ 
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ fn target_activation_available() -> bool {
+     false
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ type WaylandManagers = crate::wayland::WaylandManagers;
+ 
+ /// Snapshot of wlroots manager globals. The non-Linux stub returns an empty
+ /// snapshot so off-platform builds stay green; doctor short-circuits before
+ /// reaching it via [`is_wayland_session`].
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn probe_wayland_managers() -> anyhow::Result<WaylandManagers> {
+     crate::wayland::probe_managers()
+ }
+ 
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ fn probe_wayland_managers() -> anyhow::Result<WaylandManagers> {
+     Ok(WaylandManagers::default())
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn probe_portal_screenshot() -> anyhow::Result<bool> {
+     crate::wayland::portal_screenshot::probe_portal()
+ }
+ 
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ fn probe_portal_screenshot() -> anyhow::Result<bool> {
+     Ok(false)
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn probe_portal_remote_desktop() -> anyhow::Result<bool> {
+     #[cfg(feature = "portal-input")]
+     {
+@@ -600,14 +600,14 @@ fn probe_portal_remote_desktop() -> anyhow::Result<bool> {
+     }
+ }
+ 
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ fn probe_portal_remote_desktop() -> anyhow::Result<bool> {
+     Ok(false)
+ }
+ 
+ /// Stub of `wayland::WaylandManagers` so off-Linux builds compile. Always
+ /// reports nothing advertised — non-Linux code paths never call this.
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ #[derive(Default, Clone, Debug)]
+ struct WaylandManagers {
+     foreign_toplevel: bool,
+diff --git a/libs/cua-driver/rust/crates/platform-linux/src/lib.rs b/libs/cua-driver/rust/crates/platform-linux/src/lib.rs
+index 6298435..289fe72 100644
+--- a/libs/cua-driver/rust/crates/platform-linux/src/lib.rs
++++ b/libs/cua-driver/rust/crates/platform-linux/src/lib.rs
+@@ -17,61 +17,61 @@ pub mod overlay;
+ pub mod pip;
+ pub mod tools;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub mod x11;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub mod input;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub mod tty;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub mod proc_fs;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub mod history;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub mod browser_platform;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ mod browser_setup_ui;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ mod browser_consent_ui;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub mod installed_apps;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub mod capture;
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ mod clipboard;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub mod atspi;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub mod a11y;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub mod recording_hooks;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub mod video_wayland;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub mod wayland;
+ 
+ // `terminal` is OS-independent (pure string matching + a thin x11 hook).
+ // Keeping it un-gated lets the unit tests run on any host.
+ pub mod terminal;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub mod xauth;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub mod session_bus;
+ 
+ /// Pure WSL-detection predicate, split out from [`is_wsl`] so both branches
+@@ -128,7 +128,7 @@ pub fn no_display_hint() -> String {
+ }
+ 
+ pub fn register_tools() -> ToolRegistry {
+-    #[cfg(target_os = "linux")]
++    #[cfg(any(target_os = "linux", target_os = "android"))]
+     wayland::ensure_nested_session();
+     tools::build_registry(false)
+ }
+@@ -146,9 +146,9 @@ pub fn register_tools_with_cursor_and_provider(
+     cfg: cursor_overlay::CursorConfig,
+     compat: bool,
+ ) -> ToolRegistry {
+-    #[cfg(target_os = "linux")]
++    #[cfg(any(target_os = "linux", target_os = "android"))]
+     wayland::ensure_nested_session();
+-    #[cfg(target_os = "linux")]
++    #[cfg(any(target_os = "linux", target_os = "android"))]
+     wayland::overlay::set_config_enabled(cfg.enabled);
+     if cfg.enabled {
+         overlay::init(cfg.clone());
+diff --git a/libs/cua-driver/rust/crates/platform-linux/src/overlay.rs b/libs/cua-driver/rust/crates/platform-linux/src/overlay.rs
+index 710aa22..0556e4a 100644
+--- a/libs/cua-driver/rust/crates/platform-linux/src/overlay.rs
++++ b/libs/cua-driver/rust/crates/platform-linux/src/overlay.rs
+@@ -35,24 +35,24 @@
+ //! What stays here is the X11 window plumbing: connection setup,
+ //! override-redirect visual, ShapeInput passthrough, and the XPutImage paint.
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ use std::collections::VecDeque;
+ use std::collections::{HashMap, HashSet};
+ use std::sync::{Mutex, OnceLock};
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ use std::time::{Duration, Instant};
+ 
+-#[cfg(all(test, target_os = "linux"))]
++#[cfg(all(test, any(target_os = "linux", target_os = "android")))]
+ use cursor_overlay::CursorAction;
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ const X11_EVENT_POLL_INTERVAL: Duration = Duration::from_millis(50);
+ /// How often the `_NET_WM_CM_S{n}` owner is re-sampled. A compositing manager
+ /// starting or stopping emits no event we subscribe to, and it decides whether
+ /// the server blends our alpha, so the sample cannot be startup-only.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ const X11_COMPOSITOR_POLL_INTERVAL: Duration = Duration::from_secs(1);
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ use cursor_overlay::ZOrderEnforcer;
+ use cursor_overlay::{
+     CursorConfig, CursorKey, KeyedOverlayCommand, OverlayCommand, OverlayMsg, RenderStateCore,
+@@ -65,7 +65,7 @@ static CMD_RX_CELL: Mutex<Option<std::sync::mpsc::Receiver<OverlayMsg>>> = Mutex
+ static RENDER: Mutex<Option<RenderMap>> = Mutex::new(None);
+ static ARRIVAL_TX: Mutex<Option<HashMap<CursorKey, tokio::sync::oneshot::Sender<()>>>> =
+     Mutex::new(None);
+-#[cfg(all(test, target_os = "linux"))]
++#[cfg(all(test, any(target_os = "linux", target_os = "android")))]
+ static X11_RANDR_REPAIR_COUNT: std::sync::atomic::AtomicUsize =
+     std::sync::atomic::AtomicUsize::new(0);
+ 
+@@ -114,13 +114,13 @@ fn try_send_x11_message(
+     sender.is_some_and(|tx| tx.try_send(msg).is_ok())
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ struct X11OverlayThreadCleanup {
+     receiver: Option<std::sync::mpsc::Receiver<OverlayMsg>>,
+     disable_render_state: bool,
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ impl X11OverlayThreadCleanup {
+     fn receiver(&self) -> &std::sync::mpsc::Receiver<OverlayMsg> {
+         self.receiver
+@@ -150,7 +150,7 @@ impl X11OverlayThreadCleanup {
+     }
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ impl Drop for X11OverlayThreadCleanup {
+     fn drop(&mut self) {
+         // Disconnect first so an animator racing teardown cannot enqueue after
+@@ -163,7 +163,7 @@ impl Drop for X11OverlayThreadCleanup {
+     }
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn disable_render_map(render: &mut Option<RenderMap>) {
+     *render = None;
+ }
+@@ -310,7 +310,7 @@ fn try_send_command_for(key: CursorKey, cmd: OverlayCommand) -> bool {
+     // Also forward to the native-Wayland layer-shell overlay when Wayland
+     // is opted in. The wayland overlay's `forward` is a no-op when its
+     // owner thread isn't started yet (which is the normal X11-only case).
+-    #[cfg(target_os = "linux")]
++    #[cfg(any(target_os = "linux", target_os = "android"))]
+     {
+         if crate::wayland::is_wayland() {
+             if crate::wayland::shell_helper::semantic_cursor_available() {
+@@ -537,7 +537,7 @@ pub fn remove_cursor(key: CursorKey) {
+     if let Some(tx) = CMD_TX.get() {
+         let _ = tx.try_send(msg.clone());
+     }
+-    #[cfg(target_os = "linux")]
++    #[cfg(any(target_os = "linux", target_os = "android"))]
+     if crate::wayland::is_wayland() && !crate::wayland::shell_helper::available() {
+         let _ = crate::wayland::overlay::forward(&msg);
+     }
+@@ -554,7 +554,7 @@ pub fn revive_cursor(key: CursorKey) {
+     if let Some(tx) = CMD_TX.get() {
+         let _ = tx.try_send(msg.clone());
+     }
+-    #[cfg(target_os = "linux")]
++    #[cfg(any(target_os = "linux", target_os = "android"))]
+     if crate::wayland::is_wayland() && !crate::wayland::shell_helper::available() {
+         let _ = crate::wayland::overlay::forward(&msg);
+     }
+@@ -633,7 +633,7 @@ impl RenderState {
+     /// tick can change pixels. A brand-new sentinel cursor is deliberately
+     /// quiescent, so an idle MCP server can park on bounded maintenance waits
+     /// instead of rebuilding and repainting X11 cursor tiles at 60 fps.
+-    #[cfg(target_os = "linux")]
++    #[cfg(any(target_os = "linux", target_os = "android"))]
+     fn needs_frame_tick(&self) -> bool {
+         let fade_start = self.core.motion.idle_hide_ms / 1000.0;
+         self.core.path.is_some()
+@@ -659,19 +659,19 @@ impl RenderState {
+     }
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn render_map_needs_frame_tick(map: &RenderMap) -> bool {
+     map.cursors.values().any(RenderState::needs_frame_tick)
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn render_map_needs_z_order_tick(map: &RenderMap) -> bool {
+     map.cursors
+         .values()
+         .any(|rs| rs.core.visible && rs.core.idle_alpha >= 0.004 && rs.core.pos.0 >= -100.0)
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn tick_render_map(map: &mut RenderMap, dt: f64) -> Vec<CursorKey> {
+     let mut arrived = Vec::new();
+     for (key, rs) in map.cursors.iter_mut() {
+@@ -682,7 +682,7 @@ fn tick_render_map(map: &mut RenderMap, dt: f64) -> Vec<CursorKey> {
+     arrived
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn apply_messages_after_wake(
+     map: &mut RenderMap,
+     first_msg: Option<OverlayMsg>,
+@@ -711,7 +711,7 @@ fn apply_messages_after_wake(
+     (arrived, had_msg)
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn process_render_wake(
+     map: &mut RenderMap,
+     first_msg: Option<OverlayMsg>,
+@@ -734,7 +734,7 @@ fn process_render_wake(
+     (arrived, had_msg)
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn render_map_idle_wait_interval(map: &RenderMap) -> Option<Duration> {
+     map.cursors
+         .values()
+@@ -756,7 +756,7 @@ fn render_map_idle_wait_interval(map: &RenderMap) -> Option<Duration> {
+         .min()
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn next_maintenance_deadline(
+     last_tick: Instant,
+     last_z_order_tick: Instant,
+@@ -775,7 +775,7 @@ fn next_maintenance_deadline(
+     deadline
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn z_order_reassertion_needed(
+     had_msg: bool,
+     screen_changed: bool,
+@@ -786,7 +786,7 @@ fn z_order_reassertion_needed(
+     had_msg || screen_changed || pin_changed || (periodic_tick_needed && periodic_tick_due)
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ enum OverlayWake {
+     Frame,
+     Message(OverlayMsg),
+@@ -794,7 +794,7 @@ enum OverlayWake {
+     Disconnected,
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn wait_for_overlay_work(
+     rx: &std::sync::mpsc::Receiver<OverlayMsg>,
+     frame_tick_needed: bool,
+@@ -812,7 +812,7 @@ fn wait_for_overlay_work(
+     }
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn recoverable_x11_z_order_error(error: &x11rb::x11_utils::X11Error, overlay_win: u32) -> bool {
+     // BadWindow: the sibling died between the liveness probe and the server
+     // processing the restack. BadMatch: the sibling is not a sibling — a
+@@ -828,7 +828,7 @@ fn recoverable_x11_z_order_error(error: &x11rb::x11_utils::X11Error, overlay_win
+         && error.bad_value != overlay_win
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ /// Return `Ok(true)` for display changes, `Ok(false)` for unrelated or safely
+ /// recoverable events, and `Err` for protocol failures that disable the overlay.
+ fn classify_x11_overlay_event(
+@@ -862,13 +862,13 @@ fn classify_x11_overlay_event(
+     }
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn update_render_map_geometry(map: &mut RenderMap, width: u16, height: u16) {
+     map.scr_w = u32::from(width);
+     map.scr_h = u32::from(height);
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn drain_x11_overlay_events(
+     conn: &impl x11rb::connection::Connection,
+     overlay_win: u32,
+@@ -880,7 +880,7 @@ fn drain_x11_overlay_events(
+     Ok(display_changed)
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn subscribe_x11_display_changes(
+     conn: &impl x11rb::connection::Connection,
+     root: u32,
+@@ -894,7 +894,7 @@ fn subscribe_x11_display_changes(
+     Ok(())
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn current_x11_root_geometry(
+     conn: &impl x11rb::connection::Connection,
+     root: u32,
+@@ -911,7 +911,7 @@ fn current_x11_root_geometry(
+     Ok((geometry.width, geometry.height))
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn prepare_x11_overlay_geometry(
+     conn: &impl x11rb::connection::Connection,
+     win: u32,
+@@ -951,7 +951,7 @@ fn prepare_x11_overlay_geometry(
+     Ok(())
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn clear_x11_overlay_input_shape(
+     conn: &impl x11rb::connection::Connection,
+     win: u32,
+@@ -964,7 +964,7 @@ fn clear_x11_overlay_input_shape(
+     Ok(())
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn map_x11_overlay_with_empty_input(
+     conn: &impl x11rb::connection::Connection,
+     win: u32,
+@@ -993,7 +993,7 @@ fn map_x11_overlay_with_empty_input(
+ 
+ // ── X11 thread ────────────────────────────────────────────────────────────
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn run_overlay_thread(cfg: CursorConfig, rx: std::sync::mpsc::Receiver<OverlayMsg>) {
+     use x11rb::connection::Connection;
+     use x11rb::protocol::xproto::ConnectionExt as XprotoConnectionExt;
+@@ -1462,7 +1462,7 @@ fn run_overlay_thread(cfg: CursorConfig, rx: std::sync::mpsc::Receiver<OverlayMs
+ /// Borrows the X11 connection and overlay window id; lives only inside
+ /// `run_overlay_thread` (the X11 connection is not `'static`). Reasserted after
+ /// commands, target/display changes, and at most every 80 ms while visible.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ struct X11ZOrderEnforcer<'a, C: x11rb::connection::Connection> {
+     conn: &'a C,
+     win: u32,
+@@ -1480,7 +1480,7 @@ struct X11ZOrderEnforcer<'a, C: x11rb::connection::Connection> {
+ /// window that actually occupies a stacking slot, so it is the correct
+ /// sibling. Returns `None` for a dead window or a chain that never reaches
+ /// the root (also proving liveness, replacing a separate attribute probe).
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn resolve_x11_root_child(
+     conn: &impl x11rb::connection::Connection,
+     root: u32,
+@@ -1502,7 +1502,7 @@ fn resolve_x11_root_child(
+     None
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ impl<'a, C: x11rb::connection::Connection> ZOrderEnforcer for X11ZOrderEnforcer<'a, C> {
+     fn reassert(&self, target: Option<u64>) {
+         use x11rb::protocol::xproto::{
+@@ -1537,7 +1537,7 @@ impl<'a, C: x11rb::connection::Connection> ZOrderEnforcer for X11ZOrderEnforcer<
+     }
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn find_argb_visual(
+     _conn: &impl x11rb::connection::Connection,
+     screen: &x11rb::protocol::xproto::Screen,
+@@ -1557,7 +1557,7 @@ fn find_argb_visual(
+     None
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn x11_compositor_present(conn: &impl x11rb::connection::Connection, screen_num: usize) -> bool {
+     use x11rb::protocol::xproto::ConnectionExt as XprotoConnectionExt;
+ 
+@@ -1581,13 +1581,13 @@ fn x11_compositor_present(conn: &impl x11rb::connection::Connection, screen_num:
+ /// bloom/click effects peak below 40 px from the anchor and built-in/custom
+ /// silhouettes render at 26 px. Keep generous headroom so active work stays
+ /// independent of the root-window area without clipping antialiasing.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ const X11_CURSOR_TILE_MARGIN: f64 = 64.0;
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ const X11_BADGED_CURSOR_HORIZONTAL_MARGIN: f64 =
+     cursor_overlay::session_badge_extents().horizontal as f64 + 2.0;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+ struct X11TileBounds {
+     x: i16,
+@@ -1596,7 +1596,7 @@ struct X11TileBounds {
+     height: u16,
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ struct X11PaintTile {
+     bounds: X11TileBounds,
+     pixmap: tiny_skia::Pixmap,
+@@ -1605,7 +1605,7 @@ struct X11PaintTile {
+ /// Loop-constant X11 handles the paint path needs. Bundled so the per-frame
+ /// paint entry point keeps a reviewable argument list as the compositing
+ /// inputs grow.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ struct X11PaintTarget {
+     win: u32,
+     root: u32,
+@@ -1622,7 +1622,7 @@ struct X11PaintTarget {
+ /// rect is still our own paint when it equals `uploaded`, in which case the
+ /// true backdrop is `under`; once it differs, the window that owns those pixels
+ /// has serviced its Expose and the live read is the truth again.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ struct X11SavedBackdrop {
+     bounds: X11TileBounds,
+     under: Vec<u8>,
+@@ -1631,7 +1631,7 @@ struct X11SavedBackdrop {
+ 
+ /// One painted frame: the root-space rects the overlay actually made visible,
+ /// and the save-unders covering them.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ struct X11BackdropFrame {
+     /// When a later frame superseded this one. `None` while the frame is the
+     /// one on screen, which can never be read back as backdrop.
+@@ -1640,7 +1640,7 @@ struct X11BackdropFrame {
+     saved: Vec<X11SavedBackdrop>,
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ impl X11BackdropFrame {
+     /// A vacated frame is dropped once its save-unders are old enough that
+     /// serving them would be worse than reading whatever is there now. Nothing
+@@ -1660,7 +1660,7 @@ impl X11BackdropFrame {
+ /// backdrop ourselves. XGetImage on the root returns our own painted pixels
+ /// wherever the overlay is currently shaped in, so those pixels are served from
+ /// here instead and everything else keeps the live read.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ #[derive(Default)]
+ struct X11BackdropCache {
+     /// Newest frame at the front.
+@@ -1690,42 +1690,42 @@ struct X11BackdropCache {
+ /// windows underneath repaint before it reads the root again. Emptying the
+ /// bounding shape only queues Expose; the framebuffer still physically holds
+ /// our last frame until the owning clients answer it.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ const X11_BACKDROP_RESYNC_GRACE: Duration = Duration::from_millis(200);
+ /// How long a vacated frame's save-under stays available. Long is safe:
+ /// `resolve_backdrop` only uses it for pixels that still hold our own paint.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ const X11_BACKDROP_RETENTION: Duration = Duration::from_secs(2);
+ /// Memory ceiling on retained frames, ~2.3 MB per cursor at the largest badged
+ /// tile. This is what actually bounds the history during continuous motion:
+ /// 32 frames is roughly half a second at the 60 Hz frame budget.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ const X11_BACKDROP_MAX_FRAMES: usize = 32;
+ /// A frame's whole root read (one round trip, all tiles) must fit well inside
+ /// the 16 ms frame budget.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ const X11_BACKDROP_READ_BUDGET: Duration = Duration::from_millis(8);
+ /// Consecutive over-budget frames that latch software compositing off.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ const X11_BACKDROP_SLOW_READ_LIMIT: u8 = 3;
+ /// Consecutive frames the overlay may hold still waiting for a usable backdrop
+ /// before compositing is latched off for the session. Three frames is ~50 ms of
+ /// frozen cursor, which is cheaper than either painting a tile we cannot
+ /// account for or losing translucency to a single transient X11 error.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ const X11_BACKDROP_UNBACKED_FRAME_LIMIT: u8 = 3;
+ 
+ /// Software compositing is compositor-less only, and only until a slow server
+ /// latches it off. Split out so the hard constraint — a compositing manager
+ /// changes nothing about this path — is locked by a test.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn backdrop_compositing_enabled(compositor_present: bool, cache: &X11BackdropCache) -> bool {
+     !compositor_present && cache.enabled()
+ }
+ 
+ /// Intersect a root-space rect with a tile, returning tile-local
+ /// `(x0, y0, x1, y1)` half-open bounds, or `None` when they do not overlap.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn clip_to_tile(
+     bounds: X11TileBounds,
+     x: i32,
+@@ -1751,7 +1751,7 @@ fn clip_to_tile(
+ }
+ 
+ /// Tile-local half-open bounding box of a shape, or `None` when it is empty.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn shape_bounding_box(
+     shape: &[x11rb::protocol::xproto::Rectangle],
+ ) -> Option<(usize, usize, usize, usize)> {
+@@ -1775,7 +1775,7 @@ fn shape_bounding_box(
+ /// Copy the `(x0, y0, x1, y1)` sub-rect out of a tile-sized BGRX buffer. Only
+ /// the painted bounding box is ever consulted later, so save-unders store that
+ /// instead of the whole tile.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn crop_tile_pixels(
+     pixels: &[u8],
+     tile_width: usize,
+@@ -1789,7 +1789,7 @@ fn crop_tile_pixels(
+     out
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ impl X11BackdropCache {
+     fn enabled(&self) -> bool {
+         !self.disabled
+@@ -2060,7 +2060,7 @@ impl X11BackdropCache {
+     }
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn cursor_tile_bounds(
+     core: &RenderStateCore,
+     screen_width: u32,
+@@ -2098,7 +2098,7 @@ fn cursor_tile_bounds(
+     })
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn render_x11_tiles(map: &RenderMap) -> Vec<X11PaintTile> {
+     let mut bounds = Vec::new();
+     for rs in map.cursors.values() {
+@@ -2137,7 +2137,7 @@ fn render_x11_tiles(map: &RenderMap) -> Vec<X11PaintTile> {
+ /// XPutImage (ZPixmap). The pixmaps are premultiplied RGBA; X11 ARGB is
+ /// premultiplied BGRA. XShape hides pixels from previous tile positions, so
+ /// no full-root clear/upload is required when a cursor moves.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ const NONCOMPOSITED_ALPHA_CUTOFF: u8 = 128;
+ 
+ /// Read the true desktop pixels under every tile of one frame.
+@@ -2152,7 +2152,7 @@ const NONCOMPOSITED_ALPHA_CUTOFF: u8 = 128;
+ /// and not others would upload two different pixel policies into one bounding
+ /// shape, so the frame is deferred (or, eventually, compositing is latched off)
+ /// as a unit.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn read_root_backdrops(
+     conn: &impl x11rb::connection::Connection,
+     root: u32,
+@@ -2224,7 +2224,7 @@ fn read_root_backdrops(
+ /// map and upload on this connection, so no separate sync is needed. Errors
+ /// report as unreliable: a server that cannot service this exchange cannot
+ /// service the per-frame paint either.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn x11_visual_readback_reliable(
+     conn: &impl x11rb::connection::Connection,
+     root: u32,
+@@ -2346,7 +2346,7 @@ fn x11_visual_readback_reliable(
+ 
+ /// A composited tile: its bounds, the opaque pixels to upload, the tile-local
+ /// visible shape, and the backdrop they were blended over.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ type X11CompositedTile = (
+     X11TileBounds,
+     Vec<u8>,
+@@ -2355,7 +2355,7 @@ type X11CompositedTile = (
+ );
+ 
+ /// Compose every tile of a frame, or none of it.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn composite_x11_tiles(
+     now: Instant,
+     tiles: &[X11PaintTile],
+@@ -2375,7 +2375,7 @@ fn composite_x11_tiles(
+ 
+ /// Hide every overlay pixel. Used while a resync waits for the windows we
+ /// uncovered to repaint: the wait is only useful if we are not painting.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn blank_x11_overlay_shape(
+     conn: &impl x11rb::connection::Connection,
+     win: u32,
+@@ -2404,14 +2404,14 @@ fn blank_x11_overlay_shape(
+ /// overlay deliberately left the previous frame on screen because it could not
+ /// account for the pixels this one would cover; the caller must retry on the
+ /// next frame tick rather than treating the state as settled.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+ enum X11PaintOutcome {
+     Painted,
+     Deferred,
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn paint_x11_tiles(
+     conn: &impl x11rb::connection::Connection,
+     target: &X11PaintTarget,
+@@ -2578,7 +2578,7 @@ fn paint_x11_tiles(
+ /// `backdrop` is a tile-sized row-major BGRX buffer as XGetImage returns it for
+ /// the root. Returns `None` when it does not match the tile so callers fail
+ /// closed onto the alpha-cutoff path rather than uploading a guess.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn composited_bgra_and_visible_shape(
+     pm: &tiny_skia::Pixmap,
+     backdrop: &[u8],
+@@ -2639,7 +2639,7 @@ fn composited_bgra_and_visible_shape(
+     Some((bgra, rectangles))
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn bgra_and_visible_shape(
+     pm: &tiny_skia::Pixmap,
+     compositor_present: bool,
+@@ -2706,7 +2706,7 @@ fn bgra_and_visible_shape(
+     (bgra, rectangles)
+ }
+ 
+-#[cfg(all(test, target_os = "linux"))]
++#[cfg(all(test, any(target_os = "linux", target_os = "android")))]
+ mod tests {
+     use super::*;
+ 
+@@ -4672,5 +4672,5 @@ mod tests {
+     }
+ }
+ 
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ fn run_overlay_thread(_cfg: CursorConfig, _rx: std::sync::mpsc::Receiver<OverlayMsg>) {}
+diff --git a/libs/cua-driver/rust/crates/platform-linux/src/recording_hooks.rs b/libs/cua-driver/rust/crates/platform-linux/src/recording_hooks.rs
+index 30d62d9..0a0a10c 100644
+--- a/libs/cua-driver/rust/crates/platform-linux/src/recording_hooks.rs
++++ b/libs/cua-driver/rust/crates/platform-linux/src/recording_hooks.rs
+@@ -1,6 +1,6 @@
+ //! Application-state snapshots used by trajectory recording on Linux.
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub fn app_state_json_for(window_id: Option<u64>, pid: Option<i64>) -> Option<Vec<u8>> {
+     if tokio::runtime::Handle::try_current().is_ok() {
+         return std::thread::spawn(move || app_state_json_for_blocking(window_id, pid))
+@@ -11,7 +11,7 @@ pub fn app_state_json_for(window_id: Option<u64>, pid: Option<i64>) -> Option<Ve
+     app_state_json_for_blocking(window_id, pid)
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn app_state_json_for_blocking(window_id: Option<u64>, pid: Option<i64>) -> Option<Vec<u8>> {
+     let pid = u32::try_from(pid?).ok()?;
+     let window_id = if crate::wayland::is_inject_mode() {
+@@ -50,7 +50,7 @@ fn app_state_json_for_blocking(window_id: Option<u64>, pid: Option<i64>) -> Opti
+     serde_json::to_vec_pretty(&payload).ok()
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub fn screenshot_for_recording(window_id: Option<u64>, pid: Option<i64>) -> Option<Vec<u8>> {
+     if crate::wayland::is_inject_mode() {
+         // A full-output frame is the strongest evidence for the nested
+@@ -71,7 +71,7 @@ pub fn screenshot_for_recording(window_id: Option<u64>, pid: Option<i64>) -> Opt
+     }
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub fn element_window_local_xy(window_id: u64, pid: i64, element_index: u32) -> Option<(f64, f64)> {
+     if tokio::runtime::Handle::try_current().is_ok() {
+         return std::thread::spawn(move || {
+@@ -84,7 +84,7 @@ pub fn element_window_local_xy(window_id: u64, pid: i64, element_index: u32) ->
+     element_window_local_xy_blocking(window_id, pid, element_index)
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn element_window_local_xy_blocking(
+     window_id: u64,
+     pid: i64,
+@@ -100,7 +100,7 @@ fn element_window_local_xy_blocking(
+     ))
+ }
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ fn resolve_window_for_recording(
+     pid: u32,
+     window_id: Option<u64>,
+@@ -118,17 +118,17 @@ fn resolve_window_for_recording(
+     }
+ }
+ 
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ pub fn app_state_json_for(_window_id: Option<u64>, _pid: Option<i64>) -> Option<Vec<u8>> {
+     None
+ }
+ 
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ pub fn screenshot_for_recording(_window_id: Option<u64>, _pid: Option<i64>) -> Option<Vec<u8>> {
+     None
+ }
+ 
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ pub fn element_window_local_xy(
+     _window_id: u64,
+     _pid: i64,
+diff --git a/libs/cua-driver/rust/crates/platform-linux/src/terminal.rs b/libs/cua-driver/rust/crates/platform-linux/src/terminal.rs
+index fe43e5b..d4f15dd 100644
+--- a/libs/cua-driver/rust/crates/platform-linux/src/terminal.rs
++++ b/libs/cua-driver/rust/crates/platform-linux/src/terminal.rs
+@@ -70,7 +70,7 @@ pub fn wm_class_matches_terminal(instance: &str, class: &str) -> bool {
+ /// both fields so the substring match still works for terminals like
+ /// Ghostty / kitty / alacritty. Returns `false` when no connection is
+ /// available or the property is unset.
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub fn is_terminal_window(xid: u64) -> bool {
+     match crate::wayland::wm_class_dispatch(xid) {
+         Some((instance, class)) => wm_class_matches_terminal(&instance, &class),
+@@ -81,7 +81,7 @@ pub fn is_terminal_window(xid: u64) -> bool {
+ /// Non-Linux build: the WM_CLASS-based detector is a no-op (there are
+ /// no X11 windows). Lets the function be referenced unconditionally
+ /// without per-call `#[cfg]` guards at the call site.
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ pub fn is_terminal_window(_xid: u64) -> bool {
+     false
+ }
+diff --git a/libs/cua-driver/rust/crates/platform-linux/src/tools/mod.rs b/libs/cua-driver/rust/crates/platform-linux/src/tools/mod.rs
+index a7f298f..fe9165c 100644
+--- a/libs/cua-driver/rust/crates/platform-linux/src/tools/mod.rs
++++ b/libs/cua-driver/rust/crates/platform-linux/src/tools/mod.rs
+@@ -5,12 +5,12 @@
+ 
+ use cua_driver_core::tool::ToolRegistry;
+ 
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ mod impl_;
+-#[cfg(target_os = "linux")]
++#[cfg(any(target_os = "linux", target_os = "android"))]
+ pub(crate) mod page;
+ 
+-#[cfg(not(target_os = "linux"))]
++#[cfg(not(any(target_os = "linux", target_os = "android")))]
+ mod stubs;
+ 
+ pub fn build_registry(compat: bool) -> ToolRegistry {
+@@ -21,10 +21,10 @@ pub fn build_registry_with_provider(
+     compat: bool,
+     provider: Option<std::sync::Arc<dyn cua_driver_core::consent::ProtectedConsentProvider>>,
+ ) -> ToolRegistry {
+-    #[cfg(target_os = "linux")]
++    #[cfg(any(target_os = "linux", target_os = "android"))]
+     return impl_::build_registry_with_provider(compat, provider);
+ 
+-    #[cfg(not(target_os = "linux"))]
++    #[cfg(not(any(target_os = "linux", target_os = "android")))]
+     {
+         let _ = compat;
+         let _ = provider;
+diff --git a/libs/cua-driver/rust/crates/platform-linux/src/tty.rs b/libs/cua-driver/rust/crates/platform-linux/src/tty.rs
+index 159a4c5..d168608 100644
+--- a/libs/cua-driver/rust/crates/platform-linux/src/tty.rs
++++ b/libs/cua-driver/rust/crates/platform-linux/src/tty.rs
+@@ -33,9 +33,18 @@ fn pidfd_getfd(pidfd: &OwnedFd, remote_fd: i32) -> Option<OwnedFd> {
+ /// pts index of a pty *master* fd, or `None` if `fd` is not a master.
+ fn pts_number(fd: i32) -> Option<u32> {
+     let mut n: libc::c_uint = 0;
++    // Bionic defines TIOCGPTN as _IOR('T', 0x30, unsigned int), but the locked
++    // Rust libc 0.2.186 does not export it on Android. Its ioctl request is int.
++    // Source: aosp-mirror/platform_bionic@731631f300090436d7f5df80d50b6275c8c60a93
++    // libc/kernel/uapi/asm-generic/ioctls.h and libc/include/bits/ioctl.h.
++    // The native aarch64 probe checks the installed header and an owned PTY.
++    #[cfg(target_os = "android")]
++    let request = 0x8004_5430_u32 as libc::c_int;
++    #[cfg(not(target_os = "android"))]
++    let request = libc::TIOCGPTN;
+     // SAFETY: TIOCGPTN writes a c_uint through the pointer; it fails with
+     // ENOTTY on anything that isn't a pty master, which we treat as "no match".
+-    let ret = unsafe { libc::ioctl(fd, libc::TIOCGPTN, &mut n as *mut libc::c_uint) };
++    let ret = unsafe { libc::ioctl(fd, request, &mut n as *mut libc::c_uint) };
+     (ret == 0).then_some(n as u32)
+ }
+ 
+diff --git a/libs/cua-driver/rust/crates/platform-linux/src/wayland/mod.rs b/libs/cua-driver/rust/crates/platform-linux/src/wayland/mod.rs
+index 3432293..dc7c204 100644
+--- a/libs/cua-driver/rust/crates/platform-linux/src/wayland/mod.rs
++++ b/libs/cua-driver/rust/crates/platform-linux/src/wayland/mod.rs
+@@ -836,6 +836,24 @@ fn capture_via_screencopy() -> anyhow::Result<Vec<u8>> {
+     result
+ }
+ 
++// Bionic exports memfd_create only from Android API 30. Termux's API 24
++// target uses the same Linux syscall through libc::syscall, which preserves
++// -1/errno for denied or unavailable calls. No fallback changes ownership.
++// Source: aosp-mirror/platform_bionic@731631f300090436d7f5df80d50b6275c8c60a93
++// libc/include/sys/mman.h. The native probe checks fd flags, mapping and errno.
++//
++// SAFETY: name must point to a valid NUL-terminated C string.
++unsafe fn create_memfd(name: *const libc::c_char, flags: libc::c_uint) -> libc::c_int {
++    #[cfg(target_os = "android")]
++    {
++        unsafe { libc::syscall(libc::SYS_memfd_create, name, flags) as libc::c_int }
++    }
++    #[cfg(not(target_os = "android"))]
++    {
++        unsafe { libc::memfd_create(name, flags) }
++    }
++}
++
+ /// Allocate an anonymous shared-memory file of `size` bytes and mmap it RW.
+ /// Returns the raw fd and the mmap pointer; the caller is responsible for
+ /// passing both to [`cleanup_mmap`] when done.
+@@ -843,7 +861,7 @@ pub(crate) fn anon_shm(size: usize) -> anyhow::Result<(i32, *mut libc::c_void)>
+     // memfd_create is Linux-only and is the cleanest path; fall back to
+     // shm_open if memfd isn't available for any reason.
+     let name = b"cua-scrcopy\0";
+-    let fd = unsafe { libc::memfd_create(name.as_ptr() as *const libc::c_char, libc::MFD_CLOEXEC) };
++    let fd = unsafe { create_memfd(name.as_ptr() as *const libc::c_char, libc::MFD_CLOEXEC) };
+     if fd < 0 {
+         return Err(anyhow::anyhow!(
+             "memfd_create failed: {}",
+diff --git a/libs/cua-driver/rust/crates/platform-linux/src/wayland/virtual_keyboard.rs b/libs/cua-driver/rust/crates/platform-linux/src/wayland/virtual_keyboard.rs
+index 5a57436..aae3c11 100644
+--- a/libs/cua-driver/rust/crates/platform-linux/src/wayland/virtual_keyboard.rs
++++ b/libs/cua-driver/rust/crates/platform-linux/src/wayland/virtual_keyboard.rs
+@@ -163,7 +163,7 @@ fn send_key(
+ 
+ fn keymap_file() -> anyhow::Result<File> {
+     let name = CString::new("cua-driver-keymap")?;
+-    let fd = unsafe { libc::memfd_create(name.as_ptr(), libc::MFD_CLOEXEC) };
++    let fd = unsafe { super::create_memfd(name.as_ptr(), libc::MFD_CLOEXEC) };
+     if fd < 0 {
+         return Err(std::io::Error::last_os_error().into());
+     }

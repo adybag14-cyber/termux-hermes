@@ -1,0 +1,147 @@
+{
+  "child_command": {
+    "command": [
+      "/data/data/com.termux/files/usr/tmp/tokenizers-runtime-m_mhfro2/runtime/bin/python",
+      "-I",
+      "-B",
+      "/probes/scripts/compatibility_probe_neutts_tokenizers_runtime.py",
+      "--phase",
+      "runtime",
+      "--inputs",
+      "/out/tokenizers-inputs",
+      "--out",
+      "/out/tokenizers-component",
+      "--apt-archives",
+      "/data/data/com.termux/files/usr/tmp/tokenizers-runtime-m_mhfro2/apt-archives",
+      "--environment-manifest",
+      "/out/tokenizers-component/tokenizers-installed-closure.json",
+      "--image-receipt",
+      "/out/TOKENIZERS-PROBE-INPUTS.json"
+    ],
+    "exit_code": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "edge_count": 29,
+  "engine_installed": false,
+  "extra_apt": {
+    "compiler_installed": false,
+    "install": {
+      "command": [
+        "/data/data/com.termux/files/usr/bin/apt-get",
+        "-y",
+        "-o",
+        "Dir::Cache::archives=/data/data/com.termux/files/usr/tmp/tokenizers-runtime-m_mhfro2/apt-archives",
+        "-o",
+        "Dpkg::Options::=--force-confnew",
+        "--no-download",
+        "--no-remove",
+        "--no-install-recommends",
+        "--reinstall",
+        "install",
+        "libyaml=0.2.5-5"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "22b6b89c86026abda454402c1f3b953630c398962e46e2e422d52337293bf6ac"
+    },
+    "installed_packages": {
+      "libyaml": {
+        "architecture": "aarch64",
+        "status": "installed",
+        "version": "0.2.5-5"
+      }
+    },
+    "plan": {
+      "command": [
+        "/data/data/com.termux/files/usr/bin/apt-get",
+        "-s",
+        "-o",
+        "Dir::Cache::archives=/data/data/com.termux/files/usr/tmp/tokenizers-runtime-m_mhfro2/apt-archives",
+        "-o",
+        "Dpkg::Options::=--force-confnew",
+        "--no-download",
+        "--no-remove",
+        "--no-install-recommends",
+        "--reinstall",
+        "install",
+        "libyaml=0.2.5-5"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "808f2ae5d3ba605f0ecc54342176ebc184e142b28fdad8ad21033ed527a7c8d5"
+    },
+    "status": "passed"
+  },
+  "foundation": {
+    "apt_validation_sha256": "307dfc59201efc5154466765fee154a99ca75551a92dfa9f2ce5d4b119d413eb",
+    "case_count": 7,
+    "path": "/out/NEUTTS-CORE-RESULT.json",
+    "raw_pip_exit_code": 1,
+    "sha256": "82bc4e7c2ec9c11aa89f37fc776bce42e552299dbbd94d655fc9f3049f060709",
+    "status": "passed"
+  },
+  "foundation_after": {
+    "apt_validation_sha256": "307dfc59201efc5154466765fee154a99ca75551a92dfa9f2ce5d4b119d413eb",
+    "case_count": 7,
+    "path": "/out/NEUTTS-CORE-RESULT.json",
+    "raw_pip_exit_code": 1,
+    "sha256": "82bc4e7c2ec9c11aa89f37fc776bce42e552299dbbd94d655fc9f3049f060709",
+    "status": "passed"
+  },
+  "model_downloaded": false,
+  "network": {
+    "container_id": "ede578a7c2808662c81e30e2f7a2ccc1798077d0c995f72731613093c822683d",
+    "external_network_available": false,
+    "host_receipt_sha256": "0b9c80aabf1790a0fc0fb3bbecab94f18b0a5215a9bcb60ec3fbee1b482aa3e3",
+    "inspect_sha256": "28f4697559482ae025dbee7ce37cbf87d45a600a3eca70abcd3545e1577b06f6",
+    "interfaces": [
+      [
+        1,
+        "lo"
+      ]
+    ],
+    "route_sha256": "9bfb5e4beb5b2844bc6a69d6d480a47995940f888d810efdb2afbf2e8cc5292e",
+    "status": "verified-disconnected"
+  },
+  "node_count": 25,
+  "production_admission_changed": false,
+  "raw_pip": {
+    "authority": "copied file manifests and exact APT provenance are separate required gates",
+    "elapsed_seconds": 0.554,
+    "exit_code": 0,
+    "log": "RAW-PIP-CHECK.log",
+    "original_apt_tag_diagnostics": [],
+    "pip_check_passed": true,
+    "requirements_have_no_missing_or_conflicting_dependencies": true,
+    "sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09",
+    "text": "No broken requirements found.\n"
+  },
+  "release_output": false,
+  "runtime": {
+    "api_level": 24,
+    "base_prefix": "/data/data/com.termux/files/usr",
+    "executable": {
+      "bytes": 4448,
+      "class": 64,
+      "endianness": "little",
+      "machine": 183,
+      "path": "/data/data/com.termux/files/usr/bin/python3.14",
+      "sha256": "4f8d78ede7fc26e96e99342dd83ce42d32c9b4d0806bc9a99ff7151396269b25"
+    },
+    "machine": "aarch64",
+    "prefix": "/data/data/com.termux/files/usr",
+    "python": "3.14.6 (main, Jul  5 2026, 10:35:55) [Clang 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 5e96669f0",
+    "sys_platform": "android",
+    "uid": 1000
+  },
+  "runtime_receipt_sha256": "8cf9ca8d11ff0d16c818434299dd51872f497264703670eb46b6b497bfdd4980",
+  "schema_version": 1,
+  "source_image": {
+    "docker_image_id": "sha256:5226204b4f02255155374bdd74ff0aafca66cc66224fa7c780c2db1cc13def25",
+    "input_sha256": "214bcf94ce5b82fd35d7345849bac9a091902d10bf192e7d6dd1e3fd72d29b62",
+    "native_image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
+    "status": "passed"
+  },
+  "status": "passed"
+}

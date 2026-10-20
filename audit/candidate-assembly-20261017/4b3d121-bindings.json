@@ -1,0 +1,389 @@
+{
+  "schema": 1,
+  "repository": "adybag14-cyber/termux-hermes",
+  "run": {
+    "id": 39042809560,
+    "head_sha": "4b3d1214ea24688fdf538190fcba14d08b837d16",
+    "event": "pull_request",
+    "status": "completed",
+    "conclusion": "failure",
+    "run_attempt": 1,
+    "html_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39042809560",
+    "created_at": "2026-10-17T14:55:28Z",
+    "updated_at": "2026-10-17T16:01:34Z"
+  },
+  "job": {
+    "id": 117428157042,
+    "name": "build",
+    "status": "completed",
+    "conclusion": "failure",
+    "started_at": "2026-10-17T15:08:15Z",
+    "completed_at": "2026-10-17T16:01:34Z",
+    "html_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39042809560/job/117428157042"
+  },
+  "checkout": {
+    "actual_tested_commit": "b66d4a89c7bdddaf1821dea697c8c977e9d923ea",
+    "evidence_file": "4b3d121-assembly-excerpt.log",
+    "source": "raw checkout git log -1 --format=%H in the completed job log",
+    "pr_head_commit": "4b3d1214ea24688fdf538190fcba14d08b837d16",
+    "kind": "pull-request-merge",
+    "upstream_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+    "merge_parents": [
+      "91e096aec63aafd55700675e07148285522dcc70",
+      "4b3d1214ea24688fdf538190fcba14d08b837d16"
+    ]
+  },
+  "source_files_at_actual_checkout": {
+    ".github/workflows/next-stable-candidate.yml": {
+      "sha256": "7f1b6217bbc32e8d00b1ae1c650b779e4799cb32af61ebc95739e7de3f145207",
+      "bytes": 9849,
+      "repository_path": ".github/workflows/next-stable-candidate.yml",
+      "commit": "b66d4a89c7bdddaf1821dea697c8c977e9d923ea"
+    },
+    "patches/next-stable/compatibility.patch": {
+      "sha256": "add3afb05e2aaa4066b7e2e9eaaa7e5c9fd84a2b6bf954cede1b6564e380374e",
+      "bytes": 273015,
+      "repository_path": "patches/next-stable/compatibility.patch",
+      "commit": "b66d4a89c7bdddaf1821dea697c8c977e9d923ea"
+    },
+    "scripts/check_next_stable_candidate.sh": {
+      "sha256": "33fe5abcf2f90fe3a46f912312d270621097667bf5628e4610cc6afddb487dfb",
+      "bytes": 3194,
+      "repository_path": "scripts/check_next_stable_candidate.sh",
+      "commit": "b66d4a89c7bdddaf1821dea697c8c977e9d923ea"
+    },
+    "scripts/check_next_stable_lifecycle.py": {
+      "sha256": "659733d6963f3591d91915e890145172ba33dfbf291505eaa2b2ad62abd7bb67",
+      "bytes": 4911,
+      "repository_path": "scripts/check_next_stable_lifecycle.py",
+      "commit": "b66d4a89c7bdddaf1821dea697c8c977e9d923ea"
+    }
+  },
+  "log": {
+    "source_api_url": "https://api.github.com/repos/adybag14-cyber/termux-hermes/actions/jobs/117428157042/logs",
+    "full_log_bytes": 188870,
+    "full_log_sha256": "d759e9273b2a683f4164ff747c0128d72ca886c69265c870c808856b6241273a",
+    "full_log_storage": "external GitHub job log; not committed",
+    "excerpt_file": "4b3d121-assembly-excerpt.log",
+    "excerpt_bytes": 3336,
+    "excerpt_sha256": "40542dd2fc79c1c1072be8d7bf97e07c739770fdeb9fc4e82ee91fe004befd82",
+    "selection": "Exact original byte lines in original order; timestamp-only or other trailing-whitespace lines were omitted, never trimmed.",
+    "requested_original_line_ranges": [
+      [
+        130,
+        131
+      ],
+      [
+        281,
+        282
+      ],
+      [
+        2250,
+        2258
+      ],
+      [
+        2282,
+        2282
+      ],
+      [
+        2318,
+        2346
+      ]
+    ],
+    "retained_original_line_numbers": [
+      130,
+      131,
+      281,
+      282,
+      2250,
+      2251,
+      2252,
+      2254,
+      2256,
+      2258,
+      2282,
+      2318,
+      2319,
+      2320,
+      2321,
+      2322,
+      2324,
+      2325,
+      2327,
+      2328,
+      2329,
+      2330,
+      2331,
+      2332,
+      2333,
+      2334,
+      2335,
+      2336,
+      2337,
+      2338,
+      2339,
+      2340,
+      2341,
+      2342,
+      2343,
+      2344,
+      2345,
+      2346
+    ],
+    "omitted_original_line_numbers": [
+      2253,
+      2255,
+      2257,
+      2323,
+      2326
+    ]
+  },
+  "steps": [
+    {
+      "number": 1,
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T15:08:16Z",
+      "completed_at": "2026-10-17T15:08:17Z"
+    },
+    {
+      "number": 2,
+      "name": "Checkout Termux packaging repository",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T15:08:17Z",
+      "completed_at": "2026-10-17T15:08:18Z"
+    },
+    {
+      "number": 3,
+      "name": "Read the reviewed release pins",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T15:08:18Z",
+      "completed_at": "2026-10-17T15:08:18Z"
+    },
+    {
+      "number": 4,
+      "name": "Checkout exact upstream release source",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T15:08:18Z",
+      "completed_at": "2026-10-17T15:08:22Z"
+    },
+    {
+      "number": 5,
+      "name": "Verify immutable source and apply reviewed build adaptations",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T15:08:22Z",
+      "completed_at": "2026-10-17T15:08:34Z"
+    },
+    {
+      "number": 6,
+      "name": "Set up the upstream locked host toolchain",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T15:08:34Z",
+      "completed_at": "2026-10-17T15:08:48Z"
+    },
+    {
+      "number": 7,
+      "name": "Restore verified binary inputs",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T15:08:48Z",
+      "completed_at": "2026-10-17T15:08:48Z"
+    },
+    {
+      "number": 8,
+      "name": "Stage the complete pinned Termux runtime",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T15:08:48Z",
+      "completed_at": "2026-10-17T15:11:27Z"
+    },
+    {
+      "number": 9,
+      "name": "Save verified binary inputs",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T15:11:27Z",
+      "completed_at": "2026-10-17T15:11:30Z"
+    },
+    {
+      "number": 10,
+      "name": "Restore the native wheelhouse",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T15:11:30Z",
+      "completed_at": "2026-10-17T15:11:30Z"
+    },
+    {
+      "number": 11,
+      "name": "Build all Termux profile dependencies with the bundled Python",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T15:11:30Z",
+      "completed_at": "2026-10-17T16:01:09Z"
+    },
+    {
+      "number": 12,
+      "name": "Save the verified native wheelhouse",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T16:01:09Z",
+      "completed_at": "2026-10-17T16:01:11Z"
+    },
+    {
+      "number": 13,
+      "name": "Build the terminal UI and validate the installed bundle offline",
+      "status": "completed",
+      "conclusion": "failure",
+      "started_at": "2026-10-17T16:01:11Z",
+      "completed_at": "2026-10-17T16:01:29Z"
+    },
+    {
+      "number": 14,
+      "name": "Validate published-package upgrade and optional install with an empty cache",
+      "status": "completed",
+      "conclusion": "skipped",
+      "started_at": "2026-10-17T16:01:29Z",
+      "completed_at": "2026-10-17T16:01:29Z"
+    },
+    {
+      "number": 15,
+      "name": "Record the candidate identity without changing release pins",
+      "status": "completed",
+      "conclusion": "skipped",
+      "started_at": "2026-10-17T16:01:29Z",
+      "completed_at": "2026-10-17T16:01:29Z"
+    },
+    {
+      "number": 16,
+      "name": "Preserve the candidate package and completed lifecycle evidence",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T16:01:29Z",
+      "completed_at": "2026-10-17T16:01:29Z"
+    },
+    {
+      "number": 17,
+      "name": "Retain native build diagnostics",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T16:01:29Z",
+      "completed_at": "2026-10-17T16:01:30Z"
+    },
+    {
+      "number": 32,
+      "name": "Post Set up the upstream locked host toolchain",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T16:01:30Z",
+      "completed_at": "2026-10-17T16:01:30Z"
+    },
+    {
+      "number": 33,
+      "name": "Post Checkout exact upstream release source",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T16:01:30Z",
+      "completed_at": "2026-10-17T16:01:31Z"
+    },
+    {
+      "number": 34,
+      "name": "Post Checkout Termux packaging repository",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T16:01:31Z",
+      "completed_at": "2026-10-17T16:01:31Z"
+    },
+    {
+      "number": 35,
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-17T16:01:31Z",
+      "completed_at": "2026-10-17T16:01:31Z"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 12106307795,
+      "name": "hermes-next-stable-build-diagnostics",
+      "created_at": "2026-10-17T16:01:30Z",
+      "size_in_bytes": 8695,
+      "digest": "sha256:01fe0e1b720867f08baa5a2c49b5749a6e2b55902bb309a654729b8f4c2bd837",
+      "download_sha256_verified": true,
+      "expired_at_capture": false,
+      "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39042809560/artifacts/12106307795",
+      "api_url": "https://api.github.com/repos/adybag14-cyber/termux-hermes/actions/artifacts/12106307795",
+      "workflow_run": {
+        "id": 39042809560,
+        "repository_id": 1305668154,
+        "head_repository_id": 1305668154,
+        "head_branch": "prepare/termux-compatibility-next-stable",
+        "head_sha": "4b3d1214ea24688fdf538190fcba14d08b837d16"
+      },
+      "members": [
+        {
+          "archive_path": ".work/resolved.txt",
+          "bytes": 10031,
+          "sha256": "6ce6a6cd4752c65c11c8b8e47adf694b4d88447fed52a5806c15971370d7d961",
+          "storage": "external-artifact-only"
+        },
+        {
+          "archive_path": ".work/build_set.txt",
+          "bytes": 196,
+          "sha256": "64bce2a7ec25d2a75143abcd568d2a292f677a89631fe1f3d9c040d7b2d1025e",
+          "storage": "exact-raw-bytes-in-audit",
+          "local_file": "4b3d121-native-build-set.txt"
+        },
+        {
+          "archive_path": "index.json",
+          "bytes": 18254,
+          "sha256": "1232c1467b5601802f050aff2d629ec9f81b63d2870fbb47b825398286647bcf",
+          "storage": "external-artifact-only"
+        }
+      ]
+    },
+    {
+      "id": 12106273121,
+      "name": "hermes-termux-next-stable-candidate",
+      "created_at": "2026-10-17T16:01:29Z",
+      "size_in_bytes": 1146,
+      "digest": "sha256:a9b30a9f3d87b2de8ba142872385f51634e47d7a99362b6f77341410670356ec",
+      "download_sha256_verified": true,
+      "expired_at_capture": false,
+      "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39042809560/artifacts/12106273121",
+      "api_url": "https://api.github.com/repos/adybag14-cyber/termux-hermes/actions/artifacts/12106273121",
+      "workflow_run": {
+        "id": 39042809560,
+        "repository_id": 1305668154,
+        "head_repository_id": 1305668154,
+        "head_branch": "prepare/termux-compatibility-next-stable",
+        "head_sha": "4b3d1214ea24688fdf538190fcba14d08b837d16"
+      },
+      "members": [
+        {
+          "archive_path": "hermes-source/termux-build/payload/.work/venv-selection.json",
+          "bytes": 653,
+          "sha256": "5d7eef31190f9152c3b8005f3c9cc8bb05a69fdb57b883c648edcfe4db2cf1ce",
+          "storage": "exact-raw-bytes-in-audit",
+          "local_file": "4b3d121-venv-selection.json"
+        },
+        {
+          "archive_path": "hermes-source/termux-build/payload/.work/selected-features.txt",
+          "bytes": 43,
+          "sha256": "3df631b3a4714e9bb068d2fcc4da198f6b7248fe145aa878ebde634434510be8",
+          "storage": "exact-raw-bytes-in-audit",
+          "local_file": "4b3d121-selected-features.txt"
+        }
+      ]
+    }
+  ],
+  "classification": "host assembly failure",
+  "failure": "payload_facts.py -> write_catalog -> packaging.utils: ModuleNotFoundError: No module named 'packaging'",
+  "scope_limit": "Native wheel and application/PM environment assembly completed. Debian packaging aborted before producing a .deb; final installed offline validation and upgrade/cold-cache lifecycle gates were not reached."
+}

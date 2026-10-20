@@ -1,0 +1,77 @@
+{
+  "audio_io_tested": false,
+  "change": {
+    "behavior": "Package-level __getattr__ defers only _int8_sdpa_init. An explicit request imports, caches and returns the original callable, retaining identity and lru_cache attributes. Unsupported or broken optional imports retain their actual exceptions.",
+    "da8w4_import_and_registration": "unchanged",
+    "distributed_operator_registration": "unchanged",
+    "member": "torchao/prototype/inductor/fx_passes/__init__.py",
+    "metadata_version_tags_and_dependency_declarations": "byte-identical",
+    "nf4_implementation": "byte-identical",
+    "other_regular_member_bytes_preserved": 346,
+    "patch": {
+      "after_bytes": 506,
+      "after_sha256": "e3b00aac6fb639fe732f29468610e60bf85110982959f974d756ca79cd07f0b5",
+      "before_bytes": 211,
+      "before_sha256": "f9f58d8c905a9de6ebf795a8b3b0c59ae056d12286d59279f908c0ed42456af4",
+      "bytes": 697,
+      "changed_members": [
+        "torchao/prototype/inductor/fx_passes/__init__.py",
+        "torchao-0.12.0.dist-info/RECORD"
+      ],
+      "container_encoding": "ZIP_STORED, original member order and permissions, fixed 1980-01-01 timestamp, explicit Unix creator",
+      "input_filename": "torchao-lazy-sdpa.patch",
+      "member": "torchao/prototype/inductor/fx_passes/__init__.py",
+      "path": "patches/next-stable/torchao-lazy-sdpa.patch",
+      "sha256": "28e786678ce02f007f77e5cc70a3e48faad1c72eea3dc0ec897c4ee0a89e74cc"
+    }
+  },
+  "full_engine_proved": false,
+  "host_checks": {
+    "cases": [
+      "real_package_import",
+      "nf4_default_quantization",
+      "independent_dequantization",
+      "linear_forward",
+      "input_gradient"
+    ],
+    "native_gate_body": "entire original file unchanged except the required preparer SHA-256",
+    "new_artifact_boundary_tests": 4,
+    "new_lazy_import_semantics_tests": 6,
+    "original_tests": 20,
+    "python_ast_bash_syntax_and_scoped_workflow_guards": "passed",
+    "skipped": 0,
+    "source_fixture_scope": "The import-semantics tests load the actual patched initializer in a unique non-Torch temporary package with controlled peer modules. They prove deferral, original callable/cache identity, unchanged exports/da8w4 behavior, and propagation of missing and other errors. They do not substitute modules into or claim the native TorchAO gate.",
+    "test_methods": 30
+  },
+  "model_downloaded": false,
+  "native_fix_proved": false,
+  "next_gate": "Root review, then the same actual installed native package import and five CPU NF4 checks.",
+  "observed_native_failure": {
+    "audit": "audit/neutts-torchao-native-20261017/run-39074259828.json",
+    "error": "ModuleNotFoundError: No module named 'torch._inductor.kernel.flex_attention'",
+    "head_sha": "1fc3dde05aca3786d28d656ced9a807e872bff4f",
+    "run_id": 39074259828,
+    "stage": "Eager optional SDPA compiler import before any CPU NF4 case"
+  },
+  "preparation": {
+    "deterministic_container": "ZIP_STORED with explicit Unix creator, original order/permissions and 1980-01-01 timestamp; avoids compressor and host timestamp drift.",
+    "local_patched_artifact": {
+      "bytes": 5595917,
+      "filename": "torchao-0.12.0-py3-none-any.whl",
+      "sha256": "82bbdfef93ba0423ed84fc8afdafeb4f9f13ed3fa74ab467b3d5aeef0027b442"
+    },
+    "native_input_replay": "Requires retained original wheel, exact patch, patched wheel, lock and receipt; rebuilds and compares exact output bytes before installation.",
+    "original_and_patched_full_zip_crc_record_verified": true,
+    "public_download_url_for_patched_bytes": null,
+    "source": {
+      "bytes": 962232,
+      "filename": "torchao-0.12.0-py3-none-any.whl",
+      "sha256": "103f2a9164d2e4f705332af1aafbb8473eadd14d9164e45857ca187cde1f13d2",
+      "url": "https://files.pythonhosted.org/packages/6c/5f/6bf9b5bed6d31e286516d23e1db7320d2ccfbf1b2234749833ad1e3d25a5/torchao-0.12.0-py3-none-any.whl"
+    }
+  },
+  "production_admission_changed": false,
+  "release_output": false,
+  "reviewed_utc": "2026-10-17T22:37:23.638336+00:00",
+  "schema_version": 1
+}

@@ -1,0 +1,95 @@
+{
+  "exact_wheel": {
+    "bytes": 962232,
+    "filename": "torchao-0.12.0-py3-none-any.whl",
+    "sha256": "103f2a9164d2e4f705332af1aafbb8473eadd14d9164e45857ca187cde1f13d2",
+    "url": "https://files.pythonhosted.org/packages/6c/5f/6bf9b5bed6d31e286516d23e1db7320d2ccfbf1b2234749833ad1e3d25a5/torchao-0.12.0-py3-none-any.whl"
+  },
+  "foundation": {
+    "python": "3.14.6",
+    "required_cases": [
+      "python_dependencies",
+      "torch",
+      "torchaudio",
+      "torchcodec",
+      "scipy",
+      "llvmlite",
+      "soxr"
+    ],
+    "torch": "2.14.1",
+    "unchanged_helper_pins": {
+      "compatibility_probe_neutts.py": "170d2381b6c73863b18727ccda5c03718871df416a73e8e796bf2443c3d9bcbd",
+      "compatibility_probe_neutts_native.py": "862efa59b3c967fd360e1d9ce86d4ebadc5bbf9a4b0a3023f2990a66da130c74",
+      "prepare_neutts_core_python.py": "b78a252eb1c3d1872b64f7ffe5e16bf16c161057b6579732a7af966317e0b19e"
+    },
+    "verification": "Full passed seven-case receipt and all child digests; current selected installed APT Python/metadata bytes; actual current Torch module and native library hashes."
+  },
+  "full_graph_modified": false,
+  "independent_oracles": {
+    "dequantization": "Independent scalar unpacking of saved 4-bit bytes, int8 scalers, quantization factor and mean.",
+    "input_gradient": "Supplied gradient multiplied by independently dequantized weights.",
+    "linear": "Dense CPU linear operation on the independently dequantized ordinary tensor.",
+    "packed_weights": "Scalar float32 nearest-codebook selection and nibble packing."
+  },
+  "isolated_installation": {
+    "apt_package_inventory": "Compared unchanged before and after the component.",
+    "complete_installed_file_count_including_pip_metadata": 351,
+    "installed_record": "Every owned file exactly once; no extra files, import hooks or distributions.",
+    "installer": "Exact base APT pip --python VENV install --no-index --no-deps --no-compile --only-binary=:all:",
+    "original_installed_file_bytes_verified": 347,
+    "venv": "Fresh PREFIX/tmp venv --system-site-packages --without-pip",
+    "wheel_count_added": 1
+  },
+  "library_scope": "All mapped ELF hashes are recorded. Exact foundation Torch library hashes are required; additional Python/system library hashes remain observations.",
+  "limits": {
+    "container_memory_gb": 6,
+    "native_child_seconds": 180,
+    "native_compiler_requested": false
+  },
+  "native_run_required": true,
+  "not_proved_by_host_checks": [
+    "Actual native package import",
+    "Actual NF4 quantization or linear operation",
+    "Torchtune import",
+    "Complete 117-node NeuTTS dependency graph",
+    "Model inference",
+    "CUDA kernels",
+    "Audio I/O",
+    "Device certification"
+  ],
+  "production_admission_changed": false,
+  "purpose": "Unpublished standalone TorchAO CPU NF4 component gate; not full NeuTTS or Torchtune admission",
+  "required_native_cases": [
+    "real_package_import",
+    "nf4_default_quantization",
+    "independent_dequantization",
+    "linear_forward",
+    "input_gradient"
+  ],
+  "schema_version": 1,
+  "source_observations": {
+    "base_metadata_requirements": 0,
+    "binary_extension": "No native payload in this wheel. Optional extension loading in upstream __init__ is allowed to report its own absence.",
+    "nf4_default_dimensions": "128x128 float32 CPU values, 256 blocks of64 and one scaler block of256.",
+    "optional_dev_requirements": 24,
+    "potential_native_import_boundary": "NF4 module registers c10d operators unconditionally; observe the installed package before any proposed patch.",
+    "requires_python_header_present": false,
+    "top_level_package_import": "Real torchao import plus its actual public NF4 exports; no source-only execution"
+  },
+  "workflow": {
+    "manual_dispatch": true,
+    "permissions": {
+      "contents": "read"
+    },
+    "push_branch": "prepare/termux-compatibility-next-stable",
+    "push_paths": [
+      "scripts/prepare_neutts_torchao.py",
+      "scripts/compatibility_probe_neutts_torchao.py",
+      "scripts/neutts_torchao_component_lock.json",
+      "scripts/compatibility_probe_neutts_torchao.sh",
+      ".github/workflows/neutts-torchao-component.yml"
+    ],
+    "release_output": false,
+    "runner": "ubuntu-24.04-arm"
+  }
+}

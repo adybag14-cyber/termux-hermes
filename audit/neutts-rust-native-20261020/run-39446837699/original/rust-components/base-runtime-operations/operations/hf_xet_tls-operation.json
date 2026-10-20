@@ -1,0 +1,187 @@
+{
+  "cases": [
+    {
+      "actual_hf_xet": {
+        "accepted": true,
+        "expected_case": "trusted",
+        "native_origin": {
+          "bytes": 11766160,
+          "path": "/data/data/com.termux/files/usr/tmp/neutts-rust-ocmnl3az/base-runtime/lib/python3.14/site-packages/hf_xet/hf_xet.abi3.so",
+          "sha256": "270fc926fb5d2c2032891a2c63352ae04574cdd83a525b93ec9e7b2226831761"
+        },
+        "schema_version": 1,
+        "stage": "hf-xet-token-refresh",
+        "version": "1.6.0"
+      },
+      "case": "trusted",
+      "child_receipt_sha256": "baa54329cc55dacf5c49767597361a285f8cfba6d976e9282faf972608fb0320",
+      "command": {
+        "command": [
+          "/data/data/com.termux/files/usr/tmp/neutts-rust-ocmnl3az/base-runtime/bin/python",
+          "-I",
+          "-B",
+          "/probes/scripts/neutts_rust_operations.py",
+          "--tls-client",
+          "--url",
+          "https://127.0.0.1:38473/token",
+          "--case",
+          "trusted",
+          "--out",
+          "/out/rust-components/base-runtime-operations/operations/hf-xet-tls-trusted.json"
+        ],
+        "exit_code": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "control_and_hf_listeners_separate": true,
+      "native_python_control": {
+        "accepted": true,
+        "check_hostname": true,
+        "verify_mode": "CERT_REQUIRED"
+      },
+      "server": {
+        "handshakes": 1,
+        "requests": [
+          {
+            "method": "GET",
+            "path": "/token"
+          }
+        ],
+        "tls_failures": []
+      },
+      "status": "passed"
+    },
+    {
+      "actual_hf_xet": {
+        "accepted": false,
+        "error": "Network error: Request middleware error: error sending request for url (https://127.0.0.1:44011/token)",
+        "exception_type": "ConnectionError",
+        "expected_case": "untrusted",
+        "native_origin": {
+          "bytes": 11766160,
+          "path": "/data/data/com.termux/files/usr/tmp/neutts-rust-ocmnl3az/base-runtime/lib/python3.14/site-packages/hf_xet/hf_xet.abi3.so",
+          "sha256": "270fc926fb5d2c2032891a2c63352ae04574cdd83a525b93ec9e7b2226831761"
+        },
+        "schema_version": 1,
+        "stage": "hf-xet-token-refresh",
+        "version": "1.6.0"
+      },
+      "case": "untrusted",
+      "child_receipt_sha256": "58554e98bee12f74ff536f39ed9339a0165c2c0acc614547181afbe9e2ea6d8a",
+      "command": {
+        "command": [
+          "/data/data/com.termux/files/usr/tmp/neutts-rust-ocmnl3az/base-runtime/bin/python",
+          "-I",
+          "-B",
+          "/probes/scripts/neutts_rust_operations.py",
+          "--tls-client",
+          "--url",
+          "https://127.0.0.1:44011/token",
+          "--case",
+          "untrusted",
+          "--out",
+          "/out/rust-components/base-runtime-operations/operations/hf-xet-tls-untrusted.json"
+        ],
+        "exit_code": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "control_and_hf_listeners_separate": true,
+      "native_python_control": {
+        "accepted": false,
+        "verify_code": 20,
+        "verify_message": "unable to get local issuer certificate"
+      },
+      "server": {
+        "handshakes": 0,
+        "requests": [],
+        "tls_failures": [
+          {
+            "error": "[SSL: TLSV1_ALERT_UNKNOWN_CA] tlsv1 alert unknown ca (_ssl.c:1082)",
+            "reason": "TLSV1_ALERT_UNKNOWN_CA"
+          }
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "actual_hf_xet": {
+        "accepted": false,
+        "error": "Network error: Request middleware error: error sending request for url (https://127.0.0.1:44905/token)",
+        "exception_type": "ConnectionError",
+        "expected_case": "wrong-hostname",
+        "native_origin": {
+          "bytes": 11766160,
+          "path": "/data/data/com.termux/files/usr/tmp/neutts-rust-ocmnl3az/base-runtime/lib/python3.14/site-packages/hf_xet/hf_xet.abi3.so",
+          "sha256": "270fc926fb5d2c2032891a2c63352ae04574cdd83a525b93ec9e7b2226831761"
+        },
+        "schema_version": 1,
+        "stage": "hf-xet-token-refresh",
+        "version": "1.6.0"
+      },
+      "case": "wrong-hostname",
+      "child_receipt_sha256": "ec6b728a0ad0f8c80cc8997785129bc559db8144538446a75b444e09cd2a9610",
+      "command": {
+        "command": [
+          "/data/data/com.termux/files/usr/tmp/neutts-rust-ocmnl3az/base-runtime/bin/python",
+          "-I",
+          "-B",
+          "/probes/scripts/neutts_rust_operations.py",
+          "--tls-client",
+          "--url",
+          "https://127.0.0.1:44905/token",
+          "--case",
+          "wrong-hostname",
+          "--out",
+          "/out/rust-components/base-runtime-operations/operations/hf-xet-tls-wrong-hostname.json"
+        ],
+        "exit_code": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "control_and_hf_listeners_separate": true,
+      "native_python_control": {
+        "accepted": false,
+        "verify_code": 64,
+        "verify_message": "IP address mismatch, certificate is not valid for '127.0.0.1'."
+      },
+      "server": {
+        "handshakes": 0,
+        "requests": [],
+        "tls_failures": [
+          {
+            "error": "[SSL: SSLV3_ALERT_BAD_CERTIFICATE] ssl/tls alert bad certificate (_ssl.c:1082)",
+            "reason": "SSLV3_ALERT_BAD_CERTIFICATE"
+          }
+        ]
+      },
+      "status": "passed"
+    }
+  ],
+  "certificates": [
+    {
+      "case": "trusted",
+      "issuer": "trusted-ca",
+      "sha256": "240198ea5ae43a4b12ec633e307d91e1ea1b410c42d3888656cb0a3c5bce3fc8",
+      "subject_alt_ip": "127.0.0.1"
+    },
+    {
+      "case": "untrusted",
+      "issuer": "untrusted-ca",
+      "sha256": "6cc1a20a6f73cd1870879f18d4298be64eb86770cc6607ac8ad6c70da1fbb155",
+      "subject_alt_ip": "127.0.0.1"
+    },
+    {
+      "case": "wrong-hostname",
+      "issuer": "trusted-ca",
+      "sha256": "7cb43f6265cd1ee50b54462b3c8f7c78ee162f1c21b92f5e2844cd4de78955a4",
+      "subject_alt_ip": "127.0.0.2"
+    }
+  ],
+  "production_ca_store_changed": false,
+  "public_api": "XetSession.new_file_download_group(token_refresh_url=...)",
+  "status": "passed",
+  "traffic": "loopback HTTPS token refresh, then local:// CAS with no file transfers",
+  "upstream_route": "xet_pkg/xet_session/common.rs -> build_http_client -> DirectRefreshRouteTokenRefresher",
+  "verification_disabled": false
+}

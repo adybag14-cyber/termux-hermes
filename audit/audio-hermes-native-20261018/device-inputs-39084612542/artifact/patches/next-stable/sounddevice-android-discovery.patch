@@ -1,0 +1,16 @@
+diff --git a/sounddevice.py b/sounddevice.py
+--- a/sounddevice.py
++++ b/sounddevice.py
+@@ -69,7 +69,11 @@
+         if _libname is not None:
+             break
+     else:
+-        raise OSError('PortAudio library not found')
++        if _sys.platform == 'android':
++            # Android's loader searches LD_LIBRARY_PATH without compiler tools.
++            _libname = 'libportaudio.so'
++        else:
++            raise OSError('PortAudio library not found')
+     _lib: ... = _ffi.dlopen(_libname)
+ except OSError:
+     if _platform.system() == 'Darwin':

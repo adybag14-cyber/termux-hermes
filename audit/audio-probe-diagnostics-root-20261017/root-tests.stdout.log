@@ -1,0 +1,82 @@
+.....................................FF................................. [ 57%]
+.....................................................                    [100%]
+================================== FAILURES ===================================
+__________ test_runtime_distribution_and_file_gate_rejects_tampering __________
+
+tmp_path = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-915/test_runtime_distribution_and_0')
+
+    def test_runtime_distribution_and_file_gate_rejects_tampering(tmp_path):
+        payload = tmp_path / "payload"
+        site = payload / "venv/site-packages"
+        site.mkdir(parents=True)
+        wheel = payload / "wheelhouse/demo-1.0-py3-none-any.whl"
+        wheel.parent.mkdir()
+        files = {"demo.py": b"value = 7\n",
+                 "demo-1.0.dist-info/METADATA": b"Metadata-Version: 2.1\nName: demo\nVersion: 1.0\n",
+                 "demo-1.0.dist-info/WHEEL": b"Wheel-Version: 1.0\nTag: py3-none-any\n"}
+        with zipfile.ZipFile(wheel, "w") as archive:
+            for name, data in files.items():
+                archive.writestr(name, data)
+                target = site / name
+                target.parent.mkdir(exist_ok=True, parents=True)
+                target.write_bytes(data)
+        row = {"name": "demo", "version": "1.0", "file": "wheelhouse/" + wheel.name,
+               "size": wheel.stat().st_size, "sha256": prep.sha256(wheel)}
+>       assert prep.verify_installed(site, {"demo": row}, payload)["wheel_owned_files_checked"] == 3
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_audio_hermes_preparation.py:284: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+site = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-915/test_runtime_distribution_and_0/payload/venv/site-packages')
+rows = {'demo': {'file': 'wheelhouse/demo-1.0-py3-none-any.whl', 'name': 'demo', 'sha256': '144541624417c66006cfd010563b5c142c981da67397bcc6e7c578312730087b', 'size': 459, ...}}
+payload = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-915/test_runtime_distribution_and_0/payload')
+
+    def verify_installed(site, rows, payload):
+        """Bind every installed distribution and wheel-owned file to the frozen selection."""
+        from importlib.metadata import distributions
+>       from packaging.utils import canonicalize_name
+E       ModuleNotFoundError: No module named 'packaging'
+
+scripts\prepare_audio_hermes_environment.py:767: ModuleNotFoundError
+____________ test_runtime_gate_rejects_an_unselected_distribution _____________
+
+tmp_path = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-915/test_runtime_gate_rejects_an_u0')
+
+    def test_runtime_gate_rejects_an_unselected_distribution(tmp_path):
+        payload = tmp_path / "payload"
+        site = payload / "site"
+        extra = site / "extra-9.0.dist-info"
+        extra.mkdir(parents=True)
+        (extra / "METADATA").write_text("Metadata-Version: 2.1\nName: extra\nVersion: 9.0\n")
+        with pytest.raises(prep.PreparationError, match="distributions differ"):
+>           prep.verify_installed(site, {}, payload)
+
+tests\test_audio_hermes_preparation.py:297: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+site = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-915/test_runtime_gate_rejects_an_u0/payload/site')
+rows = {}
+payload = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-915/test_runtime_gate_rejects_an_u0/payload')
+
+    def verify_installed(site, rows, payload):
+        """Bind every installed distribution and wheel-owned file to the frozen selection."""
+        from importlib.metadata import distributions
+>       from packaging.utils import canonicalize_name
+E       ModuleNotFoundError: No module named 'packaging'
+
+scripts\prepare_audio_hermes_environment.py:767: ModuleNotFoundError
+============================== warnings summary ===============================
+tests/test_audio_hermes_preparation.py::test_actual_canonical_marker_probe_keeps_markers_without_writing_bytecode
+  tests\test_audio_hermes_preparation.py:493: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    def test_actual_canonical_marker_probe_keeps_markers_without_writing_bytecode(
+
+tests/test_audio_hermes_preparation.py::test_actual_canonical_uv_environment_strips_the_ambient_bytecode_flag
+  tests\test_audio_hermes_preparation.py:738: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    def test_actual_canonical_uv_environment_strips_the_ambient_bytecode_flag(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_audio_hermes_preparation.py::test_runtime_distribution_and_file_gate_rejects_tampering
+FAILED tests/test_audio_hermes_preparation.py::test_runtime_gate_rejects_an_unselected_distribution
+2 failed, 123 passed, 2 warnings in 2.64s

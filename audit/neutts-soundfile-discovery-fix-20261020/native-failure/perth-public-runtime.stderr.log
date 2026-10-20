@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/tmp/neutts-perth.52mcUf/perth-runtime/lib/python3.14/site-packages/soundfile.py", line 179, in <module>
+    raise OSError('no packaged library for this platform')
+OSError: no packaged library for this platform
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_neutts_perth.py", line 695, in runtime_case
+    report["perth"] = perth_operations(args, lock, prep)
+                      ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_perth.py", line 578, in perth_operations
+    import soundfile as sf
+  File "/data/data/com.termux/files/usr/tmp/neutts-perth.52mcUf/perth-runtime/lib/python3.14/site-packages/soundfile.py", line 190, in <module>
+    raise OSError('sndfile library not found using ctypes.util.find_library')
+OSError: sndfile library not found using ctypes.util.find_library

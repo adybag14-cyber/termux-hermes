@@ -1,0 +1,61 @@
+{
+  "checks": [
+    "HF-only fresh environment copy appends linker's push-state/no-as-needed/libpython3/pop-state, leaving original flags and all other build components unchanged.",
+    "Built-wheel ELF guard requires the exact original one-member HF ABI3 layout and libpython3.so DT_NEEDED.",
+    "Pinned forwarding stub and actual interpreter bytes are verified; fresh runtime requires both APT-owned libraries actually mapped.",
+    "Original source locks, Cargo/TLS configuration and declared Python metadata are unchanged.",
+    "Read-only pinned-action small handoff artifact precedes the existing complete evidence artifact; no success status is inferred from upload."
+  ],
+  "findings": [],
+  "native_runtime_executed": false,
+  "original_sources_modified": false,
+  "recorded_at": "2026-10-20T14:28:03.023730+00:00",
+  "reviewed_diff": {
+    "bytes": 10316,
+    "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-tiktoken-preparation-20261020\\final-hf-independent-review\\reviewed-source.diff",
+    "sha256": "f9bae86289b0c9b9c5e054ec27b44f358a68d827d00875f923af7d8639241b10"
+  },
+  "schema_version": 1,
+  "source_files": [
+    {
+      "bytes": 85180,
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\scripts\\compatibility_probe_neutts_rust.py",
+      "sha256": "4be7888378ff598dfc25610368bd7eb261056617e2c338e7ab697aeecd9fa871"
+    },
+    {
+      "bytes": 3435,
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\tests\\test_neutts_hf_python_linkage.py",
+      "sha256": "c31879ac394c97eba7a783dc6ed7d0da9c95fe474c9dd5f7c639cedd9c06183f"
+    },
+    {
+      "bytes": 3970,
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\.github\\workflows\\neutts-rust-components.yml",
+      "sha256": "aa32eecef1553b072c24ca0c27b589c2f226125b470b305138f1559d3b9a8a89"
+    }
+  ],
+  "status": "read-only-peer-review-passed-native-pending",
+  "tests": {
+    "command": [
+      "python",
+      "-B",
+      "-m",
+      "pytest",
+      "tests/test_neutts_hf_python_linkage.py",
+      "tests/test_neutts_rust_preparation.py",
+      "-q"
+    ],
+    "exit_code": 0,
+    "passed": 170,
+    "skipped": 0,
+    "stderr": {
+      "bytes": 0,
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-tiktoken-preparation-20261020\\final-hf-independent-review\\tests.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 264,
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-tiktoken-preparation-20261020\\final-hf-independent-review\\tests.stdout.log",
+      "sha256": "5320c5288972cb98cc85c793a36460a87be20fded0fbd7990ab3f17266229d0c"
+    }
+  }
+}

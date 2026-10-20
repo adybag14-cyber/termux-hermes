@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "recorded_date_utc": "2026-10-18",
+  "reviewer": "/root/cpu_evidence_save",
+  "status": "Independent source review and real saved-map selector replay passed after the reported boundary correction; no remaining blocking finding.",
+  "initial_reviewed_files": [
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\scripts\\compatibility_probe_audio_hermes.py",
+      "bytes": 21365,
+      "sha256": "861246d2ca30cdca75d1cd3824223f7c2bf4b7b9d8056c50e27fecfaaf9ac87f"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\scripts\\run_audio_hermes_preparation.sh",
+      "bytes": 4999,
+      "sha256": "b98108505947c06006a1241a3f7403d606b38a7a14b707eb29a2ce9642488d2d"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\tests\\test_audio_image_runtime.py",
+      "bytes": 8703,
+      "sha256": "a033c1869fa5457aced7f4952bbf202fb2b25eba20e404842e8ba4ae0ab13069"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\audio-image-boundary-20261018\\source-change.diff",
+      "bytes": 10634,
+      "sha256": "3334bd6937649a4102049dd7089391d96831c92302f1cd23f6871ad84338ee5b"
+    }
+  ],
+  "final_reviewed_files": [
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\scripts\\compatibility_probe_audio_hermes.py",
+      "bytes": 21573,
+      "sha256": "3720e56b9fafccf6a32efa01911e6c0ce95b0c6c40017362a96a7258f8af98e2"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\scripts\\run_audio_hermes_preparation.sh",
+      "bytes": 4999,
+      "sha256": "b98108505947c06006a1241a3f7403d606b38a7a14b707eb29a2ce9642488d2d"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\tests\\test_audio_image_runtime.py",
+      "bytes": 9383,
+      "sha256": "a60c136b31c1fb5ee7fc0667f6cb48eead99b4996cfa407cf84f5a3a6d5b6644"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\audio-image-boundary-20261018\\source-change.diff",
+      "bytes": 10848,
+      "sha256": "2d2fbcabae666f53b2ee41dbe034b5f1901d366dcd0101b8f54b87c45159355a"
+    }
+  ],
+  "initial_finding": {
+    "status": "corrected before native dispatch",
+    "cause": "mapped_files() returns all mapped regular files; the first new image-path selector included all AOSP files and therefore would send the mapped linker executable to a verifier accepting only five shared libraries.",
+    "evidence": "All five exact-image APT native /proc maps from run 39082604000 contain /data/data/com.termux/files/usr/opt/aosp/bin/linker64; these are cross-component source-binding fixtures, not claims about an unrecorded audio map.",
+    "correction": "The new image_shared_objects helper selects only names containing .so under the AOSP image root. Unpinned shared objects remain in the selected set and are still rejected.",
+    "only_selector_helper_and_call_changed_since_first_review": true
+  },
+  "independent_checks": {
+    "status": "corrected selector replay and exact five-file pin comparison passed",
+    "source_sha256": "3720e56b9fafccf6a32efa01911e6c0ce95b0c6c40017362a96a7258f8af98e2",
+    "original_image_pins_equal": true,
+    "actual_saved_map_cases": [
+      {
+        "case": "pyarrow",
+        "raw_maps": {
+          "path": "apt-extension-components/pyarrow/proc-self-maps.txt",
+          "bytes": 74255,
+          "sha256": "0f98a6bfd5c3cb8951f167cb0bcdd522c24b2b6287c28238d2adc951b2e8dbc5"
+        },
+        "linker_present_and_excluded": true,
+        "selected_shared_objects": 6,
+        "unreviewed_shared_objects": [
+          "/data/data/com.termux/files/usr/opt/aosp/lib64/libicuuc.so"
+        ],
+        "rejection": "unreviewed container image platform member"
+      },
+      {
+        "case": "lxml",
+        "raw_maps": {
+          "path": "apt-extension-components/lxml/proc-self-maps.txt",
+          "bytes": 28797,
+          "sha256": "2088ffd3b0104f13d0373b13f8cfe30cafbdf3c52479db9320e09be89e8aee07"
+        },
+        "linker_present_and_excluded": true,
+        "selected_shared_objects": 5,
+        "unreviewed_shared_objects": [],
+        "rejection": null
+      },
+      {
+        "case": "msgpack",
+        "raw_maps": {
+          "path": "apt-extension-components/msgpack/proc-self-maps.txt",
+          "bytes": 25804,
+          "sha256": "46e5eaf1c795be01b5a6af618a3c5bba8c041a4295f7b098b5a27099089cc000"
+        },
+        "linker_present_and_excluded": true,
+        "selected_shared_objects": 5,
+        "unreviewed_shared_objects": [],
+        "rejection": null
+      },
+      {
+        "case": "pillow",
+        "raw_maps": {
+          "path": "apt-extension-components/pillow/proc-self-maps.txt",
+          "bytes": 31156,
+          "sha256": "4a601989e843816a5051d5755ecc7fe840cebe51c996f56d2491e12473cf5943"
+        },
+        "linker_present_and_excluded": true,
+        "selected_shared_objects": 5,
+        "unreviewed_shared_objects": [],
+        "rejection": null
+      },
+      {
+        "case": "psutil",
+        "raw_maps": {
+          "path": "apt-extension-components/psutil/proc-self-maps.txt",
+          "bytes": 26358,
+          "sha256": "d7ad2589bd2a2bb541360329696770ea930cd17d1b4806b7849e2c84fdc6a13b"
+        },
+        "linker_present_and_excluded": true,
+        "selected_shared_objects": 5,
+        "unreviewed_shared_objects": [],
+        "rejection": null
+      }
+    ],
+    "device_without_image_paths": {
+      "status": "not-used",
+      "members": [],
+      "interpretation": "No container image platform library was mapped."
+    },
+    "native_library_loaded": false,
+    "package_queries_performed": false
+  },
+  "source_review": [
+    "The five exact library sizes and SHA-256 values match the unchanged original APT scientific-foundation image table; ICU was not added to the audio allowance.",
+    "Any selected image object requires the recorded immutable Termux RepoDigest, ARM64/Linux Docker inspection, unambiguous aosp-libs 9.0.0-r76-4 aarch64 installed ownership, exact regular canonical path, full original bytes and AArch64 ELF header.",
+    "The ordinary prefix library allowlist and original payload byte checks are unchanged. The new branch skips those checks only after the separate exact image-member verifier succeeds.",
+    "The absent-image branch returns before Docker inspection or dpkg queries. The driver supplies image inspection only for container execution.",
+    "The owned namespace/OpenSLES/PortAudio requirements, original NumPy and cffi operations, real PortAudio initialization exception checks and device-readiness distinctions remain unchanged.",
+    "The mixed-map regression keeps a known library and an unknown shared library in scope while excluding the linker and ordinary-prefix library; the unknown library still rejects before any package query."
+  ],
+  "root_reported_tests": {
+    "passed": 199,
+    "skipped": 0,
+    "elapsed_seconds": 6.55,
+    "independently_reexecuted_full_suite": false
+  },
+  "limitations": [
+    "The independent executable check was a host replay of path selection against five byte-verified saved APT map files. It loaded no Android native library and performed no package query.",
+    "This receipt does not claim a successful repaired native audio run, microphone access, audio playback/capture, physical VAD, Android framework presence or release readiness.",
+    "No audio implementation, lock, test, Git staging, commit, push, dispatch or release was modified or performed by this reviewer."
+  ]
+}

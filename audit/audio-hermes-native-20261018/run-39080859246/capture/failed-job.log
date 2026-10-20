@@ -1,0 +1,38 @@
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	﻿2026-10-17T23:55:53.8380037Z ##[group]Run bash scripts/run_audio_hermes_preparation.sh \
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:53.8380616Z [36;1mbash scripts/run_audio_hermes_preparation.sh \[0m
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:53.8381080Z [36;1m  reconstruction/candidate reconstruction/audio-inputs \[0m
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:53.8382126Z [36;1m  patches/next-stable/audio-readiness.patch audio-environment-proof[0m
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:53.8417873Z shell: /usr/bin/bash -e {0}
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:53.8418218Z ##[endgroup]
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:54.2240319Z docker.io/termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303: Pulling from termux/termux-docker
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:54.2252726Z 4be35323a92b: Pulling fs layer
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:54.2253763Z 4f4fb700ef54: Pulling fs layer
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:54.2882835Z 4f4fb700ef54: Verifying Checksum
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:54.2884127Z 4f4fb700ef54: Download complete
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:54.4560585Z 4be35323a92b: Verifying Checksum
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:54.4561000Z 4be35323a92b: Download complete
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:55.5433643Z 4be35323a92b: Pull complete
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:59.6652717Z 4f4fb700ef54: Pull complete
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:59.6715925Z Digest: sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:59.6725110Z Status: Downloaded newer image for termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:59.6735400Z docker.io/termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:55:59.9730804Z /candidate/hermes-agent_0.22.2-1_aarch64.deb: OK
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0867466Z Audio readiness probe failed: audio-readiness failed with exit 1; inspect the retained raw logs
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0868136Z Traceback (most recent call last):
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0868723Z   File "/probes/scripts/compatibility_probe_audio_hermes.py", line 258, in main
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0869213Z     run(args)
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0869481Z     ~~~^^^^^^
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0870028Z   File "/probes/scripts/compatibility_probe_audio_hermes.py", line 210, in run
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0870752Z     prep.run_logged([str(payload / "venv/bin/python"), "-I", "-B", str(Path(__file__).resolve()),
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0871269Z     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0871946Z                      "--runtime-worker", str(request)], evidence, "audio-readiness",
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0872402Z                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0872786Z                     env=environment, timeout=180)
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0873133Z                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0873561Z   File "/probes/scripts/prepare_audio_hermes_environment.py", line 837, in run_logged
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0874234Z     require(result.returncode == 0, f"{name} failed with exit {result.returncode}; inspect the retained raw logs")
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0874855Z     ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0875394Z   File "/probes/scripts/prepare_audio_hermes_environment.py", line 278, in require
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0875882Z     raise PreparationError(message)
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:42.0876449Z _audio_preparation_contract.PreparationError: audio-readiness failed with exit 1; inspect the retained raw logs
+Isolated complete Hermes plus audio-io	Prepare and probe twice at independent final paths	2026-10-17T23:56:48.7159606Z ##[error]Process completed with exit code 1.

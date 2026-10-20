@@ -1,0 +1,215 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 5c34e2729e5383dfb72f7cfbee994c51e70f30fd..f8beaa463956d04ae0faa7895a5eea8f1d6d7b06 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
+ 
+ ## [Unreleased]
+ 
++- fix: discover shared libraries on CPython Android
++
+ ## [0.3.36]
+ 
+ - feat: update llama.cpp to ggml-org/llama.cpp@0c1e57098
+diff --git a/llama_cpp/_ctypes_extensions.py b/llama_cpp/_ctypes_extensions.py
+index 02cee8a88f3ce37bd6b65e7f10085aa3e40e6338..63fabc0ed024d420359a8d457367ece2999510d0 100644
+--- a/llama_cpp/_ctypes_extensions.py
++++ b/llama_cpp/_ctypes_extensions.py
+@@ -34,7 +34,7 @@ def load_shared_library(lib_base_name: str, base_path: pathlib.Path):
+         lib_paths += [
+             base_path / f"lib{lib_base_name}{_EMSCRIPTEN_SIDE_MODULE_SUFFIX}",
+         ]
+-    elif sys.platform.startswith("linux") or sys.platform.startswith("freebsd"):
++    elif sys.platform == "android" or sys.platform.startswith(("linux", "freebsd")):
+         lib_paths += [
+             base_path / f"lib{lib_base_name}.so",
+         ]
+diff --git a/tests/test_ctypes_extensions.py b/tests/test_ctypes_extensions.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..d1990963384e263bf41b0a8a07a58f4dbf9fb463
+--- /dev/null
++++ b/tests/test_ctypes_extensions.py
+@@ -0,0 +1,183 @@
++"""Shared-library discovery tests that do not require a compiled llama backend."""
++
++import ctypes
++import importlib.util
++import os
++import sys
++from pathlib import Path
++from types import SimpleNamespace
++from unittest.mock import Mock, call
++
++import pytest
++
++
++@pytest.fixture
++def loader():
++    # Import this standalone module without running llama_cpp.__init__, which
++    # eagerly loads the native backend before discovery can be tested.
++    source = Path(__file__).resolve().parents[1] / "llama_cpp" / "_ctypes_extensions.py"
++    spec = importlib.util.spec_from_file_location("_llama_ctypes_loader_test", source)
++    assert spec is not None and spec.loader is not None
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++
++    # Replace only the module's references, preserving the test host's platform
++    # and environment even when exercising a different platform's branch.
++    module.sys = SimpleNamespace(platform=sys.platform, version_info=sys.version_info)
++    module.os = SimpleNamespace(
++        environ={"PATH": "existing-path", "LD_LIBRARY_PATH": "existing-library-path"},
++        path=os.path,
++        pathsep=os.pathsep,
++        add_dll_directory=Mock(),
++    )
++    module.ctypes = SimpleNamespace(CDLL=Mock(), RTLD_GLOBAL=ctypes.RTLD_GLOBAL)
++    return module
++
++
++@pytest.mark.parametrize("base_name", ["llama", "mtmd", "ggml"])
++def test_android_loads_named_so_without_changing_environment(loader, tmp_path, base_name):
++    library = tmp_path / f"lib{base_name}.so"
++    library.touch()
++    loader.sys.platform = "android"
++    environment = loader.os.environ.copy()
++    host_platform = sys.platform
++
++    result = loader.load_shared_library(base_name, tmp_path)
++
++    assert result is loader.ctypes.CDLL.return_value
++    loader.ctypes.CDLL.assert_called_once_with(str(library))
++    loader.os.add_dll_directory.assert_not_called()
++    assert loader.os.environ == environment
++    assert sys.platform == host_platform
++
++
++def test_android_missing_so_does_not_accept_other_platform_names(loader, tmp_path):
++    for filename in ("llama.dll", "libllama.dll", "libllama.dylib"):
++        (tmp_path / filename).touch()
++    loader.sys.platform = "android"
++
++    with pytest.raises(
++        FileNotFoundError, match="Shared library with base name 'llama' not found"
++    ):
++        loader.load_shared_library("llama", tmp_path)
++
++    loader.ctypes.CDLL.assert_not_called()
++
++
++def test_android_reports_real_loader_failure(loader, tmp_path):
++    library = tmp_path / "libllama.so"
++    library.touch()
++    loader.sys.platform = "android"
++    loader.ctypes.CDLL.side_effect = OSError("missing dependent library")
++
++    with pytest.raises(RuntimeError) as error:
++        loader.load_shared_library("llama", tmp_path)
++
++    assert str(error.value) == (
++        f"Failed to load shared library '{library}': missing dependent library"
++    )
++    loader.ctypes.CDLL.assert_called_once_with(str(library))
++
++
++@pytest.mark.parametrize("platform", ["linux", "linux2", "freebsd14"])
++def test_existing_unix_platforms_keep_so_lookup(loader, tmp_path, platform):
++    library = tmp_path / "libllama.so"
++    library.touch()
++    loader.sys.platform = platform
++    environment = loader.os.environ.copy()
++
++    assert loader.load_shared_library("llama", tmp_path) is loader.ctypes.CDLL.return_value
++
++    loader.ctypes.CDLL.assert_called_once_with(str(library))
++    assert loader.os.environ == environment
++
++
++@pytest.mark.parametrize(
++    ("filenames", "selected"),
++    [
++        (("libllama.so", "libllama.dylib"), "libllama.so"),
++        (("libllama.dylib",), "libllama.dylib"),
++    ],
++)
++def test_macos_keeps_so_preference_and_dylib_fallback(
++    loader, tmp_path, filenames, selected
++):
++    for filename in filenames:
++        (tmp_path / filename).touch()
++    loader.sys.platform = "darwin"
++    environment = loader.os.environ.copy()
++
++    loader.load_shared_library("llama", tmp_path)
++
++    loader.ctypes.CDLL.assert_called_once_with(str(tmp_path / selected))
++    assert loader.os.environ == environment
++
++
++@pytest.mark.parametrize(
++    ("filenames", "selected"),
++    [
++        (("llama.dll", "libllama.dll"), "llama.dll"),
++        (("libllama.dll",), "libllama.dll"),
++    ],
++)
++def test_windows_keeps_dll_lookup_and_search_directories(
++    loader, tmp_path, filenames, selected
++):
++    for filename in filenames:
++        (tmp_path / filename).touch()
++    loader.sys.platform = "win32"
++    loader.sys.version_info = (3, 14)
++    loader.os.environ.update({"CUDA_PATH": "cuda-root", "HIP_PATH": "hip-root"})
++
++    loader.load_shared_library("llama", tmp_path)
++
++    loader.ctypes.CDLL.assert_called_once_with(
++        str(tmp_path / selected), winmode=ctypes.RTLD_GLOBAL
++    )
++    assert loader.os.environ["PATH"] == str(tmp_path) + os.pathsep + "existing-path"
++    assert loader.os.environ["LD_LIBRARY_PATH"] == "existing-library-path"
++    assert loader.os.add_dll_directory.call_args_list == [
++        call(str(tmp_path)),
++        call(str(tmp_path)),
++        call(os.path.join("cuda-root", "bin")),
++        call(os.path.join("cuda-root", "lib")),
++        call(os.path.join("hip-root", "bin")),
++        call(os.path.join("hip-root", "lib")),
++    ]
++
++
++@pytest.mark.parametrize(
++    ("base_name", "dependencies"),
++    [
++        ("llama", ("ggml-base", "ggml-cpu", "ggml")),
++        ("mtmd", ("ggml-base", "ggml-cpu", "ggml", "llama")),
++    ],
++)
++def test_emscripten_keeps_side_module_dependency_order(
++    loader, tmp_path, base_name, dependencies
++):
++    suffix = ".cpython-00-wasm32-emscripten.so"
++    libraries = [tmp_path / f"lib{name}{suffix}" for name in (*dependencies, base_name)]
++    for library in libraries:
++        library.touch()
++    loader.sys.platform = "emscripten"
++
++    loader.load_shared_library(base_name, tmp_path)
++
++    assert loader.ctypes.CDLL.call_args_list == [
++        call(str(library), mode=ctypes.RTLD_GLOBAL) for library in libraries
++    ]
++    assert loader.os.environ["LD_LIBRARY_PATH"] == (
++        str(tmp_path) + os.pathsep + "existing-library-path"
++    )
++    assert loader.os.environ["PATH"] == "existing-path"
++
++
++def test_unknown_platform_still_fails_before_loading(loader, tmp_path):
++    (tmp_path / "libllama.so").touch()
++    loader.sys.platform = "plan9"
++
++    with pytest.raises(RuntimeError, match="Unsupported platform"):
++        loader.load_shared_library("llama", tmp_path)
++
++    loader.ctypes.CDLL.assert_not_called()

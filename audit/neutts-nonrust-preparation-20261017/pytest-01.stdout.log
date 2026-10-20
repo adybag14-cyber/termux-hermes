@@ -1,0 +1,42 @@
+F................F............................                           [100%]
+================================== FAILURES ===================================
+_________ test_entire_subset_is_unchanged_in_the_frozen_parent_graph __________
+
+    def test_entire_subset_is_unchanged_in_the_frozen_parent_graph():
+        path = ROOT / "scripts/neutts_runtime_closure_design.json"
+        raw = path.read_bytes()
+        assert digest(raw) == "d8596ac31c12b042d76419712802e9787c092b32e66827cd64c720118be7ae68"
+        parent = json.loads(raw)
+        expected = [node for node in parent["nodes"] if node["name"] in LOCK["names"]]
+>       assert LOCK["nodes"] == expected
+E       AssertionError: assert [{'active_ext...1', ...}, ...] == [{'active_ext...s', ...}, ...]
+E         
+E         At index 0 diff: {'active_extras': [], 'name': 'audioop-lts', 'requires_dist': [], 'requires_python': '>=3.13', 'version': '0.2.2'} != {'name': 'audioop-lts', 'version': '0.2.2', 'requires_python': '>=3.13', 'requires_dist': [], 'active_extras': [], 'metadata_source': {'name': 'pypi-audioop-lts-0.2.2.json', 'url': 'https://pypi.org/pypi/audioop-lts/0.2.2/json', 'bytes': 45666, 'sha256': 'd7d0b245813cfd7f4aa7b47e237666167a0986a2ab13f9796169e4b3ea00a0e0', 'checked_at': '2026-10-17T19:37:50.283603+00:00'}, 'route': 'exact_source_build_pending', 'source': {'name': 'audioop-...
+E         
+E         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+tests\test_neutts_nonrust_preparation.py:56: AssertionError
+_________ test_real_snapshot_metadata_matches_all_fifty_one_archives __________
+
+    def test_real_snapshot_metadata_matches_all_fifty_one_archives():
+>       frozen, raw = NATIVE.snapshot_metadata(ROOT / "audit/neutts-runtime-index-20261017", LOCK)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_neutts_nonrust_preparation.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\compatibility_probe_neutts_nonrust.py:164: in snapshot_metadata
+    require(fields["Package"] not in records, "Duplicate target APT package")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Duplicate target APT package'
+
+    def require(condition, message):
+        if not condition:
+>           raise ProbeError(message)
+E           _test_nonrust_native.ProbeError: Duplicate target APT package
+
+scripts\compatibility_probe_neutts_nonrust.py:52: ProbeError
+=========================== short test summary info ===========================
+FAILED tests/test_neutts_nonrust_preparation.py::test_entire_subset_is_unchanged_in_the_frozen_parent_graph
+FAILED tests/test_neutts_nonrust_preparation.py::test_real_snapshot_metadata_matches_all_fifty_one_archives
+2 failed, 44 passed in 1.34s

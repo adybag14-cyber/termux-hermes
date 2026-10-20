@@ -1,0 +1,146 @@
+name: Prepare full Hermes audio environment
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [prepare/termux-compatibility-next-stable]
+    paths:
+      - '.github/workflows/audio-hermes-preparation.yml'
+      - 'scripts/prepare_audio_hermes_environment.py'
+      - 'scripts/compatibility_probe_audio_hermes.py'
+      - 'scripts/run_audio_hermes_preparation.sh'
+      - 'scripts/fetch_compatibility_candidate.py'
+      - 'patches/next-stable/audio-readiness.patch'
+      - 'patches/next-stable/audio-pm-marker-bytecode.patch'
+      - 'patches/next-stable/sounddevice-android-discovery.patch'
+      - 'tests/test_audio_hermes_preparation.py'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: hermes-audio-preparation-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Isolated complete Hermes plus audio-io
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 75
+    steps:
+      - name: Checkout reviewed preparation files
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Fetch the exact verified main candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/fetch_compatibility_candidate.py --out reconstruction/candidate
+
+      - name: Fetch exact audio wheels, official wrapper and canonical source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/prepare_audio_hermes_environment.py fetch-inputs \
+            --out reconstruction/audio-inputs
+
+      - name: Complete the offline reconstruction input bundle
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, shutil
+          from pathlib import Path
+          root = Path("reconstruction")
+          for name in (
+              "scripts/prepare_audio_hermes_environment.py",
+              "scripts/compatibility_probe_audio_hermes.py",
+              "scripts/run_audio_hermes_preparation.sh",
+              "scripts/fetch_compatibility_candidate.py",
+              "patches/next-stable/audio-readiness.patch",
+              "patches/next-stable/audio-pm-marker-bytecode.patch",
+              "patches/next-stable/sounddevice-android-discovery.patch",
+          ):
+              target = root / name
+              target.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copyfile(name, target)
+          text = """# Native Termux audio preparation inputs
+
+          This is an offline reconstruction input bundle for an unpublished experiment.
+          It contains the exact main candidate, original 100-wheel catalog, two added
+          audio wheels, pinned official PortAudio/OpenSL ES inputs, the reviewed source
+          patches, and canonical PM/launcher preparation code. The original sounddevice
+          wheel is retained as an input; preparation applies the exact Android library
+          discovery patch and records the derived wheel with its original provenance.
+
+          On AArch64 Termux at the standard com.termux prefix, unpack this bundle in a
+          private app directory. Choose a NEW final output path; existing paths are
+          refused. From this bundle directory run:
+
+              bash scripts/run_audio_hermes_preparation.sh --native \
+                candidate audio-inputs patches/next-stable/audio-readiness.patch \
+                "$HOME/hermes-audio-next-stable-20261017" prepare-and-probe
+
+          The command extracts the candidate into owned directories and creates fresh
+          canonical PM/application environments directly at the intended final path.
+          It never installs the .deb or replaces the installed Hermes environment.
+          Do not move the finished environment or copy a CI venv to the phone; repeat
+          preparation from these inputs at a new desired path.
+
+          The output run-hermes launcher owns its separate profile and cache.
+          The probe imports native dependencies and may enumerate device metadata.
+          It does not open or start a stream, record, play, or upload audio.
+          Android's real OpenSL ES framework/audio services and the appropriate
+          microphone permission are required for a later user-started capture/VAD
+          test. No successful VAD result is claimed by preparation or enumeration.
+
+          Both dependency preparation and PortAudio initialization have separate
+          receipts. Docker may pass complete dependency/integrity checks while
+          PortAudio reports the previously observed absent-framework error.
+
+          The immutable release, package version and main-branch installer pins are
+          unchanged. This bundle is not a new published release.
+          """
+          (root / "README.md").write_text(text, encoding="utf-8")
+          files = {p.relative_to(root).as_posix(): {
+              "bytes": p.stat().st_size,
+              "sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
+          } for p in sorted(root.rglob("*")) if p.is_file()}
+          (root / "RECONSTRUCTION-INPUTS.json").write_text(json.dumps({
+              "schema_version": 1, "purpose": "fresh local preparation, not a copied CI venv",
+              "files": files, "published": False, "microphone_accessed": False,
+          }, sort_keys=True, indent=2) + "\n")
+          PY
+
+      - name: Preserve exact device reconstruction inputs
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-audio-device-preparation-inputs
+          path: reconstruction/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
+
+      - name: Prepare and probe twice at independent final paths
+        run: |
+          bash scripts/run_audio_hermes_preparation.sh \
+            reconstruction/candidate reconstruction/audio-inputs \
+            patches/next-stable/audio-readiness.patch audio-environment-proof
+
+      - name: Retain full staging proof and distinct audio diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-audio-environment-proof
+          path: |
+            audio-environment-proof/*.json
+            audio-environment-proof/*.log
+            audio-environment-proof/prepared/*.json
+            audio-environment-proof/prepared/evidence/
+            audio-environment-proof/reconstructed/*.json
+            audio-environment-proof/reconstructed/evidence/
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 30

@@ -1,0 +1,231 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-17",
+  "status": "host-build-frontend-fix-verified; native-retry-required",
+  "scope": "Repair the native component harness's CPython platform-detection failure. No Numba or llama source/dependency changes, model work, Hermes PM admission, or release.",
+  "native_failure": {
+    "repository": "adybag14-cyber/termux-hermes",
+    "run_id": 39062163081,
+    "head_sha": "3d9086cfc190ba981e48e0276234064903315539",
+    "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39062163081",
+    "run_metadata_sha256": "57b91e4e47b56161d63ad77f10612b8ec4649aa53a744d78e8dc4fd89bea5b7a",
+    "artifact": {
+      "id": 12111708125,
+      "bytes": 128077620,
+      "sha256": "54674b8f315b4673b6b47a1ecdd854c3fcd40bd6b6bd485038bc0d2a5d2a88d2",
+      "verification": "Whole-archive SHA/size and all member CRCs verified by the parent acquisition task; member bytes read from its verified extraction."
+    },
+    "original_helper": {
+      "path": "scripts/compatibility_probe_neutts_native.py",
+      "bytes": 42502,
+      "sha256": "59135f1fce0bcb58d24d96e3ba53fe4dc92ede81bc503db98921440011413624"
+    },
+    "stage": "native-build",
+    "error": {
+      "message": "native-build-numba failed; retained exit code 2",
+      "type": "ProbeError"
+    },
+    "logs": [
+      {
+        "file": "native-components/native-build-numba.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "file": "native-components/native-build-numba.stderr.log",
+        "bytes": 2811,
+        "sha256": "020e92c38bdc2d67c4747ec18116fc63f63ed671fa1704cc1d72f1dde35e18ec"
+      },
+      {
+        "file": "native-components/native-build-python-inputs.stdout.log",
+        "bytes": 749,
+        "sha256": "ae744470854fbf871c9d84790175fb2fbe2014daa1a6e09f7269d2240f8a71b3"
+      },
+      {
+        "file": "native-components/native-build-python-inputs.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "foundation": {
+      "apt_validation_sha256": "3f5256f6f1873da84e0dad9472615e66b5a485922b6629540c9fc39663490015",
+      "case_count": 7,
+      "path": "/out/NEUTTS-CORE-RESULT.json",
+      "raw_pip_exit_code": 1,
+      "sha256": "e6542a6219582c84c26861283195257c05a6514dff7b502d9d9671bcdb211c76",
+      "status": "passed"
+    },
+    "compiler_closure": {
+      "status": "passed",
+      "verified_archive_count": 44,
+      "additional_count": 19
+    },
+    "actual_python": {
+      "version": "3.14.6",
+      "sys_platform": "android",
+      "machine": "aarch64",
+      "api_level": 24,
+      "executable_sha256": "4f8d78ede7fc26e96e99342dd83ce42d32c9b4d0806bc9a99ff7151396269b25"
+    },
+    "root_cause": "The helper set _PYTHON_HOST_PLATFORM=android-24-arm64_v8a. CPython partitions this cross-build input at its first dash into OS=android and machine=24-arm64_v8a; its Android ABI mapping raises KeyError before pip creates the resolver, reads Numba metadata, or compiles Numba.",
+    "native_numba_compilation_reached": false,
+    "native_numba_cases_reached": false
+  },
+  "correction": {
+    "file": "scripts/compatibility_probe_neutts_native.py",
+    "behavior": "Remove an inherited _PYTHON_HOST_PLATFORM before pip installs build inputs, and stop setting it for Numba or llama wheel construction. Use the already-native interpreter's API and AArch64 machine to derive modern Android tags.",
+    "why_not_an_alternative_override": "android-aarch64 is accepted by CPython, but pinned scikit-build-core1.1.1 directly normalizes the override into android_aarch64, which is not the required modern Android API24 wheel tag.",
+    "expected_platform": "android_24_arm64_v8a",
+    "retained": [
+      "Exact native Python3.14.6/API24/AArch64 checks",
+      "--target=aarch64-linux-android24 and -march=armv8-a compiler flags",
+      "Exact source and wheel locks",
+      "Numba workqueue-only configuration",
+      "No-index/no-deps/no-build-isolation build path",
+      "Strict filename/WHEEL tag, supported native tag, RECORD, native ELF, runtime requirements and source-patch verification",
+      "No finished-wheel retagging or metadata changes"
+    ],
+    "wheel_verifier_unchanged": true,
+    "frozen_trial_lock": {
+      "file": "scripts/neutts_native_sources_lock.json",
+      "sha256": "a06e595179fad6f437ca95210d685beb339baa0867cd527dba5f5083d94b36ce",
+      "recorded_wording": "Emit modern Android API24 tags during the native build using _PYTHON_HOST_PLATFORM; never mutate/retag a finished wheel. sys.platform remains android.",
+      "clarification": "The unchanged trial lock preserves the originally attempted execution method. This failure/fix receipt supersedes only its statement that _PYTHON_HOST_PLATFORM is used: the corrected helper derives tags from the real native interpreter. Target, version, source, dependency, compiler-option and finished-wheel policies remain unchanged."
+    }
+  },
+  "inspected_primary_code": {
+    "numba_setup": {
+      "version": "0.67.0",
+      "file": "setup.py",
+      "bytes": 17305,
+      "sha256": "25031d3133633e6f6b1f49915c2e61341b7791c69a0552e98739709d6ae7b611",
+      "scope": "Read-only source inspection; not patched."
+    },
+    "host_cpython": {
+      "version": "3.14.2 (tags/v3.14.2:df79316, Dec  5 2025, 17:18:21) [MSC v.1944 64 bit (AMD64)]",
+      "file": "C:\\Python314\\Lib\\sysconfig\\__init__.py",
+      "function": "get_platform",
+      "test_method": "Execute the actual stdlib function code with only OS/configuration inputs replaced for Android/AArch64/API24. This is a host regression, not native execution."
+    },
+    "wheel_backends": [
+      {
+        "wheel": "setuptools-83.0.0-py3-none-any.whl",
+        "wheel_sha256": "29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3",
+        "member": "setuptools/command/bdist_wheel.py",
+        "bytes": 22210,
+        "sha256": "d93325db57fb596787de6d0d8492d564f54e496134c3ec19706da916c78ff10c"
+      },
+      {
+        "wheel": "scikit_build_core-1.1.1-py3-none-any.whl",
+        "wheel_sha256": "6f6d6cf600e2e9639fd258ecd11cfc19bd189354b968916a519c6793e7e26237",
+        "member": "scikit_build_core/builder/wheel_tag.py",
+        "bytes": 10399,
+        "sha256": "5638af91e220c6fe9b5155e2643f01b5153b664e14b2935440160acbcef5e949"
+      }
+    ]
+  },
+  "files": {
+    "scripts/compatibility_probe_neutts_native.py": {
+      "bytes": 42721,
+      "sha256": "6f3668dd5fda907a58d9acc0657d7cba332afce4977d44f0f50720d45ba25bfd"
+    },
+    "tests/test_neutts_native_components.py": {
+      "bytes": 12089,
+      "sha256": "06bd9c3e042bb6ae7cbd3418865aed9f771ab9a7c4344ae4838ac1535dacf37d"
+    },
+    "scripts/neutts_native_sources_lock.json": {
+      "bytes": 35165,
+      "sha256": "a06e595179fad6f437ca95210d685beb339baa0867cd527dba5f5083d94b36ce"
+    },
+    "scripts/prepare_neutts_native_sources.py": {
+      "bytes": 22681,
+      "sha256": "7e4abf6794f848d399d15a877e9c8a74db1a44ba5e87ceb898d5d4777169f744"
+    }
+  },
+  "validation": {
+    "red": {
+      "command": [
+        "C:\\Python314\\python.exe",
+        "-B",
+        "-m",
+        "pytest",
+        "-v",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_neutts_native_components.py",
+        "-k",
+        "native_build_uses_actual_android_platform"
+      ],
+      "exit_code": 1,
+      "failed": 4,
+      "deselected": 27,
+      "helper_sha256": "59135f1fce0bcb58d24d96e3ba53fe4dc92ede81bc503db98921440011413624",
+      "test_sha256": "06bd9c3e042bb6ae7cbd3418865aed9f771ab9a7c4344ae4838ac1535dacf37d",
+      "log": {
+        "file": "audit/neutts-native-20261017/numba-build-platform-red-20261017.log",
+        "bytes": 24280,
+        "sha256": "e88322ae170400e6ae7b889596b45e44c2c981a4e5448687dcee9a51b7c2e36f"
+      }
+    },
+    "green": {
+      "command": [
+        "C:\\Python314\\python.exe",
+        "-B",
+        "-m",
+        "pytest",
+        "-v",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_neutts_native_components.py"
+      ],
+      "exit_code": 0,
+      "passed": 31,
+      "failed": 0,
+      "skipped": 0,
+      "pytest_seconds": 0.17,
+      "log": {
+        "file": "audit/neutts-native-20261017/numba-build-platform-green-20261017.log",
+        "bytes": 4057,
+        "sha256": "2240ec57d6d1c8dbe89c2203d3f357cf61b5f4b6b2305d0c85abc95e1b82afca"
+      }
+    },
+    "added_cases": 4,
+    "previous_cases_unchanged": 27,
+    "regression_inputs": [
+      null,
+      "android-24-arm64_v8a",
+      "android-aarch64",
+      "linux-x86_64"
+    ],
+    "measured_child_environments": [
+      "native-build-python-inputs",
+      "native-build-numba"
+    ],
+    "static_checks": [
+      "Python AST",
+      "UTF-8/LF",
+      "Trailing whitespace",
+      "Frozen source lock and source preparer SHA-256 unchanged",
+      "Finished-wheel verifier exact source bytes unchanged"
+    ],
+    "raw_logs": "Saved merged subprocess stdout/stderr bytes before decoding; retained SHA-256 covers the complete raw log.",
+    "aggregate_with_prior_runs": false,
+    "native_retry_executed": false
+  },
+  "performed": {
+    "pinned_source_modified": false,
+    "pinned_lock_modified": false,
+    "requirements_relaxed": false,
+    "finished_wheel_retagged": false,
+    "native_execution": false,
+    "models_downloaded": false,
+    "commit": false,
+    "push": false,
+    "release": false
+  },
+  "pending": [
+    "Native rerun must pass pip frontend and compile the exact pinned sources.",
+    "Built wheel tags and integrity must pass the existing strict checks.",
+    "Real Numba CPU/JIT/workqueue and matching llama backend cases remain unclaimed until they run."
+  ]
+}

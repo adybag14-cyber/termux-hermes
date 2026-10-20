@@ -1,0 +1,138 @@
+name: Probe next-stable Termux compatibility
+
+on:
+  workflow_dispatch:
+    inputs:
+      group:
+        description: Native probe group
+        type: choice
+        default: all
+        options: [all, uvloop, matrix, nemo, browser, desktop, audio, gateway]
+  pull_request:
+    paths:
+      - 'manifest/**'
+      - 'patches/upstream-*.patch'
+      - '.github/workflows/compatibility-probes.yml'
+      - 'patches/next-stable/**'
+      - 'scripts/probe_native_compatibility.*'
+      - 'scripts/plan_next_stable_validation.py'
+      - 'scripts/compatibility_probe_browser.sh'
+      - 'scripts/compatibility_probe_desktop.sh'
+      - 'scripts/compatibility_probe_gateway.sh'
+      - 'tests/test_native_compatibility_probe.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: termux-compatibility-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      required: ${{ steps.select.outputs.required }}
+      groups: ${{ steps.select.outputs.groups }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Select checks whose inputs changed
+        id: select
+        env:
+          REQUESTED_GROUP: ${{ inputs.group || 'all' }}
+        run: python3 scripts/plan_next_stable_validation.py --kind components
+
+  probe:
+    needs: plan
+    if: needs.plan.outputs.required == 'true'
+    name: Native ${{ matrix.group }} probe
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        group: ${{ fromJSON(needs.plan.outputs.groups) }}
+    steps:
+      - name: Checkout proposed packaging changes
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Read the immutable source baseline
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          pins = json.loads(Path("manifest/release.json").read_text())
+          assert pins["source_repository"] == "NousResearch/hermes-agent"
+          assert pins["source_tag"] == "v0.22.2"
+          assert pins["source_commit"] == "d923a5eb487a17c0a68801bba9ef0f56c81040a8"
+          assert re.fullmatch(r"termux/termux-docker@sha256:[a-f0-9]{64}", pins["termux_image"])
+          with open(os.environ["GITHUB_ENV"], "a") as stream:
+              stream.write(f'HERMES_COMMIT={pins["source_commit"]}\n')
+              stream.write(f'HERMES_TAG={pins["source_tag"]}\n')
+          PY
+
+      - name: Checkout the exact upstream source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: NousResearch/hermes-agent
+          ref: ${{ env.HERMES_COMMIT }}
+          path: hermes-source
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Apply released adapters and the proposed compatibility patch
+        env:
+          GROUP: ${{ matrix.group }}
+        run: |
+          set -Eeuo pipefail
+          test "$(git -C hermes-source rev-parse HEAD)" = "$HERMES_COMMIT"
+          git -C hermes-source fetch --depth=1 origin "refs/tags/$HERMES_TAG:refs/tags/$HERMES_TAG"
+          test "$(git -C hermes-source rev-parse "$HERMES_TAG^{commit}")" = "$HERMES_COMMIT"
+          for patch in "$GITHUB_WORKSPACE"/patches/upstream-v0.22.2-*.patch; do
+            git -C hermes-source apply --check "$patch"
+            git -C hermes-source apply "$patch"
+          done
+          patch="$GITHUB_WORKSPACE/patches/next-stable/compatibility.patch"
+          test -s "$patch"
+          git -C hermes-source apply --check "$patch"
+          git -C hermes-source apply "$patch"
+          mkdir -p "probe-results/$GROUP"
+          sha256sum patches/upstream-v0.22.2-*.patch "$patch" > "probe-results/$GROUP/BUILD-ADAPTATIONS.sha256"
+          git -C hermes-source diff --stat
+          git -C hermes-source diff --check
+
+      - name: Build the isolated locked closure and exercise native behavior
+        env:
+          GROUP: ${{ matrix.group }}
+        run: |
+          bash scripts/probe_native_compatibility.sh \
+            "$GROUP" hermes-source "probe-results/$GROUP"
+
+      - name: Preserve candidate evidence and diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-compatibility-${{ matrix.group }}
+          path: |
+            probe-results/${{ matrix.group }}/*.json
+            probe-results/${{ matrix.group }}/*.log
+            probe-results/${{ matrix.group }}/*.txt
+            probe-results/${{ matrix.group }}/*.tsv
+            probe-results/${{ matrix.group }}/*.sha256
+            probe-results/${{ matrix.group }}/*SUMS
+            probe-results/${{ matrix.group }}/*.lock
+            probe-results/${{ matrix.group }}/*.toml
+            probe-results/${{ matrix.group }}/*.png
+            probe-results/${{ matrix.group }}/*.jpg
+            probe-results/${{ matrix.group }}/wheelhouse/*.whl
+            probe-results/${{ matrix.group }}/build-runtime-libs/*
+            probe-results/${{ matrix.group }}/added-runtime-libs/*
+          if-no-files-found: warn
+          compression-level: 0

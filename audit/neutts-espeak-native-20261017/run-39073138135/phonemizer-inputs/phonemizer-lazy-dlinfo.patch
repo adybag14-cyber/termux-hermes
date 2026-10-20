@@ -1,0 +1,248 @@
+diff --git a/compat_tests/test_espeak_library_discovery.py b/compat_tests/test_espeak_library_discovery.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..b1f39ad42a9b384d78bb8858718c4e719d7d6034
+--- /dev/null
++++ b/compat_tests/test_espeak_library_discovery.py
+@@ -0,0 +1,211 @@
++"""Source contract tests for eSpeak library discovery, with no native loading.
++
++Execute the exact API and Voice module source, replacing only import boundaries
++for the platform value and dlinfo. Temporary files are path fixtures, not shared
++libraries. These tests do not certify ctypes or Android native ABI behavior.
++"""
++import builtins
++import os
++from pathlib import Path
++from types import ModuleType, SimpleNamespace
++
++import pytest
++
++
++ROOT = Path(os.environ.get(
++    "PHONEMIZER_TEST_SOURCE_ROOT", Path(__file__).resolve().parents[1]))
++API_SOURCE = ROOT / "phonemizer" / "backend" / "espeak" / "api.py"
++VOICE_SOURCE = API_SOURCE.with_name("voice.py")
++
++
++def load_api(platform, *, dlinfo_module=None, import_error=None):
++    """Load the whole production module, including its top-level imports."""
++    imports = []
++    voice = ModuleType("phonemizer.backend.espeak.voice")
++    exec(compile(VOICE_SOURCE.read_bytes(), str(VOICE_SOURCE), "exec"),
++         voice.__dict__)
++    real_import = builtins.__import__
++
++    def controlled_import(name, globals=None, locals=None, fromlist=(), level=0):
++        if name == "sys":
++            return SimpleNamespace(platform=platform)
++        if name == "phonemizer.backend.espeak.voice":
++            return voice
++        if name == "dlinfo":
++            imports.append(name)
++            if import_error is not None:
++                raise import_error
++            if dlinfo_module is None:
++                raise AssertionError("unexpected dlinfo import")
++            return dlinfo_module
++        return real_import(name, globals, locals, fromlist, level)
++
++    api = ModuleType("source_contract_espeak_api")
++    api.__dict__["__builtins__"] = {
++        **vars(builtins), "__import__": controlled_import}
++    exec(compile(API_SOURCE.read_bytes(), str(API_SOURCE), "exec"),
++         api.__dict__)
++    return api.EspeakAPI, imports
++
++
++def library(name):
++    return SimpleNamespace(_name=name)
++
++
++@pytest.mark.parametrize("platform", ["android", "linux", "darwin", "win32"])
++def test_module_import_does_not_load_library_discovery_backend(platform):
++    api, imports = load_api(
++        platform, import_error=AttributeError("undefined symbol: dlinfo"))
++    assert callable(api._shared_library_path)
++    assert imports == []
++
++
++@pytest.mark.parametrize("platform", ["android", "linux", "darwin", "win32"])
++@pytest.mark.parametrize("name_type", [str, Path])
++def test_explicit_existing_path_needs_no_dlinfo(tmp_path, platform, name_type):
++    path = tmp_path / "eSpeak data with spaces" / "libespeak-test.so"
++    path.parent.mkdir()
++    path.write_bytes(b"path fixture only, not a native library")
++    api, imports = load_api(
++        platform, import_error=AttributeError("undefined symbol: dlinfo"))
++    assert api._shared_library_path(library(name_type(path))) == path.resolve()
++    assert imports == []
++
++
++def test_missing_dlinfo_package_does_not_block_explicit_path(tmp_path):
++    path = tmp_path / "libespeak-test.so"
++    path.write_bytes(b"path fixture")
++    api, imports = load_api(
++        "android", import_error=ModuleNotFoundError("No module named dlinfo"))
++    assert api._shared_library_path(library(str(path))) == path.resolve()
++    assert imports == []
++
++
++def test_existing_relative_path_keeps_existing_resolution(tmp_path, monkeypatch):
++    path = tmp_path / "local-espeak.so"
++    path.write_bytes(b"path fixture")
++    monkeypatch.chdir(tmp_path)
++    api, imports = load_api(
++        "android", import_error=AttributeError("undefined symbol: dlinfo"))
++    assert api._shared_library_path(library(path.name)) == path
++    assert imports == []
++
++
++@pytest.mark.parametrize("platform", ["linux", "darwin"])
++def test_unresolved_name_uses_ordinary_dlinfo_fallback(tmp_path, platform):
++    resolved = tmp_path / "resolved" / "libespeak-test.so"
++    expected_library = library(str(tmp_path / "unknown-library-name.so"))
++    calls = []
++
++    def info(loaded):
++        calls.append(loaded)
++        return SimpleNamespace(path=str(resolved))
++
++    api, imports = load_api(platform, dlinfo_module=SimpleNamespace(DLInfo=info))
++    assert api._shared_library_path(expected_library) == resolved.resolve()
++    assert calls == [expected_library]
++    assert imports == ["dlinfo"]
++
++
++def test_directory_name_is_not_mistaken_for_existing_library(tmp_path):
++    resolved = tmp_path / "actual.so"
++    calls = []
++
++    def info(loaded):
++        calls.append(loaded)
++        return SimpleNamespace(path=str(resolved))
++
++    api, imports = load_api("linux", dlinfo_module=SimpleNamespace(DLInfo=info))
++    loaded = library(str(tmp_path))
++    assert api._shared_library_path(loaded) == resolved
++    assert calls == [loaded]
++    assert imports == ["dlinfo"]
++
++
++@pytest.mark.parametrize("error_type", [
++    ModuleNotFoundError, AttributeError, OSError])
++def test_unavailable_dlinfo_fallback_preserves_public_error(tmp_path, error_type):
++    api, imports = load_api(
++        "android", import_error=error_type("discovery backend unavailable"))
++    loaded = library(str(tmp_path / "unknown.so"))
++    with pytest.raises(RuntimeError) as raised:
++        api._shared_library_path(loaded)
++    assert str(raised.value) == (
++        f"failed to retrieve the path to {loaded} library")
++    assert raised.value.__cause__ is None
++    assert raised.value.__suppress_context__ is True
++    assert imports == ["dlinfo"]
++
++
++@pytest.mark.parametrize("error_type", [AttributeError, OSError, ValueError])
++def test_dlinfo_failure_keeps_existing_error_translation(tmp_path, error_type):
++    def info(_loaded):
++        raise error_type("lookup failed")
++
++    api, imports = load_api("linux", dlinfo_module=SimpleNamespace(DLInfo=info))
++    loaded = library(str(tmp_path / "unknown.so"))
++    with pytest.raises(RuntimeError) as raised:
++        api._shared_library_path(loaded)
++    assert str(raised.value) == (
++        f"failed to retrieve the path to {loaded} library")
++    assert raised.value.__cause__ is None
++    assert raised.value.__suppress_context__ is True
++    assert imports == ["dlinfo"]
++
++
++def test_invalid_dlinfo_result_keeps_existing_error_translation(tmp_path):
++    api, imports = load_api(
++        "linux", dlinfo_module=SimpleNamespace(
++            DLInfo=lambda _loaded: SimpleNamespace(path=None)))
++    loaded = library(str(tmp_path / "unknown.so"))
++    with pytest.raises(RuntimeError) as raised:
++        api._shared_library_path(loaded)
++    assert str(raised.value) == (
++        f"failed to retrieve the path to {loaded} library")
++    assert raised.value.__suppress_context__ is True
++    assert imports == ["dlinfo"]
++
++
++@pytest.mark.parametrize("error_type", [KeyboardInterrupt, SystemExit])
++def test_control_flow_during_import_is_not_swallowed(tmp_path, error_type):
++    try:
++        api, imports = load_api(
++            "android", import_error=error_type("stop discovery"))
++    except error_type:
++        pytest.fail("dlinfo imported before the path fallback was requested")
++    with pytest.raises(error_type, match="stop discovery"):
++        api._shared_library_path(library(str(tmp_path / "unknown.so")))
++    assert imports == ["dlinfo"]
++
++
++@pytest.mark.parametrize("error_type", [KeyboardInterrupt, SystemExit])
++def test_control_flow_during_discovery_is_not_swallowed(tmp_path, error_type):
++    def info(_loaded):
++        raise error_type("stop discovery")
++
++    api, imports = load_api("linux", dlinfo_module=SimpleNamespace(DLInfo=info))
++    with pytest.raises(error_type, match="stop discovery"):
++        api._shared_library_path(library(str(tmp_path / "unknown.so")))
++    assert imports == ["dlinfo"]
++
++
++def test_windows_unresolved_path_never_imports_dlinfo(tmp_path):
++    api, imports = load_api(
++        "win32", import_error=AssertionError("Windows must not import dlinfo"))
++    loaded = library(str(tmp_path / "unknown.dll"))
++    with pytest.raises(RuntimeError) as raised:
++        api._shared_library_path(loaded)
++    assert str(raised.value) == (
++        f"failed to retrieve the path to {loaded} library")
++    assert raised.value.__cause__ is None
++    assert raised.value.__suppress_context__ is True
++    assert imports == []
++
++
++def test_invalid_library_name_error_is_not_hidden():
++    api, imports = load_api(
++        "linux", dlinfo_module=SimpleNamespace(
++            DLInfo=lambda _loaded: pytest.fail("unexpected fallback")))
++    with pytest.raises(TypeError):
++        api._shared_library_path(library(None))
++    assert imports == []
+diff --git a/phonemizer/backend/espeak/api.py b/phonemizer/backend/espeak/api.py
+index dbf7b3e4534b9b3c931139359c29929dc0ac1796..da82c1c01824dffa9b8a2e6881c9c2d35f4db198 100644
+--- a/phonemizer/backend/espeak/api.py
++++ b/phonemizer/backend/espeak/api.py
+@@ -27,10 +27,6 @@ from typing import Union
+ 
+ from phonemizer.backend.espeak.voice import EspeakVoice
+ 
+-if sys.platform != 'win32':
+-    # cause a crash on Windows
+-    import dlinfo
+-
+ 
+ class EspeakAPI:
+     """Exposes the espeak API to the EspeakWrapper
+@@ -138,7 +134,14 @@ class EspeakAPI:
+             return path
+ 
+         try:
+-            # Linux or MacOS only, ImportError on Windows
++            # Windows must not import dlinfo, even for an unresolved path.
++            if sys.platform == 'win32':
++                raise ImportError('dlinfo is not supported on Windows')
++
++            # An explicit path does not need dlinfo. Importing it can fail on
++            # platforms without that native symbol, such as Android.
++            # pylint: disable=import-outside-toplevel
++            import dlinfo
+             return pathlib.Path(dlinfo.DLInfo(library).path).resolve()
+         except (Exception, ImportError):  # pragma: nocover
+             raise RuntimeError(

@@ -1,0 +1,49 @@
+.................................................F...                    [100%]
+================================== FAILURES ===================================
+______ test_real_local_certificate_fixture_validates_chain_and_hostname _______
+
+tmp_path = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-905/test_real_local_certificate_fi0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001F2148F8650>
+
+    def test_real_local_certificate_fixture_validates_chain_and_hostname(tmp_path, monkeypatch):
+        openssl = os.environ.get("HERMES_RUST_TLS_OPENSSL") or shutil.which("openssl")
+        assert openssl, "Host integrity gate requires OpenSSL for its real local certificate fixture"
+        executable = Path(openssl)
+        monkeypatch.setattr(ops, "PREFIX", executable.parent.parent)
+        def run(command, label, timeout, env=None):
+            # Only this selected host fixture command is substituted for the native APT
+            # OpenSSL path. No Termux, source backend, or Cargo command is executed.
+            command = [str(executable), *command[1:]]
+            completed = subprocess.run(command, capture_output=True, timeout=timeout, env=env)
+            assert completed.returncode == 0, completed.stderr.decode(errors="replace")
+            return {"exit_code": completed.returncode}
+        certs = tmp_path / "certificates"
+>       records = ops.issue_certificates(certs, tmp_path / "public-certificates", run)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_neutts_rust_preparation.py:406: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\neutts_rust_operations.py:198: in issue_certificates
+    run([openssl, "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-sha256", "-days", "2",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+command = ['C:\\Strawberry\\c\\bin\\openssl.EXE', 'req', '-x509', '-newkey', 'rsa:2048', '-nodes', ...]
+label = 'tls-generate-trusted-ca', timeout = 30, env = None
+
+    def run(command, label, timeout, env=None):
+        # Only this selected host fixture command is substituted for the native APT
+        # OpenSSL path. No Termux, source backend, or Cargo command is executed.
+        command = [str(executable), *command[1:]]
+        completed = subprocess.run(command, capture_output=True, timeout=timeout, env=env)
+>       assert completed.returncode == 0, completed.stderr.decode(errors="replace")
+E       AssertionError: Can't open "Z:/extlib/_5040x__/ssl\/openssl.cnf" for reading, No such file or directory
+E         3CC10000:error:80000003:system library:BIO_new_file:No such process:crypto/bio/bss_file.c:67:calling fopen(Z:/extlib/_5040x__/ssl\/openssl.cnf, r)
+E         3CC10000:error:10000080:BIO routines:BIO_new_file:no such file:crypto/bio/bss_file.c:75:
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['C:\\Strawberry\\c\\bin\\openssl.EXE', 'req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-sha25...ssl\\/openssl.cnf, r)\r\n3CC10000:error:10000080:BIO routines:BIO_new_file:no such file:crypto/bio/bss_file.c:75:\r\n').returncode
+
+tests\test_neutts_rust_preparation.py:403: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_neutts_rust_preparation.py::test_real_local_certificate_fixture_validates_chain_and_hostname
+1 failed, 52 passed in 3.04s

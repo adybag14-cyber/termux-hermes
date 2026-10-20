@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "status": "concrete-original-input-collision-confirmed",
+  "failed_native_run": 39452440876,
+  "lock_sha256": "883d0fec890062f93eee763e8c89dfae7deba29970a376c6b951e5fc0b0aa1b5",
+  "selected_wheel_path_inventories": 105,
+  "original_apt_payload_path_inventories": 11,
+  "single_prefix_relative_namespace": true,
+  "distinct_targets": 28935,
+  "collisions": [
+    {
+      "prefix_relative_path": "lib/python3.14/site-packages/docs/source/conf.py",
+      "same_bytes": false,
+      "owners": [
+        {
+          "package": "einx",
+          "member": "docs/source/conf.py",
+          "bytes": 1635,
+          "sha256": "386f1a451b02667af9c1b3337bbad94972c4031af9a1f757b7186a33e587dcd2"
+        },
+        {
+          "package": "phonemizer",
+          "member": "docs/source/conf.py",
+          "bytes": 2051,
+          "sha256": "8ff1bfe77a14e0bec2e5d34e8fb3f92e155c12ee32778ff1d817e29936fdfce4"
+        }
+      ]
+    }
+  ],
+  "affected_archive_identities": [
+    {
+      "name": "einx",
+      "version": "0.4.3",
+      "artifact": {
+        "bytes": 163766,
+        "filename": "einx-0.4.3-py3-none-any.whl",
+        "sha256": "47ce54a0144f6dffcfacdd8fe2cc9e2e5e6485dda2471330ab75ee747dd22f39",
+        "url": "https://files.pythonhosted.org/packages/d0/28/6768d342b2b888f9facdddbd430daf015cab936e2598281ab436b1be1b4a/einx-0.4.3-py3-none-any.whl"
+      },
+      "original_frozen_archive_rehashed": true
+    },
+    {
+      "name": "phonemizer",
+      "version": "3.3.0",
+      "artifact": {
+        "bytes": 106164,
+        "filename": "phonemizer-3.3.0-py3-none-any.whl",
+        "sha256": "8e0ae407d381db31d176f4aed74ee43808659f73e9f93c00ca34bde8662a2906"
+      },
+      "original_frozen_archive_rehashed": true
+    }
+  ],
+  "scope": "Independently inspect actual selected wheel ZIP member paths and affected payload bytes against the frozen lock, plus original APT file manifests. This is not a read of the already-destroyed native environment.",
+  "interpretation": "Both unchanged wheels cannot simultaneously satisfy exact installed-file identity at this path. The native traceback independently reports installed_wheel_bytes rejecting changed payload before operations; no script transformation exception is justified.",
+  "ruled_out": {
+    "typer_typer_slim_overlap": false,
+    "typer_slim_metadata_only_members": 5,
+    "all_original_data_scripts_match_existing_shebang_allowance": true
+  },
+  "reviewed_remedy": "Relocate only Einx's unchanged documentation config into its distribution-specific standard .data/data/share/doc path, preserve all runtime code/METADATA/WHEEL/license and116/183 requirements, regenerate truthful RECORD, then reject any target collision before installation and rerun native.",
+  "source_edited": false,
+  "native_retry_passed": false,
+  "release_created": false
+}

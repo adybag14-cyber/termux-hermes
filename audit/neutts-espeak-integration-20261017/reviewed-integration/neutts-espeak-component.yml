@@ -1,0 +1,55 @@
+name: Prepare NeuTTS eSpeak and real Phonemizer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [prepare/termux-compatibility-next-stable]
+    paths:
+      - '.github/workflows/neutts-espeak-component.yml'
+      - 'scripts/compatibility_probe_neutts_espeak.sh'
+      - 'scripts/compatibility_probe_neutts_espeak.py'
+      - 'scripts/prepare_neutts_espeak_source.py'
+      - 'scripts/neutts_espeak_source_lock.json'
+      - 'scripts/check_neutts_espeak_cmake.py'
+      - 'patches/next-stable/espeak-ng-explicit-off-sonic.patch'
+      - 'scripts/extract_phonemizer_catalog.py'
+      - 'scripts/prepare_phonemizer_runtime.py'
+      - 'scripts/phonemizer_runtime_lock.json'
+      - 'scripts/compatibility_probe_phonemizer.py'
+      - 'patches/next-stable/phonemizer-lazy-dlinfo.patch'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: neutts-espeak-component-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  native-espeak:
+    name: Scientific foundation, eSpeak C ABI and real Phonemizer
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 65
+    steps:
+      - name: Checkout the reviewed source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify source, offline configuration, C ABI and installed public API
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEUTTS_PROBE_HEAD_SHA: ${{ github.sha }}
+        run: bash scripts/compatibility_probe_neutts_espeak.sh --out probe-results/neutts-espeak
+
+      - name: Preserve separate source, C ABI and public-wrapper evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-neutts-espeak-component
+          path: probe-results/neutts-espeak/
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 14

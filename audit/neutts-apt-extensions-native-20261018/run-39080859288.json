@@ -1,0 +1,772 @@
+{
+  "artifact": {
+    "binary_archives_and_wheels_retained_in_git": false,
+    "bytes": 16213852,
+    "every_crc_and_member_sha256_verified": true,
+    "id": 12118791683,
+    "ledger": "run-39080859288/capture/verified-artifact.json",
+    "members": 91,
+    "retained_artifact_bytes": 2449330,
+    "retained_artifact_files": 77,
+    "sha256": "ffd82a4e588908b0447f200a60f52dd0efc7bf0a24aeab7ffe23aea7ea33c2fb"
+  },
+  "boundaries": {
+    "compiler_requested": false,
+    "default_speech_models_downloaded": false,
+    "engine_installed": false,
+    "original_metadata_and_tags_modified": false,
+    "production_admission_changed": false,
+    "release_created": false,
+    "speech_synthesis_tested": false
+  },
+  "failure": {
+    "classification": "strict image-library pin missing; this run does not establish safe admission of that library",
+    "message": "Unreviewed native mapping outside exact APT/image paths: /data/data/com.termux/files/usr/opt/aosp/lib64/libicuuc.so",
+    "stage": "PyArrow final native mapping provenance",
+    "type": "ProbeError",
+    "unknown_library_bytes_or_owner_established_by_this_run": false
+  },
+  "foundation": {
+    "cases": 7,
+    "raw_pip_exit_code": 1,
+    "raw_pip_passed": false,
+    "status": "passed"
+  },
+  "operations": {
+    "lxml": "not reached",
+    "msgpack": "not reached",
+    "pillow": "not reached",
+    "psutil": "not reached",
+    "pyarrow": {
+      "behavior": "passed before separate final mapping gate",
+      "evidence": "run-39080859288/apt-extension-components/pyarrow/CASE-RESULT.json",
+      "filtered_ids": [
+        3,
+        4,
+        5
+      ],
+      "final_case_status": "failed",
+      "operations": [
+        "NumPy zero-copy",
+        "IPC stream",
+        "IPC file/memory-map",
+        "compute",
+        "dataset filter/projection"
+      ],
+      "rows": 6,
+      "sum": 12
+    }
+  },
+  "prerequisites": {
+    "authenticated_frozen_snapshot": "passed; original 20261017 InRelease and Packages.gz, native configured trust store, no insecure exceptions",
+    "installation": {
+      "compiler_requested": false,
+      "install": {
+        "argv": [
+          "/data/data/com.termux/files/usr/bin/apt-get",
+          "--yes",
+          "-o",
+          "Dir::Etc::sourcelist=/data/data/com.termux/files/usr/tmp/neutts-apt-extensions-gokdhrak/frozen.list",
+          "-o",
+          "Dir::Etc::sourceparts=-",
+          "-o",
+          "Dir::State::lists=/data/data/com.termux/files/usr/tmp/neutts-apt-extensions-gokdhrak/apt-lists",
+          "-o",
+          "Acquire::Languages=none",
+          "-o",
+          "Acquire::AllowInsecureRepositories=false",
+          "-o",
+          "Acquire::AllowDowngradeToInsecureRepositories=false",
+          "-o",
+          "Acquire::AllowWeakRepositories=false",
+          "-o",
+          "APT::Get::AllowUnauthenticated=false",
+          "-o",
+          "APT::Update::Error-Mode=any",
+          "-o",
+          "Dir::Cache::archives=/data/data/com.termux/files/usr/tmp/neutts-apt-extensions.9nTJYx/archives",
+          "-o",
+          "Dpkg::Options::=--force-confnew",
+          "--no-download",
+          "--no-remove",
+          "--no-install-recommends",
+          "--reinstall",
+          "install",
+          "apache-orc=2.3.1-1",
+          "libarrow-cpp=26.0.0-2",
+          "libgcrypt=1.12.4",
+          "libgpg-error=1.61",
+          "libimagequant=4.4.1",
+          "liblz4=1.10.0-1",
+          "libraqm=0.11.0",
+          "libre2=2025-11-05-2",
+          "libsnappy=1.3.1",
+          "libxslt=1.1.45-1",
+          "openjpeg=2.5.4",
+          "python-lxml=6.1.3",
+          "python-msgpack=1.2.3",
+          "python-pillow=12.3.0",
+          "python-psutil=7.2.2-2",
+          "python-pyarrow=26.0.0-2",
+          "thrift=0.25.0",
+          "utf8proc=2.12.0"
+        ],
+        "exit_code": 0,
+        "status": "passed",
+        "stderr": {
+          "bytes": 0,
+          "file": "apt-install.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 6047,
+          "file": "apt-install.stdout.log",
+          "sha256": "eac7d89d361e32926087785d02b23e5bf32847959a7ddf202d7fe08cc0a78f6d"
+        },
+        "timed_out": false
+      },
+      "new_packages": [
+        "apache-orc",
+        "libarrow-cpp",
+        "libimagequant",
+        "libraqm",
+        "libre2",
+        "libsnappy",
+        "libxslt",
+        "openjpeg",
+        "python-lxml",
+        "python-msgpack",
+        "python-pillow",
+        "python-psutil",
+        "python-pyarrow",
+        "thrift",
+        "utf8proc"
+      ],
+      "other_state_changes": [],
+      "plan": {
+        "argv": [
+          "/data/data/com.termux/files/usr/bin/apt-get",
+          "--simulate",
+          "-o",
+          "Dir::Etc::sourcelist=/data/data/com.termux/files/usr/tmp/neutts-apt-extensions-gokdhrak/frozen.list",
+          "-o",
+          "Dir::Etc::sourceparts=-",
+          "-o",
+          "Dir::State::lists=/data/data/com.termux/files/usr/tmp/neutts-apt-extensions-gokdhrak/apt-lists",
+          "-o",
+          "Acquire::Languages=none",
+          "-o",
+          "Acquire::AllowInsecureRepositories=false",
+          "-o",
+          "Acquire::AllowDowngradeToInsecureRepositories=false",
+          "-o",
+          "Acquire::AllowWeakRepositories=false",
+          "-o",
+          "APT::Get::AllowUnauthenticated=false",
+          "-o",
+          "APT::Update::Error-Mode=any",
+          "-o",
+          "Dir::Cache::archives=/data/data/com.termux/files/usr/tmp/neutts-apt-extensions.9nTJYx/archives",
+          "-o",
+          "Dpkg::Options::=--force-confnew",
+          "--no-download",
+          "--no-remove",
+          "--no-install-recommends",
+          "--reinstall",
+          "install",
+          "apache-orc=2.3.1-1",
+          "libarrow-cpp=26.0.0-2",
+          "libgcrypt=1.12.4",
+          "libgpg-error=1.61",
+          "libimagequant=4.4.1",
+          "liblz4=1.10.0-1",
+          "libraqm=0.11.0",
+          "libre2=2025-11-05-2",
+          "libsnappy=1.3.1",
+          "libxslt=1.1.45-1",
+          "openjpeg=2.5.4",
+          "python-lxml=6.1.3",
+          "python-msgpack=1.2.3",
+          "python-pillow=12.3.0",
+          "python-psutil=7.2.2-2",
+          "python-pyarrow=26.0.0-2",
+          "thrift=0.25.0",
+          "utf8proc=2.12.0"
+        ],
+        "exit_code": 0,
+        "status": "passed",
+        "stderr": {
+          "bytes": 0,
+          "file": "apt-plan.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2828,
+          "file": "apt-plan.stdout.log",
+          "sha256": "c7c3517c1886d35dadd6cf7d71532052c3764b3d8e0f20b6994175cda203a37f"
+        },
+        "timed_out": false
+      },
+      "reinstalled_exact_packages": [
+        "libgcrypt",
+        "libgpg-error",
+        "liblz4"
+      ],
+      "removed_packages": [],
+      "selected_archive_bytes": 14043104,
+      "selected_count": 18,
+      "selected_versions": {
+        "apache-orc": "2.3.1-1",
+        "libarrow-cpp": "26.0.0-2",
+        "libgcrypt": "1.12.4",
+        "libgpg-error": "1.61",
+        "libimagequant": "4.4.1",
+        "liblz4": "1.10.0-1",
+        "libraqm": "0.11.0",
+        "libre2": "2025-11-05-2",
+        "libsnappy": "1.3.1",
+        "libxslt": "1.1.45-1",
+        "openjpeg": "2.5.4",
+        "python-lxml": "6.1.3",
+        "python-msgpack": "1.2.3",
+        "python-pillow": "12.3.0",
+        "python-psutil": "7.2.2-2",
+        "python-pyarrow": "26.0.0-2",
+        "thrift": "0.25.0",
+        "utf8proc": "2.12.0"
+      },
+      "status": "passed",
+      "unreviewed_upgrades": []
+    },
+    "installed_controls": "passed: all 84 exact archive control identities",
+    "original_apt_archives": "passed: 84 exact archives, 126542852 bytes",
+    "original_root_files_before_operations": {
+      "aarch64_elf_files": 34,
+      "installed_manifest_sha256": "f09b3cf2eda59d7f85916d73455e379c041b3201ef8ad72bb79f4344882b34ad",
+      "original_metadata_and_tags_preserved": true,
+      "regular_files": 893,
+      "status": "passed",
+      "symlinks": 1
+    },
+    "original_root_inputs": "passed: 5 archives, 893 original regular files, 1 symlink, 34 AArch64 ELF files",
+    "requirements": {
+      "apt_distributions": 12,
+      "raw_pip_exit_code": 1,
+      "raw_pip_passed": false,
+      "sha256": "ac97b3ed066f8ef069cff8867d4cf7b0f24b54dac2e8806137782e6045f5ba43",
+      "status": "requirements-and-provenance-passed"
+    }
+  },
+  "raw_bytes": 2689387,
+  "raw_file_count": 83,
+  "raw_files": [
+    {
+      "bytes": 84,
+      "path": "APT-EXTENSIONS-EXIT.json",
+      "sha256": "837b945dc61e1c4478a0f330c5afdebe7a7899afbcdc974ad169787126414640",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 2594,
+      "path": "APT-EXTENSIONS-PROBE-INPUTS.json",
+      "sha256": "5947f4638f1af1232e911eb9f146bf98b497ed9d2c4ae821f3af53586c7371b0",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 32254,
+      "path": "NEUTTS-APT-PYTHON-METADATA.json",
+      "sha256": "6fb50c94a727ee743580f3c763b8f119066e82bc6b5d3020f7f57b6877203c56",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 173678,
+      "path": "NEUTTS-APT-PYTHON-VALIDATION.json",
+      "sha256": "6adcb0db6955fbd1dd2c18842a9c47567576e036e0cc4b87e883bda3373e6c3c",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 141,
+      "path": "NEUTTS-APT-PYTHON-VALIDATION.log",
+      "sha256": "fad891e4749fc619ae026aa4faebc8b99e2ab08c1c1ce59c947af0683acdf95b",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 1471,
+      "path": "NEUTTS-BASE-PACKAGES.tsv",
+      "sha256": "78ff2592d1d13be57ae34035e67f41de78677af37644cea50622877b590c6046",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 5688,
+      "path": "NEUTTS-BOOTSTRAP-ARCHIVES.sha256",
+      "sha256": "53496a4c81705c4cc4253c9545ac84a081fe3416dd5f7f081ea6c572da93a6b5",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 40501,
+      "path": "NEUTTS-CORE-RESULT.json",
+      "sha256": "0b749587814ca825cc8b785a06aa8c9f9d008cd99b0eaebd9b9ed1d4428ee2cd",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 54,
+      "path": "NEUTTS-EXIT.json",
+      "sha256": "868f263d1c2a443d1f3c3c2d00a4f4da64a3d873205db50ed16605ddda7ea3eb",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 4804,
+      "path": "NEUTTS-INSTALLED-PACKAGES.tsv",
+      "sha256": "40c4104a1cc044bd3f5297deb160e0f952208afe1e383f1b5b8fa3b441956bd3",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 18469,
+      "path": "NEUTTS-PINNED-APT.tsv",
+      "sha256": "7ad635d7f1ce1157c7f3b3d7808eaf113c8bb77c4e99a8fe30b6b155faf04c5e",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 339,
+      "path": "NEUTTS-PYTHON-CHECK.log",
+      "sha256": "2c025ce5a45cfa2b6f032ea3bc706e8173fa7c6a1c78ff860e40d669199a48bf",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 2992,
+      "path": "NEUTTS-PYTHON-INSTALL.log",
+      "sha256": "b6f168a7c490237e88b0756959eeb782b15fcd2ed77c0b1ca229f435d4dea5fa",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 1448,
+      "path": "NEUTTS-UPGRADED-BASE-PACKAGES.tsv",
+      "sha256": "132cb4a2c2714a6c97f61d2393ac17dd5f11edaf16eaaf1dbce3527972d076aa",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 183180,
+      "path": "apt-extension-components/APT-EXTENSIONS-REQUIREMENTS.json",
+      "sha256": "ac97b3ed066f8ef069cff8867d4cf7b0f24b54dac2e8806137782e6045f5ba43",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 31648,
+      "path": "apt-extension-components/APT-EXTENSIONS-RESULT.json",
+      "sha256": "864ba8af9915335ed5dc7cd0e86fff0aedfc28c82c31f2cac8608a2c5c5c1fb4",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 38427,
+      "path": "apt-extension-components/VERIFIED-APT-ARCHIVES.json",
+      "sha256": "e6db33344412bc85987a892c2b3e4fe7e1c7fcc24d25794533961e062a8bb255",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 1770,
+      "path": "apt-extension-components/apt-install.command.json",
+      "sha256": "b1eb3ae9b9e6c860d601485f12690bcc92d52a6ae5e72f64070a094150d1cf21",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "apt-extension-components/apt-install.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 6047,
+      "path": "apt-extension-components/apt-install.stdout.log",
+      "sha256": "eac7d89d361e32926087785d02b23e5bf32847959a7ddf202d7fe08cc0a78f6d",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 1769,
+      "path": "apt-extension-components/apt-plan.command.json",
+      "sha256": "e5eab6c0ae2bda5c29b8a52a2d7f57a077494a84eb795927cb4954af8631d1ec",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "apt-extension-components/apt-plan.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 2828,
+      "path": "apt-extension-components/apt-plan.stdout.log",
+      "sha256": "c7c3517c1886d35dadd6cf7d71532052c3764b3d8e0f20b6994175cda203a37f",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 1077,
+      "path": "apt-extension-components/authenticated-frozen-index.command.json",
+      "sha256": "7a14a0008446b57cc3bfac6b672be30c068eb2e619dcd652ec1378c9423c9333",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "apt-extension-components/authenticated-frozen-index.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 845,
+      "path": "apt-extension-components/authenticated-frozen-index.stdout.log",
+      "sha256": "ab408dc8626969ca3d178dff8d585413a3fb627b32b279014ebbf56020c8cc3b",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 835,
+      "path": "apt-extension-components/case-pyarrow.command.json",
+      "sha256": "e670bbf53e20f5db8f777bcc3fce7a5201ffab71713b1f7c86d652f8d46169df",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 1410,
+      "path": "apt-extension-components/case-pyarrow.stderr.log",
+      "sha256": "b45aa77ecd27cf3ec3720a08fa76c8eeec367dcb7423a0c7909930964ce28d1d",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "apt-extension-components/case-pyarrow.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 541,
+      "path": "apt-extension-components/dpkg-after.command.json",
+      "sha256": "6155a800310d0daedced0ebad9c4e223be63a0a76b1da92d71493a52b3593a5b",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 21481,
+      "path": "apt-extension-components/dpkg-after.json",
+      "sha256": "56f82eed8d24d7a41298be8d6f961e022dfdfabe985939659ccbc3f52334fe63",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "apt-extension-components/dpkg-after.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 7264,
+      "path": "apt-extension-components/dpkg-after.stdout.log",
+      "sha256": "24668c3ecda7cee37cc86007a0c1e734bbfecf1b1aefbf1e24afc7a46a302846",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 543,
+      "path": "apt-extension-components/dpkg-before.command.json",
+      "sha256": "b46c6ddd83e57a93c19387aaee47fa85d08ba28bd82a895f3b728dbca1eefd87",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 19896,
+      "path": "apt-extension-components/dpkg-before.json",
+      "sha256": "ad3ef8c663cfa1ad6fe7d1ad11d5d47b274106a08c8b8d10324e45a895d4b6a5",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "apt-extension-components/dpkg-before.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 6714,
+      "path": "apt-extension-components/dpkg-before.stdout.log",
+      "sha256": "b134028016c734b2395198dee098d00867f07316db7c9eea9e2115392da31592",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 1221,
+      "path": "apt-extension-components/pyarrow/CASE-FAILURE.json",
+      "sha256": "3a461224a3beacbdfee8f1b4982029482a8cd8e1194c3affd6e77991e7f51bca",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 2123,
+      "path": "apt-extension-components/pyarrow/CASE-RESULT.json",
+      "sha256": "925f17ed448aeb411c999bb10904c52af5f3f90145cf32a79a890744812a188b",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 74304,
+      "path": "apt-extension-components/pyarrow/proc-self-maps.txt",
+      "sha256": "7447f6f453ba6fa103e197d63bc218e3e4e0fdd558f9b73968a0ace2f8302d51",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 722,
+      "path": "apt-extension-components/pyarrow/tiny-arrow-ipc.arrow",
+      "sha256": "a70966c5b4a40243d815e288435ae8838e7de8810ca72991638156548542a69c",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 499,
+      "path": "apt-extension-components/raw-pip-check.command.json",
+      "sha256": "3adb0e2df4d923c02743f82d69a1c0cab938f5b86a2418c70922c70b3c682b4d",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "apt-extension-components/raw-pip-check.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 576,
+      "path": "apt-extension-components/raw-pip-check.stdout.log",
+      "sha256": "3dd42a598f5af86415a05c92afe0dbf8f77042af26d4097ccd423e1d2c6c5da2",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 576,
+      "path": "apt-extension-components/raw-pip-check.txt",
+      "sha256": "3dd42a598f5af86415a05c92afe0dbf8f77042af26d4097ccd423e1d2c6c5da2",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 2877,
+      "path": "apt-extension-inputs/APT-EXTENSIONS-PREPARED.json",
+      "sha256": "b8d8c3fb4a0b11e040389b030054f6002b11cb3852328477b7fa34b66d8412f0",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 12771,
+      "path": "apt-extension-inputs/apt-provenance-pins.tsv",
+      "sha256": "ef57aea05867860c8689ecd41b9facad54c1417a332257d71331e45b3fd11e3f",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 18469,
+      "path": "apt-extension-inputs/foundation-pins.tsv",
+      "sha256": "7ad635d7f1ce1157c7f3b3d7808eaf113c8bb77c4e99a8fe30b6b155faf04c5e",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 517167,
+      "path": "apt-extension-inputs/neutts_apt_extensions_lock.json",
+      "sha256": "b20d35dc54da253578ffd499e0dc7a226c77b4f704b2601e37a22edb81fab8d4",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 14016,
+      "path": "apt-extension-inputs/snapshot/InRelease",
+      "sha256": "249dab3ab3da3993b2436d48c819506f9aa586f6985905d81a451e76f2de7901",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 727968,
+      "path": "apt-extension-inputs/snapshot/Packages.gz",
+      "sha256": "dba73c2f0caaa828b65f02ba0e56cac694ee7186999a442ae7858b4258c321b6",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 108819,
+      "path": "apt-extensions-native-probe.log",
+      "sha256": "0d7ef08e07ec0a9bb88a96d59f1ffff60207258295d0bd048cc77fd07e888e2a",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 782,
+      "path": "capture/artifacts-api.json",
+      "sha256": "9a7cc059571ff853cbf97e9f7e856e63ef5477ec9214cd4ced706ff96396990c",
+      "source": "immutable GitHub API snapshot"
+    },
+    {
+      "bytes": 7232,
+      "path": "capture/capture-helper.py",
+      "sha256": "cd7769841c2e806a07cc14b6d8d44729ece5f0e76bfdd15f5f165f00fe9461cb",
+      "source": "exact capture implementation"
+    },
+    {
+      "bytes": 2115,
+      "path": "capture/jobs-api.json",
+      "sha256": "8d201cbd0acc1e32acf10f039a88ff7884ec6aa23da9b815f608a754482f3431",
+      "source": "immutable GitHub API snapshot"
+    },
+    {
+      "bytes": 195154,
+      "path": "capture/native-job.log",
+      "sha256": "60a8fb48f7f399c9cb50995e2987ea51eec37e0ccd579e3a9360e1aac87cbe08",
+      "source": "captured run evidence"
+    },
+    {
+      "bytes": 13854,
+      "path": "capture/run-api.json",
+      "sha256": "a0ceec396c0dc16dd482d1e30757884be345b09ff95e9056c52e122f70eaeeda",
+      "source": "immutable GitHub API snapshot"
+    },
+    {
+      "bytes": 20920,
+      "path": "capture/verified-artifact.json",
+      "sha256": "72d7b0e79edb8e9e54c79784ca3eae44c902ab6dfb69b5fdfa134b4074bcbfbb",
+      "source": "captured run evidence"
+    },
+    {
+      "bytes": 14905,
+      "path": "neutts-llvmlite.json",
+      "sha256": "73c00bd81765e6982107865719843f96c49dfb2f4f6fa31d422dba734431d6c2",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "neutts-llvmlite.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "neutts-llvmlite.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 18115,
+      "path": "neutts-python_dependencies.json",
+      "sha256": "8ecaa3d5333511323e1af52d671307a116ddaeab817d30eb3cac75329504aa9a",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "neutts-python_dependencies.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "neutts-python_dependencies.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 35798,
+      "path": "neutts-scipy.json",
+      "sha256": "cf32241af3ecadffc4906dff456b83a58722c579723aa63460c38d9b929b4646",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "neutts-scipy.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "neutts-scipy.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 16445,
+      "path": "neutts-soxr.json",
+      "sha256": "b7914bf73171af91500eef34deadc4af5d3127437ac674f0d8cfdfa194791746",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "neutts-soxr.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "neutts-soxr.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 59936,
+      "path": "neutts-torch.json",
+      "sha256": "9ebb95ca6ca4e3dc3b029b6693e6483fbf6359ff9fa44c887fff65bdc1430961",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "neutts-torch.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "neutts-torch.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 61598,
+      "path": "neutts-torchaudio.json",
+      "sha256": "da6cb5a4578a9edb148ddd7ca896307b25f99b16a07b3b4ba10a47941f187105",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "neutts-torchaudio.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "neutts-torchaudio.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 101228,
+      "path": "neutts-torchcodec.json",
+      "sha256": "1ba3db42b556f601fb7e0556a561246797a5b92c8ccec7926997910f3b065bb7",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "neutts-torchcodec.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 0,
+      "path": "neutts-torchcodec.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 17316,
+      "path": "python-wheelhouse/neutts_core_python_lock.json",
+      "sha256": "ba927bae7ec87c331e23136ba883da86876ca24044485288d9866649130fab38",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 16207,
+      "path": "python-wheelhouse/python-wheelhouse-receipt.json",
+      "sha256": "2f07f894d5099d9075c94f7bb975735b19b1a9edd85172cecce547a240264cbb",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 866,
+      "path": "python-wheelhouse/requirements.txt",
+      "sha256": "7a8c6c2672cf2b28305978102d9f3fb6025398015603947f362a79c700f8fdd1",
+      "source": "verified artifact member"
+    },
+    {
+      "bytes": 14016,
+      "path": "signed-apt/packages.termux.dev_apt_termux-main_dists_stable_InRelease",
+      "sha256": "249dab3ab3da3993b2436d48c819506f9aa586f6985905d81a451e76f2de7901",
+      "source": "verified artifact member"
+    }
+  ],
+  "run": {
+    "conclusion": "failure",
+    "head_sha": "eea63728f755b02a70c3a57da3653cdc6f79f1b3",
+    "id": 39080859288,
+    "job_id": 117537321729,
+    "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39080859288",
+    "workflow": ".github/workflows/neutts-apt-extensions.yml"
+  },
+  "schema_version": 1,
+  "scope": "Five original APT extension prerequisites; first native attempt"
+}

@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-10-17T20:48:00.731569+00:00",
+  "native_failure_run": 39067100543,
+  "inputs": {
+    "scripts/prepare_audio_hermes_environment.py": {
+      "bytes": 58260,
+      "sha256": "04663ed192171d14866a49c33a45e16ca34eef1a2325d9403dd578029414be3b"
+    },
+    "tests/test_audio_hermes_preparation.py": {
+      "bytes": 20422,
+      "sha256": "34918a1bc05f04213a7e51928eeb8f69cccc64a4269c28b11e27fcd6e745196c"
+    }
+  },
+  "canonical_pm_source": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\hermes-agent-audio-readiness-v0.22.2-20261017",
+  "canonical_pm_files": {
+    "pm/build_operations.py": {
+      "bytes": 11832,
+      "sha256": "7334157f5723942d66ab0f1d2e51b204f70ef31ce12021fa2cddf6f95e25bba0"
+    },
+    "pm/install.py": {
+      "bytes": 43978,
+      "sha256": "03cdcda0964e93c7f02a9a1565e02e9b614c7b3a970fa2e646832bfdb5d3c354"
+    },
+    "pm/lock.py": {
+      "bytes": 12890,
+      "sha256": "0c1999a2781305bf64b1596e71ef393e84b1ad4fb2e2864b37cf39805a5f69c4"
+    },
+    "pm/registry.py": {
+      "bytes": 7438,
+      "sha256": "1f39dd259bc730c4820b18f9c3b04809c79f37bc1302f2ad5cd1f28b76ce2f11"
+    },
+    "pm/package.py": {
+      "bytes": 17085,
+      "sha256": "27ca5a6b83fb9e8e0130699584a924e5a97738c0ae3bb0421ee79d7782fa17ca"
+    },
+    "pm/store.py": {
+      "bytes": 17065,
+      "sha256": "87e551a844c1086f2625bf5e445c8000c4aee12252bcd47fbf84ff08ce5542ad"
+    },
+    "scripts/bundles/payload.py": {
+      "bytes": 7974,
+      "sha256": "ab2fb59a2face83a92121af5e09e68b04c3abe3301261248cdf0c8a2cca9ae98"
+    }
+  },
+  "test_command": [
+    "C:\\Python314\\python.exe",
+    "-X",
+    "utf8",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_audio_hermes_preparation.py"
+  ],
+  "tests": {
+    "passed": 56,
+    "skipped": 0,
+    "exit_code": 0,
+    "log": "audio-hermes-packaged-tool-root-tests-20261017.log",
+    "sha256": "ec6fb1ea98437f80b7f94ce6fe540a43ea3a5ad339557587716144a052591d79"
+  },
+  "review": "The helper uses actual canonical lock identity, Facts.installed, tree_digest, _copy_links, package binary/env and VerifiedTools/InstalledPackage. Only the expected source-store entry convention changes to exact published flat python/uv entries; receipt/lock/source identities remain unchanged. Independent tests use canonical PM classes and prohibit writes, chmod and subprocess execution during admission.",
+  "native_retry_status": "Not yet started; this is host review evidence."
+}

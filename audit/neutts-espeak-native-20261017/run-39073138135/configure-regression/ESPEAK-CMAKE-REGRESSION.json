@@ -1,0 +1,92 @@
+{
+  "cases": [
+    {
+      "case": "original-explicit-off",
+      "command": [
+        "/usr/local/bin/cmake",
+        "-S",
+        "/tmp/espeak-cmake-guard-k7j1jqhg/original-explicit-off",
+        "-B",
+        "/tmp/espeak-cmake-guard-k7j1jqhg/original-explicit-off-build",
+        "-G",
+        "Ninja",
+        "-DCMAKE_MAKE_PROGRAM=/usr/local/bin/ninja",
+        "-DUSE_LIBSONIC=OFF"
+      ],
+      "exit_code": 1,
+      "expected_configure_success": false,
+      "network_fetch_disabled": true,
+      "source_sha256": "312539333dd476d726ddea0a4886d191eb7ac3b53a41a47419f34643cea7af92",
+      "status": "passed",
+      "stderr_sha256": "cdf810ea72a27cbc941163f1b7761e02c737c6387d0ee8f8f6f011225077d26d",
+      "stdout_sha256": "204e913b87cf5c75b808ca3186aab27bf7d903deb3392da1736bc0c966ba1151"
+    },
+    {
+      "case": "guarded-explicit-off",
+      "command": [
+        "/usr/local/bin/cmake",
+        "-S",
+        "/tmp/espeak-cmake-guard-k7j1jqhg/guarded-explicit-off",
+        "-B",
+        "/tmp/espeak-cmake-guard-k7j1jqhg/guarded-explicit-off-build",
+        "-G",
+        "Ninja",
+        "-DCMAKE_MAKE_PROGRAM=/usr/local/bin/ninja",
+        "-DUSE_LIBSONIC=OFF"
+      ],
+      "exit_code": 0,
+      "expected_configure_success": true,
+      "network_fetch_disabled": true,
+      "source_sha256": "deffe5428e5a8c94e32777c07ef6998892d7ff60eeb9a586a8401566eb666a52",
+      "status": "passed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "cc0bdac18981634a50cf8c76bec97a5fe256fd6e4bf370b5dc9ee48a6f41c45b"
+    },
+    {
+      "case": "guarded-explicit-on",
+      "command": [
+        "/usr/local/bin/cmake",
+        "-S",
+        "/tmp/espeak-cmake-guard-k7j1jqhg/guarded-explicit-on",
+        "-B",
+        "/tmp/espeak-cmake-guard-k7j1jqhg/guarded-explicit-on-build",
+        "-G",
+        "Ninja",
+        "-DCMAKE_MAKE_PROGRAM=/usr/local/bin/ninja",
+        "-DUSE_LIBSONIC=ON"
+      ],
+      "exit_code": 1,
+      "expected_configure_success": false,
+      "network_fetch_disabled": true,
+      "source_sha256": "deffe5428e5a8c94e32777c07ef6998892d7ff60eeb9a586a8401566eb666a52",
+      "status": "passed",
+      "stderr_sha256": "62cb5dff81ae57f8fd7508745b8db62d04ccc807a4585e6df01d1e4fa0592af6",
+      "stdout_sha256": "204e913b87cf5c75b808ca3186aab27bf7d903deb3392da1736bc0c966ba1151"
+    },
+    {
+      "case": "guarded-default",
+      "command": [
+        "/usr/local/bin/cmake",
+        "-S",
+        "/tmp/espeak-cmake-guard-k7j1jqhg/guarded-default",
+        "-B",
+        "/tmp/espeak-cmake-guard-k7j1jqhg/guarded-default-build",
+        "-G",
+        "Ninja",
+        "-DCMAKE_MAKE_PROGRAM=/usr/local/bin/ninja"
+      ],
+      "exit_code": 1,
+      "expected_configure_success": false,
+      "network_fetch_disabled": true,
+      "source_sha256": "deffe5428e5a8c94e32777c07ef6998892d7ff60eeb9a586a8401566eb666a52",
+      "status": "passed",
+      "stderr_sha256": "8a27e31aa71fa75baa9e224512781cfc15d8e9975c7f61ba67dd8460614886a1",
+      "stdout_sha256": "204e913b87cf5c75b808ca3186aab27bf7d903deb3392da1736bc0c966ba1151"
+    }
+  ],
+  "native_compatibility_claimed": false,
+  "patch_sha256": "934c9d9a5d3cc76e0011321cfea7270b91dc954fed2a4c03857a7a6ea42b7d4a",
+  "schema_version": 1,
+  "source_commit": "69bfd1efde0236654ccc117a28d04aef27673a30",
+  "status": "passed"
+}

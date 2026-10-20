@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-10-20T13:15:48.710733+00:00",
+  "review": "read-only peer review of frozen audio device guide",
+  "guide": {
+    "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\docs-recovery-20261020\\drafts\\docs\\audio-readiness-device-validation.md",
+    "bytes": 19087,
+    "sha256": "ea8b7682f988c6c5bb163ab13f0086969acb8e6f7bddf93062f2be73a8dcc15f"
+  },
+  "status": "passed",
+  "blocking_findings": [],
+  "checks": [
+    "Canonical payload/app, payload/venv/bin/python and payload/tools paths match native_environment and final-path receipt",
+    "Canonical HERMES_INSTALL_ROOT, HERMES_PYTHON_SRC_ROOT and HERMES_RUNTIME_DIR names and library path match preparer",
+    "prepare-and-probe executes once; subsequent inventory check reads original non-recording receipt",
+    "Dependency readiness, initialized PortAudio, no inventory error and actual input-capable device are required",
+    "Per-take private TMPDIR is established before importing exact pinned voice_mode; _TEMP_DIR containment is checked",
+    "Returned recording rejects symlink and requires exact owned parent/file before assigning cleanup target",
+    "Nested finally releases recorder and only unlinks validated owned WAV; forced-termination limitation is explicit",
+    "No transcription/model/network is invoked by the local PCM check; streaming disabled and provider none checked before start",
+    "Receipt enumeration and host construction are not represented as physical microphone/VAD success"
+  ],
+  "source_files": [
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\scripts\\prepare_audio_hermes_environment.py",
+      "bytes": 86191,
+      "sha256": "cd84f5a9e23b4a81e5ed000e311546786c6dfb1d386cb234541fc4829161f515"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\scripts\\run_audio_hermes_preparation.sh",
+      "bytes": 4999,
+      "sha256": "b98108505947c06006a1241a3f7403d606b38a7a14b707eb29a2ce9642488d2d"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\scripts\\compatibility_probe_audio_hermes.py",
+      "bytes": 21573,
+      "sha256": "3720e56b9fafccf6a32efa01911e6c0ce95b0c6c40017362a96a7258f8af98e2"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\hermes-agent-audio-readiness-v0.22.2-20261017\\tools\\voice_mode.py",
+      "bytes": 70749,
+      "sha256": "2080ba077ec94146d06cbd704a7e21763e5cf37f4221561145b4c45de6a78a58"
+    }
+  ],
+  "execution": {
+    "microphone_commands_executed": false,
+    "device_commands_executed": false,
+    "guide_snippets_executed": false,
+    "edits_made_by_peer": false
+  },
+  "syntax_validation": "Docs owner separately reports four bash -n checks and two Python AST parses passed; this peer review did not repeat those tests"
+}

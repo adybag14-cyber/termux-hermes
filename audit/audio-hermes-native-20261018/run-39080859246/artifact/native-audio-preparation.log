@@ -1,0 +1,19 @@
+/candidate/hermes-agent_0.22.2-1_aarch64.deb: OK
+Audio readiness probe failed: audio-readiness failed with exit 1; inspect the retained raw logs
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_audio_hermes.py", line 258, in main
+    run(args)
+    ~~~^^^^^^
+  File "/probes/scripts/compatibility_probe_audio_hermes.py", line 210, in run
+    prep.run_logged([str(payload / "venv/bin/python"), "-I", "-B", str(Path(__file__).resolve()),
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     "--runtime-worker", str(request)], evidence, "audio-readiness",
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                    env=environment, timeout=180)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/prepare_audio_hermes_environment.py", line 837, in run_logged
+    require(result.returncode == 0, f"{name} failed with exit {result.returncode}; inspect the retained raw logs")
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/prepare_audio_hermes_environment.py", line 278, in require
+    raise PreparationError(message)
+_audio_preparation_contract.PreparationError: audio-readiness failed with exit 1; inspect the retained raw logs

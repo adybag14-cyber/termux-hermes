@@ -1,0 +1,2111 @@
+{
+  "allowed_generated_source_manifests": {
+    "regex": {
+      "bytes": 409,
+      "original_bytes": 399,
+      "original_sha256": "abfb745dfe9a84cb6594f8896b4b5e431b03c0098be2c502edc07e36d21ae16f",
+      "path": "regex.egg-info/SOURCES.txt",
+      "reason": "Original Setuptools egg_info lists the already present generated setup.cfg in its working-copy SOURCES.txt; no other original file or dependency declaration may change.",
+      "replay_evidence": "audit/neutts-tiktoken-preparation-20261020/metadata-replay/regex.SOURCES.txt",
+      "sha256": "09afb60e53ff5a0e701583de57c64e1a9575470308fa6f5c2ac7677d21c4e8c0"
+    },
+    "tiktoken": {
+      "bytes": 692,
+      "original_bytes": 682,
+      "original_sha256": "431d40d56292ce6136dc488e0d614e60c715fc7babf7e71d979dfd64791e7773",
+      "path": "tiktoken.egg-info/SOURCES.txt",
+      "reason": "Original Setuptools egg_info lists the already present generated setup.cfg in its working-copy SOURCES.txt; no other original file or dependency declaration may change.",
+      "replay_evidence": "audit/neutts-tiktoken-preparation-20261020/metadata-replay/tiktoken.SOURCES.txt",
+      "sha256": "a7535cab2fbc1a3996ade0814983281739e8c7663b4efe0c024b40c453f337b2"
+    }
+  },
+  "boundaries": {
+    "complete_engine_admitted": false,
+    "existing_locks_modified": false,
+    "finished_wheel_retagging": false,
+    "model_downloads": false,
+    "original_backend_modified": false,
+    "original_runtime_metadata_modified": false,
+    "release_output": false
+  },
+  "captured_cargo_lock": {
+    "bytes": 6462,
+    "path": "Cargo.lock",
+    "raw_audit_path": "raw-termux-neutts-rust-tiktoken-lock/rust-components/captured-tiktoken-inputs/sources/tiktoken-0.14.0/Cargo.lock",
+    "sha256": "44c9797be677b8af84478a3d54d09ac34d5a654e4ed8ee3e36a871415bc3dd80"
+  },
+  "cargo_build_lock_policy": "Run original Setuptools-Rust backend unchanged with Cargo offline and the exact independently verified directory source; verify --locked --offline metadata before the build and byte-identical approved Cargo.lock before and after. No unsupported locked environment variable or source patch.",
+  "environment": {
+    "extra": "",
+    "implementation_name": "cpython",
+    "implementation_version": "3.14.6",
+    "os_name": "posix",
+    "platform_machine": "aarch64",
+    "platform_python_implementation": "CPython",
+    "platform_system": "Android",
+    "python_full_version": "3.14.6",
+    "python_version": "3.14",
+    "sys_platform": "android"
+  },
+  "python_build_packages": [
+    {
+      "artifact": {
+        "bytes": 1008090,
+        "filename": "setuptools-83.0.0-py3-none-any.whl",
+        "sha256": "29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3",
+        "url": "https://files.pythonhosted.org/packages/5d/40/e1e72872c6354b306daef1703549e8e83b4d43cfea356311bf722a043752/setuptools-83.0.0-py3-none-any.whl"
+      },
+      "base_requires_dist": [],
+      "name": "setuptools",
+      "native_members": [],
+      "requires_dist": [
+        "pytest!=8.1.*,>=6; extra == \"test\"",
+        "virtualenv>=13.0.0; extra == \"test\"",
+        "wheel>=0.44.0; extra == \"test\"",
+        "pip>=19.1; extra == \"test\"",
+        "packaging>=24.2; extra == \"test\"",
+        "jaraco.envs>=2.2; extra == \"test\"",
+        "pytest-xdist>=3; extra == \"test\"",
+        "jaraco.path>=3.7.2; extra == \"test\"",
+        "build[virtualenv]>=1.0.3; extra == \"test\"",
+        "filelock>=3.4.0; extra == \"test\"",
+        "ini2toml[lite]>=0.14; extra == \"test\"",
+        "tomli-w>=1.0.0; extra == \"test\"",
+        "pytest-timeout; extra == \"test\"",
+        "pytest-perf; sys_platform != \"cygwin\" and extra == \"test\"",
+        "jaraco.develop>=7.21; (python_version >= \"3.9\" and sys_platform != \"cygwin\") and extra == \"test\"",
+        "pytest-home>=0.5; extra == \"test\"",
+        "pytest-subprocess; extra == \"test\"",
+        "pyproject-hooks!=1.1; extra == \"test\"",
+        "jaraco.test>=5.5; extra == \"test\"",
+        "sphinx>=3.5; extra == \"doc\"",
+        "jaraco.packaging>=9.3; extra == \"doc\"",
+        "rst.linker>=1.9; extra == \"doc\"",
+        "furo; extra == \"doc\"",
+        "sphinx-lint; extra == \"doc\"",
+        "jaraco.tidelift>=1.4; extra == \"doc\"",
+        "pygments-github-lexers==0.0.5; extra == \"doc\"",
+        "sphinx-favicon; extra == \"doc\"",
+        "sphinx-inline-tabs; extra == \"doc\"",
+        "sphinx-reredirects; extra == \"doc\"",
+        "sphinxcontrib-towncrier; extra == \"doc\"",
+        "sphinx-notfound-page<2,>=1; extra == \"doc\"",
+        "pyproject-hooks!=1.1; extra == \"doc\"",
+        "towncrier<24.7; extra == \"doc\"",
+        "packaging>=24.2; extra == \"core\"",
+        "more_itertools>=8.8; extra == \"core\"",
+        "jaraco.text>=3.7; extra == \"core\"",
+        "importlib_metadata>=6; python_version < \"3.10\" and extra == \"core\"",
+        "tomli>=2.0.1; python_version < \"3.11\" and extra == \"core\"",
+        "wheel>=0.43.0; extra == \"core\"",
+        "jaraco.functools>=4; extra == \"core\"",
+        "more_itertools; extra == \"core\"",
+        "pytest-checkdocs>=2.14; extra == \"check\"",
+        "pytest-ruff>=0.2.1; sys_platform != \"cygwin\" and extra == \"check\"",
+        "ruff>=0.13.0; sys_platform != \"cygwin\" and extra == \"check\"",
+        "pytest-cov; extra == \"cover\"",
+        "pytest-enabler>=3.4; extra == \"enabler\"",
+        "pytest-mypy>=1.0.1; platform_python_implementation != \"PyPy\" and extra == \"type\"",
+        "mypy==1.18.*; extra == \"type\"",
+        "importlib_metadata>=7.0.2; python_version < \"3.10\" and extra == \"type\"",
+        "jaraco.develop>=7.21; sys_platform != \"cygwin\" and extra == \"type\""
+      ],
+      "requires_python": ">=3.10",
+      "version": "83.0.0",
+      "wheel": {
+        "declared_requires_dist_count": 50,
+        "declared_requires_dist_sha256": "b49752a643dd37041b6420716b495b863967848fb9c07b5773f040242a134d1c",
+        "entry_count": 441,
+        "file_count": 441,
+        "max_member_bytes": 365819,
+        "members_sha256": "162ee7a0c3949be4bd36aebbc050cccacba66f69235a06f0019175d43a4c5717",
+        "metadata_member": "setuptools-83.0.0.dist-info/METADATA",
+        "metadata_sha256": "26e45e90de763c6938d93d1df2ecd6782a0f1514d41cbd22ebef4e0ab6475771",
+        "record_member": "setuptools-83.0.0.dist-info/RECORD",
+        "record_sha256": "9dfe956672a9afd8504e50feddb626727f53def6a3590219ce9ff3a05e302c91",
+        "root_is_purelib": true,
+        "tags": [
+          "py3-none-any"
+        ],
+        "uncompressed_bytes": 3466279,
+        "wheel_member": "setuptools-83.0.0.dist-info/WHEEL",
+        "wheel_sha256": "2b6eb4118ce7cd7b09601406aa623c553c4476265836f0d9c16f5c061f7efcc0"
+      }
+    },
+    {
+      "artifact": {
+        "bytes": 74366,
+        "filename": "packaging-26.0-py3-none-any.whl",
+        "sha256": "b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529",
+        "url": "https://files.pythonhosted.org/packages/b7/b9/c538f279a4e237a006a2c98387d081e9eb060d203d8ed34467cc0f0b9b53/packaging-26.0-py3-none-any.whl"
+      },
+      "base_requires_dist": [],
+      "name": "packaging",
+      "native_members": [],
+      "requires_dist": [],
+      "requires_python": ">=3.8",
+      "version": "26.0",
+      "wheel": {
+        "declared_requires_dist_count": 0,
+        "declared_requires_dist_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "entry_count": 24,
+        "file_count": 24,
+        "max_member_bytes": 51122,
+        "members_sha256": "3bf9166b506631b59a49c61eb764d1d961a4474c69fa6634993f5e7c35cf6b55",
+        "metadata_member": "packaging-26.0.dist-info/METADATA",
+        "metadata_sha256": "3362bb7d6a26da2962ba8daaa4785cd0bacac21aba908a1195cc8f59580a265a",
+        "record_member": "packaging-26.0.dist-info/RECORD",
+        "record_sha256": "b358fa1f4d28338c7c0ec20137ec48728349cc75277aad2e9e988c9cd700b17a",
+        "root_is_purelib": true,
+        "tags": [
+          "py3-none-any"
+        ],
+        "uncompressed_bytes": 276911,
+        "wheel_member": "packaging-26.0.dist-info/WHEEL",
+        "wheel_sha256": "1b68144734c4b66791f27add5d425f3620775585718a03d0f9b110ba3a4d88db"
+      }
+    },
+    {
+      "artifact": {
+        "bytes": 30557,
+        "filename": "wheel-0.46.3-py3-none-any.whl",
+        "sha256": "4b399d56c9d9338230118d705d9737a2a468ccca63d5e813e2a4fc7815d8bc4d",
+        "url": "https://files.pythonhosted.org/packages/87/22/b76d483683216dde3d67cba61fb2444be8d5be289bf628c13fc0fd90e5f9/wheel-0.46.3-py3-none-any.whl"
+      },
+      "base_requires_dist": [
+        "packaging >= 24.0"
+      ],
+      "name": "wheel",
+      "native_members": [],
+      "requires_dist": [
+        "packaging >= 24.0",
+        "pytest >= 6.0.0 ; extra == \"test\"",
+        "setuptools >= 77 ; extra == \"test\""
+      ],
+      "requires_python": ">=3.9",
+      "version": "0.46.3",
+      "wheel": {
+        "declared_requires_dist_count": 3,
+        "declared_requires_dist_sha256": "d529fad40bc89cb9fe797ee882a291d3b9802d365b64eaefceed96d6e547b8dd",
+        "entry_count": 19,
+        "file_count": 19,
+        "max_member_bytes": 21729,
+        "members_sha256": "d117347b3d9005cda889ce83f2cd318bfcdda6b880def81d71dc704080e09180",
+        "metadata_member": "wheel-0.46.3.dist-info/METADATA",
+        "metadata_sha256": "22910aa97ca89cbcc20a019e27fe31360b7929a4bd66ca0d310f99a44f6ccd35",
+        "record_member": "wheel-0.46.3.dist-info/RECORD",
+        "record_sha256": "6fb943baeed608b72b6e514c46772ec5c1e9a3363179e5a7496ec137764f89eb",
+        "root_is_purelib": true,
+        "tags": [
+          "py3-none-any"
+        ],
+        "uncompressed_bytes": 87810,
+        "wheel_member": "wheel-0.46.3.dist-info/WHEEL",
+        "wheel_sha256": "1b68144734c4b66791f27add5d425f3620775585718a03d0f9b110ba3a4d88db"
+      }
+    },
+    {
+      "artifact": {
+        "bytes": 30536,
+        "filename": "setuptools_rust-1.13.0-py3-none-any.whl",
+        "sha256": "666439c4d90e968bb625bcf87ec0aa02b4f49e599d2f5dc255c633a04e8eca99",
+        "url": "https://files.pythonhosted.org/packages/0b/80/909e46e684e47b116ed145bf2a1a8f5f7c9d90e8c3f8f7fce6a529c0068d/setuptools_rust-1.13.0-py3-none-any.whl"
+      },
+      "base_requires_dist": [
+        "setuptools>=62.4",
+        "semantic_version<3,>=2.8.2"
+      ],
+      "name": "setuptools-rust",
+      "native_members": [],
+      "requires_dist": [
+        "setuptools>=62.4",
+        "semantic_version<3,>=2.8.2"
+      ],
+      "requires_python": ">=3.9",
+      "version": "1.13.0",
+      "wheel": {
+        "declared_requires_dist_count": 2,
+        "declared_requires_dist_sha256": "973af926c0a62969363adf5fa4dd4fa3b124c6a1ab5a1bcf35960ed16dafbfe6",
+        "entry_count": 17,
+        "file_count": 17,
+        "max_member_bytes": 37362,
+        "members_sha256": "2cded9f5e1d350687b7ded675e5ad52f4c4500509ab65e28d84ce491fab736b4",
+        "metadata_member": "setuptools_rust-1.13.0.dist-info/METADATA",
+        "metadata_sha256": "0b6b38c834cc8597bb72270656cf98175ebb522daba799dba34678804b91503c",
+        "record_member": "setuptools_rust-1.13.0.dist-info/RECORD",
+        "record_sha256": "702dffd4712ae4dc948a9fd6a9f0707d4d657dd40264e895248fa3a76826c286",
+        "root_is_purelib": true,
+        "tags": [
+          "py3-none-any"
+        ],
+        "uncompressed_bytes": 91891,
+        "wheel_member": "setuptools_rust-1.13.0.dist-info/WHEEL",
+        "wheel_sha256": "69e6228a0d35958183cc1812f07c565ce837b95eb51bd8a33acba9fa4f68d6c9"
+      }
+    },
+    {
+      "artifact": {
+        "bytes": 15552,
+        "filename": "semantic_version-2.10.0-py2.py3-none-any.whl",
+        "sha256": "de78a3b8e0feda74cabc54aab2da702113e33ac9d9eb9d2389bcf1f58b7d9177",
+        "url": "https://files.pythonhosted.org/packages/6a/23/8146aad7d88f4fcb3a6218f41a60f6c2d4e3a72de72da1825dc7c8f7877c/semantic_version-2.10.0-py2.py3-none-any.whl"
+      },
+      "base_requires_dist": [],
+      "name": "semantic-version",
+      "native_members": [],
+      "requires_dist": [
+        "Django (>=1.11) ; extra == 'dev'",
+        "nose2 ; extra == 'dev'",
+        "tox ; extra == 'dev'",
+        "check-manifest ; extra == 'dev'",
+        "coverage ; extra == 'dev'",
+        "flake8 ; extra == 'dev'",
+        "wheel ; extra == 'dev'",
+        "zest.releaser[recommended] ; extra == 'dev'",
+        "readme-renderer (<25.0) ; (python_version == \"3.4\") and extra == 'dev'",
+        "colorama (<=0.4.1) ; (python_version == \"3.4\") and extra == 'dev'",
+        "Sphinx ; extra == 'doc'",
+        "sphinx-rtd-theme ; extra == 'doc'"
+      ],
+      "requires_python": ">=2.7",
+      "version": "2.10.0",
+      "wheel": {
+        "declared_requires_dist_count": 12,
+        "declared_requires_dist_sha256": "fb50172a3532b9ad22e8e956317cc951293d9b0048856b7bfba761560c64df2a",
+        "entry_count": 8,
+        "file_count": 8,
+        "max_member_bytes": 48115,
+        "members_sha256": "996bc3958fb89fb4149da48bd854623b32e890d139993fa6864bde0bb4c68498",
+        "metadata_member": "semantic_version-2.10.0.dist-info/METADATA",
+        "metadata_sha256": "7414d469a569046b6a246bfb1f105aab1b7abfdc32a95253f15432ea30159aa6",
+        "record_member": "semantic_version-2.10.0.dist-info/RECORD",
+        "record_sha256": "bb3f4fa49fb2180ac8149fa7514c33d4d1276474b59af98df384140eb1fffb2e",
+        "root_is_purelib": true,
+        "tags": [
+          "py2-none-any",
+          "py3-none-any"
+        ],
+        "uncompressed_bytes": 63989,
+        "wheel_member": "semantic_version-2.10.0.dist-info/WHEEL",
+        "wheel_sha256": "67e9f2629c2b712ab17ddbb1e4c6e7fc3439db988fec9d831b72601af398c934"
+      }
+    }
+  ],
+  "references": {
+    "capture": {
+      "bytes": 40937,
+      "path": "audit/neutts-rust-native-20261017/run-39084939992/captured-tiktoken-exact-inputs.json",
+      "sha256": "10d0e1336e9c00e17c74eb3a89b41cbc08c32614898860da16d0a3eeb33b5744"
+    },
+    "cargo_lock": {
+      "bytes": 6462,
+      "path": "audit/neutts-rust-native-20261017/run-39084939992/raw-termux-neutts-rust-tiktoken-lock/rust-components/captured-tiktoken-inputs/sources/tiktoken-0.14.0/Cargo.lock",
+      "sha256": "44c9797be677b8af84478a3d54d09ac34d5a654e4ed8ee3e36a871415bc3dd80"
+    },
+    "regex_source_lock": {
+      "bytes": 78659,
+      "path": "scripts/phonemizer_runtime_lock.json",
+      "sha256": "48d43784778817bd4a907b63f11738ff910cafc6aac2eed6bc27349b6d5d8c82"
+    },
+    "root_review": {
+      "bytes": 1493,
+      "path": "audit/neutts-rust-native-20261017/run-39084939992/TIKTOKEN-ROOT-REVIEW.json",
+      "sha256": "6eacbf072424672f4f57353103cb5c07677cc962f63ff5ed87653627c8183db8"
+    },
+    "runtime_design": {
+      "bytes": 331941,
+      "path": "scripts/neutts_runtime_closure_design.json",
+      "sha256": "d8596ac31c12b042d76419712802e9787c092b32e66827cd64c720118be7ae68"
+    },
+    "rust_lock": {
+      "bytes": 552620,
+      "path": "scripts/neutts_rust_sources_lock.json",
+      "sha256": "de243480c74b12ad81efc2886b8f78a237abb958588c8424f070e5a6be766670"
+    }
+  },
+  "regex_source": {
+    "archive_root": "regex-2026.9.10",
+    "artifact": {
+      "bytes": 417072,
+      "filename": "regex-2026.9.10.tar.gz",
+      "sha256": "1e321e2c84f0e52c457f5ea5944f796d6e8e09cb99738ea98dcc1bfe402a128d",
+      "url": "https://files.pythonhosted.org/packages/b9/5c/f403115361de25809e8f785686ec7096e30fef73be9ae35aa51da4e80abb/regex-2026.9.10.tar.gz"
+    },
+    "build_backend": "setuptools.build_meta",
+    "build_requires": [
+      "setuptools>77.0.3"
+    ],
+    "expected_tag": "cp314-cp314-android_24_arm64_v8a",
+    "files": [
+      {
+        "bytes": 11584,
+        "mode": "100644",
+        "path": "LICENSE.txt",
+        "sha256": "bff55ef4cdcc8c14ce259f8e8ab60e264418440d6335f4dc138273fbd506144d"
+      },
+      {
+        "bytes": 40564,
+        "mode": "100644",
+        "path": "PKG-INFO",
+        "sha256": "0ea2fa001b650382a8d968125230865955d559fbf1bd3d4064a665053620867f"
+      },
+      {
+        "bytes": 39490,
+        "mode": "100644",
+        "path": "README.rst",
+        "sha256": "96691e60c7bc93446a19656c4f2fc32c96ed81e2cbcc416c84ad1e51808c964a"
+      },
+      {
+        "bytes": 40482,
+        "mode": "100644",
+        "path": "changelog.txt",
+        "sha256": "2714ebd868ee86af9c4338b679e952b93959c6d4706d90f7e31d145851a20ae6"
+      },
+      {
+        "bytes": 149397,
+        "mode": "100644",
+        "path": "docs/Features.html",
+        "sha256": "8129f538e16ca6aa98e8754de36d82d411547bd548ef083271d056dfafcb19a5"
+      },
+      {
+        "bytes": 29426,
+        "mode": "100644",
+        "path": "docs/UnicodeProperties.rst",
+        "sha256": "4c35f7b93b0fdc91ac9a946e5dd76c595281402caf777e16777d85f20cd22395"
+      },
+      {
+        "bytes": 1282,
+        "mode": "100644",
+        "path": "pyproject.toml",
+        "sha256": "821e15c9f20659107775529ffdfcf3698d6d97d63152936b899d75c61bb42e0a"
+      },
+      {
+        "bytes": 40564,
+        "mode": "100644",
+        "path": "regex.egg-info/PKG-INFO",
+        "sha256": "0ea2fa001b650382a8d968125230865955d559fbf1bd3d4064a665053620867f"
+      },
+      {
+        "bytes": 399,
+        "mode": "100644",
+        "path": "regex.egg-info/SOURCES.txt",
+        "sha256": "abfb745dfe9a84cb6594f8896b4b5e431b03c0098be2c502edc07e36d21ae16f"
+      },
+      {
+        "bytes": 1,
+        "mode": "100644",
+        "path": "regex.egg-info/dependency_links.txt",
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+      },
+      {
+        "bytes": 6,
+        "mode": "100644",
+        "path": "regex.egg-info/top_level.txt",
+        "sha256": "6909a20cc84d4c5dba7022b8ffb0fea9a56f85bc42946d30c824e7121933601b"
+      },
+      {
+        "bytes": 75,
+        "mode": "100644",
+        "path": "regex/__init__.py",
+        "sha256": "039934ae6f0b9fb1cab1f1bef2c11661e85e93ccc22847bab105b94065009925"
+      },
+      {
+        "bytes": 33410,
+        "mode": "100644",
+        "path": "regex/_main.py",
+        "sha256": "2ff4b88d0b81b9d56a6360ba2eb5f577aef49865780795d59b69d825791eefa9"
+      },
+      {
+        "bytes": 147335,
+        "mode": "100644",
+        "path": "regex/_regex_core.py",
+        "sha256": "604eb46253402336c66362f32c4a20af095d3bd0b5505501b44e6077e92951a2"
+      },
+      {
+        "bytes": 225809,
+        "mode": "100644",
+        "path": "regex/tests/test_regex.py",
+        "sha256": "884e1739f884a56ac62835192120f1971362f98d2b5fc28f1fcc80c293132db2"
+      },
+      {
+        "bytes": 38,
+        "mode": "100644",
+        "path": "setup.cfg",
+        "sha256": "1c473cbaee8da5fc46e7f0158794af5cea4414c34a3cf3f180c2001f5e38bd3e"
+      },
+      {
+        "bytes": 390,
+        "mode": "100644",
+        "path": "setup.py",
+        "sha256": "b84eb50db68c0391d5f84f92b0346b7da90bc6fa57f444a08145fdf203a6d710"
+      },
+      {
+        "bytes": 832319,
+        "mode": "100644",
+        "path": "src/_regex.c",
+        "sha256": "6d6118ed296b700fb1148c38480399f94b71e58f121ecd43a6a201eee44a520b"
+      },
+      {
+        "bytes": 6288,
+        "mode": "100644",
+        "path": "src/_regex.h",
+        "sha256": "17a001a575734dac177794b7fa45471234f6abac17f2aa7cd101efdc4106769c"
+      },
+      {
+        "bytes": 1954780,
+        "mode": "100644",
+        "path": "src/_regex_unicode.c",
+        "sha256": "67a7d9e2f9cf91c680a57809bb74c415026aa9ec86303668957dcca26a10abe2"
+      },
+      {
+        "bytes": 11295,
+        "mode": "100644",
+        "path": "src/_regex_unicode.h",
+        "sha256": "a1fce59c64be5d5c7f16f12d2fee0190dff4e358883303a708b2a20a2bb80d0b"
+      },
+      {
+        "bytes": 56466,
+        "mode": "100644",
+        "path": "tools/build_regex_unicode.py",
+        "sha256": "b6e06059857d0fe216511445d23cbfc0f2c02933619aa66869300a22165c2889"
+      }
+    ],
+    "name": "regex",
+    "requires_dist": [],
+    "requires_python": ">=3.10",
+    "version": "2026.9.10"
+  },
+  "registry": [
+    {
+      "bytes": 184315,
+      "checksum_sha256": "606365ddd30ff065343599a500a8b230d1c098b73594e345c81c8c4c46bdf350",
+      "filename": "aho-corasick-1.1.5.crate",
+      "files": 48,
+      "name": "aho-corasick",
+      "sha256": "c982642fa9e8606056828ee9a8505737230110bb1099153c79efe865c59d12ba",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/aho-corasick/aho-corasick-1.1.5.crate",
+      "version": "1.1.5"
+    },
+    {
+      "bytes": 16289,
+      "checksum_sha256": "399c520f65d4450d438717f165da9e4d3a95a80a90b216761820dd9eba057cc2",
+      "filename": "bit-set-0.8.0.crate",
+      "files": 12,
+      "name": "bit-set",
+      "sha256": "08807e080ed7f9d5433fa9b275196cfc35414f66a0c79d864dc51a0d825231a3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/bit-set/bit-set-0.8.0.crate",
+      "version": "0.8.0"
+    },
+    {
+      "bytes": 24132,
+      "checksum_sha256": "492d5ec027a220b71e1e0d7b615beec4e1a2de33491ca266bf1ea1642799a048",
+      "filename": "bit-vec-0.8.0.crate",
+      "files": 14,
+      "name": "bit-vec",
+      "sha256": "5e764a1d40d510daf35e07be9eb06e75770908c27d411ee6c92109c9840eaaf7",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/bit-vec/bit-vec-0.8.0.crate",
+      "version": "0.8.0"
+    },
+    {
+      "bytes": 356631,
+      "checksum_sha256": "cd0d3abca4ed8828741130d4d0da5200ff0b1df66ad6d0e15054e802589360e4",
+      "filename": "bstr-1.13.1.crate",
+      "files": 62,
+      "name": "bstr",
+      "sha256": "6bb31b46c14244e20ee9984b11bf5c992b91fb6939fea616e3512c8baecdbe5f",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/bstr/bstr-1.13.1.crate",
+      "version": "1.13.1"
+    },
+    {
+      "bytes": 235529,
+      "checksum_sha256": "9b6bd1e93545646385d357d06cd1ef6d5b13795cfcef92b8a0f50cd6154486ac",
+      "filename": "fancy-regex-0.19.2.crate",
+      "files": 59,
+      "name": "fancy-regex",
+      "sha256": "d301f5bf187b3c295fce6468d3875037a0bccc5f6b151c63cac2f85babf21912",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/fancy-regex/fancy-regex-0.19.2.crate",
+      "version": "0.19.2"
+    },
+    {
+      "bytes": 11517,
+      "checksum_sha256": "0aaf45afdf9ff05597bf2ded4af1548bf66b34ff08ae54e4371242c4022d7dd2",
+      "filename": "heck-0.5.0.crate",
+      "files": 16,
+      "name": "heck",
+      "sha256": "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/heck/heck-0.5.0.crate",
+      "version": "0.5.0"
+    },
+    {
+      "bytes": 855401,
+      "checksum_sha256": "a097da64b5b4810dc63eff64aafe52c1e942b5926b4370fd414a484cc2bf2809",
+      "filename": "libc-0.2.191.crate",
+      "files": 452,
+      "name": "libc",
+      "sha256": "65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/libc/libc-0.2.191.crate",
+      "version": "0.2.191"
+    },
+    {
+      "bytes": 99165,
+      "checksum_sha256": "d8192212088f8d232bcb3a5ef96fc533975510ce5b343c3f27e8f64e8164ca1c",
+      "filename": "memchr-2.8.3.crate",
+      "files": 59,
+      "name": "memchr",
+      "sha256": "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/memchr/memchr-2.8.3.crate",
+      "version": "2.8.3"
+    },
+    {
+      "bytes": 35010,
+      "checksum_sha256": "10e24bfff43dd8ca5a471b02448bf528e662e3525d806524c2f92dd0ac70298b",
+      "filename": "once_cell-1.21.4.crate",
+      "files": 29,
+      "name": "once_cell",
+      "sha256": "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/once_cell/once_cell-1.21.4.crate",
+      "version": "1.21.4"
+    },
+    {
+      "bytes": 202705,
+      "checksum_sha256": "e8afd75b83f219a8fb085a46154d5fb30d525080c87382467d1f453df1aa1981",
+      "filename": "portable-atomic-1.15.0.crate",
+      "files": 69,
+      "name": "portable-atomic",
+      "sha256": "05c8b63e8d9609db387f0324918f81d68fe27748f084ef092fb35954d0539a85",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/portable-atomic/portable-atomic-1.15.0.crate",
+      "version": "1.15.0"
+    },
+    {
+      "bytes": 59588,
+      "checksum_sha256": "41dbd0ce3d97a2cddf8a4932246e8a520b09a73ad51b3002a62995636b425eca",
+      "filename": "proc-macro2-1.0.107.crate",
+      "files": 33,
+      "name": "proc-macro2",
+      "sha256": "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/proc-macro2/proc-macro2-1.0.107.crate",
+      "version": "1.0.107"
+    },
+    {
+      "bytes": 1261077,
+      "checksum_sha256": "4313ca80b79e2f20a28b7d4c86dd6fbe086d89eaa3fc1f7336f11b11647f8f4e",
+      "filename": "pyo3-0.29.3.crate",
+      "files": 287,
+      "name": "pyo3",
+      "sha256": "700d18fa267b73b9b521fd7e13580e2f446916f176cacee1ab63fcc8191f1655",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/pyo3/pyo3-0.29.3.crate",
+      "version": "0.29.3"
+    },
+    {
+      "bytes": 41138,
+      "checksum_sha256": "6133df02cec803cc0859a47d6b349368f0f03630114401bda26fab70c04e2688",
+      "filename": "pyo3-build-config-0.29.3.crate",
+      "files": 9,
+      "name": "pyo3-build-config",
+      "sha256": "7b3fc0c4d08f6bb10e71fe39dfb9e2f59c6eb6854e22ec8092f50c69a4499adb",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/pyo3-build-config/pyo3-build-config-0.29.3.crate",
+      "version": "0.29.3"
+    },
+    {
+      "bytes": 91291,
+      "checksum_sha256": "35d7ca12dd02b3d3101823807be5941a591801c2ffcd948324738dbfc862adde",
+      "filename": "pyo3-ffi-0.29.3.crate",
+      "files": 117,
+      "name": "pyo3-ffi",
+      "sha256": "dfc0b8e19df29aad7086cf977bb0c2a2f143e30567eb113e9cf72b62ca698330",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/pyo3-ffi/pyo3-ffi-0.29.3.crate",
+      "version": "0.29.3"
+    },
+    {
+      "bytes": 9050,
+      "checksum_sha256": "2acd682a3529c20692138d0f73782e836a322e97e462135cd0ff255081eb5979",
+      "filename": "pyo3-macros-0.29.3.crate",
+      "files": 7,
+      "name": "pyo3-macros",
+      "sha256": "6100e8a4b5eba53afaa5ed078364851a0b2499c553a44c31026b929049b49dc6",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/pyo3-macros/pyo3-macros-0.29.3.crate",
+      "version": "0.29.3"
+    },
+    {
+      "bytes": 95162,
+      "checksum_sha256": "e415ff32276798706f71e5011a5330c80cf1d90d4ded324040db4f1a78b61e4c",
+      "filename": "pyo3-macros-backend-0.29.3.crate",
+      "files": 25,
+      "name": "pyo3-macros-backend",
+      "sha256": "6143877a16e82b5a727b7127ff4cd86858a24a28d745d72f43e6f227c7b1bdb3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/pyo3-macros-backend/pyo3-macros-backend-0.29.3.crate",
+      "version": "0.29.3"
+    },
+    {
+      "bytes": 31622,
+      "checksum_sha256": "7a29a2f1d3ed2c69c8d0dda0ec42f8f45aee88ef1368278624825cae0d51fcf5",
+      "filename": "quote-1.0.47.crate",
+      "files": 35,
+      "name": "quote",
+      "sha256": "1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/quote/quote-1.0.47.crate",
+      "version": "1.0.47"
+    },
+    {
+      "bytes": 157118,
+      "checksum_sha256": "29758ae83a250a2650c51d66b133189170f3339f10c31a285002bbdbb30b86d2",
+      "filename": "regex-1.13.1.crate",
+      "files": 55,
+      "name": "regex",
+      "sha256": "f020237b6c8eed93db2e2cb53c00c60a8e1bc73da7d073199a1180401450218d",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/regex/regex-1.13.1.crate",
+      "version": "1.13.1"
+    },
+    {
+      "bytes": 628707,
+      "checksum_sha256": "f2b803f2fd6491bf0fcdacceacc97b73eedb6e9aa2bfe31df8f92f5d1d74c207",
+      "filename": "regex-automata-0.4.18.crate",
+      "files": 107,
+      "name": "regex-automata",
+      "sha256": "ad8553b9b26413251cbf30e620595c7a41b3887f03da04579c0e6b0d6a06b4b2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/regex-automata/regex-automata-0.4.18.crate",
+      "version": "0.4.18"
+    },
+    {
+      "bytes": 359055,
+      "checksum_sha256": "b507c41a8386371f5385aa673387d3b1adc95a5f4fb6685dae6cf15f0d3f4eef",
+      "filename": "regex-syntax-0.8.11.crate",
+      "files": 42,
+      "name": "regex-syntax",
+      "sha256": "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/regex-syntax/regex-syntax-0.8.11.crate",
+      "version": "0.8.11"
+    },
+    {
+      "bytes": 14811,
+      "checksum_sha256": "24f87d89d09d5dc5cffdad0d558ffce4562652ba9f69ee7feff6c3a5a818d1bf",
+      "filename": "rustc-hash-2.1.3.crate",
+      "files": 14,
+      "name": "rustc-hash",
+      "sha256": "6b1e7f9a428571be2dc5bc0505c13fb6bf936822b894ec87abf8a08a4e51742d",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/rustc-hash/rustc-hash-2.1.3.crate",
+      "version": "2.1.3"
+    },
+    {
+      "bytes": 63100,
+      "checksum_sha256": "e84b23209ec820f6e24dc82a0c2c100837d923a49f6eef5d752d8df0397db2f3",
+      "filename": "serde_core-1.0.229.crate",
+      "files": 27,
+      "name": "serde_core",
+      "sha256": "67dca2c9c51e58a4791a4b1ed58308b39c64224d349a935ab5039aa360942a48",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/serde_core/serde_core-1.0.229.crate",
+      "version": "1.0.229"
+    },
+    {
+      "bytes": 59864,
+      "checksum_sha256": "abf0717e286858348aab05821aea3d67dda5b2dd0736b8a04ea8062f00f6f869",
+      "filename": "serde_derive-1.0.229.crate",
+      "files": 36,
+      "name": "serde_derive",
+      "sha256": "e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/serde_derive/serde_derive-1.0.229.crate",
+      "version": "1.0.229"
+    },
+    {
+      "bytes": 307407,
+      "checksum_sha256": "329e23b68aa38f8f3fbb9b08d59c72d134578fd0f61a8578abb86f65e9dd0f8e",
+      "filename": "syn-2.0.119.crate",
+      "files": 105,
+      "name": "syn",
+      "sha256": "872831b642d1a07999a962a351ed35b955ea2cfc8f3862091e2a240a84f17297",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/syn/syn-2.0.119.crate",
+      "version": "2.0.119"
+    },
+    {
+      "bytes": 313970,
+      "checksum_sha256": "7cad35cca3ec3b934485387640b5ea551f7c038c3650e0217ee5a30efaec8439",
+      "filename": "syn-3.0.9.crate",
+      "files": 104,
+      "name": "syn",
+      "sha256": "d78c8dee4c7bf0e14673097256fed6142ce9d3b85a408189d07482442145823b",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/syn/syn-3.0.9.crate",
+      "version": "3.0.9"
+    },
+    {
+      "bytes": 26928,
+      "checksum_sha256": "19a835c7606101c491976cd0dd34f1c6e8e48571b36911fa1b4aa9fa92b13478",
+      "filename": "target-lexicon-0.13.5.crate",
+      "files": 14,
+      "name": "target-lexicon",
+      "sha256": "adb6935a6f5c20170eeceb1a3835a49e12e19d792f6dd344ccc76a985ca5a6ca",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/target-lexicon/target-lexicon-0.13.5.crate",
+      "version": "0.13.5"
+    },
+    {
+      "bytes": 48807,
+      "checksum_sha256": "c12dbdbca452dd590f517790d66c0e5e08b1e1aea5869ce0c2ac7260780836e9",
+      "filename": "unicode-ident-1.0.27.crate",
+      "files": 26,
+      "name": "unicode-ident",
+      "sha256": "a2c754d6c33795a1c324727428e5a7dedb5b06195f9890bdbcba760d3e246563",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "url": "https://static.crates.io/crates/unicode-ident/unicode-ident-1.0.27.crate",
+      "version": "1.0.27"
+    }
+  ],
+  "reviewed_capture_commit": "c1ea01d2f06b77dfab14e2f50daf7d72b5ad18d8",
+  "runtime_edges": [
+    {
+      "from": "requests",
+      "requirement": "charset_normalizer<4,>=2",
+      "selected_extras": [],
+      "to": "charset-normalizer"
+    },
+    {
+      "from": "requests",
+      "requirement": "idna<4,>=2.5",
+      "selected_extras": [],
+      "to": "idna"
+    },
+    {
+      "from": "requests",
+      "requirement": "urllib3<3,>=1.26",
+      "selected_extras": [],
+      "to": "urllib3"
+    },
+    {
+      "from": "requests",
+      "requirement": "certifi>=2023.5.7",
+      "selected_extras": [],
+      "to": "certifi"
+    },
+    {
+      "from": "tiktoken",
+      "requirement": "regex",
+      "selected_extras": [],
+      "to": "regex"
+    },
+    {
+      "from": "tiktoken",
+      "requirement": "requests",
+      "selected_extras": [],
+      "to": "requests"
+    }
+  ],
+  "runtime_metadata": [
+    {
+      "active_extras": [],
+      "name": "certifi",
+      "requires_dist": [],
+      "requires_python": ">=3.7",
+      "version": "2026.5.20"
+    },
+    {
+      "active_extras": [],
+      "name": "charset-normalizer",
+      "requires_dist": [],
+      "requires_python": ">=3.7",
+      "version": "3.5.1"
+    },
+    {
+      "active_extras": [],
+      "name": "idna",
+      "requires_dist": [
+        "ruff>=0.16.0; extra == \"all\"",
+        "mypy>=1.11.2; extra == \"all\"",
+        "ty>=0.0.37; extra == \"all\"",
+        "pytest>=8.3.2; extra == \"all\"",
+        "hypothesis>=6.141.1; extra == \"all\"",
+        "coverage>=7.10.0; extra == \"all\""
+      ],
+      "requires_python": ">=3.9",
+      "version": "3.19"
+    },
+    {
+      "active_extras": [],
+      "name": "regex",
+      "requires_dist": [],
+      "requires_python": ">=3.10",
+      "version": "2026.9.10"
+    },
+    {
+      "active_extras": [],
+      "name": "requests",
+      "requires_dist": [
+        "charset_normalizer<4,>=2",
+        "idna<4,>=2.5",
+        "urllib3<3,>=1.26",
+        "certifi>=2023.5.7",
+        "PySocks!=1.5.7,>=1.5.6; extra == \"socks\"",
+        "chardet<8,>=3.0.2; extra == \"use-chardet-on-py3\"",
+        "pytest-httpbin==2.1.0; extra == \"test\"",
+        "pytest-cov; extra == \"test\"",
+        "pytest-mock; extra == \"test\"",
+        "pytest-xdist; extra == \"test\"",
+        "PySocks!=1.5.7,>=1.5.6; extra == \"test\"",
+        "pytest>=3; extra == \"test\""
+      ],
+      "requires_python": ">=3.10",
+      "version": "2.33.0"
+    },
+    {
+      "active_extras": [],
+      "name": "tiktoken",
+      "requires_dist": [
+        "regex",
+        "requests",
+        "blobfile>=3; extra == \"blobfile\""
+      ],
+      "requires_python": ">=3.9",
+      "version": "0.14.0"
+    },
+    {
+      "active_extras": [],
+      "name": "urllib3",
+      "requires_dist": [
+        "brotli>=1.2.0; platform_python_implementation == \"CPython\" and extra == \"brotli\"",
+        "brotlicffi>=1.2.0.0; platform_python_implementation != \"CPython\" and extra == \"brotli\"",
+        "h2<5,>=4; extra == \"h2\"",
+        "pysocks!=1.5.7,<2.0,>=1.5.6; extra == \"socks\"",
+        "backports-zstd>=1.0.0; python_version < \"3.14\" and extra == \"zstd\""
+      ],
+      "requires_python": ">=3.10",
+      "version": "2.7.0"
+    }
+  ],
+  "runtime_names": [
+    "certifi",
+    "charset-normalizer",
+    "idna",
+    "regex",
+    "requests",
+    "tiktoken",
+    "urllib3"
+  ],
+  "runtime_wheels": [
+    {
+      "artifact": {
+        "bytes": 134134,
+        "filename": "certifi-2026.5.20-py3-none-any.whl",
+        "sha256": "3c52e209ba0a4ad7aebe60436a4ab349c39e1e602e8c134221e546902ad25897",
+        "url": "https://files.pythonhosted.org/packages/59/8c/57e832b7af6d7c5abe66eb3fbe3a3a32f4d11ea23a1aa7131371035be991/certifi-2026.5.20-py3-none-any.whl"
+      },
+      "base_requires_dist": [],
+      "name": "certifi",
+      "native_members": [],
+      "requires_dist": [],
+      "requires_python": ">=3.7",
+      "version": "2026.5.20",
+      "wheel": {
+        "declared_requires_dist_count": 0,
+        "declared_requires_dist_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "entry_count": 10,
+        "file_count": 10,
+        "max_member_bytes": 236095,
+        "members_sha256": "1bb977677bd285acb811e5f1a4bf82a240940254bad310653df945711d5d26e4",
+        "metadata_member": "certifi-2026.5.20.dist-info/METADATA",
+        "metadata_sha256": "1c38826bc95f7744c69501689e00e3a1a2c93a158988937ce32ef4ed5c1df0f6",
+        "record_member": "certifi-2026.5.20.dist-info/RECORD",
+        "record_sha256": "4c62def7c0a9fd1921eba7b9d81c8fc8d2b50828b6d4e8904e1ac2cce30b9c4d",
+        "root_is_purelib": true,
+        "tags": [
+          "py3-none-any"
+        ],
+        "uncompressed_bytes": 244169,
+        "wheel_member": "certifi-2026.5.20.dist-info/WHEEL",
+        "wheel_sha256": "69e6228a0d35958183cc1812f07c565ce837b95eb51bd8a33acba9fa4f68d6c9"
+      }
+    },
+    {
+      "artifact": {
+        "bytes": 212318,
+        "filename": "charset_normalizer-3.5.1-cp314-cp314-android_24_arm64_v8a.whl",
+        "sha256": "774d157f112367ff4abd29019f38f023c24e00e56edc7829c20e358a5a913ad8",
+        "url": "https://files.pythonhosted.org/packages/29/cd/2b812ce5e888f1ce69a5350281e58aab07ae64a958ecae8912f30865718e/charset_normalizer-3.5.1-cp314-cp314-android_24_arm64_v8a.whl"
+      },
+      "base_requires_dist": [],
+      "name": "charset-normalizer",
+      "native_members": [
+        {
+          "bytes": 150448,
+          "member": "charset_normalizer/cd.cpython-314-aarch64-linux-android.so",
+          "sha256": "caf50e0f4e7c8837067ce2899f08b771a004d77f4b4a4f3fbb6b71a2b613796c"
+        },
+        {
+          "bytes": 281224,
+          "member": "charset_normalizer/md.cpython-314-aarch64-linux-android.so",
+          "sha256": "c3f9efb82b005bb01294e3eb64499038342bea643279a33c65f8b9aad5dda13f"
+        }
+      ],
+      "requires_dist": [],
+      "requires_python": ">=3.7",
+      "version": "3.5.1",
+      "wheel": {
+        "declared_requires_dist_count": 0,
+        "declared_requires_dist_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "entry_count": 25,
+        "file_count": 21,
+        "max_member_bytes": 281224,
+        "members_sha256": "8165f21d401ba8d49adc52ec769d1e858ac3a464d1e079155c9d6292608daafd",
+        "metadata_member": "charset_normalizer-3.5.1.dist-info/METADATA",
+        "metadata_sha256": "955c93827d59f1280f6d6a76b1e11bfb999cc65a55df83a6f9b28b7bc0e467f6",
+        "record_member": "charset_normalizer-3.5.1.dist-info/RECORD",
+        "record_sha256": "827a0c7fee4358e1d4c3cdba646613a4471ee21b742a550ea12dbb892c465cb2",
+        "root_is_purelib": false,
+        "tags": [
+          "cp314-cp314-android_24_arm64_v8a"
+        ],
+        "uncompressed_bytes": 672668,
+        "wheel_member": "charset_normalizer-3.5.1.dist-info/WHEEL",
+        "wheel_sha256": "676315b0d344f476b9468cbc6f589814d727a39adf66134e8a4b487f6dbb7cdc"
+      }
+    },
+    {
+      "artifact": {
+        "bytes": 68550,
+        "filename": "idna-3.19-py3-none-any.whl",
+        "sha256": "815e7be7a7806d54abb586dc943addc79e8b2ee16915059658cbeff4b1b43bf4",
+        "url": "https://files.pythonhosted.org/packages/57/b0/0e52c878c53f245edd3a11020f20979b3f490f245af532c7cae3027754b5/idna-3.19-py3-none-any.whl"
+      },
+      "base_requires_dist": [],
+      "name": "idna",
+      "native_members": [],
+      "requires_dist": [
+        "ruff >= 0.16.0 ; extra == \"all\"",
+        "mypy >= 1.11.2 ; extra == \"all\"",
+        "ty >= 0.0.37 ; extra == \"all\"",
+        "pytest >= 8.3.2 ; extra == \"all\"",
+        "hypothesis >= 6.141.1 ; extra == \"all\"",
+        "coverage >= 7.10.0 ; extra == \"all\""
+      ],
+      "requires_python": ">=3.9",
+      "version": "3.19",
+      "wheel": {
+        "declared_requires_dist_count": 6,
+        "declared_requires_dist_sha256": "85e1d28be22ff0c27bebf767a238a3eca35768aced18181046f2d62e52d8924c",
+        "entry_count": 16,
+        "file_count": 16,
+        "max_member_bytes": 234034,
+        "members_sha256": "cb2b349cc8deaeca09a0e3658730d380411cf5fcad73aeb25fc2678d7a4b2f31",
+        "metadata_member": "idna-3.19.dist-info/METADATA",
+        "metadata_sha256": "4d113161aca8582e8d28fddf3ea50f19b607209c2b3e4364379a163454680084",
+        "record_member": "idna-3.19.dist-info/RECORD",
+        "record_sha256": "6123257215bd36c92651b888120ce7e5fb6df5db27eff2712ad45068614bc4c4",
+        "root_is_purelib": true,
+        "tags": [
+          "py3-none-any"
+        ],
+        "uncompressed_bytes": 337228,
+        "wheel_member": "idna-3.19.dist-info/WHEEL",
+        "wheel_sha256": "ff23073da055face9f40cc14a28f3735275308cddcf315d6157461a9a7cdfbb6"
+      }
+    },
+    {
+      "artifact": {
+        "bytes": 65017,
+        "filename": "requests-2.33.0-py3-none-any.whl",
+        "sha256": "3324635456fa185245e24865e810cecec7b4caf933d7eb133dcde67d48cee69b",
+        "url": "https://files.pythonhosted.org/packages/56/5d/c814546c2333ceea4ba42262d8c4d55763003e767fa169adc693bd524478/requests-2.33.0-py3-none-any.whl"
+      },
+      "base_requires_dist": [
+        "charset_normalizer<4,>=2",
+        "idna<4,>=2.5",
+        "urllib3<3,>=1.26",
+        "certifi>=2023.5.7"
+      ],
+      "name": "requests",
+      "native_members": [],
+      "requires_dist": [
+        "charset_normalizer<4,>=2",
+        "idna<4,>=2.5",
+        "urllib3<3,>=1.26",
+        "certifi>=2023.5.7",
+        "PySocks!=1.5.7,>=1.5.6; extra == \"socks\"",
+        "chardet<8,>=3.0.2; extra == \"use-chardet-on-py3\"",
+        "pytest-httpbin==2.1.0; extra == \"test\"",
+        "pytest-cov; extra == \"test\"",
+        "pytest-mock; extra == \"test\"",
+        "pytest-xdist; extra == \"test\"",
+        "PySocks!=1.5.7,>=1.5.6; extra == \"test\"",
+        "pytest>=3; extra == \"test\""
+      ],
+      "requires_python": ">=3.10",
+      "version": "2.33.0",
+      "wheel": {
+        "declared_requires_dist_count": 12,
+        "declared_requires_dist_sha256": "53c1cf44fd95e6c16ff34cdc220f75ac7c7ed122ff3a47bc54975188d05e72c3",
+        "entry_count": 24,
+        "file_count": 24,
+        "max_member_bytes": 35465,
+        "members_sha256": "f0e003ab76bb2c02edfb007de45992adb6c821002636438a05673d4508b5902f",
+        "metadata_member": "requests-2.33.0.dist-info/METADATA",
+        "metadata_sha256": "0cc0fa6e89be83cfa1777957519e3fffe78d1a79b30561934d1e4384fb177711",
+        "record_member": "requests-2.33.0.dist-info/RECORD",
+        "record_sha256": "b9a5b849feecd93c961a7bb61d84315b0d51715bf69ce944648087c798274a09",
+        "root_is_purelib": true,
+        "tags": [
+          "py3-none-any"
+        ],
+        "uncompressed_bytes": 204350,
+        "wheel_member": "requests-2.33.0.dist-info/WHEEL",
+        "wheel_sha256": "69e6228a0d35958183cc1812f07c565ce837b95eb51bd8a33acba9fa4f68d6c9"
+      }
+    },
+    {
+      "artifact": {
+        "bytes": 131087,
+        "filename": "urllib3-2.7.0-py3-none-any.whl",
+        "sha256": "9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897",
+        "url": "https://files.pythonhosted.org/packages/7f/3e/5db95bcf282c52709639744ca2a8b149baccf648e39c8cc87553df9eae0c/urllib3-2.7.0-py3-none-any.whl"
+      },
+      "base_requires_dist": [],
+      "name": "urllib3",
+      "native_members": [],
+      "requires_dist": [
+        "brotli>=1.2.0; (platform_python_implementation == 'CPython') and extra == 'brotli'",
+        "brotlicffi>=1.2.0.0; (platform_python_implementation != 'CPython') and extra == 'brotli'",
+        "h2<5,>=4; extra == 'h2'",
+        "pysocks!=1.5.7,<2.0,>=1.5.6; extra == 'socks'",
+        "backports-zstd>=1.0.0; (python_version < '3.14') and extra == 'zstd'"
+      ],
+      "requires_python": ">=3.10",
+      "version": "2.7.0",
+      "wheel": {
+        "declared_requires_dist_count": 5,
+        "declared_requires_dist_sha256": "1fc093b13b7bdbc99246c3fb41e872dceb0f7af72c51dc5af896f37c0b7ce931",
+        "entry_count": 42,
+        "file_count": 42,
+        "max_member_bytes": 53219,
+        "members_sha256": "0c820039383ee49c6aa3c88c6201d887e502e33b32c3fe7f670324dd7e996003",
+        "metadata_member": "urllib3-2.7.0.dist-info/METADATA",
+        "metadata_sha256": "66147856d30bbb6bed01c6ce3326d0f48d84ed5f286ac177633a1486b82eace5",
+        "record_member": "urllib3-2.7.0.dist-info/RECORD",
+        "record_sha256": "4100397eb65d69ffbfcabfe99373cb59ab2b7c0261abf9a5bdfb2f263baef787",
+        "root_is_purelib": true,
+        "tags": [
+          "py3-none-any"
+        ],
+        "uncompressed_bytes": 432384,
+        "wheel_member": "urllib3-2.7.0.dist-info/WHEEL",
+        "wheel_sha256": "41c708c5adba6e097513ab8ccb9f1d7865a2fb469e22491a9e01dcc64da459fc"
+      }
+    }
+  ],
+  "schema_version": 1,
+  "scope": "Unpublished standalone Tiktoken build and complete seven-distribution base runtime; no NeuTTS engine admission",
+  "source": {
+    "archive_root": "tiktoken-0.14.0",
+    "artifact": {
+      "bytes": 38898,
+      "filename": "tiktoken-0.14.0.tar.gz",
+      "sha256": "231dec90efcdccf1b565a1416107736f1e09b1a08fe736ef9d6363e626d03874",
+      "url": "https://files.pythonhosted.org/packages/66/62/167a842aa0429d45f5e797354fd4343a96f6043d67d0513c675c7b8d36e6/tiktoken-0.14.0.tar.gz"
+    },
+    "backend_path": [],
+    "build_backend": "setuptools.build_meta",
+    "build_requires": [
+      "setuptools>=62.4",
+      "wheel",
+      "setuptools-rust>=1.5.2"
+    ],
+    "build_stage": "separate-reviewed-lock-required",
+    "cargo_lock": null,
+    "cargo_manifest": {
+      "bytes": 412,
+      "path": "Cargo.toml",
+      "sha256": "576ae766a31304ebaeaf668386036cb363213c9401cbeac0345787d772dbd78d"
+    },
+    "cargo_metadata_args": [],
+    "expected_tag": "cp314-cp314-android_24_arm64_v8a",
+    "extra_cargo_features": [],
+    "file_count": 36,
+    "files": [
+      {
+        "bytes": 3987,
+        "executable": false,
+        "path": "CHANGELOG.md",
+        "sha256": "b4e26ec7c449a22f619068636f1646e4571141528fa27d3a82ca4a10a896d923"
+      },
+      {
+        "bytes": 412,
+        "executable": false,
+        "path": "Cargo.toml",
+        "sha256": "576ae766a31304ebaeaf668386036cb363213c9401cbeac0345787d772dbd78d"
+      },
+      {
+        "bytes": 1078,
+        "executable": false,
+        "path": "LICENSE",
+        "sha256": "418cb499b436128d653d79941333a5437b7be2ea9213dcc2f04d15d5d2c51d86"
+      },
+      {
+        "bytes": 170,
+        "executable": false,
+        "path": "MANIFEST.in",
+        "sha256": "c979703c8c134fa6021e51ee60a284cfad8ff335344962677aff1617bd0038fa"
+      },
+      {
+        "bytes": 6669,
+        "executable": false,
+        "path": "PKG-INFO",
+        "sha256": "30086725221223f7a19463e71c0e9f79fe7aba9125b36632c00bf50a23fa968a"
+      },
+      {
+        "bytes": 4807,
+        "executable": false,
+        "path": "README.md",
+        "sha256": "3e6cf1c4d6df2d4b9fc3d9a09d8e68a3734f4dd4d0a11341abd3a7c62256bc2a"
+      },
+      {
+        "bytes": 15845,
+        "executable": false,
+        "path": "perf.svg",
+        "sha256": "35e39a1f529ff471aba58deaba9d2b0976157a99e6bed53e690aee75642313ac"
+      },
+      {
+        "bytes": 1244,
+        "executable": false,
+        "path": "pyproject.toml",
+        "sha256": "d6c04dd65e42bb26f292d0a20002bd5f919fa409084ec3fe083437be8ef8a1bd"
+      },
+      {
+        "bytes": 1000,
+        "executable": false,
+        "path": "scripts/benchmark.py",
+        "sha256": "fbae8afcd6968346b0d1fecb9bbaa2b751d5140638268b9d143de4e1e36ec873"
+      },
+      {
+        "bytes": 1746,
+        "executable": false,
+        "path": "scripts/redact.py",
+        "sha256": "520573c1150066f37ca5bb21f8b9417067b802f0ff81fcd06863bdad4e843425"
+      },
+      {
+        "bytes": 2040,
+        "executable": false,
+        "path": "scripts/wheel_download.py",
+        "sha256": "c62da9615487a6008c5ebce41644fce2bf8ffa1a22b711ee6c510c53b130a8fe"
+      },
+      {
+        "bytes": 38,
+        "executable": false,
+        "path": "setup.cfg",
+        "sha256": "1c473cbaee8da5fc46e7f0158794af5cea4414c34a3cf3f180c2001f5e38bd3e"
+      },
+      {
+        "bytes": 572,
+        "executable": false,
+        "path": "setup.py",
+        "sha256": "bea74f08e89f9fcc6ba25e0cc7e488c4a41d20a30bdef736021e5753b0c57c19"
+      },
+      {
+        "bytes": 26068,
+        "executable": false,
+        "path": "src/lib.rs",
+        "sha256": "efb8ffce1eea0492944a242e46f80c49526295e8785728c9f8535e8d9b7147a5"
+      },
+      {
+        "bytes": 9203,
+        "executable": false,
+        "path": "src/py.rs",
+        "sha256": "a3abe513150c511c9d7f6a7b6fab582f2b0a890aba93eb2ce5e00f2b663408b4"
+      },
+      {
+        "bytes": 0,
+        "executable": false,
+        "path": "tests/__init__.py",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "bytes": 8754,
+        "executable": false,
+        "path": "tests/test_encoding.py",
+        "sha256": "6d81f28bb3c2877a3b02f2520047939c70640fe0104994c97a15a9b493ae6ca7"
+      },
+      {
+        "bytes": 477,
+        "executable": false,
+        "path": "tests/test_helpers.py",
+        "sha256": "ead2af1ae2aa3f4ff7ed28428ec810e51edc3ac8c620a22bff016401841b90c9"
+      },
+      {
+        "bytes": 886,
+        "executable": false,
+        "path": "tests/test_misc.py",
+        "sha256": "c351ea33119e2adf45d4bcd905e1df353efe73fefc3ed9376c83238fd9de3161"
+      },
+      {
+        "bytes": 2645,
+        "executable": false,
+        "path": "tests/test_offsets.py",
+        "sha256": "fae19f01ab48dd93fff95e34e16290fb33fdb9ac8718186ad442eb385c61fb29"
+      },
+      {
+        "bytes": 715,
+        "executable": false,
+        "path": "tests/test_pickle.py",
+        "sha256": "7aed98b31c749454c001fa6874c467b62413a52787ef129e204ca8049b7e5175"
+      },
+      {
+        "bytes": 1439,
+        "executable": false,
+        "path": "tests/test_simple_public.py",
+        "sha256": "de6f821034609dada4a2dca5b4cfe6bfa7e7194feb0b00a3b7013b3f3af6a118"
+      },
+      {
+        "bytes": 6669,
+        "executable": false,
+        "path": "tiktoken.egg-info/PKG-INFO",
+        "sha256": "30086725221223f7a19463e71c0e9f79fe7aba9125b36632c00bf50a23fa968a"
+      },
+      {
+        "bytes": 682,
+        "executable": false,
+        "path": "tiktoken.egg-info/SOURCES.txt",
+        "sha256": "431d40d56292ce6136dc488e0d614e60c715fc7babf7e71d979dfd64791e7773"
+      },
+      {
+        "bytes": 1,
+        "executable": false,
+        "path": "tiktoken.egg-info/dependency_links.txt",
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+      },
+      {
+        "bytes": 1,
+        "executable": false,
+        "path": "tiktoken.egg-info/not-zip-safe",
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+      },
+      {
+        "bytes": 39,
+        "executable": false,
+        "path": "tiktoken.egg-info/requires.txt",
+        "sha256": "990423645928d05b5321be421e64fdb7d8fd446060dbf5142f5274ef81587ce9"
+      },
+      {
+        "bytes": 22,
+        "executable": false,
+        "path": "tiktoken.egg-info/top_level.txt",
+        "sha256": "e781b931c7909ee0fb117be9ee3cc6c430daa40d623b0b21efb8e108df562a47"
+      },
+      {
+        "bytes": 346,
+        "executable": false,
+        "path": "tiktoken/__init__.py",
+        "sha256": "18437b6f0b99172cee1250a8de94e9acf6372f25ee3122144683b9e34811ab86"
+      },
+      {
+        "bytes": 8229,
+        "executable": false,
+        "path": "tiktoken/_educational.py",
+        "sha256": "4d414ea7c43dd568eb4ef18a842344cab86dbdaf365257a75df84fcbdcd2ed54"
+      },
+      {
+        "bytes": 17601,
+        "executable": false,
+        "path": "tiktoken/core.py",
+        "sha256": "3c136f06b05992855dc329216dfa1fa5b6718cccd3d79f658262de8f871f45f0"
+      },
+      {
+        "bytes": 5887,
+        "executable": false,
+        "path": "tiktoken/load.py",
+        "sha256": "43c3cfb29dc48a74e70e0c85bb01cfd96a3de069a98de8778ccab7f72a2836cc"
+      },
+      {
+        "bytes": 3909,
+        "executable": false,
+        "path": "tiktoken/model.py",
+        "sha256": "600f26902d1cf6a1a5f54e37be988b3e0d911f1ff17ba7060bb361f9b5295521"
+      },
+      {
+        "bytes": 0,
+        "executable": false,
+        "path": "tiktoken/py.typed",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "bytes": 3256,
+        "executable": false,
+        "path": "tiktoken/registry.py",
+        "sha256": "edf92d65b27529c9bcb15c968047c8cbe6717d4bdc5eea4b50d5ca3df486c105"
+      },
+      {
+        "bytes": 5613,
+        "executable": false,
+        "path": "tiktoken_ext/openai_public.py",
+        "sha256": "954392738e60d0fb6dca1dad80872efc47c8e2733babecbbf0a23970ed66c2cb"
+      }
+    ],
+    "maturin_config": {},
+    "name": "tiktoken",
+    "native_extension_prefix": "tiktoken/",
+    "pkg_info_sha256": "30086725221223f7a19463e71c0e9f79fe7aba9125b36632c00bf50a23fa968a",
+    "pyproject_sha256": "d6c04dd65e42bb26f292d0a20002bd5f919fa409084ec3fe083437be8ef8a1bd",
+    "requires_dist": [
+      "regex",
+      "requests",
+      "blobfile>=3; extra == \"blobfile\""
+    ],
+    "requires_python": ">=3.9",
+    "source_bytes": 142050,
+    "version": "0.14.0"
+  },
+  "target": {
+    "abi": "cp314",
+    "android_api": 24,
+    "cargo_host_target": "aarch64-linux-android",
+    "implementation": "cpython",
+    "platform": "android_24_arm64_v8a",
+    "python": "3.14.6",
+    "uid": 1000
+  },
+  "target_filtered_packages": [
+    {
+      "dependency_ids": [
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "memchr",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#memchr@2.8.3"
+        }
+      ],
+      "features": [
+        "perf-literal",
+        "std"
+      ],
+      "name": "aho-corasick",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.1.5"
+    },
+    {
+      "dependency_ids": [
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "bit_vec",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#bit-vec@0.8.0"
+        }
+      ],
+      "features": [
+        "std"
+      ],
+      "name": "bit-set",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.8.0"
+    },
+    {
+      "dependency_ids": [],
+      "features": [
+        "std"
+      ],
+      "name": "bit-vec",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.8.0"
+    },
+    {
+      "dependency_ids": [
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "memchr",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#memchr@2.8.3"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "regex_automata",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#regex-automata@0.4.18"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "serde_core",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#serde_core@1.0.229"
+        }
+      ],
+      "features": [
+        "alloc",
+        "default",
+        "std",
+        "unicode"
+      ],
+      "name": "bstr",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.13.1"
+    },
+    {
+      "dependency_ids": [
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "bit_set",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#bit-set@0.8.0"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "regex_automata",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#regex-automata@0.4.18"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "regex_syntax",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#regex-syntax@0.8.11"
+        }
+      ],
+      "features": [
+        "default",
+        "perf",
+        "std",
+        "unicode",
+        "variable-lookbehinds"
+      ],
+      "name": "fancy-regex",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.19.2"
+    },
+    {
+      "dependency_ids": [],
+      "features": [],
+      "name": "heck",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.5.0"
+    },
+    {
+      "dependency_ids": [],
+      "features": [
+        "default",
+        "std"
+      ],
+      "name": "libc",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.2.191"
+    },
+    {
+      "dependency_ids": [],
+      "features": [
+        "alloc",
+        "std"
+      ],
+      "name": "memchr",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "2.8.3"
+    },
+    {
+      "dependency_ids": [],
+      "features": [
+        "alloc",
+        "default",
+        "race",
+        "std"
+      ],
+      "name": "once_cell",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.21.4"
+    },
+    {
+      "dependency_ids": [
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "unicode_ident",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#unicode-ident@1.0.27"
+        }
+      ],
+      "features": [
+        "proc-macro"
+      ],
+      "name": "proc-macro2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.0.107"
+    },
+    {
+      "dependency_ids": [
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "libc",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#libc@0.2.191"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "once_cell",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#once_cell@1.21.4"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": "build",
+              "target": null
+            }
+          ],
+          "name": "pyo3_build_config",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#pyo3-build-config@0.29.3"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "pyo3_ffi",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#pyo3-ffi@0.29.3"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "pyo3_macros",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#pyo3-macros@0.29.3"
+        }
+      ],
+      "features": [
+        "extension-module",
+        "macros",
+        "pyo3-macros"
+      ],
+      "name": "pyo3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.29.3"
+    },
+    {
+      "dependency_ids": [
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            },
+            {
+              "kind": "build",
+              "target": null
+            }
+          ],
+          "name": "target_lexicon",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#target-lexicon@0.13.5"
+        }
+      ],
+      "features": [
+        "default",
+        "extension-module"
+      ],
+      "name": "pyo3-build-config",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.29.3"
+    },
+    {
+      "dependency_ids": [
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "libc",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#libc@0.2.191"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": "build",
+              "target": null
+            }
+          ],
+          "name": "pyo3_build_config",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#pyo3-build-config@0.29.3"
+        }
+      ],
+      "features": [
+        "default",
+        "extension-module"
+      ],
+      "name": "pyo3-ffi",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.29.3"
+    },
+    {
+      "dependency_ids": [
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "proc_macro2",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#proc-macro2@1.0.107"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "pyo3_macros_backend",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#pyo3-macros-backend@0.29.3"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "quote",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#quote@1.0.47"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "syn",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#syn@2.0.119"
+        }
+      ],
+      "features": [],
+      "name": "pyo3-macros",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.29.3"
+    },
+    {
+      "dependency_ids": [
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "heck",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#heck@0.5.0"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "proc_macro2",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#proc-macro2@1.0.107"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "quote",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#quote@1.0.47"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "syn",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#syn@2.0.119"
+        }
+      ],
+      "features": [],
+      "name": "pyo3-macros-backend",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.29.3"
+    },
+    {
+      "dependency_ids": [
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "proc_macro2",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#proc-macro2@1.0.107"
+        }
+      ],
+      "features": [
+        "default",
+        "proc-macro"
+      ],
+      "name": "quote",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.0.47"
+    },
+    {
+      "dependency_ids": [
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "aho_corasick",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#aho-corasick@1.1.5"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "memchr",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#memchr@2.8.3"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "regex_automata",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#regex-automata@0.4.18"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "regex_syntax",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#regex-syntax@0.8.11"
+        }
+      ],
+      "features": [
+        "default",
+        "perf",
+        "perf-backtrack",
+        "perf-cache",
+        "perf-dfa",
+        "perf-inline",
+        "perf-literal",
+        "perf-onepass",
+        "std",
+        "unicode",
+        "unicode-age",
+        "unicode-bool",
+        "unicode-case",
+        "unicode-gencat",
+        "unicode-perl",
+        "unicode-script",
+        "unicode-segment"
+      ],
+      "name": "regex",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.13.1"
+    },
+    {
+      "dependency_ids": [
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "aho_corasick",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#aho-corasick@1.1.5"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "memchr",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#memchr@2.8.3"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "regex_syntax",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#regex-syntax@0.8.11"
+        }
+      ],
+      "features": [
+        "alloc",
+        "dfa-onepass",
+        "dfa-search",
+        "hybrid",
+        "meta",
+        "nfa",
+        "nfa-backtrack",
+        "nfa-pikevm",
+        "nfa-thompson",
+        "perf",
+        "perf-inline",
+        "perf-literal",
+        "perf-literal-multisubstring",
+        "perf-literal-substring",
+        "std",
+        "syntax",
+        "unicode",
+        "unicode-age",
+        "unicode-bool",
+        "unicode-case",
+        "unicode-gencat",
+        "unicode-perl",
+        "unicode-script",
+        "unicode-segment",
+        "unicode-word-boundary"
+      ],
+      "name": "regex-automata",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.4.18"
+    },
+    {
+      "dependency_ids": [],
+      "features": [
+        "default",
+        "std",
+        "unicode",
+        "unicode-age",
+        "unicode-bool",
+        "unicode-case",
+        "unicode-gencat",
+        "unicode-perl",
+        "unicode-script",
+        "unicode-segment"
+      ],
+      "name": "regex-syntax",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.8.11"
+    },
+    {
+      "dependency_ids": [],
+      "features": [
+        "default",
+        "std"
+      ],
+      "name": "rustc-hash",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "2.1.3"
+    },
+    {
+      "dependency_ids": [],
+      "features": [
+        "alloc",
+        "std"
+      ],
+      "name": "serde_core",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.0.229"
+    },
+    {
+      "dependency_ids": [
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "proc_macro2",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#proc-macro2@1.0.107"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "quote",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#quote@1.0.47"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "unicode_ident",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#unicode-ident@1.0.27"
+        }
+      ],
+      "features": [
+        "clone-impls",
+        "default",
+        "derive",
+        "extra-traits",
+        "full",
+        "parsing",
+        "printing",
+        "proc-macro",
+        "visit-mut"
+      ],
+      "name": "syn",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "2.0.119"
+    },
+    {
+      "dependency_ids": [],
+      "features": [
+        "default"
+      ],
+      "name": "target-lexicon",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.13.5"
+    },
+    {
+      "dependency_ids": [
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "bstr",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#bstr@1.13.1"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "fancy_regex",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#fancy-regex@0.19.2"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "pyo3",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#pyo3@0.29.3"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "regex",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#regex@1.13.1"
+        },
+        {
+          "dep_kinds": [
+            {
+              "kind": null,
+              "target": null
+            }
+          ],
+          "name": "rustc_hash",
+          "pkg": "registry+https://github.com/rust-lang/crates.io-index#rustc-hash@2.1.3"
+        }
+      ],
+      "features": [
+        "default",
+        "pyo3",
+        "python"
+      ],
+      "name": "tiktoken",
+      "source": null,
+      "version": "0.14.0"
+    },
+    {
+      "dependency_ids": [],
+      "features": [],
+      "name": "unicode-ident",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.0.27"
+    }
+  ]
+}

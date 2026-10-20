@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 862, in runtime_case
+    report["native_mappings"] = verify_native_mappings(manifest, prep, common, apt, args, lock)
+                                ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 841, in verify_native_mappings
+    apt_mappings = common.verify_mapped_apt_libraries(args.apt_archives, all_pins, apt)
+  File "/probes/scripts/compatibility_probe_phonemizer.py", line 643, in verify_mapped_apt_libraries
+    require(len(candidates) == 1 and candidates[0] in pins, "Unowned or unpinned APT native library")
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_phonemizer.py", line 52, in require
+    raise ProbeError(message)
+_nonrust_native_common.ProbeError: Unowned or unpinned APT native library

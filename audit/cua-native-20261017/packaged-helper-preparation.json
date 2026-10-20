@@ -1,0 +1,247 @@
+{
+  "schema_version": 1,
+  "status": "host-helper-gates-passed; native packaged-default pending",
+  "files": [
+    {
+      "path": "scripts/compatibility_probe_cua_hermes.py",
+      "bytes": 53637,
+      "sha256": "4d7cb22d3c3f26eea72b7229805d53110b98a160bf35f63147506aec0ded56e8"
+    },
+    {
+      "path": "tests/test_cua_hermes_probe.py",
+      "bytes": 19084,
+      "sha256": "fe3aa68a32c92a3f85a9ce15e48b2304ea7e6c0b71498c428e488989554d64a3"
+    }
+  ],
+  "source_patch_unchanged": "8bbfddbbacfd508db35de6158e4c1a2c06423b84cd5f4ed621d4955fcd529edd",
+  "cli": {
+    "existing_required": [
+      "--source",
+      "--driver",
+      "--driver-sha256",
+      "--fixture",
+      "--out",
+      "--candidate-receipt"
+    ],
+    "new_paired_options": [
+      "--packaged-default",
+      "--prepared-receipt"
+    ],
+    "prepared_outputs_required_as_siblings": [
+      "prepared-cua-receipt.json",
+      "hermes-agent_0.22.2-1_aarch64-cua-candidate.deb",
+      "CUA-PREPARED-PAYLOAD.json"
+    ],
+    "workflow_head_binding": "If CUA_PROBE_HEAD_SHA is present, prepared packaging_commit must equal it exactly; native workflow supplies it from its verified input receipt."
+  },
+  "packaged_checks": [
+    "Exact original candidate receipt/raw identities and unchanged native Python catalog/locks/extras.",
+    "Exact experimental patch, prepared .deb bytes, source receipt, resident binary and complete installed payload inventory.",
+    "Fixed native Termux payload/app source and real PM-selected resident path/version/bytes, with three authority overrides absent.",
+    "Actual installed dpkg name/version/architecture, Depends libx11, libxi, and empty Pre-Depends.",
+    "Real provider/registry/runtime manifest/MCP child and automatic no-overlay invocation.",
+    "Omitted delivery settings for no-approver, three once approvals, once-not-reusable and viewer-lease refusal; every original argument object remains unchanged.",
+    "Explicit background refused with no fixture input.",
+    "Existing scoped background-only grant cannot authorize omitted foreground; grant cleared before the first MCP backend starts.",
+    "Original independent pixel/click/scroll/type oracles, same transport generation, real viewer lease, cleanup and full inventory preservation including directory modes."
+  ],
+  "native_result_check_counts": {
+    "explicit_override": 5,
+    "packaged_default": 7
+  },
+  "host_validation": {
+    "program": "C:\\Python314\\python.exe",
+    "argv": [
+      "-B",
+      "-m",
+      "pytest",
+      "-v",
+      "-p",
+      "no:cacheprovider",
+      "tests/test_cua_hermes_probe.py",
+      "tests/test_prepare_cua_hermes_candidate.py"
+    ],
+    "working_directory": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017",
+    "exit_code": 0,
+    "passed": 43,
+    "failed": 0,
+    "skipped": 0,
+    "suite_passed": 87,
+    "per_file_passed": {
+      "tests/test_cua_hermes_probe.py": 43,
+      "tests/test_prepare_cua_hermes_candidate.py": 44
+    },
+    "scope": "One host-only invocation; this audit's passed count is scoped to tests/test_cua_hermes_probe.py. The combined 87-test run is shared by both preparation audits and must not be counted twice.",
+    "log_file": "audit/cua-native-20261017/pin-refresh-final-label-tests-20261017.log",
+    "log_bytes": 11430,
+    "log_sha256": "31f058d2a2d1996765d7af34b6e64178b678739647d9769319a94d0faf509456",
+    "capture_form": "Raw subprocess stdout and stderr merged and saved as bytes before decoding; SHA-256 is the complete retained log.",
+    "summary": "============================= 87 passed in 1.00s ==============================",
+    "aggregate_with_prior_runs": false,
+    "compile_and_whitespace_checks": {
+      "AST": "passed",
+      "UTF8_LF": "passed",
+      "trailing_whitespace": "passed",
+      "pin_only_reverse_identity": "passed",
+      "source_patch_and_sealed_receipt": "passed",
+      "tests_unchanged": "passed"
+    }
+  },
+  "unchanged_scope": [
+    "shell/workflow",
+    "source and packaging mechanics",
+    "main compatibility patch",
+    "successful explicit native evidence",
+    "release/installer pins"
+  ],
+  "previous_host_validation": {
+    "command": "python -m pytest -q tests/test_cua_hermes_probe.py",
+    "python": "C:/Python314/python.exe",
+    "passed": 43,
+    "failed": 0,
+    "skipped": 0,
+    "pytest_seconds": 0.31,
+    "log_file": "packaged-helper-tests-final.log",
+    "log_bytes": 101,
+    "log_sha256": "3822793aaeeef96408e4fe75042b2e835cf04ada8f7007ccff5bc7759503b9b6",
+    "compile_and_whitespace_checks": "passed",
+    "scope": "Host-only byte/identity/environment/oracle regressions; no native execution or new CUA capability claim.",
+    "validated_helper_sha256": "ec609752a2f5b15c6f33b18285fbc126fb7b5bd19d6c55e1720e3ba4a7d3e444",
+    "validated_patch_sha256": "141d38b9f7ad5004164fcf443b271fdd89458a15a3b1c4b610bedb9f73686d0e",
+    "unchanged_scope": [
+      "shell/workflow",
+      "candidate augmenter",
+      "main compatibility patch",
+      "CUA source patch",
+      "successful explicit native evidence",
+      "release/installer pins"
+    ]
+  },
+  "pin_refresh": {
+    "previous_patch": {
+      "sha256": "cbfa3b9e79d4189350fd9e33adcb14a66195244bc04366c5e8c430c5f8033ed8",
+      "bytes": 67641,
+      "replay_tree": "2d5548348553e4c81c29318af66159e6fffe2001"
+    },
+    "current_patch": {
+      "sha256": "8bbfddbbacfd508db35de6158e4c1a2c06423b84cd5f4ed621d4955fcd529edd",
+      "bytes": 67709,
+      "replay_tree": "bf1356eda991ea38dcb3c5866d0d97be3d7eb3e6"
+    },
+    "source_reference_receipt": {
+      "file": "audit/cua-native-20261017/sealed-driver-preparation.json",
+      "bytes": 14233,
+      "sha256": "4b2df6d0ea4b105f1351f6540d0780a52e8ba8ae464cbdac61b2f4c858d68d12"
+    },
+    "changed_source_files": [
+      {
+        "path": "hermes_cli/tools_config.py",
+        "bytes": 62528,
+        "sha256": "0917e0ba72ebcec3f9ef25fc2912881d93e957c69d9d5c588bbbd043e400352a"
+      }
+    ],
+    "unchanged_permissions": {
+      "path": "tools/computer_use/permissions.py",
+      "bytes": 8792,
+      "sha256": "4c13f04af424f04e34448a9485564c9c5070862f7e54fbe752de937dbb72c995"
+    },
+    "scope": "Final source follow-up changes only the provider label from cua-driver (background) to cua-driver. Combined with the previous checkpoint, the source change is limited to four display/status strings. This preparation refresh changes only the patch and tools_config.py post-patch pins.",
+    "mechanics_unchanged": true,
+    "tests_unchanged": true,
+    "historical_native_receipts_unchanged": true,
+    "script_reverse_identity": "Reversing only pin constants reproduces the original complete augmenter SHA a67ea2528a24f096b844f6d73513834d6f76f33079e315f37af841f5a23b59fb and helper SHA ec609752a2f5b15c6f33b18285fbc126fb7b5bd19d6c55e1720e3ba4a7d3e444.",
+    "source_reference_at_test_start": {
+      "file": "audit/cua-native-20261017/sealed-driver-preparation.json",
+      "bytes": 13400,
+      "sha256": "6f76a70170079fd02168c0567b93fe56d250c3727635a4dc8be1da1a9c7dee90"
+    },
+    "source_reference_post_test_update": "Only diagnostic_followup.source_test_gate was appended after the 87-test pin-refresh gate. Exact source_reference values, patch bytes, script bytes and test bytes were verified unchanged; the earlier sealed-receipt hash is retained as the test-start checkpoint."
+  },
+  "pin_refresh_history": [
+    {
+      "pin_refresh": {
+        "previous_patch": {
+          "sha256": "141d38b9f7ad5004164fcf443b271fdd89458a15a3b1c4b610bedb9f73686d0e",
+          "bytes": 67606,
+          "replay_tree": "dfac85279351daafa64350b6bfc7fcb3ac3ce02b"
+        },
+        "current_patch": {
+          "sha256": "cbfa3b9e79d4189350fd9e33adcb14a66195244bc04366c5e8c430c5f8033ed8",
+          "bytes": 67641,
+          "replay_tree": "2d5548348553e4c81c29318af66159e6fffe2001"
+        },
+        "source_reference_receipt": {
+          "file": "audit/cua-native-20261017/sealed-driver-preparation.json",
+          "bytes": 13112,
+          "sha256": "43a139fc1e05af966b3ad9b4a21e797d49510a2e45d123cf7fbf018aefdb0e67"
+        },
+        "changed_source_files": [
+          {
+            "path": "hermes_cli/tools_config.py",
+            "bytes": 62541,
+            "sha256": "4acfdb56808f073dbcf242475c7fb97a0cdf8ffbf3b800712d1cc623c53e35f1"
+          },
+          {
+            "path": "tools/computer_use/permissions.py",
+            "bytes": 8792,
+            "sha256": "4c13f04af424f04e34448a9485564c9c5070862f7e54fbe752de937dbb72c995"
+          }
+        ],
+        "scope": "Follow-up source change is limited to three display/status strings. This preparation refresh changes only the corresponding patch and post-patch file pins; reversing those constants reproduces the previous complete augmenter/helper SHA-256 values.",
+        "mechanics_unchanged": true,
+        "tests_unchanged": true,
+        "historical_native_receipts_unchanged": true
+      },
+      "files": [
+        {
+          "path": "scripts/compatibility_probe_cua_hermes.py",
+          "bytes": 53637,
+          "sha256": "42c17222c3c712d03443f76e158094331eaa5cecab58f254f5dc337161124952"
+        },
+        {
+          "path": "tests/test_cua_hermes_probe.py",
+          "bytes": 19084,
+          "sha256": "fe3aa68a32c92a3f85a9ce15e48b2304ea7e6c0b71498c428e488989554d64a3"
+        }
+      ],
+      "host_validation": {
+        "program": "C:\\Python314\\python.exe",
+        "argv": [
+          "-B",
+          "-m",
+          "pytest",
+          "-v",
+          "-p",
+          "no:cacheprovider",
+          "tests/test_cua_hermes_probe.py",
+          "tests/test_prepare_cua_hermes_candidate.py"
+        ],
+        "working_directory": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017",
+        "exit_code": 0,
+        "passed": 43,
+        "failed": 0,
+        "skipped": 0,
+        "suite_passed": 87,
+        "per_file_passed": {
+          "tests/test_cua_hermes_probe.py": 43,
+          "tests/test_prepare_cua_hermes_candidate.py": 44
+        },
+        "scope": "One host-only invocation; this audit's passed count is scoped to tests/test_cua_hermes_probe.py. The combined 87-test run is shared by both preparation audits and must not be counted twice.",
+        "log_file": "audit/cua-native-20261017/pin-refresh-tests-20261017.log",
+        "log_bytes": 11430,
+        "log_sha256": "8e40dae850df38966e8a170ae0de47585de6bbb77517443504e002c7f22f54d1",
+        "capture_form": "Raw subprocess stdout and stderr merged and saved as bytes before decoding; SHA-256 is the complete retained log.",
+        "summary": "============================= 87 passed in 1.18s ==============================",
+        "aggregate_with_prior_runs": false,
+        "compile_and_whitespace_checks": {
+          "AST": "passed",
+          "UTF8_LF": "passed",
+          "trailing_whitespace": "passed",
+          "pin_only_reverse_identity": "passed",
+          "source_patch_and_sealed_receipt": "passed",
+          "tests_unchanged": "passed"
+        }
+      }
+    }
+  ]
+}

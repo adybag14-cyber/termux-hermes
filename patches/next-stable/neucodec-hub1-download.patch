@@ -1,0 +1,396 @@
+diff --git a/neucodec/model.py b/neucodec/model.py
+index 1bb40b3..233853a 100644
+--- a/neucodec/model.py
++++ b/neucodec/model.py
+@@ -1,4 +1,5 @@
+ from typing import Optional, Dict
++import inspect
+ from pathlib import Path
+ import numpy as np
+ import torch
+@@ -15,8 +16,39 @@ from .codec_decoder_vocos import CodecDecoderVocos
+ from .module import SemanticEncoder
+ 
+ 
++def _hub_download_parameters(proxies):
++    parameters = inspect.signature(hf_hub_download).parameters
++    if proxies and "proxies" not in parameters:
++        raise ValueError(
++            "This huggingface_hub version does not support per-call proxies. "
++            "Configure HTTP_PROXY and HTTPS_PROXY, or "
++            "huggingface_hub.set_client_factory, before loading the codec."
++        )
++    return parameters
++
++
++def _download_from_hub(*, proxies=None, resume_download=False, **kwargs):
++    """Keep legacy Hub options without passing removed arguments to Hub 1.x."""
++    parameters = _hub_download_parameters(proxies)
++    if "proxies" in parameters:
++        kwargs["proxies"] = proxies
++    if "resume_download" in parameters:
++        kwargs["resume_download"] = resume_download
++    # Hub 1.x resumes downloads automatically when possible.
++    return hf_hub_download(**kwargs)
++
++
++class _HubDownloadCompat:
++    @classmethod
++    def from_pretrained(cls, *args, **kwargs):
++        # Hub's public method may fetch config before our _from_pretrained hook.
++        _hub_download_parameters(kwargs.get("proxies"))
++        return super().from_pretrained(*args, **kwargs)
++
++
+ class NeuCodec(
+     nn.Module,
++    _HubDownloadCompat,
+     PyTorchModelHubMixin,
+     repo_url="https://github.com/neuphonic/neucodec",
+     license="apache-2.0",
+@@ -66,7 +98,7 @@ class NeuCodec(
+             ignore_keys = []
+ 
+         # download the model weights file
+-        ckpt_path = hf_hub_download(
++        ckpt_path = _download_from_hub(
+             repo_id=model_id,
+             filename="pytorch_model.bin",
+             revision=revision,
+@@ -79,7 +111,7 @@ class NeuCodec(
+         )
+ 
+         # download meta.yaml to track number of downloads
+-        _ = hf_hub_download(
++        _ = _download_from_hub(
+             repo_id=model_id,
+             filename="meta.yaml",
+             revision=revision,
+@@ -250,6 +282,7 @@ class DistillNeuCodec(NeuCodec):
+ 
+ 
+ class NeuCodecOnnxDecoder(
++    _HubDownloadCompat,
+     ModelHubMixin,
+     repo_url="https://github.com/neuphonic/neucodec",
+     license="apache-2.0",
+@@ -290,7 +323,7 @@ class NeuCodecOnnxDecoder(
+     ):
+         
+         # download the model weights file
+-        onnx_path = hf_hub_download(
++        onnx_path = _download_from_hub(
+             repo_id=model_id,
+             filename="model.onnx",
+             revision=revision,
+@@ -303,7 +336,7 @@ class NeuCodecOnnxDecoder(
+         )
+ 
+         # download meta.yaml to track number of downloads
+-        _ = hf_hub_download(
++        _ = _download_from_hub(
+             repo_id=model_id,
+             filename="meta.yaml",
+             revision=revision,
+diff --git a/tests/test_hub_download_compat.py b/tests/test_hub_download_compat.py
+new file mode 100644
+index 0000000..b93e984
+--- /dev/null
++++ b/tests/test_hub_download_compat.py
+@@ -0,0 +1,296 @@
++"""Source-isolated downloader regressions; no Torch, network, or model execution.
++
++The real two _from_pretrained bodies are compiled from model.py. Their model
++constructors and torch.load are replaced with recording fixtures. Strict Python
++call signatures stand in for the documented old and new Hugging Face APIs.
++"""
++import ast
++import functools
++import inspect
++import os
++from pathlib import Path
++from typing import Dict, Optional
++
++import pytest
++
++SOURCE = Path(__file__).resolve().parents[1] / "neucodec" / "model.py"
++ROUTES = [
++    ("NeuCodec", "neuphonic/neucodec", "pytorch_model.bin"),
++    ("NeuCodec", "neuphonic/distill-neucodec", "pytorch_model.bin"),
++    ("NeuCodecOnnxDecoder", "neuphonic/neucodec-onnx-decoder", "model.onnx"),
++]
++
++
++def load_route(class_name, downloader):
++    source = ast.parse(SOURCE.read_text(encoding="utf-8"), filename=str(SOURCE))
++    owner = next(
++        item for item in source.body
++        if isinstance(item, ast.ClassDef) and item.name == class_name
++    )
++    method = next(
++        item for item in owner.body
++        if isinstance(item, ast.FunctionDef) and item.name == "_from_pretrained"
++    )
++    helpers = [
++        item for item in source.body
++        if isinstance(item, ast.FunctionDef) and item.name in {"_download_from_hub", "_hub_download_parameters"}
++    ]
++    tree = ast.fix_missing_locations(ast.Module(body=helpers + [method], type_ignores=[]))
++    loads, constructions = [], []
++
++    class TorchStub:
++        @staticmethod
++        def load(path, map_location):
++            loads.append((path, map_location))
++            return {"weight": "value", "fc_post_s.weight": "legacy", "SemanticDecoder.weight": "legacy"}
++
++    class CodecStub:
++        def __init__(self, *args):
++            constructions.append(args)
++
++        def load_state_dict(self, values, strict):
++            self.loaded_state = values
++            self.strict = strict
++
++    namespace = {
++        "Optional": Optional,
++        "Dict": Dict,
++        "inspect": inspect,
++        "hf_hub_download": downloader,
++        "torch": TorchStub,
++    }
++    exec(compile(tree, str(SOURCE), "exec"), namespace)
++    CodecStub._from_pretrained = namespace["_from_pretrained"]
++    return CodecStub, loads, constructions
++
++
++def downloader_contract(kind, calls, error=None):
++    def modern(
++        repo_id, filename, *, revision=None, cache_dir=None,
++        force_download=False, local_files_only=False, token=None,
++    ):
++        calls.append({
++            "repo_id": repo_id, "filename": filename, "revision": revision,
++            "cache_dir": cache_dir, "force_download": force_download,
++            "local_files_only": local_files_only, "token": token,
++        })
++        if error is not None:
++            raise error
++        return "/owned-cache/" + filename
++
++    def legacy(
++        repo_id, filename, *, revision=None, cache_dir=None,
++        force_download=False, proxies=None, resume_download=None,
++        local_files_only=False, token=None,
++    ):
++        calls.append({
++            "repo_id": repo_id, "filename": filename, "revision": revision,
++            "cache_dir": cache_dir, "force_download": force_download,
++            "local_files_only": local_files_only, "token": token,
++            "proxies": proxies, "resume_download": resume_download,
++        })
++        if error is not None:
++            raise error
++        return "/owned-cache/" + filename
++
++    return modern if kind == "modern" else legacy
++
++
++def call_route(route, kind, *, resume=False, proxies=None, token="test-only-token", error=None):
++    class_name, repo_id, _ = route
++    calls = []
++    downloader = downloader_contract(kind, calls, error)
++    cls, loads, constructions = load_route(class_name, downloader)
++    kwargs = {
++        "model_id": repo_id,
++        "revision": "exact-revision-identity",
++        "cache_dir": Path("/owned-cache"),
++        "force_download": True,
++        "local_files_only": True,
++        "token": token,
++        "proxies": proxies,
++        "resume_download": resume,
++    }
++    result = cls._from_pretrained(**kwargs)
++    return result, calls, loads, constructions, kwargs
++
++
++@pytest.mark.parametrize("route", ROUTES)
++@pytest.mark.parametrize("resume", [False, True])
++def test_modern_hub_preserves_download_contract_and_automatic_resume(route, resume):
++    environment = os.environ.copy()
++    result, calls, loads, constructions, kwargs = call_route(route, "modern", resume=resume)
++    assert os.environ == environment
++    assert len(calls) == 2
++    assert [call["filename"] for call in calls] == [route[2], "meta.yaml"]
++    for call in calls:
++        assert set(call) == {
++            "repo_id", "filename", "revision", "cache_dir",
++            "force_download", "local_files_only", "token",
++        }
++        assert call["repo_id"] == route[1]
++        for key in ("revision", "cache_dir", "force_download", "local_files_only", "token"):
++            assert call[key] is kwargs[key]
++    assert len(constructions) == 1
++    if route[0] == "NeuCodec":
++        assert loads == [("/owned-cache/pytorch_model.bin", "cpu")]
++        assert result.strict is False
++        assert ("fc_post_s.weight" in result.loaded_state) == ("distill" in route[1])
++    else:
++        assert not loads
++        assert constructions == [("/owned-cache/model.onnx",)]
++
++
++@pytest.mark.parametrize("route", ROUTES)
++@pytest.mark.parametrize("resume", [False, True])
++def test_legacy_hub_keeps_explicit_proxy_and_resume_values(route, resume):
++    proxy = {"https": "http://proxy.owned.invalid:8080"}
++    _, calls, _, _, _ = call_route(route, "legacy", resume=resume, proxies=proxy)
++    assert len(calls) == 2
++    for call in calls:
++        assert call["proxies"] is proxy
++        assert call["resume_download"] is resume
++
++
++@pytest.mark.parametrize("route", ROUTES)
++def test_modern_hub_refuses_nonempty_proxy_before_downloader_or_model(route):
++    calls = []
++    cls, loads, constructions = load_route(route[0], downloader_contract("modern", calls))
++    proxy = {"https": "http://proxy.owned.invalid:8080"}
++    with pytest.raises(ValueError, match="HTTP_PROXY.*HTTPS_PROXY"):
++        cls._from_pretrained(model_id=route[1], proxies=proxy)
++    assert not calls
++    assert not loads
++    assert not constructions
++    assert proxy == {"https": "http://proxy.owned.invalid:8080"}
++
++
++@pytest.mark.parametrize("route", ROUTES)
++def test_modern_hub_accepts_empty_proxy_without_global_mutation(route):
++    before = os.environ.copy()
++    _, calls, _, _, _ = call_route(route, "modern", proxies={})
++    assert os.environ == before
++    assert len(calls) == 2
++    assert all("proxies" not in call for call in calls)
++
++
++@pytest.mark.parametrize("route", ROUTES)
++@pytest.mark.parametrize("kind", ["modern", "legacy"])
++def test_original_download_errors_propagate_without_retry_or_model_creation(route, kind):
++    calls = []
++    failure = FileNotFoundError("owned offline-cache sentinel")
++    cls, loads, constructions = load_route(route[0], downloader_contract(kind, calls, failure))
++    with pytest.raises(FileNotFoundError) as caught:
++        cls._from_pretrained(model_id=route[1], local_files_only=True, token=False)
++    assert caught.value is failure
++    assert len(calls) == 1
++    assert calls[0]["local_files_only"] is True
++    assert calls[0]["token"] is False
++    assert not loads
++    assert not constructions
++
++
++@pytest.mark.parametrize("route", ROUTES)
++def test_false_token_remains_explicitly_unauthenticated(route):
++    _, calls, _, _, _ = call_route(route, "modern", token=False)
++    assert all(call["token"] is False for call in calls)
++
++
++def test_wrapped_legacy_function_preserves_signature_based_proxy_support():
++    calls = []
++    real = downloader_contract("legacy", calls)
++
++    @functools.wraps(real)
++    def wrapped(*args, **kwargs):
++        return real(*args, **kwargs)
++
++    cls, _, _ = load_route("NeuCodec", wrapped)
++    proxy = {"http": "http://proxy.owned.invalid:8080"}
++    cls._from_pretrained(
++        model_id="neuphonic/neucodec", proxies=proxy, resume_download=True
++    )
++    assert len(calls) == 2
++    assert all(call["proxies"] is proxy and call["resume_download"] is True for call in calls)
++
++
++def load_public_route(class_name, downloader, parent_calls):
++    """Compile the source's real class bases and compatibility mixin."""
++    from types import SimpleNamespace
++
++    source = ast.parse(SOURCE.read_text(encoding="utf-8"), filename=str(SOURCE))
++    owner = next(
++        item for item in source.body
++        if isinstance(item, ast.ClassDef) and item.name == class_name
++    )
++    helpers = [
++        item for item in source.body
++        if isinstance(item, ast.FunctionDef) and item.name == "_hub_download_parameters"
++    ]
++    mixins = [
++        item for item in source.body
++        if isinstance(item, ast.ClassDef) and item.name == "_HubDownloadCompat"
++    ]
++    owner.body = [ast.Pass()]
++    module = ast.fix_missing_locations(
++        ast.Module(body=helpers + mixins + [owner], type_ignores=[])
++    )
++    sentinel = object()
++
++    class Parent:
++        def __init_subclass__(cls, **kwargs):
++            super().__init_subclass__()
++
++        @classmethod
++        def from_pretrained(cls, *args, **kwargs):
++            parent_calls.append((cls.__name__, args, kwargs))
++            return sentinel
++
++    class TorchModule:
++        pass
++
++    namespace = {
++        "inspect": inspect, "hf_hub_download": downloader,
++        "nn": SimpleNamespace(Module=TorchModule),
++        "PyTorchModelHubMixin": Parent, "ModelHubMixin": Parent,
++    }
++    exec(compile(module, str(SOURCE), "exec"), namespace)
++    return namespace[class_name], sentinel
++
++
++@pytest.mark.parametrize("class_name", ["NeuCodec", "NeuCodecOnnxDecoder"])
++def test_public_modern_proxy_rejection_precedes_parent_config_fetch(class_name):
++    downloads, parent_calls = [], []
++    cls, _ = load_public_route(
++        class_name, downloader_contract("modern", downloads), parent_calls
++    )
++    with pytest.raises(ValueError, match="per-call proxies"):
++        cls.from_pretrained(
++            "owned/model", proxies={"https": "http://proxy.owned.invalid:8080"}
++        )
++    assert not parent_calls
++    assert not downloads
++
++
++@pytest.mark.parametrize("class_name", ["NeuCodec", "NeuCodecOnnxDecoder"])
++@pytest.mark.parametrize("kind", ["modern", "legacy"])
++def test_public_forwarding_retains_parent_result_and_all_original_arguments(class_name, kind):
++    downloads, parent_calls = [], []
++    cls, sentinel = load_public_route(
++        class_name, downloader_contract(kind, downloads), parent_calls
++    )
++    proxy = {"https": "http://proxy.owned.invalid:8080"} if kind == "legacy" else None
++    options = {
++        "proxies": proxy, "resume_download": True, "token": False,
++        "local_files_only": True, "cache_dir": Path("/owned-cache"),
++        "revision": "exact-revision-identity", "force_download": False,
++    }
++    before = os.environ.copy()
++    assert cls.from_pretrained("owned/model", **options) is sentinel
++    assert os.environ == before
++    assert len(parent_calls) == 1
++    name, args, kwargs = parent_calls[0]
++    assert name == class_name
++    assert args == ("owned/model",)
++    assert kwargs.keys() == options.keys()
++    assert all(kwargs[key] is value for key, value in options.items())
++    assert not downloads

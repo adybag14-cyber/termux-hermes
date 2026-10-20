@@ -1,0 +1,138 @@
+{
+  "artifact": {
+    "all_member_crc_size_sha256_verified": true,
+    "bytes": 450464802,
+    "id": 12274530873,
+    "regular_member_count": 2264,
+    "sha256": "21db502f0d7e75d1170fd8f4f082abeade0b253268be9ecde3170a4b43e553ab",
+    "uncompressed_bytes": 478448973,
+    "whole_archive_verified": true
+  },
+  "correction": {
+    "lock_changed": false,
+    "native_retry": "required",
+    "requirements_changed": false,
+    "scope": "Parse PEP 508 requirement syntax before comparison; exact original source bytes, backend, local backend path, lock and all selected versions remain mandatory.",
+    "source_archive_changed": false,
+    "source_files": [
+      {
+        "bytes": 31620,
+        "path": "scripts/compatibility_probe_neutts_tiktoken.py",
+        "sha256": "4bcd8b0364db7597ee8d5d2a44fda7658ca94b16f4f5f5efcb1c272f467e782f"
+      },
+      {
+        "bytes": 20561,
+        "path": "tests/test_neutts_tiktoken.py",
+        "sha256": "fe183f95e2d968c380c67eb35c3a1a668fd8db75d349fd5f2bac5fc5c85fafd7"
+      }
+    ]
+  },
+  "engine_installed": false,
+  "failure": {
+    "canonical_lock_requires": [
+      "setuptools>77.0.3"
+    ],
+    "child_stderr": {
+      "bytes": 1180,
+      "path": "audit/neutts-tiktoken-native-20261020/run-39440363758/artifact/tiktoken-component/components/regex/native-build-regex.stderr.log",
+      "sha256": "48282d0cb8aa7c11cd000c3c5f6b346aa78c2581c42d896fca649d825a8c3573"
+    },
+    "error": "native-build-regex failed; retained exit code 1",
+    "original_pyproject": {
+      "bytes": 1282,
+      "path": "audit/neutts-tiktoken-native-20261020/run-39440363758/artifact/tiktoken-inputs/sources/regex-2026.9.10/pyproject.toml",
+      "sha256": "821e15c9f20659107775529ffdfcf3698d6d97d63152936b899d75c61bb42e0a"
+    },
+    "original_requires": [
+      "setuptools > 77.0.3"
+    ],
+    "regex_backend_called": false,
+    "regex_compiler_called": false,
+    "stage": "source-regex"
+  },
+  "full_runtime_passed": false,
+  "head_sha": "4a95a07086a0b88d209485ac7a01cdd40e268f40",
+  "host_tests": {
+    "command": [
+      "python",
+      "-B",
+      "-m",
+      "pytest",
+      "tests/test_neutts_tiktoken.py",
+      "-q"
+    ],
+    "exit_code": 0,
+    "passed": 35,
+    "skipped": 0,
+    "stderr": {
+      "bytes": 0,
+      "path": "audit/neutts-tiktoken-native-20261020/run-39440363758/host-tests.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 152,
+      "path": "audit/neutts-tiktoken-native-20261020/run-39440363758/host-tests.stdout.log",
+      "sha256": "9a4d83afc128d14d3541826d4209156a6cd62ea7650fd10aef0aad9e97e412c0"
+    },
+    "subtests_passed": 50
+  },
+  "job_id": 118688268417,
+  "model_downloaded": false,
+  "production_admission_changed": false,
+  "recorded_at": "2026-10-20T14:53:02.010248+00:00",
+  "release_output": false,
+  "run_id": 39440363758,
+  "schema_version": 1,
+  "source_input_bindings": [
+    {
+      "bytes": 30913,
+      "path": "scripts/compatibility_probe_neutts_tiktoken.py",
+      "sha256": "379438277fe7a8987c9d634e082d441fec631acfec24f6507fdc5d0791d5d197"
+    },
+    {
+      "bytes": 15430,
+      "path": "scripts/prepare_neutts_tiktoken.py",
+      "sha256": "5cb1e90882272c84f95702de67ff34d36ea82064ecbd237adca19ea6b958bf6b"
+    },
+    {
+      "bytes": 72296,
+      "path": "scripts/neutts_tiktoken_lock.json",
+      "sha256": "6d7e2d5f10f35547eea573ec1d38cbfb88ed2f09ff58fe86cb56f1be134e7f21"
+    },
+    {
+      "bytes": 85180,
+      "path": "scripts/compatibility_probe_neutts_rust.py",
+      "sha256": "4be7888378ff598dfc25610368bd7eb261056617e2c338e7ab697aeecd9fa871"
+    },
+    {
+      "bytes": 28083,
+      "path": "scripts/prepare_neutts_rust_sources.py",
+      "sha256": "db8ce00daaece15f69b4f7b1de415accd207f13e256b2097d4efcb2d0894c428"
+    },
+    {
+      "bytes": 552620,
+      "path": "scripts/neutts_rust_sources_lock.json",
+      "sha256": "de243480c74b12ad81efc2886b8f78a237abb958588c8424f070e5a6be766670"
+    },
+    {
+      "bytes": 78659,
+      "path": "scripts/phonemizer_runtime_lock.json",
+      "sha256": "48d43784778817bd4a907b63f11738ff910cafc6aac2eed6bc27349b6d5d8c82"
+    }
+  ],
+  "status": "actual-native-failure-preserved-verifier-corrected-native-retry-required",
+  "tiktoken_build": {
+    "complete_seven_distribution_runtime_executed": false,
+    "raw_receipt": {
+      "bytes": 6865,
+      "path": "audit/neutts-tiktoken-native-20261020/run-39440363758/artifact/tiktoken-component/components/tiktoken/TIKTOKEN-SOURCE-WHEEL-RESULT.json",
+      "sha256": "0ec8cfe705eaa26ea78fecf93d80e47fd851f05fc4f8f4c819b7ec4db67940f6"
+    },
+    "status": "wheel-built-and-verified",
+    "wheel": {
+      "bytes": 1128536,
+      "filename": "tiktoken-0.14.0-cp314-cp314-android_24_arm64_v8a.whl",
+      "sha256": "f16a657657a1541295e7147264299359fd17ba6c76777206def9c608a9f1dc9f"
+    }
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "archive": {
+    "architecture": "aarch64",
+    "bytes": 36675500,
+    "filename": "pool/main/p/python-torch/python-torch_2.14.1-2_aarch64.deb",
+    "name": "python-torch",
+    "sha256": "cb5d96877f30bca10a0a19bcd32934a4f477ec7e5bfd00c2a82ac5c9e7d0eb73",
+    "version": "2.14.1-2"
+  },
+  "gate_policy": {
+    "all_global_python_site_package_mappings_rejected": true,
+    "binary_or_metadata_modified": false,
+    "child_ld_library_path": "<isolated-prefix>/lib/python3.14/site-packages/torch/lib:/data/data/com.termux/files/usr/lib",
+    "compiler_installed": false
+  },
+  "measured_facts": [
+    "The original APT archive exposes five global library symlinks into its global Torch Python payload.",
+    "Original Torch native libraries have PREFIX/lib RUNPATH; the public loader opens its own libtorch_global_deps path without rewriting native bytes."
+  ],
+  "native_runtime_tested": false,
+  "original_global_library_aliases": [
+    {
+      "bytes": 0,
+      "link": "python3.14/site-packages/torch/lib/libc10.so",
+      "member": "data/data/com.termux/files/usr/lib/libc10.so",
+      "type": "2"
+    },
+    {
+      "bytes": 0,
+      "link": "python3.14/site-packages/torch/lib/libtorch.so",
+      "member": "data/data/com.termux/files/usr/lib/libtorch.so",
+      "type": "2"
+    },
+    {
+      "bytes": 0,
+      "link": "python3.14/site-packages/torch/lib/libtorch_cpu.so",
+      "member": "data/data/com.termux/files/usr/lib/libtorch_cpu.so",
+      "type": "2"
+    },
+    {
+      "bytes": 0,
+      "link": "python3.14/site-packages/torch/lib/libtorch_global_deps.so",
+      "member": "data/data/com.termux/files/usr/lib/libtorch_global_deps.so",
+      "type": "2"
+    },
+    {
+      "bytes": 0,
+      "link": "python3.14/site-packages/torch/lib/libtorch_python.so",
+      "member": "data/data/com.termux/files/usr/lib/libtorch_python.so",
+      "type": "2"
+    }
+  ],
+  "original_global_loader_function_sha256": "99f2ab658751b95b7b5a6ee1694e72623ca70c7870aa5280eac9c62a02271179",
+  "original_runtime_paths": [
+    {
+      "member": "torch/_C.cpython-314-aarch64-linux-android.so",
+      "runpath": [
+        "/data/data/com.termux/files/usr/lib"
+      ],
+      "sha256": "8fa918403e07cf8d04d84518f2af9de3fb606f1003f31bc60887f97dd83a99ce"
+    },
+    {
+      "member": "torch/lib/libc10.so",
+      "runpath": [
+        "/data/data/com.termux/files/usr/lib"
+      ],
+      "sha256": "d25c603085289f05bf2ebd5d77497104bbb781c2891cee68a40aca80df76a346"
+    },
+    {
+      "member": "torch/lib/libshm.so",
+      "runpath": [
+        "/data/data/com.termux/files/usr/lib"
+      ],
+      "sha256": "d34767256a86ba85bc227834da5e2497206b0d3bfc6b6ce756ffe390fe88a3b4"
+    },
+    {
+      "member": "torch/lib/libtorch.so",
+      "runpath": [
+        "/data/data/com.termux/files/usr/lib"
+      ],
+      "sha256": "3c0afea22c3e3a558886fbcda8f07f875580b523a7cac867fca3b3581ec3f35f"
+    },
+    {
+      "member": "torch/lib/libtorch_cpu.so",
+      "runpath": [
+        "/data/data/com.termux/files/usr/lib"
+      ],
+      "sha256": "fbe74dc77b4e56202e5b540e3b7bc0feac046a096962edf2e2dd073bbefdbf2d"
+    },
+    {
+      "member": "torch/lib/libtorch_global_deps.so",
+      "runpath": [
+        "/data/data/com.termux/files/usr/lib"
+      ],
+      "sha256": "d1099ee2e7777ea5e360e4a84db4313aec6552b55146926e85615f02911f12b4"
+    },
+    {
+      "member": "torch/lib/libtorch_python.so",
+      "runpath": [
+        "/data/data/com.termux/files/usr/lib"
+      ],
+      "sha256": "1f3c1c7d8a5da2ef90e5981d2a3ac45f06f10648f866c0fe1390edfe4bd005a3"
+    }
+  ],
+  "original_torch_init_sha256": "bd4a10ff16357ed78f45aaf4b46ce5b771fdc0e8549402206e324d0eb792c672",
+  "release_output": false,
+  "schema_version": 1,
+  "scope": "Original Torch archive loader and namespace review; no native execution"
+}

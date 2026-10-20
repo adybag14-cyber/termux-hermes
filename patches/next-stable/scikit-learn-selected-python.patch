@@ -1,0 +1,22 @@
+--- a/meson.build
++++ b/meson.build
+@@ -1,7 +1,7 @@
+ project(
+   'scikit-learn',
+   'c', 'cpp', 'cython',
+-  version: run_command('sklearn/_build_utils/version.py', check: true).stdout().strip(),
++  version: run_command(find_program('python'), 'sklearn/_build_utils/version.py', check: true).stdout().strip(),
+   license: 'BSD-3',
+   meson_version: '>= 1.9.0',
+   default_options: [
+@@ -42,9 +42,8 @@
+   add_project_link_arguments('-lm', language : 'c')
+ endif
+ 
+-tempita = find_program('sklearn/_build_utils/tempita.py')
+-
+ py = import('python').find_installation(pure: false)
++tempita = [py, files('sklearn/_build_utils/tempita.py')]
+ 
+ # Copy all the .py files to the install dir, rather than using
+ # py.install_sources and needing to list them explicitly one by one

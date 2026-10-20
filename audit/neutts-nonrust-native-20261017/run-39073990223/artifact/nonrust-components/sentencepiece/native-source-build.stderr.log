@@ -1,0 +1,105 @@
+warning: build_py: byte-compiling is disabled, skipping.
+
+CMake Error at /data/data/com.termux/files/usr/share/cmake-4.4/Modules/ExternalProject/shared_internal_commands.cmake:932 (message):
+  error: could not find git for clone of abseil-cpp-populate
+Call Stack (most recent call first):
+  /data/data/com.termux/files/usr/share/cmake-4.4/Modules/ExternalProject.cmake:3283 (_ep_add_download_command)
+  CMakeLists.txt:29 (ExternalProject_Add)
+
+
+CMake Error at /data/data/com.termux/files/usr/share/cmake-4.4/Modules/FetchContent.cmake:1921 (message):
+  CMake step for abseil-cpp failed: 1
+Call Stack (most recent call first):
+  /data/data/com.termux/files/usr/share/cmake-4.4/Modules/FetchContent.cmake:1622 (__FetchContent_populateSubbuild)
+  /data/data/com.termux/files/usr/share/cmake-4.4/Modules/FetchContent.cmake:2012 (__FetchContent_doPopulation)
+  /data/data/com.termux/files/usr/share/cmake-4.4/Modules/FetchContent.cmake:1993:EVAL:1 (__FetchContent_Populate)
+  /data/data/com.termux/files/usr/share/cmake-4.4/Modules/FetchContent.cmake:1993 (cmake_language)
+  CMakeLists.txt:190 (FetchContent_Populate)
+
+
+make: Makefile: No such file or directory
+make: *** No rule to make target 'Makefile'.  Stop.
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 911, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 900, in main
+    return build_one(args, lock, prep, common)
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 614, in build_one
+    filename = backend.build_wheel(str(args.wheel_dir), config_settings=settings)
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/build_meta.py", line 438, in build_wheel
+    return _build(['bdist_wheel'])
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/build_meta.py", line 429, in _build
+    return self._build_with_temp_dir(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        cmd,
+        ^^^^
+    ...<3 lines>...
+        self._arbitrary_args(config_settings),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/build_meta.py", line 410, in _build_with_temp_dir
+    self.run_setup()
+    ~~~~~~~~~~~~~~^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/build_meta.py", line 317, in run_setup
+    exec(code, locals())
+    ~~~~^^^^^^^^^^^^^^^^
+  File "<string>", line 301, in <module>
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/__init__.py", line 117, in setup
+    return distutils.core.setup(**attrs)  # type: ignore[return-value]
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/_distutils/core.py", line 186, in setup
+    return run_commands(dist)
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/_distutils/core.py", line 202, in run_commands
+    dist.run_commands()
+    ~~~~~~~~~~~~~~~~~^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/_distutils/dist.py", line 1001, in run_commands
+    self.run_command(cmd)
+    ~~~~~~~~~~~~~~~~^^^^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/dist.py", line 1107, in run_command
+    super().run_command(command)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/_distutils/dist.py", line 1020, in run_command
+    cmd_obj.run()
+    ~~~~~~~~~~~^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/command/bdist_wheel.py", line 370, in run
+    self.run_command("build")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/_distutils/cmd.py", line 341, in run_command
+    self.distribution.run_command(command)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/dist.py", line 1107, in run_command
+    super().run_command(command)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/_distutils/dist.py", line 1020, in run_command
+    cmd_obj.run()
+    ~~~~~~~~~~~^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/_distutils/command/build.py", line 135, in run
+    self.run_command(cmd_name)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/_distutils/cmd.py", line 341, in run_command
+    self.distribution.run_command(command)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/dist.py", line 1107, in run_command
+    super().run_command(command)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/_distutils/dist.py", line 1020, in run_command
+    cmd_obj.run()
+    ~~~~~~~~~~~^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/command/build_ext.py", line 97, in run
+    _build_ext.run(self)
+    ~~~~~~~~~~~~~~^^^^^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/_distutils/command/build_ext.py", line 367, in run
+    self.build_extensions()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/_distutils/command/build_ext.py", line 483, in build_extensions
+    self._build_extensions_serial()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/data/data/com.termux/files/usr/tmp/nonrust-native-_a94q8zs/build-venv/lib/python3.14/site-packages/setuptools/_distutils/command/build_ext.py", line 509, in _build_extensions_serial
+    self.build_extension(ext)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "<string>", line 112, in build_extension
+  File "/data/data/com.termux/files/usr/lib/python3.14/subprocess.py", line 420, in check_call
+    raise CalledProcessError(retcode, cmd)
+subprocess.CalledProcessError: Command '['./build_bundled.sh', '0.2.2']' returned non-zero exit status 2.

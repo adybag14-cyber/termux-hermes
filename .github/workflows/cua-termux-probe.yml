@@ -1,0 +1,123 @@
+name: Probe CUA on native Termux X11
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [prepare/termux-compatibility-next-stable]
+    paths:
+      - '.github/workflows/cua-termux-probe.yml'
+      - 'scripts/prepare_cua_termux_source.py'
+      - 'scripts/compatibility_probe_cua.sh'
+      - 'patches/next-stable/cua-driver.patch'
+      - 'patches/next-stable/cua-hermes-integration.patch'
+      - 'scripts/compatibility_probe_cua_hermes.py'
+      - 'scripts/fetch_compatibility_candidate.py'
+      - 'scripts/prepare_cua_assembly_source.py'
+      - 'scripts/prepare_cua_hermes_candidate.py'
+      - 'scripts/run_cua_packaged_probe.py'
+      - 'scripts/check_cua_candidate_lifecycle.sh'
+      - 'scripts/check_next_stable_candidate.sh'
+      - 'scripts/check_next_stable_lifecycle.py'
+      - 'manifest/release.json'
+      - 'tests/test_cua_hermes_probe.py'
+      - 'tests/test_prepare_cua_hermes_candidate.py'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cua-termux-probe-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  cua:
+    name: Native CUA virtual X11 experiment
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 90
+    steps:
+      - name: Checkout the proposed probe
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Checkout the exact CUA component source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: trycua/cua
+          ref: 70db98d1bcd92890d778f4978e0eb107a4b66c1b
+          path: cua-source
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout: |
+            libs/cua-driver/rust
+            libs/cua-driver/wayland-helper
+
+      - name: Verify and prepare reviewed source adapters
+        run: |
+          python3 scripts/prepare_cua_termux_source.py \
+            --source cua-source \
+            --patch patches/next-stable/cua-driver.patch \
+            --out probe-results/cua
+
+      - name: Fetch and verify the exact passed Hermes candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/fetch_compatibility_candidate.py \
+            --out "$RUNNER_TEMP/verified-compatibility-candidate"
+
+      - name: Restore verified-source native build cache
+        id: cargo-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cua-native-cache
+          key: cua-termux-aarch64-v1-${{ hashFiles('scripts/compatibility_probe_cua.sh', 'scripts/prepare_cua_termux_source.py', 'patches/next-stable/cua-driver.patch') }}
+          restore-keys: |
+            cua-termux-aarch64-v1-
+
+      - name: Build and exercise the isolated virtual desktop
+        env:
+          CUA_PROBE_HEAD_SHA: ${{ github.sha }}
+        run: |
+          bash scripts/compatibility_probe_cua.sh \
+            --source cua-source --out probe-results/cua \
+            --candidate-dir "$RUNNER_TEMP/verified-compatibility-candidate"
+
+      - name: Validate CUA upgrade and optional installs without build tools
+        run: |
+          bash scripts/check_cua_candidate_lifecycle.sh \
+            probe-results/cua/hermes-prepared probe-results/cua/hermes-lifecycle
+
+      - name: Retain Cargo fingerprints after a compile failure or success
+        if: always() && steps.cargo-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cua-native-cache
+          key: ${{ steps.cargo-cache.outputs.cache-primary-key }}
+
+      - name: Preserve candidate evidence and any concrete build blocker
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-cua-x11-experiment
+          path: |
+            probe-results/cua/*.json
+            probe-results/cua/*.jsonl
+            probe-results/cua/*.log
+            probe-results/cua/*.txt
+            probe-results/cua/*.tsv
+            probe-results/cua/*.sha256
+            probe-results/cua/*.lock
+            probe-results/cua/*.patch
+            probe-results/cua/*.png
+            probe-results/cua/bin/cua-driver
+            probe-results/cua/hermes-candidate/
+            probe-results/cua/hermes-integration/
+            probe-results/cua/hermes-prepared/
+            probe-results/cua/assembly-source/
+            probe-results/cua/hermes-lifecycle/
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 14

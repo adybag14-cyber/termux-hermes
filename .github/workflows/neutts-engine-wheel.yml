@@ -1,0 +1,56 @@
+name: Prepare NeuTTS engine wheel without admission
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [prepare/termux-compatibility-next-stable]
+    paths:
+      - 'scripts/compatibility_probe_neutts.sh'
+      - 'scripts/prepare_neutts_apt_snapshot.py'
+      - 'scripts/neutts_apt_snapshot.sh'
+      - 'tests/test_neutts_apt_snapshot_preparation.py'
+      - 'vendor/termux-preparation/**'
+      - 'audit/neutts-runtime-index-20261017/**'
+      - 'audit/neutts-native-20261017/run-39058569758/NEUTTS-PINNED-APT.tsv'
+      - '.github/workflows/neutts-engine-wheel.yml'
+      - 'scripts/compatibility_probe_neutts_engine_wheel.sh'
+      - 'scripts/compatibility_probe_neutts_engine_wheel.py'
+      - 'scripts/prepare_neutts_engine_wheel.py'
+      - 'scripts/neutts_engine_wheel_lock.json'
+      - 'scripts/verify_neutts_engine_wheel.py'
+      - 'scripts/check_neutts_engine_wheel_cmake.py'
+      - 'patches/next-stable/neutts-propagate-espeak-toolchain.patch'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neutts-engine-wheel-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  native-engine-wheel:
+    name: Scientific foundation, exact wheel and bundled eSpeak C ABI
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 55
+    steps:
+      - name: Checkout the reviewed preparation
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Prepare exact sources and run the native build-only gate
+        env:
+          NEUTTS_PROBE_HEAD_SHA: ${{ github.sha }}
+        run: bash scripts/compatibility_probe_neutts_engine_wheel.sh --out probe-results/neutts-engine-wheel
+
+      - name: Preserve original metadata, nested compiler and actual wheel C ABI evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-neutts-engine-wheel
+          path: probe-results/neutts-engine-wheel/
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 14

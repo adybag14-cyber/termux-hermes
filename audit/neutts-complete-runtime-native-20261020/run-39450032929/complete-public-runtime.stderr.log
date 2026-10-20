@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_neutts_complete_runtime.py", line 542, in runtime_case
+    report["installed_before"] = nr.installed_inventory(manifest, prep, common)
+                                 ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 458, in installed_inventory
+    record = installed_wheel_bytes(Path(package["wheel_path"]), package, site, prep)
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 379, in installed_wheel_bytes
+    parts = prep.safe_relative(item.filename).split("/")
+            ^^^^^^^^^^^^^^^^^^
+AttributeError: module '_complete_preparation' has no attribute 'safe_relative'

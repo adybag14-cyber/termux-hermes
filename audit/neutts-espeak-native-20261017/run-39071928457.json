@@ -1,0 +1,97 @@
+{
+  "artifact": {
+    "all_member_crc_and_sha256_verified": true,
+    "bytes": 54767182,
+    "full_member_ledger_sha256": "b1739b7306554e28b668af590c432c9102a39b52527ea31a437435cfd685840f",
+    "full_zip_saved_outside_git": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\espeak-termux-native-evidence-20261017\\39071928457\\artifact.zip",
+    "id": 12115681939,
+    "retained_members": 134,
+    "sha256": "0198a6225fc09c0ab9f77a036901332ca712e9aad087630b4e9fd00a5d75b7b1",
+    "zip_members": 641
+  },
+  "captured_utc": "2026-10-17T21:50:40.874294+00:00",
+  "earlier_failure_preserved": "audit/neutts-espeak-native-20261017/run-39068675792.json",
+  "failure": {
+    "bounded_followup": "Copy to an exclusively created destination and verify exact source/destination bytes before later wheel and runtime gates.",
+    "cause": "Path.rename cannot move a wheel from PREFIX/tmp to the separate /out bind mount.",
+    "error": {
+      "message": "[Errno 18] Cross-device link: '/data/data/com.termux/files/usr/tmp/phonemizer-native-tjq9mfle/wheel-phonemizer/phonemizer-3.3.0-py3-none-any.whl' -> '/out/phonemizer-component/wheels/phonemizer-3.3.0-py3-none-any.whl'",
+      "type": "OSError"
+    },
+    "source": "scripts/compatibility_probe_phonemizer.py:804",
+    "stage": "Phonemizer built-wheel retention, before Regex and installed public API"
+  },
+  "head_sha": "555752c8e080b38715bff234001283a03298c743",
+  "job_id": 117511147583,
+  "native_job_log": {
+    "bytes": 207730,
+    "sha256": "d6e8a3cd448fb45df905003bfc9be6dc9308ea4188781b6ff7280fd889836fe2"
+  },
+  "not_proved": [
+    "Retained and independently verified built Phonemizer wheel",
+    "Regex native build",
+    "23-distribution installed Phonemizer public API",
+    "Complete NeuTTS engine",
+    "Model inference or synthesis",
+    "Audio I/O",
+    "Physical device behavior",
+    "Release readiness"
+  ],
+  "proved": {
+    "compiler_archive_identities": 44,
+    "data_tree": {
+      "bytes": 18632313,
+      "dictionary_count": 117,
+      "file_count": 371,
+      "manifest": "ESPEAK-DATA-MANIFEST.json",
+      "manifest_sha256": "b9514f64f2eb82d9c79cb2aa6d4037e94183788cb553da74928f767b6a5a49f8",
+      "path": "/out/espeak-component/bundle/share/espeak-ng-data"
+    },
+    "espeak_c_abi_checks": 14,
+    "espeak_source_commit": "69bfd1efde0236654ccc117a28d04aef27673a30",
+    "espeak_source_manifest": {
+      "bytes": 63434219,
+      "file_count": 2606,
+      "sha256": "69e5228b663815a4fa4b20bfca13242826d132128f1ee5a43f03091ce608ff50"
+    },
+    "native_library": {
+      "bytes": 482432,
+      "class": 64,
+      "endianness": "little",
+      "machine": 183,
+      "needed": [
+        "libm.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "/out/espeak-component/bundle/lib/libespeak-ng.so.1.52.0.1",
+      "runpath": [
+        "/data/data/com.termux/files/usr/bin/../../usr/lib:/out/espeak-component/bundle/lib"
+      ],
+      "sha256": "e82becf2bd6e89adb93b9f075bb507b3f76bed97989079809454eb9935dda1f6"
+    },
+    "post_c_abi_provenance_archive_union": 45,
+    "pure_phonemizer_wheel_build_completion": "Logged; output wheel was lost during temporary-directory cleanup after the cross-filesystem rename failed.",
+    "scientific_foundation_cases": 7,
+    "selected_toolchain_installs": 19
+  },
+  "raw_evidence": {
+    "binary_wheels_sources_and_data_tree_excluded_from_git": true,
+    "directory": "audit/neutts-espeak-native-20261017/run-39071928457",
+    "file_count": 144,
+    "preserved_exact_bytes": true,
+    "result_recheck_sha256": "b0fc5104e856e8183a12e18704760783866adb416663e5dd57cb30871c2bf7a1",
+    "saved_files_sha256": "33c40b3503516578655c2c1a7138c5b33c5643204ff69c39d78fb66163b371d7",
+    "total_bytes": 3384037
+  },
+  "release_output": false,
+  "repository": "adybag14-cyber/termux-hermes",
+  "run_id": 39071928457,
+  "schema_version": 1,
+  "source_inputs_receipt": {
+    "path": "run-39071928457/ESPEAK-PROBE-INPUTS.json",
+    "sha256": "b5f84b5fa3876806c7b35042126bb9acbce059de8b0d6558eb2dd09f7f9bd130"
+  },
+  "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39071928457",
+  "workflow_conclusion": "failure"
+}

@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "C:\Users\adyba\docker-chatgpt-devbox\workspace\termux-hermes-next-stable-20261017\scripts\compatibility_probe_neutts_espeak.py", line 266, in <module>
+    result = run(arguments)
+  File "C:\Users\adyba\docker-chatgpt-devbox\workspace\termux-hermes-next-stable-20261017\scripts\compatibility_probe_neutts_espeak.py", line 157, in run
+    report["runtime"] = native.native_runtime()
+                        ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\adyba\docker-chatgpt-devbox\workspace\termux-hermes-next-stable-20261017\scripts\compatibility_probe_neutts_native.py", line 85, in native_runtime
+    require(sys.platform == "android" and os.uname().machine == "aarch64"
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            and os.getuid() == 1000 and sys.version_info[:3] == (3, 14, 6),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            "Real native Bionic aarch64 Python3.14.6 UID1000 is required")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\adyba\docker-chatgpt-devbox\workspace\termux-hermes-next-stable-20261017\scripts\compatibility_probe_neutts_native.py", line 47, in require
+    raise ProbeError(message)
+_espeak_native_support.ProbeError: Real native Bionic aarch64 Python3.14.6 UID1000 is required

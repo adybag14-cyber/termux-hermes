@@ -1,0 +1,138 @@
+{
+  "compiler_reuse": {
+    "existing_lock_sha256": "a06e595179fad6f437ca95210d685beb339baa0867cd527dba5f5083d94b36ce",
+    "minimum_direct_targets": [
+      "clang",
+      "cmake",
+      "ninja"
+    ],
+    "minimum_source_review_transitive_count": 31,
+    "new_apt_dependency": false,
+    "reviewed_installer_additions": 19,
+    "verified_archive_closure": 44
+  },
+  "host_evidence": {
+    "actual_cmake": "4.2.1",
+    "configure_regression_cases": 4,
+    "enabled_and_unspecified_behavior_preserved": true,
+    "git_patch_application_matches_reviewed_postimage": true,
+    "guarded_explicit_off_configures_without_deps_directory": true,
+    "host_checks": 8,
+    "non_bionic_runtime_refused_before_install": true,
+    "original_explicit_off_fails_without_network": true
+  },
+  "native_test_plan": {
+    "abi_binding": "direct ctypes to the compiled exact eSpeak C ABI in APT Python; no source-only exec and no dlinfo import",
+    "data_manifest": "ESPEAK-DATA-MANIFEST.json",
+    "library_receipt": "ESPEAK-COMPONENT-RESULT.json",
+    "planned_ascii_golden_cases": 5,
+    "planned_fresh_ipa_cases": 2,
+    "planned_negative_cases": 2,
+    "planned_relocated_golden_cases": 5,
+    "real_python_wrapper_is_separate": true,
+    "status": "not-run"
+  },
+  "new_implementation_inputs": [
+    {
+      "bytes": 4837,
+      "path": "scripts/neutts_espeak_source_lock.json",
+      "sha256": "02e4469a3b7b3e6594d7b1bc9c6816c72adf1ea9eb917256cefefc9c12763baa"
+    },
+    {
+      "bytes": 345,
+      "path": "patches/next-stable/espeak-ng-explicit-off-sonic.patch",
+      "sha256": "934c9d9a5d3cc76e0011321cfea7270b91dc954fed2a4c03857a7a6ea42b7d4a"
+    },
+    {
+      "bytes": 11172,
+      "path": "scripts/prepare_neutts_espeak_source.py",
+      "sha256": "6ae148eeefdea830908d14c3db9431678c5b382303f0e5ca6a2f33c41214c25a"
+    },
+    {
+      "bytes": 4999,
+      "path": "scripts/check_neutts_espeak_cmake.py",
+      "sha256": "f43c775ff47bd495d0415ff5da74185a5514f4017e4da43946a7d3d44f1a5f27"
+    },
+    {
+      "bytes": 16481,
+      "path": "scripts/compatibility_probe_neutts_espeak.py",
+      "sha256": "b563a95409559f2bda41b29ef0a64e2ec538b990a02775368e32916eb8427b5c"
+    },
+    {
+      "bytes": 5654,
+      "path": "scripts/compatibility_probe_neutts_espeak.sh",
+      "sha256": "d9f8bc01d3caf886d2ef64694e948b3cb9ad61b4cc760c2b6884bb085ad03672"
+    },
+    {
+      "bytes": 1169,
+      "path": ".github/workflows/neutts-espeak-component.yml",
+      "sha256": "13e8921d8605597e45fe4368317069f39627f812ccb8a3302a42c01aae41aa6c"
+    }
+  ],
+  "patch": {
+    "after_sha256": "deffe5428e5a8c94e32777c07ef6998892d7ff60eeb9a586a8401566eb666a52",
+    "before_sha256": "312539333dd476d726ddea0a4886d191eb7ac3b53a41a47419f34643cea7af92",
+    "bytes": 345,
+    "path": "patches/next-stable/espeak-ng-explicit-off-sonic.patch",
+    "sha256": "934c9d9a5d3cc76e0011321cfea7270b91dc954fed2a4c03857a7a6ea42b7d4a",
+    "source_path": "cmake/deps.cmake"
+  },
+  "patched_manifest": {
+    "bytes": 63434219,
+    "file_count": 2606,
+    "sha256": "69e5228b663815a4fa4b20bfca13242826d132128f1ee5a43f03091ce608ff50"
+  },
+  "pending": "Root source/command review before dispatch; real installed Phonemizer public-wrapper gate uses a separately verified 23-distribution subset and remains distinct from C ABI proof.",
+  "raw_evidence": {
+    "byte_preserving_attributes": true,
+    "bytes": 1985028,
+    "directory": "audit/neutts-espeak-preparation-20261017",
+    "file_count": 30,
+    "saved_files_sha256": "111eeedb7de714d672a15db0fa7bd98d131bfd43f4db2c328b754cbafa57586c"
+  },
+  "schema_version": 1,
+  "scope": {
+    "audio_io_performed": false,
+    "existing_gate_or_lock_modified": false,
+    "model_downloaded": false,
+    "native_build_or_install_performed": false,
+    "native_compatibility_claimed": false,
+    "released": false,
+    "synthesis_tested": false,
+    "workflow_dispatched": false
+  },
+  "source": {
+    "artifact": {
+      "bytes": 18493532,
+      "filename": "espeak-ng-69bfd1efde0236654ccc117a28d04aef27673a30.tar.gz",
+      "sha256": "0d36c8e81e972805d343e2b93d77baf3b57dd6c7a18a12df6782c80fe9f11d15",
+      "url": "https://codeload.github.com/espeak-ng/espeak-ng/tar.gz/69bfd1efde0236654ccc117a28d04aef27673a30"
+    },
+    "commit": "69bfd1efde0236654ccc117a28d04aef27673a30",
+    "exact_symlink": {
+      "git_blob_sha1": "aef4ce539b7a20c99eecca7d95fb1e4761839583",
+      "path": "src/include/espeak/speak_lib.h",
+      "target": "../espeak-ng/speak_lib.h"
+    },
+    "git_blobs_verified_against_official_tree": 2606,
+    "manifest": {
+      "bytes": 63434177,
+      "file_count": 2606,
+      "sha256": "6872687c996bb3f48c6627431ef376ffe9d354d496907826dd5978e8299f8f4e"
+    },
+    "regular_source_bytes": 63434153,
+    "repository": "https://github.com/espeak-ng/espeak-ng.git",
+    "root": "espeak-ng-69bfd1efde0236654ccc117a28d04aef27673a30",
+    "tree": "c8d05b9f7d8a1fe9c38ca909e152ee4cec20dd97"
+  },
+  "source_lock_sha256": "02e4469a3b7b3e6594d7b1bc9c6816c72adf1ea9eb917256cefefc9c12763baa",
+  "source_review_correction": {
+    "detail": "The earlier design's total blob-byte figure included the 24-byte compatibility-header symlink; it was not all regular-file bytes.",
+    "manifest_total_bytes": 63434177,
+    "manifest_total_entries": 2606,
+    "one_exact_header_symlink_bytes": 24,
+    "regular_bytes": 63434153,
+    "regular_files": 2605
+  },
+  "status": "source-prepared-and-host-checks-passed-native-not-run"
+}

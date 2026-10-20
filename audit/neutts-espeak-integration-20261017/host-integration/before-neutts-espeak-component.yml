@@ -1,0 +1,38 @@
+name: Prepare NeuTTS eSpeak native component
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neutts-espeak-component-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  native-espeak:
+    name: Scientific foundation then exact eSpeak phonemization
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 50
+    steps:
+      - name: Checkout the reviewed source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify offline configuration and native C ABI behavior
+        env:
+          NEUTTS_PROBE_HEAD_SHA: ${{ github.sha }}
+        run: bash scripts/compatibility_probe_neutts_espeak.sh --out probe-results/neutts-espeak
+
+      - name: Preserve source, configuration, compiler and phoneme evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-neutts-espeak-component
+          path: probe-results/neutts-espeak/
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 14

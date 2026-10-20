@@ -1,0 +1,258 @@
+{
+  "all_locked_torch_payload_facts_verified": true,
+  "guard_contract": "Only fallback for ModuleNotFoundError.name == torch._inductor.kernel.flex_attention; preserve ordinary ImportError and unrelated transitive ModuleNotFoundError.",
+  "members": [
+    {
+      "bytes": 450425,
+      "path": "torch/_inductor/ir.py",
+      "requested_symbols": {
+        "ChoiceCaller": {
+          "declaration": "class ChoiceCaller:",
+          "line": 6309,
+          "node_kind": "ClassDef",
+          "source_excerpt": "class ChoiceCaller:\n    \"\"\"\n    Represents a possible choice used in autotune_process.py.\n    During autotuning, self.benchmark() is first called to get benchmark result,\n    and if this choice is selected, self.output_node() is called to get the output_node.\n"
+        },
+        "FixedLayout": {
+          "declaration": "class FixedLayout(Layout):",
+          "line": 4848,
+          "node_kind": "ClassDef",
+          "source_excerpt": "class FixedLayout(Layout):\n    \"\"\"A Tensor layout we cannot change\"\"\"\n\n    def make_indexer(self) -> Callable[[Sequence[Expr]], Expr]:\n        \"\"\"A closure containing math to read a given element\"\"\"\n        return _fixed_indexer(self.size, self.stride, self.offset)"
+        },
+        "TensorBox": {
+          "declaration": "class TensorBox(MutableBox):",
+          "line": 10707,
+          "node_kind": "ClassDef",
+          "source_excerpt": "class TensorBox(MutableBox):\n    @overload\n    @staticmethod\n    def create(data: ShapeAsConstantBuffer) -> ShapeAsConstantBuffer: ...\n    @overload\n    @staticmethod"
+        },
+        "get_fill_order": {
+          "declaration": "def get_fill_order(seq: Sequence[int | torch.SymInt | Expr], shape_env: ShapeEnv | None=None) -> Sequence[int]:",
+          "line": 345,
+          "node_kind": "FunctionDef",
+          "source_excerpt": "def get_fill_order(\n    seq: Sequence[int | torch.SymInt | Expr], shape_env: ShapeEnv | None = None\n) -> Sequence[int]:\n    \"\"\"\n    Convert strides to fill order (argsort)\n    \"\"\""
+        }
+      },
+      "sha256": "4d411c1353b042bee93c45e024352b565628c233b786df547c6e9a676cb1c2ba"
+    },
+    {
+      "bytes": 331643,
+      "path": "torch/_inductor/lowering.py",
+      "requested_symbols": {
+        "lowerings": {
+          "declaration": "lowerings: dict[Callable[..., Any] | str, Callable[..., Any]] = {}",
+          "line": 126,
+          "node_kind": "AnnAssign",
+          "source_excerpt": "lowerings: dict[Callable[..., Any] | str, Callable[..., Any]] = {}"
+        },
+        "make_fallback": {
+          "declaration": "def make_fallback(op, layout_constraint=None, warn=True, override_decomp=False, get_decomp_fn=None):",
+          "line": 2903,
+          "node_kind": "FunctionDef",
+          "source_excerpt": "def make_fallback(\n    op,\n    layout_constraint=None,\n    warn=True,\n    override_decomp=False,\n    get_decomp_fn=None,"
+        },
+        "register_lowering": {
+          "declaration": "def register_lowering(aten_fn, broadcast=False, type_promotion_kind: ELEMENTWISE_TYPE_PROMOTION_KIND | None=ELEMENTWISE_TYPE_PROMOTION_KIND.DEFAULT, convert_input_to_bool=False, lowering_dict=lowerings) -> Callable[[Callable[_P, _T]], Callable[_P, _T]]:",
+          "line": 536,
+          "node_kind": "FunctionDef",
+          "source_excerpt": "def register_lowering(\n    aten_fn,\n    broadcast=False,\n    type_promotion_kind: ELEMENTWISE_TYPE_PROMOTION_KIND\n    | None = ELEMENTWISE_TYPE_PROMOTION_KIND.DEFAULT,\n    convert_input_to_bool=False,"
+        }
+      },
+      "sha256": "c2ea8692e9948b82175cf8fc3ad9fa67e98b04c9b9e1fba5ae2ac77902d18e0c"
+    },
+    {
+      "bytes": 249832,
+      "path": "torch/_inductor/select_algorithm.py",
+      "requested_symbols": {
+        "DataProcessorTemplateWrapper": {
+          "declaration": "class DataProcessorTemplateWrapper:",
+          "line": 3680,
+          "node_kind": "ClassDef",
+          "source_excerpt": "class DataProcessorTemplateWrapper:\n    \"\"\"\n    A wrapper class for a kernel template.\n\n    This class together with `DataProcessorChoiceCallerWrapper` provides a convenient way to\n    preprocess and postprocess data before and after using the wrapped template. A typical"
+        },
+        "ExternKernelChoice": {
+          "declaration": "class ExternKernelChoice:",
+          "line": 3227,
+          "node_kind": "ClassDef",
+          "source_excerpt": "class ExternKernelChoice:\n    \"\"\"Represents an external kernel that can participate in autotuning.\n\n    Each instance is registered as a singleton by name in ``_registry`` and\n    on the ``extern_kernels`` module so that codegen can emit a stable\n    reference.  Use ``lookup(name)`` to retrieve an existing instance"
+        },
+        "autotune_select_algorithm": {
+          "declaration": "def autotune_select_algorithm(*args, **kwargs):",
+          "line": 6093,
+          "node_kind": "FunctionDef",
+          "source_excerpt": "def autotune_select_algorithm(*args, **kwargs):\n    cache = get_algorithm_selector_cache()\n\n    if \"return_multi_template\" not in kwargs:\n        kwargs[\"return_multi_template\"] = (\n            torch._inductor.config.benchmark_epilogue_fusion"
+        }
+      },
+      "sha256": "8742c4959dc49e82df53d8aa3668e7ba876008b4afb8dd711fbf09a478c9aa24"
+    },
+    {
+      "bytes": 58668,
+      "path": "torch/_inductor/codegen/cpp_flex_attention_template.py",
+      "requested_symbols": {
+        "CppFlexAttentionTemplate": {
+          "declaration": "class CppFlexAttentionTemplate(CppTemplate):",
+          "line": 1062,
+          "node_kind": "ClassDef",
+          "source_excerpt": "class CppFlexAttentionTemplate(CppTemplate):\n    \"\"\"\n    CPP template based FlexAttention CPP Template.\n\n    This class supports generation of C++ code for broad attention variants,\n    with applying Flash Attention and Flash Decoding. It enables template-based"
+        }
+      },
+      "sha256": "feec703fc4ef1a35b2436046fc71c0018ecc81f236b51e2426f416da18d485fb"
+    },
+    {
+      "bytes": 5112,
+      "path": "torch/_inductor/codegen/cpp_template.py",
+      "requested_symbols": {
+        "CppTemplate": {
+          "declaration": "class CppTemplate(KernelTemplate):",
+          "line": 23,
+          "node_kind": "ClassDef",
+          "source_excerpt": "class CppTemplate(KernelTemplate):\n    index_counter = itertools.count()\n\n    def __init__(\n        self,\n        name: str,"
+        }
+      },
+      "sha256": "c1d7decadd09e3a93029178e3771fe476414262741bd812c9ad6522da5cf057a"
+    },
+    {
+      "bytes": 28427,
+      "path": "torch/_inductor/codegen/cpp_template_kernel.py",
+      "requested_symbols": {
+        "parse_expr_with_index_symbols": {
+          "declaration": "def parse_expr_with_index_symbols(expr):",
+          "line": 26,
+          "node_kind": "FunctionDef",
+          "source_excerpt": "def parse_expr_with_index_symbols(expr):\n    if isinstance(expr, sympy.Expr):\n        return expr\n    elif isinstance(expr, (list, tuple)):\n        return [parse_expr_with_index_symbols(e) for e in expr]\n    else:"
+        },
+        "wrap_with_tensorbox": {
+          "declaration": "def wrap_with_tensorbox(node) -> ir.TensorBox:",
+          "line": 37,
+          "node_kind": "FunctionDef",
+          "source_excerpt": "def wrap_with_tensorbox(node) -> ir.TensorBox:\n    return (\n        ir.TensorBox.create(node) if isinstance(node, ir.Buffer) else ir.TensorBox(node)\n    )"
+        }
+      },
+      "sha256": "b02db66a50404e4aa3ba5783238b95992be1041f74666cd9824cb0ac7cc397e9"
+    },
+    {
+      "bytes": 165776,
+      "path": "torch/_inductor/utils.py",
+      "requested_symbols": {
+        "parallel_num_threads": {
+          "declaration": "def parallel_num_threads() -> int:",
+          "line": 2982,
+          "node_kind": "FunctionDef",
+          "source_excerpt": "def parallel_num_threads() -> int:\n    threads = config.cpp.threads\n    if threads < 1:\n        threads = torch.get_num_threads()\n    return threads"
+        }
+      },
+      "sha256": "f2618b8a174d83d08165c0868692a5718bbf80f57dbb6aa5275c580a888adf5f"
+    },
+    {
+      "bytes": 112254,
+      "path": "torch/_inductor/pattern_matcher.py",
+      "requested_symbols": {
+        "Arg": {
+          "declaration": "class Arg(PatternExpr):",
+          "line": 561,
+          "node_kind": "ClassDef",
+          "source_excerpt": "class Arg(PatternExpr):\n    \"\"\"\n    Capture an arg which will become an input to the handler.  Args are\n    passed in depth first order.\n    \"\"\"\n"
+        },
+        "CallFunction": {
+          "declaration": "class CallFunction(_TargetArgsExpr):",
+          "line": 1058,
+          "node_kind": "ClassDef",
+          "source_excerpt": "class CallFunction(_TargetArgsExpr):\n    \"\"\"\n    Matches a call_function node in the FX graphs: `fns[i](*args, **kwargs)`\n    \"\"\"\n\n    op = \"call_function\""
+        },
+        "KeywordArg": {
+          "declaration": "class KeywordArg(PatternExpr):",
+          "line": 745,
+          "node_kind": "ClassDef",
+          "source_excerpt": "class KeywordArg(PatternExpr):\n    \"\"\"\n    Capture a kwarg which will become an input to the handler.\n    \"\"\"\n\n    def __init__(self, name: str) -> None:"
+        },
+        "Match": {
+          "declaration": "class Match:",
+          "line": 234,
+          "node_kind": "ClassDef",
+          "source_excerpt": "class Match:\n    \"\"\"\n    Represents a successfully matched pattern.\n\n    The `Match` object is returned to represent a successfully matched\n    pattern. Included in the Match are the pattern that was matched, the graph"
+        },
+        "PatternMatcherPass": {
+          "declaration": "class PatternMatcherPass:",
+          "line": 2583,
+          "node_kind": "ClassDef",
+          "source_excerpt": "class PatternMatcherPass:\n    \"\"\"\n    Registry of patterns to match and replace in FX graphs.\n    \"\"\"\n\n    def __init__("
+        },
+        "register_lowering_pattern": {
+          "declaration": "def register_lowering_pattern(pattern: PatternExpr, extra_check: Callable[[Match], bool]=_return_true, *, pass_dict: _PassDictsType, prepend: bool=False, output_metadata_ignores_input_storage: bool=True, output_metadata_is_input: int | str | None=None, output_metadata_fn: Callable[..., Any] | None=None) -> Callable[[Callable[..., Any]], Callable[..., Any]]:",
+          "line": 2296,
+          "node_kind": "FunctionDef",
+          "source_excerpt": "def register_lowering_pattern(\n    pattern: PatternExpr,\n    extra_check: Callable[[Match], bool] = _return_true,\n    *,\n    pass_dict: _PassDictsType,\n    prepend: bool = False,"
+        }
+      },
+      "sha256": "f3adcef339d1195dceb8ced943c1354006982462d940f50842f358706a91cf9b"
+    },
+    {
+      "bytes": 8269,
+      "path": "torch/_inductor/custom_graph_pass.py",
+      "requested_symbols": {
+        "CustomGraphPass": {
+          "declaration": "class CustomGraphPass(CustomPassBase):",
+          "line": 53,
+          "node_kind": "ClassDef",
+          "source_excerpt": "class CustomGraphPass(CustomPassBase):\n    \"\"\"\n    Implement this interface for custom Graph passes:\n\n    1) The __call__() method contains the implementation of the custom pass.\n"
+        },
+        "get_hash_for_files": {
+          "declaration": "@lru_cache(1)",
+          "line": 151,
+          "node_kind": "FunctionDef",
+          "source_excerpt": "def get_hash_for_files(paths: tuple[str, ...], extra: str = \"\") -> bytes:\n    \"\"\"\n    Helper to compute a unique string by hashing the contents of a list of files.\n    \"\"\"\n    hasher = hashlib.sha256()\n    hasher.update(extra.encode(\"utf-8\"))"
+        }
+      },
+      "sha256": "f0fd5036666de547b6eaafcec274dcf3b17a5d87482218ff4225012f3c754f5b"
+    },
+    {
+      "bytes": 214231,
+      "path": "torch/_dynamo/utils.py",
+      "requested_symbols": {
+        "counters": {
+          "declaration": "counters: collections.defaultdict[str, Counter[str]] = collections.defaultdict(collections.Counter)",
+          "line": 177,
+          "node_kind": "AnnAssign",
+          "source_excerpt": "counters: collections.defaultdict[str, Counter[str]] = collections.defaultdict(\n    collections.Counter\n)"
+        }
+      },
+      "sha256": "e550c68c924e1c0babaf31fc629e900c1d3b6ecbcf10aa88442d39b405b7102a"
+    },
+    {
+      "bytes": 17627,
+      "path": "torch/_inductor/kernel/flex/common.py",
+      "requested_symbols": {
+        "construct_strides": {
+          "declaration": "def construct_strides(sizes: Sequence[_IntLike], fill_order: Sequence[int]) -> Sequence[_IntLike]:",
+          "line": 362,
+          "node_kind": "FunctionDef",
+          "source_excerpt": "def construct_strides(\n    sizes: Sequence[_IntLike],\n    fill_order: Sequence[int],\n) -> Sequence[_IntLike]:\n    \"\"\"From a list of sizes and a fill order, construct the strides of the permuted tensor.\"\"\"\n    # Initialize strides"
+        },
+        "maybe_realize": {
+          "declaration": "def maybe_realize(args: list[IRNode | None]):",
+          "line": 243,
+          "node_kind": "FunctionDef",
+          "source_excerpt": "def maybe_realize(args: list[IRNode | None]):\n    \"\"\"Accepts a list of optional IRNodes and returns a list of realized IRNodes\"\"\"\n    return tree_map(\n        lambda x: (\n            realize_inputs(x) if x is not None and not isinstance(x, sympy.Expr) else x\n        ),"
+        }
+      },
+      "sha256": "d20df6180978954f79a576f20b32a021558318f0c53d2c7c3bb8164edfa1918d"
+    }
+  ],
+  "missing_direct_import_symbols": [],
+  "modules_reviewed": 11,
+  "moved_helper_call_shapes": {
+    "construct_strides": "sizes, fill_order -> strides; original TorchAO call shape unchanged",
+    "maybe_realize": "list[IRNode|None] -> realized list; original TorchAO call shape unchanged"
+  },
+  "native_identity_and_operation_retry_required": true,
+  "old_flex_attention_module_absent": true,
+  "scope": "Bounded static source/symbol review of the directly reached TorchAO Inductor import path against all-facts-verified original signed Torch payload; no native runtime execution.",
+  "status": "passed",
+  "symbols_reviewed": 26,
+  "torch_archive": {
+    "architecture": "aarch64",
+    "bytes": 36675500,
+    "filename": "pool/main/p/python-torch/python-torch_2.14.1-2_aarch64.deb",
+    "name": "python-torch",
+    "sha256": "cb5d96877f30bca10a0a19bcd32934a4f477ec7e5bfd00c2a82ac5c9e7d0eb73",
+    "version": "2.14.1-2"
+  }
+}

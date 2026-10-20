@@ -1,0 +1,66 @@
+name: Prepare NeuTTS Tiktoken native component
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [prepare/termux-compatibility-next-stable]
+    paths:
+      - 'scripts/compatibility_probe_neutts.sh'
+      - 'scripts/compatibility_probe_neutts.py'
+      - 'scripts/prepare_neutts_apt_snapshot.py'
+      - 'scripts/neutts_apt_snapshot.sh'
+      - 'scripts/prepare_neutts_core_python.py'
+      - 'scripts/neutts_core_python_lock.json'
+      - 'scripts/validate_neutts_apt_python.py'
+      - 'scripts/neutts_apt_python_metadata.json'
+      - 'vendor/termux-preparation/**'
+      - 'audit/neutts-runtime-index-20261017/**'
+      - 'audit/neutts-native-20261017/run-39058569758/NEUTTS-PINNED-APT.tsv'
+      - '.github/workflows/neutts-tiktoken-component.yml'
+      - 'scripts/compatibility_probe_neutts_tiktoken.sh'
+      - 'scripts/compatibility_probe_neutts_tiktoken.py'
+      - 'scripts/prepare_neutts_tiktoken.py'
+      - 'scripts/neutts_tiktoken_lock.json'
+      - 'scripts/compatibility_probe_neutts_rust.py'
+      - 'scripts/prepare_neutts_rust_sources.py'
+      - 'scripts/neutts_rust_sources_lock.json'
+      - 'scripts/neutts_runtime_closure_design.json'
+      - 'scripts/phonemizer_runtime_lock.json'
+      - 'tests/test_neutts_tiktoken.py'
+      - 'audit/neutts-rust-native-20261017/run-39084939992/**'
+      - 'audit/neutts-tiktoken-preparation-20261020/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neutts-tiktoken-component-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  native-tiktoken:
+    name: Original reviewed Tiktoken lock and complete native base runtime
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 95
+    steps:
+      - name: Checkout the exact reviewed preparation
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify the scientific foundation and actual isolated tokenization
+        env:
+          NEUTTS_PROBE_HEAD_SHA: ${{ github.sha }}
+        run: bash scripts/compatibility_probe_neutts_tiktoken.sh --out probe-results/neutts-tiktoken
+
+      - name: Preserve exact sources, approved lock, complete vendor and native evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-neutts-tiktoken-component
+          path: probe-results/neutts-tiktoken/
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 14
+          include-hidden-files: true

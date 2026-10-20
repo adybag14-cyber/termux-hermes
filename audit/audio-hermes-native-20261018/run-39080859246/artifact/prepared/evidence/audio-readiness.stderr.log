@@ -1,0 +1,13 @@
+Audio readiness probe failed: native import borrowed an undeclared prefix library: /data/data/com.termux/files/usr/lib/libtermux-platform-ns.so
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_audio_hermes.py", line 254, in main
+    runtime_worker(request)
+    ~~~~~~~~~~~~~~^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_audio_hermes.py", line 164, in runtime_worker
+    require(path.name in {"libc.so", "libdl.so", "libm.so", "liblog.so", "libandroid.so", "libz.so"},
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            "native import borrowed an undeclared prefix library: " + str(path))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/prepare_audio_hermes_environment.py", line 278, in require
+    raise PreparationError(message)
+_audio_preparation_contract.PreparationError: native import borrowed an undeclared prefix library: /data/data/com.termux/files/usr/lib/libtermux-platform-ns.so

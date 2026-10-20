@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "reviewed_at_utc": "2026-10-18T01:00:19.538933+00:00",
+  "status": "cache correction reviewed; 126 focused host tests passed with zero skips",
+  "failed_native_run": 39082981266,
+  "failed_head": "123e70ee7ec9ff97b2cc82a05c13794d98e3e4b5",
+  "source_diff": {
+    "bytes": 19001,
+    "path": "audit/neutts-rust-native-20261017/run-39082981266/native-cache-fix.diff",
+    "sha256": "236f33291bafce9c558337e41f5f39466c0401ae43144dc77c63c23d2b4eb13d"
+  },
+  "checks": [
+    "The native cache name now matches the actual APT lowercase epoch lookup; original signed/portable names, versions and bytes stay unchanged.",
+    "Every function before the new helper and from install_toolchain onward is byte-identical.",
+    "All 130 frozen owned files and nine protected files matched size/SHA; complete ledger matches.",
+    "Both complete original failed artifacts were independently rehashed.",
+    "Existing source/build/runtime/TLS gates remain intact."
+  ],
+  "focused_tests": {
+    "passed": 126,
+    "skipped": 0,
+    "seconds": 3.93
+  },
+  "failed_artifacts": [
+    {
+      "id": 12119747428,
+      "bytes": 257951988,
+      "sha256": "c13dc2444ec54eaab34e51b85a9ce38d4debd826db31d9ba8d5b1b510f7b1ca5",
+      "whole_archive_root_rechecked": true
+    },
+    {
+      "id": 12119921806,
+      "bytes": 559778211,
+      "sha256": "552da20e4f4cb9448a7a46596d9700adf367c0b92ad54f0f32f7b570d82bb0fa",
+      "whole_archive_root_rechecked": true
+    }
+  ],
+  "full_member_crc_and_sha256_capture": "47526 member checks retained by the capture; root rechecked complete ZIP digests and all frozen evidence files.",
+  "production_staging_replay": {
+    "bytes": 19122,
+    "path": "audit/neutts-rust-native-20261017/run-39082981266/actual-native-cache-layout-production-replay.json",
+    "sha256": "99c69acc74b28b075ff585f27b9d6ab3064fa728b2d26618a68219557e0c056f"
+  },
+  "native_retry_passed": false,
+  "new_tiktoken_lock_produced": false,
+  "release_output": false,
+  "raw_source_whitespace": "One original upstream APT strutl.cc line contains spaces before indentation tabs; an exact-path audit attribute preserves its authenticated bytes. Production whitespace rules remain enabled."
+}

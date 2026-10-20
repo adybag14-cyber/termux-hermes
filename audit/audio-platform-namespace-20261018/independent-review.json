@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "recorded_date_utc": "2026-10-18",
+  "reviewer": "/root/cpu_evidence_save",
+  "status": "independent read-only source and exact archive review passed; no blocking defect identified",
+  "scope": "Audio namespace extraction, ordered explicit loading, exact mapped-library provenance, and preservation of prior audio success predicates.",
+  "repository": "https://github.com/adybag14-cyber/termux-hermes",
+  "worktree": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017",
+  "reviewed_files": [
+    {
+      "path": "scripts/prepare_audio_hermes_environment.py",
+      "bytes": 86191,
+      "sha256": "cd84f5a9e23b4a81e5ed000e311546786c6dfb1d386cb234541fc4829161f515"
+    },
+    {
+      "path": "scripts/compatibility_probe_audio_hermes.py",
+      "bytes": 16165,
+      "sha256": "e9a40e9bb230e6ce672345d02fc871245b51c92ad3381e78bcbe8d9d9a6751e8"
+    },
+    {
+      "path": "tests/test_audio_hermes_preparation.py",
+      "bytes": 69473,
+      "sha256": "82b327dfca72e4a324608eecdc23d6663497a4f34182a047557387ee0bfa7267"
+    },
+    {
+      "path": "tests/fixtures/audio_namespace/libandroid-stub_30-2_aarch64.deb",
+      "bytes": 26788,
+      "sha256": "74087792a86e3f90772627f2217797e422e5d5fc47f24ad825fc3bbb539a667a"
+    }
+  ],
+  "original_archive": {
+    "package": "libandroid-stub",
+    "version": "30-2",
+    "architecture": "aarch64",
+    "bytes": 26788,
+    "sha256": "74087792a86e3f90772627f2217797e422e5d5fc47f24ad825fc3bbb539a667a",
+    "control_bytes": 304,
+    "control_sha256": "d2179fdc47fca1ffa715d6ddb0659f63b94da37a93e7758b5e5137ee698312af"
+  },
+  "independent_byte_and_elf_review": {
+    "status": "read-only byte and ELF review passed",
+    "archive_sha256": "74087792a86e3f90772627f2217797e422e5d5fc47f24ad825fc3bbb539a667a",
+    "control_sha256": "d2179fdc47fca1ffa715d6ddb0659f63b94da37a93e7758b5e5137ee698312af",
+    "members": {
+      "libOpenSLES.so": {
+        "path": "./data/data/com.termux/files/usr/lib/libOpenSLES.so",
+        "bytes": 11480,
+        "sha256": "87c61d872767541e332783d85f70bfdc1b2d48e373ef3025380345171bac4db9",
+        "mode": 448,
+        "elf": {
+          "class": 64,
+          "endianness": "little",
+          "machine": 183
+        },
+        "needed": [
+          "libc.so",
+          "libdl.so",
+          "libtermux-platform-ns.so"
+        ]
+      },
+      "libtermux-platform-ns.so": {
+        "path": "./data/data/com.termux/files/usr/lib/libtermux-platform-ns.so",
+        "bytes": 6552,
+        "sha256": "6c39c6a3318accd5e34f4f2c9e5c9e14eed113fb3a92e8c0be86006dc9256e34",
+        "mode": 448,
+        "elf": {
+          "class": 64,
+          "endianness": "little",
+          "machine": 183
+        },
+        "needed": [
+          "libc.so",
+          "libdl.so"
+        ]
+      }
+    },
+    "fixture_matches_original_archive": true,
+    "native_code_executed": false
+  },
+  "source_review": [
+    "The preparer preflights both owned destinations and verifies both original archive members before copying them; it adds only the exact new runtime-libs/lib/libtermux-platform-ns.so payload path.",
+    "The original archive already supplies the 6,552-byte namespace library directly needed by its 11,480-byte OpenSLES member. Independent ar/tar and ELF dynamic-table parsing reproduced each member's exact size, SHA-256, AArch64 identity and DT_NEEDED closure.",
+    "The probe explicitly loads the owned namespace library before the owned OpenSLES and PortAudio libraries, and requires all three exact owned mappings.",
+    "Actual mapped-library observations are written before provenance classification, while the prefix mapping allowlist and exact owned-library checks remain strict.",
+    "The original Sounddevice Android discovery repair, original 100 catalog rows and NumPy bytes are unchanged by this namespace-only diff.",
+    "The prior real PortAudioError classification and rejection of generic discovery/loading errors are preserved. No stream or device is opened by this change."
+  ],
+  "method": {
+    "source_identity_recheck": "All three current implementation/test file sizes and SHA-256 values were re-read immediately before writing this receipt.",
+    "independent_archive_parser": "Read original ar/control.tar/data.tar bytes and independently parsed ELF program headers/dynamic strings; did not execute either ELF or depend on the implementation's own ELF checker.",
+    "original_member_modes_octal": "0700",
+    "installed_owned_copy_modes_octal": "0644",
+    "fixture_matches_original_archive": true
+  },
+  "limitations": [
+    "This receipt records an independent source/byte/ELF review, not a native Android execution or an independent replay of the test suite.",
+    "The root separately reported 173 host tests passed with zero skips; that reported result is not represented here as this reviewer's own test execution.",
+    "No claim is made that the repaired native audio workflow has passed, that an Android audio framework is present, or that microphone/playback hardware works.",
+    "No source files, release metadata, locks, wheel versions, Git staging, commits, pushes or workflow dispatches were performed by this reviewer."
+  ]
+}

@@ -1,0 +1,12 @@
+diff --git a/pm/bundled_wheels.py b/pm/bundled_wheels.py
+--- a/pm/bundled_wheels.py
++++ b/pm/bundled_wheels.py
+@@ -48,7 +48,7 @@
+ }))
+ """
+     try:
+-        result = subprocess.run([native(python), "-I", "-S", "-c", code],
++        result = subprocess.run([native(python), "-I", "-B", "-S", "-c", code],
+                                 env=dict(environment), capture_output=True, text=True,
+                                 encoding="utf-8", errors="replace", timeout=30, check=False)
+     except subprocess.TimeoutExpired as exc:

@@ -1,0 +1,145 @@
+{
+  "scope": "Static original-source inspection only; no native execution. Relevant source members are bound by INDEPENDENT-TORCH-API-REVIEW.json.",
+  "actual_source_call_shapes": {
+    "torch/_inductor/select_algorithm.py": [
+      {
+        "name": "ExternKernelChoice.__init__",
+        "signature": "self, kernel: Callable[..., Any], cpp_kernel: str | None=None, *, name: str | None=None, has_out_variant: bool=True, op_overload: torch._ops.OpOverload | None=None, use_fallback_kernel: bool=False, kernel_creator: Callable[..., ir.ExternKernel] | None=None",
+        "head": [
+          "def __init__(self, kernel: Callable[..., Any], cpp_kernel: str | None=None, *, name: str | None=None, has_out_variant: bool=True, op_overload: torch._ops.OpOverload | None=None, use_fallback_kernel: bool=False, kernel_creator: Callable[..., ir.ExternKernel] | None=None) -> None:",
+          "    super().__init__()",
+          "    name = name or kernel.__name__",
+          "    if not callable(kernel):",
+          "        raise AssertionError('kernel must be callable')",
+          "    existing = getattr(extern_kernels, name, None)",
+          "    if existing is not None and existing is not kernel:",
+          "        raise AssertionError(f'duplicate extern kernel: {name}')",
+          "    self.name = name",
+          "    self.cpp_kernel_name = cpp_kernel",
+          "    self.has_out_variant = has_out_variant",
+          "    setattr(extern_kernels, name, kernel)"
+        ]
+      },
+      {
+        "name": "DataProcessorTemplateWrapper.__init__",
+        "signature": "self, wrapped_template_cls, preprocessor, postprocessor, **kwargs",
+        "head": [
+          "def __init__(self, wrapped_template_cls, preprocessor, postprocessor, **kwargs) -> None:",
+          "    if preprocessor is not None:",
+          "        self._preprocessor = preprocessor",
+          "    else:",
+          "        self._preprocessor = lambda x, y: (x, y)",
+          "    if postprocessor is not None:",
+          "        self._postprocessor = postprocessor",
+          "    else:",
+          "        self._postprocessor = lambda x: x",
+          "    if 'input_nodes' not in kwargs:",
+          "        raise AssertionError('input_nodes argument required')",
+          "    if 'layout' not in kwargs:"
+        ]
+      }
+    ],
+    "torch/_inductor/codegen/cpp_flex_attention_template.py": [
+      {
+        "name": "CppFlexAttentionTemplate.__init__",
+        "signature": "self, input_nodes, layout: ir.Layout, scale, score_mod, mask_mod, kv_block_size, q_block_size, partition_size, has_other_buffer, no_full_kv_block, fake_buffers, len_score_other, len_mask_other, kernel_input_name_to_buffer, block_vars",
+        "head": [
+          "def __init__(self, input_nodes, layout: ir.Layout, scale, score_mod, mask_mod, kv_block_size, q_block_size, partition_size, has_other_buffer, no_full_kv_block, fake_buffers, len_score_other, len_mask_other, kernel_input_name_to_buffer, block_vars) -> None:",
+          "    if layout.dtype not in [torch.float, torch.bfloat16, torch.float16]:",
+          "        raise AssertionError(f'unsupported layout dtype: {layout.dtype}')",
+          "    super().__init__('flex_attention', input_nodes, layout, parallel_num_threads())",
+          "    self.scale = scale",
+          "    self.score_mod = score_mod",
+          "    self.mask_mod = mask_mod",
+          "    self.score_buf_name = V.graph.register_buffer(self.score_mod) if self.score_mod else None",
+          "    self.mask_buf_name = V.graph.register_buffer(self.mask_mod) if self.mask_mod else None",
+          "",
+          "    def get_idx(buf_name):",
+          "        match = re.search('\\\\d+', buf_name)"
+        ]
+      }
+    ],
+    "torch/_inductor/lowering.py": [
+      {
+        "name": "register_lowering",
+        "signature": "aten_fn, broadcast=False, type_promotion_kind: ELEMENTWISE_TYPE_PROMOTION_KIND | None=ELEMENTWISE_TYPE_PROMOTION_KIND.DEFAULT, convert_input_to_bool=False, lowering_dict=lowerings"
+      }
+    ],
+    "torch/_inductor/pattern_matcher.py": [
+      {
+        "name": "register_lowering_pattern",
+        "signature": "pattern: PatternExpr, extra_check: Callable[[Match], bool]=_return_true, *, pass_dict: _PassDictsType, prepend: bool=False, output_metadata_ignores_input_storage: bool=True, output_metadata_is_input: int | str | None=None, output_metadata_fn: Callable[..., Any] | None=None"
+      },
+      {
+        "name": "PatternMatcherPass.__init__",
+        "signature": "self, pass_name: str | None=None, subsystem: str | None=None",
+        "head": [
+          "def __init__(self, pass_name: str | None=None, subsystem: str | None=None) -> None:",
+          "    super().__init__()",
+          "    self.patterns: defaultdict[tuple[str, torch.fx.node.Target], list[PatternEntry]] = defaultdict(list)",
+          "    self.pass_name = pass_name",
+          "    self.subsystem = subsystem",
+          "    self.seen_patterns: dict[str, list[str | None]] = defaultdict(list)"
+        ]
+      }
+    ],
+    "torch/_inductor/custom_graph_pass.py": [
+      {
+        "name": "get_hash_for_files",
+        "signature": "paths: tuple[str, ...], extra: str=''"
+      }
+    ],
+    "fx_init": "from .da8w4_concat_linear_fusion_cpu import register_da8w4_concat_linear_cpu_pass\nfrom .int8_sdpa_fusion import _int8_sdpa_init\n\n__all__ = [\n    \"_int8_sdpa_init\",\n    \"register_da8w4_concat_linear_cpu_pass\",\n]\n",
+    "torchao/prototype/inductor/codegen/cpp_int8_sdpa_template.py": {
+      "top_level": [
+        "from typing import List, Optional",
+        "import torch",
+        "import torch.utils",
+        "from sympy import sympify",
+        "from torch._inductor import ir",
+        "from torch._inductor.codegen.cpp_flex_attention_template import CppFlexAttentionTemplate",
+        "from torch._inductor.codegen.cpp_template import CppTemplate",
+        "from torch._inductor.ir import TensorBox",
+        "from torch._inductor.select_algorithm import DataProcessorTemplateWrapper",
+        "from torch._inductor.utils import parallel_num_threads",
+        "from .utils import expand",
+        "USEFUL_FUNCTIONS = '\\ninline float calculate_scale(\\n    int64_t headSize,\\n    std::optional<double> scale) {\\n  return scale.has_value()\\n      ? scale.value()\\n      : (1.0 / std::sqrt(headSize));\\n}\\n\\ntemplate <typename scalar_t>\\ninline void fill_stub(scalar_t* data, scalar_t val, int64_t size) {\\n  const int32_t vec_size = at::vec::Vectorized<scalar_t>::size();\\n  auto data_vec = at::vec::Vectorized<scalar_t>(val);\\n  int64_t d = 0;\\n  for (; d < size - (size % vec_size); d += vec_size) {",
+        "ALLOCATE_BUFFER = '\\n  auto& {{buffer_name}}_allocator = *at::getCPUAllocator();\\n  auto {{buffer_name}}_work_data = {{buffer_name}}_allocator.allocate({{buffer_size}} * sizeof({{buffer_dtype}}));\\n  void* {{buffer_name}}_data_ptr = {{buffer_name}}_work_data.get();\\n  {{buffer_dtype}}* {{buffer_name}} = ({{buffer_dtype}}*){{buffer_name}}_data_ptr;\\n'",
+        "INT8_SDPA_ONE_LOOP_TEMPLATE = '\\n#ifndef HEADER_DEFINED\\n#define HEADER_DEFINED\\n\\n{{template.header().getvalue()}}\\n#include <ATen/ATen.h>\\n#include <ATen/AccumulateType.h>\\n#include <ATen/Dispatch.h>\\n#include <ATen/core/Tensor.h>\\n#include <ATen/cpu/vec/functional.h>\\n#include <ATen/cpu/vec/vec.h>\\n#include <ATen/cpu/Utils.h>\\n#include <ATen/native/cpu/utils.h>\\n#include <ATen/native/CPUBlas.h>\\n#include <ATen/Parallel.h>\\n#include <ATen/Tensor.h>\\n#include <c10/util/irange.h>\\n\\n#ifndef AT_P",
+        "INT8_SDPA_SEVERAL_LOOPS_TEMPLATE = '\\n#ifndef HEADER_DEFINED\\n#define HEADER_DEFINED\\n\\n{{template.header().getvalue()}}\\n#include <ATen/ATen.h>\\n#include <ATen/AccumulateType.h>\\n#include <ATen/Dispatch.h>\\n#include <ATen/core/Tensor.h>\\n#include <ATen/cpu/vec/functional.h>\\n#include <ATen/cpu/vec/vec.h>\\n#include <ATen/cpu/vec/vec_quant.h>\\n#include <ATen/cpu/Utils.h>\\n#include <ATen/native/cpu/utils.h>\\n#include <ATen/native/CPUBlas.h>\\n#include <ATen/Parallel.h>\\n#include <ATen/Tensor.h>\\n#i"
+      ],
+      "class_bases": [
+        {
+          "name": "CppInt8SdpaTemplate",
+          "bases": [
+            "CppFlexAttentionTemplate"
+          ]
+        }
+      ],
+      "decorator_and_call_shapes": []
+    },
+    "torchao/prototype/inductor/fx_passes/int8_sdpa_fusion.py": {
+      "top_level": [
+        "import functools",
+        "import itertools",
+        "import torch",
+        "from torch._dynamo.utils import counters",
+        "from torch._inductor import config",
+        "from torch._inductor.lowering import lowerings as L",
+        "from torch._inductor.lowering import make_fallback",
+        "from torch._inductor.pattern_matcher import Arg, CallFunction, KeywordArg, Match, PatternMatcherPass, register_lowering_pattern",
+        "from torchao.utils import TORCH_VERSION_AT_LEAST_2_7",
+        "if TORCH_VERSION_AT_LEAST_2_7:\n    from ..int8_sdpa_lowering import register_int8_sdpa\nelse:\n    make_fallback(torch.ops.torchao.qscaled_dot_product.default)",
+        "__all__ = ['_int8_sdpa_init']",
+        "aten = torch.ops.aten",
+        "custom_pass = None",
+        "if TORCH_VERSION_AT_LEAST_2_7:\n    from torch._inductor.custom_graph_pass import CustomGraphPass, get_hash_for_files\n\n    class _CustomPass(PatternMatcherPass, CustomGraphPass):\n\n        def __init__(self) -> None:\n            super().__init__()\n\n        def __call__(self, g: torch.fx.graph.Graph):\n            self.apply(g)\n\n        def uuid(self) -> bytes:\n            return get_hash_for_files((__file__,))\n    custom_pass = _CustomPass()"
+      ],
+      "class_bases": [],
+      "decorator_and_call_shapes": [
+        "register_lowering_pattern(pattern, extra_check=_is_valid_int8_sdpa_pattern(), pass_dict=custom_pass_dict)",
+        "get_hash_for_files((__file__,))"
+      ]
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "status": "passed-read-only-api-review",
+  "reviewer": "docs_recover_final",
+  "date": "2026-10-20",
+  "source": {
+    "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\scripts\\neutts_rust_operations.py",
+    "bytes": 17121,
+    "sha256": "168382b4db418f71879d5d65979a1d9efc59140eac175231c411c312d6e37123"
+  },
+  "authoritative_native_wheel": {
+    "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-rust-native-monitor-20261020\\run-39440363583\\raw\\rust-components\\wheels\\safetensors\\safetensors-0.8.0-cp310-abi3-android_24_arm64_v8a.whl",
+    "bytes": 527328,
+    "sha256": "450d5abe95220e5d796a54fdc134c908be91942a1710eaed897516aff1bb4ae4"
+  },
+  "authoritative_api_members": [
+    {
+      "member": "safetensors/__init__.py",
+      "bytes": 210,
+      "sha256": "92c988289b8c225a92f25e487ad5d7a1eb7e326eec0fedfc6b75e6f04d85e32f"
+    },
+    {
+      "member": "safetensors/__init__.pyi",
+      "bytes": 9663,
+      "sha256": "88467818dfbb7a6e4e2d1c085efb1d07cee365d87350ebe85d1d76f9ced6325d"
+    }
+  ],
+  "findings": [],
+  "checks": [
+    "Exact shipped __init__.py re-exports TensorSpec, serialize, serialize_file, deserialize and SafetensorError.",
+    "TensorSpec keyword constructor accepts dtype, shape, data_ptr and data_len. float32 input maps to the F32 dtype property; shape [2,2] and 16-byte contiguous owned ctypes storage match four explicitly little-endian float32 values.",
+    "The ctypes array remains strongly referenced by a local variable through both serialize and serialize_file, and bytes(buffer) is checked afterwards. This satisfies the original API's pointer lifetime requirement.",
+    "The deserialize result is the documented list of name/dictionary pairs containing dtype, shape and data; dict conversion and exact bytes comparisons use that original result shape.",
+    "The in-memory round trip checks exact tensor name, dtype, shape and bytes. File serialization independently reads and deserializes its output and verifies the same bytes.",
+    "The three pre-existing invalid inputs remain bounded and each must raise the original native SafetensorError. No exception is changed into a successful case.",
+    "The outer operations loop writes each completed operation receipt before continuing, records a failed operation separately and re-raises; successful HF work is retained without marking the entire Rust stage passed.",
+    "Native origin verification and exact Android/Python guard remain in place; no runtime package source, metadata, Cargo input, version or Requires-Python change is part of this API correction."
+  ],
+  "host_tests_executed_by_reviewer": false,
+  "native_runtime_executed_by_reviewer": false,
+  "native_runtime_pass_claimed": false,
+  "limitation": "Static API and ownership review against the exact native-built wheel. The corrected full native Rust stage still requires a successful retry.",
+  "git_operations_performed": false,
+  "source_edits_performed": false
+}

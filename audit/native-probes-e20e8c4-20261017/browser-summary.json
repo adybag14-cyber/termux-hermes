@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "run_id": 39044958038,
+  "packaging_head_sha": "e20e8c447681b832ae3d1956e105da6aaf338146",
+  "actual_packaging_checkout_sha": "e20e8c447681b832ae3d1956e105da6aaf338146",
+  "workflow_ref_commit": "d80e2bd1cd999d2e25c6315160e3e77601d1e797",
+  "provenance_note": "The raw artifact field PROBE-INPUTS.packaging_commit was populated from GITHUB_SHA and denotes the workflow merge commit. The workflow explicitly checked out the PR head; the job checkout log confirms actual packaging HEAD e20e8c447681b832ae3d1956e105da6aaf338146. The raw artifact record is retained unchanged.",
+  "next_stable_patch_sha256": "add3afb05e2aaa4066b7e2e9eaaa7e5c9fd84a2b6bf954cede1b6564e380374e",
+  "job_id": 117431762915,
+  "job_conclusion": "success",
+  "bindings": "browser-bindings.json",
+  "artifact": {
+    "id": 12105870627,
+    "name": "termux-compatibility-browser",
+    "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39044958038/artifacts/12105870627",
+    "sha256": "44073e08ea0bc0500cd06faab4ae4c7fc8058502837409e0e634bbd20cbca992",
+    "bytes": 1380804,
+    "created_at": "2026-10-17T15:26:59Z"
+  },
+  "raw_static_driver_roundtrip": "passed",
+  "pm_built_in_browser_roundtrip": "passed",
+  "default_browser_exec_readiness": "passed",
+  "default_browser_exec_roundtrip": "passed",
+  "default_result": {
+    "success": true,
+    "exit_code": 0,
+    "fixture": {
+      "title": "🐴 Hermes Android browser probe",
+      "before": "Before click",
+      "after": "Clicked successfully"
+    }
+  },
+  "validated": [
+    "Native Android/Bionic UID 1000.",
+    "Pinned PM AgentBrowser 0.26.0 installation and exact static ARM64 binary selection.",
+    "Chromium remains owned by Termux APT, with no fabricated PM Chromium artifact.",
+    "Built-in backend off: actual Hermes readiness, child environment isolation, native navigation/snapshot/click/readback/PNG screenshot/close.",
+    "Unset backend: actual default browser_exec surface and bundled browser-harness 0.1.13 interpreter.",
+    "Default browser_exec used the managed local CDP route with no backend or operator CDP override.",
+    "Default fixed loopback URL and heading, cosmetic controlled-tab title marker, before/after DOM values, CDP PNG screenshot, and product cleanup calls completed."
+  ],
+  "user_configuration": {
+    "default": "Keep browser.backend unset to use browser_exec/browser-harness; the native local managed CDP route passed.",
+    "built_in_alternative": "Set browser.backend to off to select the built-in browser_* tools; this disables Browser Use CLI surface selection, not local browsing.",
+    "chromium": "Chromium is supplied by official Termux APT, installed with pkg install x11-repo followed by pkg install chromium."
+  },
+  "screenshot_metadata": {
+    "browser-loopback.png": {
+      "sha256": "306f58c9500f60b755225e5df7d04239666da7035ee4d6f8605592ef75c14489",
+      "bytes": 13474,
+      "width": 1280,
+      "height": 633
+    },
+    "pm-browser-loopback.png": {
+      "sha256": "306f58c9500f60b755225e5df7d04239666da7035ee4d6f8605592ef75c14489",
+      "bytes": 13474,
+      "width": 1280,
+      "height": 633
+    },
+    "browser-default-loopback.png": {
+      "sha256": "306f58c9500f60b755225e5df7d04239666da7035ee4d6f8605592ef75c14489",
+      "bytes": 13474,
+      "width": 1280,
+      "height": 633
+    }
+  },
+  "scope": "Headless local loopback browser operation in the pinned native ARM64 Termux container, using the published payload plus proposed next-stable source overlays.",
+  "physical_android_phone_ui_tested": false,
+  "physical_android_audio_tested": false,
+  "arbitrary_external_website_coverage": false,
+  "screenshots": "Binary screenshots remain in the linked artifact; hashes and dimensions are recorded here and in browser-bindings.json.",
+  "release_output": false
+}

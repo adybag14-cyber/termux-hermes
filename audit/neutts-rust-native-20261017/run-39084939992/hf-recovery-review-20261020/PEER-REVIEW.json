@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "reviewer": "independent hf_recovery_review agent",
+  "reviewed_at_utc": "2026-10-20T12:49:49.535340+00:00",
+  "reviewed_git_head": "9877b37c54fea6e1df2047072948fe71ee3aefbf",
+  "source_mutation_scope": {
+    "modified_existing_functions": [
+      "capture_cargo_metadata"
+    ],
+    "added_functions": [
+      "verify_hf_tls_identity"
+    ],
+    "all_other_existing_function_ASTs_unchanged": true,
+    "existing_test_function_ASTs_unchanged": true
+  },
+  "verdict": "No implementation defect found in the exact recovered HF identity correction. The stale Tiktoken documentation was corrected to reflect the saved c1ea01d lock review.",
+  "reviewed_conditions": [
+    "exact original workspace, extension and backing manifest bytes",
+    "unique Cargo package/node identities",
+    "resolve.root bound to hf_xet name/version/local manifest",
+    "distinct hf-xet backing package bound to its original manifest and workspace version",
+    "exact unconditional normal xet_pkg dependency edge",
+    "native-tls on both extension and backing package",
+    "existing unique Reqwest/native-tls/no-http3 requirement preserved",
+    "existing pinned-registry and OpenSSL requirements preserved",
+    "old predicate fails against original actual native metadata",
+    "all twenty wrong-root/name/version/manifest/edge/feature/duplicate negative cases",
+    "all three original-manifest-byte negative cases",
+    "all five Reqwest/OpenSSL/registry negatives",
+    "existing TLS certificate and hostname tests unchanged and passed"
+  ],
+  "tests": {
+    "methods_and_parametrized_cases": 155,
+    "skipped": 0,
+    "errors": 0,
+    "failures": 0,
+    "pytest_elapsed_seconds": 5.38,
+    "process_elapsed_seconds": 6.694,
+    "host_python": "3.14.2 Windows AMD64",
+    "new_actual_metadata_cases": 29,
+    "native_HF_build_or_TLS_runtime_certified": false
+  },
+  "actual_metadata": {
+    "actual_metadata_path": "audit/neutts-rust-native-20261017/run-39084939992/raw-termux-neutts-rust-locked-build/rust-components/cargo-metadata-hf-xet.stdout.log",
+    "actual_metadata_bytes": 1139905,
+    "actual_metadata_sha256": "fd944c9ddd49c18d2c1068633303ee30679da22102c9f29543ac3ab619ae80a7",
+    "packages": 250,
+    "target_filtered_resolved_nodes": 250
+  },
+  "input_source_versions_requirements_features_build_commands_unchanged": true,
+  "source_lock_unchanged_from_HEAD": true,
+  "all_seven_original_manifest_hashes_verified": true,
+  "original_baseline_helper_matches_HEAD": true,
+  "native_retry_required": true,
+  "scope": "Host review and actual-metadata replay only; no new native Rust build, HF runtime/TLS result, engine admission or release."
+}

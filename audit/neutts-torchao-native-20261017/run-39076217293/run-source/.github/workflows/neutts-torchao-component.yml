@@ -1,0 +1,47 @@
+name: Prepare NeuTTS TorchAO CPU component
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [prepare/termux-compatibility-next-stable]
+    paths:
+      - '.github/workflows/neutts-torchao-component.yml'
+      - 'scripts/compatibility_probe_neutts_torchao.sh'
+      - 'scripts/compatibility_probe_neutts_torchao.py'
+      - 'scripts/prepare_neutts_torchao.py'
+      - 'scripts/neutts_torchao_component_lock.json'
+      - 'patches/next-stable/torchao-lazy-sdpa.patch'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neutts-torchao-component-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  native-torchao:
+    name: Scientific foundation and actual TorchAO CPU NF4
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 45
+    steps:
+      - name: Checkout the reviewed source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact wheel and run installed CPU quantization
+        env:
+          NEUTTS_PROBE_HEAD_SHA: ${{ github.sha }}
+        run: bash scripts/compatibility_probe_neutts_torchao.sh --out probe-results/neutts-torchao
+
+      - name: Preserve separate wheel, foundation and actual operation evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-neutts-torchao-component
+          path: probe-results/neutts-torchao/
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 14

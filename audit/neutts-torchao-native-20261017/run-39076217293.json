@@ -1,0 +1,109 @@
+{
+  "artifact": {
+    "all_crc_and_sha256_checked": true,
+    "bytes": 11966175,
+    "id": 12117560030,
+    "members": 63,
+    "sha256": "b753c4cd87f4769cdde2ccc088334c6938fb48ddbf3bd508f49b96d3c17d3087"
+  },
+  "complete_engine_tested": false,
+  "conclusion": "success",
+  "foundation_cases_passed": 7,
+  "foundation_torch_libraries_rechecked": 7,
+  "head_sha": "aefb50d1e0e612773eb3cb454f15fe98eef6cc14",
+  "installed_wheel": {
+    "complete_installed_record_verified": true,
+    "extra_distribution_count": 0,
+    "installed_file_count": 351,
+    "installer_generated_files": [
+      "torchao-0.12.0.dist-info/INSTALLER",
+      "torchao-0.12.0.dist-info/RECORD",
+      "torchao-0.12.0.dist-info/REQUESTED",
+      "torchao-0.12.0.dist-info/direct_url.json"
+    ],
+    "name": "torchao",
+    "original_files_manifest_sha256": "e0022ab6b7207529b4fe30244bcc38fe686425970f4b8f3a67c45ad696534dd6",
+    "original_files_verified": 347,
+    "version": "0.12.0",
+    "wheel_sha256": "82bbdfef93ba0423ed84fc8afdafeb4f9f13ed3fa74ab467b3d5aeef0027b442"
+  },
+  "job_id": 117523805964,
+  "model_downloaded": false,
+  "native_cases": [
+    {
+      "active_base_requirements": [],
+      "case": "real_package_import",
+      "status": "passed",
+      "torch": {
+        "distribution": "torch",
+        "module_file": "/data/data/com.termux/files/usr/lib/python3.14/site-packages/torch/__init__.py",
+        "module_sha256": "bd4a10ff16357ed78f45aaf4b46ce5b771fdc0e8549402206e324d0eb792c672",
+        "version": "2.14.1"
+      },
+      "torchao_file": "/data/data/com.termux/files/usr/tmp/torchao-component-ij7fx6z9/runtime/lib/python3.14/site-packages/torchao/__init__.py",
+      "torchao_sha256": "2b5dbcb251f02f9b29134037c54c1e6b124f628c0b9e91ca375d79c209089cb0"
+    },
+    {
+      "block_size": 64,
+      "case": "nf4_default_quantization",
+      "independent_packed_byte_oracle": true,
+      "packed_bytes": 8192,
+      "packed_sha256": "c8a3cf4e14777c7a30bd5049b4af22864fc42c1469bc6a64a31cd5e8772948a9",
+      "scaler_block_size": 256,
+      "shape": [
+        128,
+        128
+      ],
+      "status": "passed",
+      "weight_values": 16384
+    },
+    {
+      "case": "independent_dequantization",
+      "maximum_absolute_error": 0.0,
+      "normalized_l2_error_bound": 0.16,
+      "normalized_l2_error_to_original": 0.0881182849407196,
+      "status": "passed"
+    },
+    {
+      "case": "linear_forward",
+      "maximum_absolute_error": 0.0,
+      "output_shape": [
+        3,
+        128
+      ],
+      "public_operation": "torchao.dtypes.nf4tensor.linear_nf4",
+      "status": "passed"
+    },
+    {
+      "case": "input_gradient",
+      "maximum_absolute_error": 0.0,
+      "status": "passed",
+      "weight_training_proved": false
+    }
+  ],
+  "original_versions_and_dependency_declarations_preserved": true,
+  "patch": {
+    "changed_members": [
+      "torchao/prototype/inductor/fx_passes/__init__.py",
+      "torchao-0.12.0.dist-info/RECORD"
+    ],
+    "member": "torchao/prototype/inductor/fx_passes/__init__.py",
+    "original_wheel_sha256": "103f2a9164d2e4f705332af1aafbb8473eadd14d9164e45857ca187cde1f13d2",
+    "sha256": "28e786678ce02f007f77e5cc70a3e48faad1c72eea3dc0ec897c4ee0a89e74cc",
+    "tested_wheel_sha256": "82bbdfef93ba0423ed84fc8afdafeb4f9f13ed3fa74ab467b3d5aeef0027b442"
+  },
+  "physical_audio_tested": false,
+  "previous_failure_unchanged": "audit/neutts-torchao-native-20261017/run-39074259828.json",
+  "production_admission_changed": false,
+  "raw_evidence": {
+    "bytes": 1320741,
+    "directory": "audit/neutts-torchao-native-20261017/run-39076217293",
+    "file_count": 72,
+    "root_recheck_sha256": "7e0a2dccd87b04b6ae98b0098866e0cfaf46f0330a1f0de48a09f7dfdd262159",
+    "saved_files_sha256": "980cf6830ba3ce28c41e7a60eb294e2cd89239704adbaadb442917502362d5cf"
+  },
+  "release_output": false,
+  "run_id": 39076217293,
+  "schema_version": 1,
+  "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39076217293"
+}

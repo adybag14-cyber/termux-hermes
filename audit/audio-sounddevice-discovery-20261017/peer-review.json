@@ -1,0 +1,47 @@
+{
+  "derived_wheel": {
+    "bytes": 130096,
+    "sha256": "b98585045e53173f589267e8ee543f034ba4229b0696ec32032b9f5f5637caf7"
+  },
+  "findings": [
+    "All eight RECORD entries checked in original and derivative; only sounddevice.py and RECORD change.",
+    "All six other member bodies, version, dependencies, license and tags remain exact.",
+    "Canonical catalog is created from original wheel bytes before deriving; only Sounddevice size and SHA change afterward.",
+    "Original100 rows plus NumPy remain identical and original wheel origin/fingerprint remains tied to uv.lock.",
+    "Android fallback occurs only after all existing discovery results are None; successful discovery, loader errors and initialization code retain original behavior.",
+    "Runtime probe still imports the actual installed sounddevice and rejects library-discovery/loader errors."
+  ],
+  "full_tests_rerun_by_peer": false,
+  "independent_derivation_and_record_verification": true,
+  "native_initialization_claimed": false,
+  "original_source_fingerprint": "71df4e14b992d2cdcc02187a17861401ac679f329637b79d6abc5369b47a4ef9",
+  "original_wheel": {
+    "bytes": 32807,
+    "sha256": "30ff99f6c107f49d25ad16a45cacd8d91c25a1bcdd3e81a206b921a3a6405b1f"
+  },
+  "reviewer": "independent CPU/evidence agent",
+  "schema_version": 1,
+  "sources": {
+    ".github/workflows/audio-hermes-preparation.yml": {
+      "bytes": 6651,
+      "sha256": "e0d191ef509c06f60cc316df60a2044864045634857714cb32991832e1cf067a"
+    },
+    "patches/next-stable/sounddevice-android-discovery.patch": {
+      "bytes": 556,
+      "sha256": "7f655d5547c715ed62941d4b3bb5f0d87657a8fcede7dddb277e9afa516cf2e7"
+    },
+    "scripts/compatibility_probe_audio_hermes.py": {
+      "bytes": 14899,
+      "sha256": "8d15703276d74de32d5c65eecfe62e5fb3ae63790449f725e41e7ceb7317a293"
+    },
+    "scripts/prepare_audio_hermes_environment.py": {
+      "bytes": 84975,
+      "sha256": "84cad7c9b684225abd20823a0f4634e1ae0cd5e0661ab1f7d31af312adeb9da9"
+    },
+    "tests/test_audio_hermes_preparation.py": {
+      "bytes": 62529,
+      "sha256": "fb0d9a9cbeee2879dbf66e059d817873530fc259388c970e9f1aa57abe395411"
+    }
+  },
+  "status": "no-blocking-findings"
+}

@@ -1,0 +1,9 @@
+--- a/perth/perth_net/__init__.py
++++ b/perth/perth_net/__init__.py
+@@ -1,4 +1,4 @@
+-from pkg_resources import resource_filename
+-PREPACKAGED_MODELS_DIR = resource_filename(__name__, "pretrained")
++from pathlib import Path
++PREPACKAGED_MODELS_DIR = str(Path(__file__).resolve().parent / "pretrained")
+ 
+ from .perth_net_implicit.perth_watermarker import PerthImplicitWatermarker

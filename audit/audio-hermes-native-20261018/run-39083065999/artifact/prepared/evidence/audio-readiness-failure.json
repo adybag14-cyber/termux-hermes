@@ -1,0 +1,23 @@
+{
+  "audio_stream_opened": false,
+  "dependency_readiness": "not-completed",
+  "error": {
+    "chain": [
+      {
+        "args": "('native import borrowed an undeclared prefix library: /data/data/com.termux/files/usr/opt/aosp/lib64/libc++.so',)",
+        "message": "native import borrowed an undeclared prefix library: /data/data/com.termux/files/usr/opt/aosp/lib64/libc++.so",
+        "module": "_audio_preparation_contract",
+        "type": "PreparationError"
+      }
+    ],
+    "message": "native import borrowed an undeclared prefix library: /data/data/com.termux/files/usr/opt/aosp/lib64/libc++.so",
+    "traceback": "Traceback (most recent call last):\n  File \"/probes/scripts/compatibility_probe_audio_hermes.py\", line 275, in main\n    runtime_worker(request)\n    ~~~~~~~~~~~~~~^^^^^^^^^\n  File \"/probes/scripts/compatibility_probe_audio_hermes.py\", line 185, in runtime_worker\n    require(path.name in {\"libc.so\", \"libdl.so\", \"libm.so\", \"liblog.so\", \"libandroid.so\", \"libz.so\"},\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n            \"native import borrowed an undeclared prefix library: \" + str(path))\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/probes/scripts/prepare_audio_hermes_environment.py\", line 281, in require\n    raise PreparationError(message)\n_audio_preparation_contract.PreparationError: native import borrowed an undeclared prefix library: /data/data/com.termux/files/usr/opt/aosp/lib64/libc++.so\n",
+    "type": "PreparationError"
+  },
+  "microphone_accessed": false,
+  "physical_vad": "not-tested",
+  "published": false,
+  "schema_version": 1,
+  "stage": "runtime-worker",
+  "status": "failed"
+}

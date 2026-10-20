@@ -1,0 +1,682 @@
+{
+  "schema_version": 1,
+  "record_type": "neutts_default_gguf_source_review_and_isolated_loader_experiment",
+  "recorded_at_utc": "2026-10-17T18:15:53Z",
+  "status": "experimental_source_fix_only",
+  "packaging_repository": "adybag14-cyber/termux-hermes",
+  "packaging_head_at_start": "48c07cf68dc388450fb10f18b3c823d29c799f19",
+  "boundaries": {
+    "main_hermes_patch_modified_by_this_task": false,
+    "neutts_probe_or_locks_modified_by_this_task": false,
+    "managed_neutts_admission": false,
+    "native_build_or_binary_execution_performed": false,
+    "model_download_or_synthesis_performed": false,
+    "dependency_installation_performed": false,
+    "release_or_workflow_execution_performed": false,
+    "complete_independently_resolved_engine_closure": false
+  },
+  "documentation": {
+    "path": "docs/neutts-default-gguf-feasibility.md",
+    "sha256": "f5a8b8272c5cb39467f25a3b23eceaeef0ba6e88718543ce9408971f2aeb2489",
+    "bytes": 7978
+  },
+  "hermes_helper": {
+    "upstream_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+    "path": "tools/neutts_synth.py",
+    "inspected_sha256": "b618b1dca838650fc00d79f3eb7ed3b4f10c1388b970e2c8081dc59544e7f5df",
+    "bytes": 3225,
+    "default_backbone": "neuphonic/neutts-air-q4-gguf",
+    "default_codec": "neuphonic/neucodec",
+    "reference_preparation": "librosa.load(ref_audio_path, sr=16000, mono=True)",
+    "full_codec_semantic_model": "facebook/w2v-bert-2.0",
+    "output_sample_rate_hz": 24000,
+    "model_revisions_or_weight_digests_frozen": false,
+    "upstream_file_sha256": "b618b1dca838650fc00d79f3eb7ed3b4f10c1388b970e2c8081dc59544e7f5df",
+    "inspected_file_matches_upstream": true
+  },
+  "engine": {
+    "name": "neutts",
+    "version": "1.4.1",
+    "repository": "neuphonic/neutts",
+    "commit": "b7a3427d0d25e20e8b9e92cbaae688f732916baf",
+    "declared_requires_python": ">=3.10,<3.14",
+    "declared_base_requirements": [
+      "librosa==0.11.0",
+      "neucodec>=0.0.4",
+      "numpy>=2.2.6",
+      "phonemizer>=3.0.0",
+      "resemble-perth==1.0.1",
+      "soundfile==0.13.1",
+      "torch>=2.8.0",
+      "torchaudio>=2.8.0",
+      "transformers==5.1.0"
+    ],
+    "gguf_extra_requirements": [
+      "llama-cpp-python",
+      "gguf"
+    ],
+    "onnx_decoder_is_not_reference_encoder": true,
+    "source_files": [
+      {
+        "path": "neutts/__init__.py",
+        "url": "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/neutts/__init__.py",
+        "sha256": "f55d24a283b3215544116d8c1740c394f418ab0758785171670a08bbdf0b7464"
+      },
+      {
+        "path": "neutts/neutts.py",
+        "url": "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/neutts/neutts.py",
+        "sha256": "88295403fdf5bb14dfc0df712231c57f5000afc470c9f197c590cf082f8bd7ed"
+      },
+      {
+        "path": "neutts/phonemizers.py",
+        "url": "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/neutts/phonemizers.py",
+        "sha256": "737d1138839271f06bf762552de376f1c6816460bbf5855b51192b717d67d9cb"
+      },
+      {
+        "path": "pyproject.toml",
+        "url": "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/pyproject.toml",
+        "sha256": "3d74df60f0db27733b308c93b88ae95f9deaa8f396f48183b0cf4f14eb3deb94"
+      },
+      {
+        "path": "CMakeLists.txt",
+        "url": "https://raw.githubusercontent.com/neuphonic/neutts/b7a3427d0d25e20e8b9e92cbaae688f732916baf/CMakeLists.txt",
+        "sha256": "bafe8e5131ebcf804a27679b2de91ad7d8a901e70c9d22c4688d5d49a2f5e267"
+      }
+    ],
+    "espeak_commit": "69bfd1efde0236654ccc117a28d04aef27673a30"
+  },
+  "candidate_metadata": [
+    {
+      "name": "neucodec",
+      "version": "0.0.4",
+      "url": "https://pypi.org/pypi/neucodec/0.0.4/json",
+      "requires_python": "<4.0,>=3.10",
+      "requires_dist": [
+        "numpy>=2.0.2",
+        "torch>=2.5.1",
+        "torchaudio>=2.5.1",
+        "torchao>=0.12.0",
+        "torchtune>=0.3.1",
+        "vector-quantize-pytorch==1.17.8",
+        "transformers>=4.44.2",
+        "local_attention>=1.11.1"
+      ],
+      "source_artifacts": [
+        {
+          "filename": "neucodec-0.0.4.tar.gz",
+          "bytes": 23072,
+          "url": "https://files.pythonhosted.org/packages/5e/5f/e948b92def28eb7d069fccc281a8c57279054a5063750742d8a62f572dda/neucodec-0.0.4.tar.gz",
+          "sha256": "994c9367b691b96c30247ebe5f3d9b7088411ff640b8df2f0dd9e1efe39f6f42"
+        }
+      ],
+      "android_wheel_count": 0
+    },
+    {
+      "name": "numba",
+      "version": "0.67.0",
+      "url": "https://pypi.org/pypi/numba/0.67.0/json",
+      "requires_python": ">=3.10",
+      "requires_dist": [
+        "llvmlite<0.50,>=0.49.0dev0",
+        "numpy<2.6,>=1.22"
+      ],
+      "source_artifacts": [
+        {
+          "filename": "numba-0.67.0.tar.gz",
+          "bytes": 2836515,
+          "url": "https://files.pythonhosted.org/packages/7a/90/2544f4e3a61e501d6c9a5418fd4b905323222693d54a02cab0106a0af865/numba-0.67.0.tar.gz",
+          "sha256": "cd75aa535b33fa05d9d930b1ae8af9f97a2881e96d72dfb38ec9b78284d9f851"
+        }
+      ],
+      "android_wheel_count": 0
+    },
+    {
+      "name": "resemble-perth",
+      "version": "1.0.1",
+      "url": "https://pypi.org/pypi/resemble-perth/1.0.1/json",
+      "requires_python": ">=3.8",
+      "requires_dist": null,
+      "source_artifacts": [
+        {
+          "filename": "resemble_perth-1.0.1.tar.gz",
+          "bytes": 34402288,
+          "url": "https://files.pythonhosted.org/packages/d8/02/f9b5adba306b5cd8bc5525f6bcad8f9d6840c6635d74fcf229a45c0dfb56/resemble_perth-1.0.1.tar.gz",
+          "sha256": "e4688cfc22e07b2ace567b987eb2c26e4ac19cbc37fbfacfd6794a2933ad2392"
+        }
+      ],
+      "android_wheel_count": 0
+    },
+    {
+      "name": "librosa",
+      "version": "0.11.0",
+      "url": "https://pypi.org/pypi/librosa/0.11.0/json",
+      "metadata_sha256": "a184f73a041c056c336bd588c87c9b2380289b795618c613fc4a136c462e6837",
+      "requires_python": ">=3.8",
+      "base_requires_dist": [
+        "audioread>=2.1.9",
+        "numba>=0.51.0",
+        "numpy>=1.22.3",
+        "scipy>=1.6.0",
+        "scikit-learn>=1.1.0",
+        "joblib>=1.0",
+        "decorator>=4.3.0",
+        "soundfile>=0.12.1",
+        "pooch>=1.1",
+        "soxr>=0.3.2",
+        "typing_extensions>=4.1.1",
+        "lazy_loader>=0.1",
+        "msgpack>=1.0",
+        "standard-aifc; python_version >= \"3.13\"",
+        "standard-sunau; python_version >= \"3.13\""
+      ],
+      "artifacts": [
+        {
+          "filename": "librosa-0.11.0-py3-none-any.whl",
+          "bytes": 260749,
+          "url": "https://files.pythonhosted.org/packages/b5/ba/c63c5786dfee4c3417094c4b00966e61e4a63efecee22cb7b4c0387dda83/librosa-0.11.0-py3-none-any.whl",
+          "sha256": "0b6415c4fd68bff4c29288abe67c6d80b587e0e1e2cfb0aad23e4559504a7fa1"
+        },
+        {
+          "filename": "librosa-0.11.0.tar.gz",
+          "bytes": 327001,
+          "url": "https://files.pythonhosted.org/packages/64/36/360b5aafa0238e29758729e9486c6ed92a6f37fa403b7875e06c115cdf4a/librosa-0.11.0.tar.gz",
+          "sha256": "f5ed951ca189b375bbe2e33b2abd7e040ceeee302b9bbaeeffdfddb8d0ace908"
+        }
+      ],
+      "android_wheel_count": 0
+    },
+    {
+      "name": "transformers",
+      "version": "5.1.0",
+      "url": "https://pypi.org/pypi/transformers/5.1.0/json",
+      "metadata_sha256": "8c54dcdbe7d3c6adb1ff031b11904118d80afe3418d4693e5793f5f4ce2d4317",
+      "requires_python": ">=3.10.0",
+      "base_requires_dist": [
+        "huggingface-hub<2.0,>=1.3.0",
+        "numpy>=1.17",
+        "packaging>=20.0",
+        "pyyaml>=5.1",
+        "regex!=2019.12.17",
+        "tokenizers<=0.23.0,>=0.22.0",
+        "typer-slim",
+        "safetensors>=0.4.3",
+        "tqdm>=4.27"
+      ],
+      "artifacts": [
+        {
+          "filename": "transformers-5.1.0-py3-none-any.whl",
+          "bytes": 10276537,
+          "url": "https://files.pythonhosted.org/packages/b7/66/57042d4b0f1ede8046d7ae6409bf3640df996e9cbc3fe20467aa29badc54/transformers-5.1.0-py3-none-any.whl",
+          "sha256": "de534b50c9b2ce6217fc56421075a1734241fb40704fdc90f50f6a08fc533d59"
+        },
+        {
+          "filename": "transformers-5.1.0.tar.gz",
+          "bytes": 8531810,
+          "url": "https://files.pythonhosted.org/packages/c9/1d/a7d91500a6c02ec76058bc9e65fcdec1bdb8882854dec8e4adf12d0aa8b0/transformers-5.1.0.tar.gz",
+          "sha256": "c60d6180e5845ea1b4eed38d7d1b06fcc4cc341c6b7fa5c1dc767d7e25fe0139"
+        }
+      ],
+      "android_wheel_count": 0
+    },
+    {
+      "name": "torchao",
+      "version": "0.12.0",
+      "url": "https://pypi.org/pypi/torchao/0.12.0/json",
+      "metadata_sha256": "dd7656c6a1094ee670255281cc897f90a4ee73d85810efb1efc582a7feebfc5d",
+      "requires_python": null,
+      "base_requires_dist": [],
+      "artifacts": [
+        {
+          "filename": "torchao-0.12.0-py3-none-any.whl",
+          "bytes": 962232,
+          "url": "https://files.pythonhosted.org/packages/6c/5f/6bf9b5bed6d31e286516d23e1db7320d2ccfbf1b2234749833ad1e3d25a5/torchao-0.12.0-py3-none-any.whl",
+          "sha256": "103f2a9164d2e4f705332af1aafbb8473eadd14d9164e45857ca187cde1f13d2"
+        }
+      ],
+      "android_wheel_count": 0
+    },
+    {
+      "name": "torchtune",
+      "version": "0.3.1",
+      "url": "https://pypi.org/pypi/torchtune/0.3.1/json",
+      "metadata_sha256": "b6b2f26c5adbf9e06669c8f5de3539077ed5e2de96b70ae5fbff8729c146856c",
+      "requires_python": ">=3.9",
+      "base_requires_dist": [
+        "datasets",
+        "huggingface-hub",
+        "safetensors",
+        "sentencepiece",
+        "tiktoken",
+        "blobfile>=2",
+        "numpy",
+        "tqdm",
+        "omegaconf",
+        "psutil",
+        "Pillow>=9.4.0"
+      ],
+      "artifacts": [
+        {
+          "filename": "torchtune-0.3.1-py3-none-any.whl",
+          "bytes": 596650,
+          "url": "https://files.pythonhosted.org/packages/64/5e/09722b84ce4ee8eaec0d9b06a653a3c6ad0cb6efdbd23f1cbdeff834b567/torchtune-0.3.1-py3-none-any.whl",
+          "sha256": "b409f2bb180ed444d50e2600c854654a8954dbfab9d655cf1461eeedf6a74094"
+        }
+      ],
+      "android_wheel_count": 0
+    },
+    {
+      "name": "vector",
+      "version": "1.17.8",
+      "url": "https://pypi.org/pypi/vector-quantize-pytorch/1.17.8/json",
+      "metadata_sha256": "634f803c379c1cb0ed8827ed7b78d91a33bf0a3d16741ba87b1f6670f60e8d9f",
+      "requires_python": ">=3.9",
+      "base_requires_dist": [
+        "einops>=0.8.0",
+        "einx>=0.3.0",
+        "torch>=2.0"
+      ],
+      "artifacts": [
+        {
+          "filename": "vector_quantize_pytorch-1.17.8-py3-none-any.whl",
+          "bytes": 40324,
+          "url": "https://files.pythonhosted.org/packages/fb/2e/58e1dae68baea6e55caf78be53b0d6fb3ff800f70df950a3a1462242cbbd/vector_quantize_pytorch-1.17.8-py3-none-any.whl",
+          "sha256": "63fd86b5d951a8e7dcb70b499a8ae684a51ec05a4ffe8f2c0912c1af4848ae78"
+        },
+        {
+          "filename": "vector_quantize_pytorch-1.17.8.tar.gz",
+          "bytes": 592912,
+          "url": "https://files.pythonhosted.org/packages/57/58/2a8c3b2f6b13ee34aaa940e552109becf0148f3cccbdea22b7d3b2fcbdc3/vector_quantize_pytorch-1.17.8.tar.gz",
+          "sha256": "3b9b9514dcdce7af122b7e8abae1a01b4050c3446b78b4b8a07da74f0008d3ea"
+        }
+      ],
+      "android_wheel_count": 0
+    },
+    {
+      "name": "scikit-learn",
+      "version": "1.9.1",
+      "observed_metadata_url": "https://pypi.org/pypi/scikit-learn/json",
+      "metadata_sha256": "7f2c77f9da0b1765ccd00fe236628488f1645a0e8d14e2f38bdcc85d2ea477dd",
+      "requires_python": ">=3.11",
+      "requires_dist": [
+        "numpy>=1.24.1",
+        "scipy>=1.10.0",
+        "joblib>=1.4.0",
+        "narwhals>=2.0.1",
+        "threadpoolctl>=3.5.0"
+      ],
+      "source_artifact": [
+        {
+          "filename": "scikit_learn-1.9.1.tar.gz",
+          "bytes": 7786908,
+          "url": "https://files.pythonhosted.org/packages/d2/eb/eaf5e07fcc0da7149b0e084f24e54edd7441b9a89ce7e034032ae97fe3a0/scikit_learn-1.9.1.tar.gz",
+          "sha256": "629cada3e33e2b9bf376cdc7614a47a4140b8aedc1d836579e359736fbd82977"
+        }
+      ],
+      "android_wheel_count": 0
+    },
+    {
+      "label": "llama-current-metadata",
+      "url": "https://pypi.org/pypi/llama-cpp-python/0.3.36/json",
+      "sha256": "b55fb3c5cda9b7a3dc1b6a99411d4b4738473c7fac2d96ce8e09f7e41ad5befb",
+      "version": "0.3.36",
+      "requires_python": ">=3.8",
+      "requires_dist": [
+        "typing-extensions>=4.5.0",
+        "numpy>=1.20.0",
+        "diskcache>=5.6.1",
+        "jinja2>=2.11.3"
+      ],
+      "sdist": [
+        {
+          "filename": "llama_cpp_python-0.3.36.tar.gz",
+          "bytes": 76589250,
+          "sha256": "832db0699007f1be95a7e41ef12e88926b02ba836461e36a36372db2760c1a2e",
+          "url": "https://files.pythonhosted.org/packages/ec/e9/e7de2b0463ea3ffbf0ede6cb21b58c1258a8f6521aae45ca773a59fe7cf3/llama_cpp_python-0.3.36.tar.gz"
+        }
+      ],
+      "archive_bytes_inspected": false
+    }
+  ],
+  "verified_archive_inspections": [
+    {
+      "artifact": {
+        "filename": "torchao-0.12.0-py3-none-any.whl",
+        "bytes": 962232,
+        "url": "https://files.pythonhosted.org/packages/6c/5f/6bf9b5bed6d31e286516d23e1db7320d2ccfbf1b2234749833ad1e3d25a5/torchao-0.12.0-py3-none-any.whl",
+        "sha256": "103f2a9164d2e4f705332af1aafbb8473eadd14d9164e45857ca187cde1f13d2"
+      },
+      "archive_sha256_verified": true,
+      "wheel_metadata": "Wheel-Version: 1.0\nGenerator: setuptools (78.1.1)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n",
+      "metadata_sha256": "1fce0be31c323a3049634baa0af2e888a64631bb7a27ba889680b70a67ddca4f",
+      "source_file_hashes": {
+        "torchao/__init__.py": "2b5dbcb251f02f9b29134037c54c1e6b124f628c0b9e91ca375d79c209089cb0"
+      },
+      "native_members": []
+    },
+    {
+      "artifact": {
+        "filename": "torchtune-0.3.1-py3-none-any.whl",
+        "bytes": 596650,
+        "url": "https://files.pythonhosted.org/packages/64/5e/09722b84ce4ee8eaec0d9b06a653a3c6ad0cb6efdbd23f1cbdeff834b567/torchtune-0.3.1-py3-none-any.whl",
+        "sha256": "b409f2bb180ed444d50e2600c854654a8954dbfab9d655cf1461eeedf6a74094"
+      },
+      "archive_sha256_verified": true,
+      "wheel_metadata": "Wheel-Version: 1.0\nGenerator: setuptools (75.1.0)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n",
+      "metadata_sha256": "e95cb4af25f5bc958734c34712ccc6e590c76962e7f52b26ebc81e953bef0d90",
+      "source_file_hashes": {
+        "torchtune/__init__.py": "6416c2e05162c0ca1fff299edb15a56aff7a99b9fc22dcb171a329c7f20a19e5",
+        "torchtune/modules/__init__.py": "72643c9ec01b838417692c7d3ac937f3d8f250b500fb0a7d47d8ebbdd1ed6cf2",
+        "torchtune/modules/position_embeddings.py": "8d79a03e1334fe6ecaff14b1e6a2d554e7e6209c95db058846973de013f92b80"
+      },
+      "native_members": []
+    },
+    {
+      "name": "neucodec",
+      "version": "0.0.4",
+      "artifact": {
+        "filename": "neucodec-0.0.4.tar.gz",
+        "bytes": 23072,
+        "url": "https://files.pythonhosted.org/packages/5e/5f/e948b92def28eb7d069fccc281a8c57279054a5063750742d8a62f572dda/neucodec-0.0.4.tar.gz",
+        "sha256": "994c9367b691b96c30247ebe5f3d9b7088411ff640b8df2f0dd9e1efe39f6f42"
+      },
+      "archive_sha256_verified": true,
+      "inspection": "Source files read from archive in memory; no install/build."
+    },
+    {
+      "name": "numba",
+      "version": "0.67.0",
+      "artifact": {
+        "filename": "numba-0.67.0.tar.gz",
+        "bytes": 2836515,
+        "url": "https://files.pythonhosted.org/packages/7a/90/2544f4e3a61e501d6c9a5418fd4b905323222693d54a02cab0106a0af865/numba-0.67.0.tar.gz",
+        "sha256": "cd75aa535b33fa05d9d930b1ae8af9f97a2881e96d72dfb38ec9b78284d9f851"
+      },
+      "archive_sha256_verified": true,
+      "inspection": "Source files read from archive in memory; no install/build."
+    }
+  ],
+  "exact_source_observations": [
+    {
+      "path": "neucodec-0.0.4/neucodec/bs_roformer5.py",
+      "sha256": "a397f57a93351f0cbb51233759352372048c30079d8e90c7ace73056050e33ec",
+      "archive": "neucodec-0.0.4.tar.gz"
+    },
+    {
+      "path": "neucodec-0.0.4/neucodec/codec_decoder_vocos.py",
+      "sha256": "1a26ca125774575608cd4b17a8e06b237bc05284ed84650413081bb190cb08f5",
+      "archive": "neucodec-0.0.4.tar.gz"
+    },
+    {
+      "path": "neucodec-0.0.4/neucodec/codec_encoder_distill.py",
+      "sha256": "e4bee35dccb49e5984c2899ff13a5ded19ab023030f41e7f8625d8608a917c6c",
+      "archive": "neucodec-0.0.4.tar.gz"
+    },
+    {
+      "path": "neucodec-0.0.4/neucodec/model.py",
+      "sha256": "2a67250caa2692258b64260471739080268b3e0370d64208fde517cd61b9673f",
+      "archive": "neucodec-0.0.4.tar.gz"
+    },
+    {
+      "path": "neucodec-0.0.4/pyproject.toml",
+      "sha256": "79f2e400ac0e693cec93f1247fe2d20dea3f7d8a0ad77be5465d9ea5e066efbb",
+      "archive": "neucodec-0.0.4.tar.gz"
+    },
+    {
+      "path": "perth/__init__.py",
+      "url": "https://raw.githubusercontent.com/resemble-ai/Perth/d6cc38cc9ab9da71c6b64d8c741bc13049eb881e/perth/__init__.py",
+      "sha256": "d76ba80784ae3a5c5b7ff1a37f67a6c49312f6e425d98a67dad70116df7afd84"
+    },
+    {
+      "path": "requirements.txt",
+      "url": "https://raw.githubusercontent.com/resemble-ai/Perth/d6cc38cc9ab9da71c6b64d8c741bc13049eb881e/requirements.txt",
+      "sha256": "b7e9925bb5828251f95df56affb6c313ef9104ee727e76965f0581dd62e76066"
+    },
+    {
+      "path": "setup.py",
+      "url": "https://raw.githubusercontent.com/resemble-ai/Perth/d6cc38cc9ab9da71c6b64d8c741bc13049eb881e/setup.py",
+      "sha256": "d6f638fb8fb4583b58a254af96a5380f220511f281d37b3ec2744d4257962988"
+    },
+    {
+      "path": "perth/perth_net/perth_net_implicit/perth_watermarker.py",
+      "url": "https://raw.githubusercontent.com/resemble-ai/Perth/d6cc38cc9ab9da71c6b64d8c741bc13049eb881e/perth/perth_net/perth_net_implicit/perth_watermarker.py",
+      "sha256": "a9140231e1f563c9a2a7f903f1be9a060889062a927b7ac795ba6b0fdc5bd5a5"
+    },
+    {
+      "path": "perth/perth_net/perth_net_implicit/checkpoint_manager.py",
+      "url": "https://raw.githubusercontent.com/resemble-ai/Perth/d6cc38cc9ab9da71c6b64d8c741bc13049eb881e/perth/perth_net/perth_net_implicit/checkpoint_manager.py",
+      "sha256": "98e17d0fc8295f20d43328c09c27494e6a3725e9fbb5a1095f90034a8434de93"
+    },
+    {
+      "path": "perth/perth_net/perth_net_implicit/model/perth_net.py",
+      "url": "https://raw.githubusercontent.com/resemble-ai/Perth/d6cc38cc9ab9da71c6b64d8c741bc13049eb881e/perth/perth_net/perth_net_implicit/model/perth_net.py",
+      "sha256": "46bb4f0621c96af7d82e629382a487a676a299a4cd5574b18a7cddc747721d80"
+    },
+    {
+      "path": "perth/perth_net/perth_net_implicit/audio_processor.py",
+      "url": "https://raw.githubusercontent.com/resemble-ai/Perth/d6cc38cc9ab9da71c6b64d8c741bc13049eb881e/perth/perth_net/perth_net_implicit/audio_processor.py",
+      "sha256": "aa19832b8f5bd43dc6d1606eb45b0374fb7b53fb1835527fc0735c61a66883d1"
+    },
+    {
+      "path": "perth/perth_net/perth_net_implicit/utils.py",
+      "url": "https://raw.githubusercontent.com/resemble-ai/Perth/d6cc38cc9ab9da71c6b64d8c741bc13049eb881e/perth/perth_net/perth_net_implicit/utils.py",
+      "sha256": "b235d997b67f644c097a4b0c71d9c37678ea9f68af91f18b631cfdbc7c6a9a6c"
+    },
+    {
+      "path": "perth/utils.py",
+      "url": "https://raw.githubusercontent.com/resemble-ai/Perth/d6cc38cc9ab9da71c6b64d8c741bc13049eb881e/perth/utils.py",
+      "sha256": "16f4fa8b2ee46e695c61541a81e22aca0af6c7810fcbe2be633598466edd1915"
+    },
+    {
+      "path": "numba-0.67.0/numba/__init__.py",
+      "sha256": "ad86000e18ba728805be54c5a249d212ef2631d8bcbc086bed8959076ea25656"
+    },
+    {
+      "path": "numba-0.67.0/setup.py",
+      "sha256": "25031d3133633e6f6b1f49915c2e61341b7791c69a0552e98739709d6ae7b611"
+    },
+    {
+      "label": "torchtune-init",
+      "url": "https://raw.githubusercontent.com/pytorch/torchtune/v0.3.1/torchtune/__init__.py",
+      "sha256": "cce59816e2143fbf078b5ce6aedccabcaaf5a2fee681e2ea39ef0d43a77f0d86"
+    },
+    {
+      "label": "torchtune-modules",
+      "url": "https://raw.githubusercontent.com/pytorch/torchtune/v0.3.1/torchtune/modules/__init__.py",
+      "sha256": "72643c9ec01b838417692c7d3ac937f3d8f250b500fb0a7d47d8ebbdd1ed6cf2"
+    },
+    {
+      "label": "torchtune-rope",
+      "url": "https://raw.githubusercontent.com/pytorch/torchtune/v0.3.1/torchtune/modules/position_embeddings.py",
+      "sha256": "8d79a03e1334fe6ecaff14b1e6a2d554e7e6209c95db058846973de013f92b80"
+    },
+    {
+      "label": "sklearn-project",
+      "url": "https://raw.githubusercontent.com/scikit-learn/scikit-learn/1.9.1/pyproject.toml",
+      "sha256": "69e625c729bbf603a32f9c9b4c7f09d715a0f2389e60a767ee152eaadbde41cb"
+    },
+    {
+      "label": "sklearn-meson",
+      "url": "https://raw.githubusercontent.com/scikit-learn/scikit-learn/1.9.1/sklearn/meson.build",
+      "sha256": "bac2cfdc4226d5d37b3fd59a1f26cf229f10cf957ea1939e842424169e5fb1ce"
+    },
+    {
+      "label": "llama-current-loader",
+      "url": "https://raw.githubusercontent.com/abetlen/llama-cpp-python/v0.3.36/llama_cpp/_ctypes_extensions.py",
+      "sha256": "a7864ec4b9ed9a0341bc545e8622af91132866c759cdbab053eeebb04d46d9c3"
+    },
+    {
+      "label": "espeak-recipe",
+      "url": "https://raw.githubusercontent.com/termux/termux-packages/ae877f2c6a2b2318abeb43699d6ec5f619c216a6/packages/espeak/build.sh",
+      "sha256": "220dffb03090b6dca62250f6a130577ec6da0c8149b5f27b0003afe1b35e7140"
+    }
+  ],
+  "findings": [
+    {
+      "id": "numba_apt_ranges",
+      "status": "source_compatible_ranges_native_build_unproven",
+      "selected_candidate": "numba==0.67.0",
+      "apt_versions": {
+        "python": "3.14.6",
+        "numpy": "2.5.4",
+        "llvmlite": "0.49.0"
+      },
+      "source_bounds": {
+        "python": ">=3.10,<3.15",
+        "numpy": ">=1.22,<2.6",
+        "llvmlite": ">=0.49.0dev0,<0.50"
+      },
+      "bounded_build_flags": [
+        "NUMBA_DISABLE_TBB=1",
+        "NUMBA_DISABLE_OPENMP=1"
+      ],
+      "note": "No general Android CPU-JIT exclusion found in inspected production source; this is not a native execution result."
+    },
+    {
+      "id": "librosa_declared_closure",
+      "status": "unfrozen_remaining_requirements",
+      "note": "The reference-load path uses SoundFile/Audioread, SciPy, Soxr and Numba. Stock metadata also requires scikit-learn and Python>=3.13 standard-aifc/standard-sunau; unused-on-this-path requirements were not deleted."
+    },
+    {
+      "id": "sklearn_build_bounds",
+      "status": "candidate_native_build_unproven",
+      "selected_candidate": "scikit-learn==1.9.1",
+      "build_requirements": [
+        "meson-python>=0.17.1,<0.22.0",
+        "cython>=3.1.2,<3.2.6",
+        "numpy>=2,<2.6.0",
+        "scipy>=1.10.0,<1.19.0"
+      ]
+    },
+    {
+      "id": "codec_training_import_pressure",
+      "status": "source_finding_runtime_import_gate_pending",
+      "note": "NeuCodec default uses full Wav2Vec2-BERT reference encoding. Relevant Vocos/RoFormer code imports Torchtune RotaryPositionalEmbeddings only. Torchtune package initialization imports wider training modules and TorchAO. Official pure wheels exist, so a native TorchAO build is not assumed necessary."
+    },
+    {
+      "id": "llama_android_loader",
+      "status": "isolated_source_correction_host_regression_passed",
+      "note": "Admit literal CPython android to the existing .so branch; no global platform spoofing or replacement native ABI."
+    },
+    {
+      "id": "espeak_faithfulness",
+      "status": "exact_engine_build_pending",
+      "note": "Retain pinned shared library and language data. System fallback can alter phonemes. Do not execute the Termux espeak packaging recipe on a device; its own recipe rejects destructive on-device packaging steps."
+    },
+    {
+      "id": "perth_runtime_metadata_gap",
+      "status": "unfrozen_checkpoint_path",
+      "version": "1.0.1",
+      "source_commit": "d6cc38cc9ab9da71c6b64d8c741bc13049eb881e",
+      "note": "PyPI Requires-Dist absent; repository requirements pin older Torch and unrelated tooling. Actual implicit watermarker uses Torch, Torchaudio spectral transforms, NumPy, Librosa, SciPy and YAML/checkpoint loading. Preserve NeuTTS warning if optional watermarking is unavailable; no model archive downloaded."
+    }
+  ],
+  "proposed_lazy_imports": [
+    "NeuTTS AutoTokenizer/AutoModelForCausalLM only in the non-GGUF branch.",
+    "NeuTTS selected codec-class import inside selected _load_codec branch.",
+    "Librosa import inside encode_reference; remains a real default-path dependency.",
+    "NeuCodec DistillCodecEncoder import inside distilled constructor.",
+    "Only consider Torchtune lazy exports after a concrete unused-training import failure; do not silently omit original distribution requirements."
+  ],
+  "loader_experiment": {
+    "repository": "abetlen/llama-cpp-python",
+    "tag": "v0.3.36",
+    "base_commit": "1652066e0af45f2313b339670ef9555e8a54e545",
+    "branch": "experiment/android-shared-library-discovery",
+    "git_submodule_entry": "160000 commit 0c1e57098bba43ac29e6e3b677cdceebdd22334f\tvendor/llama.cpp",
+    "patch": {
+      "path": "patches/next-stable/llama-cpp-python-android-loader.patch",
+      "sha256": "254d0d86b5b3d0ff0a92f0767d997f9d11d16449570713f1fc6ab64f0e718a9b",
+      "bytes": 7913,
+      "diff_stat": " CHANGELOG.md                    |   2 +\n llama_cpp/_ctypes_extensions.py |   2 +-\n tests/test_ctypes_extensions.py | 183 ++++++++++++++++++++++++++++++++++++++++\n 3 files changed, 186 insertions(+), 1 deletion(-)\n"
+    },
+    "files": {
+      "CHANGELOG.md": {
+        "sha256": "c8b409b872feb69738644c3e32e9a44b57dfd80e7f21069bad0d926197315791",
+        "bytes": 48000,
+        "original_sha256": "7215167ef56599a76244133dfbd697b2972307a51f2403b02bd03aa68b0117a4"
+      },
+      "llama_cpp/_ctypes_extensions.py": {
+        "sha256": "75bd8f8c9ea47b7988c9fdf5cd1d294b24888a02c0b154b888e9f42f8b5812e8",
+        "bytes": 5512,
+        "original_sha256": "a7864ec4b9ed9a0341bc545e8622af91132866c759cdbab053eeebb04d46d9c3"
+      },
+      "tests/test_ctypes_extensions.py": {
+        "sha256": "ba13a220987d0c90a2816002eb59100cf1d198595f20e1f801e5d43d0b5e7ca4",
+        "bytes": 6342
+      }
+    },
+    "checks": {
+      "ast_python_3_8": true,
+      "diff_whitespace": true,
+      "reverse_application": true,
+      "clean_base_index_application": true
+    },
+    "source_directory": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\llama-cpp-python-android-loader-v0.3.36-20261017",
+    "upstream_conventions": {
+      "contributing_sha256": "be97b6e691646e16f12aad5c2874fefd808ae7bc3c015d078feb8a2670cf9a7d",
+      "test_workflow": ".github/workflows/test.yaml",
+      "test_workflow_sha256": "8c48eb069ad4527577143111c4b05eb597d88f9172f349d0257530109b73e837",
+      "make_test_command": "python3 -m pytest --full-trace -v",
+      "focused_test_file": "tests/test_ctypes_extensions.py"
+    },
+    "host_validation": {
+      "platform": "Windows AMD64",
+      "python": "3.14.2",
+      "pytest": "9.0.2",
+      "typing_extensions": "4.15.0",
+      "strategy": "Load the standalone source module without llama_cpp package initialization; replace only its sys/os/ctypes references and mock CDLL. Real pytest temporary paths exercise discovery. No native library loaded.",
+      "baseline": {
+        "passed": 10,
+        "failed": 5,
+        "expected_failure": "All Android cases fail at Unsupported platform",
+        "command": [
+          "C:\\Python314\\python.exe",
+          "-m",
+          "pytest",
+          "-q",
+          "--tb=short",
+          "tests/test_ctypes_extensions.py"
+        ],
+        "returncode": 1,
+        "stdout_sha256": "043f48cab60fd4a1205b693cbda26fa5134ef52e5ed9832182d81edcf246c73d",
+        "stdout_bytes": 2993,
+        "stdout": "FFFFF..........                                                          [100%]\r\n================================== FAILURES ===================================\r\n_______ test_android_loads_named_so_without_changing_environment[llama] _______\r\ntests\\test_ctypes_extensions.py:45: in test_android_loads_named_so_without_changing_environment\r\n    result = loader.load_shared_library(base_name, tmp_path)\r\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\nllama_cpp\\_ctypes_extensions.py:52: in load_shared_library\r\n    raise RuntimeError(\"Unsupported platform\")\r\nE   RuntimeError: Unsupported platform\r\n_______ test_android_loads_named_so_without_changing_environment[mtmd] ________\r\ntests\\test_ctypes_extensions.py:45: in test_android_loads_named_so_without_changing_environment\r\n    result = loader.load_shared_library(base_name, tmp_path)\r\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\nllama_cpp\\_ctypes_extensions.py:52: in load_shared_library\r\n    raise RuntimeError(\"Unsupported platform\")\r\nE   RuntimeError: Unsupported platform\r\n_______ test_android_loads_named_so_without_changing_environment[ggml] ________\r\ntests\\test_ctypes_extensions.py:45: in test_android_loads_named_so_without_changing_environment\r\n    result = loader.load_shared_library(base_name, tmp_path)\r\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\nllama_cpp\\_ctypes_extensions.py:52: in load_shared_library\r\n    raise RuntimeError(\"Unsupported platform\")\r\nE   RuntimeError: Unsupported platform\r\n________ test_android_missing_so_does_not_accept_other_platform_names _________\r\ntests\\test_ctypes_extensions.py:62: in test_android_missing_so_does_not_accept_other_platform_names\r\n    loader.load_shared_library(\"llama\", tmp_path)\r\nllama_cpp\\_ctypes_extensions.py:52: in load_shared_library\r\n    raise RuntimeError(\"Unsupported platform\")\r\nE   RuntimeError: Unsupported platform\r\n__________________ test_android_reports_real_loader_failure ___________________\r\ntests\\test_ctypes_extensions.py:76: in test_android_reports_real_loader_failure\r\n    assert str(error.value) == (\r\nE   AssertionError: assert 'Unsupported platform' == 'Failed to lo...ndent library'\r\nE     \r\nE     - Failed to load shared library 'C:\\Users\\adyba\\AppData\\Local\\Temp\\pytest-of-adyba\\pytest-832\\test_android_reports_real_load0\\libllama.so': missing dependent library\r\nE     + Unsupported platform\r\n=========================== short test summary info ===========================\r\nFAILED tests/test_ctypes_extensions.py::test_android_loads_named_so_without_changing_environment[llama]\r\nFAILED tests/test_ctypes_extensions.py::test_android_loads_named_so_without_changing_environment[mtmd]\r\nFAILED tests/test_ctypes_extensions.py::test_android_loads_named_so_without_changing_environment[ggml]\r\nFAILED tests/test_ctypes_extensions.py::test_android_missing_so_does_not_accept_other_platform_names\r\nFAILED tests/test_ctypes_extensions.py::test_android_reports_real_loader_failure\r\n5 failed, 10 passed in 0.18s\r\n",
+        "stderr": "",
+        "interpreter": "3.14.2 (tags/v3.14.2:df79316, Dec  5 2025, 17:18:21) [MSC v.1944 64 bit (AMD64)]",
+        "dependencies": {
+          "pytest": "9.0.2",
+          "typing_extensions": "4.15.0"
+        }
+      },
+      "patched": {
+        "passed": 15,
+        "failed": 0,
+        "command": [
+          "C:\\Python314\\python.exe",
+          "-m",
+          "pytest",
+          "--full-trace",
+          "-v",
+          "tests/test_ctypes_extensions.py"
+        ],
+        "returncode": 0,
+        "stdout_sha256": "6636a7cb0943f4118c527b0c20ab36638d9fe2ac8172447ab2668cd94c667eac",
+        "stdout_bytes": 2167,
+        "stdout": "============================= test session starts =============================\r\nplatform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- C:\\Python314\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\llama-cpp-python-android-loader-v0.3.36-20261017\r\nconfigfile: pyproject.toml\r\nplugins: anyio-4.12.1, xdist-3.8.0, typeguard-4.5.1\r\ncollecting ... collected 15 items\r\n\r\ntests/test_ctypes_extensions.py::test_android_loads_named_so_without_changing_environment[llama] PASSED [  6%]\r\ntests/test_ctypes_extensions.py::test_android_loads_named_so_without_changing_environment[mtmd] PASSED [ 13%]\r\ntests/test_ctypes_extensions.py::test_android_loads_named_so_without_changing_environment[ggml] PASSED [ 20%]\r\ntests/test_ctypes_extensions.py::test_android_missing_so_does_not_accept_other_platform_names PASSED [ 26%]\r\ntests/test_ctypes_extensions.py::test_android_reports_real_loader_failure PASSED [ 33%]\r\ntests/test_ctypes_extensions.py::test_existing_unix_platforms_keep_so_lookup[linux] PASSED [ 40%]\r\ntests/test_ctypes_extensions.py::test_existing_unix_platforms_keep_so_lookup[linux2] PASSED [ 46%]\r\ntests/test_ctypes_extensions.py::test_existing_unix_platforms_keep_so_lookup[freebsd14] PASSED [ 53%]\r\ntests/test_ctypes_extensions.py::test_macos_keeps_so_preference_and_dylib_fallback[filenames0-libllama.so] PASSED [ 60%]\r\ntests/test_ctypes_extensions.py::test_macos_keeps_so_preference_and_dylib_fallback[filenames1-libllama.dylib] PASSED [ 66%]\r\ntests/test_ctypes_extensions.py::test_windows_keeps_dll_lookup_and_search_directories[filenames0-llama.dll] PASSED [ 73%]\r\ntests/test_ctypes_extensions.py::test_windows_keeps_dll_lookup_and_search_directories[filenames1-libllama.dll] PASSED [ 80%]\r\ntests/test_ctypes_extensions.py::test_emscripten_keeps_side_module_dependency_order[llama-dependencies0] PASSED [ 86%]\r\ntests/test_ctypes_extensions.py::test_emscripten_keeps_side_module_dependency_order[mtmd-dependencies1] PASSED [ 93%]\r\ntests/test_ctypes_extensions.py::test_unknown_platform_still_fails_before_loading PASSED [100%]\r\n\r\n============================= 15 passed in 0.08s ==============================\r\n",
+        "stderr": ""
+      },
+      "ruff": {
+        "status": "not_run",
+        "reason": "Existing prepared Ruff executable found, but direct Devbox host invocation rejected it under HOST_PROGRAM_ALLOWLIST; no dependency installation or alternate execution attempted."
+      },
+      "scope": "Shared-library discovery, original platform ordering/environment effects, missing-library and dlopen-error propagation only; no Bionic, ABI or model claim."
+    }
+  },
+  "next_bounded_gates": [
+    "Exact Numba native extension build + real CPU JIT/gufunc against existing APT NumPy/llvmlite.",
+    "Librosa 0.11 real 16kHz-mono preparation of a deterministic local PCM reference, with complete frozen declared dependencies.",
+    "Patched llama-cpp-python native build against its exact vendored llama.cpp and model-free wrapper initialization.",
+    "Official pure TorchAO/Torchtune imports and actual RoPE/FSQ/SDPA/spectral primitive operations before dependency-initialization changes.",
+    "Only later freeze all model/reference/espeak identities and invoke the actual Hermes default helper; watermarking separately evidenced."
+  ]
+}

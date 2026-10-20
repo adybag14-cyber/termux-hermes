@@ -1,0 +1,260 @@
+{
+  "schema": "neutts-frozen-apt-root-review/v1",
+  "at": "2026-10-20T13:19:15.633739+00:00",
+  "scope": "Preparation input availability recovery; exact original versions; no product release",
+  "retained_original_archives": [
+    {
+      "path": "vendor/termux-preparation/apt-archives/abseil-cpp_20260526.0_aarch64.deb",
+      "sha256": "e489fac652cddc39d9436141e627285f1034a545a06fbb19c420514a419ad877",
+      "bytes": 1197740,
+      "package": "abseil-cpp",
+      "version": "20260526.0",
+      "architecture": "aarch64"
+    },
+    {
+      "path": "vendor/termux-preparation/apt-archives/fmt_1%3A11.2.0-1_aarch64.deb",
+      "sha256": "dad595afcb3b1096d725c6772c0c5531764caa5841affba3c533c6298a32ab08",
+      "bytes": 168824,
+      "package": "fmt",
+      "version": "1:11.2.0-1",
+      "architecture": "aarch64"
+    },
+    {
+      "path": "vendor/termux-preparation/apt-archives/libprotobuf_2%3A36.2_aarch64.deb",
+      "sha256": "2f79e70af72127b6e9d8e8ea1a8bf261ea5f390914e667049b4f1dbc81f21fb0",
+      "bytes": 1434244,
+      "package": "libprotobuf",
+      "version": "2:36.2",
+      "architecture": "aarch64"
+    },
+    {
+      "path": "vendor/termux-preparation/apt-archives/libwebp_1.6.0-rc1-0_aarch64.deb",
+      "sha256": "80fa46bec4faad0ccfd969df5acfd501d813ca9d112b5c49f3f91390e987f3a9",
+      "bytes": 329496,
+      "package": "libwebp",
+      "version": "1.6.0-rc1-0",
+      "architecture": "aarch64"
+    },
+    {
+      "path": "vendor/termux-preparation/apt-archives/python-torch_2.14.1-2_aarch64.deb",
+      "sha256": "cb5d96877f30bca10a0a19bcd32934a4f477ec7e5bfd00c2a82ac5c9e7d0eb73",
+      "bytes": 36675500,
+      "package": "python-torch",
+      "version": "2.14.1-2",
+      "architecture": "aarch64"
+    },
+    {
+      "path": "vendor/termux-preparation/apt-archives/python-torchcodec_0.17.0-1_aarch64.deb",
+      "sha256": "743240ce85592ed31f05e95e139490c5a94c3bc8fe3c519b32d52e1585a5117f",
+      "bytes": 571432,
+      "package": "python-torchcodec",
+      "version": "0.17.0-1",
+      "architecture": "aarch64"
+    },
+    {
+      "path": "vendor/termux-preparation/apt-archives/python_3.14.6-1_aarch64.deb",
+      "sha256": "3166e56c2b6c03fff41191fbb9d736302978e7c484702814d9f6dc99dd6006bd",
+      "bytes": 4816756,
+      "package": "python",
+      "version": "3.14.6-1",
+      "architecture": "aarch64"
+    }
+  ],
+  "shell_syntax": [
+    {
+      "path": "scripts/compatibility_probe_neutts_nonrust.sh",
+      "bash_n_exit": 0,
+      "embedded_python_blocks_compiled": 2
+    },
+    {
+      "path": "scripts/compatibility_probe_neutts_torchao.sh",
+      "bash_n_exit": 0,
+      "embedded_python_blocks_compiled": 1
+    },
+    {
+      "path": "scripts/compatibility_probe_neutts_espeak.sh",
+      "bash_n_exit": 0,
+      "embedded_python_blocks_compiled": 2
+    },
+    {
+      "path": "scripts/compatibility_probe_neutts_apt_extensions.sh",
+      "bash_n_exit": 0,
+      "embedded_python_blocks_compiled": 2
+    }
+  ],
+  "workflow_reviews": [
+    {
+      "path": ".github/workflows/neutts-apt-extensions.yml",
+      "permissions_jobs_steps_byte_equal_head": true,
+      "actual_test_filter": true
+    },
+    {
+      "path": ".github/workflows/neutts-engine-components.yml",
+      "permissions_jobs_steps_byte_equal_head": true,
+      "actual_test_filter": true
+    },
+    {
+      "path": ".github/workflows/neutts-engine-wheel.yml",
+      "permissions_jobs_steps_byte_equal_head": true,
+      "actual_test_filter": true
+    },
+    {
+      "path": ".github/workflows/neutts-espeak-component.yml",
+      "permissions_jobs_steps_byte_equal_head": true,
+      "actual_test_filter": true
+    },
+    {
+      "path": ".github/workflows/neutts-nonrust-components.yml",
+      "permissions_jobs_steps_byte_equal_head": true,
+      "actual_test_filter": true
+    },
+    {
+      "path": ".github/workflows/neutts-rust-components.yml",
+      "permissions_jobs_steps_byte_equal_head": true,
+      "actual_test_filter": true
+    },
+    {
+      "path": ".github/workflows/neutts-termux-probe.yml",
+      "permissions_jobs_steps_byte_equal_head": true,
+      "actual_test_filter": true
+    },
+    {
+      "path": ".github/workflows/neutts-torchao-component.yml",
+      "permissions_jobs_steps_byte_equal_head": true,
+      "actual_test_filter": true
+    }
+  ],
+  "apt_extension_lock_change": "Only exact foundation source checksum/size and cascading helper checksums; all package and behavior fields equal",
+  "source_files": [
+    {
+      "path": "scripts/compatibility_probe_neutts_nonrust.sh",
+      "bytes": 9247,
+      "sha256": "f6b24589304d59e7243854ea622ebbfb346a964cd33e0b3231b96480d50e266d"
+    },
+    {
+      "path": "scripts/compatibility_probe_neutts_torchao.sh",
+      "bytes": 5284,
+      "sha256": "f072465bd3a71880a6a6d62cc49c1ac9440ea44e59cf0d2041e84aed91d52c4b"
+    },
+    {
+      "path": "scripts/compatibility_probe_neutts_espeak.sh",
+      "bytes": 12524,
+      "sha256": "9f6415b02428605fb53d8ddec7e5d074593fc39f6c49ae111100015d1f1b3e6e"
+    },
+    {
+      "path": "scripts/compatibility_probe_neutts_apt_extensions.sh",
+      "bytes": 8127,
+      "sha256": "5386051805805b72c39204c3a449c1be1ff699a3d15bb30650e3487e233b59f4"
+    },
+    {
+      "path": "scripts/neutts_apt_extensions_lock.json",
+      "bytes": 518329,
+      "sha256": "c8226572fd116afd4fee3402bc325289b5729249d2c6f223ec45468cc19a56b9"
+    },
+    {
+      "path": "scripts/prepare_neutts_apt_extensions.py",
+      "bytes": 21404,
+      "sha256": "42db2e03b89d08e05ac72de9615c585f5425488639968b746f56cf5d29aeb64f"
+    },
+    {
+      "path": "scripts/compatibility_probe_neutts_apt_extensions.py",
+      "bytes": 39470,
+      "sha256": "0d021d9c1ab21ea84aa5786c1e2904c89e7e22704cb18514d75e80a235891610"
+    },
+    {
+      "path": ".github/workflows/neutts-apt-extensions.yml",
+      "bytes": 1926,
+      "sha256": "671fa75436239ee416078a6c2407306612c6bf2d07ef84671032d8ed0a313ff8"
+    },
+    {
+      "path": ".github/workflows/neutts-engine-components.yml",
+      "bytes": 2075,
+      "sha256": "ef48bc164a69aaa63adb588b935870aab3258fcf0da1ac818ee732007d1c072e"
+    },
+    {
+      "path": ".github/workflows/neutts-engine-wheel.yml",
+      "bytes": 2096,
+      "sha256": "6eb5f76eb046f57ac07360b99eb8a40d36a4a9814f0c66987d97fec5d1cda751"
+    },
+    {
+      "path": ".github/workflows/neutts-espeak-component.yml",
+      "bytes": 2308,
+      "sha256": "1f65f1868d8641f875c69262a2421e648e3d9123087f2a7bf2de7f2a3a3da850"
+    },
+    {
+      "path": ".github/workflows/neutts-nonrust-components.yml",
+      "bytes": 2245,
+      "sha256": "2a8248c2eb58dc50233d5fdb4f0711337d9682037cd0ce297e063e8bbda1e872"
+    },
+    {
+      "path": ".github/workflows/neutts-rust-components.yml",
+      "bytes": 2565,
+      "sha256": "4fe7d796676acf56b0ecb6008be7aa636f1a11dd0b6550ef932b01dafd8557d4"
+    },
+    {
+      "path": ".github/workflows/neutts-termux-probe.yml",
+      "bytes": 1989,
+      "sha256": "994423d49f5b8eda9b9b1e90a4f972945c08950b8be042e027307f393690db85"
+    },
+    {
+      "path": ".github/workflows/neutts-torchao-component.yml",
+      "bytes": 1926,
+      "sha256": "b44e03d13fbd690771e2a99f85eeaa92ab159c503a7e77b290247ef25538f1e3"
+    }
+  ],
+  "host_tests": {
+    "passed": 66,
+    "subtests_passed": 81,
+    "skipped": 0,
+    "native_execution": false
+  },
+  "peer_review": {
+    "agent": "engine_recover_final",
+    "status": "passed",
+    "scope": "Four consumer integrations and eight paths-only workflow changes"
+  },
+  "evidence_files": [
+    {
+      "path": "audit/neutts-frozen-apt-recovery-20261020/root-host/root-host-tests-all-inputs.xml",
+      "bytes": 10772,
+      "sha256": "1e27932c02f6e621877ef91ff2ac70cff7ca34b2101f1d55c540faa2cb7d815c"
+    },
+    {
+      "path": "audit/neutts-frozen-apt-recovery-20261020/root-host/root-host-tests-all-inputs.stdout.log",
+      "bytes": 115,
+      "sha256": "f9f26a78948394a19a7277d21c30d1b6d9cf093598ea5fbe5fc8c8c6dc8cbe55"
+    },
+    {
+      "path": "audit/neutts-frozen-apt-recovery-20261020/root-host/root-host-tests-all-inputs.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "audit/neutts-frozen-apt-recovery-20261020/root-host/SOURCE-PIN-REFRESH.json",
+      "bytes": 1055,
+      "sha256": "925862656e3f74c0ecde4393a1bfdf5f6dfd41e26cbc5038b17910c35f0e24d7"
+    },
+    {
+      "path": "audit/neutts-frozen-apt-recovery-20261020/RETAINED-CACHE-API-REVIEW.json",
+      "bytes": 2950,
+      "sha256": "4b5f03aed3d084fd620e4aad60d05bf930e39abf61cf5875ac011d629c41af4e"
+    },
+    {
+      "path": "audit/neutts-frozen-apt-recovery-20261020/docs-applied-review.json",
+      "bytes": 2044,
+      "sha256": "c0940750988ee4cb809da2d41ca1796d8cf4131940bb05129f344d34f0cdfbed"
+    },
+    {
+      "path": "audit/neutts-frozen-apt-recovery-20261020/audio-guide-peer-review.json",
+      "bytes": 2986,
+      "sha256": "a376870f90db77f024e617e11f19f5aa805a39b5003d07ec877693b751d8cd2d"
+    },
+    {
+      "path": "audit/neutts-frozen-apt-recovery-20261020/docs-source-review.json",
+      "bytes": 2420,
+      "sha256": "bcc48086d0b1adec9fda3198bd387a9e47f97a9a9ef8bd0dde0548c01545aacb"
+    }
+  ],
+  "release_output": false,
+  "native_apt_and_component_validation_pending": true
+}

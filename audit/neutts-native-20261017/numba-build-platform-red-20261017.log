@@ -1,0 +1,446 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- C:\Python314\python.exe
+rootdir: C:\Users\adyba\docker-chatgpt-devbox\workspace\termux-hermes-next-stable-20261017
+configfile: pyproject.toml
+plugins: anyio-4.12.1, xdist-3.8.0, typeguard-4.5.1
+collecting ... collected 31 items / 27 deselected / 4 selected
+
+tests/test_neutts_native_components.py::test_native_build_uses_actual_android_platform[None] FAILED [ 25%]
+tests/test_neutts_native_components.py::test_native_build_uses_actual_android_platform[android-24-arm64_v8a] FAILED [ 50%]
+tests/test_neutts_native_components.py::test_native_build_uses_actual_android_platform[android-aarch64] FAILED [ 75%]
+tests/test_neutts_native_components.py::test_native_build_uses_actual_android_platform[linux-x86_64] FAILED [100%]
+
+================================== FAILURES ===================================
+____________ test_native_build_uses_actual_android_platform[None] _____________
+
+tmp_path = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-856/test_native_build_uses_actual_0')
+lock = {'additional_python_wheels': [{'artifact': {'bytes': 293450, 'filename': 'scikit_build_core-1.1.1-py3-none-any.whl', '...ndor/wheel; no additional wheel distribution install', 'requirements': ['packaging>=24.0'], 'version': '0.46.3'}}, ...}
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001947D4E1810>
+inherited_platform = None
+
+    @pytest.mark.parametrize("inherited_platform", [
+        None, "android-24-arm64_v8a", "android-aarch64", "linux-x86_64",
+    ])
+    def test_native_build_uses_actual_android_platform(tmp_path, lock, monkeypatch, inherited_platform):
+        """Exercise CPython's real parser using the environment passed to pip.
+    
+        This is a host-side build-command control, not a Bionic compilation. Clone
+        the stdlib function with only its OS/configuration inputs replaced so the
+        actual Android platform parser is exercised without mutating host globals.
+        """
+        if inherited_platform is None:
+            monkeypatch.delenv("_PYTHON_HOST_PLATFORM", raising=False)
+        else:
+            monkeypatch.setenv("_PYTHON_HOST_PLATFORM", inherited_platform)
+        inputs, out, work = (tmp_path / name for name in ("inputs", "out", "work"))
+        (inputs / "sources").mkdir(parents=True)
+        out.mkdir()
+        work.mkdir()
+        observed = []
+    
+        class BuildReached(Exception):
+            pass
+    
+        def command(argv, output, label, timeout, env=None, cwd=None):
+            if label not in ("native-build-python-inputs", "native-build-numba"):
+                return {}
+            namespace = dict(sysconfig.get_platform.__globals__)
+            namespace.update({
+                "os": SimpleNamespace(name="posix", environ=env,
+                                      uname=lambda: ("Linux", "owned-fixture", "6.1", "", "aarch64")),
+                "sys": SimpleNamespace(platform="android"),
+                "get_config_var": lambda name: 24 if name == "ANDROID_API_LEVEL" else None,
+            })
+            platform_name = FunctionType(sysconfig.get_platform.__code__, namespace)()
+            assert platform_name.replace("-", "_") == lock["target"]["wheel_platform"]
+            # scikit-build-core reads this variable directly instead of expanding
+            # CPython's OS/machine pair, so neither form is valid across both backends.
+            assert "_PYTHON_HOST_PLATFORM" not in env
+            observed.append(label)
+            if label == "native-build-numba":
+                raise BuildReached
+            return {}
+    
+        monkeypatch.setattr(probe, "bounded_command", command)
+        with pytest.raises(BuildReached):
+>           probe.build_packages(lock, inputs, out, work)
+
+tests\test_neutts_native_components.py:269: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\compatibility_probe_neutts_native.py:467: in build_packages
+    build = bounded_command(command, out, "native-build-" + package, seconds, env=env)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_neutts_native_components.py:257: in command
+    platform_name = FunctionType(sysconfig.get_platform.__code__, namespace)()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def get_platform():
+        """Return a string that identifies the current platform.
+    
+        This is used mainly to distinguish platform-specific build directories and
+        platform-specific built distributions.  Typically includes the OS name and
+        version and the architecture (as supplied by 'os.uname()'), although the
+        exact information included depends on the OS; on Linux, the kernel version
+        isn't particularly important.
+    
+        Examples of returned values:
+    
+    
+        Windows:
+    
+        - win-amd64 (64-bit Windows on AMD64, aka x86_64, Intel64, and EM64T)
+        - win-arm64 (64-bit Windows on ARM64, aka AArch64)
+        - win32 (all others - specifically, sys.platform is returned)
+    
+        POSIX based OS:
+    
+        - linux-x86_64
+        - macosx-15.5-arm64
+        - macosx-26.0-universal2 (macOS on Apple Silicon or Intel)
+        - android-24-arm64_v8a
+    
+        For other non-POSIX platforms, currently just returns :data:`sys.platform`."""
+        if os.name == 'nt':
+            if 'amd64' in sys.version.lower():
+                return 'win-amd64'
+            if '(arm)' in sys.version.lower():
+                return 'win-arm32'
+            if '(arm64)' in sys.version.lower():
+                return 'win-arm64'
+            return sys.platform
+    
+        if os.name != "posix" or not hasattr(os, 'uname'):
+            # XXX what about the architecture? NT is Intel or Alpha
+            return sys.platform
+    
+        # Set for cross builds explicitly
+        if "_PYTHON_HOST_PLATFORM" in os.environ:
+            osname, _, machine = os.environ["_PYTHON_HOST_PLATFORM"].partition('-')
+            release = None
+        else:
+            # Try to distinguish various flavours of Unix
+            osname, host, release, version, machine = os.uname()
+    
+            # Convert the OS name to lowercase, remove '/' characters, and translate
+            # spaces (for "Power Macintosh")
+            osname = osname.lower().replace('/', '')
+            machine = machine.replace(' ', '_')
+            machine = machine.replace('/', '-')
+    
+        if osname == "android" or sys.platform == "android":
+            osname = "android"
+            release = get_config_var("ANDROID_API_LEVEL")
+    
+            # Wheel tags use the ABI names from Android's own tools.
+>           machine = {
+                "x86_64": "x86_64",
+                "i686": "x86",
+                "aarch64": "arm64_v8a",
+                "armv7l": "armeabi_v7a",
+E               KeyError: '24-arm64_v8a'
+
+C:\Python314\Lib\sysconfig\__init__.py:701: KeyError
+____ test_native_build_uses_actual_android_platform[android-24-arm64_v8a] _____
+
+tmp_path = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-856/test_native_build_uses_actual_1')
+lock = {'additional_python_wheels': [{'artifact': {'bytes': 293450, 'filename': 'scikit_build_core-1.1.1-py3-none-any.whl', '...ndor/wheel; no additional wheel distribution install', 'requirements': ['packaging>=24.0'], 'version': '0.46.3'}}, ...}
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001947D4E08A0>
+inherited_platform = 'android-24-arm64_v8a'
+
+    @pytest.mark.parametrize("inherited_platform", [
+        None, "android-24-arm64_v8a", "android-aarch64", "linux-x86_64",
+    ])
+    def test_native_build_uses_actual_android_platform(tmp_path, lock, monkeypatch, inherited_platform):
+        """Exercise CPython's real parser using the environment passed to pip.
+    
+        This is a host-side build-command control, not a Bionic compilation. Clone
+        the stdlib function with only its OS/configuration inputs replaced so the
+        actual Android platform parser is exercised without mutating host globals.
+        """
+        if inherited_platform is None:
+            monkeypatch.delenv("_PYTHON_HOST_PLATFORM", raising=False)
+        else:
+            monkeypatch.setenv("_PYTHON_HOST_PLATFORM", inherited_platform)
+        inputs, out, work = (tmp_path / name for name in ("inputs", "out", "work"))
+        (inputs / "sources").mkdir(parents=True)
+        out.mkdir()
+        work.mkdir()
+        observed = []
+    
+        class BuildReached(Exception):
+            pass
+    
+        def command(argv, output, label, timeout, env=None, cwd=None):
+            if label not in ("native-build-python-inputs", "native-build-numba"):
+                return {}
+            namespace = dict(sysconfig.get_platform.__globals__)
+            namespace.update({
+                "os": SimpleNamespace(name="posix", environ=env,
+                                      uname=lambda: ("Linux", "owned-fixture", "6.1", "", "aarch64")),
+                "sys": SimpleNamespace(platform="android"),
+                "get_config_var": lambda name: 24 if name == "ANDROID_API_LEVEL" else None,
+            })
+            platform_name = FunctionType(sysconfig.get_platform.__code__, namespace)()
+            assert platform_name.replace("-", "_") == lock["target"]["wheel_platform"]
+            # scikit-build-core reads this variable directly instead of expanding
+            # CPython's OS/machine pair, so neither form is valid across both backends.
+            assert "_PYTHON_HOST_PLATFORM" not in env
+            observed.append(label)
+            if label == "native-build-numba":
+                raise BuildReached
+            return {}
+    
+        monkeypatch.setattr(probe, "bounded_command", command)
+        with pytest.raises(BuildReached):
+>           probe.build_packages(lock, inputs, out, work)
+
+tests\test_neutts_native_components.py:269: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\compatibility_probe_neutts_native.py:441: in build_packages
+    bounded_command([python, "-I", "-B", "-m", "pip", "install", "--no-index", "--no-deps",
+tests\test_neutts_native_components.py:257: in command
+    platform_name = FunctionType(sysconfig.get_platform.__code__, namespace)()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def get_platform():
+        """Return a string that identifies the current platform.
+    
+        This is used mainly to distinguish platform-specific build directories and
+        platform-specific built distributions.  Typically includes the OS name and
+        version and the architecture (as supplied by 'os.uname()'), although the
+        exact information included depends on the OS; on Linux, the kernel version
+        isn't particularly important.
+    
+        Examples of returned values:
+    
+    
+        Windows:
+    
+        - win-amd64 (64-bit Windows on AMD64, aka x86_64, Intel64, and EM64T)
+        - win-arm64 (64-bit Windows on ARM64, aka AArch64)
+        - win32 (all others - specifically, sys.platform is returned)
+    
+        POSIX based OS:
+    
+        - linux-x86_64
+        - macosx-15.5-arm64
+        - macosx-26.0-universal2 (macOS on Apple Silicon or Intel)
+        - android-24-arm64_v8a
+    
+        For other non-POSIX platforms, currently just returns :data:`sys.platform`."""
+        if os.name == 'nt':
+            if 'amd64' in sys.version.lower():
+                return 'win-amd64'
+            if '(arm)' in sys.version.lower():
+                return 'win-arm32'
+            if '(arm64)' in sys.version.lower():
+                return 'win-arm64'
+            return sys.platform
+    
+        if os.name != "posix" or not hasattr(os, 'uname'):
+            # XXX what about the architecture? NT is Intel or Alpha
+            return sys.platform
+    
+        # Set for cross builds explicitly
+        if "_PYTHON_HOST_PLATFORM" in os.environ:
+            osname, _, machine = os.environ["_PYTHON_HOST_PLATFORM"].partition('-')
+            release = None
+        else:
+            # Try to distinguish various flavours of Unix
+            osname, host, release, version, machine = os.uname()
+    
+            # Convert the OS name to lowercase, remove '/' characters, and translate
+            # spaces (for "Power Macintosh")
+            osname = osname.lower().replace('/', '')
+            machine = machine.replace(' ', '_')
+            machine = machine.replace('/', '-')
+    
+        if osname == "android" or sys.platform == "android":
+            osname = "android"
+            release = get_config_var("ANDROID_API_LEVEL")
+    
+            # Wheel tags use the ABI names from Android's own tools.
+>           machine = {
+                "x86_64": "x86_64",
+                "i686": "x86",
+                "aarch64": "arm64_v8a",
+                "armv7l": "armeabi_v7a",
+E               KeyError: '24-arm64_v8a'
+
+C:\Python314\Lib\sysconfig\__init__.py:701: KeyError
+_______ test_native_build_uses_actual_android_platform[android-aarch64] _______
+
+tmp_path = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-856/test_native_build_uses_actual_2')
+lock = {'additional_python_wheels': [{'artifact': {'bytes': 293450, 'filename': 'scikit_build_core-1.1.1-py3-none-any.whl', '...ndor/wheel; no additional wheel distribution install', 'requirements': ['packaging>=24.0'], 'version': '0.46.3'}}, ...}
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001947D4BE7B0>
+inherited_platform = 'android-aarch64'
+
+    @pytest.mark.parametrize("inherited_platform", [
+        None, "android-24-arm64_v8a", "android-aarch64", "linux-x86_64",
+    ])
+    def test_native_build_uses_actual_android_platform(tmp_path, lock, monkeypatch, inherited_platform):
+        """Exercise CPython's real parser using the environment passed to pip.
+    
+        This is a host-side build-command control, not a Bionic compilation. Clone
+        the stdlib function with only its OS/configuration inputs replaced so the
+        actual Android platform parser is exercised without mutating host globals.
+        """
+        if inherited_platform is None:
+            monkeypatch.delenv("_PYTHON_HOST_PLATFORM", raising=False)
+        else:
+            monkeypatch.setenv("_PYTHON_HOST_PLATFORM", inherited_platform)
+        inputs, out, work = (tmp_path / name for name in ("inputs", "out", "work"))
+        (inputs / "sources").mkdir(parents=True)
+        out.mkdir()
+        work.mkdir()
+        observed = []
+    
+        class BuildReached(Exception):
+            pass
+    
+        def command(argv, output, label, timeout, env=None, cwd=None):
+            if label not in ("native-build-python-inputs", "native-build-numba"):
+                return {}
+            namespace = dict(sysconfig.get_platform.__globals__)
+            namespace.update({
+                "os": SimpleNamespace(name="posix", environ=env,
+                                      uname=lambda: ("Linux", "owned-fixture", "6.1", "", "aarch64")),
+                "sys": SimpleNamespace(platform="android"),
+                "get_config_var": lambda name: 24 if name == "ANDROID_API_LEVEL" else None,
+            })
+            platform_name = FunctionType(sysconfig.get_platform.__code__, namespace)()
+            assert platform_name.replace("-", "_") == lock["target"]["wheel_platform"]
+            # scikit-build-core reads this variable directly instead of expanding
+            # CPython's OS/machine pair, so neither form is valid across both backends.
+            assert "_PYTHON_HOST_PLATFORM" not in env
+            observed.append(label)
+            if label == "native-build-numba":
+                raise BuildReached
+            return {}
+    
+        monkeypatch.setattr(probe, "bounded_command", command)
+        with pytest.raises(BuildReached):
+>           probe.build_packages(lock, inputs, out, work)
+
+tests\test_neutts_native_components.py:269: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\compatibility_probe_neutts_native.py:441: in build_packages
+    bounded_command([python, "-I", "-B", "-m", "pip", "install", "--no-index", "--no-deps",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+argv = ['C:\\Users\\adyba\\AppData\\Local\\Temp\\pytest-of-adyba\\pytest-856\\test_native_build_uses_actual_2\\work\\venv\\bin\\python', '-I', '-B', '-m', 'pip', 'install', ...]
+output = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-856/test_native_build_uses_actual_2/out')
+label = 'native-build-python-inputs', timeout = 90
+env = {'ALLUSERSPROFILE': 'C:\\ProgramData', 'APPDATA': 'C:\\Users\\adyba\\AppData\\Roaming', 'COMMONPROGRAMFILES': 'C:\\Program Files\\Common Files', 'COMMONPROGRAMFILES(X86)': 'C:\\Program Files (x86)\\Common Files', ...}
+cwd = None
+
+    def command(argv, output, label, timeout, env=None, cwd=None):
+        if label not in ("native-build-python-inputs", "native-build-numba"):
+            return {}
+        namespace = dict(sysconfig.get_platform.__globals__)
+        namespace.update({
+            "os": SimpleNamespace(name="posix", environ=env,
+                                  uname=lambda: ("Linux", "owned-fixture", "6.1", "", "aarch64")),
+            "sys": SimpleNamespace(platform="android"),
+            "get_config_var": lambda name: 24 if name == "ANDROID_API_LEVEL" else None,
+        })
+        platform_name = FunctionType(sysconfig.get_platform.__code__, namespace)()
+        assert platform_name.replace("-", "_") == lock["target"]["wheel_platform"]
+        # scikit-build-core reads this variable directly instead of expanding
+        # CPython's OS/machine pair, so neither form is valid across both backends.
+>       assert "_PYTHON_HOST_PLATFORM" not in env
+E       AssertionError: assert '_PYTHON_HOST_PLATFORM' not in {'ALLUSERSPROFILE': 'C:\\ProgramData', 'APPDATA': 'C:\\Users\\adyba\\AppData\\Roaming', 'COMMONPROGRAMFILES': 'C:\\Program Files\\Common Files', 'COMMONPROGRAMFILES(X86)': 'C:\\Program Files (x86)\\Common Files', ...}
+
+tests\test_neutts_native_components.py:261: AssertionError
+________ test_native_build_uses_actual_android_platform[linux-x86_64] _________
+
+tmp_path = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-856/test_native_build_uses_actual_3')
+lock = {'additional_python_wheels': [{'artifact': {'bytes': 293450, 'filename': 'scikit_build_core-1.1.1-py3-none-any.whl', '...ndor/wheel; no additional wheel distribution install', 'requirements': ['packaging>=24.0'], 'version': '0.46.3'}}, ...}
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001947D59AF10>
+inherited_platform = 'linux-x86_64'
+
+    @pytest.mark.parametrize("inherited_platform", [
+        None, "android-24-arm64_v8a", "android-aarch64", "linux-x86_64",
+    ])
+    def test_native_build_uses_actual_android_platform(tmp_path, lock, monkeypatch, inherited_platform):
+        """Exercise CPython's real parser using the environment passed to pip.
+    
+        This is a host-side build-command control, not a Bionic compilation. Clone
+        the stdlib function with only its OS/configuration inputs replaced so the
+        actual Android platform parser is exercised without mutating host globals.
+        """
+        if inherited_platform is None:
+            monkeypatch.delenv("_PYTHON_HOST_PLATFORM", raising=False)
+        else:
+            monkeypatch.setenv("_PYTHON_HOST_PLATFORM", inherited_platform)
+        inputs, out, work = (tmp_path / name for name in ("inputs", "out", "work"))
+        (inputs / "sources").mkdir(parents=True)
+        out.mkdir()
+        work.mkdir()
+        observed = []
+    
+        class BuildReached(Exception):
+            pass
+    
+        def command(argv, output, label, timeout, env=None, cwd=None):
+            if label not in ("native-build-python-inputs", "native-build-numba"):
+                return {}
+            namespace = dict(sysconfig.get_platform.__globals__)
+            namespace.update({
+                "os": SimpleNamespace(name="posix", environ=env,
+                                      uname=lambda: ("Linux", "owned-fixture", "6.1", "", "aarch64")),
+                "sys": SimpleNamespace(platform="android"),
+                "get_config_var": lambda name: 24 if name == "ANDROID_API_LEVEL" else None,
+            })
+            platform_name = FunctionType(sysconfig.get_platform.__code__, namespace)()
+            assert platform_name.replace("-", "_") == lock["target"]["wheel_platform"]
+            # scikit-build-core reads this variable directly instead of expanding
+            # CPython's OS/machine pair, so neither form is valid across both backends.
+            assert "_PYTHON_HOST_PLATFORM" not in env
+            observed.append(label)
+            if label == "native-build-numba":
+                raise BuildReached
+            return {}
+    
+        monkeypatch.setattr(probe, "bounded_command", command)
+        with pytest.raises(BuildReached):
+>           probe.build_packages(lock, inputs, out, work)
+
+tests\test_neutts_native_components.py:269: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\compatibility_probe_neutts_native.py:441: in build_packages
+    bounded_command([python, "-I", "-B", "-m", "pip", "install", "--no-index", "--no-deps",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+argv = ['C:\\Users\\adyba\\AppData\\Local\\Temp\\pytest-of-adyba\\pytest-856\\test_native_build_uses_actual_3\\work\\venv\\bin\\python', '-I', '-B', '-m', 'pip', 'install', ...]
+output = WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-856/test_native_build_uses_actual_3/out')
+label = 'native-build-python-inputs', timeout = 90
+env = {'ALLUSERSPROFILE': 'C:\\ProgramData', 'APPDATA': 'C:\\Users\\adyba\\AppData\\Roaming', 'COMMONPROGRAMFILES': 'C:\\Program Files\\Common Files', 'COMMONPROGRAMFILES(X86)': 'C:\\Program Files (x86)\\Common Files', ...}
+cwd = None
+
+    def command(argv, output, label, timeout, env=None, cwd=None):
+        if label not in ("native-build-python-inputs", "native-build-numba"):
+            return {}
+        namespace = dict(sysconfig.get_platform.__globals__)
+        namespace.update({
+            "os": SimpleNamespace(name="posix", environ=env,
+                                  uname=lambda: ("Linux", "owned-fixture", "6.1", "", "aarch64")),
+            "sys": SimpleNamespace(platform="android"),
+            "get_config_var": lambda name: 24 if name == "ANDROID_API_LEVEL" else None,
+        })
+        platform_name = FunctionType(sysconfig.get_platform.__code__, namespace)()
+>       assert platform_name.replace("-", "_") == lock["target"]["wheel_platform"]
+E       AssertionError: assert 'android_24_x86_64' == 'android_24_arm64_v8a'
+E         
+E         - android_24_arm64_v8a
+E         + android_24_x86_64
+
+tests\test_neutts_native_components.py:258: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_neutts_native_components.py::test_native_build_uses_actual_android_platform[None]
+FAILED tests/test_neutts_native_components.py::test_native_build_uses_actual_android_platform[android-24-arm64_v8a]
+FAILED tests/test_neutts_native_components.py::test_native_build_uses_actual_android_platform[android-aarch64]
+FAILED tests/test_neutts_native_components.py::test_native_build_uses_actual_android_platform[linux-x86_64]
+====================== 4 failed, 27 deselected in 0.25s =======================

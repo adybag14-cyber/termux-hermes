@@ -1,0 +1,11 @@
+--- a/soundfile.py
++++ b/soundfile.py
+@@ -196,7 +196,7 @@
+             _explicit_libname = 'libsndfile.dylib'
+         elif _sys.platform == 'win32':
+             _explicit_libname = 'libsndfile.dll'
+-        elif _sys.platform == 'linux':
++        elif _sys.platform in ('linux', 'android'):
+             _explicit_libname = 'libsndfile.so'
+         else:
+             raise

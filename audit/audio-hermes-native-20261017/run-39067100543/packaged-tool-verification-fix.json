@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-10-17T20:44:09.045141+00:00",
+  "status": "host-regression-passed-native-retry-required",
+  "native_failure": {
+    "run_id": 39067100543,
+    "head_sha": "6586c5c5e7a17c1ebb3db0170f2f59e1121e3762",
+    "job_id": 117496925419,
+    "completed_at_utc": "2026-10-17T20:32:30Z",
+    "conclusion": "failure",
+    "successful_steps": [
+      "exact main candidate acquisition",
+      "exact audio/source/wrapper acquisition",
+      "offline reconstruction input bundle creation and upload",
+      "failure proof upload"
+    ],
+    "failed_step": "Prepare and probe twice at independent final paths",
+    "phase": "bootstrap packaged-tool verification before manager creation",
+    "exception": "pm.package.InstallError: python: tool source failed verification \u2014 run preparation again",
+    "stderr": {
+      "path": "artifact-files/prepared/evidence/canonical-preparation.stderr.log",
+      "bytes": 933,
+      "sha256": "282e3bd2f8d240a4db8dd7f9ce3c094c12c11ba32a06e6e10dca6e12103ab0d0"
+    },
+    "proof_artifact": {
+      "id": 12113244788,
+      "bytes": 6861645,
+      "sha256": "f3422a24c9033b7249f3b1dcc4fe8d9ce05c69b0c859caebd0a711bff3f0bd1f",
+      "all_11_zip_members_crc_and_sha_verified": true,
+      "receipt": {
+        "path": "verified-proof-artifact.json",
+        "bytes": 3022,
+        "sha256": "9575307982e14b9bc29a0380748a9a4bff773147e00f40fd5be240bd533ceeba"
+      }
+    },
+    "full_job_log": {
+      "path": "job-117496925419.log",
+      "bytes": 29350,
+      "sha256": "cac01e27f3a5ea3686f27a91ef1fa1e91639d202533b16e1d631794ccf87a77e"
+    },
+    "reconstruction_input_artifact": {
+      "id": 12113876670,
+      "advertised_bytes": 233678659,
+      "advertised_sha256": "996f951cb8ccf8cd954f6b99e5fc3d71d994599119334ad37273c2b7f4c6413c",
+      "complete_local_byte_verification": "not yet completed; bounded acquisition timed out before validated range parts were available"
+    },
+    "application_environment_built": false,
+    "native_numpy_or_cffi_probe_run": false,
+    "portaudio_initialization": "not-probed",
+    "physical_vad": "not-tested"
+  },
+  "diagnosis": {
+    "wrong_api": "pm.build_operations.verified_tools admits a versioned build cache, not the flat published .deb tool layout.",
+    "build_cache_entry_contract": "package.store_entry(version,target) -> name-version-target",
+    "published_entry_contract": "scripts.bundles.payload.record_tools records the supplied published entry names; this exact candidate uses tools/python and tools/uv.",
+    "basis": [
+      "canonical source inspected independently by root and this agent",
+      "actual failed native traceback",
+      "actual canonical PM fixture reproduces rejection of valid flat entries"
+    ],
+    "mode_hypothesis": "Canonical tree_digest deliberately excludes mode bits and __pycache__ directories. The fix does not heal modes or refresh digests.",
+    "actual_original_tool_digest_limit": "The failed proof preserves the full original payload file inventory and original catalog. Its artifact did not include raw tools/facts.json or complete Python tree bytes; the next native admission must compare actual original tool digests. No new digest is accepted or substituted."
+  },
+  "fix": {
+    "function": "verified_packaged_tools",
+    "scope": "The fixed python and uv names and the exact linux-arm64-bionic target only.",
+    "preserved_checks": [
+      "actual canonical Python/UV registry closure with no state/pin-only/additional packages",
+      "Facts(strict=True)",
+      "original lock version and _identity target/artifact set",
+      "Facts.installed original identity",
+      "fixed flat entry names and entry containment",
+      "unchanged canonical tree_digest versus original recorded digest",
+      "canonical _copy_links validation",
+      "contained original binary",
+      "canonical package.env exactly equals Facts.env_for",
+      "canonical VerifiedTools and InstalledPackage return types"
+    ],
+    "writes_acquisition_execution_or_mode_healing": false,
+    "facts_rewritten_or_digests_refreshed": false,
+    "private_installed_location_used": false,
+    "application_build_mechanics_changed": false,
+    "source_patches_or_dependency_locks_changed": false,
+    "previous_preparer": {
+      "bytes": 55237,
+      "sha256": "9fd482258e43aa2472dbaefb787b757855a5f905c7acb303133c75321c49fe94"
+    },
+    "previous_tests": {
+      "bytes": 12494,
+      "sha256": "78ca16d81246c004fcd35237d6f9f9868a2f126d0f5777809ebaaeec2733a000"
+    },
+    "current_files": {
+      "scripts/prepare_audio_hermes_environment.py": {
+        "bytes": 58260,
+        "sha256": "04663ed192171d14866a49c33a45e16ca34eef1a2325d9403dd578029414be3b"
+      },
+      "tests/test_audio_hermes_preparation.py": {
+        "bytes": 20422,
+        "sha256": "34918a1bc05f04213a7e51928eeb8f69cccc64a4269c28b11e27fcd6e745196c"
+      }
+    },
+    "other_unchanged_inputs": {
+      "scripts/compatibility_probe_audio_hermes.py": {
+        "bytes": 12881,
+        "sha256": "487b35edf7f65c0c1482095486a12d021473e73fceac11038e3769d490a8c85b"
+      },
+      "scripts/run_audio_hermes_preparation.sh": {
+        "bytes": 4646,
+        "sha256": "db04f7c51f18ffe1f5e2fab6ac2303d337ea657bb7199b5349a8a460f2b9ef2d"
+      },
+      "scripts/fetch_compatibility_candidate.py": {
+        "bytes": 19415,
+        "sha256": "dc075415b46e14f3f09fb6a889fdf38279564b2f2e6e6008b21232545d1d6d8a"
+      },
+      "patches/next-stable/audio-readiness.patch": {
+        "bytes": 8470,
+        "sha256": "82b92d5095ceabc05f0200569da1cc16b861c77b166095982b05d57940573db7"
+      }
+    }
+  },
+  "host_validation": {
+    "command": [
+      "python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_audio_hermes_preparation.py"
+    ],
+    "environment": {
+      "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "HERMES_AUDIO_CANONICAL_PM_SOURCE": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\hermes-agent-audio-readiness-v0.22.2-20261017"
+    },
+    "passed": 56,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 0.73,
+    "original_tests": 39,
+    "new_actual_canonical_regressions": 17,
+    "source_scope": "Actual canonical PM classes and modules with controlled, non-executable file fixtures. No ARM tool or audio device execution.",
+    "cases": [
+      "old canonical build-cache verifier rejects valid published flat layout",
+      "new flat verifier returns canonical contract and does not write facts, chmod or execute",
+      "ten independent fact/version/target/artifact/digest/entry/tree/binary/environment/extra-file mutations fail",
+      "changed registry closure fails",
+      "absolute internal, relative escaping and broken symlinks fail; valid internal relative link passes"
+    ],
+    "all_four_real_symlink_cases_passed": true,
+    "optional_source_fixture": "The 17 source-bound tests explicitly skip in a packaging-only checkout unless HERMES_AUDIO_CANONICAL_PM_SOURCE points to the canonical source. The recorded 56-pass run supplied it and had zero skips.",
+    "canonical_source_checkout": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\hermes-agent-audio-readiness-v0.22.2-20261017",
+    "canonical_source_module_pins": {
+      "pm/__init__.py": {
+        "bytes": 2293,
+        "sha256": "67adcba1f0e4db2b2967d07e6b630aca4214b1fac9bd8649dcf221b4bf3fcfac"
+      },
+      "pm/build_operations.py": {
+        "bytes": 11832,
+        "sha256": "7334157f5723942d66ab0f1d2e51b204f70ef31ce12021fa2cddf6f95e25bba0"
+      },
+      "pm/install.py": {
+        "bytes": 43978,
+        "sha256": "03cdcda0964e93c7f02a9a1565e02e9b614c7b3a970fa2e646832bfdb5d3c354"
+      },
+      "pm/lock.py": {
+        "bytes": 12890,
+        "sha256": "0c1999a2781305bf64b1596e71ef393e84b1ad4fb2e2864b37cf39805a5f69c4"
+      },
+      "pm/package.py": {
+        "bytes": 17085,
+        "sha256": "27ca5a6b83fb9e8e0130699584a924e5a97738c0ae3bb0421ee79d7782fa17ca"
+      },
+      "pm/packages.py": {
+        "bytes": 58757,
+        "sha256": "2d7e25f30ecc223279893bebe2cbba44f6677a009aec929706343770bda00c6c"
+      },
+      "pm/registry.py": {
+        "bytes": 7438,
+        "sha256": "1f39dd259bc730c4820b18f9c3b04809c79f37bc1302f2ad5cd1f28b76ce2f11"
+      },
+      "pm/store.py": {
+        "bytes": 17065,
+        "sha256": "87e551a844c1086f2625bf5e445c8000c4aee12252bcd47fbf84ff08ce5542ad"
+      },
+      "pm/filesystem.py": {
+        "bytes": 6304,
+        "sha256": "7a9fac03dfc900618f8bb1884e845c182e3691b488ed5e90511a0905723ecfa5"
+      },
+      "pm/paths.py": {
+        "bytes": 2611,
+        "sha256": "8f15860b82f443a424186317dc361ea6063e0e7c3113af9b56a76f6b89e97737"
+      }
+    },
+    "raw_log": {
+      "path": "audit/audio-hermes-native-20261017/run-39067100543/packaged-tool-verification-host-tests-attempt1.log",
+      "bytes": 101,
+      "sha256": "ec6fb1ea98437f80b7f94ce6fe540a43ea3a5ad339557587716144a052591d79"
+    },
+    "python_ast": "passed",
+    "git_diff_check": "passed"
+  },
+  "boundary": {
+    "existing_failure_receipts_preserved": true,
+    "release_or_version_changed": false,
+    "commit_or_push_by_this_agent": false,
+    "native_retry_dispatched_by_this_agent": false,
+    "microphone_accessed": false,
+    "physical_vad": "not-tested"
+  }
+}

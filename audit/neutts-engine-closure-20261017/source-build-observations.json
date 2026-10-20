@@ -1,0 +1,621 @@
+[
+  {
+    "name": "hf-xet",
+    "version": "1.6.0",
+    "archive": {
+      "filename": "hf_xet-1.6.0.tar.gz",
+      "packagetype": "sdist",
+      "url": "https://files.pythonhosted.org/packages/1b/ab/522a2ab67f27971a9d48ca666d4fca85ef7d5282d142e31fd087e27b1bbe/hf_xet-1.6.0.tar.gz",
+      "bytes": 920527,
+      "sha256": "2e58454a340b3556dfa4972d5451aff4fba8dd42a236600ba1a1d2b1514f0fef",
+      "requires_python": ">=3.8",
+      "yanked": false
+    },
+    "archive_bytes_verified": true,
+    "files": [
+      {
+        "path": "hf_xet-1.6.0/xet_pkg/Cargo.toml",
+        "sha256": "03d7b9191bd0451c5fb17f493354060beeac592cd955a57a32494a3a4c54fb82",
+        "bytes": 3407,
+        "package": {
+          "name": "hf-xet",
+          "version": {
+            "workspace": true
+          },
+          "edition": {
+            "workspace": true
+          },
+          "license": {
+            "workspace": true
+          },
+          "homepage": {
+            "workspace": true
+          },
+          "repository": {
+            "workspace": true
+          },
+          "description": "Client library and tooling for the Hugging Face Xet data storage system.",
+          "readme": "README.md",
+          "keywords": [
+            "huggingface",
+            "datasets",
+            "large-files",
+            "deduplication",
+            "cloud-storage"
+          ],
+          "categories": [
+            "artificial-intelligence",
+            "asynchronous",
+            "data-structures",
+            "filesystem"
+          ]
+        },
+        "pyo3": {
+          "workspace": true,
+          "optional": true
+        },
+        "workspace_pyo3": null
+      },
+      {
+        "path": "hf_xet-1.6.0/xet_core_structures/Cargo.toml",
+        "sha256": "50b7783e042c986d1536920788c09973d1256c4b75e87930391fb1a6241d1066",
+        "bytes": 3012,
+        "package": {
+          "name": "xet-core-structures",
+          "version": {
+            "workspace": true
+          },
+          "edition": {
+            "workspace": true
+          },
+          "license": {
+            "workspace": true
+          },
+          "homepage": {
+            "workspace": true
+          },
+          "repository": {
+            "workspace": true
+          },
+          "description": "Core data structures including MerkleHash, metadata shards, and Xorb objects.",
+          "readme": "README.md",
+          "keywords": [
+            "huggingface"
+          ],
+          "categories": [
+            "artificial-intelligence",
+            "data-structures"
+          ]
+        },
+        "pyo3": null,
+        "workspace_pyo3": null
+      },
+      {
+        "path": "hf_xet-1.6.0/pyproject.toml",
+        "sha256": "07bec0c5fa229037df1d699880f92955a9444b7143a749bb7248b6763244baab",
+        "bytes": 2021,
+        "build_system": {
+          "requires": [
+            "maturin>=1.7,<2.0"
+          ],
+          "build-backend": "maturin"
+        },
+        "maturin": {
+          "features": [
+            "pyo3/extension-module"
+          ],
+          "include": [
+            {
+              "path": "LICENSE",
+              "format": "sdist"
+            }
+          ],
+          "manifest-path": "hf_xet/Cargo.toml"
+        }
+      },
+      {
+        "path": "hf_xet-1.6.0/xet_data/Cargo.toml",
+        "sha256": "5f5d6a69a0a13b614df5795d54efe2aa33737ee7da3ecf84f5e80ff429ab3ea0",
+        "bytes": 3264,
+        "package": {
+          "name": "xet-data",
+          "version": {
+            "workspace": true
+          },
+          "edition": {
+            "workspace": true
+          },
+          "license": {
+            "workspace": true
+          },
+          "homepage": {
+            "workspace": true
+          },
+          "repository": {
+            "workspace": true
+          },
+          "description": "Data processing pipeline for chunking, deduplication, and file reconstruction; used in the Hugging Face Xet client tools.  Intended to be used through the API in the hf-xet package.",
+          "readme": "README.md",
+          "keywords": [
+            "huggingface"
+          ],
+          "categories": [
+            "artificial-intelligence",
+            "data-structures",
+            "filesystem"
+          ]
+        },
+        "pyo3": {
+          "workspace": true,
+          "optional": true
+        },
+        "workspace_pyo3": null
+      },
+      {
+        "path": "hf_xet-1.6.0/hf_xet/Cargo.toml",
+        "sha256": "140eeaed487d842fcfd4a0b97f493a117aac131e542db350e8ca5cbee03ad6cb",
+        "bytes": 2776,
+        "package": {
+          "name": "hf_xet",
+          "version": "1.6.0",
+          "edition": "2024",
+          "license": "Apache-2.0",
+          "readme": "README.md"
+        },
+        "pyo3": {
+          "version": "0.29",
+          "features": [
+            "abi3-py38"
+          ]
+        },
+        "workspace_pyo3": null
+      },
+      {
+        "path": "hf_xet-1.6.0/xet_client/Cargo.toml",
+        "sha256": "2d3933712082e068a9d06c5018605220c3232e2a9be550dadfa214a422e46404",
+        "bytes": 3169,
+        "package": {
+          "name": "xet-client",
+          "version": {
+            "workspace": true
+          },
+          "edition": {
+            "workspace": true
+          },
+          "license": {
+            "workspace": true
+          },
+          "homepage": {
+            "workspace": true
+          },
+          "repository": {
+            "workspace": true
+          },
+          "description": "Client library for communicating with Hugging Face Xet storage servers.  Use through the hf-xet crate.",
+          "readme": "README.md",
+          "keywords": [
+            "huggingface"
+          ],
+          "categories": [
+            "artificial-intelligence",
+            "network-programming"
+          ]
+        },
+        "pyo3": null,
+        "workspace_pyo3": null
+      },
+      {
+        "path": "hf_xet-1.6.0/xet_runtime/Cargo.toml",
+        "sha256": "0f44692170d57fe78d19cbf8214639cee1aea50996970abb25f04d2dc8b48b65",
+        "bytes": 2575,
+        "package": {
+          "name": "xet-runtime",
+          "version": {
+            "workspace": true
+          },
+          "edition": {
+            "workspace": true
+          },
+          "license": {
+            "workspace": true
+          },
+          "homepage": {
+            "workspace": true
+          },
+          "repository": {
+            "workspace": true
+          },
+          "description": "Async runtime, configuration, logging, and utility infrastructure for the Hugging Face Xet client tools.",
+          "readme": "README.md",
+          "keywords": [
+            "huggingface"
+          ],
+          "categories": [
+            "artificial-intelligence",
+            "asynchronous"
+          ]
+        },
+        "pyo3": {
+          "workspace": true,
+          "optional": true
+        },
+        "workspace_pyo3": null
+      },
+      {
+        "path": "hf_xet-1.6.0/Cargo.toml",
+        "sha256": "794a6fa509c2d49a443dcf3b6faa1f4b806b30aef08fac87289594e5608467ce",
+        "bytes": 3280,
+        "package": null,
+        "pyo3": null,
+        "workspace_pyo3": {
+          "version": "0.29",
+          "features": [
+            "abi3-py38",
+            "multiple-pymethods"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "tokenizers",
+    "version": "0.22.2",
+    "archive": {
+      "filename": "tokenizers-0.22.2.tar.gz",
+      "packagetype": "sdist",
+      "url": "https://files.pythonhosted.org/packages/73/6f/f80cfef4a312e1fb34baf7d85c72d4411afde10978d4657f8cdd811d3ccc/tokenizers-0.22.2.tar.gz",
+      "bytes": 372115,
+      "sha256": "473b83b915e547aa366d1eee11806deaf419e17be16310ac0a14077f1e28f917",
+      "requires_python": ">=3.9",
+      "yanked": false
+    },
+    "archive_bytes_verified": true,
+    "files": [
+      {
+        "path": "tokenizers-0.22.2/tokenizers/Cargo.toml",
+        "sha256": "d8ff10e2bfe9724af11b80a79eb81a506cc905abb7f1a024ac365f6e77a06ff4",
+        "bytes": 2516,
+        "package": {
+          "authors": [
+            "Anthony MOI <m.anthony.moi@gmail.com>",
+            "Nicolas Patry <patry.nicolas@protonmail.com>"
+          ],
+          "edition": "2018",
+          "name": "tokenizers",
+          "version": "0.22.2",
+          "homepage": "https://github.com/huggingface/tokenizers",
+          "repository": "https://github.com/huggingface/tokenizers",
+          "documentation": "https://docs.rs/tokenizers/",
+          "license": "Apache-2.0",
+          "keywords": [
+            "tokenizer",
+            "NLP",
+            "huggingface",
+            "BPE",
+            "WordPiece"
+          ],
+          "readme": "README.md",
+          "description": "Provides an implementation of today's most used tokenizers,\nwith a focus on performances and versatility.\n",
+          "exclude": [
+            "rust-toolchain",
+            "target/*",
+            "Cargo.lock",
+            "benches/*.txt",
+            "benches/*.json",
+            "data/*"
+          ]
+        },
+        "pyo3": null,
+        "workspace_pyo3": null
+      },
+      {
+        "path": "tokenizers-0.22.2/bindings/python/Cargo.toml",
+        "sha256": "be1b571940f8bd84ba000527c09cb1a9057f17b617b386442ef293582b4d50c5",
+        "bytes": 897,
+        "package": {
+          "name": "tokenizers-python",
+          "version": "0.22.2",
+          "authors": [
+            "Anthony MOI <m.anthony.moi@gmail.com>"
+          ],
+          "edition": "2021",
+          "readme": "README.md"
+        },
+        "pyo3": {
+          "version": "0.26",
+          "features": [
+            "abi3",
+            "abi3-py39",
+            "py-clone"
+          ]
+        },
+        "workspace_pyo3": null
+      },
+      {
+        "path": "tokenizers-0.22.2/pyproject.toml",
+        "sha256": "bedbeeeba324cc7bfba0d2b708fb3cf14fcae0052dc41c9388342d5c01a76a52",
+        "bytes": 1970,
+        "build_system": {
+          "requires": [
+            "maturin>=1.0,<2.0"
+          ],
+          "build-backend": "maturin"
+        },
+        "maturin": {
+          "python-source": "py_src",
+          "module-name": "tokenizers.tokenizers",
+          "bindings": "pyo3",
+          "features": [
+            "pyo3/extension-module"
+          ],
+          "manifest-path": "bindings/python/Cargo.toml"
+        }
+      }
+    ]
+  },
+  {
+    "name": "safetensors",
+    "version": "0.8.0",
+    "archive": {
+      "filename": "safetensors-0.8.0.tar.gz",
+      "packagetype": "sdist",
+      "url": "https://files.pythonhosted.org/packages/45/06/f955dbbb1859e3bd23c8ac6141af5106e7ad5fedec4a3a6e3d60f94b7001/safetensors-0.8.0.tar.gz",
+      "bytes": 325846,
+      "sha256": "fabaf3e0f18a6618d9b36560682562157f77c2b71fcffc7b432be2baed9d753d",
+      "requires_python": ">=3.10",
+      "yanked": false
+    },
+    "archive_bytes_verified": true,
+    "files": [
+      {
+        "path": "safetensors-0.8.0/bindings/python/Cargo.toml",
+        "sha256": "9e8f8910c092b4069081b27668ab8826516ebdef236acbc3919ab6f5576fd1f8",
+        "bytes": 890,
+        "package": {
+          "name": "safetensors-python",
+          "version": "0.8.0",
+          "edition": "2021",
+          "rust-version": "1.74",
+          "readme": "README.md"
+        },
+        "pyo3": {
+          "version": "0.28",
+          "features": [
+            "abi3",
+            "abi3-py310"
+          ]
+        },
+        "workspace_pyo3": null
+      },
+      {
+        "path": "safetensors-0.8.0/pyproject.toml",
+        "sha256": "1ab70b67266015d9c73d48561fe7569209c62ece387a87b77992b481334ba24c",
+        "bytes": 3123,
+        "build_system": {
+          "requires": [
+            "maturin>=1.0,<2.0"
+          ],
+          "build-backend": "maturin"
+        },
+        "maturin": {
+          "module-name": "safetensors._safetensors_rust",
+          "bindings": "pyo3",
+          "features": [
+            "pyo3/extension-module"
+          ],
+          "manifest-path": "bindings/python/Cargo.toml",
+          "python-source": "py_src"
+        }
+      },
+      {
+        "path": "safetensors-0.8.0/safetensors/Cargo.toml",
+        "sha256": "40e01570a0a0d554fab7bce451d6edf135e091a75926366fa756a93b2642e195",
+        "bytes": 1506,
+        "package": {
+          "name": "safetensors",
+          "version": "0.8.0",
+          "edition": "2021",
+          "rust-version": "1.80",
+          "homepage": "https://github.com/huggingface/safetensors",
+          "repository": "https://github.com/huggingface/safetensors",
+          "documentation": "https://docs.rs/safetensors/",
+          "license": "Apache-2.0",
+          "keywords": [
+            "safetensors",
+            "huggingface",
+            "Tensors",
+            "Pytorch",
+            "Tensorflow"
+          ],
+          "readme": "README.md",
+          "description": "Provides functions to read and write safetensors which aim to be safer than\ntheir PyTorch counterpart.\nThe format is 8 bytes which is an unsized int, being the size of a JSON header,\nthe JSON header refers the `dtype` the `shape` and `data_offsets` which are the offsets\nfor the values in the rest of the file.\n",
+          "exclude": [
+            "rust-toolchain",
+            "target/*",
+            "Cargo.lock"
+          ]
+        },
+        "pyo3": null,
+        "workspace_pyo3": null
+      }
+    ]
+  },
+  {
+    "name": "tiktoken",
+    "version": "0.14.0",
+    "archive": {
+      "filename": "tiktoken-0.14.0.tar.gz",
+      "packagetype": "sdist",
+      "url": "https://files.pythonhosted.org/packages/66/62/167a842aa0429d45f5e797354fd4343a96f6043d67d0513c675c7b8d36e6/tiktoken-0.14.0.tar.gz",
+      "bytes": 38898,
+      "sha256": "231dec90efcdccf1b565a1416107736f1e09b1a08fe736ef9d6363e626d03874",
+      "requires_python": ">=3.9",
+      "yanked": false
+    },
+    "archive_bytes_verified": true,
+    "files": [
+      {
+        "path": "tiktoken-0.14.0/Cargo.toml",
+        "sha256": "576ae766a31304ebaeaf668386036cb363213c9401cbeac0345787d772dbd78d",
+        "bytes": 412,
+        "package": {
+          "name": "tiktoken",
+          "version": "0.14.0",
+          "edition": "2024"
+        },
+        "pyo3": {
+          "version": "0.29.2",
+          "default-features": false,
+          "features": [
+            "extension-module",
+            "macros"
+          ],
+          "optional": true
+        },
+        "workspace_pyo3": null
+      },
+      {
+        "path": "tiktoken-0.14.0/pyproject.toml",
+        "sha256": "d6c04dd65e42bb26f292d0a20002bd5f919fa409084ec3fe083437be8ef8a1bd",
+        "bytes": 1244,
+        "build_system": {
+          "build-backend": "setuptools.build_meta",
+          "requires": [
+            "setuptools>=62.4",
+            "wheel",
+            "setuptools-rust>=1.5.2"
+          ]
+        },
+        "maturin": null
+      },
+      {
+        "path": "tiktoken-0.14.0/setup.py",
+        "sha256": "bea74f08e89f9fcc6ba25e0cc7e488c4a41d20a30bdef736021e5753b0c57c19",
+        "bytes": 572,
+        "build_lines": [
+          "from setuptools_rust import Binding, RustExtension",
+          "RustExtension("
+        ]
+      }
+    ]
+  },
+  {
+    "name": "audioop-lts",
+    "version": "0.2.2",
+    "archive": {
+      "filename": "audioop_lts-0.2.2.tar.gz",
+      "packagetype": "sdist",
+      "url": "https://files.pythonhosted.org/packages/38/53/946db57842a50b2da2e0c1e34bd37f36f5aadba1a929a3971c5d7841dbca/audioop_lts-0.2.2.tar.gz",
+      "bytes": 30686,
+      "sha256": "64d0c62d88e67b98a1a5e71987b7aa7b5bcffc7dcee65b635823dbdd0a8dbbd0",
+      "requires_python": ">=3.13",
+      "yanked": false
+    },
+    "archive_bytes_verified": true,
+    "files": [
+      {
+        "path": "audioop_lts-0.2.2/pyproject.toml",
+        "sha256": "e6718266d23ea75d7c0dae59eb43eace0c54341bb5a6e9975a042d48a8eadfd3",
+        "bytes": 1538,
+        "build_system": {
+          "requires": [
+            "setuptools"
+          ],
+          "build-backend": "setuptools.build_meta"
+        },
+        "maturin": null
+      },
+      {
+        "path": "audioop_lts-0.2.2/setup.py",
+        "sha256": "412bde70cd5e3eb9587375b5b552f5aa500e62b65193ded5cffe3fa450a63442",
+        "bytes": 1201,
+        "build_lines": [
+          "options[\"bdist_wheel\"] = {\"py_limited_api\": \"cp313\"}",
+          "Extension(",
+          "depends=[\"audioop/_audioop.c.h\"],",
+          "py_limited_api=not Py_GIL_DISABLED,"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "dlinfo",
+    "version": "2.0.0",
+    "archive": {
+      "filename": "dlinfo-2.0.0.tar.gz",
+      "packagetype": "sdist",
+      "url": "https://files.pythonhosted.org/packages/85/8e/8f2f94cd40af1b51e8e371a83b385d622170d42f98776441a6118f4dd682/dlinfo-2.0.0.tar.gz",
+      "bytes": 12727,
+      "sha256": "88a2bc04f51d01bc604cdc9eb1c3cc0bde89057532ca6a3e71a41f6235433e17",
+      "requires_python": ">=3.9",
+      "yanked": false
+    },
+    "archive_bytes_verified": true,
+    "files": [
+      {
+        "path": "dlinfo-2.0.0/conftest.py",
+        "sha256": "23b327b9d053c0807373d446f671a4fbca2986930a5f150cc1a0401ed8e7e533",
+        "bytes": 850,
+        "source": "import builtins\nimport os\nimport platform\nimport re\nimport unittest.mock\n\n\ndef dyld_find_mock(lib_filename):\n    # https://github.com/python/cpython/blob/master/Lib/ctypes/macholib/dyld.py#L116\n    lib_name = re.match(r'^(lib\\w+)\\.\\w+(\\.\\d+)?$', lib_filename).group(1)\n    return os.path.join(os.sep, 'usr', 'lib', lib_name + '.dylib')\n\n_BUILTIN_IMPORT = builtins.__import__\n\ndef import_mock(name, *args, **kwargs):\n    if name == 'ctypes.macholib.dyld' and platform.system() != 'Darwin':\n        dyld_module = unittest.mock.MagicMock()\n        dyld_module.dyld_find = dyld_find_mock\n        return dyld_module\n    return _BUILTIN_IMPORT(name, *args, **kwargs)\n\n# required for tests/dlinfo_macosx_mock_test.py and doctests in dlinfo/_macosx.py.\n# @pytest.fixture(autouse=True) does not run before import statements.\nbuiltins.__import__ = import_mock\n"
+      },
+      {
+        "path": "dlinfo-2.0.0/dlinfo/__init__.py",
+        "sha256": "9ae2659358c5401cf97bbd2123937c9ed95a2b26cfbb8f3dd07a11bb530a67f3",
+        "bytes": 192,
+        "source": "__all__ = ['DLInfo']\n\nimport sys\n\n# pylint: disable=import-private-name; internal\nif sys.platform == 'darwin':\n    from dlinfo._macosx import DLInfo\nelse:\n    from dlinfo._glibc import DLInfo\n"
+      },
+      {
+        "path": "dlinfo-2.0.0/dlinfo/_glibc.py",
+        "sha256": "3d811bd992cbdbdc40a1d2d11da09cbb6060dc5ee52cccb123516ac3dddd2aaa",
+        "bytes": 1278,
+        "source": "import ctypes\nimport ctypes.util\nimport sys\n\n# dlfcn.h\n_RTLD_DI_LINKMAP = 2\n\n\nclass _LinkMap(ctypes.Structure):  # pylint: disable=too-few-public-methods\n    # link.h\n    _fields_ = [\n        ('l_addr', ctypes.c_void_p),\n        ('l_name', ctypes.c_char_p),\n        ('l_ld', ctypes.c_void_p),\n        ('l_next', ctypes.c_void_p),\n        ('l_previous', ctypes.c_void_p),\n    ]\n\n\n_LIBDL = ctypes.cdll.LoadLibrary(ctypes.util.find_library('dl'))\n_DLINFO = _LIBDL.dlinfo\n_DLINFO.argtypes = ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p\n_DLINFO.restype = ctypes.c_int\n\n\nclass DLInfo:  # pylint: disable=too-few-public-methods\n\n    \"\"\"\n    >>> lib = ctypes.cdll.LoadLibrary(ctypes.util.find_library('c'))\n    >>> dlinfo = DLInfo(lib)\n    >>> dlinfo.path\n    '/lib/x86_64-linux-gnu/libc.so.6'\n    \"\"\"\n\n    def __init__(self, cdll: ctypes.CDLL):\n        _linkmap = ctypes.c_void_p()\n        # pylint: disable=protected-access\n        if _DLINFO(cdll._handle, _RTLD_DI_LINKMAP, ctypes.byref(_linkmap)) != 0:  # pragma: no cover\n            raise RuntimeError(f\"dlinfo on {cdll._name} failed\")\n        self._linkmap = ctypes.cast(_linkmap, ctypes.POINTER(_LinkMap))\n\n    @property\n    def path(self) -> str:\n        return self._linkmap.contents.l_name.decode(sys.getdefaultencoding())\n"
+      },
+      {
+        "path": "dlinfo-2.0.0/dlinfo/_macosx.py",
+        "sha256": "87c94e89e2e6efe8682188738a9c851ee8f9d8919ec18540bc669fc1c6280162",
+        "bytes": 523,
+        "source": "import ctypes\n# pylint: disable=import-error,no-name-in-module\nfrom ctypes.macholib.dyld import dyld_find\n\n\nclass DLInfo:  # pylint: disable=too-few-public-methods\n\n    \"\"\"\n    >>> lib = ctypes.cdll.LoadLibrary(ctypes.util.find_library('c'))\n    >>> dlinfo = DLInfo(lib)\n    >>> dlinfo.path\n    '/usr/lib/libc.dylib'\n    \"\"\"\n\n    def __init__(self, cdll: ctypes.CDLL):\n        self._cdll = cdll\n\n    @property\n    def path(self) -> str:\n        # pylint: disable=protected-access\n        return dyld_find(self._cdll._name)\n"
+      },
+      {
+        "path": "dlinfo-2.0.0/setup.py",
+        "sha256": "3851cb18c226f7fcf48a0c800dcc91a13a3f5d32dacf4449ebd021b877ae834f",
+        "bytes": 1110,
+        "source": "import setuptools\n\nwith open(\"README.rst\", \"r\") as readme:\n    LONG_DESCRIPTION = readme.read()\n\nsetuptools.setup(\n    name=\"dlinfo\",\n    use_scm_version=True,\n    maintainer=\"Fabian Peter Hammerle\",\n    maintainer_email=\"fabian.dlinfo@hammerle.me\",\n    description=\"Python wrapper for libc's dlinfo and dyld_find on Mac\",\n    long_description=LONG_DESCRIPTION,\n    license=\"MIT\",\n    url=\"https://github.com/fphammerle/python-dlinfo\",\n    packages=setuptools.find_packages(),\n    python_requires=\">=3.9\",  # >=3.6 for f-strings, <3.9 untested\n    setup_requires=[\"setuptools_scm\"],\n    tests_require=[\"pytest\"],\n    classifiers=[\n        # https://pypi.org/classifiers/\n        \"Development Status :: 5 - Production/Stable\",\n        \"Intended Audience :: Developers\",\n        # .github/workflows/python.yml\n        \"Programming Language :: Python :: 3.9\",\n        \"Programming Language :: Python :: 3.10\",\n        \"Programming Language :: Python :: 3.11\",\n        \"Programming Language :: Python :: 3.12\",\n        \"Operating System :: MacOS :: MacOS X\",\n        \"Operating System :: POSIX :: Linux\",\n    ],\n)\n",
+        "build_lines": []
+      }
+    ]
+  },
+  {
+    "name": "pandas",
+    "version": "3.0.6",
+    "archive": {
+      "filename": "pandas-3.0.6.tar.gz",
+      "packagetype": "sdist",
+      "url": "https://files.pythonhosted.org/packages/e2/17/d7b106e05bfa642e8694451e7d3d759c6a241c5386a5d962e4f66c047e06/pandas-3.0.6.tar.gz",
+      "bytes": 4667686,
+      "sha256": "66b07ef7315a31bfe1089cd3d71a7de781c9dca986762d0b4fe7c0ef17465d10",
+      "requires_python": ">=3.11",
+      "yanked": false
+    },
+    "archive_bytes_verified": true,
+    "files": [
+      {
+        "path": "pandas-3.0.6/pyproject.toml",
+        "sha256": "1082aa877fa2e0902249287086041d95bd814fd678347625a3d04f9f411bce5e",
+        "bytes": 28028,
+        "build_system": {
+          "requires": [
+            "meson-python>=0.17.1,<1",
+            "meson>=1.2.1,<2",
+            "wheel",
+            "Cython>3.1.0,<4",
+            "numpy>=2.0.0,!=2.5.0",
+            "versioneer[toml]"
+          ],
+          "build-backend": "mesonpy"
+        },
+        "maturin": null
+      }
+    ]
+  }
+]

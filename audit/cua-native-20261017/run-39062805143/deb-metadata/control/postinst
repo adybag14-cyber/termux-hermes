@@ -1,0 +1,16 @@
+#!/data/data/com.termux/files/usr/bin/sh
+set -eu
+PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+mkdir -p "$PREFIX/bin"
+for name in hermes hermes-agent hermes-acp; do
+    link="$PREFIX/bin/$name"
+    target="../lib/hermes-agent/bin/$name"
+    if [ -L "$link" ] && [ "$(readlink "$link")" = "$target" ]; then
+        continue
+    fi
+    if [ -e "$link" ] || [ -L "$link" ]; then
+        printf 'Refusing to replace foreign launcher: %s\n' "$link" >&2
+        exit 1
+    fi
+    ln -s "$target" "$link"
+done

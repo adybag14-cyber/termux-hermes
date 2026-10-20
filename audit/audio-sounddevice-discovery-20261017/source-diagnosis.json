@@ -1,0 +1,28 @@
+{
+  "ctypes_source": {
+    "bytes": 19981,
+    "sha256": "61dc75080b68c8d2a8ceded305e04757e3080e65669f95569b00c25b7383b59e"
+  },
+  "failure_location": "sounddevice.py:72",
+  "failure_message": "PortAudio library not found",
+  "failure_type": "OSError",
+  "native_fix_replay_pending": true,
+  "original_ctypes_entry": {
+    "bytes": 19981,
+    "kind": "file",
+    "mode": 420,
+    "path": "tools/python/data/data/com.termux/files/usr/lib/python3.14/ctypes/util.py",
+    "sha256": "61dc75080b68c8d2a8ceded305e04757e3080e65669f95569b00c25b7383b59e"
+  },
+  "original_failure_receipt": "audit/audio-hermes-native-20261017/run-39077868541.json",
+  "original_failure_run": 39077868541,
+  "original_published_release_changed": false,
+  "payload_inventory": "audit/audio-hermes-native-20261017/run-39077868541/artifact/prepared/evidence/original-payload-inventory.json",
+  "payload_inventory_sha256": "0232971ac994a0961954eb7574517492ee02bfc1bce3ce29b9dc37a4924de16b",
+  "schema_version": 1,
+  "source_findings": [
+    "The exact packaged ctypes.util has the generic POSIX library search and no Android-specific SONAME fallback.",
+    "The search uses /sbin/ldconfig, gcc or cc, ld.lld and llvm-objdump; the isolated packaged runtime has no compiler toolchain.",
+    "Verified absolute CDLL calls loaded the owned PortAudio/OpenSL ES libraries, but sounddevice still failed in its name-discovery loop before Pa_Initialize."
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "purpose": "unpublished isolated native CUA virtual-X11 experiment",
+  "run_id": "39062805143",
+  "head_sha": "49a9c383f4582bba4f7fdf69658e56168ec5c847",
+  "workflow_sha": "49a9c383f4582bba4f7fdf69658e56168ec5c847",
+  "builder_image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
+  "native_architecture": "aarch64",
+  "inputs": {
+    "scripts/compatibility_probe_cua.sh": "21c681dfa2fef6175b328a56912deff88a01232818a613b60bd8fa36979faaf2",
+    "scripts/prepare_cua_termux_source.py": "093c12378c2f04e07da58dce83ac8e77c3d9edf86e5f2ad7bb2d14bd855c1d57",
+    "patches/next-stable/cua-driver.patch": "8b7c3453bed12feabd319436eae1abc791b4127a4fe485adcc96eb90ce780b6a",
+    ".github/workflows/cua-termux-probe.yml": "7f01283a9381dd17659b7a0d863831ca782fadfb5bd7bc0ee3f6ba31f359ce16",
+    "scripts/compatibility_probe_cua_hermes.py": "4d7cb22d3c3f26eea72b7229805d53110b98a160bf35f63147506aec0ded56e8",
+    "scripts/fetch_compatibility_candidate.py": "dc075415b46e14f3f09fb6a889fdf38279564b2f2e6e6008b21232545d1d6d8a",
+    "patches/next-stable/cua-hermes-integration.patch": "8bbfddbbacfd508db35de6158e4c1a2c06423b84cd5f4ed621d4955fcd529edd",
+    "scripts/prepare_cua_assembly_source.py": "43b8272fa97b4eb52bb9d6f5b7614ebae39d426e7051ff0c4e2c9146791a521d",
+    "scripts/prepare_cua_hermes_candidate.py": "b6f5b394ff5d4a58fd8e79f1108ec6dd1a3966f5b27debf7f33cec19798d20d2",
+    "scripts/run_cua_packaged_probe.py": "8b4db0a71161d6d1be8aec08628b08a2293a1b8117cf71badc2c8ea7010ddf18"
+  },
+  "hermes_pm_cua_admission_changed": true,
+  "release_output": false,
+  "main_candidate_modified": false,
+  "prepared_cua_candidate_requested": true,
+  "hermes_integration_requested": true,
+  "canonical_assembly_source": {
+    "receipt_sha256": "1cd7a2b0eb254fd07f5f8eb9c63c124a9bfb87e93c0c07397936b3c71cd0652a",
+    "source": {
+      "schema_version": 1,
+      "status": "verified-canonical-assembly-source",
+      "repository": "NousResearch/hermes-agent",
+      "commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+      "files": {
+        "scripts/build/agent.py": {
+          "bytes": 8754,
+          "sha256": "f59ed0dc39a37814a43f2465e1391311a3ce8203e42a69257e58db6f3cda3652",
+          "source_url": "https://raw.githubusercontent.com/NousResearch/hermes-agent/d923a5eb487a17c0a68801bba9ef0f56c81040a8/scripts/build/agent.py"
+        },
+        "scripts/build/inputs.py": {
+          "bytes": 5846,
+          "sha256": "36fb218726fce97505d7dfd50002046bb9c19b25c0b7cc546bae0b9c586083d9",
+          "source_url": "https://raw.githubusercontent.com/NousResearch/hermes-agent/d923a5eb487a17c0a68801bba9ef0f56c81040a8/scripts/build/inputs.py"
+        },
+        "scripts/build/launchers.py": {
+          "bytes": 4861,
+          "sha256": "cf5c225ded65193042a330f69b217a5ffcd5201032cca9e288cebea681cb37b3",
+          "source_url": "https://raw.githubusercontent.com/NousResearch/hermes-agent/d923a5eb487a17c0a68801bba9ef0f56c81040a8/scripts/build/launchers.py"
+        },
+        "scripts/build/launcher_wrapper.py": {
+          "bytes": 6327,
+          "sha256": "bfab043b63b8faa588ea1fa6f9143ff33b319df71ef6a7e3855f8574c2b07155",
+          "source_url": "https://raw.githubusercontent.com/NousResearch/hermes-agent/d923a5eb487a17c0a68801bba9ef0f56c81040a8/scripts/build/launcher_wrapper.py"
+        }
+      },
+      "source_executed": false,
+      "published_release": false
+    }
+  },
+  "hermes_candidate": {
+    "receipt_sha256": "2bf694eec468c10a4d3820092813d8b2734c2b212954888009e3867a8a88dbf3",
+    "run_id": 39048514731,
+    "head_sha": "e271e922a2e71fd18591c45e9b98b8c7f9fffe02",
+    "artifact": {
+      "id": 12107225801,
+      "name": "hermes-termux-next-stable-candidate",
+      "bytes": 222119336,
+      "sha256": "c49f41590424520b99136800b7ba9fa41f3ab3926d418131cdf686da812d849b"
+    },
+    "package": {
+      "file": "hermes-agent_0.22.2-1_aarch64.deb",
+      "bytes": 222089768,
+      "sha256": "1e4e58fe17a1800f23ababcb2724e92b8904829eae3284569db52dbc672ca76a",
+      "zip_member": "hermes-source/termux-build/deb/hermes-agent_0.22.2-1_aarch64.deb"
+    }
+  }
+}

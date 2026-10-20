@@ -1,0 +1,515 @@
+{
+  "backend_receipt_sha256": "cccc852d4c70ad7c404a9c22ae59390f6e3b010e071612bc3a2149d3a8c28394",
+  "build_process": {
+    "command": [
+      "/data/data/com.termux/files/usr/tmp/nonrust-native-4cjr6mxn/build-venv/bin/python",
+      "-I",
+      "-B",
+      "/probes/scripts/compatibility_probe_neutts_nonrust.py",
+      "--phase",
+      "build",
+      "--inputs",
+      "/out/nonrust-inputs",
+      "--out",
+      "/out/nonrust-components/scikit-learn",
+      "--source-name",
+      "scikit-learn",
+      "--source-root",
+      "/data/data/com.termux/files/usr/tmp/nonrust-native-4cjr6mxn/scikit_learn-1.9.1",
+      "--wheel-dir",
+      "/out/nonrust-components/scikit-learn/wheels",
+      "--environment-manifest",
+      "/out/nonrust-components/build-environment/build-installed-closure.json"
+    ],
+    "exit_code": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "814bcb66acca229017d6381e28c2e71920adf76343a312c705098c75ce935030"
+  },
+  "component": "scikit-learn",
+  "model_downloaded": false,
+  "production_admission_changed": false,
+  "release_output": false,
+  "runtime": {
+    "active_edge_count": 7,
+    "actual_runtime_distribution_count": 7,
+    "copied_apt_payloads": [
+      {
+        "archive_sha256": "a99ae20cd33c77553cc94d402aefc4bed96b7ec9f18e9fb6e2e5a7943693c802",
+        "bytes": 18943738,
+        "copy_mode_policy": "preserve executable bit, normalize ordinary copied permissions",
+        "file_count": 924,
+        "metadata_changed": false,
+        "metadata_sha256": "e2b909d6a37d76c2bc130f528d7fed0c517322bce16dc7846b6a6df30e200403",
+        "name": "numpy",
+        "record_changed": false
+      },
+      {
+        "archive_sha256": "27900dbbc1db0d6fb63d2a2039d12b5af84cddf81d0d2cb27716dff6782cc710",
+        "bytes": 56745210,
+        "copy_mode_policy": "preserve executable bit, normalize ordinary copied permissions",
+        "file_count": 1429,
+        "metadata_changed": false,
+        "metadata_sha256": "48c20b804bd0eb3b5e216809a44b2f3657832a3506a4bc1b346d5eb33a6a5246",
+        "name": "scipy",
+        "record_changed": false
+      }
+    ],
+    "process": {
+      "command": [
+        "/data/data/com.termux/files/usr/tmp/nonrust-native-4cjr6mxn/runtime-scikit-learn/bin/python",
+        "-I",
+        "-B",
+        "/probes/scripts/compatibility_probe_neutts_nonrust.py",
+        "--phase",
+        "runtime",
+        "--inputs",
+        "/out/nonrust-inputs",
+        "--out",
+        "/out/nonrust-components/scikit-learn",
+        "--apt-archives",
+        "/data/data/com.termux/files/usr/tmp/neutts-nonrust.UGHixp/archives",
+        "--source-name",
+        "scikit-learn",
+        "--environment-manifest",
+        "/out/nonrust-components/scikit-learn/runtime-installed-closure.json",
+        "--image-receipt",
+        "/out/NONRUST-PROBE-INPUTS.json"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "8d814c45b4557ef278fc2e68f834b7c7ec9c829fbdc00c013567aa61a745099f"
+    },
+    "raw_pip": {
+      "authority": "copied file manifests and exact APT provenance are separate required gates",
+      "elapsed_seconds": 0.473,
+      "exit_code": 1,
+      "log": "RAW-PIP-CHECK.log",
+      "original_apt_tag_diagnostics": [
+        {
+          "metadata_modified": false,
+          "name": "numpy",
+          "native_convention_tags": [
+            "cp314-cp314-android_24_arm64_v8a"
+          ],
+          "original_tags": [
+            "cp314-cp314-android_aarch64"
+          ],
+          "supported_tags_modified": false
+        },
+        {
+          "metadata_modified": false,
+          "name": "scipy",
+          "native_convention_tags": [
+            "cp314-cp314-android_24_arm64_v8a"
+          ],
+          "original_tags": [
+            "cp314-cp314-android_aarch64"
+          ],
+          "supported_tags_modified": false
+        }
+      ],
+      "pip_check_passed": false,
+      "requirements_have_no_missing_or_conflicting_dependencies": true,
+      "sha256": "0a696a1082df67b6b1450d89cfa469093716b33fd24c8cf026aad9e041e92a7a",
+      "text": "numpy 2.5.4 is not supported on this platform\nscipy 1.18.1 is not supported on this platform\n"
+    },
+    "receipt": "RUNTIME-OPERATIONS-RESULT.json",
+    "receipt_sha256": "acef4e7c80b0a8205a72a7f791e5d1bc97efb4d56869c0e1f38e4ead8ac6e1ba",
+    "status": "passed"
+  },
+  "schema_version": 1,
+  "source_archive_sha256": "629cada3e33e2b9bf376cdc7614a47a4140b8aedc1d836579e359736fbd82977",
+  "stage": "complete",
+  "status": "passed",
+  "wheel": {
+    "artifact": {
+      "bytes": 14521068,
+      "filename": "scikit_learn-1.9.1-cp314-cp314-android_24_arm64_v8a.whl",
+      "sha256": "abfe5427cc8b43fba55dd8dfb42aa31fa793110fa18805edaefc076ee0865995"
+    },
+    "base_requires_dist": [
+      "numpy>=1.24.1",
+      "scipy>=1.10.0",
+      "joblib>=1.4.0",
+      "narwhals>=2.0.1",
+      "threadpoolctl>=3.5.0"
+    ],
+    "name": "scikit-learn",
+    "native_members": [
+      {
+        "bytes": 37344,
+        "member": "sklearn/__check_build/_check_build.cpython-314-aarch64-linux-android.so",
+        "sha256": "861d28b71bd25748047a3105226c55f8aa32c5a8286f8fc45ec98153073b9178"
+      },
+      {
+        "bytes": 152176,
+        "member": "sklearn/_cyutility.cpython-314-aarch64-linux-android.so",
+        "sha256": "d89a551b1afda929c22011d2325df56fb8a949d461fe59474b14cb220cea9cb1"
+      },
+      {
+        "bytes": 111968,
+        "member": "sklearn/_isotonic.cpython-314-aarch64-linux-android.so",
+        "sha256": "cd2724f1d9f5c73eff0f45b5aaf56d02e3134b4e6c229cfa86da53d75232e93e"
+      },
+      {
+        "bytes": 2518008,
+        "member": "sklearn/_loss/_loss.cpython-314-aarch64-linux-android.so",
+        "sha256": "257eb9f123f9112c05f1340daa0fee7d770dfcb39edd4e371dd27b5e00562b0a"
+      },
+      {
+        "bytes": 98312,
+        "member": "sklearn/cluster/_dbscan_inner.cpython-314-aarch64-linux-android.so",
+        "sha256": "c3041a0ebcf7ca5fba07aa3a52ac8f99d5db2827bf9aa98f261e0d9b29db8e24"
+      },
+      {
+        "bytes": 103648,
+        "member": "sklearn/cluster/_hdbscan/_linkage.cpython-314-aarch64-linux-android.so",
+        "sha256": "99d573baf16bac8408474a3c325511e53fd042348751a5ce4c77f545390dcf9b"
+      },
+      {
+        "bytes": 172128,
+        "member": "sklearn/cluster/_hdbscan/_reachability.cpython-314-aarch64-linux-android.so",
+        "sha256": "1151c1d0e474d7e83a2f5ce438ce93b0e91be22c8df5e5e5d817aeb80f7ac9f1"
+      },
+      {
+        "bytes": 198120,
+        "member": "sklearn/cluster/_hdbscan/_tree.cpython-314-aarch64-linux-android.so",
+        "sha256": "3fce66bdf50ac59845cac29d4e3c13d5f543b71f21f0a71d3e6c8141ea1a4138"
+      },
+      {
+        "bytes": 149768,
+        "member": "sklearn/cluster/_hierarchical_fast.cpython-314-aarch64-linux-android.so",
+        "sha256": "54a61decb1ed01da4969f333b421108c8e5ec31689bf713fe1f016c1a6edd921"
+      },
+      {
+        "bytes": 1187936,
+        "member": "sklearn/cluster/_k_means_common.cpython-314-aarch64-linux-android.so",
+        "sha256": "f640d547df1def548d556eee64507b4aa6e7c0fe932bbf21299fee5e1edeb54a"
+      },
+      {
+        "bytes": 1200792,
+        "member": "sklearn/cluster/_k_means_elkan.cpython-314-aarch64-linux-android.so",
+        "sha256": "44fa7d7cdf9c9832823915f3fcc007d3031a3eb3e578bd43c675d4085873c4d0"
+      },
+      {
+        "bytes": 1122688,
+        "member": "sklearn/cluster/_k_means_lloyd.cpython-314-aarch64-linux-android.so",
+        "sha256": "533b25a65b222c9d34ee7f5e706afff7eae2ea9773448ae99acb2c5594a990ec"
+      },
+      {
+        "bytes": 1086560,
+        "member": "sklearn/cluster/_k_means_minibatch.cpython-314-aarch64-linux-android.so",
+        "sha256": "988973e922d93886a21760b2a1f752c85232e986211bd9ee565a6743c81f24d4"
+      },
+      {
+        "bytes": 339120,
+        "member": "sklearn/datasets/_svmlight_format_fast.cpython-314-aarch64-linux-android.so",
+        "sha256": "a11743f72f4d596d65a316505d1349c5022adc1f03fb7baae43e19a07d732168"
+      },
+      {
+        "bytes": 77600,
+        "member": "sklearn/decomposition/_cdnmf_fast.cpython-314-aarch64-linux-android.so",
+        "sha256": "3af0cfbf2ac547b5d259b8b5451d8529507cddf3c2d7dce63b4e4862ff4d1f65"
+      },
+      {
+        "bytes": 105712,
+        "member": "sklearn/decomposition/_online_lda_fast.cpython-314-aarch64-linux-android.so",
+        "sha256": "4ccf941b47cbabdbabea753edceeff745b3b74d78d6fe95c94fe291945ff983b"
+      },
+      {
+        "bytes": 88544,
+        "member": "sklearn/ensemble/_gradient_boosting.cpython-314-aarch64-linux-android.so",
+        "sha256": "2d80122bac17b682b164565c3dfc5b2c40f9d5dc1143c36caa7ab2e4be83ed67"
+      },
+      {
+        "bytes": 1027216,
+        "member": "sklearn/ensemble/_hist_gradient_boosting/_binning.cpython-314-aarch64-linux-android.so",
+        "sha256": "018e369cdddc3fd204c328ac0bc4187ebaf4edc0f43ad1581c8c7208e8ded839"
+      },
+      {
+        "bytes": 1032888,
+        "member": "sklearn/ensemble/_hist_gradient_boosting/_gradient_boosting.cpython-314-aarch64-linux-android.so",
+        "sha256": "f9fc61aed13ea1da53147cd6fdc18c9395c06cb5a23fb129634730bf3211ed02"
+      },
+      {
+        "bytes": 1051808,
+        "member": "sklearn/ensemble/_hist_gradient_boosting/_predictor.cpython-314-aarch64-linux-android.so",
+        "sha256": "661b493ae530e334d78b25303a1d704e4ddc4941f6401fef9584f01ae9efa25c"
+      },
+      {
+        "bytes": 37408,
+        "member": "sklearn/ensemble/_hist_gradient_boosting/common.cpython-314-aarch64-linux-android.so",
+        "sha256": "2bb4ae926bdd3e650e0bc7645dbef12f9fb609877bee93316482b554d3bae06e"
+      },
+      {
+        "bytes": 1115464,
+        "member": "sklearn/ensemble/_hist_gradient_boosting/histogram.cpython-314-aarch64-linux-android.so",
+        "sha256": "c05ba318ac788aa6b5dc187030b66d5f67868bb0699182e3c6c5a82ed3ca538e"
+      },
+      {
+        "bytes": 1133128,
+        "member": "sklearn/ensemble/_hist_gradient_boosting/splitting.cpython-314-aarch64-linux-android.so",
+        "sha256": "e878c50458cc84582750eed13a3d1a4b7f28d67bccc2e86351297958024ebe85"
+      },
+      {
+        "bytes": 115512,
+        "member": "sklearn/feature_extraction/_hashing_fast.cpython-314-aarch64-linux-android.so",
+        "sha256": "828af6293813c81b2ae844068b6d7c4601a8a6a314d12f826ea9a1eab2836e2c"
+      },
+      {
+        "bytes": 326480,
+        "member": "sklearn/linear_model/_cd_fast.cpython-314-aarch64-linux-android.so",
+        "sha256": "fd0b37a5b2e309ac137577315157c39fa130c589377c49586e24bddde9473099"
+      },
+      {
+        "bytes": 114456,
+        "member": "sklearn/linear_model/_sag_fast.cpython-314-aarch64-linux-android.so",
+        "sha256": "f570a8bf9b325d3891521526107a8e55f1534ca3b419810b15cd1092eee77b1a"
+      },
+      {
+        "bytes": 175480,
+        "member": "sklearn/linear_model/_sgd_fast.cpython-314-aarch64-linux-android.so",
+        "sha256": "c2f89df988e87174201a9727c54c6f2c498670384301ac8d3d36e01076cc1370"
+      },
+      {
+        "bytes": 1051320,
+        "member": "sklearn/manifold/_barnes_hut_tsne.cpython-314-aarch64-linux-android.so",
+        "sha256": "b8ec76f88800afcef1abc1002dc188a1d683327f3937f3035d85a59b34a9c047"
+      },
+      {
+        "bytes": 65072,
+        "member": "sklearn/manifold/_utils.cpython-314-aarch64-linux-android.so",
+        "sha256": "6697c505d77f1a5431aa9ce67243b0b96c3bb669fab3adf15a5cc4d0353b7185"
+      },
+      {
+        "bytes": 479816,
+        "member": "sklearn/metrics/_dist_metrics.cpython-314-aarch64-linux-android.so",
+        "sha256": "b54f42612ca2142f6c6f91a22ee23a1e18abdf3e542e1b85f1d46e7d1e2a056a"
+      },
+      {
+        "bytes": 1152352,
+        "member": "sklearn/metrics/_pairwise_distances_reduction/_argkmin.cpython-314-aarch64-linux-android.so",
+        "sha256": "86841be7bf200562c6a1f4045adf75d8336bfe9d234c5fde91039361801a917b"
+      },
+      {
+        "bytes": 1089216,
+        "member": "sklearn/metrics/_pairwise_distances_reduction/_argkmin_classmode.cpython-314-aarch64-linux-android.so",
+        "sha256": "c7d0749803717f62336b30540d8f093b0c5548a41bc941c92d19f1f1d9dd5bb9"
+      },
+      {
+        "bytes": 1162184,
+        "member": "sklearn/metrics/_pairwise_distances_reduction/_base.cpython-314-aarch64-linux-android.so",
+        "sha256": "f09f839d0778138fb755064c0bbe6312c1113c27b3a52d1b0f831c1c0330791d"
+      },
+      {
+        "bytes": 272464,
+        "member": "sklearn/metrics/_pairwise_distances_reduction/_datasets_pair.cpython-314-aarch64-linux-android.so",
+        "sha256": "005b476bc6f1420ce42e440760908ddecf3587d8d904fa2617dedc2d60089706"
+      },
+      {
+        "bytes": 320048,
+        "member": "sklearn/metrics/_pairwise_distances_reduction/_middle_term_computer.cpython-314-aarch64-linux-android.so",
+        "sha256": "265952a32e26d749bd474b09e8d26a14beaed82529ae967093da40ed9f651bf9"
+      },
+      {
+        "bytes": 1221312,
+        "member": "sklearn/metrics/_pairwise_distances_reduction/_radius_neighbors.cpython-314-aarch64-linux-android.so",
+        "sha256": "6cb699893428547661d2a8e564e4f77356265aa38bd678184723def68096be01"
+      },
+      {
+        "bytes": 1101968,
+        "member": "sklearn/metrics/_pairwise_distances_reduction/_radius_neighbors_classmode.cpython-314-aarch64-linux-android.so",
+        "sha256": "c5eb3b8e65e1b20f23ad86d613c9b1fb3899e9eaabd3c4ab9a773051168e0025"
+      },
+      {
+        "bytes": 1074992,
+        "member": "sklearn/metrics/_pairwise_fast.cpython-314-aarch64-linux-android.so",
+        "sha256": "c4cfb45b89f91be5a21f9b8e5e1021519c542e914ca9da9efc4e0d4341068cd2"
+      },
+      {
+        "bytes": 76240,
+        "member": "sklearn/metrics/cluster/_expected_mutual_info_fast.cpython-314-aarch64-linux-android.so",
+        "sha256": "1f2ee0e69d0c2174871e3cbfe9e8652700c222e6b6c6e1ddfcc7e823d41c3457"
+      },
+      {
+        "bytes": 447784,
+        "member": "sklearn/neighbors/_ball_tree.cpython-314-aarch64-linux-android.so",
+        "sha256": "fd4222478a6c622dea4fbe2044c5df9d2c50893a5794da986d3622732fea1efc"
+      },
+      {
+        "bytes": 485152,
+        "member": "sklearn/neighbors/_kd_tree.cpython-314-aarch64-linux-android.so",
+        "sha256": "2b93cd7cbf3cf72dfb31f7406d9b7a25ddabf6a4f2e107d08efd5d06086f5e51"
+      },
+      {
+        "bytes": 64888,
+        "member": "sklearn/neighbors/_partition_nodes.cpython-314-aarch64-linux-android.so",
+        "sha256": "bfa5f493110fc746a39aa4d69d7f7b7cd32d69b82d203a95347db4b45a7031eb"
+      },
+      {
+        "bytes": 139312,
+        "member": "sklearn/neighbors/_quad_tree.cpython-314-aarch64-linux-android.so",
+        "sha256": "76cb3a0ad70cbb7d782dc9154c7d4aa97c65546ae7c069af39a01e678564f7af"
+      },
+      {
+        "bytes": 215784,
+        "member": "sklearn/preprocessing/_csr_polynomial_expansion.cpython-314-aarch64-linux-android.so",
+        "sha256": "362aa3cfee54d9d124b36e9d34c2a326f498ce3ec1dc341fe550e516a39cd65f"
+      },
+      {
+        "bytes": 314920,
+        "member": "sklearn/preprocessing/_target_encoder_fast.cpython-314-aarch64-linux-android.so",
+        "sha256": "86b6cdc623663ad24fc3f31bfc89cd96a8bdd9ee9a3583c1b2a5b3d92f6c1d62"
+      },
+      {
+        "bytes": 167808,
+        "member": "sklearn/svm/_liblinear.cpython-314-aarch64-linux-android.so",
+        "sha256": "286330abcd6e7ea5cc39f28e1867cb08a338548d21aaf398e9703d21d3b3bb24"
+      },
+      {
+        "bytes": 362136,
+        "member": "sklearn/svm/_libsvm.cpython-314-aarch64-linux-android.so",
+        "sha256": "b9207d8aeaacda2f738c6df0e925573b5a47e0cae0a4d06b927e9ad89843b442"
+      },
+      {
+        "bytes": 316384,
+        "member": "sklearn/svm/_libsvm_sparse.cpython-314-aarch64-linux-android.so",
+        "sha256": "453f8c53b081069378e736d3e36807d0b73194dbbdae1f76d6f04dc5f035d0a7"
+      },
+      {
+        "bytes": 46776,
+        "member": "sklearn/svm/_newrand.cpython-314-aarch64-linux-android.so",
+        "sha256": "7d4dace062bfd77975fbcd4f0c5045d13e30bd7f0aa025232ae2a05eb3356064"
+      },
+      {
+        "bytes": 175504,
+        "member": "sklearn/tree/_criterion.cpython-314-aarch64-linux-android.so",
+        "sha256": "0a24f5bf72ceb447340d93d105c7bd634d4cd38f1f755da4b0fc41d5e3005fd9"
+      },
+      {
+        "bytes": 139640,
+        "member": "sklearn/tree/_partitioner.cpython-314-aarch64-linux-android.so",
+        "sha256": "299dea96f6b5f0c7bac724b671efc2635bd34912d5baa2fc4ce55c359fe315ae"
+      },
+      {
+        "bytes": 111008,
+        "member": "sklearn/tree/_splitter.cpython-314-aarch64-linux-android.so",
+        "sha256": "458c22e2b9c67150e5f975d6c8e6fe963dd28e6e23a7fde06b1d4b1a821605a7"
+      },
+      {
+        "bytes": 391400,
+        "member": "sklearn/tree/_tree.cpython-314-aarch64-linux-android.so",
+        "sha256": "26d474658a0d00a8c06aca1c221d4ad0e10ac047ce2adffd42ac375f3f6f34f0"
+      },
+      {
+        "bytes": 88344,
+        "member": "sklearn/tree/_utils.cpython-314-aarch64-linux-android.so",
+        "sha256": "fe0768ab0123c54054522dcf3be92300cc13dc2231b50a7ba30f1a11e1888c2b"
+      },
+      {
+        "bytes": 62296,
+        "member": "sklearn/utils/_bitset.cpython-314-aarch64-linux-android.so",
+        "sha256": "1d867eabc11fde30ceb3d92a557fa081d8e78f4c1652698e8806749966a026bc"
+      },
+      {
+        "bytes": 185512,
+        "member": "sklearn/utils/_cython_blas.cpython-314-aarch64-linux-android.so",
+        "sha256": "871b4a14fd3e1174ff4194071491e41f23efb60e0ec5eed18ee10d8377454649"
+      },
+      {
+        "bytes": 158336,
+        "member": "sklearn/utils/_fast_dict.cpython-314-aarch64-linux-android.so",
+        "sha256": "2e2bf5f59b7cefc05aee58b399661b07e7ff44acb8de803459f95a6bd9267d52"
+      },
+      {
+        "bytes": 19328,
+        "member": "sklearn/utils/_heap.cpython-314-aarch64-linux-android.so",
+        "sha256": "5fe5c9a7df39e60abf7dc67d16c0dda05c9ace36917582d69e2ae345e0fda3ce"
+      },
+      {
+        "bytes": 80504,
+        "member": "sklearn/utils/_isfinite.cpython-314-aarch64-linux-android.so",
+        "sha256": "4d63d3c58a2fe70d22fdc47e033cf202c0ee29fc5c0a33342e24df5c19c43dee"
+      },
+      {
+        "bytes": 1007440,
+        "member": "sklearn/utils/_openmp_helpers.cpython-314-aarch64-linux-android.so",
+        "sha256": "349ce8a71f03103f48c6cbb37c475909580e0cf8532ebf25cfdeeab4e537fffe"
+      },
+      {
+        "bytes": 145776,
+        "member": "sklearn/utils/_random.cpython-314-aarch64-linux-android.so",
+        "sha256": "e1cb45e7d770aaf8acd14474238bf290493cdd041f8e042f988611f3d278c3c3"
+      },
+      {
+        "bytes": 154544,
+        "member": "sklearn/utils/_seq_dataset.cpython-314-aarch64-linux-android.so",
+        "sha256": "0dc07e002e6a287e2c60dfbb9073c05c888fbf809f7118350abf8e22c30dad11"
+      },
+      {
+        "bytes": 80920,
+        "member": "sklearn/utils/_sorting.cpython-314-aarch64-linux-android.so",
+        "sha256": "2bc02c903335a4bc1995f194e8dfad80885b7dadef41513fe01755aa6233d7c0"
+      },
+      {
+        "bytes": 98312,
+        "member": "sklearn/utils/_typedefs.cpython-314-aarch64-linux-android.so",
+        "sha256": "e1bba5bbe0ff26f1dd77ecc16af0cacb59eb9a8ac283ee50f223da322c0da149"
+      },
+      {
+        "bytes": 163520,
+        "member": "sklearn/utils/_vector_sentinel.cpython-314-aarch64-linux-android.so",
+        "sha256": "ff87f5816ecc95cc021675430730f0a4aa66b2cd5ea4fddc7734e7801c8e3e9c"
+      },
+      {
+        "bytes": 60912,
+        "member": "sklearn/utils/_weight_vector.cpython-314-aarch64-linux-android.so",
+        "sha256": "ee3b26d6f316cf70df40558ba77ddc4eea9243102234db81aabb818dfe54ac79"
+      },
+      {
+        "bytes": 114008,
+        "member": "sklearn/utils/arrayfuncs.cpython-314-aarch64-linux-android.so",
+        "sha256": "18e46fe5b7abd2c1e8743c0fd8886c51887d88e297cff5687f96ca0f19dd31f1"
+      },
+      {
+        "bytes": 87336,
+        "member": "sklearn/utils/murmurhash.cpython-314-aarch64-linux-android.so",
+        "sha256": "b254b88d31b948a52efdaa9c0959e8cac780184371afcc73ff6af99568d55525"
+      },
+      {
+        "bytes": 518112,
+        "member": "sklearn/utils/sparsefuncs_fast.cpython-314-aarch64-linux-android.so",
+        "sha256": "cd08a352113fed4279c0ed17490772d91f8129a862e14b295312ca958af5fe47"
+      }
+    ],
+    "requires_dist": [
+      "numpy>=1.24.1",
+      "scipy>=1.10.0",
+      "joblib>=1.4.0",
+      "narwhals>=2.0.1",
+      "threadpoolctl>=3.5.0"
+    ],
+    "requires_python": ">=3.11",
+    "version": "1.9.1",
+    "wheel": {
+      "declared_requires_dist_count": 5,
+      "declared_requires_dist_sha256": "1a969f4685464f4a412f5ec4275d46025b83f5f7ff8e0b6020c3eee27e94c785",
+      "entry_count": 1006,
+      "file_count": 1006,
+      "max_member_bytes": 2518008,
+      "members_sha256": "cb1bcfaa494665acd1a0a8d402ffbb91b119d0bbc568369a3adcc1afb156f66a",
+      "metadata_member": "scikit_learn-1.9.1.dist-info/METADATA",
+      "metadata_sha256": "32e503c710a61e4e04be4edb450f9f8141233ac6af3f3db59a877667538fa4ec",
+      "record_member": "scikit_learn-1.9.1.dist-info/RECORD",
+      "record_sha256": "b71fb9ef41e7050161170dcfc4269f30dffa823748b3680959e448910cbb5362",
+      "root_is_purelib": false,
+      "tags": [
+        "cp314-cp314-android_24_arm64_v8a"
+      ],
+      "uncompressed_bytes": 46113608,
+      "wheel_member": "scikit_learn-1.9.1.dist-info/WHEEL",
+      "wheel_sha256": "d491e4e4966817650e80f50477c5dfc8277c01988aa0b75a163387f1e14e1090"
+    },
+    "wheel_path": "/out/nonrust-components/scikit-learn/wheels/scikit_learn-1.9.1-cp314-cp314-android_24_arm64_v8a.whl"
+  }
+}

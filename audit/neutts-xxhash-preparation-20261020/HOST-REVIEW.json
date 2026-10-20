@@ -1,0 +1,128 @@
+{
+  "bash_syntax": {
+    "command": [
+      "bash",
+      "-n",
+      "/tmp/neutts-xxhash-component-check.sh"
+    ],
+    "environment": "Linux verification scratch; exact bytes copied from the Windows worktree",
+    "exit_code": 0,
+    "source": "scripts/compatibility_probe_neutts_xxhash.sh",
+    "source_bytes": 5427,
+    "source_sha256": "488a17631e484ef45281765085570d2c8fa2a41e571c566b9ffbb25497c0a85c"
+  },
+  "complete_engine_tested": false,
+  "files_before_review": [
+    {
+      "bytes": 8764,
+      "path": "scripts/prepare_neutts_xxhash.py",
+      "sha256": "9ec0a426ef3c58ac258fa759ee98c3c349cb721b928c5420bc1544b0df44f1b2"
+    },
+    {
+      "bytes": 23064,
+      "path": "scripts/compatibility_probe_neutts_xxhash.py",
+      "sha256": "1a1f598713b14e5bd497d301447ac75435621a85f8f4f33340655cca2528b24e"
+    },
+    {
+      "bytes": 5427,
+      "path": "scripts/compatibility_probe_neutts_xxhash.sh",
+      "sha256": "488a17631e484ef45281765085570d2c8fa2a41e571c566b9ffbb25497c0a85c"
+    },
+    {
+      "bytes": 14724,
+      "path": "tests/test_neutts_xxhash.py",
+      "sha256": "7a6c02a0fce48250db7a8e20fb7d8c6a12e9cc05c77aa57a82f6cfda7795f4de"
+    },
+    {
+      "bytes": 2358,
+      "path": ".github/workflows/neutts-xxhash-component.yml",
+      "sha256": "f29303a4504e4fa9e38bfaad46a17932a3642d4b3f8a463ccce7b703b877be53"
+    },
+    {
+      "bytes": 4700,
+      "path": "audit/neutts-xxhash-preparation-20261020/FIXTURES.json",
+      "sha256": "84d56689161666a091f101152c8e533a719f37aa9fb30dab590ade4565e7e7d9"
+    },
+    {
+      "bytes": 0,
+      "path": "audit/neutts-xxhash-preparation-20261020/pytest.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 102,
+      "path": "audit/neutts-xxhash-preparation-20261020/pytest.stdout.log",
+      "sha256": "cf1af7fcd70cbf8840959cc94d01c9fb586cde0d6d6056bcae58cc913361f929"
+    },
+    {
+      "bytes": 3702,
+      "path": "audit/neutts-xxhash-preparation-20261020/README.md",
+      "sha256": "17e7839b3c1d3baf8f5de6767f8455d5ad03136f9b3bd7e7dc6ca895b1577489"
+    },
+    {
+      "bytes": 1313,
+      "path": "audit/neutts-xxhash-preparation-20261020/upstream/LICENSE",
+      "sha256": "b76e99529f3e47372029e11914a8f4b95d6313463ed5a1a5c9afe96c3e015114"
+    },
+    {
+      "bytes": 5813,
+      "path": "audit/neutts-xxhash-preparation-20261020/upstream/test_xxh32.py",
+      "sha256": "99f312f864c15696942bef58a7ee1810f320e264a45adc838aefbf50787f7aeb"
+    },
+    {
+      "bytes": 6581,
+      "path": "audit/neutts-xxhash-preparation-20261020/upstream/test_xxh3_128.py",
+      "sha256": "b9ce6287fa999b66e45b20cbd35eafd5cdd22de71f7f1ba699b07b47f80e1796"
+    },
+    {
+      "bytes": 6505,
+      "path": "audit/neutts-xxhash-preparation-20261020/upstream/test_xxh3_64.py",
+      "sha256": "12fae0ecc21c4ed51d1245c8f9940b3619218034288ffac78eb7e9504983af68"
+    },
+    {
+      "bytes": 5131,
+      "path": "audit/neutts-xxhash-preparation-20261020/upstream/test_xxh64.py",
+      "sha256": "7c1b57b852f1e92ef491031de4018fd3c9fa975806f4a0c8832c86bb0a15b3e6"
+    },
+    {
+      "bytes": 43747,
+      "path": "audit/neutts-xxhash-preparation-20261020/xxhash-4.0.1-cp314-cp314-android_24_arm64_v8a.whl",
+      "sha256": "af05a3f650220a6c59fa0ad2410249f2d2470a05225807c378fb67458693f8df"
+    }
+  ],
+  "host_tests": {
+    "command": [
+      "python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_neutts_xxhash.py"
+    ],
+    "environment": "Windows Devbox Hermes, Python 3.14",
+    "exit_code": 0,
+    "passed": 21,
+    "skipped": 0,
+    "stderr_file": "pytest.stderr.log",
+    "stdout_file": "pytest.stdout.log",
+    "subtests_passed": 19
+  },
+  "model_downloaded": false,
+  "native_operations_proved": false,
+  "production_admission_changed": false,
+  "python_syntax": {
+    "files": 3,
+    "shell_embedded_python_blocks": 1,
+    "status": "passed"
+  },
+  "release_output": false,
+  "review_notes": [
+    "The exact original Android wheel and primary source fixtures were fetched and hash-verified.",
+    "Original public member-name inventory has no final newline; unchanged foundation verifier uses one. Both frozen encodings are checked.",
+    "Host tests do not import the Android extension. Native success requires the new separately bounded native ARM64 workflow.",
+    "No tracked existing file was edited by this component task."
+  ],
+  "schema_version": 1,
+  "source_parent_head": "d2159613a9a4a2c0bbd8d86bc2e8f9cb75987ff4",
+  "status": "host-integrity-passed-native-pending",
+  "workflow_parse_and_scope": "passed"
+}

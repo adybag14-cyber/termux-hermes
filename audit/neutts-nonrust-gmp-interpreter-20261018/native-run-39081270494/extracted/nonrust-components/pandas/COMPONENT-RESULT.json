@@ -1,0 +1,449 @@
+{
+  "backend_receipt_sha256": "4087407956762793485bcd3399475f1263c17dea852c7aafe75c440737e05e5c",
+  "build_process": {
+    "command": [
+      "/data/data/com.termux/files/usr/tmp/nonrust-native-bdgrutjc/build-venv/bin/python",
+      "-I",
+      "-B",
+      "/probes/scripts/compatibility_probe_neutts_nonrust.py",
+      "--phase",
+      "build",
+      "--inputs",
+      "/out/nonrust-inputs",
+      "--out",
+      "/out/nonrust-components/pandas",
+      "--source-name",
+      "pandas",
+      "--source-root",
+      "/data/data/com.termux/files/usr/tmp/nonrust-native-bdgrutjc/pandas-3.0.6",
+      "--wheel-dir",
+      "/out/nonrust-components/pandas/wheels",
+      "--environment-manifest",
+      "/out/nonrust-components/build-environment/build-installed-closure.json"
+    ],
+    "exit_code": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "168f282d39e1e064f025ba89b915b7071de827b00c87219047959ffd2bc7806b"
+  },
+  "component": "pandas",
+  "model_downloaded": false,
+  "production_admission_changed": false,
+  "release_output": false,
+  "runtime": {
+    "active_edge_count": 3,
+    "actual_runtime_distribution_count": 4,
+    "copied_apt_payloads": [
+      {
+        "archive_sha256": "a99ae20cd33c77553cc94d402aefc4bed96b7ec9f18e9fb6e2e5a7943693c802",
+        "bytes": 18943738,
+        "copy_mode_policy": "preserve executable bit, normalize ordinary copied permissions",
+        "file_count": 924,
+        "metadata_changed": false,
+        "metadata_sha256": "e2b909d6a37d76c2bc130f528d7fed0c517322bce16dc7846b6a6df30e200403",
+        "name": "numpy",
+        "record_changed": false
+      }
+    ],
+    "process": {
+      "command": [
+        "/data/data/com.termux/files/usr/tmp/nonrust-native-bdgrutjc/runtime-pandas/bin/python",
+        "-I",
+        "-B",
+        "/probes/scripts/compatibility_probe_neutts_nonrust.py",
+        "--phase",
+        "runtime",
+        "--inputs",
+        "/out/nonrust-inputs",
+        "--out",
+        "/out/nonrust-components/pandas",
+        "--apt-archives",
+        "/data/data/com.termux/files/usr/tmp/neutts-nonrust.W5kwiJ/archives",
+        "--source-name",
+        "pandas",
+        "--environment-manifest",
+        "/out/nonrust-components/pandas/runtime-installed-closure.json",
+        "--image-receipt",
+        "/out/NONRUST-PROBE-INPUTS.json"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw_pip": {
+      "authority": "copied file manifests and exact APT provenance are separate required gates",
+      "elapsed_seconds": 0.501,
+      "exit_code": 1,
+      "log": "RAW-PIP-CHECK.log",
+      "original_apt_tag_diagnostics": [
+        {
+          "metadata_modified": false,
+          "name": "numpy",
+          "native_convention_tags": [
+            "cp314-cp314-android_24_arm64_v8a"
+          ],
+          "original_tags": [
+            "cp314-cp314-android_aarch64"
+          ],
+          "supported_tags_modified": false
+        }
+      ],
+      "pip_check_passed": false,
+      "requirements_have_no_missing_or_conflicting_dependencies": true,
+      "sha256": "b23964696165a9d39de369cd2a1f2f0b4b4803568087a8191a652fdec26c6803",
+      "text": "numpy 2.5.4 is not supported on this platform\n"
+    },
+    "receipt": "RUNTIME-OPERATIONS-RESULT.json",
+    "receipt_sha256": "afb6fbf0c0e40a8ab4adc772b3740a6903f67ada36d68a3f07397849d509a246",
+    "status": "passed"
+  },
+  "schema_version": 1,
+  "source_archive_sha256": "66b07ef7315a31bfe1089cd3d71a7de781c9dca986762d0b4fe7c0ef17465d10",
+  "stage": "complete",
+  "status": "passed",
+  "wheel": {
+    "artifact": {
+      "bytes": 9768475,
+      "filename": "pandas-3.0.6-cp314-cp314-android_24_arm64_v8a.whl",
+      "sha256": "4922cb8fe6f903cabaf83b8240eadc8c9482e1b75579e7e9c48177e3d749ec94"
+    },
+    "base_requires_dist": [
+      "python-dateutil>=2.8.2"
+    ],
+    "name": "pandas",
+    "native_members": [
+      {
+        "bytes": 150800,
+        "member": "pandas/_libs/_cyutility.cpython-314-aarch64-linux-android.so",
+        "sha256": "eda40c205636d24293013ad0ac1c688d5e628584c05828d94a00ff83a5b19d46"
+      },
+      {
+        "bytes": 1462648,
+        "member": "pandas/_libs/algos.cpython-314-aarch64-linux-android.so",
+        "sha256": "a23bf2b70878783877f573fad28962d00fe2992a54ab864c4f01ee1263a77455"
+      },
+      {
+        "bytes": 107336,
+        "member": "pandas/_libs/arrays.cpython-314-aarch64-linux-android.so",
+        "sha256": "cde40473110a58909aef9e4dab93fad2515630f22ce9372b86c5430142159bdf"
+      },
+      {
+        "bytes": 52488,
+        "member": "pandas/_libs/byteswap.cpython-314-aarch64-linux-android.so",
+        "sha256": "678994f39bf7a5be5a53dbe3246f665f58aa1401fa0271f01683fc964ec80fac"
+      },
+      {
+        "bytes": 1796440,
+        "member": "pandas/_libs/groupby.cpython-314-aarch64-linux-android.so",
+        "sha256": "4343567d0092d2deceb4166c93e976983944507c46e9f9aeee737aae02ac7a88"
+      },
+      {
+        "bytes": 80104,
+        "member": "pandas/_libs/hashing.cpython-314-aarch64-linux-android.so",
+        "sha256": "ab168aaa5358daaa2520321c71843e6e4dcd47e8212e4401c3df731b28f058c8"
+      },
+      {
+        "bytes": 1723952,
+        "member": "pandas/_libs/hashtable.cpython-314-aarch64-linux-android.so",
+        "sha256": "827817ac48ef5d5e9f0fc1e99616ac273749194472633065dab113b4a384b696"
+      },
+      {
+        "bytes": 675776,
+        "member": "pandas/_libs/index.cpython-314-aarch64-linux-android.so",
+        "sha256": "344da9410115691c711e87150aed5a306d1a24e66d186e06dac5f7c206abce74"
+      },
+      {
+        "bytes": 62440,
+        "member": "pandas/_libs/indexing.cpython-314-aarch64-linux-android.so",
+        "sha256": "6ecb2bedea68d1be2098812886df28fc7257de100e41de652277499bfe33710e"
+      },
+      {
+        "bytes": 251840,
+        "member": "pandas/_libs/internals.cpython-314-aarch64-linux-android.so",
+        "sha256": "879a0853232404ac3591e1a04c118df295ae5b34731794eb704c5dfec55dc66b"
+      },
+      {
+        "bytes": 873440,
+        "member": "pandas/_libs/interval.cpython-314-aarch64-linux-android.so",
+        "sha256": "8b9a4c1e5bcaf3ed8403c64bd1a23ab7182b9d7fd13ee492f0e6422f24c0b9e0"
+      },
+      {
+        "bytes": 831336,
+        "member": "pandas/_libs/join.cpython-314-aarch64-linux-android.so",
+        "sha256": "8bb6442be5c02d9b33768917a7adc510413187055d1e392a7afa85efe67f0c93"
+      },
+      {
+        "bytes": 63664,
+        "member": "pandas/_libs/json.cpython-314-aarch64-linux-android.so",
+        "sha256": "ee929cc7dd0f632e77f53f891ca4b769f343b6f2a2ca47a36768257b50dafdaf"
+      },
+      {
+        "bytes": 546528,
+        "member": "pandas/_libs/lib.cpython-314-aarch64-linux-android.so",
+        "sha256": "aeb4cda1700ad1630a387d9af31ee2b7eee8d229d02dd22bacf137469140bc64"
+      },
+      {
+        "bytes": 165216,
+        "member": "pandas/_libs/missing.cpython-314-aarch64-linux-android.so",
+        "sha256": "573fc2b07aa183520843185fd7f303e582f69a4d2167a56fae2dac6089d5e443"
+      },
+      {
+        "bytes": 113232,
+        "member": "pandas/_libs/ops.cpython-314-aarch64-linux-android.so",
+        "sha256": "408049a3798196e74b076e0baeda4428a841d80948bae7e0f46e8b0762ea5cb1"
+      },
+      {
+        "bytes": 55464,
+        "member": "pandas/_libs/ops_dispatch.cpython-314-aarch64-linux-android.so",
+        "sha256": "1b566eddc3f2abd5958f45156968c7165734c7519b727a9ff406745083befe3d"
+      },
+      {
+        "bytes": 35800,
+        "member": "pandas/_libs/pandas_datetime.cpython-314-aarch64-linux-android.so",
+        "sha256": "519cbf16e38068fdab92978ab8d73f661d666443b165d98ebe321d510ea3e7d8"
+      },
+      {
+        "bytes": 31616,
+        "member": "pandas/_libs/pandas_parser.cpython-314-aarch64-linux-android.so",
+        "sha256": "d6cbab66b089541d735ba1e408e145211c8c86f6baef0d276256bf78cc0970eb"
+      },
+      {
+        "bytes": 358240,
+        "member": "pandas/_libs/parsers.cpython-314-aarch64-linux-android.so",
+        "sha256": "d9a8216d6dd466678bc8f5e91329be95206f67b532c685c22201d5784e14182b"
+      },
+      {
+        "bytes": 77672,
+        "member": "pandas/_libs/properties.cpython-314-aarch64-linux-android.so",
+        "sha256": "652e0451749688e1cdc65631f9008f8a0abb21dd540526787aa3f43be8912fc3"
+      },
+      {
+        "bytes": 150048,
+        "member": "pandas/_libs/reshape.cpython-314-aarch64-linux-android.so",
+        "sha256": "d59618c6b2afe371121cab78efcea8010cd17d740579236d9d5c0831293f995b"
+      },
+      {
+        "bytes": 113440,
+        "member": "pandas/_libs/sas.cpython-314-aarch64-linux-android.so",
+        "sha256": "1241c166ee2d5c65796ddccb449240c241ce410dfadf688774275dd583e5c421"
+      },
+      {
+        "bytes": 605576,
+        "member": "pandas/_libs/sparse.cpython-314-aarch64-linux-android.so",
+        "sha256": "b1e464ac3a7c08fa03e5691d798ee1105e1fdfc2708ac09efa38e8b77eddd310"
+      },
+      {
+        "bytes": 93136,
+        "member": "pandas/_libs/testing.cpython-314-aarch64-linux-android.so",
+        "sha256": "0cc447d25c9e5cbcfdcd90ecca73160b9a5d8d4bc1a151d51c74d67eaa46353e"
+      },
+      {
+        "bytes": 137648,
+        "member": "pandas/_libs/tslib.cpython-314-aarch64-linux-android.so",
+        "sha256": "6ca78d315d9a2713624c80ed1f52033266c50e62476b05c219d6004d53d9c8ae"
+      },
+      {
+        "bytes": 56600,
+        "member": "pandas/_libs/tslibs/base.cpython-314-aarch64-linux-android.so",
+        "sha256": "a8f545b4b1413c46dfae79624c8609a55fd1a32fd16124b9c5c6bd85c592fd38"
+      },
+      {
+        "bytes": 78144,
+        "member": "pandas/_libs/tslibs/ccalendar.cpython-314-aarch64-linux-android.so",
+        "sha256": "cf965caa2d96db8c6c5860721548b7b7f5d25e026f885ecb07db7ccc6746bda7"
+      },
+      {
+        "bytes": 150680,
+        "member": "pandas/_libs/tslibs/conversion.cpython-314-aarch64-linux-android.so",
+        "sha256": "ed56bfe53a2f0da0d77b11965f9babe68a077c93f2481f86550b3602fa3582ef"
+      },
+      {
+        "bytes": 142560,
+        "member": "pandas/_libs/tslibs/dtypes.cpython-314-aarch64-linux-android.so",
+        "sha256": "68230983cd2ab22f8be70dfc87f21d2a128af4e7607103a268d64b23a193f6f5"
+      },
+      {
+        "bytes": 176440,
+        "member": "pandas/_libs/tslibs/fields.cpython-314-aarch64-linux-android.so",
+        "sha256": "00d8779e175003ece887ceef73276b2cb03aeb1ce64d2bb682179a3851fedd7e"
+      },
+      {
+        "bytes": 190320,
+        "member": "pandas/_libs/tslibs/nattype.cpython-314-aarch64-linux-android.so",
+        "sha256": "df4c762bad7827230dfd334e4028e96ddb9d294a966d888565799ce0cfa9a31e"
+      },
+      {
+        "bytes": 120552,
+        "member": "pandas/_libs/tslibs/np_datetime.cpython-314-aarch64-linux-android.so",
+        "sha256": "80b797ee811ffd169949b32c535fbbd2b1070eb370a917837ec9a4a1075b5316"
+      },
+      {
+        "bytes": 956616,
+        "member": "pandas/_libs/tslibs/offsets.cpython-314-aarch64-linux-android.so",
+        "sha256": "9a56a5ff6936f8a8414fe52a8d096d6dcd1dc55d030574cbff3fa1e45369b661"
+      },
+      {
+        "bytes": 218728,
+        "member": "pandas/_libs/tslibs/parsing.cpython-314-aarch64-linux-android.so",
+        "sha256": "e409b7683913e922ed7c49cb42025934b011e443ee414fa06e37bb8e14aaea12"
+      },
+      {
+        "bytes": 335464,
+        "member": "pandas/_libs/tslibs/period.cpython-314-aarch64-linux-android.so",
+        "sha256": "c623917b2675a1aa968ca0c630a509dafade74506a925d70cf67ea88d067eb16"
+      },
+      {
+        "bytes": 187840,
+        "member": "pandas/_libs/tslibs/strptime.cpython-314-aarch64-linux-android.so",
+        "sha256": "afab127cb877e79bfe8a6827222e98117c757a5da4bc135539a9486e3756bbf6"
+      },
+      {
+        "bytes": 419464,
+        "member": "pandas/_libs/tslibs/timedeltas.cpython-314-aarch64-linux-android.so",
+        "sha256": "e2c229c0253dd89499849954d64fbe3ecf6da4b3a8d27135183bceba1bce1709"
+      },
+      {
+        "bytes": 451824,
+        "member": "pandas/_libs/tslibs/timestamps.cpython-314-aarch64-linux-android.so",
+        "sha256": "626bdb60e3c7dec5c054d859229c2f19cc9f40dfa757e60ce36bcceacec5dffd"
+      },
+      {
+        "bytes": 152944,
+        "member": "pandas/_libs/tslibs/timezones.cpython-314-aarch64-linux-android.so",
+        "sha256": "149a8df48ab40e2103d556bc98a49cb79579b538b995600f74a2bc6bb50f1c84"
+      },
+      {
+        "bytes": 156840,
+        "member": "pandas/_libs/tslibs/tzconversion.cpython-314-aarch64-linux-android.so",
+        "sha256": "7028dcdf46334d534eb6eabb25d52c05a8c4b8a975fb412c9fdef59d0744c81b"
+      },
+      {
+        "bytes": 103744,
+        "member": "pandas/_libs/tslibs/vectorized.cpython-314-aarch64-linux-android.so",
+        "sha256": "f9cf690743e599005fbe88e927e99a0b6dbbf5b2c0cc756da71c6e6193302d27"
+      },
+      {
+        "bytes": 374112,
+        "member": "pandas/_libs/window/aggregations.cpython-314-aarch64-linux-android.so",
+        "sha256": "1aaf73e8b172f58590353f4a6e27e568ad2cda527b994a9f7bc5fb3666e82fe6"
+      },
+      {
+        "bytes": 167480,
+        "member": "pandas/_libs/window/indexers.cpython-314-aarch64-linux-android.so",
+        "sha256": "13002e13d823d764635072f69001fdf50d751acafac1a10ec1431f9e134d9bd6"
+      },
+      {
+        "bytes": 101120,
+        "member": "pandas/_libs/writers.cpython-314-aarch64-linux-android.so",
+        "sha256": "af5d1551052e886d6ce0accdde128806c0240c20d9939edadbbcc5783631df41"
+      }
+    ],
+    "requires_dist": [
+      "numpy>=1.26.0; python_version < \"3.14\"",
+      "numpy>=2.3.3; python_version >= \"3.14\"",
+      "python-dateutil>=2.8.2",
+      "tzdata; sys_platform == \"win32\"",
+      "tzdata; sys_platform == \"emscripten\"",
+      "hypothesis>=6.116.0; extra == \"test\"",
+      "pytest<9.1,>=8.3.4; extra == \"test\"",
+      "pytest-xdist>=3.6.1; extra == \"test\"",
+      "pyarrow>=13.0.0; extra == \"pyarrow\"",
+      "bottleneck>=1.4.2; extra == \"performance\"",
+      "numba>=0.60.0; extra == \"performance\"",
+      "numexpr>=2.10.2; extra == \"performance\"",
+      "scipy>=1.14.1; extra == \"computation\"",
+      "xarray>=2024.10.0; extra == \"computation\"",
+      "fsspec>=2024.10.0; extra == \"fss\"",
+      "s3fs>=2024.10.0; extra == \"aws\"",
+      "gcsfs>=2024.10.0; extra == \"gcp\"",
+      "odfpy>=1.4.1; extra == \"excel\"",
+      "openpyxl>=3.1.5; extra == \"excel\"",
+      "python-calamine>=0.3.0; extra == \"excel\"",
+      "pyxlsb>=1.0.10; extra == \"excel\"",
+      "xlrd>=2.0.1; extra == \"excel\"",
+      "xlsxwriter>=3.2.0; extra == \"excel\"",
+      "pyarrow>=13.0.0; extra == \"parquet\"",
+      "pyarrow>=13.0.0; extra == \"feather\"",
+      "pyiceberg>=0.8.1; extra == \"iceberg\"",
+      "tables>=3.10.1; extra == \"hdf5\"",
+      "pyreadstat>=1.2.8; extra == \"spss\"",
+      "SQLAlchemy>=2.0.36; extra == \"postgresql\"",
+      "psycopg2>=2.9.10; extra == \"postgresql\"",
+      "adbc-driver-postgresql>=1.2.0; extra == \"postgresql\"",
+      "SQLAlchemy>=2.0.36; extra == \"mysql\"",
+      "pymysql>=1.1.1; extra == \"mysql\"",
+      "SQLAlchemy>=2.0.36; extra == \"sql-other\"",
+      "adbc-driver-postgresql>=1.2.0; extra == \"sql-other\"",
+      "adbc-driver-sqlite>=1.2.0; extra == \"sql-other\"",
+      "beautifulsoup4>=4.12.3; extra == \"html\"",
+      "html5lib>=1.1; extra == \"html\"",
+      "lxml>=5.3.0; extra == \"html\"",
+      "lxml>=5.3.0; extra == \"xml\"",
+      "matplotlib>=3.9.3; extra == \"plot\"",
+      "jinja2>=3.1.5; extra == \"output-formatting\"",
+      "tabulate>=0.9.0; extra == \"output-formatting\"",
+      "PyQt5>=5.15.9; extra == \"clipboard\"",
+      "qtpy>=2.4.2; extra == \"clipboard\"",
+      "zstandard>=0.23.0; extra == \"compression\"",
+      "pytz>=2020.1; extra == \"timezone\"",
+      "adbc-driver-postgresql>=1.2.0; extra == \"all\"",
+      "adbc-driver-sqlite>=1.2.0; extra == \"all\"",
+      "beautifulsoup4>=4.12.3; extra == \"all\"",
+      "bottleneck>=1.4.2; extra == \"all\"",
+      "fastparquet>=2024.11.0; extra == \"all\"",
+      "fsspec>=2024.10.0; extra == \"all\"",
+      "gcsfs>=2024.10.0; extra == \"all\"",
+      "html5lib>=1.1; extra == \"all\"",
+      "hypothesis>=6.116.0; extra == \"all\"",
+      "jinja2>=3.1.5; extra == \"all\"",
+      "lxml>=5.3.0; extra == \"all\"",
+      "matplotlib>=3.9.3; extra == \"all\"",
+      "numba>=0.60.0; extra == \"all\"",
+      "numexpr>=2.10.2; extra == \"all\"",
+      "odfpy>=1.4.1; extra == \"all\"",
+      "openpyxl>=3.1.5; extra == \"all\"",
+      "psycopg2>=2.9.10; extra == \"all\"",
+      "pyarrow>=13.0.0; extra == \"all\"",
+      "pyiceberg>=0.8.1; extra == \"all\"",
+      "pymysql>=1.1.1; extra == \"all\"",
+      "PyQt5>=5.15.9; extra == \"all\"",
+      "pyreadstat>=1.2.8; extra == \"all\"",
+      "pytest>=8.3.4; extra == \"all\"",
+      "pytest-xdist>=3.6.1; extra == \"all\"",
+      "python-calamine>=0.3.0; extra == \"all\"",
+      "pytz>=2020.1; extra == \"all\"",
+      "pyxlsb>=1.0.10; extra == \"all\"",
+      "qtpy>=2.4.2; extra == \"all\"",
+      "scipy>=1.14.1; extra == \"all\"",
+      "s3fs>=2024.10.0; extra == \"all\"",
+      "SQLAlchemy>=2.0.36; extra == \"all\"",
+      "tables>=3.10.1; extra == \"all\"",
+      "tabulate>=0.9.0; extra == \"all\"",
+      "xarray>=2024.10.0; extra == \"all\"",
+      "xlrd>=2.0.1; extra == \"all\"",
+      "xlsxwriter>=3.2.0; extra == \"all\"",
+      "zstandard>=0.23.0; extra == \"all\""
+    ],
+    "requires_python": ">=3.11",
+    "version": "3.0.6",
+    "wheel": {
+      "declared_requires_dist_count": 84,
+      "declared_requires_dist_sha256": "33d70fa1df74cd191b9a99308f3b358c2212063a780edb03aa13abd41938fcc9",
+      "entry_count": 1521,
+      "file_count": 1521,
+      "max_member_bytes": 1796440,
+      "members_sha256": "aab2ea4504c396fec6ec1ab87fde39c53df9848210461df4464fa87567d16f41",
+      "metadata_member": "pandas-3.0.6.dist-info/METADATA",
+      "metadata_sha256": "9eb4d20fc21b7851d6f782bd5186ded152fce80a48ac93120bf88e03c89ebc39",
+      "record_member": "pandas-3.0.6.dist-info/RECORD",
+      "record_sha256": "0bf03da8e10220ca6b01d6c96eaee5730809dc9074ab8c105567909028a66f5f",
+      "root_is_purelib": false,
+      "tags": [
+        "cp314-cp314-android_24_arm64_v8a"
+      ],
+      "uncompressed_bytes": 36797420,
+      "wheel_member": "pandas-3.0.6.dist-info/WHEEL",
+      "wheel_sha256": "d491e4e4966817650e80f50477c5dfc8277c01988aa0b75a163387f1e14e1090"
+    },
+    "wheel_path": "/out/nonrust-components/pandas/wheels/pandas-3.0.6-cp314-cp314-android_24_arm64_v8a.whl"
+  }
+}

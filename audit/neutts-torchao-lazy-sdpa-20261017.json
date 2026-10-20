@@ -1,0 +1,111 @@
+{
+  "captured_utc": "2026-10-17T22:37:23.638336+00:00",
+  "host_tests": {
+    "actual_fixture": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\torchao-lazy-sdpa-preparation-20261017\\prepared-inputs-v2",
+    "methods_passed": 30,
+    "seconds": 7.858,
+    "skipped": 0,
+    "stderr_sha256": "7e276dbafe8d909ebeb6955c23f70ed592b45c936ca36387b79bf1a528638da6"
+  },
+  "implementation": [
+    {
+      "bytes": 12187,
+      "path": "scripts/prepare_neutts_torchao.py",
+      "sha256": "2053b4b6e457196527e86ee547e9f358bbbfbb78798550fd84bf520bc0f28c55"
+    },
+    {
+      "bytes": 22944,
+      "path": "scripts/compatibility_probe_neutts_torchao.py",
+      "sha256": "ab526cd88d618dd11d23d1792b3066bde35f1e49fdea2c1bcbfe505c1bc92492"
+    },
+    {
+      "bytes": 6550,
+      "path": "scripts/neutts_torchao_component_lock.json",
+      "sha256": "10017cbb4992011143a6928b1beb09a647d6c14c9ec479d0c89e9a6f35d40de4"
+    },
+    {
+      "bytes": 4959,
+      "path": "scripts/compatibility_probe_neutts_torchao.sh",
+      "sha256": "5a1de0da9cf9e14b0d66116bbbec01743cc42e1751bb2cf2d12fe22b49031683"
+    },
+    {
+      "bytes": 1567,
+      "path": ".github/workflows/neutts-torchao-component.yml",
+      "sha256": "107ba435ba074a47b39b5f42363664833a5efd663182c220d506e7fc5384611e"
+    },
+    {
+      "bytes": 697,
+      "path": "patches/next-stable/torchao-lazy-sdpa.patch",
+      "sha256": "28e786678ce02f007f77e5cc70a3e48faad1c72eea3dc0ec897c4ee0a89e74cc"
+    },
+    {
+      "bytes": 21005,
+      "path": "tests/test_neutts_torchao_component.py",
+      "sha256": "9176350a99e5e55beb052d1d3d4064237cda8bdcbf3c87201b481ad1235a1add"
+    }
+  ],
+  "not_claimed": [
+    "Successful native TorchAO import or NF4 operation",
+    "Complete NeuTTS or Torchtune",
+    "Model inference or audio I/O",
+    "Physical device behavior",
+    "Release readiness"
+  ],
+  "observed_failure": {
+    "audit": "audit/neutts-torchao-native-20261017/run-39074259828.json",
+    "error": "ModuleNotFoundError: No module named 'torch._inductor.kernel.flex_attention'",
+    "head_sha": "1fc3dde05aca3786d28d656ced9a807e872bff4f",
+    "run_id": 39074259828,
+    "stage": "Eager optional SDPA compiler import before any CPU NF4 case"
+  },
+  "original_wheel": {
+    "bytes": 962232,
+    "filename": "torchao-0.12.0-py3-none-any.whl",
+    "sha256": "103f2a9164d2e4f705332af1aafbb8473eadd14d9164e45857ca187cde1f13d2",
+    "url": "https://files.pythonhosted.org/packages/6c/5f/6bf9b5bed6d31e286516d23e1db7320d2ccfbf1b2234749833ad1e3d25a5/torchao-0.12.0-py3-none-any.whl"
+  },
+  "patch": {
+    "after_bytes": 506,
+    "after_sha256": "e3b00aac6fb639fe732f29468610e60bf85110982959f974d756ca79cd07f0b5",
+    "before_bytes": 211,
+    "before_sha256": "f9f58d8c905a9de6ebf795a8b3b0c59ae056d12286d59279f908c0ed42456af4",
+    "bytes": 697,
+    "changed_members": [
+      "torchao/prototype/inductor/fx_passes/__init__.py",
+      "torchao-0.12.0.dist-info/RECORD"
+    ],
+    "container_encoding": "ZIP_STORED, original member order and permissions, fixed 1980-01-01 timestamp, explicit Unix creator",
+    "input_filename": "torchao-lazy-sdpa.patch",
+    "member": "torchao/prototype/inductor/fx_passes/__init__.py",
+    "path": "patches/next-stable/torchao-lazy-sdpa.patch",
+    "sha256": "28e786678ce02f007f77e5cc70a3e48faad1c72eea3dc0ec897c4ee0a89e74cc"
+  },
+  "patched_wheel": {
+    "bytes": 5595917,
+    "filename": "torchao-0.12.0-py3-none-any.whl",
+    "sha256": "82bbdfef93ba0423ed84fc8afdafeb4f9f13ed3fa74ab467b3d5aeef0027b442"
+  },
+  "preserved": {
+    "five_native_case_bodies": true,
+    "foundation_and_operation_locks": true,
+    "full_engine_graph_not_changed": true,
+    "metadata_version_tags_dependency_declarations": true,
+    "nf4_source": true,
+    "other_regular_wheel_members": 346
+  },
+  "previous_preparation_and_failure_unchanged": [
+    "audit/neutts-torchao-preparation-20261017.json",
+    "audit/neutts-torchao-native-20261017/run-39074259828.json"
+  ],
+  "production_admission_changed": false,
+  "raw_evidence": {
+    "all_copied_bytes_verified": true,
+    "directory": "audit/neutts-torchao-lazy-sdpa-20261017",
+    "file_count": 32,
+    "saved_files_sha256": "bba45bbd2a3d2b2ef418414ec16d22d97c7146eec2104d609ac4ade533430db2",
+    "total_bytes": 388522
+  },
+  "release_output": false,
+  "schema_version": 1,
+  "status": "host-verified-scoped-fix-native-retry-pending"
+}

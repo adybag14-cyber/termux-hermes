@@ -1,0 +1,202 @@
+diff --git a/tests/tools/test_voice_wsl_pipewire.py b/tests/tools/test_voice_wsl_pipewire.py
+index 7197b08a..1197def0 100644
+--- a/tests/tools/test_voice_wsl_pipewire.py
++++ b/tests/tools/test_voice_wsl_pipewire.py
+@@ -25,7 +25,7 @@ def _base(monkeypatch):
+     monkeypatch.delenv("PIPEWIRE_REMOTE", raising=False)
+     monkeypatch.setattr("hermes_constants.is_container", lambda: False)
+     monkeypatch.setattr("tools.voice_mode._pulse_socket_reachable", lambda: False)
+-    sd = MagicMock(); sd.query_devices.return_value = [{"name": "dev"}]
++    sd = MagicMock(); sd.query_devices.return_value = [{"name": "dev", "max_input_channels": 1}]
+     monkeypatch.setattr("tools.voice_mode._import_audio", lambda: (sd, MagicMock()))
+ 
+ 
+diff --git a/tools/voice_mode.py b/tools/voice_mode.py
+index d7bccc11..3b41d97d 100644
+--- a/tools/voice_mode.py
++++ b/tools/voice_mode.py
+@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
+ from hermes_constants import is_termux as _is_termux_environment
+ from hermes_platform.host.runtime import is_wsl
+ from tools.voice_mode_transcript import _voice_config, is_voice_stop_phrase, is_whisper_hallucination
++from tools.voice_mode_capture import AudioInitializationError, import_audio_modules
+ 
+ # ── Recording parameters ──
+ SAMPLE_RATE = 16000  # Whisper native rate
+@@ -47,7 +48,7 @@ def _import_audio():
+ 
+     Raises ImportError when the extra cannot be enabled here (lazy installs off, platform
+     gate, or installed-but-needs-restart) and OSError when PortAudio's shared library is
+-    missing — pip can't fix that one, so it is reported separately.
++    missing. AudioInitializationError preserves import-time native runtime failures.
+     """
+     import pm
+ 
+@@ -56,9 +57,7 @@ def _import_audio():
+             pm.ensure_import("audio-io")
+         except pm.InstallError as exc:
+             raise ImportError(str(exc)) from exc
+-    import sounddevice as sd
+-    import numpy as np
+-    return sd, np
++    return import_audio_modules()
+ 
+ 
+ def _sounddevice_output_allowed() -> bool:
+@@ -110,6 +109,8 @@ def _audio_unavailable_reason() -> str:
+         return _voice_capture_install_hint(exc)
+     except OSError:
+         return _portaudio_missing_message().splitlines()[0]
++    except AudioInitializationError as exc:
++        return str(exc)
+     return ""
+ 
+ 
+@@ -117,7 +118,7 @@ def _audio_available() -> bool:
+     try:
+         _import_audio()
+         return True
+-    except (ImportError, OSError):
++    except (ImportError, OSError, AudioInitializationError):
+         return False
+ 
+ 
+@@ -276,9 +277,15 @@ def _probe_audio_libraries(warnings: list[str], notices: list[str], *, has_forwa
+     except OSError:
+         return outcome("Termux:API microphone recording available (PortAudio not required)",
+                        _portaudio_missing_message(), import_failed=True)
++    except AudioInitializationError as exc:
++        return outcome("Termux:API microphone recording available (PortAudio not required)", str(exc))
+     try:
+-        if sd.query_devices():
++        devices = sd.query_devices()
++        if any(device.get("max_input_channels", 0) > 0 for device in devices):
+             return
++        if devices:
++            return outcome("No PortAudio input devices detected, but Termux:API microphone capture is available",
++                           "No audio input devices detected (only output devices available)")
+         outcome("No PortAudio devices detected, but Termux:API microphone capture is available",
+                 "No audio input/output devices detected",
+                 forwarded_notice="No PortAudio devices detected but host audio forwarding is configured -- continuing")
+diff --git a/tools/voice_mode_capture.py b/tools/voice_mode_capture.py
+index 30b63355..04bf5b85 100644
+--- a/tools/voice_mode_capture.py
++++ b/tools/voice_mode_capture.py
+@@ -8,6 +8,24 @@ from collections.abc import Callable, Mapping
+ _BACKENDS = {"auto", "sounddevice", "termux-api"}
+ 
+ 
++class AudioInitializationError(RuntimeError):
++    """Optional audio libraries exist but cannot initialize their native runtime."""
++
++
++def import_audio_modules():
++    """Translate import-time native failures without hiding missing dependencies."""
++    try:
++        import sounddevice as sd
++        import numpy as np
++    except (ImportError, OSError):
++        raise
++    except Exception as exc:
++        # sounddevice initializes PortAudio during import; PortAudioError derives
++        # directly from Exception and cannot be imported after that import fails.
++        raise AudioInitializationError(f"Audio library initialization failed: {exc}") from exc
++    return sd, np
++
++
+ def choose_backend(config: Mapping[str, object], *, termux_available: Callable[[], bool]) -> str:
+     raw = config.get("capture_backend", "auto")
+     name = raw.strip().lower() if isinstance(raw, str) else ""
+diff --git a/tests/tools/test_voice_audio_readiness.py b/tests/tools/test_voice_audio_readiness.py
+new file mode 100644
+index 00000000..4233b699
+--- /dev/null
++++ b/tests/tools/test_voice_audio_readiness.py
+@@ -0,0 +1,87 @@
++"""Audio readiness reports native initialization failures without opening a microphone."""
++
++from __future__ import annotations
++
++import sys
++from types import SimpleNamespace
++
++import pytest
++
++from tools import voice_mode as vm
++from tools import voice_mode_capture as capture
++
++
++@pytest.fixture
++def unavailable_portaudio(tmp_path, monkeypatch):
++    """sounddevice 0.5.5 initializes on import and raises Exception, not OSError."""
++    (tmp_path / "sounddevice.py").write_text(
++        'class PortAudioError(Exception):\n'
++        '    def __str__(self):\n'
++        '        return f"{self.args[0]} [PaErrorCode {self.args[1]}]: {self.args[2][2]}"\n'
++        'raise PortAudioError("Error initializing PortAudio", -9999, '
++        '(-10000, -9999, "Initializing engine failed"))\n',
++        encoding="utf-8",
++    )
++    monkeypatch.syspath_prepend(str(tmp_path))
++    monkeypatch.delitem(sys.modules, "sounddevice", raising=False)
++    import pm
++    monkeypatch.setattr(pm, "available", lambda extra: extra == "audio-io")
++
++    def unexpected_install(*args, **kwargs):
++        pytest.fail("an installed library's initialization failure must not provision dependencies")
++
++    monkeypatch.setattr(pm, "ensure_import", unexpected_install)
++
++
++def test_portaudio_import_failure_is_a_readiness_diagnostic(unavailable_portaudio):
++    assert vm._audio_available() is False
++    reason = vm._audio_unavailable_reason()
++    assert "initialization failed" in reason.lower()
++    assert "Initializing engine failed" in reason
++    assert "-9999" in reason
++    assert "not found" not in reason
++
++    result = capture.capture_requirements({"capture_backend": "sounddevice"})
++    assert result["available"] is False
++    assert reason in result["detail"]
++
++    warnings, notices = [], []
++    vm._probe_audio_libraries(
++        warnings, notices, has_forwarded_audio=False,
++        termux_mic_cmd=None, termux_app_installed=False,
++    )
++    assert warnings == [reason]
++    assert notices == []
++
++    recorder = vm.AudioRecorder()
++    with pytest.raises(RuntimeError, match="initialization failed") as caught:
++        recorder.start()
++    assert type(caught.value.__cause__).__name__ == "PortAudioError"
++    assert not recorder.is_recording
++    assert recorder._stream is None
++
++
++@pytest.mark.parametrize(
++    "devices, forwarded, ready",
++    [
++        ([{"name": "speaker", "max_input_channels": 0, "max_output_channels": 2}], False, False),
++        ([{"name": "speaker", "max_input_channels": 0, "max_output_channels": 2}], True, False),
++        ([{"name": "speaker", "max_input_channels": 0, "max_output_channels": 2},
++          {"name": "microphone", "max_input_channels": 1, "max_output_channels": 0}], False, True),
++    ],
++)
++def test_device_inventory_requires_an_input_not_just_output(monkeypatch, devices, forwarded, ready):
++    library = SimpleNamespace(query_devices=lambda: devices)
++    monkeypatch.setattr(vm, "_import_audio", lambda: (library, None))
++    warnings, notices = [], []
++
++    vm._probe_audio_libraries(
++        warnings, notices, has_forwarded_audio=forwarded,
++        termux_mic_cmd=None, termux_app_installed=False,
++    )
++
++    assert (not warnings) is ready
++    assert notices == []
++    if not ready:
++        assert "input" in warnings[0].lower()
++        assert "output" in warnings[0].lower()

@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/probes/scripts/prepare_audio_hermes_environment.py", line 1050, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/probes/scripts/prepare_audio_hermes_environment.py", line 1033, in main
+    bootstrap_worker(json_object(args.bootstrap_worker.read_bytes()))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/prepare_audio_hermes_environment.py", line 767, in bootstrap_worker
+    verified_tools(["python", "uv"], source_store=payload / "tools", target=TARGET)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/out/prepared/payload/app/pm/build_operations.py", line 186, in verified_tools
+    raise InstallError(package.name, "tool source failed verification", "run preparation again")
+pm.package.InstallError: python: tool source failed verification — run preparation again

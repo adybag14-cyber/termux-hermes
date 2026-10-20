@@ -1,0 +1,36 @@
+........................................................................ [ 61%]
+..........................................F...                           [100%]
+================================== FAILURES ===================================
+_ test_missing_documentation_destination_cannot_be_redirected_inside_payload __
+
+baseline_documentation_payload = namespace(payload=WindowsPath('C:/Users/adyba/AppData/Local/Temp/pytest-of-adyba/pytest-903/test_missing_documentation.../runtime-libs/share/LICENSES/GPL-3.0.txt'), license_raw=b'unchanged license bytes for the filesystem policy fixture\n')
+
+    def test_missing_documentation_destination_cannot_be_redirected_inside_payload(
+        baseline_documentation_payload,
+    ):
+        fixture = baseline_documentation_payload
+        destination = fixture.payload / fixture.pin["missing_destination"]
+        destination.parent.mkdir(parents=True)
+        redirected = destination.parent.with_name("other-license-dir")
+        redirected.mkdir()
+        # Keep it missing, but redirect the lexical destination's parent elsewhere.
+        destination.parent.rmdir()
+        destination.parent.symlink_to(redirected.name, target_is_directory=True)
+>       with pytest.raises(prep.PreparationError, match="documentation destination differs"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'audio_preparation_test.PreparationError'>
+
+tests\test_audio_hermes_preparation.py:950: Failed
+============================== warnings summary ===============================
+tests/test_audio_hermes_preparation.py::test_actual_canonical_marker_probe_keeps_markers_without_writing_bytecode
+  tests\test_audio_hermes_preparation.py:493: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    def test_actual_canonical_marker_probe_keeps_markers_without_writing_bytecode(
+
+tests/test_audio_hermes_preparation.py::test_actual_canonical_uv_environment_strips_the_ambient_bytecode_flag
+  tests\test_audio_hermes_preparation.py:738: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    def test_actual_canonical_uv_environment_strips_the_ambient_bytecode_flag(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_audio_hermes_preparation.py::test_missing_documentation_destination_cannot_be_redirected_inside_payload
+1 failed, 117 passed, 2 warnings in 3.08s

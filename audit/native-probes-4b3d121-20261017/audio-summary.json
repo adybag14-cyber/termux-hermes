@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "run_id": 39042809536,
+  "job_id": 117425533105,
+  "artifact_id": 12104289747,
+  "snapshot": "4b3d1214ea24688fdf538190fcba14d08b837d16",
+  "run_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39042809536",
+  "artifact_url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39042809536/artifacts/12104289747",
+  "full_audio_lane_status": "failed",
+  "numpy": {
+    "version": "2.4.3",
+    "qualification": "candidate-built",
+    "builder_runtime_numerical_proof": "passed",
+    "original_payload_runtime_numerical_proof": "passed",
+    "checks": [
+      "NumPy native array arithmetic",
+      "FFT roundtrip",
+      "internal LAPACK linear solve",
+      "matrix multiplication without external BLAS"
+    ],
+    "wheel": {
+      "name": "numpy-2.4.3-cp314-cp314-android_24_arm64_v8a.whl",
+      "sha256": "619d0dcb59d6e8e90c370ea9fa5a35efdd4fde0a625f1972a8209da46e8da446",
+      "size": 7180471
+    }
+  },
+  "portaudio": {
+    "package_version": "19.07.00-3",
+    "dlopen_reached": true,
+    "initialization": "failed",
+    "sounddevice_version": "0.5.5",
+    "error": "PaErrorCode -9999: Initializing engine failed",
+    "runtime_qualification": "unverified",
+    "opensles_origin": "not recorded in this first probe",
+    "container_audio_services": "not recorded in this first probe",
+    "failure_classification": "not yet established; generic initialization errors remain failures",
+    "primary_source_context": {
+      "installed_container_package": "libandroid-stub 30-2",
+      "installed_package_evidence": "audio-termux-packages.tsv",
+      "wrapper_source_url": "https://github.com/termux/termux-packages/blob/11ae750781a261b8df328697b12d66d75b72e5da/packages/libandroid-stub/libOpenSLES-wrapper.c",
+      "wrapper_behavior": "Forwards to the platform OpenSL ES object; returns feature unsupported when that object cannot load.",
+      "interpretation": "A possible container limitation, not yet the verified loaded-library/root-cause result."
+    }
+  },
+  "no_undeclared_libraries_in_static_linkage_scan": true,
+  "hardware_capture_tested": false,
+  "default_audio_io_admitted": false,
+  "published": false,
+  "evidence_sha256": {
+    "audio-numpy-runtime.json": "92f6618f400db6722e3e8286351d818a048ea4343baaff32a19eb5b09d35af79",
+    "audio-numpy-original-runtime.json": "92f6618f400db6722e3e8286351d818a048ea4343baaff32a19eb5b09d35af79",
+    "audio-build-probe.json": "0b79c656683a16ac5b109aff1df831fbdd00b840636b043f9cd8e3f091f05d37",
+    "audio-native-linkage.json": "630c17b01e1e252fcba04475865b90afd65981ac1b74a9af5de2c38c9b1d9887",
+    "audio-runtime-inputs.json": "61cd76cdc76463b73819aeb7b310aaf6fb9005502a2c31b5f7f15362da7c5871",
+    "audio-runtime-probe.json": "3a1363669c2a131f75d74ec518960149bd0de9e5aab07597687183b8e901ecfb",
+    "audio-original-runtime-probe.json": "3a1363669c2a131f75d74ec518960149bd0de9e5aab07597687183b8e901ecfb",
+    "audio-probe-inputs.json": "71f00d463a6726a7923744dbc51f27bb3b28e98d478255f5c211f412aabdffeb",
+    "audio-build-adaptations.sha256": "a7b18a198c5128b59534bc610b237b0f55bb6cabb26d39b739c7bd6c695edbbe",
+    "audio-termux-packages.tsv": "29263d77a82cfd75484c3ff5212aa2098e58ffc83140d1d6ebd0928a251578ba"
+  },
+  "diagnostic_follow_up": {
+    "purpose": "Record actual mapped library paths/SHA/package origin and fixed Android audio framework/service prerequisites.",
+    "classification_relaxed": false,
+    "full_audio_lane_may_pass_on_initialization_error": false,
+    "focused_tests_passed": 17,
+    "expected_evidence": [
+      "AUDIO-HOST-RUNTIME-PROBE.json",
+      "AUDIO-HOST-ORIGINAL-RUNTIME-PROBE.json"
+    ]
+  }
+}

@@ -1,0 +1,379 @@
+{
+  "artifact": {
+    "all_member_crc_verified": true,
+    "binary_members_saved_in_git": false,
+    "bytes": 353358744,
+    "full_zip_sha256_verified": true,
+    "id": 12112143099,
+    "member_count": 50,
+    "sha256": "179e09a63fc9193098b17da25da9178646042fa23beb98d10c521bab7ef4321f",
+    "verification_receipt": {
+      "bytes": 11146,
+      "path": "run-39062805143/verified-artifact.json",
+      "sha256": "6aea22fdc2a7c457705a624aa854b8097f2c11ef7b18cd626ea93808435bcd9b"
+    }
+  },
+  "claim_boundaries": {
+    "android_phone_ui_tested": false,
+    "at_spi_content_tested": false,
+    "background_input_certified": false,
+    "fresh_runtime_only_lifecycle_passed": false,
+    "history_preview_tested": false,
+    "model_calls_requested": false,
+    "original_main_candidate_artifact_modified": false,
+    "parallel_uinput_claimed": false,
+    "physical_device_tested": false,
+    "prepared_candidate_pm_cua_admission_changed": true,
+    "published": false,
+    "version_bumped": false
+  },
+  "fresh_lifecycle": {
+    "diagnosis": "The host wrapper attempted chmod on the UID 1000 container-owned prepared candidate and failed with Operation not permitted before starting its fresh lifecycle container.",
+    "error_lines": [
+      "2026-10-17T19:38:14.0994714Z chmod: changing permissions of '/home/runner/work/termux-hermes/termux-hermes/probe-results/cua/hermes-prepared/hermes-agent_0.22.2-1_aarch64-cua-candidate.deb': Operation not permitted",
+      "2026-10-17T19:38:14.1259602Z ##[error]Process completed with exit code 1."
+    ],
+    "fresh_container_started": false,
+    "host_exit_code": 1,
+    "inputs_receipt": {
+      "bytes": 1054,
+      "path": "run-39062805143/hermes-lifecycle/CUA-LIFECYCLE-INPUTS.json",
+      "sha256": "d6c3166ece55bf62e4389574e418744c985df889e8a24516251e5ab2a8dd6626"
+    },
+    "native_packaged_probe_is_not_a_fresh_lifecycle_pass": true,
+    "published_baseline_upgrade_executed": false,
+    "runtime_only_driver_load_executed": false,
+    "runtime_only_optional_install_executed": false,
+    "status": "host-preflight-failed-before-container",
+    "workflow_step": {
+      "completed_at": "2026-10-17T19:38:14Z",
+      "conclusion": "failure",
+      "name": "Validate CUA upgrade and optional installs without build tools",
+      "number": 8,
+      "started_at": "2026-10-17T19:38:12Z",
+      "status": "completed"
+    }
+  },
+  "inputs": {
+    "builder_image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
+    "canonical_assembly_source": {
+      "bytes": 1444,
+      "path": "run-39062805143/assembly-source/SOURCE.json",
+      "sha256": "1cd7a2b0eb254fd07f5f8eb9c63c124a9bfb87e93c0c07397936b3c71cd0652a"
+    },
+    "cargo_lock": {
+      "bytes": 150467,
+      "path": "run-39062805143/CUA-Cargo.lock",
+      "sha256": "fd6e9eb4984e8af3de23f38822bd91ca2e700cd20d0ad81b44142e33991116b9"
+    },
+    "driver_patch": {
+      "bytes": 53489,
+      "path": "run-39062805143/cua-driver.patch",
+      "sha256": "8b7c3453bed12feabd319436eae1abc791b4127a4fe485adcc96eb90ce780b6a"
+    },
+    "driver_source_receipt": {
+      "bytes": 5571,
+      "path": "run-39062805143/CUA-SOURCE-RECEIPT.json",
+      "sha256": "47c43e002a868f0387e02142a9c623e5790c2656076959688abc3e93a6ec6167"
+    },
+    "probe": {
+      "bytes": 4137,
+      "path": "run-39062805143/CUA-PROBE-INPUTS.json",
+      "sha256": "bb8887148019624fc0900a06a4e4e281d8e4d12525b0776a6e60deee82f93cfb"
+    }
+  },
+  "package_preparation_and_reinstall": {
+    "base_candidate": {
+      "artifact_id": 12107225801,
+      "candidate_receipt_sha256": "2bf694eec468c10a4d3820092813d8b2734c2b212954888009e3867a8a88dbf3",
+      "head_sha": "e271e922a2e71fd18591c45e9b98b8c7f9fffe02",
+      "package_sha256": "1e4e58fe17a1800f23ababcb2724e92b8904829eae3284569db52dbc672ca76a",
+      "run_id": 39048514731
+    },
+    "base_payload_unchanged_during_preparation": true,
+    "complete_payload_inventory": {
+      "bytes": 6788659,
+      "path": "run-39062805143/hermes-prepared/CUA-PREPARED-PAYLOAD.json",
+      "sha256": "a64a3e7f99f39a2307f1cd536b374812dc464bb496277cff670f4088eac5e354"
+    },
+    "dependency_identity": {
+      "environment_rebuilt": false,
+      "facts_sha256": "a6f4930d619eaf8c86f14bd98421baa47ee5ddf6da1dd3b01b81c7568dd7d3fc",
+      "locks_and_catalog_preserved": true,
+      "method": "Native PM recomputation; unchanged exact graph/catalog and final interpreter path.",
+      "original_pm_runtime_inventory_sha256": "07b31614b4756d5453ad3d5c747e7d40b4a94b94496e05749d0daff535b8c708",
+      "original_venv_inventory_sha256": "7a7bfa3334b7cd17f73d65c3be4a1832af0b7bf9bd0a4a6614f74578ae10a15e",
+      "original_wheel_count": 100,
+      "original_wheels_preserved": true,
+      "pm_runtime_inputs_original": "4de3e31fb23069e9ef4d0b748ee2d78fe890205d50a8c6571d2f3de72df2a379",
+      "pm_runtime_inputs_recomputed": "4de3e31fb23069e9ef4d0b748ee2d78fe890205d50a8c6571d2f3de72df2a379",
+      "venv_stamp_original": "3b2935496d2e947be1904f37052d1fcbae409418e892a52973d5a46fc1df4d7f",
+      "venv_stamp_recomputed": "3b2935496d2e947be1904f37052d1fcbae409418e892a52973d5a46fc1df4d7f"
+    },
+    "installed_payload_after": {
+      "file_and_symlink_count": 29819,
+      "regular_file_bytes": 933459066,
+      "sha256": "db565010dc2d8430add2c9595883d477d75fe3564bdcb40c3a9b953a700576c8"
+    },
+    "installed_payload_before": {
+      "file_and_symlink_count": 29819,
+      "regular_file_bytes": 933459066,
+      "sha256": "db565010dc2d8430add2c9595883d477d75fe3564bdcb40c3a9b953a700576c8"
+    },
+    "metadata_extracted_directly_from_verified_deb": [
+      {
+        "bytes": 218,
+        "path": "run-39062805143/deb-metadata/control/control",
+        "sha256": "c03049576e2015e8356d801896aa8bcc92200ca1af0045c5fc62d7cbabd3fcbb"
+      },
+      {
+        "bytes": 509,
+        "path": "run-39062805143/deb-metadata/control/postinst",
+        "sha256": "9c4333832be51fc5ebdc5bab16f9e51a6faf02b8e2b7229a5f8d71b392f5e678"
+      },
+      {
+        "bytes": 374,
+        "path": "run-39062805143/deb-metadata/control/prerm",
+        "sha256": "25eb3c8d7518f79f5452ddf012ff7fea3fc0dfe30e8d2aa795d8e25bf228843a"
+      },
+      {
+        "bytes": 565,
+        "path": "run-39062805143/deb-metadata/payload/bundled-tools.json",
+        "sha256": "a87cb211f069b91ad5672cfc406d8fd2f6419f53ef6e18e5c3c4f4595d410f54"
+      },
+      {
+        "bytes": 802,
+        "path": "run-39062805143/deb-metadata/payload/manifest.json",
+        "sha256": "cc0bd22d50a3c1881b85e21ec0cf985e407b85b64bcacf2ffac2190f575a9087"
+      }
+    ],
+    "package": {
+      "architecture": "aarch64",
+      "bytes": 235261472,
+      "depends": "libx11, libxi",
+      "file": "hermes-agent_0.22.2-1_aarch64-cua-candidate.deb",
+      "name": "hermes-agent",
+      "pre_depends": "",
+      "sha256": "1f80c66faa35d314ca425cc4a9e7864e91d50f059e2d0b5be85b98e6c6ff1ce5",
+      "version": "0.22.2-1"
+    },
+    "patch": {
+      "bytes": 67709,
+      "file": "cua-hermes-integration.patch",
+      "sha256": "8bbfddbbacfd508db35de6158e4c1a2c06423b84cd5f4ed621d4955fcd529edd"
+    },
+    "prepared_receipt": {
+      "bytes": 20091,
+      "path": "run-39062805143/hermes-prepared/prepared-cua-receipt.json",
+      "sha256": "c3f34e2032d9f0cb1cc99bc8237e097e09ba0583cf73fab688dec71d4b605fe0"
+    },
+    "prepared_receipt_timing_note": "The preparation receipt intentionally leaves future native/lifecycle checks pending. The later Hermes result and outer preparation receipt demonstrate completed native default selection and same-version reinstall; the separate fresh lifecycle remains incomplete.",
+    "receipt": {
+      "bytes": 8124,
+      "path": "run-39062805143/CUA-HERMES-PREPARATION.json",
+      "sha256": "11ffa4ef73563f97a131a83cade5dc4c04eaaac54911538b79e8e99008175878"
+    },
+    "same_version_reinstall_passed": true,
+    "status": "passed"
+  },
+  "packaged_default": {
+    "all_dispatch_arguments_unchanged": true,
+    "background_scope": {
+      "created": "cua:click:background",
+      "foreground_authorized": false,
+      "input_events_added": 0,
+      "revoked": true
+    },
+    "check_count": 7,
+    "checks": [
+      "no-approver-input-refused",
+      "explicit-background-refused-without-input",
+      "background-only-grant-cannot-approve-default-foreground",
+      "registered-handler-exact-window-and-pixels",
+      "three-once-approvals-with-independent-input-oracles",
+      "real-viewer-lease-blocks-input-and-capture",
+      "product-session-desktop-and-owned-child-cleanup"
+    ],
+    "cleanup": {
+      "desktop_stopped": true,
+      "errors": [],
+      "fixture_reaped": true,
+      "private_workspace_removed": true,
+      "session_released": true
+    },
+    "dispatch_count": 12,
+    "driver_selection_mode": "packaged-default",
+    "payload_preservation": {
+      "files_links_and_directory_modes": true,
+      "inventory_entries": 32515
+    },
+    "pm_selection": {
+      "authority_overrides_present": [],
+      "binary": "/data/data/com.termux/files/usr/lib/hermes-agent/tools/cua-driver-0.21.0-linux-arm64-bionic/cua-driver",
+      "path": "/data/data/com.termux/files/usr/lib/hermes-agent/tools/cua-driver-0.21.0-linux-arm64-bionic",
+      "sha256": "97abdcfdbddc55c20c9ea4a2e897be9e3183458df83475cee0e3d152212f0b53",
+      "version": "0.21.0"
+    },
+    "receipt": {
+      "bytes": 45932,
+      "path": "run-39062805143/hermes-integration/hermes-cua-result.json",
+      "sha256": "51c93b1b6b7f0b80c41685c6d40e20f074389accd45bb9dc09178d41707bbc11"
+    },
+    "runtime_contract": {
+      "binary": "/data/data/com.termux/files/usr/lib/hermes-agent/tools/cua-driver-0.21.0-linux-arm64-bionic/cua-driver",
+      "ready": true,
+      "reason": "",
+      "version": "0.21.0"
+    },
+    "single_use_approvals": [
+      {
+        "action": "click",
+        "choice": "once"
+      },
+      {
+        "action": "scroll",
+        "choice": "once"
+      },
+      {
+        "action": "type",
+        "choice": "once"
+      }
+    ],
+    "status": "passed",
+    "successful_click_scroll_type_delivery_mode_omitted": true,
+    "transport": {
+      "argv": [
+        "/data/data/com.termux/files/usr/lib/hermes-agent/tools/cua-driver-0.21.0-linux-arm64-bionic/cua-driver",
+        "mcp",
+        "--no-overlay"
+      ],
+      "capability_version": "",
+      "create_time": 1792265863.26,
+      "generation": 1,
+      "kind": "real MCP stdio",
+      "pid": 3825
+    },
+    "transport_fallbacks": []
+  },
+  "raw_evidence": {
+    "api_snapshots": [
+      {
+        "bytes": 13847,
+        "path": "run-39062805143/run-api.json",
+        "sha256": "51c4ea712c7010365090ae4924872056a9025742b648e52a8b39a048d20f671d"
+      },
+      {
+        "bytes": 3393,
+        "path": "run-39062805143/jobs-api.json",
+        "sha256": "59454ddfafcaa6e785ce872be6c36626ec1cba77a2fd944d1c8b5c21f2eac4f3"
+      },
+      {
+        "bytes": 780,
+        "path": "run-39062805143/artifacts-api.json",
+        "sha256": "7a1b2d5aae0985a8420cffe5def1bfb74b818856b5269ace10ad47ab8d9deee7"
+      },
+      {
+        "bytes": 13847,
+        "path": "run-39062805143/run-api-c565d04ae2c82fde.json",
+        "sha256": "c565d04ae2c82fdee22ee664ea03186751d6c63686e022fb90aa0e9ede258303"
+      }
+    ],
+    "artifact_member_bytes_preserved": 7630682,
+    "artifact_members_preserved": 48,
+    "directory": "run-39062805143",
+    "excluded_binary_members": [
+      {
+        "bytes": 110459288,
+        "crc": 2787421156,
+        "extracted": false,
+        "name": "bin/cua-driver",
+        "sha256": "97abdcfdbddc55c20c9ea4a2e897be9e3183458df83475cee0e3d152212f0b53"
+      },
+      {
+        "bytes": 235261472,
+        "crc": 1806061176,
+        "extracted": false,
+        "name": "hermes-prepared/hermes-agent_0.22.2-1_aarch64-cua-candidate.deb",
+        "sha256": "1f80c66faa35d314ca425cc4a9e7864e91d50f059e2d0b5be85b98e6c6ff1ce5"
+      }
+    ],
+    "file_count": 60,
+    "file_inventory": {
+      "bytes": 14348,
+      "path": "run-39062805143/SAVED-FILES.json",
+      "sha256": "d50d8acea6a9575f3d683fa58852f35b7b00edc29fd660fdad11d30c6bc6d1fc"
+    },
+    "job_log": {
+      "bytes": 229118,
+      "path": "run-39062805143/native-job.log",
+      "sha256": "e8cb8fab7bd6e6fd599b171d1bf978f17503b4b25bb074ddde92fdd261fe5bd7"
+    },
+    "run_api_snapshot_note": "The complete run API snapshots are retained without rewriting nested current PR heads. The immutable workflow-run head was checked in every snapshot.",
+    "total_bytes": 7919629
+  },
+  "run": {
+    "completed_at": "2026-10-17T19:38:33Z",
+    "conclusion": "failure",
+    "head_sha": "49a9c383f4582bba4f7fdf69658e56168ec5c847",
+    "id": 39062805143,
+    "job_id": 117484076488,
+    "started_at": "2026-10-17T19:31:09Z",
+    "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39062805143",
+    "workflow": ".github/workflows/cua-termux-probe.yml"
+  },
+  "schema_version": 1,
+  "scope": "Unpublished same-version Hermes candidate containing the native Bionic CUA driver; owned virtual X11 desktop checks only.",
+  "standalone": {
+    "check_count": 11,
+    "checks": [
+      "native-aarch64-bionic-elf",
+      "private-session-bus-method-roundtrip",
+      "private-authenticated-x11-unix-only",
+      "real-linux-tool-registry",
+      "screenshot-png-independent-two-color-oracle",
+      "click-observed-by-xlib-fixture",
+      "scroll-two-exact-xlib-wheel-events",
+      "foreground-text-exact-keypress-oracle",
+      "clipboard-exact-roundtrip",
+      "window-frame-independent-xlib-readback",
+      "all-owned-child-processes-reaped"
+    ],
+    "cleanup": [
+      {
+        "name": "driver",
+        "pid": 3572,
+        "returncode": -15
+      },
+      {
+        "name": "fixture",
+        "pid": 3571,
+        "returncode": -15
+      },
+      {
+        "name": "xfwm4",
+        "pid": 3562,
+        "returncode": 0
+      },
+      {
+        "name": "xvnc",
+        "pid": 3558,
+        "returncode": 0
+      },
+      {
+        "name": "dbus",
+        "pid": 3556,
+        "returncode": 0
+      }
+    ],
+    "cleanup_errors": [],
+    "driver_sha256": "97abdcfdbddc55c20c9ea4a2e897be9e3183458df83475cee0e3d152212f0b53",
+    "receipt": {
+      "bytes": 1611,
+      "path": "run-39062805143/CUA-BEHAVIOR.json",
+      "sha256": "9840d6d89f815c21accc615311a973cca1132569ca0bf740ce16aeffbe6ac4d9"
+    },
+    "status": "passed",
+    "tool_count": 60
+  },
+  "status": "native-packaged-default-passed-fresh-lifecycle-host-preflight-failed"
+}

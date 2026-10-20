@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "prepared_at_utc": "2026-10-18T00:55:50.635422+00:00",
+  "status": "reviewed preparation and 199 focused host tests passed; native reconstruction retry pending",
+  "failure_evidence": "audit/audio-hermes-native-20261018/run-39083065999.json",
+  "failure_run": 39083065999,
+  "failure_description": "Owned wrapper, namespace and PortAudio mappings passed; actual PortAudio initialization error was retained, then strict prefix mapping rejected the immutable image libc++.so.",
+  "change": [
+    "Verify only the exact five previously measured image shared objects, with immutable Docker digest/architecture, current aosp-libs owner/version/status, each exact path/hash/size/AArch64 ELF header.",
+    "Keep original raw Docker inspection and dpkg-query logs in each independent probe.",
+    "Exclude non-library linker mappings, while every unpinned shared object anywhere under opt/aosp remains rejected.",
+    "Leave owned payload libraries, all ordinary prefix restrictions and actual initialization-error behavior unchanged.",
+    "Real devices without image platform mappings need neither Docker inspection nor image-specific package queries."
+  ],
+  "source_files": {
+    "scripts/compatibility_probe_audio_hermes.py": {
+      "bytes": 21573,
+      "sha256": "3720e56b9fafccf6a32efa01911e6c0ce95b0c6c40017362a96a7258f8af98e2"
+    },
+    "scripts/run_audio_hermes_preparation.sh": {
+      "bytes": 4999,
+      "sha256": "b98108505947c06006a1241a3f7403d606b38a7a14b707eb29a2ce9642488d2d"
+    },
+    "tests/test_audio_image_runtime.py": {
+      "bytes": 9383,
+      "sha256": "a60c136b31c1fb5ee7fc0667f6cb48eead99b4996cfa407cf84f5a3a6d5b6644"
+    }
+  },
+  "tracked_source_diff": {
+    "bytes": 10848,
+    "sha256": "2d2fbcabae666f53b2ee41dbe034b5f1901d366dcd0101b8f54b87c45159355a"
+  },
+  "host_tests": {
+    "passed": 199,
+    "skipped": 0,
+    "seconds": 6.55,
+    "prior_198_test_result_preserved": true,
+    "physical_device_execution": false
+  },
+  "independent_review": {
+    "bytes": 7741,
+    "sha256": "679e612461d4bddf2afec4f2f11338bafe43de1ffa6e4327845d07d627e68c7a",
+    "finding_resolved": "Shared-object selection excludes the real image linker.",
+    "actual_raw_map_fixtures_replayed": 5
+  },
+  "original_five_file_pins": "Byte-identical to the separately reviewed nonRust platform_runtime files; no ICU or general directory allowance.",
+  "raw_files": {
+    "bash-syntax.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "bash-syntax.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "before-peer-correction/pytest-root-run.json": {
+      "bytes": 833,
+      "sha256": "bce1c14a69e8a4293dd394795f65704ce1a8b50245baf454d03658d9995bdca5"
+    },
+    "before-peer-correction/pytest-root.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "before-peer-correction/pytest-root.stdout.log": {
+      "bytes": 1120,
+      "sha256": "8c0b2e4a7821c070ab08e59737c8857198272bc87ea59c4100088477302116cd"
+    },
+    "before-peer-correction/pytest-root.xml": {
+      "bytes": 31701,
+      "sha256": "de737b73f05f5bf27b0b427ab853c8ce9523663a141fa64f8f5466d7664d7341"
+    },
+    "before-peer-correction/SOURCE-AFTER.json": {
+      "bytes": 458,
+      "sha256": "439ed8b5c36727b71d2c2136ac6dac03dca096a69facf799fe3d602fe2dbc187"
+    },
+    "before-peer-correction/source-change.diff": {
+      "bytes": 10634,
+      "sha256": "3334bd6937649a4102049dd7089391d96831c92302f1cd23f6871ad84338ee5b"
+    },
+    "independent-review.json": {
+      "bytes": 7741,
+      "sha256": "679e612461d4bddf2afec4f2f11338bafe43de1ffa6e4327845d07d627e68c7a"
+    },
+    "original-image-platform-pins.json": {
+      "bytes": 3927,
+      "sha256": "e153516f8bf7abfcf436cd7ef72e1dab173e32868c58d8bfa3dfc8a576cc15a2"
+    },
+    "pytest-root-run.json": {
+      "bytes": 833,
+      "sha256": "6a75d66dc542a687ff03ab985bdcd62ee010161a96dba9a76bd0360680bd1e0e"
+    },
+    "pytest-root.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "pytest-root.stdout.log": {
+      "bytes": 1120,
+      "sha256": "f6eaac2b593dac5fed1057ae8ce6cce15bd84691f5c2252e6fee63e30b027196"
+    },
+    "pytest-root.xml": {
+      "bytes": 31848,
+      "sha256": "c5cc77becd5fd9fdebbb2ba92c97f2383f37e588ef1983b987d2c6abc082cce4"
+    },
+    "SOURCE-AFTER.json": {
+      "bytes": 458,
+      "sha256": "5c22ea5f8af4c572dc22964bbf6fee94e8d60ebc3970bfd5302dbe943422f08f"
+    },
+    "SOURCE-BEFORE.json": {
+      "bytes": 464,
+      "sha256": "14f15fabc816cf499b28429e1093a1ef23c5c0edadb535927f8a5cc8ac0de203"
+    },
+    "source-change.diff": {
+      "bytes": 10848,
+      "sha256": "2d2fbcabae666f53b2ee41dbe034b5f1901d366dcd0101b8f54b87c45159355a"
+    }
+  },
+  "complete_audio_dependency_readiness": false,
+  "physical_vad": "not-tested",
+  "microphone_accessed": false,
+  "audio_stream_opened": false,
+  "published": false
+}

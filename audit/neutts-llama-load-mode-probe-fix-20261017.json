@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-17T19:56:55.806294+00:00",
+  "status": "host-probe-contract-fixed-native-retry-required",
+  "scope": "Correct the native llama receipt's obsolete default parameter field. No native source, wheel retagging, dependency pin or model changes.",
+  "failed_native_run": {
+    "run_id": 39063611598,
+    "job_id": 117486532194,
+    "head_sha": "5cace91a4253642d2597c7712b7cf119ade8d892",
+    "url": "https://github.com/adybag14-cyber/termux-hermes/actions/runs/39063611598",
+    "artifact_id": 12112761027,
+    "artifact_bytes": 151553565,
+    "artifact_sha256": "e0226ab37ed9b2f9cbe35494b7a6f897706fae369efb4b220a04974b68a8c87f",
+    "artifact_full_acquisition_pending_at_this_receipt": true,
+    "reported_foundation_cases_passed": 7,
+    "reported_source_wheel_build_and_installed_inputs": "passed",
+    "reported_numba_native_case": "passed",
+    "numba_receipt_sha256": "02707bb72c95a3657e35bd246f0237d90e3efb232b2898791be2de21a1b8684f",
+    "llama_case": "failed",
+    "llama_receipt_sha256": "26b30e568437ea76fba7a0ed8956b2e6a7a9280fc1425e416e93dd033f37a4a0",
+    "error_type": "AttributeError",
+    "error_message": "'llama_model_params' object has no attribute 'use_mmap'",
+    "whole_native_gate_passed": false
+  },
+  "primary_contract": {
+    "llama_cpp_python_commit": "1652066e0af45f2313b339670ef9555e8a54e545",
+    "llama_cpp_commit": "0c1e57098bba43ac29e6e3b677cdceebdd22334f",
+    "model_param_fields": [
+      "devices",
+      "tensor_buft_overrides",
+      "n_gpu_layers",
+      "split_mode",
+      "load_mode",
+      "lazy_mode",
+      "main_gpu",
+      "tensor_split",
+      "progress_callback",
+      "progress_callback_user_data",
+      "kv_overrides",
+      "vocab_only",
+      "check_tensors",
+      "use_extra_bufts",
+      "no_host",
+      "no_alloc",
+      "load_mtp"
+    ],
+    "LLAMA_LOAD_MODE_AUTO": -1,
+    "source_files": {
+      "llama_cpp/llama_cpp.py": {
+        "bytes": 189135,
+        "sha256": "db8d48ce5003d8ed1bb690b3b529ae112ca71881110a43fb9acd164210848fd0"
+      },
+      "vendor/llama.cpp/include/llama.h": {
+        "bytes": 89978,
+        "sha256": "d5cf9203bea63b575e76cba4881f29cfd1b611451578b01582b75b72ecbb04bc"
+      },
+      "vendor/llama.cpp/src/llama-model.cpp": {
+        "bytes": 162018,
+        "sha256": "be90575de2cf5248ea42fbe7136a93325b394d3cdb7f9920e2f429f213f08493"
+      }
+    },
+    "source_default": "llama_model_default_params sets load_mode to LLAMA_LOAD_MODE_AUTO; the binding uses the same enum field and has no use_mmap member."
+  },
+  "correction": {
+    "default_model_load_mode": "Require and record the actual load_mode enum; keep supports_mmap as a distinct native capability call.",
+    "library_ownership_context_capability_and_finally_cleanup_checks_preserved": true,
+    "finished_wheel_verifier_unchanged": true,
+    "runtime_model_loaded": false,
+    "synthesis_tested": false
+  },
+  "files": {
+    "scripts/compatibility_probe_neutts_native.py": {
+      "bytes": 42842,
+      "sha256": "862efa59b3c967fd360e1d9ce86d4ebadc5bbf9a4b0a3023f2990a66da130c74"
+    },
+    "tests/test_neutts_native_components.py": {
+      "bytes": 14413,
+      "sha256": "94d105af320b7579b4bf83bb91a787a0a6977174c17617b177ae01baec6f0816"
+    },
+    "audit/neutts-native-20261017/llama-load-mode-red-20261017.log": {
+      "bytes": 10132,
+      "sha256": "09e41660da70210d22aed9e7cad385ef1ab1f323bb38a61bfacfd2a3456c6b36"
+    },
+    "audit/neutts-native-20261017/llama-load-mode-green-20261017.log": {
+      "bytes": 4308,
+      "sha256": "3f6a3711534df10b1bcd2fd189e1a28e262c817119e77133912e6ba5dc532411"
+    }
+  },
+  "validation": {
+    "baseline_new_cases_failed": 2,
+    "patched_cases_passed": 33,
+    "patched_cases_failed": 0,
+    "patched_cases_skipped": 0,
+    "new_cases": 2,
+    "scope": "Host fixtures model the current ctypes field and native-call contract; verify success, rejection of an invalid default, and backend cleanup. No host native ABI execution claimed.",
+    "native_retry_required": true
+  },
+  "source_and_lock_pins": {
+    "scripts/neutts_native_sources_lock.json": {
+      "bytes": 35165,
+      "sha256": "a06e595179fad6f437ca95210d685beb339baa0867cd527dba5f5083d94b36ce"
+    },
+    "scripts/prepare_neutts_native_sources.py": {
+      "bytes": 22681,
+      "sha256": "7e4abf6794f848d399d15a877e9c8a74db1a44ba5e87ceb898d5d4777169f744"
+    },
+    "patches/next-stable/llama-cpp-python-android-loader.patch": {
+      "bytes": 7913,
+      "sha256": "254d0d86b5b3d0ff0a92f0767d997f9d11d16449570713f1fc6ab64f0e718a9b"
+    }
+  },
+  "published": false,
+  "version_bumped": false
+}

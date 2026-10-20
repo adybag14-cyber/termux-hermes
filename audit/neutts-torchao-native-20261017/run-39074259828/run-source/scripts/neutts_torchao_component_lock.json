@@ -1,0 +1,97 @@
+{
+  "foundation": {
+    "apt_metadata_ledger_sha256": "2031c8a6915915ffffb980b268ad5107d42a186682cb2ca7009d803fe2abe200",
+    "helpers": {
+      "compatibility_probe_neutts.py": "170d2381b6c73863b18727ccda5c03718871df416a73e8e796bf2443c3d9bcbd",
+      "compatibility_probe_neutts_native.py": "862efa59b3c967fd360e1d9ce86d4ebadc5bbf9a4b0a3023f2990a66da130c74",
+      "prepare_neutts_core_python.py": "b78a252eb1c3d1872b64f7ffe5e16bf16c161057b6579732a7af966317e0b19e"
+    },
+    "image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303",
+    "python": "3.14.6",
+    "required_cases": [
+      "python_dependencies",
+      "torch",
+      "torchaudio",
+      "torchcodec",
+      "scipy",
+      "llvmlite",
+      "soxr"
+    ],
+    "torch": "2.14.1"
+  },
+  "operation": {
+    "audio_tested": false,
+    "block_size": 64,
+    "complete_engine_tested": false,
+    "cuda_tested": false,
+    "device": "cpu",
+    "dtype": "float32",
+    "forward_atol": 1e-05,
+    "forward_rtol": 1e-05,
+    "gradient_atol": 1e-05,
+    "gradient_rtol": 1e-05,
+    "model_downloaded": false,
+    "normalized_l2_error_max": 0.16,
+    "scaler_block_size": 256,
+    "weight_shape": [
+      128,
+      128
+    ]
+  },
+  "package": {
+    "artifact": {
+      "bytes": 962232,
+      "filename": "torchao-0.12.0-py3-none-any.whl",
+      "sha256": "103f2a9164d2e4f705332af1aafbb8473eadd14d9164e45857ca187cde1f13d2",
+      "url": "https://files.pythonhosted.org/packages/6c/5f/6bf9b5bed6d31e286516d23e1db7320d2ccfbf1b2234749833ad1e3d25a5/torchao-0.12.0-py3-none-any.whl"
+    },
+    "base_requires_dist": [],
+    "name": "torchao",
+    "native_members": [],
+    "requires_python": "",
+    "version": "0.12.0",
+    "wheel": {
+      "declared_requires_dist_count": 24,
+      "declared_requires_dist_sha256": "ed0a80c52cdb4de3c9a1ce8cd080161e30230897bf255baeb81f9ab5d385337f",
+      "entry_count": 422,
+      "file_count": 348,
+      "max_member_bytes": 1975954,
+      "members_sha256": "63963fd0577da7ae2ca6054a5339dc1eec6a87292076871e2f1082473085fb73",
+      "metadata_member": "torchao-0.12.0.dist-info/METADATA",
+      "metadata_sha256": "1fce0be31c323a3049634baa0af2e888a64631bb7a27ba889680b70a67ddca4f",
+      "record_member": "torchao-0.12.0.dist-info/RECORD",
+      "record_sha256": "09ee202b061917b6ecb96014f8d1a09a1e16baba7da342f33ca8f49e35879815",
+      "root_is_purelib": true,
+      "tags": [
+        "py3-none-any"
+      ],
+      "uncompressed_bytes": 5529470,
+      "wheel_member": "torchao-0.12.0.dist-info/WHEEL",
+      "wheel_sha256": "95353a07a7887d8a224094d935cf9fc9a47a0692fa7a14f3537c466319f69fc9"
+    }
+  },
+  "purpose": "Unpublished standalone TorchAO CPU NF4 component gate; not full NeuTTS or Torchtune admission",
+  "schema_version": 1,
+  "source_members": [
+    {
+      "bytes": 1804,
+      "path": "torchao/__init__.py",
+      "sha256": "2b5dbcb251f02f9b29134037c54c1e6b124f628c0b9e91ca375d79c209089cb0"
+    },
+    {
+      "bytes": 1983,
+      "path": "torchao/dtypes/__init__.py",
+      "sha256": "220e3b3abdc6542ccefbfedb3b259ec39edf42f2802184778e07d3c60df884ca"
+    },
+    {
+      "bytes": 40011,
+      "path": "torchao/dtypes/nf4tensor.py",
+      "sha256": "6a748db3a725870d3617fe1572a33ad60cdac8c6fd39ba84646b921209808f9e"
+    },
+    {
+      "bytes": 2676,
+      "path": "torchao/experimental/op_lib.py",
+      "sha256": "fb0113ba56e00ba3b6056e4455a0b9f467b92a03b26b1657e7a72de200356bd5"
+    }
+  ]
+}

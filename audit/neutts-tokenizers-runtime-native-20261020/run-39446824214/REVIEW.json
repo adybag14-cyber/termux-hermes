@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "run_id": 39446824214,
+  "job_id": 118710823795,
+  "head_sha": "73525752755f990926243396f34f5ba8e6148a03",
+  "status": "native-foundation-passed-runtime-not-reached",
+  "diagnosis": "Host preparation retained mkdtemp mode0700 on the verified tokenizers-inputs root. UID1000 foundation cleanup could not traverse it and failed; the skipped directory chmod then also prevented artifact upload.",
+  "exact_failures": [
+    "find: /out/tokenizers-inputs: Permission denied",
+    "EACCES: permission denied, scandir .../NEUTTS-FROZEN-APT"
+  ],
+  "foundation_receipt_scope": "The original job log includes status passed for all7 original foundation cases; standalone receipts were not uploaded.",
+  "native_tokenizers_runtime_reached": false,
+  "artifact_upload_passed": false,
+  "fix": "Normalize only the completely verified public staging handoff to directories0755/files0644 before atomic publication and read-only container binding.",
+  "source_or_dependency_metadata_changed": false,
+  "release_output": false,
+  "host_posix_regression": "Actual full25 input preparation under umask0077 verifies every published mode in Linux CI; intentionally skipped on Windows.",
+  "source_changes": [
+    {
+      "path": "scripts/prepare_neutts_tokenizers_runtime.py",
+      "bytes": 12015,
+      "sha256": "a8a584da44e789ec7b215551986694182798f895c12e1934ad24c0fed5f7b3f1"
+    },
+    {
+      "path": "scripts/compatibility_probe_neutts_tokenizers_runtime.py",
+      "bytes": 23085,
+      "sha256": "d3188ab496dd882e51b45535c0ef575ba2577df595140feae98d1194f7e4bb8b"
+    },
+    {
+      "path": "tests/test_neutts_tokenizers_runtime.py",
+      "bytes": 16510,
+      "sha256": "2a41fc64e3032888aa2cd50722235aa0075003efa9e7804da516b460736d6cf0"
+    }
+  ],
+  "host_tests": {
+    "exit_code": 0,
+    "platform": "win32",
+    "posix_permission_case": "skipped on Windows; must execute on Linux CI",
+    "stdout_sha256": "13bb72eb3b55447ab26f2e54853331413cccdd9f4d2ea0af465d7357dd3659cd",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

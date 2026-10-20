@@ -1,0 +1,60 @@
+name: Prepare NeuTTS non-Rust native dependencies
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [prepare/termux-compatibility-next-stable]
+    paths:
+      - 'scripts/compatibility_probe_neutts.sh'
+      - 'scripts/prepare_neutts_apt_snapshot.py'
+      - 'scripts/neutts_apt_snapshot.sh'
+      - 'tests/test_neutts_apt_snapshot_preparation.py'
+      - 'vendor/termux-preparation/**'
+      - 'audit/neutts-runtime-index-20261017/**'
+      - 'audit/neutts-native-20261017/run-39058569758/NEUTTS-PINNED-APT.tsv'
+      - '.github/workflows/neutts-nonrust-components.yml'
+      - 'scripts/compatibility_probe_neutts_nonrust.sh'
+      - 'scripts/compatibility_probe_neutts_nonrust.py'
+      - 'scripts/prepare_neutts_nonrust_runtime.py'
+      - 'scripts/neutts_nonrust_runtime_lock.json'
+      - 'scripts/neutts_nonrust_operations.py'
+      - 'patches/next-stable/sentencepiece-bounded-build.patch'
+      - 'patches/next-stable/scikit-learn-selected-python.patch'
+      - 'tests/test_neutts_nonrust_preparation.py'
+      - 'tests/fixtures/neutts_nonrust/**'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: neutts-nonrust-components-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  native-nonrust:
+    name: Scientific foundation then six independent source and runtime gates
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 115
+    steps:
+      - name: Checkout the reviewed preparation
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Prepare exact inputs and run native component experiments
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEUTTS_PROBE_HEAD_SHA: ${{ github.sha }}
+        run: bash scripts/compatibility_probe_neutts_nonrust.sh --out probe-results/neutts-nonrust
+
+      - name: Preserve separate build, installed inventory and operation evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-neutts-nonrust-components
+          path: probe-results/neutts-nonrust/
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 14

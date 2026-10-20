@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "reviewed_at_utc": "2026-10-17T20:31:39.691197+00:00",
+  "base_commit": "4fd661e1b3586a6480c20ec6ca3c8fb17aaba05d",
+  "reason": "New manual-only workflow is absent from repository workflow registry; both gh workflow run and REST dispatch returned HTTP 404. The existing successful CPU component workflow demonstrates a narrowly filtered preparation-branch push entrypoint.",
+  "workflow": ".github/workflows/audio-hermes-preparation.yml",
+  "original_sha256": "5f8cefb7454431a7408a49522ff383394af56cbdc7330c85cb6ffadc4d4ed780",
+  "current_sha256": "0c10ba8e0f68c869a33b3b031185450aaa60c8db16c81dcb3678469871797b1c",
+  "current_bytes": 6183,
+  "change": "Add push only on prepare/termux-compatibility-next-stable when one of seven audio input paths changes; preserve manual dispatch.",
+  "unchanged": {
+    "all_jobs_steps_permissions_and_artifact_behavior": true,
+    "implementation_and_tests": true,
+    "published_release_and_version": true,
+    "default_branch": true
+  },
+  "validation": {
+    "yaml_parsed": true,
+    "exact_branch_and_event_assertions": true,
+    "job_bytes_unchanged": true,
+    "focused_tests_exit_code": 0,
+    "focused_tests_stdout": ".......................................                                  [100%]\n39 passed in 0.11s\n",
+    "focused_tests_stderr": ""
+  },
+  "native_status": "Not yet started; next reviewed branch push is intended to run this job."
+}

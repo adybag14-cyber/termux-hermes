@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "record_type": "derived host-validation record",
+  "created_date_utc": "2026-10-17",
+  "derivation": "Saved from two retained successful Devbox run_program results. Tests were not rerun to create this record. No aggregate pass count is asserted.",
+  "subject": {
+    "patch": "patches/next-stable/cua-hermes-integration.patch",
+    "sha256": "7d78150b29f186ab64e05818826d85312fa9c986a19d63facfbccb08aecdfbb7",
+    "bytes": 22045,
+    "upstream_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+    "baseline_tree": "f49c77b666cef7fd5235cdd786556908527b532e",
+    "replayed_result_tree": "d4e6233dc147ca2595d37e9a76a03878ee137498"
+  },
+  "execution": {
+    "host_platform": "win32",
+    "working_directory": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\hermes-agent-cua-integration-v0.22.2-20261017",
+    "canonical_runner": "scripts/run_tests.sh",
+    "invocation_transport": "Git Bash executable launched through a bounded Python subprocess in Devbox Hermes",
+    "environment_overrides": {
+      "HERMES_PYTHON": "C:/Users/adyba/AppData/Local/hermes/installs/9e27fc18556ae4a8/test-environment/gen-1b15ec8e3cfd4a399274d893e0cfbbf6/venv/Scripts/python.exe",
+      "HERMES_TEST_FILE_RETRIES": "0"
+    },
+    "runner_reported_environment": {
+      "TZ": "UTC",
+      "LANG": "C.UTF-8",
+      "PYTHONHASHSEED": "0"
+    },
+    "native_termux_execution": false
+  },
+  "runs": [
+    {
+      "id": "source-integration-regressions",
+      "label": "Run 1: initial integration and existing regressions",
+      "canonical_argv": [
+        "C:\\Program Files\\Git\\bin\\bash.exe",
+        "scripts/run_tests.sh",
+        "tests/tools/test_computer_use_termux_override.py",
+        "tests/hermes_cli/test_cua_termux_setup.py",
+        "tests/tools/test_computer_use_remote_availability.py",
+        "tests/hermes_cli/test_install_cua_driver.py",
+        "tests/hermes_cli/test_computer_use_cli.py",
+        "tests/tools/test_computer_use_backend_plugins.py",
+        "-j",
+        "1",
+        "--file-timeout",
+        "30",
+        "-q"
+      ],
+      "revision": {
+        "production_matches_frozen_patch": true,
+        "final_test_file": false,
+        "note": "Executed before the two readiness-environment cases were added to tests/tools/test_computer_use_termux_override.py. That file had seven cases. Production code was unchanged afterward."
+      },
+      "exit_code": 0,
+      "result": {
+        "passed": 58,
+        "failed": 0,
+        "skipped": 3,
+        "elapsed_seconds": 25.7
+      },
+      "file_results": [
+        {
+          "file": "tests/tools/test_computer_use_termux_override.py",
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "file": "tests/hermes_cli/test_cua_termux_setup.py",
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "file": "tests/tools/test_computer_use_remote_availability.py",
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "file": "tests/hermes_cli/test_install_cua_driver.py",
+          "passed": 28,
+          "failed": 0,
+          "skipped": 3
+        },
+        {
+          "file": "tests/hermes_cli/test_computer_use_cli.py",
+          "passed": 9,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "file": "tests/tools/test_computer_use_backend_plugins.py",
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "raw_summary_line": "=== Summary: 6 files, 58 tests passed, 0 failed, 3 skipped (100% complete) in 25.7s (1 workers) ===",
+      "stdout": {
+        "representation": "captured Unicode text from the Devbox structured stdout field",
+        "original_process_bytes_retained": false,
+        "raw_byte_sha256_available": false,
+        "truncated": false,
+        "text": "▶ not activated — using HERMES_PYTHON: C:/Users/adyba/AppData/Local/hermes/installs/9e27fc18556ae4a8/test-environment/gen-1b15ec8e3cfd4a399274d893e0cfbbf6/venv/Scripts/python.exe\n▶ running per-file parallel test suite via run_tests_parallel.py\n  (TZ=UTC LANG=C.UTF-8 PYTHONHASHSEED=0; clean env)\n▶ pre-compiling bytecode cache\n▶ launching test runner\nDiscovered 6 test files (~35 tests) under ['tests\\\\tools\\\\test_computer_use_termux_override.py', 'tests\\\\hermes_cli\\\\test_cua_termux_setup.py', 'tests\\\\tools\\\\test_computer_use_remote_availability.py', 'tests\\\\hermes_cli\\\\test_install_cua_driver.py', 'tests\\\\hermes_cli\\\\test_computer_use_cli.py', 'tests\\\\tools\\\\test_computer_use_backend_plugins.py']; running with -j 1\r\n[ 14.3% |     5/~35 | ✓9 | ✗0] ✓ tests\\hermes_cli\\test_computer_use_cli.py (9✓, 7.0s)\r\n[ 20.0% |     7/~35 | ✓11 | ✗ 0] ✓ tests\\hermes_cli\\test_cua_termux_setup.py (2✓, 3.4s)\r\n[ 65.7% |    23/~35 | ✓39 | ✗ 0] ✓ tests\\hermes_cli\\test_install_cua_driver.py (28✓ 3s, 3.4s)\r\n[ 77.1% |    27/~35 | ✓44 | ✗ 0] ✓ tests\\tools\\test_computer_use_backend_plugins.py (5✓, 4.0s)\r\n[ 85.7% |    30/~35 | ✓51 | ✗ 0] ✓ tests\\tools\\test_computer_use_remote_availability.py (7✓, 2.3s)\r\n[100.0% |    35/~35 | ✓58 | ✗ 0] ✓ tests\\tools\\test_computer_use_termux_override.py (7✓, 2.6s)\r\n\r\n=== Summary: 6 files, 58 tests passed, 0 failed, 3 skipped (100% complete) in 25.7s (1 workers) ===\r\n\r\n  note: platforms('macos') tests (in 1 file) were SKIPPED on this host (win32); they run on the macOS Python-tests lane.\r\n  Durations cached to test_durations.json (6 files)\r\n\r\n=== Per-file subprocess time distribution ===\r\n  Files:   6\r\n  Total subprocess CPU-wall: 22.6s  (runner wall: 25.7s, parallelism: 1x)\r\n  P50: 3.37s  P90: 7.01s  P95: 7.01s  P99: 7.01s  Max: 7.01s\r\n  <1s: 0 files (0%)  <2s: 0 files (0%)\r\n  Top 10 slowest:\r\n      7.01s  tests\\hermes_cli\\test_computer_use_cli.py\r\n      3.99s  tests\\tools\\test_computer_use_backend_plugins.py\r\n      3.37s  tests\\hermes_cli\\test_cua_termux_setup.py\r\n      3.37s  tests\\hermes_cli\\test_install_cua_driver.py\r\n      2.56s  tests\\tools\\test_computer_use_termux_override.py\r\n      2.26s  tests\\tools\\test_computer_use_remote_availability.py\r\n"
+      }
+    },
+    {
+      "id": "source-readiness-environment",
+      "label": "Run 2: final readiness test file and existing environment regressions",
+      "canonical_argv": [
+        "C:\\Program Files\\Git\\bin\\bash.exe",
+        "scripts/run_tests.sh",
+        "tests/tools/test_computer_use_termux_override.py",
+        "tests/computer_use/test_cua_spawn_env_sanitization.py",
+        "-j",
+        "1",
+        "--file-timeout",
+        "30",
+        "-q"
+      ],
+      "revision": {
+        "production_matches_frozen_patch": true,
+        "final_test_file": true,
+        "note": "Executed the final nine-case tests/tools/test_computer_use_termux_override.py, including real-child cases for absent and stale ambient DISPLAY, plus the five existing spawn-environment cases."
+      },
+      "exit_code": 0,
+      "result": {
+        "passed": 14,
+        "failed": 0,
+        "skipped": 0,
+        "elapsed_seconds": 8.7
+      },
+      "file_results": [
+        {
+          "file": "tests/tools/test_computer_use_termux_override.py",
+          "passed": 9,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "file": "tests/computer_use/test_cua_spawn_env_sanitization.py",
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "raw_summary_line": "=== Summary: 2 files, 14 tests passed, 0 failed (100% complete) in 8.7s (1 workers) ===",
+      "stdout": {
+        "representation": "captured Unicode text from the Devbox structured stdout field",
+        "original_process_bytes_retained": false,
+        "raw_byte_sha256_available": false,
+        "truncated": false,
+        "text": "▶ not activated — using HERMES_PYTHON: C:/Users/adyba/AppData/Local/hermes/installs/9e27fc18556ae4a8/test-environment/gen-1b15ec8e3cfd4a399274d893e0cfbbf6/venv/Scripts/python.exe\n▶ running per-file parallel test suite via run_tests_parallel.py\n  (TZ=UTC LANG=C.UTF-8 PYTHONHASHSEED=0; clean env)\n▶ pre-compiling bytecode cache\n▶ launching test runner\nDiscovered 2 test files (~11 tests) under ['tests\\\\tools\\\\test_computer_use_termux_override.py', 'tests\\\\computer_use\\\\test_cua_spawn_env_sanitization.py']; running with -j 1\r\n[ 45.5% |     5/~11 | ✓5 | ✗0] ✓ tests\\computer_use\\test_cua_spawn_env_sanitization.py (5✓, 1.8s)\r\n[100.0% |    11/~11 | ✓14 | ✗ 0] ✓ tests\\tools\\test_computer_use_termux_override.py (9✓, 3.7s)\r\n\r\n=== Summary: 2 files, 14 tests passed, 0 failed (100% complete) in 8.7s (1 workers) ===\r\n  Durations cached to test_durations.json (2 files)\r\n\r\n=== Per-file subprocess time distribution ===\r\n  Files:   2\r\n  Total subprocess CPU-wall: 5.5s  (runner wall: 8.7s, parallelism: 1x)\r\n  P50: 3.71s  P90: 3.71s  P95: 3.71s  P99: 3.71s  Max: 3.71s\r\n  <1s: 0 files (0%)  <2s: 1 files (50%)\r\n  Top 10 slowest:\r\n      3.71s  tests\\tools\\test_computer_use_termux_override.py\r\n      1.82s  tests\\computer_use\\test_cua_spawn_env_sanitization.py\r\n"
+      }
+    }
+  ],
+  "overlap": {
+    "passed_cases": 7,
+    "file": "tests/tools/test_computer_use_termux_override.py",
+    "description": "Run 2 repeats the original seven cases from Run 1 and adds two readiness-environment cases.",
+    "aggregate_counts_reported": false
+  },
+  "limitations": [
+    "Run 1's three skips are macOS-specific tests on the Windows host.",
+    "The two source suites verify host-side behavior and environment plumbing; they do not establish native CUA or MCP operation.",
+    "Captured stdout text is retained below. The original stdout byte stream was not retained, so no raw-byte stdout digest is claimed.",
+    "The broader root-run packaging suite is recorded separately and is not included here."
+  ]
+}

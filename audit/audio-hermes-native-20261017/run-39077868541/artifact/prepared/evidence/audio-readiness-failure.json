@@ -1,0 +1,29 @@
+{
+  "audio_stream_opened": false,
+  "dependency_readiness": "not-completed",
+  "error": {
+    "chain": [
+      {
+        "args": "('audio import failed for a reason other than PortAudio initialization',)",
+        "message": "audio import failed for a reason other than PortAudio initialization",
+        "module": "_audio_preparation_contract",
+        "type": "PreparationError"
+      },
+      {
+        "args": "('PortAudio library not found',)",
+        "message": "PortAudio library not found",
+        "module": "builtins",
+        "type": "OSError"
+      }
+    ],
+    "message": "audio import failed for a reason other than PortAudio initialization",
+    "traceback": "Traceback (most recent call last):\n  File \"/probes/scripts/compatibility_probe_audio_hermes.py\", line 112, in runtime_worker\n    import sounddevice as sd\n  File \"/out/prepared/payload/venv/lib/python3.14/site-packages/sounddevice.py\", line 72, in <module>\n    raise OSError('PortAudio library not found')\nOSError: PortAudio library not found\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/probes/scripts/compatibility_probe_audio_hermes.py\", line 247, in main\n    runtime_worker(request)\n    ~~~~~~~~~~~~~~^^^^^^^^^\n  File \"/probes/scripts/compatibility_probe_audio_hermes.py\", line 115, in runtime_worker\n    require(type(exc).__name__ == \"PortAudioError\", \"audio import failed for a reason other than PortAudio initialization\")\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/probes/scripts/prepare_audio_hermes_environment.py\", line 262, in require\n    raise PreparationError(message)\n_audio_preparation_contract.PreparationError: audio import failed for a reason other than PortAudio initialization\n",
+    "type": "PreparationError"
+  },
+  "microphone_accessed": false,
+  "physical_vad": "not-tested",
+  "published": false,
+  "schema_version": 1,
+  "stage": "runtime-worker",
+  "status": "failed"
+}

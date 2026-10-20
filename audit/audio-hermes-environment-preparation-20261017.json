@@ -1,0 +1,294 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-10-17T20:18:40Z",
+  "status": "preparation-code-ready-for-reviewed-native-validation",
+  "purpose": "Prepare a complete isolated Hermes plus audio-io environment from exact existing candidate inputs at its intended final path.",
+  "boundary": {
+    "new_files_only": true,
+    "original_source_patch_changed": false,
+    "original_locks_changed": false,
+    "original_candidate_changed": false,
+    "installed_payload_changed": false,
+    "release_created": false,
+    "version_changed": false,
+    "native_execution_performed_by_this_preparation_task": false,
+    "workflow_dispatched_by_this_preparation_task": false,
+    "microphone_accessed": false,
+    "physical_vad": "not-tested",
+    "environment_already_prepared_claimed": false
+  },
+  "implementation_files": {
+    ".github/workflows/audio-hermes-preparation.yml": {
+      "bytes": 5740,
+      "sha256": "5f8cefb7454431a7408a49522ff383394af56cbdc7330c85cb6ffadc4d4ed780"
+    },
+    "scripts/compatibility_probe_audio_hermes.py": {
+      "bytes": 12881,
+      "sha256": "487b35edf7f65c0c1482095486a12d021473e73fceac11038e3769d490a8c85b"
+    },
+    "scripts/prepare_audio_hermes_environment.py": {
+      "bytes": 55237,
+      "sha256": "9fd482258e43aa2472dbaefb787b757855a5f905c7acb303133c75321c49fe94"
+    },
+    "scripts/run_audio_hermes_preparation.sh": {
+      "bytes": 4646,
+      "sha256": "db04f7c51f18ffe1f5e2fab6ac2303d337ea657bb7199b5349a8a460f2b9ef2d"
+    },
+    "tests/test_audio_hermes_preparation.py": {
+      "bytes": 12494,
+      "sha256": "78ca16d81246c004fcd35237d6f9f9868a2f126d0f5777809ebaaeec2733a000"
+    }
+  },
+  "candidate": {
+    "run_id": 39048514731,
+    "head_sha": "e271e922a2e71fd18591c45e9b98b8c7f9fffe02",
+    "artifact_id": 12107225801,
+    "artifact_name": "hermes-termux-next-stable-candidate",
+    "artifact_bytes": 222119336,
+    "artifact_sha256": "c49f41590424520b99136800b7ba9fa41f3ab3926d418131cdf686da812d849b",
+    "package": "hermes-agent_0.22.2-1_aarch64.deb",
+    "package_bytes": 222089768,
+    "package_sha256": "1e4e58fe17a1800f23ababcb2724e92b8904829eae3284569db52dbc672ca76a",
+    "original_catalog": {
+      "wheel_count": 100,
+      "bytes": 68318,
+      "sha256": "d2dc66575cf8aa5ef828e5e536b4d55b8801143101b7e608f6fb4878c2397904"
+    },
+    "original_extras": [
+      "acp",
+      "cron",
+      "matrix",
+      "mcp",
+      "telegram",
+      "termux",
+      "uvloop"
+    ],
+    "prepared_extras": [
+      "acp",
+      "cron",
+      "matrix",
+      "mcp",
+      "telegram",
+      "termux",
+      "uvloop",
+      "audio-io"
+    ],
+    "uv_lock_sha256": "72abb87a634769baaf30830cd317892053c6e15f8e9519b085524fa0ed542829",
+    "manager_lock_sha256": "49b79259220160f147255078a19af541a5f328d3871c8041cc1eb909d19eb549",
+    "pyproject_sha256": "7ee8c02a9eb624c8fe2c718ba0f69a573d55e5223f3297bb3439afa2dd275547",
+    "shared_verified_fetcher": {
+      "path": "scripts/fetch_compatibility_candidate.py",
+      "sha256": "dc075415b46e14f3f09fb6a889fdf38279564b2f2e6e6008b21232545d1d6d8a"
+    }
+  },
+  "audio_inputs": {
+    "historical_run_id": 39043935925,
+    "historical_job_id": 117428798466,
+    "historical_run_conclusion": "failure",
+    "workflow_head_sha": "9fcd31cbd1e10cf9ffdd88c28ab95824ee13700b",
+    "actual_pr_checkout_sha": "84f44aa2d23568b58773696964057174985d734a",
+    "artifact_id": 12104898993,
+    "artifact_name": "termux-compatibility-audio",
+    "artifact_bytes": 11408114,
+    "artifact_sha256": "e30a93fb8d503a020091c3c853b17b361fa6f833afb0a506742f138f8e1ec511",
+    "verified_archive_members": 28,
+    "archive_verification": "Exact whole ZIP digest and byte length, then every member size, SHA-256 and ZIP CRC; all member pins are embedded in the new preparer.",
+    "selected_catalog_union": 102,
+    "new_wheels": {
+      "numpy-2.4.3-cp314-cp314-android_24_arm64_v8a.whl": {
+        "bytes": 7180471,
+        "sha256": "4b1840a7d73d6111604b22102e58b551a670db579164e0ddede3e78733fd68d4"
+      },
+      "sounddevice-0.5.5-py3-none-any.whl": {
+        "bytes": 32807,
+        "sha256": "30ff99f6c107f49d25ad16a45cacd8d91c25a1bcdd3e81a206b921a3a6405b1f"
+      }
+    },
+    "numpy_build_options": "blas=none, lapack=none, allow-noblas=true",
+    "main_cffi_preserved": {
+      "version": "2.1.1",
+      "bytes": 201386,
+      "main_wheel_sha256": "026bdab93fdadca4ddf85071c35736ec1b98b1cec575d2bf9280684940642165",
+      "historical_audio_wheel_sha256": "36977e26001a7f4da546fda9fd8715ff6e81e6661d02eb28bc5f2ee0f235f9b2",
+      "exact_uncompressed_members_equal": 31,
+      "backend_bytes": 291152,
+      "backend_sha256": "c8322dcc98136a84268d292bf4b52f988ca7399b9b9fabc2acc5a7740dd9593c",
+      "policy": "Preserve the main wheel archive; compare all uncompressed members to the separately audited audio wheel."
+    },
+    "main_pycparser_preserved": {
+      "version": "3.0",
+      "bytes": 48172,
+      "sha256": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992"
+    },
+    "distribution_count_interpretation": "102 is the complete catalog union. Actual manager and application installed counts must be derived independently from their canonical frozen, marker-evaluated exports; no 102-installed-distribution claim is made."
+  },
+  "audio_libraries": {
+    "portaudio": {
+      "package": "portaudio",
+      "version": "19.07.00-3",
+      "relative_paths": [
+        "runtime-libs/lib/libportaudio.so",
+        "runtime-libs/lib/libportaudio.so.2",
+        "runtime-libs/lib/libportaudio.so.2.0.0"
+      ],
+      "each_bytes": 61976,
+      "each_sha256": "116ff3e80f1b29042cad96e3f923d25dfe5325420d4b5140653fa2226ba47073",
+      "dt_needed": [
+        "libc.so",
+        "libOpenSLES.so",
+        "libm.so"
+      ],
+      "historical_provenance_json": {
+        "bytes": 1318,
+        "sha256": "61cd76cdc76463b73819aeb7b310aaf6fb9005502a2c31b5f7f15362da7c5871"
+      }
+    },
+    "opensles_wrapper": {
+      "package": "libandroid-stub",
+      "version": "30-2",
+      "architecture": "aarch64",
+      "archive_url": "https://packages.termux.dev/apt/termux-main/pool/main/liba/libandroid-stub/libandroid-stub_30-2_aarch64.deb",
+      "archive_bytes": 26788,
+      "archive_sha256": "74087792a86e3f90772627f2217797e422e5d5fc47f24ad825fc3bbb539a667a",
+      "archive_member": "./data/data/com.termux/files/usr/lib/libOpenSLES.so",
+      "output_path": "runtime-libs/lib/libOpenSLES.so",
+      "member_bytes": 11480,
+      "member_sha256": "87c61d872767541e332783d85f70bfdc1b2d48e373ef3025380345171bac4db9",
+      "source_reference": "https://github.com/termux/termux-packages/blob/11ae750781a261b8df328697b12d66d75b72e5da/packages/libandroid-stub/libOpenSLES-wrapper.c",
+      "installation": "Extract exact official member into the owned prepared payload; do not install the archive or borrow an unreviewed ambient wrapper."
+    },
+    "platform_requirement": "The official wrapper still requires the real Android OpenSL ES framework and audio services. Physical capture additionally needs appropriate permission and a user-started device test.",
+    "historical_container_result": "PortAudio initialization error -9999 was observed in the historical audio lane. That failure is preserved and not reported as VAD success.",
+    "inference_limit": "Absent Docker framework/services explain the expected limitation, but this preparation receipt does not claim a newly traced native initialization call."
+  },
+  "source_patch": {
+    "path": "patches/next-stable/audio-readiness.patch",
+    "bytes": 8470,
+    "sha256": "82b92d5095ceabc05f0200569da1cc16b861c77b166095982b05d57940573db7",
+    "baseline_git_tree": "f49c77b666cef7fd5235cdd786556908527b532e",
+    "full_reference_replay_git_tree": "aa90e9a6eca74835dacc2dc55f376bddfd499c25",
+    "upstream_commit": "d923a5eb487a17c0a68801bba9ef0f56c81040a8",
+    "actual_payload_paths": [
+      {
+        "baseline_bytes": 70132,
+        "baseline_sha256": "f5be589a9807016958af833cdabb4e1f965db1b3935bdacad72a89f7b0ac88eb",
+        "path": "tools/voice_mode.py",
+        "prepared_bytes": 70749,
+        "prepared_sha256": "2080ba077ec94146d06cbd704a7e21763e5cf37f4221561145b4c45de6a78a58"
+      },
+      {
+        "baseline_bytes": 6870,
+        "baseline_sha256": "3fe427ceac71c7a4680f4d9e88b6ffe957b46753bc7683d468dbb4f3ab0b96d0",
+        "path": "tools/voice_mode_capture.py",
+        "prepared_bytes": 7542,
+        "prepared_sha256": "492c013f8473acdd58dff027ffc4f787347dc27524e801692bf32efe67516d60"
+      },
+      {
+        "baseline_bytes": 2208,
+        "baseline_sha256": "25c0db303a87391b64f2c3863fbd11534a146575ce26a32c5e76f96c9e5bee95",
+        "path": "tests/tools/test_voice_wsl_pipewire.py",
+        "prepared_bytes": 2233,
+        "prepared_sha256": "3ac8ad669799f3c23b1bfda02996619e7f71d8ed08c58a80fd61234981870be0"
+      },
+      {
+        "baseline_bytes": 0,
+        "baseline_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "path": "tests/tools/test_voice_audio_readiness.py",
+        "prepared_bytes": 3281,
+        "prepared_sha256": "d94b5bc0db75dff255c4f1ef5cd155d5605ce907d2606c2e71052457b5c470ef"
+      }
+    ],
+    "application": "All four real payload paths are included. The stdlib applier accepts exact original lines and exact hunk positions only, supports the pinned new-file zero-length hunk, verifies every output hash before writing, and allows no extra paths."
+  },
+  "canonical_preparation": {
+    "native_runtime": "Exact bundled CPython 3.14.6 on Android AArch64 at the standard com.termux prefix.",
+    "manager": "Import canonical PM from owned source using the original bundled Python; import verified_tools from pm.build_operations; stage_manager_runtime builds a fresh offline manager with the 102-wheel catalog.",
+    "application": "Use canonical build_environment with all eight extras, frozen=True, offline=True, explicit=True, sealed=True and no_install_project=True.",
+    "graph_verification": "Canonical frozen exports determine marker-evaluated manager/application selections. The catalog must supply every selected dependency; installed distribution names and versions and every wheel-owned installed file are checked.",
+    "install_scheme_policy": "Only normal wheel paths plus .data/purelib and .data/platlib are accepted. Any other .data installation scheme fails for explicit review rather than silently skipping integrity checks.",
+    "installed_file_policy": "Byte-compare each wheel-owned file except the installer-rewritten .dist-info/RECORD. Extra generated metadata is handled by canonical Hermes assembly.",
+    "source_binding": "Canonical AgentInputs placement=contained, assemble, link sealing, PM-runtime sealing and Venv expected stamps bind the actual final path.",
+    "relocation": "Payload is placed before environment creation. Finished environments are not moved; reconstruct from exact inputs at any new intended final path. No PYTHONHOME shim or metadata version relaxation.",
+    "ownership": "Refuse an existing output; isolate profiles/caches/temp paths; rebuild only extracted copies of venv and pm-runtime; preserve all original Python/UV/runtime bytes, original inputs and installed payload.",
+    "repeatability": "Workflow performs two fresh offline preparations in separate containers and paths, then compares canonical catalog/source/selected distribution-file results. It does not require path-dependent bytecode or venv metadata hashes to match.",
+    "evidence": "Preparation and probe record full payload inventories, canonical selected counts, runtime maps and diagnostics; timeout failures preserve captured stdout and stderr.",
+    "docker_image": "termux/termux-docker@sha256:c14ffb703abf44f2d3bf7fdffdcc50df7d1454d09c705be190e0342a0b47f303"
+  },
+  "validation": {
+    "host_python": "CPython 3.14.2, Windows AMD64",
+    "final_focused_tests": {
+      "command": "python -m pytest -q tests/test_audio_hermes_preparation.py",
+      "environment": {
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1"
+      },
+      "passed": 39,
+      "failed": 0,
+      "duration_seconds": 0.14,
+      "exit_code": 0,
+      "log": {
+        "path": "audit/audio-hermes-preparation-host-tests-final-20261017.log",
+        "bytes": 101,
+        "sha256": "e5f13b0ab6b83671d5cbfeb3739b7d115ea212b3013009efb0db38387e8a5e26"
+      }
+    },
+    "earlier_checkpoint": {
+      "passed": 36,
+      "duration_seconds": 0.13,
+      "interpretation": "Historical checkpoint before the four-path source correction and added concrete file-integrity cases; do not add it to the final test count.",
+      "log": {
+        "path": "audit/audio-hermes-preparation-host-tests-initial-20261017.log",
+        "bytes": 101,
+        "sha256": "50d9433e8d6474f756369e6596e423db7b96bbd340cd3d59c03843f75de93cd8"
+      }
+    },
+    "source_bootstrap": {
+      "invocation": "python -I -S -B using actual canonical source PM modules, no site-packages",
+      "imports_passed": true,
+      "verified_tools_module": "pm.build_operations",
+      "stage_manager_runtime_module": "pm.operations",
+      "stage_manager_runtime_result": "Canonical missing-tool InstallError reached before creation on the host.",
+      "limit": "This proves stdlib-only bootstrap imports and the guarded stage entry. Actual ARM tool verification and manager/application creation are reserved for native validation.",
+      "log": {
+        "path": "audit/audio-hermes-bootstrap-import-proof-20261017.log",
+        "bytes": 543,
+        "sha256": "e4ebfeebaa5f1ea238ba53ff072d969ab4910905f7cb2290d0b7cfb90a0c993b"
+      }
+    },
+    "static_and_patch_gates": {
+      "python_ast": "passed",
+      "bash_runner_syntax": "passed",
+      "workflow_yaml": "passed",
+      "workflow_run_blocks_bash_syntax": 4,
+      "embedded_workflow_python_ast": "passed",
+      "exact_four_path_patch_replay": "passed against real baseline plus absent new-file path; all final bytes match the separately patched reference",
+      "record": {
+        "path": "audit/audio-hermes-preparation-host-gates-20261017.json",
+        "bytes": 2588,
+        "sha256": "26fc52f7a44d5fef4f24a1a67ba612def9f06cdeef2abd70cfc8c6aff945a110"
+      }
+    },
+    "cached_wheel_scheme_inspection": {
+      "inspected_exact_main_wheels": 38,
+      "wheels_with_dot_data_members": 0,
+      "limit": "This is the available cached main overlap subset, not all 100 main or all 102 union wheels; native canonical verification checks every selected wheel."
+    },
+    "remaining_native_gates": [
+      "Fresh canonical manager build with actual bundled ARM Python/UV",
+      "Fresh full application graph with audio-io",
+      "Complete selected wheel-owned installed-file catalog",
+      "Native NumPy and Cffi behavior",
+      "Actual library closure and separate PortAudio initialization outcome",
+      "Independent second preparation at a different final path"
+    ],
+    "physical_audio_test": "Not performed, not claimed and not enabled by the probe."
+  },
+  "deliverables": {
+    "workflow": ".github/workflows/audio-hermes-preparation.yml",
+    "trigger": "workflow_dispatch only; root reviews and dispatches",
+    "reconstruction_artifact": "termux-audio-device-preparation-inputs",
+    "reconstruction_contents": "Exact candidate, verified audio inputs, original source patch, exact new preparation scripts, shared fetcher, device instructions, complete input file SHA map; uploaded before native validation.",
+    "evidence_artifact": "termux-audio-environment-proof",
+    "copied_ci_environment_published": false,
+    "native_device_command": "bash scripts/run_audio_hermes_preparation.sh --native candidate audio-inputs patches/next-stable/audio-readiness.patch \"$HOME/hermes-audio-next-stable-20261017\" prepare-and-probe"
+  }
+}
