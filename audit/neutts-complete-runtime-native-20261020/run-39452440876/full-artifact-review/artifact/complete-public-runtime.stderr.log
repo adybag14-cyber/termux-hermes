@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_neutts_complete_runtime.py", line 542, in runtime_case
+    report["installed_before"] = nr.installed_inventory(manifest, prep, common)
+                                 ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 458, in installed_inventory
+    record = installed_wheel_bytes(Path(package["wheel_path"]), package, site, prep)
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 402, in installed_wheel_bytes
+    require(script and before.startswith((b"#!python\n", b"#!pythonw\n"))
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            and after.startswith(b"#!") and before.split(b"\n", 1)[1] == after.split(b"\n", 1)[1],
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            "Installed wheel file bytes changed")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_nonrust.py", line 52, in require
+    raise ProbeError(message)
+_complete_isolated_runtime.ProbeError: Installed wheel file bytes changed

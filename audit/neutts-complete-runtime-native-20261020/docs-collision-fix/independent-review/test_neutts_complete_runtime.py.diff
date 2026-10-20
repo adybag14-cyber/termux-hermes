@@ -1,0 +1,90 @@
+--- original-tests-11f7bb6.py
++++ tests/test_neutts_complete_runtime.py
+@@ -8,6 +8,7 @@
+ import json
+ from pathlib import Path
+ import re
++import shutil
+ import tempfile
+ import sys
+ import unittest
+@@ -192,6 +193,79 @@
+                            "deleted": deleted}
+                     with self.assertRaises(ValueError):
+                         runtime.classify_asset_mappings([row], root / "work", assets, prep)
++
++
++class DocumentationCollisionTests(unittest.TestCase):
++    @classmethod
++    def setUpClass(cls):
++        cls.lock, _ = prep.load_lock()
++        cls.einx = next(p for p in cls.lock["packages"] if p["name"] == "einx")
++        cls.original = cls.lock["einx_documentation_relocation"]["upstream_package"]
++        cls.phonemizer = next(p for p in cls.lock["packages"] if p["name"] == "phonemizer")
++
++    def test_deterministic_relocation_preserves_every_original_payload_except_record(self):
++        first = prep.einx_documentation_bytes(self.lock)
++        self.assertEqual(first, prep.einx_documentation_bytes(self.lock))
++        import io
++        original = ROOT / self.lock["einx_documentation_relocation"]["upstream_path"]
++        with zipfile.ZipFile(original) as before, zipfile.ZipFile(io.BytesIO(first)) as after:
++            old, new = next(iter(self.lock["einx_documentation_relocation"]["relocations"].items()))
++            self.assertEqual(after.namelist(), [new if name == old else name for name in before.namelist()])
++            for name in before.namelist():
++                if name != self.original["wheel"]["record_member"]:
++                    self.assertEqual(before.read(name), after.read(new if name == old else name), name)
++            self.assertNotEqual(before.read(self.original["wheel"]["record_member"]),
++                                after.read(self.einx["wheel"]["record_member"]))
++        self.assertEqual(prep.installed_target(new), "share/doc/einx-0.4.3/source/conf.py")
++
++    def test_original_real_pair_collides_and_derived_real_pair_has_unique_owners(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            wheelhouse = Path(temporary)
++            einx = wheelhouse / self.einx["artifact"]["filename"]
++            shutil.copyfile(ROOT / self.lock["einx_documentation_relocation"]["upstream_path"], einx)
++            shutil.copyfile(ROOT / self.phonemizer["origin"]["retained_path"],
++                            wheelhouse / self.phonemizer["artifact"]["filename"])
++            with self.assertRaisesRegex(ValueError, "multiple file owners.*docs/source/conf.py"):
++                prep.validate_install_targets(wheelhouse, [self.original, self.phonemizer], [])
++            shutil.copyfile(ROOT / self.einx["origin"]["retained_path"], einx)
++            result = prep.validate_install_targets(wheelhouse, [self.einx, self.phonemizer], [])
++            self.assertEqual(result["duplicate_file_owners"], 0)
++            self.assertEqual(result["target_count"],
++                             self.einx["wheel"]["file_count"] + self.phonemizer["wheel"]["file_count"])
++
++    def test_duplicate_identical_files_and_scheme_aliases_are_rejected(self):
++        pairs = [("shared.py", "shared.py"),
++                 ("shared.py", "other.data/purelib/shared.py"),
++                 ("shared.py", "other.data/platlib/shared.py"),
++                 ("shared.py", "other.data/data/lib/python3.14/site-packages/shared.py")]
++        for first, second in pairs:
++            with self.subTest(first=first, second=second), tempfile.TemporaryDirectory() as temporary:
++                root = Path(temporary)
++                packages = [{"name": name, "artifact": {"filename": name + ".whl"}}
++                            for name in ("first", "second")]
++                for package, member in zip(packages, (first, second)):
++                    with zipfile.ZipFile(root / package["artifact"]["filename"], "w") as archive:
++                        archive.writestr(member, b"identical bytes still have duplicate owners")
++                with self.assertRaisesRegex(ValueError, "multiple file owners"):
++                    prep.validate_install_targets(root, packages, [])
++
++    def test_data_alias_cannot_hide_an_apt_payload_or_parent_file_collision(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            root = Path(temporary)
++            package = {"name": "fixture", "artifact": {"filename": "fixture.whl"}}
++            with zipfile.ZipFile(root / "fixture.whl", "w") as archive:
++                archive.writestr("fixture.data/data/lib/python3.14/site-packages/shared.py", b"fixture")
++            with self.assertRaisesRegex(ValueError, "multiple file owners"):
++                prep.validate_install_targets(root, [package],
++                    [{"name": "apt-fixture", "files": [{"path": "shared.py"}]}])
++            with zipfile.ZipFile(root / "fixture.whl", "w") as archive:
++                archive.writestr("package", b"file that cannot also be a directory")
++                archive.writestr("package/child.py", b"fixture")
++            with self.assertRaisesRegex(ValueError, "parent directory"):
++                prep.validate_install_targets(root, [package], [])
++        for invalid in ("../escape", "fixture.data/data/../escape", "fixture.data/headers/header.h"):
++            with self.subTest(member=invalid), self.assertRaises((ValueError, prep.helper().wheel_helper().PrepareError)):
++                prep.installed_target(invalid)
+ 
+ 
+ class SharedInventoryIntegrationTests(unittest.TestCase):

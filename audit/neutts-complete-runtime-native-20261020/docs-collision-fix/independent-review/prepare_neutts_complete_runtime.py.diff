@@ -1,0 +1,189 @@
+--- original-preparer-11f7bb6.py
++++ scripts/prepare_neutts_complete_runtime.py
+@@ -7,9 +7,12 @@
+ from __future__ import annotations
+ 
+ import argparse
++import base64
++import csv
+ import functools
+ import hashlib
+ import importlib.util
++import io
+ import json
+ import os
+ from pathlib import Path
+@@ -23,7 +26,7 @@
+ ROOT = SCRIPT_DIR.parent
+ LOCK_FILENAME = "neutts_complete_runtime_lock.json"
+ RECEIPT_FILENAME = "COMPLETE-PREPARED-INPUTS.json"
+-LOCK_SHA256 = "883d0fec890062f93eee763e8c89dfae7deba29970a376c6b951e5fc0b0aa1b5"
++LOCK_SHA256 = "0e4818b8da88237f3aacb79d0e0a928605b4851c5a1fb8e4613918142a9c7c19"
+ PERTH_PREPARER_SHA256 = "7445bf89b0fd26f9f74a7935724e394b24b331409f200ecca9f2904ffacb40db"
+ NEUCODEC_PREPARER_SHA256 = "ea54baa56bbb9f9a82558233f68c4f2fca02c167e55f785ab3f31cf1cf980d7b"
+ GRAPH_SHA256 = "d8596ac31c12b042d76419712802e9787c092b32e66827cd64c720118be7ae68"
+@@ -110,6 +113,91 @@
+ 
+ def verify_wheel(path, package):
+     return helper().verify_wheel(path, package)
++
++
++def einx_documentation_bytes(lock):
++    """Relocate one original documentation file without changing any runtime payload."""
++    rule = lock["einx_documentation_relocation"]
++    upstream = rule["upstream_package"]
++    path = ROOT / rule["upstream_path"]
++    verify_wheel(path, upstream)
++    old = "docs/source/conf.py"
++    new = "einx-0.4.3.data/data/share/doc/einx-0.4.3/source/conf.py"
++    require(rule["relocations"] == {old: new}, "Unreviewed documentation relocation")
++    record = upstream["wheel"]["record_member"]
++    with zipfile.ZipFile(path) as archive:
++        infos = archive.infolist()
++        before = {item.filename: archive.read(item) for item in infos}
++    require(old in before and new not in before and len(infos) == len(before) == 131,
++            "Original Einx member set changed")
++    content = {new if name == old else name: body for name, body in before.items()}
++    buffer = io.StringIO(newline="")
++    writer = csv.writer(buffer, lineterminator="\n")
++    for name, _, _ in csv.reader(io.StringIO(before[record].decode("utf-8"))):
++        target = new if name == old else name
++        if name == record:
++            writer.writerow((target, "", ""))
++        else:
++            body = content[target]
++            writer.writerow((target, "sha256=" + base64.urlsafe_b64encode(
++                hashlib.sha256(body).digest()).decode().rstrip("="), len(body)))
++    content[record] = buffer.getvalue().encode("utf-8")
++    require(all(content[new if name == old else name] == body
++                for name, body in before.items() if name != record),
++            "Documentation relocation changed an original payload")
++    output = io.BytesIO()
++    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED) as archive:
++        for original in infos:
++            name = new if original.filename == old else original.filename
++            item = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
++            item.create_system = 3
++            item.create_version = item.extract_version = 20
++            item.external_attr = original.external_attr
++            item.internal_attr = 0
++            item.compress_type = zipfile.ZIP_STORED
++            archive.writestr(item, content[name])
++    raw = output.getvalue()
++    package = next(p for p in lock["packages"] if p["name"] == "einx")
++    require(raw == verified_bytes(ROOT / package["origin"]["retained_path"], package["artifact"]),
++            "Documentation derivative is not byte-reproducible")
++    return raw
++
++
++def installed_target(member):
++    """Map every wheel scheme into one Android-prefix-relative namespace."""
++    parts = safe_relative(member).split("/")
++    site = "lib/python3.14/site-packages/"
++    if parts[0].endswith(".data"):
++        require(len(parts) >= 3, "Malformed wheel data scheme")
++        scheme, tail = parts[1], "/".join(parts[2:])
++        require(scheme in ("purelib", "platlib", "scripts", "data"), "Unreviewed wheel data scheme")
++        return {"purelib": site, "platlib": site, "scripts": "bin/", "data": ""}[scheme] + tail
++    return site + "/".join(parts)
++
++
++def validate_install_targets(directory, packages, apt_python):
++    """Reject duplicate installed file owners before invoking the real installer."""
++    owners = {}
++    def claim(target, owner, member):
++        require(target not in owners, "Installed target has multiple file owners: "
++                + target + " (" + str(owners.get(target)) + ", " + owner + ":" + member + ")")
++        owners[target] = owner + ":" + member
++    for package in packages:
++        with zipfile.ZipFile(Path(directory) / package["artifact"]["filename"]) as archive:
++            for item in archive.infolist():
++                if not item.is_dir():
++                    claim(installed_target(item.filename), package["name"], item.filename)
++    for package in apt_python:
++        for item in package["files"]:
++            target = "lib/python3.14/site-packages/" + safe_relative(item["path"])
++            claim(target, package["name"], item["path"])
++    for target in owners:
++        parts = target.split("/")
++        require(not any("/".join(parts[:i]) in owners for i in range(1, len(parts))),
++                "Installed file also owns a parent directory: " + target)
++    return {"status": "unique-installed-file-owners", "wheel_count": len(packages),
++            "apt_python_payloads": len(apt_python), "target_count": len(owners),
++            "target_owners_sha256": sha(json_bytes(owners)), "duplicate_file_owners": 0}
+ 
+ 
+ def requirement_key(value):
+@@ -237,6 +325,19 @@
+     require(codec["origin"]["kind"] == "neucodec-hub1-derivative"
+             and codec["artifact"] == neucodec_helper().load_lock()["derived_artifact"],
+             "Reviewed NeuCodec Hub compatibility derivative changed")
++    docs = lock["einx_documentation_relocation"]
++    einx = next(p for p in packages if p["name"] == "einx")
++    original = docs["upstream_package"]
++    require(original["artifact"]["sha256"]
++            == "47ce54a0144f6dffcfacdd8fe2cc9e2e5e6485dda2471330ab75ee747dd22f39"
++            and docs["relocations"] == {"docs/source/conf.py":
++                "einx-0.4.3.data/data/share/doc/einx-0.4.3/source/conf.py"}
++            and einx["origin"]["kind"] == "einx-documentation-derivative"
++            and all(einx[k] == original[k] for k in ("name", "version", "requires_python", "requires_dist",
++                    "base_requires_dist", "frozen_graph_requires_dist", "native_members"))
++            and all(einx["wheel"][k] == original["wheel"][k]
++                    for k in ("metadata_sha256", "wheel_sha256", "file_count")),
++            "Original Einx metadata, runtime boundary or reviewed docs relocation changed")
+     metadata = {p["name"]: {k: p[k] for k in ("version", "requires_dist", "requires_python")}
+                 for p in packages + apt_python}
+     validate_closure(lock, metadata, lock["environment"])
+@@ -317,10 +418,11 @@
+             "distribution_metadata_extracted": False}
+ 
+ 
+-def receipt_for(lock, raw, wheels, downloads):
++def receipt_for(lock, raw, wheels, downloads, targets):
+     return {"schema_version": 1, "status": "verified-complete-dependency-inputs",
+             "lock_sha256": sha(raw), "node_count": 116, "active_edge_count": 183,
+             "wheel_count": 105, "apt_python_payloads": 11, "wheels": wheels,
++            "installed_target_ownership": targets,
+             "apt_downloads": downloads, "extra_apt_installs": [p["name"] for p in lock["apt_install"]],
+             "inherited_apt_verification_only": ["libgmp"],
+             "foundation_support_outside_graph": ["pip", "torchcodec"],
+@@ -347,6 +449,10 @@
+     require({p.name for p in (directory / "wheels").iterdir()}
+             == {p["artifact"]["filename"] for p in lock["packages"]}, "Complete wheel set changed")
+     wheels = [verify_wheel(directory / "wheels" / p["artifact"]["filename"], p) for p in lock["packages"]]
++    einx = next(p for p in lock["packages"] if p["name"] == "einx")
++    require(read_regular(directory / "wheels" / einx["artifact"]["filename"], 2 * 1024 * 1024)
++            == einx_documentation_bytes(lock), "Prepared Einx documentation derivative changed")
++    targets = validate_install_targets(directory / "wheels", lock["packages"], lock["apt_python"])
+     for name, subdir in (("resemble-perth", "perth-resource-inputs"), ("soundfile", "soundfile-inputs"),
+                          ("neucodec", "neucodec-inputs")):
+         p = next(p for p in lock["packages"] if p["name"] == name)
+@@ -373,7 +479,7 @@
+                 and row.get("origin_url") == apt_helper().ORIGIN + pin["filename"]
+                 and row.get("method") in ("verified-retained-cache", "original-https-archive"),
+                 "Original APT acquisition provenance changed")
+-    require(receipt == receipt_for(lock, raw, wheels, downloads), "Prepared input receipt changed")
++    require(receipt == receipt_for(lock, raw, wheels, downloads, targets), "Prepared input receipt changed")
+     if foundation_inputs is not None:
+         foundation_inputs = Path(foundation_inputs)
+         foundation = apt_helper().verify_inputs(foundation_inputs)
+@@ -423,6 +529,9 @@
+             kind, artifact = p["origin"]["kind"], p["artifact"]
+             if kind == "main-catalog":
+                 continue
++            if kind == "einx-documentation-derivative":
++                write_new(staging / "wheels" / artifact["filename"], einx_documentation_bytes(lock))
++                continue
+             derivatives = {"perth-resource-derivative": "perth-resource-inputs",
+                            "soundfile-android-derivative": "soundfile-inputs",
+                            "neucodec-hub1-derivative": "neucodec-inputs"}
+@@ -445,7 +554,8 @@
+         write_new(staging / "runtime-requirements.txt", base_helper().requirement_text(lock["packages"]))
+         write_new(staging / "extra-install.tsv", apt_helper().pins_tsv(lock["apt_install"]))
+         wheels = [verify_wheel(staging / "wheels" / p["artifact"]["filename"], p) for p in lock["packages"]]
+-        receipt = receipt_for(lock, raw, wheels, downloads)
++        targets = validate_install_targets(staging / "wheels", lock["packages"], lock["apt_python"])
++        receipt = receipt_for(lock, raw, wheels, downloads, targets)
+         write_new(staging / RECEIPT_FILENAME, json_bytes(receipt))
+         verify_inputs(staging, foundation_inputs)
+         for path in (staging, *staging.rglob("*")):

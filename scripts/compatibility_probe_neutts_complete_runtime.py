@@ -25,7 +25,7 @@ import zipfile
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPT_DIR.parent
 PREFIX = Path("/data/data/com.termux/files/usr")
-PREPARER_SHA256 = "791d0a85dbaacffac90c9f31d2217c0983fe4db06b7c353023f5ffc98385a9cd"
+PREPARER_SHA256 = "f12add142a48890c8933dc609d86f3e08105925cb0575bc07fee73d3eb9c4bc2"
 PERTH_SHA256 = "7780965f1a336afa8244136e7c40b44d9483d91e17e662f6d07c2cbb78fcd7a2"
 NONRUST_SHA256 = "11d0dc5ed34dd45c855bffbba51c02eecf74ce8c5a5dd38cb1483e57f1d14e4b"
 FALSE_FLAGS = ("neutts_engine_installed", "default_speech_model_downloaded",
