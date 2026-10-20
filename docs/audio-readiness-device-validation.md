@@ -4,6 +4,15 @@ Prepared on 2026-10-17; updated 2026-10-20. This is a separate robustness experi
 
 ## What is fixed, and what is still unproved
 
+The 20 October checkpoint remains **nine published restrictions, seven
+native-validated unpublished repairs and two incomplete features**. The new
+engine-wheel, APT-extension and XXHash successes are recorded in the
+[compatibility audit](compatibility-0.22.2-1.md#remaining-native-runtime-work).
+Those software component results do not establish physical capture, permission,
+silence stopping or VAD. Public NeuTTS dependency integration also remains work;
+the remaining task is not solely waiting for device or model access. No command
+in this guide was executed as part of that checkpoint.
+
 The standalone [audio-readiness patch](../patches/next-stable/audio-readiness.patch) turns an optional library's import-time native initialization failure into a readable diagnostic, retaining the original exception and message. It also rejects a populated PortAudio inventory that contains only output devices. Missing Python modules and a missing PortAudio shared library retain their existing diagnostics; empty or failed forwarded-audio inventories retain their existing handling. This patch does not provide an Android audio framework or establish microphone/VAD support.
 
 The [native audio record](../audit/native-probes-9fcd31c-20261017/audio-summary.json) proves NumPy 2.4.3 arithmetic, FFT and internal LAPACK with both the build runtime and original package libraries. The same run failed PortAudio initialization with error -9999. Its mapped OpenSL ES object was the official libandroid-stub wrapper, and the container lacked the actual Android framework library and recorded Binder/audio services. The relationship to the engine error is an inference from those measured facts and the pinned wrapper source. Actual device initialization, microphone permission, capture, and silence stopping remain unproved.

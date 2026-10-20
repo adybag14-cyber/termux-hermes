@@ -1,0 +1,71 @@
+name: Prepare NeuTTS Tokenizers runtime
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [prepare/termux-compatibility-next-stable]
+    paths:
+      - '.github/workflows/neutts-tokenizers-runtime.yml'
+      - 'scripts/compatibility_probe_neutts_tokenizers_runtime.*'
+      - 'scripts/prepare_neutts_tokenizers_runtime.py'
+      - 'scripts/neutts_tokenizers_runtime_lock.json'
+      - 'scripts/neutts_tokenizers_operations.py'
+      - 'tests/test_neutts_tokenizers_runtime.py'
+      - 'audit/neutts-tokenizers-runtime-preparation-20261020/**'
+      - 'scripts/neutts_runtime_elf.py'
+      - 'tests/test_neutts_runtime_elf.py'
+      - 'scripts/neutts_rust_operations.py'
+      - 'scripts/prepare_neutts_nonrust_runtime.py'
+      - 'scripts/compatibility_probe_neutts_nonrust.py'
+      - 'scripts/prepare_phonemizer_runtime.py'
+      - 'scripts/compatibility_probe_phonemizer.py'
+      - 'scripts/phonemizer_runtime_lock.json'
+      - 'scripts/neutts_native_sources_lock.json'
+      - 'scripts/neutts_runtime_closure_design.json'
+      - 'scripts/compatibility_probe_neutts.sh'
+      - 'scripts/compatibility_probe_neutts.py'
+      - 'scripts/compatibility_probe_neutts_native.py'
+      - 'scripts/prepare_neutts_core_python.py'
+      - 'scripts/neutts_core_python_lock.json'
+      - 'scripts/prepare_neutts_apt_snapshot.py'
+      - 'scripts/neutts_apt_snapshot.sh'
+      - 'scripts/validate_neutts_apt_python.py'
+      - 'scripts/neutts_apt_python_metadata.json'
+      - 'vendor/termux-preparation/**'
+      - 'audit/neutts-runtime-index-20261017/**'
+      - 'audit/neutts-native-20261017/run-39058569758/NEUTTS-PINNED-APT.tsv'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neutts-tokenizers-runtime-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  native-tokenizers-runtime:
+    name: Complete original Tokenizers, Hub and fsspec HTTP runtime
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 45
+    steps:
+      - name: Checkout the reviewed preparation source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify the original inputs and execute local native APIs offline
+        env:
+          NEUTTS_PROBE_HEAD_SHA: ${{ github.sha }}
+        run: bash scripts/compatibility_probe_neutts_tokenizers_runtime.sh --out probe-results/neutts-tokenizers-runtime
+
+      - name: Preserve original inputs and separate native runtime evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: termux-neutts-tokenizers-runtime
+          path: probe-results/neutts-tokenizers-runtime/
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 14
+          include-hidden-files: true

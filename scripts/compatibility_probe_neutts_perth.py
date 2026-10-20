@@ -30,7 +30,7 @@ import types
 
 PREFIX = Path("/data/data/com.termux/files/usr")
 SCRIPT_DIR = Path(__file__).resolve().parent
-PREPARER_SHA256 = "2dbe52e9142b5093523144c6a445698076a0c6ba72be60ee0101e3c58813d28c"
+PREPARER_SHA256 = "7445bf89b0fd26f9f74a7935724e394b24b331409f200ecca9f2904ffacb40db"
 ELF_SHA256 = "73d00842dfe5c6f46712d6171007c3cb2735ca68ba678515c15ace01af500b11"
 NONRUST_SHA256 = "11d0dc5ed34dd45c855bffbba51c02eecf74ce8c5a5dd38cb1483e57f1d14e4b"
 FALSE_FLAGS = ("neutts_engine_installed", "neutts_python_bound_changed",
@@ -661,7 +661,8 @@ def perth_operations(args, lock, prep):
             "injected_original_model": True, "checkpoint_sha256": operation["checkpoint"]["sha256"],
             "checkpoint_step": checkpoint_value["step"], "actual_state_tensor_count": len(state),
             "weights_only": True, "map_location": "cpu", "strict_state_dict": True,
-            "soundfile_library": sf._libname, "libsndfile_version": sf.__libsndfile_version__,
+            "soundfile_library": sf._libname or getattr(sf, "_explicit_libname", None),
+            "soundfile_ctypes_lookup": sf._libname, "libsndfile_version": sf.__libsndfile_version__,
             "operations": records, "default_speech_model_downloaded": False,
             "public_bundled_watermark_checkpoint_executed": True}
 

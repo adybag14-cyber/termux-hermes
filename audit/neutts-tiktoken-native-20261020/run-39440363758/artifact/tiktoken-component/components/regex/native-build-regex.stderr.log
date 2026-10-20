@@ -1,0 +1,19 @@
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_neutts_tiktoken.py", line 524, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/probes/scripts/compatibility_probe_neutts_tiktoken.py", line 511, in main
+    build_one(args, lock, own, rust, prep)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_tiktoken.py", line 228, in build_one
+    require(declared["requires"] == source["build_requires"]
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            and declared["build-backend"] == source["build_backend"]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            and declared.get("backend-path", []) == source.get("backend_path", []) == [],
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            "Original Setuptools backend declarations changed")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_tiktoken.py", line 37, in require
+    raise ProbeError(message)
+ProbeError: Original Setuptools backend declarations changed

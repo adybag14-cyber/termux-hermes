@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools > 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "regex"
+version = "2026.9.10"
+description = "Alternative regular expression module, to replace re."
+readme = "README.rst"
+authors = [
+    {name = "Matthew Barnett", email = "regex@mrabarnett.plus.com"},
+]
+license = "Apache-2.0 AND CNRI-Python"
+license-files = ["LICENSE.txt"]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing",
+    "Topic :: Text Processing :: General",
+]
+
+requires-python = ">= 3.10"
+
+[project.urls]
+Homepage = "https://github.com/mrabarnett/mrab-regex"
+
+[tool.setuptools]
+package-dir = {"regex" = "regex"}
+py-modules = [
+    "regex.__init__",
+    "regex._main",
+    "regex._regex_core",
+    "regex.tests.test_regex",
+]

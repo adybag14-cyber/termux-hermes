@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 from contextlib import contextmanager
+import ctypes
 import hashlib
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import importlib.metadata
@@ -77,7 +78,16 @@ def safetensors_operation(work):
     import safetensors._safetensors_rust as native
     values = (0.25, -1.5, 3.0, 42.0)
     raw = struct.pack("<4f", *values)
-    tensors = {"fixture": {"dtype": "F32", "shape": [2, 2], "data": raw}}
+    # Safetensors 0.8 takes an explicit TensorSpec. The owned ctypes array
+    # remains referenced until after both serializations, as its public API
+    # requires for a data_ptr whose backing memory is managed by the caller.
+    buffer = (ctypes.c_ubyte * len(raw)).from_buffer_copy(raw)
+    spec = safetensors.TensorSpec(dtype="float32", shape=[2, 2],
+                                  data_ptr=ctypes.addressof(buffer), data_len=len(raw))
+    require(spec.dtype == "F32" and list(spec.shape) == [2, 2]
+            and spec.data_ptr == ctypes.addressof(buffer) and spec.data_len == len(raw),
+            "Safetensors TensorSpec does not describe the owned buffer")
+    tensors = {"fixture": spec}
     encoded = safetensors.serialize(tensors, metadata={"fixture": "termux-hermes"})
     decoded = dict(safetensors.deserialize(encoded))
     require(set(decoded) == {"fixture"} and decoded["fixture"]["dtype"] == "F32"
@@ -96,7 +106,9 @@ def safetensors_operation(work):
             rejected.append({"case": label, "error": str(exc)})
         else:
             raise RuntimeError("Safetensors accepted corrupt data: " + label)
+    require(bytes(buffer) == raw, "Safetensors modified the caller-owned tensor buffer")
     return {"status": "passed", "version": importlib.metadata.version("safetensors"),
+            "serialization_api": "TensorSpec", "backing_buffer_retained": True,
             "origin": module_origin(native, "safetensors"), "dtype": "F32", "shape": [2, 2],
             "values": values, "serialized_sha256": hashlib.sha256(encoded).hexdigest(),
             "file_sha256": sha(target), "corrupt_inputs_rejected": rejected,
@@ -305,12 +317,22 @@ def operations(work, evidence, env, run):
             "Real native CPython3.14.6 is required")
     work.mkdir()
     evidence.mkdir()
-    return {"hf_xet": hash_operation(work),
-            "safetensors": safetensors_operation(work),
-            "hf_xet_tls": tls_operation(work, evidence, env, run),
-            "tokenizers_full_runtime": "pending exact external PyYAML wheel and complete 25-node subset",
-            "tiktoken_runtime": "pending separate native lock review",
-            "models_downloaded": False}
+    result = {
+        "tokenizers_full_runtime": "pending exact external PyYAML wheel and complete 25-node subset",
+        "tiktoken_runtime": "pending separate native lock review", "models_downloaded": False}
+    cases = (("hf_xet", lambda: hash_operation(work)),
+             ("safetensors", lambda: safetensors_operation(work)),
+             ("hf_xet_tls", lambda: tls_operation(work, evidence, env, run)))
+    for name, operation in cases:
+        try:
+            result[name] = operation()
+            save(evidence / (name + "-operation.json"), result[name])
+        except Exception as exc:
+            save(evidence / (name + "-failure.json"), {
+                "status": "failed", "operation": name,
+                "error_type": type(exc).__name__, "error": str(exc)})
+            raise
+    return result
 
 
 def main(argv=None):

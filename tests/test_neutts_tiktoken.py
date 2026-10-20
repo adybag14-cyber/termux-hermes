@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 import shutil
 import tempfile
+import tomllib
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -325,6 +326,63 @@ class TiktokenIntegrityTests(unittest.TestCase):
         path.write_bytes(path.read_bytes() + b"\n# new resolution\n")
         with self.assertRaises(RuntimeError):
             own.verify_build_tree(root, "tiktoken", self.lock, prep)
+
+
+    def test_original_pyprojects_compare_pep508_semantics_without_rewriting(self):
+        for name in ("tiktoken", "regex"):
+            with self.subTest(source=name):
+                root = self.source(name)
+                source = own.source_record(self.lock, name)
+                raw = (root / "pyproject.toml").read_bytes()
+                own.verify_source_tree(root, name, self.lock, prep)
+                project = tomllib.loads(raw.decode("utf-8"))
+                result = probe.validate_backend_declarations(project, source)
+                self.assertEqual(result["canonical_requires"], source["build_requires"])
+                self.assertFalse(result["original_source_metadata_modified"])
+                self.assertEqual((root / "pyproject.toml").read_bytes(), raw)
+                if name == "regex":
+                    self.assertEqual(project["build-system"]["requires"], ["setuptools > 77.0.3"])
+                    self.assertEqual(source["build_requires"], ["setuptools>77.0.3"])
+                    self.assertEqual(hashlib.sha256(raw).hexdigest(),
+                                     "821e15c9f20659107775529ffdfcf3698d6d97d63152936b899d75c61bb42e0a")
+
+    def test_backend_requirement_meaning_cannot_be_changed(self):
+        root = self.source("regex")
+        project = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
+        source = own.source_record(self.lock, "regex")
+        changes = [
+            [], ["setuptools>=77.0.3"], ["setuptools>77.0.2"],
+            ["setuptools[extra]>77.0.3"], ["setuptools>77.0.3; python_version < '3.14'"],
+            ["setuptools @ https://example.invalid/setuptools.whl"],
+            ["setuptools>77.0.3", "setuptools>77.0.3"],
+        ]
+        for requirements in changes:
+            with self.subTest(requirements=requirements):
+                changed = deepcopy(project)
+                changed["build-system"]["requires"] = requirements
+                with self.assertRaisesRegex(RuntimeError, "backend declarations changed"):
+                    probe.validate_backend_declarations(changed, source)
+
+    def test_backend_name_and_local_backend_path_remain_exact(self):
+        root = self.source("regex")
+        project = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
+        source = own.source_record(self.lock, "regex")
+        for key, value in (("build-backend", "unreviewed.backend"), ("backend-path", ["local"])):
+            with self.subTest(field=key):
+                changed = deepcopy(project)
+                changed["build-system"][key] = value
+                with self.assertRaisesRegex(RuntimeError, "backend declarations changed"):
+                    probe.validate_backend_declarations(changed, source)
+
+    def test_equivalent_requirement_text_still_cannot_rewrite_frozen_source(self):
+        root = self.source("regex")
+        path = root / "pyproject.toml"
+        raw = path.read_bytes()
+        changed = raw.replace(b"setuptools > 77.0.3", b"setuptools>77.0.3")
+        self.assertNotEqual(changed, raw)
+        path.write_bytes(changed)
+        with self.assertRaises(RuntimeError):
+            own.verify_source_tree(root, "regex", self.lock, prep)
 
 
 if __name__ == "__main__":

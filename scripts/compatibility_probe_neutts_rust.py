@@ -38,7 +38,7 @@ import zipfile
 PREFIX = Path("/data/data/com.termux/files/usr")
 SCRIPT_DIR = Path(__file__).resolve().parent
 PREPARER_SHA256 = "db8ce00daaece15f69b4f7b1de415accd207f13e256b2097d4efcb2d0894c428"
-OPERATIONS_SHA256 = "a8576c384d3c5aa3854c430df83e6cfb3b1f6a69ba75713079bb6947fee125a7"
+OPERATIONS_SHA256 = "168382b4db418f71879d5d65979a1d9efc59140eac175231c411c312d6e37123"
 APT_HELPER_SHA256 = "7c051b0143675594aadd52f9a0b66ec71e6950e9953feef3f773acceafcb0a29"
 FOUNDATION_PINS_SHA256 = "7ad635d7f1ce1157c7f3b3d7808eaf113c8bb77c4e99a8fe30b6b155faf04c5e"
 FOUNDATION_CASES = {"python_dependencies", "torch", "torchaudio", "torchcodec",

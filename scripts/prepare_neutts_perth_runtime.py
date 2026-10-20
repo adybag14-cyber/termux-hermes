@@ -30,10 +30,11 @@ import zipfile
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT_DIR = ROOT / "scripts"
 LOCK_FILENAME = "neutts_perth_runtime_lock.json"
-LOCK_SHA256 = "a4bf52805b1f3df17b816cb7bd155c61c1db57e320fb6cde73f03b2bf443334a"
+LOCK_SHA256 = "2396b2ff626aff9e422a3857e0cc1af2b6932ae9f13064ccbcdfd6a84a331fc6"
 RECEIPT_FILENAME = "PERTH-PREPARED-INPUTS.json"
 PREPARER_SHA256 = "6540cae859c390bdceed18aac315bf27559425262935d3e015ac99393bddc047"
 APT_HELPER_SHA256 = "d7aacac1084448d544f4b78891acb72556a2a039ec5c4fd026ac1979b027d179"
+SOUNDFILE_HELPER_SHA256 = "974eac261ad97b268c0f03f8abfe52c1b644635886b5a203729482c869c6de00"
 RESOURCE_HELPER_SHA256 = "9fde6476fa3f5d793899943052e3b4f6ac4b1df991664e14d1bb846ef77eb752"
 EXTRACT_HELPER_SHA256 = "96cae525e9c421f2e5fa820c386cfa18a52f3eca271f7e5be83754d0181c44a5"
 SITE_PREFIX = "data/data/com.termux/files/usr/lib/python3.14/site-packages/"
@@ -128,6 +129,12 @@ def base_helper():
 def apt_helper():
     return load_module("_perth_signed_apt", SCRIPT_DIR / "prepare_neutts_apt_snapshot.py",
                        APT_HELPER_SHA256)
+
+
+@lru_cache(maxsize=1)
+def soundfile_helper():
+    return load_module("_perth_soundfile_derivative", SCRIPT_DIR / "prepare_neutts_soundfile.py",
+                       SOUNDFILE_HELPER_SHA256)
 
 
 @lru_cache(maxsize=1)
@@ -277,6 +284,10 @@ def validate_lock(lock):
     for kind, expected in (("main-catalog", MAIN_NAMES), ("native-handoff", NATIVE_NAMES)):
         require({p["name"] for p in lock["packages"] if p["origin"]["kind"] == kind} == expected,
                 "Original wheel origin selection changed")
+    soundfile = next(p for p in lock["packages"] if p["name"] == "soundfile")
+    require(soundfile["origin"]["kind"] == "soundfile-android-derivative"
+            and soundfile["artifact"] == soundfile_helper().load_lock()["derived_artifact"],
+            "Reviewed SoundFile Android derivative changed")
     require([p["name"] for p in lock["apt_install"]] == ["libyaml", "python-msgpack"]
             and [p["name"] for p in lock["apt_provenance_only"]] == ["libgmp"],
             "Extra APT install/provenance boundary changed")
@@ -418,14 +429,16 @@ def verify_inputs(directory, foundation_inputs=None):
     lock, raw_lock = load_lock(directory / LOCK_FILENAME)
     expected = {LOCK_FILENAME, RECEIPT_FILENAME, "wheels", "apt-extra-archives",
                 "main-bundled-wheels.json", "runtime-requirements.txt", "extra-install.tsv",
-                "perth-resource-inputs"}
+                "perth-resource-inputs", "soundfile-inputs"}
     require({p.name for p in directory.iterdir()} == expected, "Prepared Perth inventory changed")
-    for name in ("wheels", "apt-extra-archives", "perth-resource-inputs"):
+    for name in ("wheels", "apt-extra-archives", "perth-resource-inputs", "soundfile-inputs"):
         require((directory / name).is_dir() and not (directory / name).is_symlink(),
                 "Linked prepared Perth subdirectory")
     verified_catalog(directory / "main-bundled-wheels.json", lock)
     resource = resource_helper().verify_inputs(directory / "perth-resource-inputs")
     require(resource.get("installed") is False, "Perth resource receipt scope changed")
+    soundfile = soundfile_helper().verify_inputs(directory / "soundfile-inputs")
+    require(soundfile.get("installed") is False, "SoundFile derivative receipt scope changed")
     require({p.name for p in (directory / "wheels").iterdir()}
             == {p["artifact"]["filename"] for p in lock["packages"]}, "Prepared wheel inventory changed")
     wheels = [verify_wheel(directory / "wheels" / p["artifact"]["filename"], p) for p in lock["packages"]]
@@ -433,6 +446,10 @@ def verify_inputs(directory, foundation_inputs=None):
     require(verified_bytes(directory / "wheels" / derived["artifact"]["filename"], derived["artifact"])
             == verified_bytes(directory / "perth-resource-inputs" / derived["artifact"]["filename"],
                               derived["artifact"]), "Perth runtime/resource derivative differs")
+    soundfile_package = next(p for p in lock["packages"] if p["name"] == "soundfile")
+    require(verified_bytes(directory / "wheels" / soundfile_package["artifact"]["filename"], soundfile_package["artifact"])
+            == verified_bytes(directory / "soundfile-inputs" / soundfile_package["artifact"]["filename"],
+                              soundfile_package["artifact"]), "SoundFile runtime/source derivative differs")
     extras = extra_apt_pins(lock)
     require({p.name for p in (directory / "apt-extra-archives").iterdir()}
             == {apt_helper().archive_name(p) for p in extras}, "Extra APT inventory changed")
@@ -487,6 +504,10 @@ def prepare(out, *, foundation_inputs, main_deb=None, main_wheelhouse=None, main
             shutil.copytree(resource_inputs, staging / "perth-resource-inputs")
         else:
             resource_helper().prepare(staging / "perth-resource-inputs")
+        sf = soundfile_helper()
+        sf_pin = sf.load_lock()["upstream_package"]["artifact"]
+        sf.prepare(staging / "soundfile-inputs",
+                   ROOT / "audit/neutts-soundfile-discovery-fix-20261020/original" / sf_pin["filename"])
         for package in lock["packages"]:
             if package["origin"]["kind"] == "main-catalog":
                 continue
@@ -495,6 +516,8 @@ def prepare(out, *, foundation_inputs, main_deb=None, main_wheelhouse=None, main
             kind = package["origin"]["kind"]
             if kind == "perth-resource-derivative":
                 source = staging / "perth-resource-inputs" / artifact["filename"]
+            elif kind == "soundfile-android-derivative":
+                source = staging / "soundfile-inputs" / artifact["filename"]
             elif kind == "native-handoff":
                 source = ROOT / package["origin"]["retained_path"]
             else:

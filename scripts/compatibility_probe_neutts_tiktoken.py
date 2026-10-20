@@ -23,7 +23,7 @@ import traceback
 SCRIPT_DIR = Path(__file__).resolve().parent
 PREPARER_SHA256 = "5cb1e90882272c84f95702de67ff34d36ea82064ecbd237adca19ea6b958bf6b"
 # Filled from the peer-reviewed shared helper after its separate HF-only fix.
-RUST_PROBE_SHA256 = "4be7888378ff598dfc25610368bd7eb261056617e2c338e7ab697aeecd9fa871"
+RUST_PROBE_SHA256 = "79d72b454438d0bdd95dbae17c1883ecc52c96bedbbe39f1fb64d35fd0925944"
 PREFIX = Path("/data/data/com.termux/files/usr")
 REGISTRY = "registry+https://github.com/rust-lang/crates.io-index"
 
@@ -207,6 +207,23 @@ def capture_metadata(args, lock, source_root, env, rust, prep):
             "target_packages": 25, "target_edges": 41, "locked_offline_metadata": True}
 
 
+def validate_backend_declarations(project, source):
+    """Compare parsed PEP 508 declarations after exact source-byte verification."""
+    from packaging.requirements import Requirement
+
+    declared = project["build-system"]
+    actual = [str(Requirement(value)) for value in declared["requires"]]
+    expected = [str(Requirement(value)) for value in source["build_requires"]]
+    require(actual == expected
+            and declared["build-backend"] == source["build_backend"]
+            and declared.get("backend-path", []) == source.get("backend_path", []) == [],
+            "Original Setuptools backend declarations changed")
+    return {"declared_requires": list(declared["requires"]),
+            "lock_requires": list(source["build_requires"]),
+            "canonical_requires": actual, "backend": declared["build-backend"],
+            "backend_path": [], "original_source_metadata_modified": False}
+
+
 def build_one(args, lock, own, rust, prep):
     rust.native_runtime()
     source = own.source_record(lock, args.source_name)
@@ -224,11 +241,7 @@ def build_one(args, lock, own, rust, prep):
     versions = {p["name"]: p["version"] for p in manifest["wheels"]}
     markers = default_environment()
     project = tomllib.loads((args.source_root / "pyproject.toml").read_text())
-    declared = project["build-system"]
-    require(declared["requires"] == source["build_requires"]
-            and declared["build-backend"] == source["build_backend"]
-            and declared.get("backend-path", []) == source.get("backend_path", []) == [],
-            "Original Setuptools backend declarations changed")
+    declarations = validate_backend_declarations(project, source)
     requirement_report = rust.validate_build_requirements(source["build_requires"], versions, markers)
     for package in manifest["wheels"]:
         rust.validate_build_requirements(package["requires_dist"], versions, markers)
@@ -257,7 +270,8 @@ def build_one(args, lock, own, rust, prep):
     rust.save_json(args.out / "SOURCE-BACKEND-RESULT.json", {
         "schema_version": 1, "status": "passed", "component": args.source_name,
         "original_archive_sha256": source["artifact"]["sha256"], "backend_path": str(backend_path),
-        "backend_sha256": rust.sha_file(backend_path), "declared_build_requirements": requirement_report,
+        "backend_sha256": rust.sha_file(backend_path), "build_system_declarations": declarations,
+        "declared_build_requirements": requirement_report,
         "dynamic_build_requirements": dynamic_report, "build_environment": inventory,
         "source_after": unchanged, "approved_cargo_lock_after": cargo, "config_settings": settings,
         "original_backend_modified": False, "cargo_offline": True, "new_cargo_resolution": False,

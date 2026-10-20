@@ -1,0 +1,56 @@
+{
+  "commands": [
+    {
+      "command": [
+        "C:\\Python314\\python.exe",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_neutts_rust_preparation.py",
+        "tests/test_neutts_hf_python_linkage.py",
+        "tests/test_neutts_tiktoken.py",
+        "tests/test_neutts_tokenizers_runtime.py"
+      ],
+      "elapsed_seconds": 8.706,
+      "exit_code": 0,
+      "label": "focused-host-tests",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a55b6eb7fb99f0d7c2b1912276fce919b56dc06cf016644885fdf78e85e15dc2"
+    },
+    {
+      "command": [
+        "C:\\Python314\\python.exe",
+        "-I",
+        "-B",
+        "scripts/prepare_neutts_tokenizers_runtime.py",
+        "--repo",
+        "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017",
+        "--out",
+        "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neutts-tokenizers-runtime-preparation-20261020\\prepared-inputs-final"
+      ],
+      "elapsed_seconds": 1.043,
+      "exit_code": 0,
+      "label": "complete-tokenizers-inputs",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c3fcf10c056a1ebc145149c3f01a8053c14d28d3ac31f9787bbe29c4759f042b"
+    },
+    {
+      "command": [
+        "C:\\Program Files\\Git\\bin\\bash.exe",
+        "-n",
+        "scripts/compatibility_probe_neutts_tokenizers_runtime.sh"
+      ],
+      "elapsed_seconds": 0.03,
+      "exit_code": 0,
+      "label": "tokenizers-bash-syntax",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "native_runtime_verified": false,
+  "release_output": false,
+  "schema_version": 1,
+  "scope": "Host rejection logic, complete input verification and syntax only; no Android execution or admission.",
+  "source_helper_hash_chain": "passed",
+  "status": "passed"
+}

@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "/probes/scripts/compatibility_probe_neutts_rust.py", line 1447, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/probes/scripts/compatibility_probe_neutts_rust.py", line 1438, in main
+    runtime_case(args, lock, prep, apt)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probes/scripts/compatibility_probe_neutts_rust.py", line 1156, in runtime_case
+    operations = ops.operations(args.work / "operations", args.out / "operations", dict(os.environ), run)
+  File "/probes/scripts/neutts_rust_operations.py", line 309, in operations
+    "safetensors": safetensors_operation(work),
+                   ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/probes/scripts/neutts_rust_operations.py", line 81, in safetensors_operation
+    encoded = safetensors.serialize(tensors, metadata={"fixture": "termux-hermes"})
+TypeError: argument 'tensor_dict': 'dict' object is not an instance of 'TensorSpec'
