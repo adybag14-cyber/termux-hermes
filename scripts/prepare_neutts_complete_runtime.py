@@ -67,6 +67,11 @@ def canonical_name(value):
     return helper().canonical_name(value)
 
 
+def safe_relative(value):
+    """Use the reviewed wheel-path validator required by the shared inventory."""
+    return helper().safe_relative(value)
+
+
 def read_regular(path, limit=MAX_LOCK_BYTES):
     return helper().read_regular(path, limit)
 

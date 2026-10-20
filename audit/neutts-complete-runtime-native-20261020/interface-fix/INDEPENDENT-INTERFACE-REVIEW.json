@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "reviewed_at_utc": "2026-10-20T15:51:35.107563+00:00",
+  "scope": "Independent bounded review of the first complete116 native failure correction. Host regression only; no native retry or full engine claim.",
+  "blocking_findings": [],
+  "source_files": [
+    {
+      "path": "scripts/prepare_neutts_complete_runtime.py",
+      "bytes": 24647,
+      "sha256": "791d0a85dbaacffac90c9f31d2217c0983fe4db06b7c353023f5ffc98385a9cd"
+    },
+    {
+      "path": "scripts/compatibility_probe_neutts_complete_runtime.py",
+      "bytes": 38591,
+      "sha256": "ea91998ef97d323b73f02deb33d3a4b533652cb1694d41e2b3aa72af5b62b5c3"
+    },
+    {
+      "path": "tests/test_neutts_complete_runtime.py",
+      "bytes": 18190,
+      "sha256": "64f6415f46a37afc8a13f071b07db7bde06d2d1ac4720e18c01ebec6a5c2c036"
+    },
+    {
+      "path": "scripts/neutts_complete_runtime_lock.json",
+      "bytes": 4746633,
+      "sha256": "883d0fec890062f93eee763e8c89dfae7deba29970a376c6b951e5fc0b0aa1b5"
+    },
+    {
+      "path": "scripts/compatibility_probe_neutts_complete_runtime.sh",
+      "bytes": 10761,
+      "sha256": "1d6f137b70caf550da98a8ad29851867ad1d4aa72f7f159f83478b8bc398a5c6"
+    },
+    {
+      "path": ".github/workflows/neutts-complete-runtime.yml",
+      "bytes": 4053,
+      "sha256": "6cc23194c485d02c6cc9dbea99e61e01694a8350f2a3aecdd1e934f2aa7ce4dd"
+    }
+  ],
+  "original_tests": {
+    "source_url": "https://raw.githubusercontent.com/adybag14-cyber/termux-hermes/88e2810572a85f1050909ee8373527e983927766/tests/test_neutts_complete_runtime.py",
+    "bytes": 15911,
+    "sha256": "c862ea66d8e2e2bac33e35127b97d946103a6db3028d616c7c94d87088061aeb"
+  },
+  "review_findings": [
+    "The preparer change is a single safe_relative adapter delegating to the existing hash-pinned Perth helper; it retains the original safe wheel path policy.",
+    "The native probe changes only its preparer hash binding; package metadata, graph, closure, operations, isolation, loader checks and network boundary are unchanged.",
+    "The two added tests execute the actual retained original Phonemizer wheel through the reused NonRust installed_wheel_bytes function with the complete preparer. They verify its complete original member inventory, documented pip RECORD boundary, rejection of changed installed payload and traversal.",
+    "Reachable prep attribute requirements in the six reused runtime functions are present and callable. Source-build-only unused helper paths are outside this native runtime fix.",
+    "The unchanged lock, shell and workflow match the previously independently reviewed scope; the first failed run remains a failed result."
+  ],
+  "reachable_prep_interfaces": {
+    "compatibility_probe_neutts_nonrust.py::copy_apt_python": [
+      "apt_python_payload",
+      "write_new"
+    ],
+    "compatibility_probe_neutts_nonrust.py::create_environment": [
+      "base_helper",
+      "write_new"
+    ],
+    "compatibility_probe_neutts_nonrust.py::installed_inventory": [
+      "canonical_name",
+      "read_regular"
+    ],
+    "compatibility_probe_neutts_nonrust.py::installed_wheel_bytes": [
+      "safe_relative",
+      "verify_wheel"
+    ],
+    "compatibility_probe_neutts_perth.py::installed_records": [
+      "read_regular"
+    ],
+    "compatibility_probe_neutts_perth.py::perth_operations": [
+      "verified_bytes"
+    ]
+  },
+  "host_validation": {
+    "tests": 21,
+    "additional_subtests": 41,
+    "skips": 0,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds": 1.85,
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "tests/test_neutts_complete_runtime.py",
+      "-q",
+      "--junitxml=HOST-TESTS.xml"
+    ],
+    "junit": {
+      "path": "HOST-TESTS.xml",
+      "bytes": 3444,
+      "sha256": "d8775dfa52bd362186c473a19fd17479055f8443c389ede5aaf980d990d83f28"
+    }
+  },
+  "scope_limits": {
+    "native_runtime_retested": false,
+    "all_prepared_inputs_reread_by_peer": false,
+    "engine_installed": false,
+    "original_116_183_graph_changed": false,
+    "original_python_bounds_changed": false,
+    "release_created": false,
+    "source_files_edited": false
+  }
+}

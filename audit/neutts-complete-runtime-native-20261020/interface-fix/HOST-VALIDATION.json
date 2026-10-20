@@ -1,0 +1,72 @@
+{
+  "actual_original_wheels_verified": 105,
+  "deterministic_derivatives_verified": [
+    "resemble-perth",
+    "soundfile",
+    "neucodec"
+  ],
+  "errors": 0,
+  "exact_espeak_assets_verified": true,
+  "extra_apt_archives_verified": 20,
+  "failures": 0,
+  "lock_sha256": "883d0fec890062f93eee763e8c89dfae7deba29970a376c6b951e5fc0b0aa1b5",
+  "native_runtime_retested": false,
+  "neutts_engine_installed": false,
+  "original_apt_python_payloads_rescanned": false,
+  "production_admission_changed": false,
+  "release_output": false,
+  "schema_version": 1,
+  "shared_runtime_preparation_interface_review": {
+    "all_required_methods_present": true,
+    "executed_functions": {
+      "nonrust.copy_apt_python": [
+        "apt_python_payload",
+        "write_new"
+      ],
+      "nonrust.create_environment": [
+        "base_helper",
+        "write_new"
+      ],
+      "nonrust.installed_inventory": [
+        "canonical_name",
+        "read_regular"
+      ],
+      "nonrust.installed_wheel_bytes": [
+        "safe_relative",
+        "verify_wheel"
+      ],
+      "perth.installed_records": [
+        "read_regular"
+      ],
+      "perth.perth_operations": [
+        "verified_bytes"
+      ]
+    },
+    "regression": "actual retained Phonemizer wheel passed shared installed_wheel_bytes; corrupted payload and traversal rejected",
+    "unused_source_build_only_methods": [
+      "verify_tree",
+      "retained_apt_packages"
+    ]
+  },
+  "skips": 0,
+  "source_files": [
+    {
+      "bytes": 24647,
+      "path": "scripts/prepare_neutts_complete_runtime.py",
+      "sha256": "791d0a85dbaacffac90c9f31d2217c0983fe4db06b7c353023f5ffc98385a9cd"
+    },
+    {
+      "bytes": 38591,
+      "path": "scripts/compatibility_probe_neutts_complete_runtime.py",
+      "sha256": "ea91998ef97d323b73f02deb33d3a4b533652cb1694d41e2b3aa72af5b62b5c3"
+    },
+    {
+      "bytes": 18190,
+      "path": "tests/test_neutts_complete_runtime.py",
+      "sha256": "64f6415f46a37afc8a13f071b07db7bde06d2d1ac4720e18c01ebec6a5c2c036"
+    }
+  ],
+  "status": "passed-targeted-interface-regression-and-original-input-verification",
+  "subtests": 41,
+  "tests": 21
+}

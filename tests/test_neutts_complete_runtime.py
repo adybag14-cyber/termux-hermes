@@ -12,6 +12,7 @@ import tempfile
 import sys
 import unittest
 import weakref
+import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -191,6 +192,41 @@ class AssetProvenanceTests(unittest.TestCase):
                            "deleted": deleted}
                     with self.assertRaises(ValueError):
                         runtime.classify_asset_mappings([row], root / "work", assets, prep)
+
+
+class SharedInventoryIntegrationTests(unittest.TestCase):
+    def test_original_wheel_runs_through_real_shared_inventory_and_detects_corruption(self):
+        lock = json.loads((ROOT / "scripts/neutts_complete_runtime_lock.json").read_bytes())
+        package = next(p for p in lock["packages"] if p["name"] == "phonemizer")
+        wheel = ROOT / package["origin"]["retained_path"]
+        nonrust = runtime.support()[2]
+        prep.verify_wheel(wheel, package)
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary) / "runtime/lib/python3.14/site-packages"
+            with zipfile.ZipFile(wheel) as archive:
+                for item in archive.infolist():
+                    if item.is_dir():
+                        continue
+                    target = site.joinpath(*prep.safe_relative(item.filename).split("/"))
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_bytes(archive.read(item))
+            result = nonrust.installed_wheel_bytes(wheel, package, site, prep)
+            self.assertEqual(result["verified_file_count"], package["wheel"]["file_count"] - 1)
+            self.assertEqual(len(result["owned_paths"]), package["wheel"]["file_count"])
+            self.assertEqual(result["verified_external_data"], [])
+            self.assertEqual(result["documented_rewrites"], [{
+                "path": package["wheel"]["record_member"], "reason": "pip installation RECORD"}])
+            changed = site / "phonemizer/backend/espeak/api.py"
+            changed.write_bytes(changed.read_bytes() + b"corrupted installed payload")
+            with self.assertRaisesRegex(nonrust.ProbeError, "Installed wheel file bytes changed"):
+                nonrust.installed_wheel_bytes(wheel, package, site, prep)
+
+    def test_shared_wheel_path_validator_still_rejects_traversal(self):
+        self.assertEqual(prep.safe_relative("phonemizer/backend/espeak/api.py"),
+                         "phonemizer/backend/espeak/api.py")
+        for invalid in ("../escape", "/absolute", "module/../../escape", "module\\\\escape"):
+            with self.subTest(path=invalid), self.assertRaises(prep.helper().wheel_helper().PrepareError):
+                prep.safe_relative(invalid)
 
 
 class EspeakLifetimeTests(unittest.TestCase):
