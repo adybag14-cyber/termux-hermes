@@ -21,7 +21,7 @@ from types import SimpleNamespace
 SCRIPT_DIR = Path(__file__).resolve().parent
 PREFIX = Path("/data/data/com.termux/files/usr")
 SOURCE_PINS = {
-    "prepare_neutts_tokenizers_runtime.py": "646f4935b44a1d368f3d37b6667b75cd3b96a1d613dd8cb3b0f3195aefd6579d",
+    "prepare_neutts_tokenizers_runtime.py": "a8a584da44e789ec7b215551986694182798f895c12e1934ad24c0fed5f7b3f1",
     "compatibility_probe_neutts_nonrust.py": "11d0dc5ed34dd45c855bffbba51c02eecf74ce8c5a5dd38cb1483e57f1d14e4b",
     "compatibility_probe_phonemizer.py": "6387ecead23b7777e879588d7e76bd4c8d462de5574de1d77092053efc596211",
     "validate_neutts_apt_python.py": "7c051b0143675594aadd52f9a0b66ec71e6950e9953feef3f773acceafcb0a29",

@@ -12,6 +12,8 @@ import gzip
 import hashlib
 import importlib.util
 import json
+import os
+import stat
 from pathlib import Path
 import re
 import subprocess
@@ -168,6 +170,23 @@ class OriginalClosureTests(unittest.TestCase):
                 prep.load_lock(path)
 
 class OriginalInputTests(unittest.TestCase):
+    @unittest.skipUnless(os.name == "posix", "POSIX permissions require the native Linux CI host")
+    def test_verified_handoff_is_readable_by_the_distinct_container_uid(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "original-inputs"
+            prior = os.umask(0o077)
+            try:
+                receipt = prep.prepare(ROOT, output)
+            finally:
+                os.umask(prior)
+            self.assertEqual((receipt["node_count"], receipt["edge_count"]), (25, 29))
+            for path in (output, *output.rglob("*")):
+                self.assertFalse(path.is_symlink())
+                self.assertEqual(stat.S_IMODE(path.stat().st_mode),
+                                 0o755 if path.is_dir() else 0o644,
+                                 str(path.relative_to(output)))
+            self.assertEqual(prep.verify_inputs(output)[1], receipt)
+
     def test_original_libyaml_and_gmp_control_and_hashes(self):
         for name, pin in original_archive_pins().items():
             path = AUDIT / "apt-archives" / (name + "_" + pin["version"] + "_" + pin["architecture"] + ".deb")

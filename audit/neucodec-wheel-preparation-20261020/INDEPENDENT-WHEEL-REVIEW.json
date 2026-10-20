@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "date": "2026-10-20",
+  "reviewer": "docs_recover_final",
+  "sources": [
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\scripts\\prepare_neucodec_wheel.py",
+      "bytes": 19441,
+      "sha256": "ea54baa56bbb9f9a82558233f68c4f2fca02c167e55f785ab3f31cf1cf980d7b"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\scripts\\neucodec_wheel_lock.json",
+      "bytes": 15916,
+      "sha256": "2bbd9b52fcd5c1c76a8f75d99f63f52ba5773586c55abcdb358949866f248023"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\tests\\test_neucodec_wheel.py",
+      "bytes": 15346,
+      "sha256": "36c802f06427496aa0e9f0cc1e0790b2ba97b41a57f57b8e7b240f92817abe49"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\patches\\next-stable\\neucodec-hub1-download.patch",
+      "bytes": 14750,
+      "sha256": "77a1e6e0685e9b30e9abde7ecd7386b446179d2a2b72796ab452c663e5bc8df9"
+    }
+  ],
+  "original_wheel": {
+    "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\audit\\neucodec-wheel-preparation-20261020\\original\\neucodec-0.0.4-py3-none-any.whl",
+    "bytes": 27800,
+    "sha256": "9c7c9d374d9ea92b2069953906570c748beb95e969e402c6c6a47f88ed6c17f4"
+  },
+  "derived_wheel": {
+    "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neucodec-wheel-preparation-20261020\\prepared-inputs\\neucodec-0.0.4-py3-none-any.whl",
+    "bytes": 87563,
+    "sha256": "73fa4fd88856aaec3eba2b701a32916939acb54099279a8478732daaf16f7b96"
+  },
+  "source_archive": {
+    "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\audit\\neucodec-wheel-preparation-20261020\\original\\neucodec-0.0.4.tar.gz",
+    "bytes": 23072,
+    "sha256": "994c9367b691b96c30247ebe5f3d9b7088411ff640b8df2f0dd9e1efe39f6f42"
+  },
+  "independent_archive_comparison": {
+    "original_and_derived_crc_passed": true,
+    "identical_member_order_and_inventory": 20,
+    "changed_members": [
+      "neucodec/model.py",
+      "neucodec-0.0.4.dist-info/RECORD"
+    ],
+    "original_wheel_python_members_equal_original_sdist": 16,
+    "original_sdist_members": 20,
+    "source_pkg_info_equals_original_wheel_metadata": true,
+    "source_license_equals_original_wheel_license": true,
+    "original_metadata": {
+      "name": "neucodec",
+      "version": "0.0.4",
+      "requires_python": ">=3.10,<4.0",
+      "requires_dist": [
+        "local_attention (>=1.11.1)",
+        "numpy (>=2.0.2)",
+        "torch (>=2.5.1)",
+        "torchao (>=0.12.0)",
+        "torchaudio (>=2.5.1)",
+        "torchtune (>=0.3.1)",
+        "transformers (>=4.44.2)",
+        "vector-quantize-pytorch (==1.17.8)"
+      ]
+    },
+    "patch_test_not_in_wheel": true,
+    "unchanged_wheel_members": 18
+  },
+  "host_validation": {
+    "exit_code": 0,
+    "tests": 14,
+    "subtests": 40,
+    "skips": 0,
+    "existing_patch_cases_executed_by_suite_child": 34,
+    "original_unpatched_modern_hub_failure_control": true,
+    "evidence": [
+      {
+        "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neucodec-wheel-peer-review-20261020\\HOST-TESTS.stdout.log",
+        "bytes": 79,
+        "sha256": "7cfdedef742db13448c2cd1423267634e52e9ff361055fc43a9c31c184e48ef7"
+      },
+      {
+        "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neucodec-wheel-peer-review-20261020\\HOST-TESTS.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neucodec-wheel-peer-review-20261020\\HOST-TESTS.xml",
+        "bytes": 2324,
+        "sha256": "a84aa1e73370904bdc9c211ce541f8c676b120e9571dc5afcd230f899c656262"
+      }
+    ]
+  },
+  "reviewed_guards": [
+    "Exact official metadata/archive pins, source tree/patch byte identity and all eight original requirements are retained.",
+    "ZIP and TAR paths, inventory, duplicates, type and finite per-member/total bounds fail before unsupported payload use.",
+    "The exact two-file source patch is applied without offsets/fuzz; the generated test file stays outside the 20-member wheel.",
+    "Only model.py and truthful RECORD change in the deterministic wheel. The original WHEEL metadata and original package metadata remain unchanged.",
+    "Input verification replays the derivative and validates the complete prepared source, upstream records, wheel and receipt. No backend, network or model operation occurs."
+  ],
+  "findings": [],
+  "source_edits_performed": false,
+  "git_operations_performed": false,
+  "native_runtime_executed": false,
+  "native_runtime_admission_claimed": false,
+  "limitation": "This establishes exact host preparation and original source/metadata preservation. Actual NeuCodec import and model behavior remain separate runtime gates."
+}

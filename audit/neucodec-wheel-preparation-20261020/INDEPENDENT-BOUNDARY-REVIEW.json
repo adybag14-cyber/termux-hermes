@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "status": "passed-read-only-boundary-review",
+  "reviewer": "docs_recover_final",
+  "date": "2026-10-20",
+  "sources": [
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neucodec-hub1-compat-v0.0.4-20261017\\pyproject.toml",
+      "bytes": 1515,
+      "sha256": "79f2e400ac0e693cec93f1247fe2d20dea3f7d8a0ad77be5465d9ea5e066efbb"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\neucodec-hub1-compat-v0.0.4-20261017\\PKG-INFO",
+      "bytes": 4505,
+      "sha256": "939c1a0fea3d6cb66624c0cc686a2f92ea63c479984384bd1f697dc4cdc872be"
+    },
+    {
+      "path": "C:\\Users\\adyba\\docker-chatgpt-devbox\\workspace\\termux-hermes-next-stable-20261017\\patches\\next-stable\\neucodec-hub1-download.patch",
+      "bytes": 14750,
+      "sha256": "77a1e6e0685e9b30e9abde7ecd7386b446179d2a2b72796ab452c663e5bc8df9"
+    }
+  ],
+  "findings": [],
+  "checks": [
+    "Direct derivation from the exact original universal wheel avoids regeneration of package metadata with a newly chosen Poetry Core version.",
+    "The source package includes only neucodec. The source patch touches neucodec/model.py and adds tests/test_hub_download_compat.py; the test file must remain outside the original wheel member set.",
+    "Original NeuCodec PKG-INFO declares Requires-Python >=3.10,<4.0 and eight runtime dependencies, including vector-quantize-pytorch ==1.17.8. This is distinct from the unchanged NeuTTS engine bound <3.14.",
+    "Keep all original wheel METADATA, WHEEL, license and other member bytes unchanged. The original source PKG-INFO identity is recorded separately; equality with original wheel METADATA should be established from actual bytes rather than assumed.",
+    "Validate exact original wheel model.py against the original source model.py before applying the existing patch, then permit only model.py and truthful RECORD differences.",
+    "The compatibility mixin precedes the Hub mixin on the public NeuCodec and ONNX routes; Distill inherits it. Unsupported explicit per-call proxies are rejected before parent config acquisition. Token, revision, local_files_only and other forwarded option semantics remain unchanged."
+  ],
+  "wheel_bytes_independently_reviewed": false,
+  "host_backend_executed": false,
+  "model_or_network_operations_executed": false,
+  "source_edits_performed": false,
+  "git_operations_performed": false,
+  "limitation": "This bounded review covers existing source metadata and patch boundaries. The owning agent will verify the exact original and derived wheel inventories, model.py source identity, original metadata equality and truthful RECORD."
+}

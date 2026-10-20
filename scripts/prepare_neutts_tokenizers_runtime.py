@@ -220,6 +220,11 @@ def prepare(root, output):
                    "release_output": False}
         save_new(staging / RECEIPT_NAME, receipt)
         verify_inputs(staging)
+        # Verified public input bytes are mounted read-only for the distinct
+        # UID 1000 Android runner. mkdtemp starts private (0700); publish the
+        # completed handoff with readable files and traversable directories.
+        for path in (staging, *staging.rglob("*")):
+            path.chmod(0o755 if path.is_dir() else 0o644)
         require(not os.path.lexists(output), "Output appeared during preparation")
         staging.rename(output)
         return receipt
