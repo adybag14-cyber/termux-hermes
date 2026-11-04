@@ -1,0 +1,108 @@
+diff --git a/hermes_cli/main_dashboard.py b/hermes_cli/main_dashboard.py
+--- a/hermes_cli/main_dashboard.py
++++ b/hermes_cli/main_dashboard.py
+@@ -1024,7 +1024,10 @@
+     if _headless_backend:
+         os.environ["HERMES_SERVE_HEADLESS"] = "1"  # set before web_server import
+     elif "HERMES_WEB_DIST" not in os.environ and not skip_build:
+-        if not _build_web_ui(PROJECT_ROOT / "web", fatal=True):
++        _default_dist = PROJECT_ROOT / "hermes_cli" / "web_dist"
++        if (_default_dist / "index.html").exists():
++            print(f"→ Using bundled web UI dist at {_default_dist}")
++        elif not _build_web_ui(PROJECT_ROOT / "web", fatal=True):
+             sys.exit(1)
+     elif skip_build:
+         _dist_root = (
+diff --git a/scripts/termux/build.py b/scripts/termux/build.py
+--- a/scripts/termux/build.py
++++ b/scripts/termux/build.py
+@@ -49,14 +49,17 @@
+     revision = ["--tag", args.tag] if args.tag is not None else ["--commit", args.commit]
+     if args.release_commit is not None:
+         revision.extend(["--release-commit", args.release_commit])
++    web_product = repo / ".build/termux/web"
+     commands = [
+         ["node", str(repo / "scripts/build/node-deps.mjs"),
+-         "--source", str(repo), "--workspace", "ui-tui"],
++         "--source", str(repo), "--workspace", "ui-tui", "--workspace", "web"],
+         ["node", str(repo / "scripts/build/tui.mjs"),
+          "--source", str(repo), "--out", str(product)],
++        ["node", str(repo / "scripts/build/web.mjs"),
++         "--source", str(repo), "--icons", str(repo), "--out", str(web_product)],
+         ["bash", str(repo / "scripts/termux/build_deb.sh"),
+          "--repo", str(repo), "--payload", str(payload), "--out", str(out),
+-         "--tui-product", str(product), *revision],
++         "--tui-product", str(product), "--web-product", str(web_product), *revision],
+     ]
+     try:
+         for command in commands:
+diff --git a/scripts/termux/build_deb.sh b/scripts/termux/build_deb.sh
+--- a/scripts/termux/build_deb.sh
++++ b/scripts/termux/build_deb.sh
+@@ -36,8 +36,9 @@
+ PAYLOAD=""
+ OUT=""
+ TUI_PRODUCT=""
++WEB_PRODUCT=""
+ 
+-usage() { printf 'usage: build_deb.sh --repo <dir> (--tag <tag> | --commit <full-sha>) --payload <dir> --tui-product <dir> --out <dir>\n' >&2; exit 2; }
++usage() { printf 'usage: build_deb.sh --repo <dir> (--tag <tag> | --commit <full-sha>) --payload <dir> --tui-product <dir> --web-product <dir> --out <dir>\n' >&2; exit 2; }
+ log()  { printf '\n==> %s\n' "$*"; }
+ fail() { printf 'build_deb: FAILED: %s\n' "$*" >&2; exit 1; }
+ 
+@@ -49,6 +50,7 @@
+         --release-commit) RELEASE_COMMIT="${2:?}"; shift 2 ;;
+         --payload) PAYLOAD="${2:?}"; shift 2 ;;
+         --tui-product) TUI_PRODUCT="${2:?}"; shift 2 ;;
++        --web-product) WEB_PRODUCT="${2:?}"; shift 2 ;;
+         --out) OUT="${2:?}"; shift 2 ;;
+         *) usage ;;
+     esac
+@@ -102,6 +104,9 @@
+ [ -n "$TUI_PRODUCT" ] || fail "--tui-product is required (run scripts/termux/build.py)"
+ TUI_PRODUCT="$(cd "$TUI_PRODUCT" && pwd)"
+ [ -f "$TUI_PRODUCT/dist/entry.js" ] && [ -f "$TUI_PRODUCT/package.json" ] || fail "incomplete TUI product"
++[ -n "$WEB_PRODUCT" ] || fail "--web-product is required (run scripts/termux/build.py)"
++WEB_PRODUCT="$(cd "$WEB_PRODUCT" && pwd)"
++[ -f "$WEB_PRODUCT/index.html" ] || fail "incomplete web product (missing index.html)"
+ for d in python node uv npm ffmpeg ripgrep runtime-libs app wheelhouse; do
+     [ -d "$PAYLOAD_ABS/$d" ] || fail "payload missing $d/ -- run termux_build.sh + build_cpython.sh + build_node.sh first"
+ done
+@@ -225,7 +230,7 @@
+     cp -a "$PAYLOAD_ABS/$tool" "$DEST/tools/"
+ done
+ cp -a "$PAYLOAD_ABS/runtime-libs" "$PAYLOAD_ABS/app" "$PAYLOAD_ABS/venv" "$PAYLOAD_ABS/pm-runtime" "$DEST/"
+-python3 "$HERE/payload_facts.py" "$DEST" "$PAYLOAD_ABS/.work/build_set.txt" --tui-product "$TUI_PRODUCT"
++python3 "$HERE/payload_facts.py" "$DEST" "$PAYLOAD_ABS/.work/build_set.txt" --tui-product "$TUI_PRODUCT" --web-product "$WEB_PRODUCT"
+ 
+ python3 "$HERE/launchers.py" --payload "$DEST" --control "$STAGE/DEBIAN"
+ 
+diff --git a/scripts/termux/payload_facts.py b/scripts/termux/payload_facts.py
+--- a/scripts/termux/payload_facts.py
++++ b/scripts/termux/payload_facts.py
+@@ -9,7 +9,7 @@
+ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+ 
+ 
+-def write_facts(payload: Path, lock_path: Path, build_set: Path, tui: Path) -> None:
++def write_facts(payload: Path, lock_path: Path, build_set: Path, tui: Path, web: Path | None = None) -> None:
+     from pm.lock import Lockfile
+     from pm.features import write_features
+     from pm.registry import get_package
+@@ -33,7 +33,7 @@
+         python=python,
+         site_packages=dependency_site(payload / "venv", version, target),
+         environment=payload / "venv", tools=payload / "tools", pm_runtime=payload / "pm-runtime",
+-        resources={name: repo / name for name in RESOURCE_ENV}, frontends={"tui": tui.resolve()},
++        resources={name: repo / name for name in RESOURCE_ENV}, frontends={"tui": tui.resolve(), **({"web": web.resolve()} if web is not None else {})},
+         stamp=repo / "install-stamp.json",
+         features=write_features(["termux", "telegram", "cron", "mcp", "acp"], payload),
+     ), payload)
+@@ -44,5 +44,6 @@
+     parser.add_argument("payload", type=Path)
+     parser.add_argument("build_set", type=Path)
+     parser.add_argument("--tui-product", type=Path, required=True)
++    parser.add_argument("--web-product", type=Path, default=None)
+     args = parser.parse_args()
+-    write_facts(args.payload, args.payload / "app/pm/lock.json", args.build_set, args.tui_product)
++    write_facts(args.payload, args.payload / "app/pm/lock.json", args.build_set, args.tui_product, args.web_product)

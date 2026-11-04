@@ -69,6 +69,7 @@ if [[ "${1:-}" == --in-container ]]; then
   hermes --version
   hermes chat --help >/dev/null
   hermes-acp --check
+  test -f "$PREFIX/lib/hermes-agent/app/hermes_cli/web_dist/index.html"
   test "$(hermes config get model.max_tokens --json)" = 65536
   test "$(sha256sum "$HOME/.hermes/.env")" = "$env_before"
   if hermes update > "$TMPDIR/upgrade-refusal.log" 2>&1; then
